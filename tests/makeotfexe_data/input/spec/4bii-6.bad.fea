@@ -1,0 +1,5 @@
+# Test not allowed script in size feature.
+feature size {
+    script DFLT;
+    sub A by B;
+} size;

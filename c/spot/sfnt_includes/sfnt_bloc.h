@@ -10,10 +10,10 @@
 #include "sfnt_sbit.h"
 
 typedef struct _blocBitmapSizeTable {
-    Card32 indexSubTableArrayOffset; /* offset to corresp. index      */
+    Card32 indexSubTableArrayOffset; /* offset to corresponding index */
                                      /* subtable array from beginning */
                                      /* of "bloc"                     */
-    Card32 indexTableSize;           /* length of corresp. index subtables and array */
+    Card32 indexTableSize;           /* length of corresponding index subtables and array   */
     Card32 numberofIndexSubTables;   /* number of index subtables.                          */
                                      /* There is a subtable for each range or format change */
     Card32 colorRef;                 /* set to 0. ignore for now                            */
@@ -60,8 +60,8 @@ typedef struct _blocIndexSubHeader {
 typedef struct _blocIndexSubtable_Format1 {
     blocIndexSubHeader header;
     Card32 _numoffsets;
-    DCL_ARRAY(Card32, offsetArray); /* offsetArray[glyphIndex] + imageDataOffset ==> start of bitmapdata for glyph. */
-                                    /* sizeOfArray = lastGlyph - firstGlyph + 1                                     */
+    DCL_ARRAY(Card32, offsetArray); /* offsetArray[glyphIndex] + imageDataOffset ==> start of bitmap data for glyph. */
+                                    /* sizeOfArray = lastGlyph - firstGlyph + 1                                      */
 } blocIndexSubtable_Format1;
 
 #define BLOCFORMAT1_SIZE(first, last)            \
@@ -81,7 +81,7 @@ typedef struct _blocIndexSubtable_Format2 {
                           SBITBIGGLYPHMETRICS_SIZE)
 
 /* format 3 is similar to format 1, but with 16-bit offsets, for
-   compressed PROPORTIONALLY-spaced glyphs. 
+   compressed PROPORTIONALLY-spaced glyphs.
    Must be padded to a long-word boundary. */
 typedef struct _blocIndexSubtable_Format3 {
     blocIndexSubHeader header;
@@ -100,7 +100,7 @@ typedef struct _blocCodeOffsetPair {
 #define BLOCCODEOFFSETPAIR_SIZE (SIZEOF(blocCodeOffsetPair, glyphCode) + \
                                  SIZEOF(blocCodeOffsetPair, offset))
 
-/* format 4 is for sparsely-embedded glyph data for 
+/* format 4 is for sparsely-embedded glyph data for
    PROPORTIONAL metrics */
 typedef struct _blocIndexSubtable_Format4 {
     blocIndexSubHeader header;
@@ -153,7 +153,7 @@ typedef struct _blocIndexSubTableArrayElt {
     GlyphId lastGlyphIndex;
     Card32 additionalOffsetToIndexSubtable; /* add to indexSubTableArrayOffset to get offset from beginning of "bloc" table */
     blocFormats _subtable;
-    Card16 _index; /* index in subtablearray */
+    Card16 _index; /* index in subtable array */
 } blocIndexSubTableArrayElt;
 
 #define BLOCINDEXSUBTABLEARRAYELT_SIZE (SIZEOF(blocIndexSubTableArrayElt, firstGlyphIndex) + \

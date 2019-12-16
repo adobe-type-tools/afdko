@@ -201,7 +201,7 @@ struct ufoCtx_ {
         StemHint stems[T2_MAX_STEMS];
         dnaDCL(HintMask, hintMasks);
         dnaDCL(char*, flexOpList);
-        char* pointName; /* used save the hint refernce from the first point of a curve, since it has to be used in trh last point of the curve. */
+        char* pointName; /* used save the hint reference from the first point of a curve, since it has to be used in the last point of the curve. */
     } hints;
 
     dnaDCL(char*, valueArray); /* used when parsing <array> elements */
@@ -722,7 +722,7 @@ static void setTransformMtx(Transform* transform,
     transform->isOffsetOnly = isOffsetOnly;
 }
 
-/* Multiple matices a and b giving result. */
+/* Multiple matrices a and b giving result. */
 static void matMult(float* result, float* a, float* b) {
     result[0] = a[0] * b[0] + a[1] * b[2];
     result[1] = a[0] * b[1] + a[1] * b[3];
@@ -842,7 +842,7 @@ static void doOp_ct(ufoCtx h, abfGlyphCallbacks* glyph_cb, char* pointName) {
         opRec->coords[3] = dy2;
         opRec->coords[4] = dx3;
         opRec->coords[5] = dy3;
-        // printf("curveo %f %f. opIndex: %ld \n", dx3, dy3, h->data.opList.cnt-1);
+        // printf("curveto %f %f. opIndex: %ld \n", dx3, dy3, h->data.opList.cnt-1);
 
         h->metrics.cb.curve(&h->metrics.cb,
                             dx1, dy1,
@@ -1129,7 +1129,7 @@ static void addGLIFRec(ufoCtx h, int state) {
     newGLIFRec->glyphOrder = glyphOrder;
     fileName = getKeyValue(h, "</string>", state);
     if (fileName == NULL) {
-        fatal(h, ufoErrParse, "Encounted glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
+        fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
     }
     newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
     sprintf(newGLIFRec->glifFileName, "%s", fileName);
@@ -1168,7 +1168,7 @@ static void updateGLIFRec(ufoCtx h, int state) {
 
         fileName = getKeyValue(h, "</string>", state);
         if (fileName == NULL) {
-            fatal(h, ufoErrParse, "Encounted glyph reference in alternate layer's contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
+            fatal(h, ufoErrParse, "Encountered glyph reference in alternate layer's contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
         }
 
         glifRec->altLayerGlifFileName = memNew(h, 1 + strlen(fileName));
@@ -1278,13 +1278,13 @@ static int parseGlyphOrder(ufoCtx h) {
         ctuQSort(h->data.glifOrder.array, h->data.glifOrder.cnt,
                  sizeof(h->data.glifOrder.array[0]), cmpOrderRecs, h);
 
-        /* weed out duplicates - these casue sorting to work differently depending on whether
+        /* weed out duplicates - these cause sorting to work differently depending on whether
          we approach the pair from the top or bottom. */
         {
             int i = 1;
             while (i < h->data.glifOrder.cnt) {
                 if (0 == strcmp(h->data.glifOrder.array[i].glyphName, h->data.glifOrder.array[i - 1].glyphName)) {
-                    /* set the glyoh orders to be the same. First wins */
+                    /* set the glyph orders to be the same. First wins */
                     h->data.glifOrder.array[i].order = h->data.glifOrder.array[i - 1].order;
                     message(h, "Warning: glyph order contains duplicate entries for glyphs '%s'.", h->data.glifOrder.array[i].glyphName);
                 }
@@ -2055,8 +2055,8 @@ static int parsePoint(ufoCtx h, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, 
                     /* The hint set which precedes a curve is referenced in the point name for the first point of the curve.
                     This is currently stored in h->hints.pointName. Save, it, then set h->hints.pointName to NULL.
 
-                     A curve has a point name in teh final point only when the point is the first point of the contour,
-                     and the last two points are at the end of the contour. Im this case,  h->hints.pointName is always NULL,
+                     A curve has a point name in the final point only when the point is the first point of the contour,
+                     and the last two points are at the end of the contour. In this case,  h->hints.pointName is always NULL,
                      and the hint reference is applied before the move-to of the contour.*/
 
                     if (pointName != NULL)
@@ -2256,7 +2256,7 @@ static void doOpList(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb) {
             case movetoType: {
                 OpRec* nextOpRec;
 
-                /* UFO format fonts can have paths with a single move-to, used as anchor points during design.Moti these. */
+                /* UFO format fonts can have paths with a single move-to, used as anchor points during design. Omit these. */
                 if ((i + 1) == h->data.opList.cnt)
                     break;
                 nextOpRec = &h->data.opList.array[i + 1];
@@ -2280,7 +2280,7 @@ static void doOpList(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb) {
                                    opRec1->coords[0], opRec1->coords[1],
                                    opRec1->coords[2], opRec1->coords[3],
                                    opRec1->coords[4], opRec1->coords[5]);
-                    i++; /* we skip the next op, since we just cappsed throught the flex callback. */
+                    i++; /* we skip the next op, since we just passed through the flex callback. */
                     break;
                 }
 
@@ -2436,11 +2436,11 @@ static int parseStem3(ufoCtx h, GLIF_Rec* glifRec, HintMask* curHintMask, int st
     while (i < 6) {
         StemHint* stem;
         stem = dnaNEXT(curHintMask->maskStems);
-        stem->edge = coords[i++];
-        stem->width = coords[i++];
         stem->flags = stemFlags;
         if ((i == 0) && (stemFlags & ABF_NEW_HINTS))
             stemFlags &= ~ABF_NEW_HINTS;
+        stem->edge = coords[i++];
+        stem->width = coords[i++];
     }
     return result;
 }
@@ -2511,7 +2511,7 @@ static int parseType1HintDataV1(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
 
     int prevState = outlineInHintData;
     // printf("Parsing Type1 hint data.\n");
-    /* This is Adobe private T1 hint data, so we report a fatal error if the struture is not as expected */
+    /* This is Adobe private T1 hint data, so we report a fatal error if the structure is not as expected */
     while (1) {
         token* tk;
         tk = getToken(h, state);
@@ -2771,11 +2771,11 @@ static int parseStem3V2(ufoCtx h, GLIF_Rec* glifRec, HintMask* curHintMask, int 
     while (count < 6) {
         StemHint* stem;
         stem = dnaNEXT(curHintMask->maskStems);
-        stem->edge = coords[count++];
-        stem->width = coords[count++];
         stem->flags = stemFlags;
         if ((count == 0) && (stemFlags & ABF_NEW_HINTS))
             stemFlags &= ~ABF_NEW_HINTS;
+        stem->edge = coords[count++];
+        stem->width = coords[count++];
     }
     return result;
 }
@@ -2925,7 +2925,7 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
             continue;
         } else if (tokenEqualStr(tk, "<array>") && (state == outlineInHintSetStemList)) {
             if (pointName == NULL) {
-                fatal(h, ufoErrParse, "Encountered hintset stems array before seing point name. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
+                fatal(h, ufoErrParse, "Encountered hintset stems array before seeing point name. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
             }
             result = parseHintSetV2(h, glifRec, pointName, transform);
             state = outlineInHintSet;
@@ -3006,7 +3006,7 @@ static int parseType1HintDataV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transfor
 
     int prevState = outlineInHintData;
     // printf("Parsing Type1 hint data.\n");
-    /* This is Adobe private T1 hint data, so we report a fatal error if the struture is not as expected */
+    /* This is Adobe private T1 hint data, so we report a fatal error if the structure is not as expected */
     while (1) {
         token* tk;
         tk = getToken(h, state);
@@ -3145,7 +3145,7 @@ static void skipData(ufoCtx h, GLIF_Rec* glifRec) {
 }
 
 static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Transform* transform) {
-    /* The first point in a GLIF outlne serves two purposes: it is the start point, but also the end-point.
+    /* The first point in a GLIF outline serves two purposes: it is the start point, but also the end-point.
      We need to convert it to the initial move-to, but we also need to
      re-issue it as the original point type at the end of the path.
      */
@@ -3477,7 +3477,7 @@ static STI addString(ufoCtx h, size_t length, const char* value) {
 
     if (length == 0) {
         /* A null name (/) is legal in PostScript but could lead to unexpected
-         behaviour elsewhere in the coretype libraries so it is substituted
+         behavior elsewhere in the coretype libraries so it is substituted
          for a name that is very likely to be unique in the font */
         static const char subs_name[] = "_null_name_substitute_";
         value = subs_name;
@@ -3611,7 +3611,7 @@ int ufoEndFont(ufoCtx h) {
 }
 
 int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks* glyph_cb) {
-    unsigned short i;
+    long i;
 
     /* Set error handler */
     DURING_EX(h->err.env)

@@ -1,0 +1,13 @@
+# Test skipping automatic GDEF table
+@BASE = [f i];
+@LIGATURES = [c_s c_t f_i f_f_i s_t];
+@MARKS = [acute grave];
+@COMPONENT = [noon.final noon.initial];
+table GDEF {
+    GlyphClassDef @BASE, @LIGATURES, @MARKS, @COMPONENT;
+} GDEF;
+
+feature liga {
+    lookupflag IgnoreMarks;
+    sub f i by f_i;
+} liga;

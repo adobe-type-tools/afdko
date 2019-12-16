@@ -1,0 +1,5 @@
+# Test not allowed language in size feature.
+feature size {
+    language dflt;
+    sub A by B;
+} size;

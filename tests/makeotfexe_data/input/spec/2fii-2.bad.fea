@@ -1,0 +1,4 @@
+# Test CID glyph in non-CID font.
+lookup test {
+  sub \40 by \118;
+} test;

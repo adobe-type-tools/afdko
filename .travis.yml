@@ -3,10 +3,6 @@ python: 3.6
 
 env:
   global:
-    - CIBW_BUILD="cp36-macosx_10_6_intel cp36-manylinux1_x86_64"
-    - CIBW_BEFORE_BUILD_LINUX="pip install --disable-pip-version-check -U -q pip"
-    - CIBW_TEST_REQUIRES="pytest"
-    - CIBW_TEST_COMMAND="cd {project} && pytest && pip uninstall --yes afdko"
     - TWINE_USERNAME="adobe-type-tools-ci"
     # Note: TWINE_PASSWORD is set in Travis settings
 
@@ -20,8 +16,11 @@ matrix:
         - NAME=Linux
         - PIP=pip
         - PYTHON=python
+        - CIBW_BUILD="cp36-manylinux1_x86_64"
+        - CIBW_BEFORE_BUILD="pip install --disable-pip-version-check -U -q pip"
 
     - os: osx
+      osx_image: xcode9.4
       language: generic
       env:
         - NAME=OSX
@@ -29,10 +28,30 @@ matrix:
         - PYTHON=python3
 
 script:
-  - $PIP install --upgrade pip
-  # - $PIP install cibuildwheel
-  - $PIP install git+https://github.com/adobe-type-tools/cibuildwheel
-  - cibuildwheel --output-dir wheelhouse
+  - |
+    set -e
+    if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+      $PIP install --disable-pip-version-check -U -q pip setuptools wheel pytest
+      $PYTHON --version
+      $PIP --version
+      $PIP list
+      $PYTHON setup.py bdist_wheel
+      if [[ -z $TRAVIS_TAG ]]; then
+        # run the tests only on untagged commits
+        $PIP install dist/*.whl
+        pytest
+        $PIP uninstall --yes afdko
+      fi
+    else
+      if [[ -z $TRAVIS_TAG ]]; then
+        # run the tests only on untagged commits
+        export CIBW_TEST_REQUIRES='pytest'
+        export CIBW_TEST_COMMAND='cd {project} && pytest && pip uninstall --yes afdko'
+      fi
+      $PIP install --disable-pip-version-check -U -q pip
+      $PIP install cibuildwheel
+      cibuildwheel --output-dir dist
+    fi
 
 after_success:
   # create source distribution
@@ -40,7 +59,7 @@ after_success:
   - |
     if [[ $TRAVIS_TAG ]]; then
       $PYTHON -m pip install twine
-      $PYTHON -m twine upload wheelhouse/*.whl
+      $PYTHON -m twine upload dist/*.whl
       if [[ $TRAVIS_OS_NAME == "osx" ]]; then
         $PYTHON setup.py sdist
         $PYTHON -m twine upload dist/*.tar.gz
@@ -55,7 +74,7 @@ deploy:
     skip_cleanup: true
     file_glob: true
     file:
-      - wheelhouse/*.whl
+      - dist/*.whl
       - dist/*.tar.gz
     prerelease: true
     on:

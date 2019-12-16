@@ -7,8 +7,8 @@
  * Simple top-level PostScript tokenizer.
  */
 
-#ifndef PSTOKEN_H
-#define PSTOKEN_H
+#ifndef MAKEOTF_PSTOKEN_H
+#define MAKEOTF_PSTOKEN_H
 #include <stdint.h>
 #include <stddef.h>
 
@@ -142,4 +142,4 @@ void CDECL psFatal(psCtx h, char *fmt, ...);
 }
 #endif
 
-#endif /* PS_H */
+#endif /* MAKEOTF_PSTOKEN_H */

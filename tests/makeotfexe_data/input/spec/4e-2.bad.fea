@@ -1,0 +1,6 @@
+# Different flags in lookup.
+lookup test {
+    sub A by A.sc;
+    lookupflag IgnoreMarks;
+    sub B by B.sc;
+} test;

@@ -8,7 +8,7 @@
    hot library callback support layer.
 
    This module provides a test client for the hot library. hot library clients
-   do not need to include this module; it is mearly provided for reference.
+   do not need to include this module; it is merely provided for reference.
  */
 
 #include "package.h"
@@ -398,7 +398,7 @@ static void cffSize(void *ctx, long size, int euroAdded) {
     h->cff.euroAdded = euroAdded;
 }
 
-/* -------------------------- OTF data input/ouput ------------------------- */
+/* -------------------------- OTF data input/output ------------------------- */
 
 /* [hot callback] Return OTF filename */
 static char *otfId(void *ctx) {
@@ -625,7 +625,7 @@ static void featAddAnonData(void *ctx, char *data, long count,
 #endif
 }
 
-/* [hot callback] Open Unicose Variation Selector file. (name == NULL) indicates not supplied. The full file name is returned. */
+/* [hot callback] Open Unicode Variation Selector file. (name == NULL) indicates not supplied. The full file name is returned. */
 static char *uvsOpen(void *ctx, char *name) {
     cbCtx h = ctx;
 
@@ -799,7 +799,7 @@ static void fcdbError(void *ctx, unsigned fileid, long line, int errid) {
             "empty name",
             "Compatible Full name may be specified only for the Mac platform.",
             "Both version 1 and version 2 syntax is present in the Font Menu Name DB file: name table font menu names may be in error."};
-    cbWarning(h, "%s [%s:%d] (record skipped) (fcdbError)",
+    cbWarning(h, "%s [%s:%ld] (record skipped) (fcdbError)",
               msgs[errid], h->fcdb.files.array[fileid].name, line);
 }
 
@@ -854,7 +854,7 @@ static void gnameError(cbCtx h, char *message, char *filename, long line) {
         /* 6 is max probable length of decimal line number in Glyph Name Alias Database file */
         cbWarning(h, "Glyph Name Alias Database error message [%s:$d] + file name is too long. Please move Database file to shorter absolute path.", message, line);
     } else {
-        cbWarning(h, "%s [%s:%d] (record skipped)(gnameError)", message, filename, line);
+        cbWarning(h, "%s [%s:%ld] (record skipped)(gnameError)", message, filename, line);
     }
 }
 
@@ -1077,7 +1077,7 @@ void cbAliasDBRead(cbCtx h, char *filename) {
         }
 
         if (buf[iNL] != '\n') {
-            cbFatal(h, "GlyphOrderAndAliasDB line is longer than limit of %d characters. [%s line number: %d]\n", maxLineLen, filename, lineno);
+            cbFatal(h, "GlyphOrderAndAliasDB line is longer than limit of %d characters. [%s line number: %ld]\n", maxLineLen, filename, lineno);
         }
 
         iOrder++;
@@ -1089,7 +1089,7 @@ void cbAliasDBRead(cbCtx h, char *filename) {
         }
         *p = '\0';
         if (strlen(final) > MAX_FINAL_CHAR_NAME_LEN) {
-            cbWarning(h, "final name %s is longer (%d) than limit %d, in %s line %d.\n", final, strlen(final), MAX_FINAL_CHAR_NAME_LEN, filename, lineno);
+            cbWarning(h, "final name %s is longer (%lu) than limit %d, in %s line %ld.\n", final, strlen(final), MAX_FINAL_CHAR_NAME_LEN, filename, lineno);
         }
 
         /* Skip blanks */
@@ -1105,7 +1105,7 @@ void cbAliasDBRead(cbCtx h, char *filename) {
         }
         *p = '\0';
         if (strlen(alias) > MAX_CHAR_NAME_LEN) {
-            cbWarning(h, "alias name %s is longer  (%d) than limit %d, in %s line %d.\n", alias, strlen(alias), MAX_CHAR_NAME_LEN, filename, lineno);
+            cbWarning(h, "alias name %s is longer (%lu) than limit %d, in %s line %ld.\n", alias, strlen(alias), MAX_CHAR_NAME_LEN, filename, lineno);
         }
 
         /* Skip blanks. Since line is null terminated, will not go past end of line. */
@@ -1224,7 +1224,7 @@ void cbAliasDBRead(cbCtx h, char *filename) {
 #endif
 }
 
-/* used to overide AliasDB when -q option is used: Usage scenario:
+/* used to override AliasDB when -q option is used: Usage scenario:
    default options are read in and processed from the project file, then
    the user overrides -r with -q. */
 void cbAliasDBCancel(cbCtx h) {
@@ -1756,7 +1756,7 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
     sprintf(pfbpath, "%s%s", h->dir.pfb, pfbfile);
 
     /*CFFDBG part of hack to print out temp cff file for CID fonts */
-    /*h->CMap.file.name set here is used only to trigger dbg behaviour in tempClose() */
+    /*h->CMap.file.name set here is used only to trigger dbg behavior in tempClose() */
     if (hcmapfile != NULL) {
         h->tmp.file.name = pfbpath;
     }

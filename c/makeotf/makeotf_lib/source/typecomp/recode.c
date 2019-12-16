@@ -43,7 +43,7 @@ typedef Fixed Blend[TX_MAX_MASTERS]; /* Blendable array of values */
         *dnaNEXT(da) = (unsigned char)(op); \
     } while (0)
 
-/* Calulate number size in bytes */
+/* Calculate number size in bytes */
 #define NUMSIZE(v) (-107 <= (v) && (v) <= 107 ? 1 : (-1131 <= (v) && (v) <= 1131 ? 2 : 3))
 
 /* Charstring buffer */
@@ -162,7 +162,7 @@ typedef struct {          /* Segment */
 
 typedef struct {          /* Operator */
     unsigned short nArgs; /* Number of arguments */
-    unsigned short iArgs; /* Argment index */
+    unsigned short iArgs; /* Argument index */
     unsigned short iSeg;  /* Next segment index */
     unsigned short type;  /* Operator type */
 } Operator;
@@ -250,7 +250,7 @@ typedef enum { /* Char id type */
 
 #include "cffread.h"
 
-/* Degrees to readians multiplying constant */
+/* Degrees to radians multiplying constant */
 #define DEG_2_RAD (3.141592653589793 / 180)
 
 /* Round double and convert to Fixed */
@@ -318,7 +318,7 @@ struct recodeCtx_ {
     } stack;
     struct {                /* --- Stem hints */
         HintMask initmask;  /* Initial stem id mask */
-        HintMask subsmask;  /* Hint subsitution id mask */
+        HintMask subsmask;  /* Hint substitution id mask */
         HintMask lastmask;  /* Last hint substitution mask */
         dnaDCL(Stem, list); /* Stem list */
     } stem;
@@ -391,7 +391,7 @@ struct recodeCtx_ {
     /* ---------------------------------------------------------------------- */
     double italic_angle;
     unsigned isFixedPitch;
-    unsigned noslant; /* whether the current synthetic glyphs hould be slanted. */
+    unsigned noslant; /* whether the current synthetic glyphs should be slanted. */
     cffPathCallbacks *pathcb;
     cffPathCallbacks *metricsPathcb; /* used to get some metrics WITHOUT building the newGlyphPath */
                                      /* NOTE! Must be kept parallel to pathcb, with regard to metric calculations. */
@@ -618,7 +618,7 @@ static void recodeNewFont(tcCtx g, Font *font) {
     if (font->flags & FONT_CID && h->cstrs.size < 3000000) {
         /* Resize da's for CID fonts */
         if (!(g->flags & TC_SMALLMEMORY)) {
-            /* xxx what if we've aready allocated cstrs to another font */
+            /* xxx what if we've already allocated cstrs to another font */
             dnaFREE(h->cstrs);
             dnaINIT(g->ctx.dnaCtx, h->cstrs, 3000000, 1000000);
         }
@@ -1117,7 +1117,7 @@ static void addStems(recodeCtx h, int vert, int cntr) {
     int i;
     Stem stem;
 
-    /* If we are flattening an oblique synthetix font, omit all vertical stems. */
+    /* If we are flattening an oblique synthetic font, omit all vertical stems. */
     if ((h->font->synthetic.oblique_term != 0.0) && (vert)) {
         h->stack.cnt = 0;
         return;
@@ -1498,7 +1498,7 @@ static void addFlex(recodeCtx h) {
     addPathSeg(h, seg_curve);
     add6Coords(h, 8, 9, 10, 11, 12, 13);
 
-    /* obliquing a charstring with flex should mek problems that I haven't dealt with yet. */
+    /* obliquing a charstring with flex should make problems that I haven't dealt with yet. */
     if (h->font->synthetic.oblique_term != 0.0) {
         parseWarning(h->g, "Error: flattened obliqued synthetic font uses flex. Should produce other flex errors.");
     }
@@ -2344,7 +2344,7 @@ static Blend *setCntrMask(recodeCtx h, Blend *p, int vert, HintMask cntrmask) {
 }
 
 /* Set counter control mask groups. The original counter list from the
-   charstring is contructed in reverse order and read back to front. */
+   charstring is constructed in reverse order and read back to front. */
 static void setCntrMaskGroups(recodeCtx h) {
     int i;
     HintMask *cntrmask;
@@ -2435,7 +2435,7 @@ static void saveHintMaskOp(recodeCtx h, unsigned char *map, int op,
     }
 
     if (check && memcmp(h->stem.lastmask, hintmask, h->hint.size) == 0) {
-        /* warnChar(h, iHint5); */ /* Supressing this becuase it is so common. */
+        /* warnChar(h, iHint5); */ /* Suppressing this because it is so common. */
         /* Users end up ignoring the few more interesting cases. */
         return;
     }
@@ -2762,7 +2762,7 @@ static int doFlex(recodeCtx h, int iCoords, int iHeight) {
     }
 }
 
-/* Calulate max stack depth for new args */
+/* Calculate max stack depth for new args */
 static int maxArgsDepth(recodeCtx h) {
     int i;
     int max = 0;
@@ -4085,7 +4085,7 @@ static void newGlyphAddPoint(recodeCtx h,
 
     The code allows for the target font  to be an MM font.
 
-    We currently are using the smae template glyph name with both the EuroMM and the FillinMM fonts;
+    We currently are using the same template glyph name with both the EuroMM and the FillinMM fonts;
     this code is here because David Lemon originally wanted a different template glyph for the FillinMM font.
  */
 static void saveTemplateGlyphData(recodeCtx h, TemplateGlyphData *templateGlyph) {
@@ -4206,7 +4206,7 @@ static char *euroSeek(void *ctx, long offset, long *count) {
     }
 }
 
-/* [cff callback] Refill data buffer from current postion. */
+/* [cff callback] Refill data buffer from current position. */
 /* ---------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------- */
 static char *euroRefill(void *ctx, long *count) {
@@ -4464,7 +4464,7 @@ static int FillinMM_font_clampUDV(recodeCtx h, int is_serif, cffFixed *UDV);
    each master design of the target font.
 
    The width and weight metrics to match are taken from the "templateGlyph" in the target font. For both the EuroMM and the FillinMM font,
-   teh template glyph is "zero". The font transform is calculated by comparing the height of the font BBOX between the
+   the template glyph is "zero". The font transform is calculated by comparing the height of the font BBOX between the
    target font's template glyph, and a 'scaling' glyph in the fill-in MM font. For the EuroMM, the scaling glyph is the "Euro"; for the
    FillinMM font, the scaling glyph is "zero".
  */
@@ -4536,7 +4536,7 @@ void InitStaticFontData(tcCtx g, int font__serif_selector, double *StdVW, double
         h->italic_angle = 0.0;
     }
 
-    /* if font__serif_selector is 0, use heuristics, elese respect override. */
+    /* if font__serif_selector is 0, use heuristics, else respect override. */
     if (font__serif_selector == 1) {
         is_serif = 1;
     } else if (font__serif_selector == 2) {
@@ -4593,7 +4593,7 @@ void InitStaticFontData(tcCtx g, int font__serif_selector, double *StdVW, double
         ctx = cffNew(&stdcb, 0);
 
         /* Traverse glyph */
-        h->newGlyph.matrix.c = 0; /* used in h->pathcb funtions*/
+        h->newGlyph.matrix.c = 0; /* used in h->pathcb functions*/
         h->newGlyph.matrix.d = 1.0;
         h->newGlyph.matrix.tx = 0.0;
         h->newGlyph.matrix.ty = 0.0;
@@ -4629,19 +4629,19 @@ void InitStaticFontData(tcCtx g, int font__serif_selector, double *StdVW, double
 
         /* Now get the font transform matrix and the UDV to be used with   */
         /* this master face of the target font, for the new glyph from the */
-        /* fill-in MM font. Note that we are stepping throught the master  */
+        /* fill-in MM font. Note that we are stepping through the master  */
         /* faces of the target font, not the fill-in MM Font.              */
         for (h->newGlyph.iMaster = 0; h->newGlyph.iMaster < h->nMasters; h->newGlyph.iMaster++) {
             if (h->newGlyph.templateGlyph[font_index].seen == 0) {
                 /* The only time we should be here without having seen the */
                 /* template glyph, and filled in the data, is when we are  */
-                /* forcing a nordef ona font without a "zero".             */
+                /* forcing a notdef on a font without a "zero".            */
                 if (g->flags & TC_FORCE_NOTDEF) {
                     /* Because the notdef is fixed in size in all the */
                     /* FillinMM base designs, we can hardwire all the */
                     /* generic info.                                  */
                     Fixed *UDV = &(h->newGlyph.fill_in_cff[font_index].UDV[0][h->newGlyph.iMaster]);
-                    UDV[0] = DBL2FIX(34.0); /* a low but valid wieght */
+                    UDV[0] = DBL2FIX(34.0); /* a low but valid weight */
                     UDV[1] = DBL2FIX(226);  /* min width of MM design.*/
                     h->newGlyph.matrix.c = 0;
                     h->newGlyph.matrix.d = 1.0;
@@ -4731,7 +4731,7 @@ void InitStaticFontData(tcCtx g, int font__serif_selector, double *StdVW, double
                 UDV[1] = DBL2FIX((FIX2DBL(UDV[1]) / h->newGlyph.matrix.d));
 
                 /* clamp UDV to extrapolation limits, if using FillinMM font */
-                /* record the ratio between the FillInMM and target glyph width for the template glyph ( currently zer). */
+                /* record the ratio between the FillInMM and target glyph width for the template glyph (currently zero). */
                 /* we use this later to scale up all the synthetic glyph widths */
                 if (font_index == kFillinMMIndex) {
                     FillinMM_font_clampUDV(h, is_serif, UDV);
@@ -4766,7 +4766,7 @@ void InitStaticFontData(tcCtx g, int font__serif_selector, double *StdVW, double
 /*
    Add the new glyph. It has the GID == gl_id in the fill-in font, and will be created with GID == id in the target font.
 
-   The source glyph from the fill-in font is snapshotted to a single path, via the UDV and font transfrom, for
+   The source glyph from the fill-in font is snapshotted to a single path, via the UDV and font transform, for
    each master design of the target font.
  */
 void recodeAddNewGlyph(tcCtx g, unsigned id, unsigned fill_in_font_id, unsigned gl_id, unsigned noslant, unsigned adjust_overshoot, char *char_name) {
@@ -4904,10 +4904,10 @@ void recodeAddNewGlyph(tcCtx g, unsigned id, unsigned fill_in_font_id, unsigned 
                 diff = (diff > 0) ? diff : -diff;
 
                 if (diff == 1) {
-                    parseWarning(g, "Zero width vs. calculated Euro width round-off difference: %f, %d", FIX2DBL(zeroWidth), iwidth);
+                    parseWarning(g, "Zero width vs. calculated Euro width round-off difference: %f, %ld", FIX2DBL(zeroWidth), iwidth);
                 }
                 if (diff > 1) {
-                    parseWarning(g, "Problem: Zero width of target font is not same as calculated Euro width: %f, %d", FIX2DBL(zeroWidth), iwidth);
+                    parseWarning(g, "Problem: Zero width of target font is not same as calculated Euro width: %f, %ld", FIX2DBL(zeroWidth), iwidth);
                 }
                 h->newGlyph.width[iMaster] = zeroWidth;
             }

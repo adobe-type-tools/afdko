@@ -1,16 +1,20 @@
 import argparse
+import glob
 import logging
 import os
 import sys
+from functools import partial, singledispatch
+from itertools import chain
+from multiprocessing import Pool
 
 from cu2qu.pens import Cu2QuPen
 from fontTools import configLogger
 from fontTools.misc.cliTools import makeOutputFileName
 from fontTools.pens.ttGlyphPen import TTGlyphPen
-from fontTools.ttLib import TTFont, newTable
-
+from fontTools.ttLib import TTCollection, TTFont, TTLibError, newTable
 
 log = logging.getLogger()
+configLogger(logger=log)
 
 # default approximation error, measured in UPEM
 MAX_ERR = 1.0
@@ -36,8 +40,10 @@ def glyphs_to_quadratic(
     return quadGlyphs
 
 
+@singledispatch
 def otf_to_ttf(ttFont, post_format=POST_FORMAT, **kwargs):
-    assert ttFont.sfntVersion == "OTTO"
+    if ttFont.sfntVersion != "OTTO":
+        raise TTLibError("Not a OpenType font (bad sfntVersion)")
     assert "CFF " in ttFont
 
     glyphOrder = ttFont.getGlyphOrder()
@@ -79,9 +85,47 @@ def otf_to_ttf(ttFont, post_format=POST_FORMAT, **kwargs):
     ttFont.sfntVersion = "\000\001\000\000"
 
 
-def main(args=None):
-    configLogger(logger=log)
+@otf_to_ttf.register(TTCollection)
+def _(fonts, **kwargs):
+    skip = 0
+    for font in fonts:
+        try:
+            otf_to_ttf(font, **kwargs)
+        except TTLibError as warn:
+            skip += 1
+            log.warning(warn)
 
+    if skip == len(fonts):
+        raise TTLibError("a Font Collection that has Not a OpenType font")
+
+
+def run(path, options):
+    try:
+        font = TTFont(path, fontNumber=options.face_index)
+        extension = '.ttf'
+    except TTLibError:
+        font = TTCollection(path)
+        extension = '.ttc'
+
+    if options.output and not os.path.isdir(options.output):
+        output = options.output
+    else:
+        output = makeOutputFileName(path, outputDir=options.output,
+                                    extension=extension,
+                                    overWrite=options.overwrite)
+
+    try:
+        otf_to_ttf(font,
+                   post_format=options.post_format,
+                   max_err=options.max_error,
+                   reverse_direction=options.reverse_direction)
+    except TTLibError as warn:
+        log.warning(f'"{path}" cannot be converted since it is {warn}.')
+    else:
+        font.save(output)
+
+
+def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("input", nargs='+', metavar="INPUT")
     parser.add_argument("-o", "--output")
@@ -89,7 +133,7 @@ def main(args=None):
     parser.add_argument("--post-format", type=float, default=POST_FORMAT)
     parser.add_argument(
         "--keep-direction", dest='reverse_direction', action='store_false')
-    parser.add_argument("--face-index", type=int, default=0)
+    parser.add_argument("--face-index", type=int, default=-1)
     parser.add_argument("--overwrite", action='store_true')
     options = parser.parse_args(args)
 
@@ -98,20 +142,15 @@ def main(args=None):
             parser.error("-o/--output option must be a directory when "
                          "processing multiple fonts")
 
-    for path in options.input:
-        if options.output and not os.path.isdir(options.output):
-            output = options.output
-        else:
-            output = makeOutputFileName(path, outputDir=options.output,
-                                        extension='.ttf',
-                                        overWrite=options.overwrite)
+    files = chain.from_iterable(map(glob.glob, options.input))
 
-        font = TTFont(path, fontNumber=options.face_index)
-        otf_to_ttf(font,
-                   post_format=options.post_format,
-                   max_err=options.max_error,
-                   reverse_direction=options.reverse_direction)
-        font.save(output)
+    # Do not use "with" statement, or code coverage will malfunction.
+    pool = Pool()
+    try:
+        pool.map(partial(run, options=options), files)
+    finally:
+        pool.close()
+        pool.join()
 
 
 if __name__ == "__main__":

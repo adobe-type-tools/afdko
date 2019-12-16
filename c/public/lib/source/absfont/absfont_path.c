@@ -161,7 +161,7 @@ typedef struct /* Segment */
     long iNext;                /* Next segment index */
     long iPath;                /* Parent path */
     long inJunc;               /* ingoing junction index */
-    long outJunc;              /* outcoming junction index */
+    long outJunc;              /* outgoing junction index */
     float score;               /* Confidence level of delete/undelete status (non-negative) */
 } Segment;
 
@@ -929,7 +929,7 @@ static Point calcLineIsectPoint(float t, Segment *seg) {
     return p;
 }
 
-/* Compute intersection point on bezier segment. */
+/* Compute intersection point on Bezier segment. */
 static Point calcCurveIsectPoint(float t, Segment *seg) {
     Point p;
     p.x = t * (t * (t * (seg->p3.x - 3 * (seg->p2.x - seg->p1.x) - seg->p0.x) +
@@ -1071,7 +1071,7 @@ static void saveIsectPair(abfCtx h,
         if (m == 1)
             p = h->isects.array[i].p;
 
-        /* If the two exact matches happen to have distict intersection IDs, unify them altogether */
+        /* If the two exact matches happen to have distinct intersection IDs, unify them altogether */
         if (match0 == 2 && match1 == 2 && h->isects.array[i0].id != h->isects.array[i1].id) {
             long id1 = h->isects.array[i1].id;
             long j;
@@ -1808,7 +1808,7 @@ static int getWind(float beg, float end) {
     return (beg > end) ? 1 : -1;
 }
 
-/* Split bezier curve at t. */
+/* Split Bezier curve at t. */
 static void splitBez(Bezier *a, Bezier *b, float t) {
     Point p0 = a->p0;
     Point p1 = a->p1;
@@ -1835,7 +1835,7 @@ static void splitBez(Bezier *a, Bezier *b, float t) {
     b->p0 = a->p3;
 }
 
-/* Find t value that yeilds the target value from Bezier equation. */
+/* Find t value that yields the target value from Bezier equation. */
 static float solveBezAtValue(float value,
                              float p3, float p2, float p1, float p0) {
     float a = p3 - 3 * (p2 - p1) - p0;

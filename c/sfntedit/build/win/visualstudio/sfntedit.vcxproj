@@ -167,7 +167,6 @@
     <ClInclude Include="..\..\..\source\Eglobal.h" />
     <ClInclude Include="..\..\..\source\Emsgs.h" />
     <ClInclude Include="..\..\..\source\Esys.h" />
-    <ClInclude Include="..\..\..\source\otter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

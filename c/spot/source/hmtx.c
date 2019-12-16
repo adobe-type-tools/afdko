@@ -40,7 +40,7 @@ void hmtxRead(LongN start, Card32 length) {
         else if (nGlyphs == 0)
             nGlyphs = nLongHorMetrics;
         else {
-            fprintf(OUTPUTBUFF, "spot [Error]: Badly constructed font - the hmtx table isn't long enough to hold the numbe of nLongHorMetrics specified in the head table.\n");
+            fprintf(OUTPUTBUFF, "spot [Error]: Badly constructed font - the hmtx table isn't long enough to hold the number of nLongHorMetrics specified in the head table.\n");
             nLongHorMetrics = (Card16)(length / sizeof(LongHorMetrics));
             nGlyphs = nLongHorMetrics;
             return;

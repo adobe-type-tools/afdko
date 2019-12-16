@@ -357,7 +357,7 @@ cleanup:;
 
 static void var_freefvar(ctlSharedStmCallbacks *sscb, var_fvar fvar) {
     if (fvar) {
-        unsigned short i;
+        long i;
 
         for (i = 0; i < fvar->instances.cnt; i++) {
             dnaFREE(fvar->instances.array[i].coordinates);
@@ -726,7 +726,7 @@ var_itemVariationStore var_loadItemVariationStore(ctlSharedStmCallbacks *sscb, u
         goto cleanup;
     }
 
-    if (dnaSetCnt(&ivs->regionList.regions, DNA_ELEM_SIZE_(ivs->regionList.regions), ivs->regionList.axisCount * ivs->regionList.regionCount) < 0)
+    if (dnaSetCnt(&ivs->regionList.regions, DNA_ELEM_SIZE_(ivs->regionList.regions), (long)ivs->regionList.axisCount * ivs->regionList.regionCount) < 0)
         goto cleanup;
 
     if (ivsOffset + regionListOffset + IVS_VARIATION_REGION_LIST_HEADER_SIZE
@@ -771,9 +771,9 @@ var_itemVariationStore var_loadItemVariationStore(ctlSharedStmCallbacks *sscb, u
             goto cleanup;
 
         dnaINIT(sscb->dna, ivd->regionIndices, ivd->regionCount, 1);
-        dnaINIT(sscb->dna, ivd->deltaValues, ivd->itemCount * ivd->regionCount, 1);
+        dnaINIT(sscb->dna, ivd->deltaValues, (size_t)ivd->itemCount * ivd->regionCount, 1);
         if ((dnaSetCnt(&ivd->regionIndices, DNA_ELEM_SIZE_(ivd->regionIndices), ivd->regionCount) < 0)
-            || (dnaSetCnt(&ivd->deltaValues, DNA_ELEM_SIZE_(ivd->deltaValues), ivd->itemCount * ivd->regionCount) < 0))
+            || (dnaSetCnt(&ivd->deltaValues, DNA_ELEM_SIZE_(ivd->deltaValues), (long)ivd->itemCount * ivd->regionCount) < 0))
             goto cleanup;
 
         /* load region indices */
@@ -991,7 +991,7 @@ static float var_applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb, var_itemVa
         return netAdjustment;
     }
 
-    deltaSetIndex = subtable->regionCount * pair->innerIndex;
+    deltaSetIndex = (long)subtable->regionCount * pair->innerIndex;
 
     if ((long)pair->innerIndex >= subtable->itemCount || deltaSetIndex + subtable->regionCount > subtable->deltaValues.cnt) {
         sscb->message(sscb, "invalid inner index in index map");
@@ -1037,7 +1037,7 @@ var_hmtx var_loadhmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     unsigned long lsbMapOffset;
     unsigned long rsbMapOffset;
     float defaultWidth;
-    unsigned short i;
+    long i;
     long numGlyphs;
 
     hmtx = (var_hmtx)sscb->memNew(sscb, sizeof(*hmtx));
@@ -1082,7 +1082,7 @@ var_hmtx var_loadhmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     if (table == NULL)
         goto cleanup;
 
-    /* estimate the number of glphs from the table size instead of reading the head table */
+    /* estimate the number of glyphs from the table size instead of reading the head table */
     numGlyphs = (table->length / 2) - hmtx->header.numberOfHMetrics;
     if (numGlyphs < hmtx->header.numberOfHMetrics) {
         sscb->message(sscb, "invalid hmtx table size");
@@ -1213,7 +1213,7 @@ var_vmtx var_loadvmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     unsigned long bsbMapOffset;
     unsigned long vorgMapOffset;
     float defaultWidth;
-    unsigned short i;
+    long i;
     long numGlyphs;
 
     vmtx = (var_vmtx)sscb->memNew(sscb, sizeof(*vmtx));
@@ -1257,7 +1257,7 @@ var_vmtx var_loadvmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     if (table == NULL)
         goto cleanup;
 
-    /* estimate the number of glphs from the table size instead of reading the head table */
+    /* estimate the number of glyphs from the table size instead of reading the head table */
     numGlyphs = (table->length / 2) - vmtx->header.numOfLongVertMetrics;
     if (numGlyphs < vmtx->header.numOfLongVertMetrics) {
         sscb->message(sscb, "invalid vmtx table size");

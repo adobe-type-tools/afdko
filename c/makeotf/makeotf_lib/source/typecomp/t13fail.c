@@ -4,7 +4,7 @@
 /***********************************************************************/
 
 /*
- * Dummy Type 13 module for implementations that don't support Moriswa
+ * Dummy Type 13 module for implementations that don't support Morisawa
  * fonts and Type 13.
  */
 

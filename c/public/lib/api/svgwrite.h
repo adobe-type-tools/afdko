@@ -38,7 +38,7 @@ extern "C" {
    These streams are managed by a single set of client callback functions
    enabling the client to choose from a wide variety of implementation schemes
    ranging from disk files to memory buffers. The temporary stream is used to
-   keep the run-time memory usage within resonable limits when handling large
+   keep the run-time memory usage within reasonable limits when handling large
    fonts.
 
    Glyph data is passed to the library via the set of glyph callback functions

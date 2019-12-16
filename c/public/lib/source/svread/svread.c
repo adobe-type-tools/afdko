@@ -556,7 +556,7 @@ static token *getPathToken(svrCtx h, long endOffset) {
                     break;
             }
         } else if (isalpha(ch)) {
-            /* The non-digit, no whitespace values are assumed to be single-letter oparators */
+            /* The non-digit, no whitespace values are assumed to be single-letter operators */
             tokenType = svrOperator;
             h->src.next++;
         } else /* Found something other than digit or alphabetic.*/
@@ -853,6 +853,10 @@ static int parseSVG(svrCtx h) {
         } else if (tokenEqualStr(tk, "font-family=")) {
             char *fnp;
             tk = getToken(h);
+            if (tk == NULL) {
+                fatal(h, svrErrParse, "Error parsing font-family string.");
+                return svrErrParse; /* should not reach this line, but it makes Xcode happy */
+            }
             fnp = memNew(h, tk->length + 1);
             strncpy(fnp, tk->val, tk->length);
             fnp[tk->length] = 0;
@@ -864,7 +868,7 @@ static int parseSVG(svrCtx h) {
             state = 1;
             char_begin = 0;
             char_end = 0;
-            /* Set default widht and name, to be used if these values are not supplied by the glyph attributes. */
+            /* Set default width and name, to be used if these values are not supplied by the glyph attributes. */
             glyphWidth = defaultWidth;
             sprintf(tempName, "gid%05d", (unsigned short)h->chars.index.cnt);
         } else if (tokenEqualStr(tk, "<missing-glyph")) {
@@ -879,6 +883,10 @@ static int parseSVG(svrCtx h) {
         } else if (tokenEqualStr(tk, "unicode=")) {
             char *endPtr;
             tk = getAttribute(h);
+            if ((tk == NULL) || (tk->length > kMaxName)) {
+                fatal(h, svrErrParse, "Error parsing Unicode value. Glyph index: %ld.", h->chars.index.cnt);
+                return svrErrParse; /* should not reach this line, but it makes Xcode happy */
+            }
             if (tk->length == 1) {
                 unicode = (long)*(tk->val);
                 if ((unicode >= 'A') && (unicode <= 'z'))
@@ -915,11 +923,15 @@ static int parseSVG(svrCtx h) {
         } else if (tokenEqualStr(tk, "horiz-adv-x=")) {
             long width;
             tk = getToken(h);
+            if ((tk == NULL) || (tk->length > kMaxName)) {
+                fatal(h, svrErrParse, "Error parsing horiz-adv-x value. Glyph index: %ld.", h->chars.index.cnt);
+                return svrErrParse; /* should not reach this line, but it makes Xcode happy */
+            }
             strncpy(tempVal, tk->val, tk->length);
             tempVal[tk->length] = 0;
             width = atol(tempVal);
 
-            if (state == 0) /* Thiis a font attribute; set default width. */
+            if (state == 0) /* This a font attribute; set default width. */
                 defaultWidth = h->metrics.defaultWidth = width;
             else if (state == 1) /* in glyph, but have not seen name yet. Defer setting width until name has been added.*/
                 glyphWidth = width;
@@ -927,7 +939,7 @@ static int parseSVG(svrCtx h) {
                 setWidth(h, gnameIndex, width);
             else {
                 h->src.buf[h->src.next - (h->src.buf)] = 0; /* terminate the buffer after the current token */
-                fatal(h, svrErrParse, "Encountered horiz-adv-x attribute in unexpected context. state %d. Glyph GID: %d. '%s'.", state, (unsigned short)h->chars.index.cnt, h->src.buf);
+                fatal(h, svrErrParse, "Encountered horiz-adv-x attribute in unexpected context. state %d. Glyph index: %d. '%s'.", state, (unsigned short)h->chars.index.cnt, h->src.buf);
             }
         } else if (tokenEqualStr(tk, "glyph-name=")) {
             if (state != 1) {
@@ -983,8 +995,8 @@ static int parseSVG(svrCtx h) {
                 chr->flags = 0;
                 chr->tag = tag;
                 /* note that we do not store gname here; as it is not stable: it is a pointer into the h->string->buf array,
-                     which moves when it gets resized.  I coudl set this when all the glyphs have been read, 
-                     but it is easier kust to use the impl field.*/
+                   which moves when it gets resized.  I could set this when all the glyphs have been read, 
+                   but it is easier just to use the impl field.*/
                 chr->gname.ptr = NULL;
                 chr->gname.impl = gnameIndex;
                 chr->iFD = 0;
@@ -1089,7 +1101,7 @@ static int readGlyph(svrCtx h, unsigned short tag, abfGlyphCallbacks *glyph_cb) 
                 copyToken(tk, &op_tk);
             } break;
             case svrUnknown: {
-                fatal(h, svrErrParse, "Encountered unknown operator '%s' in path attribute of glyph '%s'.", gi->gname.ptr);
+                fatal(h, svrErrParse, "Encountered unknown operator in path attribute of glyph '%s'.", gi->gname.ptr);
                 break;
             }
         }
@@ -1131,7 +1143,7 @@ static STI addString(svrCtx h, size_t length, const char *value) {
 
     if (length == 0) {
         /* A null name (/) is legal in PostScript but could lead to unexpected
-           behaviour elsewhere in the coretype libraries so it is substituted
+           behavior elsewhere in the coretype libraries so it is substituted
            for a name that is very likely to be unique in the font */
         const char subs_name[] = "_null_name_substitute_";
         value = subs_name;
@@ -1158,7 +1170,7 @@ static char *getString(svrCtx h, STI sti) {
 /* ----------------------Width management -----------------------*/
 static void addWidth(svrCtx h, STI sti, long value) {
     if (sti != h->chars.widths.cnt) {
-        fatal(h, svrErrParse, "Width index does not match glyph name index. Glyph index %d.", sti);
+        fatal(h, svrErrParse, "Width index does not match glyph name index. Glyph index: %d.", sti);
     }
     *dnaNEXT(h->chars.widths) = value;
 }
@@ -1175,7 +1187,7 @@ static void setWidth(svrCtx h, STI sti, long value) {
 
 /* Match glyph name. */
 static int CTL_CDECL matchChar(const void *key, const void *value, void *ctx) {
-    /* I use getString() rtaher than reference the glyphInfo->gname.ptr because
+    /* I use getString() rather than reference the glyphInfo->gname.ptr because
      gname.ptr  isn't set until after the entire font is read.
     */
     svrCtx h = ctx;
@@ -1261,7 +1273,7 @@ int svrEndFont(svrCtx h) {
 }
 
 int svrIterateGlyphs(svrCtx h, abfGlyphCallbacks *glyph_cb) {
-    unsigned short i;
+    long i;
 
     /* Set error handler */
     DURING_EX(h->err.env)

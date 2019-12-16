@@ -1,0 +1,9 @@
+# Test duplicate feature inside aalt.
+feature aalt {
+    feature smcp;
+    feature smcp;
+} aalt;
+
+feature smcp {
+    sub A by A.sc;
+} smcp;

@@ -1,0 +1,5 @@
+# Inavlide ligature sub.
+
+lookup test {
+  sub f i by f i;
+} test;

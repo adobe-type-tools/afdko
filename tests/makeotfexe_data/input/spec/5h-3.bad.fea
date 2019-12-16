@@ -1,0 +1,5 @@
+# Test only one marked glyph is supported in rsub.
+
+feature rlig {
+ rsub f' i' by f_i;
+} rlig;

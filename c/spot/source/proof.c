@@ -56,7 +56,7 @@ typedef struct _ProofContext {
     double thinspace;                /* extra inter-glyph space: in points */
     double unitsPerEm;               /* for scaling */
     Byte8 *psfilename;
-    Byte8 onNewLine; /*To avoid unnecessary linefeeds*/
+    Byte8 onNewLine; /*To avoid unnecessary line feeds */
     FILE *psfileptr;
     Int16 bbLeft, bbBottom, bbRight, bbTop;
 
@@ -126,7 +126,7 @@ static Byte8 PSPrologNS[] = "\r%%BeginPageSetup\r/_MT{moveto}bind def /_LT{linet
 
 IntX proofIsVerticalMode(void);
 
-static Byte8 str[256];
+static char g_str[256];
 
 extern Byte8 *version;
 
@@ -200,24 +200,24 @@ static void proofPageProlog(ProofContextPtr ctx) {
         platformProlog = PSPrologNS;
     }
 
-    sprintf(str, "%%%%Page: body %d %s", ctx->page + 1, platformProlog);
-    proofPSOUT(ctx, str);
+    sprintf(g_str, "%%%%Page: body %d %s", ctx->page + 1, platformProlog);
+    proofPSOUT(ctx, g_str);
 }
 
 static void proofInitPage(ProofContextPtr ctx) {
-    sprintf(str, "/SYM /Symbol findfont %d scalefont def\n", RND(ctx->glyphSize));
-    proofPSOUT(ctx, str);
-    sprintf(str, "/LAB /Times-Roman findfont %g scalefont def\n", ABS2FNT(NUMERIC_LABEL_SIZE));
-    proofPSOUT(ctx, str);
-    sprintf(str, "/BLAB /Times-Bold findfont %g scalefont def\n", ABS2FNT(NUMERIC_LABEL_SIZE));
-    proofPSOUT(ctx, str);
-    sprintf(str, "/EMLAB /Times-BoldItalic findfont %g scalefont def\n", ABS2FNT(NUMERIC_LABEL_SIZE));
-    proofPSOUT(ctx, str);
-    sprintf(str, "/TITL /Times-Roman findfont %d scalefont def\n", TITLE_LABEL_SIZE);
-    proofPSOUT(ctx, str);
+    sprintf(g_str, "/SYM /Symbol findfont %d scalefont def\n", RND(ctx->glyphSize));
+    proofPSOUT(ctx, g_str);
+    sprintf(g_str, "/LAB /Times-Roman findfont %g scalefont def\n", ABS2FNT(NUMERIC_LABEL_SIZE));
+    proofPSOUT(ctx, g_str);
+    sprintf(g_str, "/BLAB /Times-Bold findfont %g scalefont def\n", ABS2FNT(NUMERIC_LABEL_SIZE));
+    proofPSOUT(ctx, g_str);
+    sprintf(g_str, "/EMLAB /Times-BoldItalic findfont %g scalefont def\n", ABS2FNT(NUMERIC_LABEL_SIZE));
+    proofPSOUT(ctx, g_str);
+    sprintf(g_str, "/TITL /Times-Roman findfont %d scalefont def\n", TITLE_LABEL_SIZE);
+    proofPSOUT(ctx, g_str);
 
-    sprintf(str, "%% ================= %s ==============\n", ctx->title);
-    proofPSOUT(ctx, str);
+    sprintf(g_str, "%% ================= %s ==============\n", ctx->title);
+    proofPSOUT(ctx, g_str);
 }
 
 void proofNewPage(ProofContextPtr ctx) {
@@ -241,8 +241,8 @@ void proofNewPage(ProofContextPtr ctx) {
 #endif
 #endif
         } else {
-            sprintf(str, "%%!PS-Adobe-3.0\n");
-            proofPSOUT(ctx, str);
+            sprintf(g_str, "%%!PS-Adobe-3.0\n");
+            proofPSOUT(ctx, g_str);
 
             proofPageProlog(ctx); /* print page DSC and prolog for new page */
         }
@@ -251,13 +251,13 @@ void proofNewPage(ProofContextPtr ctx) {
         ctx->page += 1;
 
         /* write title */
-        proofPSOUT(ctx, str);
-        sprintf(str, "gsave TITL setfont %g %g _MT (%s) show %g %g _MT (%s) show  %g %g _MT (page %d) show grestore\n",
+        proofPSOUT(ctx, g_str);
+        sprintf(g_str, "gsave TITL setfont %g %g _MT (%s) show %g %g _MT (%s) show  %g %g _MT (page %d) show grestore\n",
                 ctx->left, ctx->top - (1 * TITLE_LABEL_SIZE), ctx->title,
                 ctx->left, ctx->top - (2 * TITLE_LABEL_SIZE), ctx->title2,
                 ctx->right - 30, ctx->top - (2 * TITLE_LABEL_SIZE), ctx->page);
 
-        proofPSOUT(ctx, str);
+        proofPSOUT(ctx, g_str);
 
         /* set position for drawing glyphs.*/
         if (proofIsVerticalMode()) {
@@ -267,10 +267,10 @@ void proofNewPage(ProofContextPtr ctx) {
         } else
             ctx->currx = ctx->left;
 
-        ctx->curry = ctx->top - ((3 * TITLE_LABEL_SIZE) + ctx->glyphSize); /* check same seting in proofMessage.*/
+        ctx->curry = ctx->top - ((3 * TITLE_LABEL_SIZE) + ctx->glyphSize); /* check same setting in proofMessage.*/
 
-        sprintf(str, "%g %g _MT\n", ctx->currx, ctx->curry);
-        proofPSOUT(ctx, str);
+        sprintf(g_str, "%g %g _MT\n", ctx->currx, ctx->curry);
+        proofPSOUT(ctx, g_str);
     }
 }
 
@@ -295,8 +295,8 @@ void proofOnlyNewPage(ProofContextPtr ctx) {
 #endif
 #endif
         } else {
-            sprintf(str, "%%!PS-Adobe-3.0\n");
-            proofPSOUT(ctx, str);
+            sprintf(g_str, "%%!PS-Adobe-3.0\n");
+            proofPSOUT(ctx, g_str);
 
             proofPageProlog(ctx); /* print page DSC and prolog for new page */
         }
@@ -314,8 +314,8 @@ void proofOnlyNewPage(ProofContextPtr ctx) {
 
         ctx->curry = ctx->top - ((3 * TITLE_LABEL_SIZE) + ctx->glyphSize);
 
-        sprintf(str, "%g %g _MT\n", ctx->currx, ctx->curry);
-        proofPSOUT(ctx, str);
+        sprintf(g_str, "%g %g _MT\n", ctx->currx, ctx->curry);
+        proofPSOUT(ctx, g_str);
     }
 }
 
@@ -338,16 +338,16 @@ void proofNewline(ProofContextPtr ctx) {
             /* ctx->currx += amt + (ctx->glyphSize/2); */
             ctx->currx -= amt + (ctx->glyphSize / 2);
             ctx->curry = ctx->top - ((3 * TITLE_LABEL_SIZE) + ctx->glyphSize);
-            sprintf(str, "\n%g %g _MT %% Vertical Newline\n", ctx->currx, ctx->curry);
-            proofPSOUT(ctx, str);
+            sprintf(g_str, "\n%g %g _MT %% Vertical Newline\n", ctx->currx, ctx->curry);
+            proofPSOUT(ctx, g_str);
             /* if (ctx->currx > ctx->right) */
             if (ctx->currx < ctx->left)
                 proofNewPage(ctx);
         } else {
             ctx->currx = ctx->left;
             ctx->curry -= amt;
-            sprintf(str, "\n%g %g _MT %% Newline\n", ctx->currx, ctx->curry);
-            proofPSOUT(ctx, str);
+            sprintf(g_str, "\n%g %g _MT %% Newline\n", ctx->currx, ctx->curry);
+            proofPSOUT(ctx, g_str);
             if (ctx->curry < ctx->bottom)
                 proofNewPage(ctx);
         }
@@ -375,8 +375,8 @@ static void advance(ProofContextPtr ctx, Int16 wx) { /* in absolute Page-space c
         ctx->currx += FNT2ABS(wx);
     }
     checkNewline(ctx);
-    sprintf(str, "%g %g _MT\n", ctx->currx, ctx->curry);
-    proofPSOUT(ctx, str);
+    sprintf(g_str, "%g %g _MT\n", ctx->currx, ctx->curry);
+    proofPSOUT(ctx, g_str);
 }
 
 void proofCheckAdvance(ProofContextPtr ctx, Int16 wx) {
@@ -400,8 +400,8 @@ static void advanceSYM(ProofContextPtr ctx, Int16 wx) { /* in absolute Page-spac
         ctx->currx += (wx / 1000.0) * ctx->glyphSize;
 
     checkNewline(ctx);
-    sprintf(str, "%g %g _MT\n", ctx->currx, ctx->curry);
-    proofPSOUT(ctx, str);
+    sprintf(g_str, "%g %g _MT\n", ctx->currx, ctx->curry);
+    proofPSOUT(ctx, g_str);
 }
 
 void proofThinspace(ProofContextPtr ctx, IntX count) {
@@ -411,13 +411,13 @@ void proofThinspace(ProofContextPtr ctx, IntX count) {
 
     if (ctx->kind == proofPS) {
         if (proofIsVerticalMode()) {
-            sprintf(str, "0 -%d rmoveto %%thin\n", amt);
-            proofPSOUT(ctx, str);
+            sprintf(g_str, "0 -%d rmoveto %%thin\n", amt);
+            proofPSOUT(ctx, g_str);
             ctx->curry -= amt;
             checkNewline(ctx);
         } else {
-            sprintf(str, "%d 0 rmoveto %%thin\n", amt);
-            proofPSOUT(ctx, str);
+            sprintf(g_str, "%d 0 rmoveto %%thin\n", amt);
+            proofPSOUT(ctx, g_str);
             ctx->currx += amt;
             checkNewline(ctx);
         }
@@ -579,25 +579,25 @@ void proofSymbol(ProofContextPtr ctx, IntX symbol) {
 }
 
 static void proofGlyphStart(ProofContextPtr ctx, GlyphId glyphid, Byte8 *glyphname) {
-    sprintf(str, "\ngsave %%glyph %d (%s)\ncurrentpoint translate %g dup scale\n",
+    sprintf(g_str, "\ngsave %%glyph %d (%s)\ncurrentpoint translate %g dup scale\n",
             glyphid, glyphname,
             ctx->glyphSize / ctx->unitsPerEm);
-    proofPSOUT(ctx, str);
+    proofPSOUT(ctx, g_str);
 }
 
 void proofGlyphMT(ProofContextPtr ctx, double x, double y) {
-    sprintf(str, "%g %g _MT\n", x, y);
-    proofPSOUT(ctx, str);
+    sprintf(g_str, "%g %g _MT\n", x, y);
+    proofPSOUT(ctx, g_str);
 }
 
 void proofGlyphLT(ProofContextPtr ctx, double x, double y) {
-    sprintf(str, "%g %g _LT\n", x, y);
-    proofPSOUT(ctx, str);
+    sprintf(g_str, "%g %g _LT\n", x, y);
+    proofPSOUT(ctx, g_str);
 }
 
 void proofGlyphCT(ProofContextPtr ctx, double x1, double y1, double x2, double y2, double x3, double y3) {
-    sprintf(str, "%g %g %g %g %g %g _CT\n", x1, y1, x2, y2, x3, y3);
-    proofPSOUT(ctx, str);
+    sprintf(g_str, "%g %g %g %g %g %g _CT\n", x1, y1, x2, y2, x3, y3);
+    proofPSOUT(ctx, g_str);
 }
 
 void proofGlyphClosePath(ProofContextPtr ctx) {
@@ -614,11 +614,11 @@ void proofDestroyContext(ProofContextPtr *ctxptr) {
     if (*ctxptr == NULL)
         return;
 
-    sprintf(str, "_SP %% %d pages\n", proofPageCount(*ctxptr));
-    proofPSOUT(*ctxptr, str);
+    sprintf(g_str, "_SP %% %d pages\n", proofPageCount(*ctxptr));
+    proofPSOUT(*ctxptr, g_str);
 
-    sprintf(str, "%%%%EOF\n");
-    proofPSOUT(*ctxptr, str);
+    sprintf(g_str, "%%%%EOF\n");
+    proofPSOUT(*ctxptr, g_str);
 
     if ((*ctxptr)->psfileptr) {
         fflush((*ctxptr)->psfileptr);
@@ -1134,12 +1134,12 @@ static void drawBox(ProofContextPtr ctx,
     /* fprintf(stderr, "Box L %d B %d R %d T %d.\n", Left, Bottom, Right, Top); */
 
     if (Left || Bottom || Right || Top) {
-        sprintf(str, "gsave newpath %d %d _MT %d %d _LT %d %d _LT %d %d _LT _CP ",
+        sprintf(g_str, "gsave newpath %d %d _MT %d %d _LT %d %d _LT %d %d _LT _CP ",
                 Left, Bottom,
                 Right, Bottom,
                 Right, Top,
                 Left, Top);
-        proofPSOUT(ctx, str);
+        proofPSOUT(ctx, g_str);
         proofPSOUT(ctx, "0 setlinewidth stroke grestore %%Box\n");
     }
 }
@@ -1153,56 +1153,56 @@ static void drawKanjiBox(ProofContextPtr ctx, IntX isGlyphBBox, IntX width, IntX
             abswy = abs(width);
 
             /* Glyph widthbox */
-            sprintf(str, "gsave newpath %g %g _MT %g %g _LT %g %g _LT %g %g _LT _CP 0 setlinewidth stroke ",
+            sprintf(g_str, "gsave newpath %g %g _MT %g %g _LT %g %g _LT %g %g _LT _CP 0 setlinewidth stroke ",
                     STD2FNT(0), STD2FNT(yOrigKanji),
                     STD2FNT(0), STD2FNT(yOrigKanji) - abswy,
                     STD2FNT(1000), STD2FNT(yOrigKanji) - abswy,
                     STD2FNT(1000), STD2FNT(yOrigKanji));
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
 
             /* adornments */
-            sprintf(str, " newpath %g %g _MT -%g 0 rlineto %g %g _MT %g 0 rlineto %g %g _MT 0 -%g rlineto %g %g _MT 0 %g rlineto _CP ",
+            sprintf(g_str, " newpath %g %g _MT -%g 0 rlineto %g %g _MT %g 0 rlineto %g %g _MT 0 -%g rlineto %g %g _MT 0 %g rlineto _CP ",
                     STD2FNT(0), STD2FNT(yOrigKanji) - abswy / 2, KANJI_TIC,
                     STD2FNT(1000), STD2FNT(yOrigKanji) - abswy / 2, KANJI_TIC,
                     STD2FNT(500), STD2FNT(yOrigKanji) - abswy, KANJI_TIC,
                     STD2FNT(500), STD2FNT(yOrigKanji), KANJI_TIC);
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
             proofPSOUT(ctx, "0 setlinewidth stroke grestore %%KanjiGTics\n");
         } else {
             /* Glyph widthbox */
             float aw = (float)width;
-            sprintf(str, "gsave newpath %g %g _MT %g %g _LT %g %g _LT %g %g _LT _CP 0 setlinewidth stroke ",
+            sprintf(g_str, "gsave newpath %g %g _MT %g %g _LT %g %g _LT %g %g _LT _CP 0 setlinewidth stroke ",
                     STD2FNT(0), STD2FNT(yOrigKanji - 1000),
                     aw, STD2FNT(yOrigKanji - 1000),
                     aw, STD2FNT(yOrigKanji),
                     STD2FNT(0), STD2FNT(yOrigKanji));
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
 
             /* adornments */
-            sprintf(str, " newpath %g %g _MT -%g 0 rlineto %g %g _MT %g 0 rlineto %g %g _MT 0 -%g rlineto %g %g _MT 0 %g rlineto _CP ",
+            sprintf(g_str, " newpath %g %g _MT -%g 0 rlineto %g %g _MT %g 0 rlineto %g %g _MT 0 -%g rlineto %g %g _MT 0 %g rlineto _CP ",
                     STD2FNT(0), STD2FNT(yOrigKanji - 500), KANJI_TIC,
                     aw, STD2FNT(yOrigKanji - 500), KANJI_TIC,
                     aw / 2, STD2FNT(yOrigKanji - 1000), KANJI_TIC,
                     aw / 2, STD2FNT(yOrigKanji), KANJI_TIC);
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
             proofPSOUT(ctx, "0 setlinewidth stroke grestore %%KanjiGTics\n");
         }
     } else {
         /* standard box */
-        sprintf(str, "gsave newpath %g %g _MT %g %g _LT %g %g _LT %g %g _LT _CP 0 setlinewidth stroke ",
+        sprintf(g_str, "gsave newpath %g %g _MT %g %g _LT %g %g _LT %g %g _LT _CP 0 setlinewidth stroke ",
                 STD2FNT(0), STD2FNT(yOrigKanji - 1000),
                 STD2FNT(1000), STD2FNT(yOrigKanji - 1000),
                 STD2FNT(1000), STD2FNT(yOrigKanji),
                 STD2FNT(0), STD2FNT(yOrigKanji));
-        proofPSOUT(ctx, str);
+        proofPSOUT(ctx, g_str);
 
         /* adornments */
-        sprintf(str, " newpath %g %g _MT -%g 0 rlineto %g %g _MT %g 0 rlineto %g %g _MT 0 -%g rlineto %g %g _MT 0 %g rlineto _CP ",
+        sprintf(g_str, " newpath %g %g _MT -%g 0 rlineto %g %g _MT %g 0 rlineto %g %g _MT 0 -%g rlineto %g %g _MT 0 %g rlineto _CP ",
                 STD2FNT(0), STD2FNT(yOrigKanji - 500), KANJI_TIC,
                 STD2FNT(1000), STD2FNT(yOrigKanji - 500), KANJI_TIC,
                 STD2FNT(500), STD2FNT(yOrigKanji - 1000), KANJI_TIC,
                 STD2FNT(500), STD2FNT(yOrigKanji), KANJI_TIC);
-        proofPSOUT(ctx, str);
+        proofPSOUT(ctx, g_str);
         proofPSOUT(ctx, "0 setlinewidth stroke grestore %%KanjiTics\n");
     }
 }
@@ -1229,12 +1229,12 @@ static void drawVertLine(ProofContextPtr ctx, FWord Xpos, FWord oldXpos, Card16 
     LinesOK = (PolicyLines && (!(flags & ANNOT_NOLINE)));
 
     if (LinesOK) {
-        sprintf(str, "gsave newpath %g %g _MT 0 %g rlineto ",
+        sprintf(g_str, "gsave newpath %g %g _MT 0 %g rlineto ",
                 Xpos + 0.0, BELOWOFFSET, TOPOFFSET);
-        proofPSOUT(ctx, str);
+        proofPSOUT(ctx, g_str);
         if (flags & ANNOT_DASHEDLINE) {
-            sprintf(str, "[%d %d] 0 setdash ", RND(ABS2FNT(3)), RND(ABS2FNT(1)));
-            proofPSOUT(ctx, str);
+            sprintf(g_str, "[%d %d] 0 setdash ", RND(ABS2FNT(3)), RND(ABS2FNT(1)));
+            proofPSOUT(ctx, g_str);
         }
         proofPSOUT(ctx, "0 setlinewidth stroke grestore %%vertline\n");
     }
@@ -1253,23 +1253,23 @@ static void drawVertLine(ProofContextPtr ctx, FWord Xpos, FWord oldXpos, Card16 
 
     if (LinesOK || HASHORZANNOTATIONS(flags)) {
         if (flags & ANNOT_ATBOTTOM) {
-            sprintf(str, "gsave %s setfont %g %g _MT (%d) show grestore\n",
+            sprintf(g_str, "gsave %s setfont %g %g _MT (%d) show grestore\n",
                     whichlabel,
                     Xpos + 0.0, BELOWOFFSET - 2 * ABS2FNT(NUMERIC_LABEL_SIZE),
                     labelvalue);
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
         } else if (flags & ANNOT_ATBOTTOMDOWN1) {
-            sprintf(str, "gsave %s setfont %g %g _MT (%d) show grestore\n",
+            sprintf(g_str, "gsave %s setfont %g %g _MT (%d) show grestore\n",
                     whichlabel,
                     Xpos + 0.0, BELOWOFFSET - 3 * ABS2FNT(NUMERIC_LABEL_SIZE),
                     labelvalue);
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
         } else if (flags & ANNOT_ATBOTTOMDOWN2) {
-            sprintf(str, "gsave %s setfont %g %g _MT (%d) show grestore\n",
+            sprintf(g_str, "gsave %s setfont %g %g _MT (%d) show grestore\n",
                     whichlabel,
                     Xpos + 0.0, BELOWOFFSET - 4 * ABS2FNT(NUMERIC_LABEL_SIZE),
                     labelvalue);
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
         }
     } else /* just vertical-mode labels */
     {
@@ -1282,11 +1282,11 @@ static void drawVertLine(ProofContextPtr ctx, FWord Xpos, FWord oldXpos, Card16 
         else if (flags & ANNOT_ATRIGHTDOWN2)
             at = RIGHTOFFSET + 4 * ABS2FNT(NUMERIC_LABEL_SIZE);
 
-        sprintf(str, "gsave %s setfont %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT (%d) show grestore grestore\n",
+        sprintf(g_str, "gsave %s setfont %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT (%d) show grestore grestore\n",
                 whichlabel,
                 at,
                 labelvalue);
-        proofPSOUT(ctx, str);
+        proofPSOUT(ctx, g_str);
     }
 }
 
@@ -1301,14 +1301,14 @@ static void drawHorzLine(ProofContextPtr ctx, FWord Ypos, FWord oldYpos, Card16 
     if (!flags) return;
     LinesOK = (PolicyLines && (!(flags & ANNOT_NOLINE)));
     if (LinesOK) {
-        sprintf(str, "gsave newpath %g %d _MT %g 0 rlineto ",
+        sprintf(g_str, "gsave newpath %g %d _MT %g 0 rlineto ",
                 LEFTOFFSET,
                 YCOORD(Ypos),
                 RIGHTOFFSET);
-        proofPSOUT(ctx, str);
+        proofPSOUT(ctx, g_str);
         if (flags & ANNOT_DASHEDLINE) {
-            sprintf(str, "[%d %d] 0 setdash ", RND(ABS2FNT(2)), RND(ABS2FNT(1)));
-            proofPSOUT(ctx, str);
+            sprintf(g_str, "[%d %d] 0 setdash ", RND(ABS2FNT(2)), RND(ABS2FNT(1)));
+            proofPSOUT(ctx, g_str);
         }
         proofPSOUT(ctx, "0 setlinewidth stroke grestore %%horzline\n");
     }
@@ -1327,26 +1327,26 @@ static void drawHorzLine(ProofContextPtr ctx, FWord Ypos, FWord oldYpos, Card16 
 
     if (LinesOK || HASVERTANNOTATIONS(flags)) {
         if (flags & ANNOT_ATRIGHT) {
-            sprintf(str, "gsave %s setfont %g %d _MT (%d) show grestore\n",
+            sprintf(g_str, "gsave %s setfont %g %d _MT (%d) show grestore\n",
                     whichlabel,
                     RIGHTOFFSET,
                     YCOORD(Ypos),
                     labelvalue);
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
         } else if (flags & ANNOT_ATRIGHTDOWN1) {
-            sprintf(str, "gsave %s setfont %g %g _MT (%d) show grestore\n",
+            sprintf(g_str, "gsave %s setfont %g %g _MT (%d) show grestore\n",
                     whichlabel,
                     RIGHTOFFSET,
                     YCOORD(Ypos) - 2 * ABS2FNT(NUMERIC_LABEL_SIZE),
                     labelvalue);
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
         } else if (flags & ANNOT_ATRIGHTDOWN2) {
-            sprintf(str, "gsave %s setfont %g %g _MT (%d) show grestore\n",
+            sprintf(g_str, "gsave %s setfont %g %g _MT (%d) show grestore\n",
                     whichlabel,
                     RIGHTOFFSET,
                     YCOORD(Ypos) - 3 * ABS2FNT(NUMERIC_LABEL_SIZE),
                     labelvalue);
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
         }
     }
 #undef YCOORD
@@ -1361,11 +1361,11 @@ void proofDrawGlyph(ProofContextPtr ctx,
                     Int16 width, Card16 widthflags,
                     proofOptions *options, Int16 yOrigKanji, char *message) {
     /* The idea is that we draw with respect to a base-line at y=0. Kanji
-       em-boxes are drawn with their top at the STD positoon of top = 880,
+       em-boxes are drawn with their top at the STD position of top = 880,
        bottom at -120.
 
-       In vertical mode, whcih is for Kanji only, the glyph is translated so
-       that its origin aligns with the top of the kanji em-box at STD position
+       In vertical mode, which is for Kanji only, the glyph is translated so
+       that its origin aligns with the top of the Kanji em-box at STD position
        y = 880. */
     int isVert = proofIsVerticalMode();
 
@@ -1389,20 +1389,20 @@ void proofDrawGlyph(ProofContextPtr ctx,
     proofGlyphStart(ctx, glyphId, glyphname); /* This sets the current transform to scale from font coordinates straight to page coordinates */
 
     /* This moves the glyph up so its origin aligns with DEFAULT_YORIG_KANJI */
-    /* If we are i horizontal mode, yOrigKanji is always passed through as DEFAULT_YORIG_KANJI, so this is nto rriggered. */
+    /* If we are i horizontal mode, yOrigKanji is always passed through as DEFAULT_YORIG_KANJI, so this is not triggered. */
 
     if (originDx || originDy || DEFAULT_YORIG_KANJI != yOrigKanji) {
         if ((originDx < 0) || (originDy < 0))
             advance(ctx, 10);
-        sprintf(str, "gsave %d %d translate %%originDelta\n",
+        sprintf(g_str, "gsave %d %d translate %%originDelta\n",
                 originDx,
                 ((isVert ? (-1) : (1)) * (RND(originDy - STD2FNT(DEFAULT_YORIG_KANJI - yOrigKanji)))));
 
         /*
         if ((glyphId==1572) || (glyphId==9619))
-            fprintf(stderr,"%s\n", str);
+            fprintf(stderr,"%s\n", g_str);
         */
-        proofPSOUT(ctx, str);
+        proofPSOUT(ctx, g_str);
     }
 
     if (glyfLoaded()) {
@@ -1423,31 +1423,31 @@ void proofDrawGlyph(ProofContextPtr ctx,
         if (isVert) {
             Int16 abswy;
             abswy = abs(width);
-            sprintf(str, "gsave newpath %g %g _MT 0 %g rlineto %g %g _MT %g 0 rlineto ",
+            sprintf(g_str, "gsave newpath %g %g _MT 0 %g rlineto %g %g _MT %g 0 rlineto ",
                     STD2FNT(500), STD2FNT(DEFAULT_YORIG_KANJI),
                     STD2FNT(WIDTHLEN),
                     STD2FNT(500) - STD2FNT(WIDTHPOS), STD2FNT(DEFAULT_YORIG_KANJI),
                     STD2FNT(WIDTHLEN));
-            proofPSOUT(ctx, str);
-            sprintf(str, "%g %g _MT 0 %g rlineto %g %g _MT %g 0 rlineto stroke grestore %%widthmarks\n",
+            proofPSOUT(ctx, g_str);
+            sprintf(g_str, "%g %g _MT 0 %g rlineto %g %g _MT %g 0 rlineto stroke grestore %%widthmarks\n",
                     STD2FNT(500), STD2FNT(DEFAULT_YORIG_KANJI) - abswy,
                     STD2FNT(-WIDTHLEN),
                     STD2FNT(500) - STD2FNT(WIDTHPOS), STD2FNT(DEFAULT_YORIG_KANJI) - abswy,
                     STD2FNT(WIDTHLEN));
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
         } else {
-            sprintf(str, "gsave newpath %d %g _MT 0 %g rlineto %d 0 _MT %g 0 rlineto ",
+            sprintf(g_str, "gsave newpath %d %g _MT 0 %g rlineto %d 0 _MT %g 0 rlineto ",
                     0, STD2FNT(-WIDTHPOS),
                     STD2FNT(WIDTHLEN),
                     0,
                     STD2FNT(-WIDTHLEN));
-            proofPSOUT(ctx, str);
-            sprintf(str, "%d 0 _MT %g 0 rlineto %d %g _MT 0 %g rlineto stroke grestore %%widthmarks\n",
+            proofPSOUT(ctx, g_str);
+            sprintf(g_str, "%d 0 _MT %g 0 rlineto %d %g _MT 0 %g rlineto stroke grestore %%widthmarks\n",
                     width,
                     STD2FNT(WIDTHLEN),
                     width, STD2FNT(-WIDTHPOS),
                     STD2FNT(WIDTHLEN));
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
         }
     }
 
@@ -1471,40 +1471,40 @@ void proofDrawGlyph(ProofContextPtr ctx,
                 whichglyphlabel = "EMLAB";
 
             if (glyphnameflags & ANNOT_ATRIGHTDOWN2)
-                sprintf(str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
+                sprintf(g_str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
                         RIGHTOFFSET + 4 * ABS2FNT(NUMERIC_LABEL_SIZE),
                         whichglyphlabel);
             else if (glyphnameflags & ANNOT_ATBOTTOMDOWN2)
-                sprintf(str, "gsave 0 %g _MT %s setfont ",
+                sprintf(g_str, "gsave 0 %g _MT %s setfont ",
                         BELOWOFFSET - 4 * ABS2FNT(NUMERIC_LABEL_SIZE),
                         whichglyphlabel);
             else if (glyphnameflags & ANNOT_ATRIGHTDOWN1)
-                sprintf(str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
+                sprintf(g_str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
                         RIGHTOFFSET + 3 * ABS2FNT(NUMERIC_LABEL_SIZE),
                         whichglyphlabel);
             else if (glyphnameflags & ANNOT_ATBOTTOMDOWN1)
-                sprintf(str, "gsave 0 %g _MT %s setfont ",
+                sprintf(g_str, "gsave 0 %g _MT %s setfont ",
                         BELOWOFFSET - 3 * ABS2FNT(NUMERIC_LABEL_SIZE),
                         whichglyphlabel);
             else if (glyphnameflags & ANNOT_ATRIGHT)
-                sprintf(str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
+                sprintf(g_str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
                         RIGHTOFFSET + 2 * ABS2FNT(NUMERIC_LABEL_SIZE),
                         whichglyphlabel);
             else if (glyphnameflags & ANNOT_ATBOTTOM)
-                sprintf(str, "gsave 0 %g _MT %s setfont ",
+                sprintf(g_str, "gsave 0 %g _MT %s setfont ",
                         BELOWOFFSET - 2 * ABS2FNT(NUMERIC_LABEL_SIZE),
                         whichglyphlabel);
 
-            proofPSOUT(ctx, str);
+            proofPSOUT(ctx, g_str);
             if (glyfLoaded()) /* a proxy for " name was derived from post or camp table" */
-                sprintf(str, "(%s %s)\n", glyphname, message);
+                sprintf(g_str, "(%s %s)\n", glyphname, message);
             else
-                sprintf(str, "(%s@%d %s)\n", glyphname, glyphId, message);
-            strcat(str, " show grestore\n");
+                sprintf(g_str, "(%s@%d %s)\n", glyphname, glyphId, message);
+            strcat(g_str, " show grestore\n");
 
             if (HASVERTANNOTATIONS(glyphnameflags))
-                strcat(str, " grestore\n");
-            proofPSOUT(ctx, str);
+                strcat(g_str, " grestore\n");
+            proofPSOUT(ctx, g_str);
         }
 
         if ((altlabelflags & ANNOT_SHOWIT) &&
@@ -1517,37 +1517,37 @@ void proofDrawGlyph(ProofContextPtr ctx,
 
             if (altlabelflags & ANNOT_ATBOTTOMDOWN1) {
                 if (isVert)
-                    sprintf(str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
+                    sprintf(g_str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
                             RIGHTOFFSET + 3 * ABS2FNT(NUMERIC_LABEL_SIZE),
                             whichaltlabel);
                 else
-                    sprintf(str, "gsave 0 %g _MT %s setfont ",
+                    sprintf(g_str, "gsave 0 %g _MT %s setfont ",
                             BELOWOFFSET - 3 * ABS2FNT(NUMERIC_LABEL_SIZE),
                             whichaltlabel);
             } else if (altlabelflags & ANNOT_ATBOTTOMDOWN2) {
                 if (isVert)
-                    sprintf(str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
+                    sprintf(g_str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
                             RIGHTOFFSET + 4 * ABS2FNT(NUMERIC_LABEL_SIZE),
                             whichaltlabel);
                 else
-                    sprintf(str, "gsave 0 %g _MT %s setfont ",
+                    sprintf(g_str, "gsave 0 %g _MT %s setfont ",
                             BELOWOFFSET - 4 * ABS2FNT(NUMERIC_LABEL_SIZE),
                             whichaltlabel);
             } else {
                 if (isVert)
-                    sprintf(str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
+                    sprintf(g_str, "gsave %g 0 _MT currentpoint gsave translate 90 rotate 0 0 _MT %s setfont ",
                             RIGHTOFFSET + 2 * ABS2FNT(NUMERIC_LABEL_SIZE),
                             whichaltlabel);
                 else
-                    sprintf(str, "gsave 0 %g _MT %s setfont ",
+                    sprintf(g_str, "gsave 0 %g _MT %s setfont ",
                             BELOWOFFSET - 2 * ABS2FNT(NUMERIC_LABEL_SIZE),
                             whichaltlabel);
             }
-            proofPSOUT(ctx, str);
-            sprintf(str, "(%s) show grestore\n", altlabel);
+            proofPSOUT(ctx, g_str);
+            sprintf(g_str, "(%s) show grestore\n", altlabel);
             if (isVert)
-                strcat(str, " grestore\n");
-            proofPSOUT(ctx, str);
+                strcat(g_str, " grestore\n");
+            proofPSOUT(ctx, g_str);
         }
     }
 
@@ -1594,13 +1594,13 @@ void proofDrawGlyph(ProofContextPtr ctx,
     }
     if (ctx->thinspace) {
         if (isVert) {
-            sprintf(str, "0 -%g rmoveto\n", ctx->thinspace);
-            proofPSOUT(ctx, str);
+            sprintf(g_str, "0 -%g rmoveto\n", ctx->thinspace);
+            proofPSOUT(ctx, g_str);
             ctx->curry -= ctx->thinspace;
             checkNewline(ctx);
         } else {
-            sprintf(str, "%g 0  rmoveto\n", ctx->thinspace);
-            proofPSOUT(ctx, str);
+            sprintf(g_str, "%g 0  rmoveto\n", ctx->thinspace);
+            proofPSOUT(ctx, g_str);
             ctx->currx += ctx->thinspace;
             checkNewline(ctx);
         }

@@ -36,28 +36,28 @@ void FNAMRead(LongN start, Card32 length) {
         /* Count clients */
         for (encoding->nClients = 0; offset < FNAM->offset[i + 1];
              encoding->nClients++) {
-            Card8 length;
+            Card8 record_length;
 
             SEEK_ABS(start + offset);
 
-            IN1(length);
-            offset += length + 1 + SIZEOF(Client, style);
+            IN1(record_length);
+            offset += record_length + 1 + SIZEOF(Client, style);
         }
 
         SEEK_ABS(FNAM->offset[i] + start);
 
         encoding->client = memNew(sizeof(Client) * encoding->nClients);
         for (j = 0; j < encoding->nClients; j++) {
-            Card8 length;
+            Card8 record_length;
             Client *client = &encoding->client[j];
 
             IN1(client->style);
-            IN1(length);
+            IN1(record_length);
 
-            client->name = memNew(length + 1);
+            client->name = memNew(record_length + 1);
 
-            IN_BYTES(length, client->name);
-            client->name[length] = '\0';
+            IN_BYTES(record_length, client->name);
+            client->name[record_length] = '\0';
         }
     }
     loaded = 1;

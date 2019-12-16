@@ -1,0 +1,7 @@
+# Format A.
+valueRecordDef -10 KERNA;
+valueRecordDef -20 KERNB;
+feature kern {
+    pos A B <KERNA>;
+    pos B A <KERNB>;
+} kern;

@@ -1,0 +1,6 @@
+# Test ignored subtable in GPOS lookups
+feature kern {
+    pos A 10;
+    subtable;
+    pos B 10;
+} kern;

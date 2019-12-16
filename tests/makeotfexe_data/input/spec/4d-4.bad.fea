@@ -1,0 +1,7 @@
+# Test repeated lookup flag.
+
+@TOP_MARKS = [acute grave macron];
+lookup test {
+  lookupflag MarkAttachmentType @TOP_MARKS IgnoreLigatures MarkAttachmentType @TOP_MARKS;
+  sub f i by f_i;
+} test;

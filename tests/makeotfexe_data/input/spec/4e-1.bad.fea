@@ -1,0 +1,5 @@
+# Different rules in lookup.
+lookup test {
+    sub A by A.sc;
+    sub A from [A.alt1 A.alt2];
+} test;

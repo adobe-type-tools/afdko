@@ -1,0 +1,5 @@
+# Bad lookup flag.
+lookup test {
+  lookupflag -1;
+  sub f i by f_i;
+} test;

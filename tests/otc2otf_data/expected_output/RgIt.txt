@@ -1,0 +1,38 @@
+Input font: RgIt.ttc
+
+Font 0: SourceSansPro-Regular.otf
+    tag     checksum    length    offset
+    ----  ----------  --------  --------
+    BASE  0x651E5DBD        70       492
+    CFF   0xF715B0B5    120605       564
+    DSIG  0x00000001         8    188688
+    GDEF  0xF721FB92       908    188696
+    GPOS  0x43FA27F5     89210    189972
+    GSUB  0x85444310     21032    293724
+    OS/2  0x5DDFD5A3        96    325856
+    cmap  0x9FCE01F4     14018    326048
+    head  0x157F8BB0        54    350824
+    hhea  0x0A840D78        36    350936
+    hmtx  0xD07616EC      7896    351008
+    maxp  0x07B65000         6    363292
+    name  0x4E7E178C      2068    363308
+    post  0xFFD10032        32    367468
+
+Font 1: SourceSansPro-It.otf
+    tag     checksum    length    offset
+    ----  ----------  --------  --------
+    BASE  - shared -
+    CFF   0xAF5B8371     67515    121172
+    DSIG  - shared -
+    GDEF  0x606A6174       368    189604
+    GPOS  0x0EA45E04     14538    279184
+    GSUB  0x705F0282     11100    314756
+    OS/2  0x5B549578        96    325952
+    cmap  0xE9DC64DE     10754    340068
+    head  0x15B198C8        54    350880
+    hhea  0x0B780CED        36    350972
+    hmtx  0x3E77750F      4388    358904
+    maxp  0x04495000         6    363300
+    name  0x14065713      2090    365376
+    post  0xFFC60032        32    367500
+

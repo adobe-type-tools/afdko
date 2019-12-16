@@ -1,0 +1,5 @@
+# Bad nameid
+table name {
+  nameid 0x10000 "Test";
+} name;
+

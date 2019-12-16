@@ -25,7 +25,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.8 Aug 6 2019
+makeotf.py v2.7.10 Dec 3 2019
 """
 
 __methods__ = """
@@ -2071,6 +2071,7 @@ def updateFontRevision(featuresPath, fontRevision):
 
     try:
         # get FontRevision from feature file
+        featuresPath = os.path.abspath(featuresPath)
         with open(featuresPath, "r", encoding='utf-8') as fp:
             data = fp.read()
     except (IOError, OSError):
@@ -2753,7 +2754,7 @@ def main(args=None):
             saveOptionsFile(makeOTFParams)
         runMakeOTF(makeOTFParams)
     except (MakeOTFOptionsError, MakeOTFShellError, MakeOTFRunError):
-        return 1
+        return 2
     except Exception:
         raise
 

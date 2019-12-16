@@ -1,0 +1,5 @@
+# Test positioning cannot be applied in the backtrack glyph sequence.
+
+lookup test {
+ pos A 10 B';
+} test;

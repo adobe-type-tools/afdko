@@ -163,7 +163,7 @@ long nam_getFamilyNamePrefix(nam_name nameTbl,
     coords - the user design vector. May be NULL if the default instance or a named
     instance is specified.
 
-    buffer - where a font name prefix stirng is returned.
+    buffer - where a font name prefix string is returned.
 
     bufferLen - the allocated byte length of buffer. Note that a null character
     is added at the end of the name string, so the actual length of the name will be at most
@@ -177,7 +177,7 @@ long nam_getNamedInstancePSName(nam_name nameTbl,
                                 int instanceIndex,
                                 char *instanceName, unsigned long instanceNameLen);
 
-/*  nam_getNamedInstancePSName() looks up the fvar table for a named instnace of a CFF2 variable font
+/*  nam_getNamedInstancePSName() looks up the fvar table for a named instance of a CFF2 variable font
     specified either by its instance index or a design vector of the instance.
     The length of the name is returned as the result.
     If no name is found, NAME_READ_INST_NOT_FOUND is returned.

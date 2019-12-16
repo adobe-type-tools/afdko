@@ -1,5 +1,5 @@
 """
-fontpdf v1.28 Jul 12 2019. This module is not run stand-alone; it requires
+fontpdf v1.30 Dec 10 2019. This module is not run stand-alone; it requires
 another module, such as proofpdf, in order to collect the options, and call
 the MakePDF function.
 
@@ -21,7 +21,6 @@ All coordinates are in points, in the usual PostScript model. Note,.
 however, that the coordinate system for the page puts (0,0) at the top
 right, with the positive Y axis pointing down.
 """
-
 from math import ceil
 import os
 import re
@@ -33,7 +32,7 @@ from afdko import fdkutils
 from afdko.pdflib import pdfgen, pdfmetrics
 from afdko.pdflib.pdfutils import LINEEND
 
-__version__ = "1.28"
+__version__ = "1.30"
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
@@ -565,7 +564,6 @@ def getTickPos(pt0, pt1, pt2, tickSize, pathisCW):
 	vector1 = makeVector(pt1, pt2)
 	sum = ( vector1[0] + vector0[0], vector1[1] + vector0[1])
 	if pathisCW:
-		tickPos = ((pt1[0] +  (sum[1] * tickSize)), pt1[1] - (sum[0]*tickSize))
 		# tickPos is 90 degrees counter-clockwise to the vector "sum"
 		tickPos = ((pt1[0] -  (sum[1] * tickSize)), pt1[1] + (sum[0]*tickSize))
 	else:
@@ -679,16 +677,16 @@ class FontPDFGlyph:
 
 		for clientMethod in params.sortedMethodsDraw:
 			methodName =  kDrawTag + clientMethod
-			if   eval("params." + methodName):
-				eval("self." + methodName + "(params)")
+			if getattr(params, methodName, 0):
+				getattr(self, methodName)(params)
 
 		rt_canvas.setFont( params.pointLabelFont, params.pointLabelSize)
 		for path  in self.pathList:
 			for pt in path:
 				for clientMethod in params.sortedMethodsDrawPoint:
 					methodName =  kDrawPointTag + clientMethod
-					if  eval("params." + methodName):
-						eval("self." + methodName + "(path, pt, params)")
+					if getattr(params, methodName, 0):
+						getattr(self, methodName)(path, pt, params)
 
 		rt_canvas.restoreState()
 		# back to 1000 em-square coords.
@@ -758,20 +756,14 @@ class FontPDFGlyph:
 		for path  in self.pathList:
 			for pdfPoint in path:
 				if pdfPoint.type == FontPDFPoint.MT: # Dont't need to draw anything.
-					x0 = curX
-					y0 = curY
 					curX = pdfPoint.pt0[0]
 					curY = pdfPoint.pt0[1]
 					p.moveTo(curX , curY)
 				if pdfPoint.type == FontPDFPoint.LT:
-					x0 = curX
-					y0 = curY
 					curX = pdfPoint.pt0[0]
 					curY = pdfPoint.pt0[1]
 					p.lineTo(curX , curY)
 				elif pdfPoint.type == FontPDFPoint.CT:
-					x0 = curX
-					y0 = curY
 					x1 = pdfPoint.bcp1[0]
 					y1 = pdfPoint.bcp1[1]
 					x2 =  pdfPoint.bcp2[0]
@@ -1136,7 +1128,7 @@ class FontPDFGlyph:
 		rt_canvas.restoreState()
 
 	def drawPoint_PointMarks(self, path, pointPDF , params):
-		eval("self.drawPoint" + pointPDF.type + "(params, pointPDF)")
+		getattr(self, f'drawPoint{pointPDF.type}')(params, pointPDF)
 
 	def drawPointm(self, params, pt):
 		rt_canvas = params.rt_canvas
@@ -1318,22 +1310,27 @@ def getTitleHeight(params):
 def doFontSetTitle(rt_canvas, params, numPages):
 	pageTitleFont = params.pageTitleFont
 	pageTitleSize = params.pageTitleSize
+	pageIncludeTitle = params.pageIncludeTitle
 	# Set 0,0 to be at top right of page.
 
-	rt_canvas.setFont(pageTitleFont, pageTitleSize)
+	if pageIncludeTitle:
+		rt_canvas.setFont(pageTitleFont, pageTitleSize)
 	title = "FontSet Proof"
 	rightMarginPos = params.pageSize[0]-params.pageRightMargin
 	cur_y = params.pageSize[1] - (params.pageTopMargin + pageTitleSize)
-	rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
-	rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
+	if pageIncludeTitle:
+		rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
+		rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
 	cur_y -= pageTitleSize*1.2
 	pageString = 'page %d' % (rt_canvas.getPageNumber())
-	rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
+	if pageIncludeTitle:
+		rt_canvas.drawRightString(rightMarginPos, cur_y, pageString)
 	cur_y -= pageTitleSize/2
-	rt_canvas.setLineWidth(3)
-	rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
-	#reset carefully afterwards
-	rt_canvas.setLineWidth(1)
+	if pageIncludeTitle:
+		rt_canvas.setLineWidth(3)
+		rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
+		#reset carefully afterwards
+		rt_canvas.setLineWidth(1)
 	return  cur_y - pageTitleSize # Add some space below the title line.
 
 def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
@@ -1362,8 +1359,7 @@ def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 	if pageIncludeTitle:
 		rt_canvas.setLineWidth(3)
 		rt_canvas.line(params.pageLeftMargin, cur_y, rightMarginPos, cur_y)
-	#reset carefully afterwards
-	if pageIncludeTitle:
+		#reset carefully afterwards
 		rt_canvas.setLineWidth(1)
 	return  cur_y - pageTitleSize # Add some space below the title line.
 
@@ -2022,9 +2018,8 @@ def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 	An entry in the pdfFontList is [glyphList, pdfFont, tempCFFPath]
 	"""
 	# Sort fonts with same charsets together. Sort by: len charset, charset, ps name.
-	sortList = map(lambda entry: [ len(entry[0]), entry[0], entry[1].getPSName(), entry[1]], pdfFontList)
-	sortList.sort()
-	pdfFontList = map(lambda entry: [entry[1], entry[3]], sortList)
+	sortList = sorted(map(lambda entry: [ len(entry[0]), entry[0], entry[1].getPSName(), entry[1]], pdfFontList))
+	pdfFontList = list(map(lambda entry: [entry[1], entry[3]], sortList))
 
 	if params.rt_pdfFileName:
 		pdfPath = params.rt_pdfFileName
@@ -2033,7 +2028,7 @@ def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 		firstPDFFont = pdfFontList[0][1]
 		fontPath = params.rt_filePath
 		pdfPath = f"{os.path.splitext(fontPath)[0]}.fontset.pdf"
-	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
+	params.rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
 	# figure out how much space to leave at start of line for PS names and fond index fields.
 	psNameSize = params.fontsetGroupPtSize
@@ -2047,7 +2042,6 @@ def makeFontSetPDF(pdfFontList, params, doProgressBar=True):
 			maxLen = psNameLen
 			maxPSName = psName
 	indexString = "%s" % (len(pdfFontList))
-	pageTitleFont
 	psNameAndIndex = maxPSName + " " + indexString
 	psNameWidth = pdfmetrics.stringwidth(psNameAndIndex, pageTitleFont)  * 0.001 * psNameSize
 	indexWidth = pdfmetrics.stringwidth(indexString, pageTitleFont)  * 0.001 * psNameSize
@@ -2333,7 +2327,7 @@ def makeKernPairPDF(pdfFont, kernOverlapList, params, doProgressBar=True):
 		fontPath = params.rt_filePath
 		pdfPath = os.path.splitext(fontPath)[0] + ".kc.pdf"
 
-	params.rt_canvas = rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
+	params.rt_canvas = pdfgen.Canvas(pdfPath, pagesize=params.pageSize, bottomup = 1)
 
 	# figure out how much space to leave at start of line for PS names and fond index fields..
 	maxLen = 0

@@ -27,10 +27,9 @@
 #define ANSI_CHARSET 0
 #define SYMBOL_CHARSET 2
 
-int setVendId_str(hotCtx g, char *vend);
 void hotAddAnonTable(hotCtx g, unsigned long tag, hotAnonRefill refill);
 
-/* Initialize chararcter name */
+/* Initialize character name */
 static void initCharName(void *ctx, long count, CharName *charname) {
     hotCtx g = ctx;
     long i;
@@ -208,13 +207,12 @@ hotCtx hotNew(hotCallbacks *hotcb) {
     return g;
 }
 
-int setVendId_str(hotCtx g, char *vend) {
+void setVendId_str(hotCtx g, char *vend) {
     char *id;
 
     id = (char *)g->cb.malloc(g->cb.ctx, strlen(vend) + 1);
     strcpy(id, vend);
     g->font.vendId = id;
-    return 0;
 }
 
 /* Try to set vendor id by matching against copyright strings in the font */
@@ -382,13 +380,13 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOv
     if (flags & HOT_RENAME) {
         tcflags |= TC_RENAME; /* turn on  renaming in typecomp */
     } else {
-        g->cb.getFinalGlyphName = NULL; /* supresses renaming in feature file */
+        g->cb.getFinalGlyphName = NULL; /* suppresses renaming in feature file */
     }
     if (flags & HOT_SUBSET) {
         tcflags |= TC_SUBSET; /* turn on subsetting to GOADB list  in typecomp */
     }
     if (flags & HOT_VERBOSE) {
-        tcflags |= TC_VERBOSE; /* turn on all wanrings and notes */
+        tcflags |= TC_VERBOSE; /* turn on all warnings and notes */
     }
     tcSetMaxNumSubrsOverride(g->ctx.tc, fontOverride->maxNumSubrs);
     tcSetWeightOverride(g->ctx.tc, fontOverride->syntheticWeight);
@@ -792,7 +790,7 @@ static void prepWinData(hotCtx g) {
     } else {
         if (!OVERRIDE(font->TypoAscender)) {
             /* try to use larger of height of lowercase d ascender, or CapHeight. */
-            /* Fall back to fonbt bbox top, but make sure it is not greater than embox height */
+            /* Fall back to font bbox top, but make sure it is not greater than embox height */
 
             hotGlyphInfo *gi = mapUV2Glyph(g, UV_ASCENT); /* gi for lower-case d */
             short dHeight = (gi == NULL) ? 0 : gi->bbox.top;
@@ -1031,9 +1029,9 @@ static void hotReuse(hotCtx g) {
     featReuse(g);
 }
 
-const char data[] = "\x00\x00\x00\x01\x00\x00\x00";
-unsigned int dsigCnt = 0;
 char *refillDSIG(void *ctx, long *count, unsigned long tag) {
+    static const char data[] = "\x00\x00\x00\x01\x00\x00\x00";
+    static unsigned int dsigCnt = 0;
     if (dsigCnt == 0) {
         *count = 8;
         dsigCnt = 1;
@@ -1261,7 +1259,7 @@ void hotAddMiscData(hotCtx g,
 }
 
 /* Prepare Windows name by converting \-format numbers to UTF-8. Return 1 on
-   sytax error else 0. */
+   syntax error else 0. */
 static int prepWinName(hotCtx g, char *src) {
     /* Next state table */
     static unsigned char next[5][6] = {
@@ -1813,7 +1811,7 @@ void hotAddAnonTable(hotCtx g, unsigned long tag, hotAnonRefill refill) {
     sfntAddAnonTable(g, tag, refill);
 }
 
-/* ---------------------------- Utility Fuctions --------------------------- */
+/* ---------------------------- Utility Functions --------------------------- */
 
 /* Call fatal if hadError is set (this is set by a hotMsg() hotERROR call) */
 void hotQuitOnError(hotCtx g) {

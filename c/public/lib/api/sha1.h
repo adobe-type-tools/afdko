@@ -25,7 +25,7 @@ Expected use...
            via the client supplied sha1_hash and calls the client
            supplied sha1_free to return the work context.
 
-Note: 
+Note:
     client is responsible for the memory callbacks. In particular,
     the sha1_malloc and sha1_free procedures are expected to honor
     all of the ANSI C rules with respect to buffer alignment.
@@ -40,7 +40,7 @@ Note:
     Data to be hashed and the resulting hash are treated as unsigned
     char data. This code will produce identical results on
     any system, regardless of byte order or word size. The client
-    must understand and accomodate byte order issues if multibyte 
+    must understand and accommodate byte order issues if multi-byte
     binary data is hashed and compared on different platforms.
 
 *******************************************************/
@@ -50,7 +50,7 @@ typedef struct sha1_ctx *sha1_pctx; /* pointer to sha1 private work area */
                                   to the implementation of sha1 and must
                                   be preserved without modification between
                                   calls to sha1_update and sha1_finalize.
-                                  The size of this work area is about 100 
+                                  The size of this work area is about 100
                                   bytes. */
 
 typedef void *sha1_malloc(size_t size, void *hook);
@@ -61,15 +61,15 @@ typedef void *sha1_malloc(size_t size, void *hook);
                                   the client malloc procedure to honor alignment
                                   requirements. hook is a client context
                                   pointer passed through to the client
-                                  callback proceedure unmodified by 
+                                  callback procedure unmodified by
                                   sha1_init. */
 typedef void sha1_free(sha1_pctx ctx, void *hook);
 /* client supplied callback procedure */
 /* this client supplied free procedure is used
                                   to return the memory allocated during sha1_init
                                   via its callback to the client procedure.
-                                  hook is a client contextpointer passed
-                          through to the client callback proceedure
+                                  hook is a client context pointer passed
+                          through to the client callback procedure
                           unmodified by sha1_free. */
 
 typedef unsigned char sha1_hash[20];
@@ -82,14 +82,14 @@ extern "C" {
 
 sha1_pctx sha1_init(sha1_malloc client_malloc, void *hook);
 /* called once per hash generation */
-/* returned context must be passed with 
+/* returned context must be passed with
                                   unmodified contents to subsequent calls */
-/* sha1_malloc is client provided malloc 
+/* sha1_malloc is client provided malloc
                                   procedure */
 
-/* return valid pointer for success, 
+/* return valid pointer for success,
                                   NULL for failure.
-                                  failure will occur 
+                                  failure will occur
                                      if client_malloc callback is NULL or
                                      if client_malloc callback returns NULL or
                                      if sizeof(Card32) != 4 (the implementation
@@ -98,7 +98,7 @@ sha1_pctx sha1_init(sha1_malloc client_malloc, void *hook);
                                 */
 
 int sha1_update(sha1_pctx ctx, unsigned char *buffer, size_t len);
-/* called 1 or more times to accumulate hash 
+/* called 1 or more times to accumulate hash
                                   value.  */
 
 /* return 0 for success, 1 for failure.
@@ -110,7 +110,7 @@ int sha1_finalize(sha1_pctx ctx, sha1_free client_free,
 /* called once after all data has been accumulated
                                   via calls to sha1 update. Note that hash value
                                   is returned to the client in hash and that the
-                                  context (ctx) is freed via a call to 
+                                  context (ctx) is freed via a call to
                                   client_free */
 
 /* return 0 for success, 1 for failure.

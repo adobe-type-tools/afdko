@@ -51,7 +51,7 @@ static const char *keys[] =
 #undef DCL_KEY
 };
 
-#define MAX_AXES 4 /* Pratical multiple master axis limit */
+#define MAX_AXES 4 /* Practical multiple master axis limit */
 
 typedef unsigned short STI; /* String index */
 #define STI_UNDEF 0xffff    /* Undefined string index */
@@ -297,7 +297,7 @@ static void newStrings(t1rCtx h) {
     dnaINIT(h->dna, h->strings.buf, 1500, 6000);
 }
 
-/* Reinitilize strings for new font. */
+/* Reinitialize strings for new font. */
 static void initStrings(t1rCtx h) {
     h->strings.index.cnt = 0;
     h->strings.buf.cnt = 0;
@@ -317,7 +317,7 @@ static STI addString(t1rCtx h, size_t length, const char *value) {
 
     if (length == 0) {
         /* A null name (/) is legal in PostScript but could lead to unexpected
-           behaviour elsewhere in the coretype libraries so it is substituted
+           behavior elsewhere in the coretype libraries so it is substituted
            for a name that is very likely to be unique in the font */
         const char subs_name[] = "_null_name_substitute_";
         value = subs_name;
@@ -352,7 +352,7 @@ static void newChars(t1rCtx h) {
     dnaINIT(h->dna, h->chars.byName, 256, 1000);
 }
 
-/* Reinitilize chars for new font. */
+/* Reinitialize chars for new font. */
 static void initChars(t1rCtx h) {
     h->chars.index.cnt = 0;
     h->chars.byName.cnt = 0;
@@ -495,7 +495,7 @@ t1rCtx t1rNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     if (h == NULL)
         return NULL;
 
-    /* explictly zero out entire structure */
+    /* explicitly zero out entire structure */
     memset(h, 0, sizeof(struct t1rCtx_));
 
     /* Safety initialization */
@@ -1450,7 +1450,7 @@ static void calcUDVFromWV(t1rCtx h, int nAxes, int nMasters) {
     }
 }
 
-/* Initailize MM font. */
+/* Initialize MM font. */
 static void mmInit(t1rCtx h) {
     static char *jenson[] =
         {
@@ -1500,7 +1500,7 @@ static void mmInit(t1rCtx h) {
     /* Compute and check design geometry */
     nMasters = h->mm.WV.cnt;
     nAxes = h->mm.BDP.cnt / nMasters;
-    if (nAxes > T1_MAX_AXES || nAxes * nMasters != h->mm.BDP.cnt ||
+    if (nAxes > T1_MAX_AXES || (long)nAxes * nMasters != h->mm.BDP.cnt ||
         !validBDM(h, nAxes, nMasters))
         fatal(h, t1rErrGeometry, NULL);
 
@@ -1544,8 +1544,16 @@ static void prepMMData(t1rCtx h) {
     char coords[64];
     char *p;
     char *FontName = getString(h, (STI)h->fd->fdict->FontName.impl);
-    unsigned int nAxes = h->mm.BDP.cnt / h->fd->aux.nMasters;
+    unsigned int nAxes;
     char *Weight = "SnapShotMM";
+
+    if (FontName == NULL)
+        fatal(h, t1rErrMMParse, "missing FontName");
+
+    if (h->fd->aux.nMasters == 0)
+        fatal(h, t1rErrMMParse, "invalid number of masters");
+
+    nAxes = h->mm.BDP.cnt / h->fd->aux.nMasters;
 
     if (h->top.ItalicAngle == 0) {
         /* BuildFont incorrectly specifies the ItalicAngle for MM oblique
@@ -1611,7 +1619,7 @@ static void prepMMData(t1rCtx h) {
 /* Report bad dict value */
 static void badKeyValue(t1rCtx h, int iKey) {
     if (h->FDArray.cnt > 1)
-        fatal(h, t1rErrKeyValue, "/%s bad value: FD[%d]",
+        fatal(h, t1rErrKeyValue, "/%s bad value: FD[%ld]",
               keys[iKey], h->fd - h->FDArray.array);
     else
         fatal(h, t1rErrKeyValue, "/%s bad value", keys[iKey]);
@@ -1976,7 +1984,7 @@ static void checkRDType(t1rCtx h) {
 }
 
 /* Parse Erode proc. If we are parsing a print stream font we look for a
-   carrige return in the proc. definition as a clue to the line ending type
+   carriage return in the proc. definition as a clue to the line ending type
    being used in the stream. If we haven't already seen the /StdVW key we
    derive its value from the 16th token in the proc. */
 static void parseErodeProc(t1rCtx h, abfPrivateDict *private) {
@@ -2742,7 +2750,7 @@ static void readCIDMap(t1rCtx h,
         unsigned char nextfd = (h->key.FDBytes == 0) ? 0 : read1(h);
         long nextoff = readN(h, h->key.GDBytes);
         if (offset != nextoff) {
-            long length;
+            long charstring_length;
             Char *chr = &h->chars.index.array[tag];
 
             /* Initialize char */
@@ -2756,8 +2764,8 @@ static void readCIDMap(t1rCtx h,
 
             setLanguageGroup(h, chr, fd, cid);
 
-            length = chr->sup.end - chr->sup.begin;
-            if (length < 0 || length > 65535)
+            charstring_length = chr->sup.end - chr->sup.begin;
+            if (charstring_length < 0 || charstring_length > 65535)
                 fatal(h, t1rErrCharLength,
                       "bad charstring length <cid-%ld>", cid);
         }
@@ -2790,7 +2798,7 @@ static void readSubrMaps(t1rCtx h, long StartDataOffset, long *maxoff) {
     for (i = 0; i < h->FDArray.cnt; i++) {
         FDInfo *fd = &h->FDArray.array[i];
 
-        /* Grow buffer to accomodate SubrCount+1 subr offset */
+        /* Grow buffer to accommodate SubrCount+1 subr offset */
         (void)dnaGROW(fd->subrs.offset, fd->key.SubrCount);
         fd->subrs.offset.cnt = fd->key.SubrCount;
         if (fd->subrs.offset.cnt == 0)
@@ -2798,10 +2806,10 @@ static void readSubrMaps(t1rCtx h, long StartDataOffset, long *maxoff) {
 
         /* Validate */
         if (fd->key.SubrMapOffset == -1)
-            fatal(h, t1rErrSubrMap, "/SubrMapOffset missing: FD[%d]", i);
+            fatal(h, t1rErrSubrMap, "/SubrMapOffset missing: FD[%ld]", i);
 
         if (fd->key.SDBytes < 1 || fd->key.SDBytes > 4)
-            fatal(h, t1rErrKeyValue, "/SDBytes: bad value: FD[%d]", i);
+            fatal(h, t1rErrKeyValue, "/SDBytes: bad value: FD[%ld]", i);
 
         /* Read SubrMap */
         srcSeek(h, StartDataOffset + fd->key.SubrMapOffset);
@@ -2826,7 +2834,7 @@ static void readSubrMaps(t1rCtx h, long StartDataOffset, long *maxoff) {
 
             if (length < 1 || length > 65535)
                 fatal(h, t1rErrKeyValue,
-                      "bad subr length FD[%d].subr[%ld]", i, j);
+                      "bad subr length FD[%ld].subr[%ld]", i, j);
 
             cstr = readCstr(h, begin, end);
 

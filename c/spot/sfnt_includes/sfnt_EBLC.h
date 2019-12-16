@@ -10,10 +10,10 @@
 #include "sfnt_sbit.h"
 
 typedef struct _EBLCBitmapSizeTable {
-    Card32 indexSubTableArrayOffset; /* offset to corresp. index      */
+    Card32 indexSubTableArrayOffset; /* offset to corresponding index */
                                      /* subtable array from beginning */
                                      /* of "EBLC"                     */
-    Card32 indexTableSize;           /* length of corresp. index subtables and array */
+    Card32 indexTableSize;           /* length of corresponding index subtables and array   */
     Card32 numberofIndexSubTables;   /* number of index subtables.                          */
                                      /* There is a subtable for each range or format change */
     Card32 colorRef;                 /* set to 0. ignore for now                            */
@@ -60,8 +60,8 @@ typedef struct _EBLCIndexSubHeader {
 typedef struct _EBLCIndexSubtable_Format1 {
     EBLCIndexSubHeader header;
     Card32 _numoffsets;
-    DCL_ARRAY(Card32, offsetArray); /* offsetArray[glyphIndex] + imageDataOffset ==> start of bitmapdata for glyph. */
-                                    /* sizeOfArray = lastGlyph - firstGlyph + 1                                     */
+    DCL_ARRAY(Card32, offsetArray); /* offsetArray[glyphIndex] + imageDataOffset ==> start of bitmap data for glyph. */
+                                    /* sizeOfArray = lastGlyph - firstGlyph + 1                                      */
 } EBLCIndexSubtable_Format1;
 
 #define EBLCFORMAT1_SIZE(first, last)            \
@@ -81,7 +81,7 @@ typedef struct _EBLCIndexSubtable_Format2 {
                           SBITBIGGLYPHMETRICS_SIZE)
 
 /* format 3 is similar to format 1, but with 16-bit offsets, for
-   compressed PROPORTIONALLY-spaced glyphs. 
+   compressed PROPORTIONALLY-spaced glyphs.
    Must be padded to a long-word boundary. */
 typedef struct _EBLCIndexSubtable_Format3 {
     EBLCIndexSubHeader header;
@@ -100,7 +100,7 @@ typedef struct _EBLCCodeOffsetPair {
 #define EBLCCODEOFFSETPAIR_SIZE (SIZEOF(EBLCCodeOffsetPair, glyphCode) + \
                                  SIZEOF(EBLCCodeOffsetPair, offset))
 
-/* format 4 is for sparsely-embedded glyph data for 
+/* format 4 is for sparsely-embedded glyph data for
    PROPORTIONAL metrics */
 typedef struct _EBLCIndexSubtable_Format4 {
     EBLCIndexSubHeader header;
@@ -153,7 +153,7 @@ typedef struct _EBLCIndexSubTableArrayElt {
     GlyphId lastGlyphIndex;
     Card32 additionalOffsetToIndexSubtable; /* add to indexSubTableArrayOffset to get offset from beginning of "EBLC" table */
     EBLCFormats _subtable;
-    Card16 _index; /* index in subtablearray */
+    Card16 _index; /* index in subtable array */
 } EBLCIndexSubTableArrayElt;
 
 #define EBLCINDEXSUBTABLEARRAYELT_SIZE (SIZEOF(EBLCIndexSubTableArrayElt, firstGlyphIndex) + \

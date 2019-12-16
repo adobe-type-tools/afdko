@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef OS_2_H
-#define OS_2_H
+#ifndef HOTCONV_OS_2_H
+#define HOTCONV_OS_2_H
 
 #include "common.h"
 
@@ -36,4 +36,4 @@ void OS_2SetWidthClass(hotCtx g, unsigned short widthClass);
 void OS_2LowerOpticalPointSize(hotCtx g, unsigned short opSize);
 void OS_2UpperOpticalPointSize(hotCtx g, unsigned short opSize);
 
-#endif /* OS_2_H */
+#endif /* HOTCONV_OS_2_H */

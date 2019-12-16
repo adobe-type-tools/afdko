@@ -10,7 +10,7 @@
 typedef struct _fbitStdHeader {
     Card32 _rsrcLength; /* FILLIN: length of resource data */
     Card16 fontFlags;
-#define FBIT_SUBSTITUTIONISON 0x0001 /* KanjiTalk font subst is enabled */
+#define FBIT_SUBSTITUTIONISON 0x0001 /* KanjiTalk font substitution is enabled */
 #define FBIT_STATICFONT 0x2000
     Card32 resourceType; /* Tag: 'fbit" */
     Int16 resourceID;

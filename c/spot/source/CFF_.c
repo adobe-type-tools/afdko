@@ -11,6 +11,7 @@
 
 #include <string.h>
 #include <math.h>
+#include <stdbool.h>
 #include "CFF_.h"
 #include "sfnt.h"
 #include "cffread.h"
@@ -394,14 +395,16 @@ static void drawText(GlyphId glyphId, IntX lsb, IntX rsb, IntX width) {
     proofPSOUT(cffproofctx, workstr);
 }
 
-static IntX donedate = 0;
-static Byte8 date[64];
-
 Byte8 *getthedate(void) {
+    static bool donedate = false;
+    static char date[64];
     if (!donedate) {
-        time_t now = time(NULL);
-        strftime(date, 64, "%m/%d/%y %H:%M", localtime(&now));
-        donedate = 1;
+        time_t seconds_since_epoch;
+        struct tm local_time;
+        time(&seconds_since_epoch);
+        SAFE_LOCALTIME(&seconds_since_epoch, &local_time);
+        strftime(date, 64, "%m/%d/%y %H:%M", &local_time);
+        donedate = true;
     }
     return date;
 }
@@ -1013,7 +1016,7 @@ void CFF_SynopsisFinish(void) {
     synopsis.title = NULL;
 }
 
-/* Draw glyph tile for font sysnopsis pages */
+/* Draw glyph tile for font synopsis pages */
 int CFF_DrawTile(GlyphId glyphId, Byte8 *code) {
     IntX origShift;
     IntX lsb, rsb, tsb, bsb;
@@ -1486,7 +1489,7 @@ void CFF_getMetrics(GlyphId glyphId,
 
     *origShift = 0; /* This is needed only for TrueType fonts, where the  */
                     /* xMin of in the glyf table glyph record may contain */
-                    /* whitesepace,and this needs to be added to the left */
+                    /* whitespace,and this needs to be added to the left */
                     /* side bearing.*/
 
     if (!loaded) {
@@ -1522,7 +1525,7 @@ void CFF_getMetrics(GlyphId glyphId,
         if (!vmtxGetMetrics(glyphId, &ttsb, &tvadv, CFF__)) {
             *vwidth = tvadv;
             *tsb = ttsb;
-            *bsb = 0; /* TT opnly */
+            *bsb = 0; /* TT only */
             if (yorig != NULL) {
                 if (!VORGGetVertOriginY(glyphId, &vertOriginY, CFF__)) {
                     *yorig = vertOriginY;
@@ -1647,14 +1650,9 @@ Byte8 *CFF_GetName(GlyphId glyphId, IntX *length, IntX forProofing) {
                     sprintf(cidname, "\\\\%04hu", cffgi->id);
                 else
                     sprintf(cidname, "\\%hu", cffgi->id);
-            } else if (nglyphs < 100000) {
-                if (forProofing)
-                    sprintf(cidname, "\\\\%05hu", cffgi->id);
-                else
-                    sprintf(cidname, "\\%hu", cffgi->id);
             } else {
                 if (forProofing)
-                    sprintf(cidname, "\\\\%hu", cffgi->id);
+                    sprintf(cidname, "\\\\%05hu", cffgi->id);
                 else
                     sprintf(cidname, "\\%hu", cffgi->id);
             }

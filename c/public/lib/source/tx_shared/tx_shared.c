@@ -10,6 +10,16 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr);
 
 /* ----------------------------- Error Handling ---------------------------- */
 
+/* Write message to stderr from varargs. */
+static void CTL_CDECL message(txCtx h, char *fmt, ...) {
+    fflush(stdout);
+    va_list ap;
+    fprintf(stderr, "%s: ", h->progname);
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+}
+
 /* If first debug message for source file; print filename */
 static void printFilename(txCtx h) {
     fflush(stdout);
@@ -102,7 +112,7 @@ void *safeManage(ctlMemoryCallbacks *cb, void *old, size_t size) {
 
 /* ------------------------------- Tmp Stream ------------------------------ */
 
-/* Intialize tmp stream. */
+/* Initialize tmp stream. */
 static void tmpSet(Stream *s, char *filename) {
     s->type = stm_Tmp;
     s->flags = 0;
@@ -561,7 +571,7 @@ static void dstFileOpen(txCtx h, abfTopDict *top) {
     if (h->dst.stm.fp != NULL)
         return; /* Already open */
 
-    /* Open dstination file */
+    /* Open destination file */
     if (strcmp(h->dst.stm.filename, "-") == 0)
         h->dst.stm.fp = stdout;
     else {
@@ -802,7 +812,7 @@ static void ps_SetMode(txCtx h) {
     h->cb.glyph = abfGlyphDrawCallbacks;
     h->cb.glyph.direct_ctx = &h->abf.draw;
 
-    /* Set source libarary flags */
+    /* Set source library flags */
     h->t1r.flags = (T1R_UPDATE_OPS | T1R_USE_MATRIX);
     h->cfr.flags = (CFR_UPDATE_OPS | CFR_USE_MATRIX);
 
@@ -854,7 +864,7 @@ static void afm_SetMode(txCtx h) {
     h->cb.glyph = abfGlyphAFMCallbacks;
     h->cb.glyph.direct_ctx = &h->abf.afm;
 
-    /* Set source libarary flags */
+    /* Set source library flags */
     h->t1r.flags = (T1R_UPDATE_OPS | T1R_USE_MATRIX);
     h->cfr.flags = (CFR_UPDATE_OPS | CFR_USE_MATRIX);
 
@@ -2074,7 +2084,7 @@ static void mtx_SetMode(txCtx h) {
     h->mtx.metrics.cb.direct_ctx = &h->mtx.metrics.ctx;
     h->mtx.metrics.ctx.flags = 0;
 
-    /* Set source libarary flags */
+    /* Set source library flags */
     h->t1r.flags = (T1R_UPDATE_OPS | T1R_USE_MATRIX);
     h->cfr.flags = (CFR_UPDATE_OPS | CFR_USE_MATRIX);
 
@@ -2296,7 +2306,7 @@ static void copyPOSTRes(txCtx h, int type, long length,
 static void writeSection(txCtx h, int type, long length,
                          FILE *src, char *srcfile,
                          FILE *dst, char *dstfile) {
-    /* Write full-length resouces */
+    /* Write full-length resources */
     long cnt = length / 2046;
     while (cnt--)
         copyPOSTRes(h, type, 2046, src, srcfile, dst, dstfile);
@@ -2732,7 +2742,7 @@ static void mkdir_tx(txCtx h, char *dirPath) {
 #endif
 
     if (dirErr != 0)
-        fatal(h, "Failed to creater directory '%s'.\n", dirPath);
+        fatal(h, "Failed to create directory '%s'.\n", dirPath);
 }
 
 /* Begin font set. */
@@ -2960,8 +2970,12 @@ static void dumpINDEX(txCtx h, char *title, const ctlRegion *region,
             countSize = 2;
         }
 
-        if (count > 0)
+        if (count > 0) {
             offSize = read1(h);
+            if (offSize == 0) {
+                fatal(h, "invalid offSize in INDEX");
+            }
+        }
 
         if (h->dcf.level < 5) {
             /* Dump header */
@@ -2973,7 +2987,7 @@ static void dumpINDEX(txCtx h, char *title, const ctlRegion *region,
             /* Dump offset array */
             flowTitle(h, "offset[index]=value");
             for (i = 0; i <= count; i++)
-                flowBreak(h, "[%ld]=%lu", i, readn(h, offSize));
+                flowBreak(h, "[%ld]=%u", i, readn(h, offSize));
             flowEnd(h);
         } else if (count == 0) {
             fprintf(fp, "empty\n");
@@ -3171,7 +3185,7 @@ static void dumpDICT(txCtx h, const ctlRegion *region) {
                 value = value << 8 | read1(h);
                 value = value << 8 | read1(h);
                 left -= 4;
-                flowArg(h, "%ld", value);
+                flowArg(h, "%d", value);
             } break;
             case cff_BCD: {
                 int count = 0;
@@ -3421,6 +3435,7 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                 flowCommand(h, opname[byte]);
                 break;
             case t2_blend:
+                CHKUFLOW(1);
                 if ((h->dcf.flags & DCF_Flatten) && (!(h->dcf.flags & DCF_END_HINTS))) {
                     int numBlends = (int)h->stack.array[h->stack.cnt - 1];
                     // take off 1 for num blend arguments, then pop the delta values: what's left are stem coords.
@@ -3429,8 +3444,17 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr) {
                 flowCommand(h, opname[byte]);
                 break;
             case t2_vsindex: {
-                unsigned long vsIndex = (unsigned long)h->stack.array[0];
-                h->dcf.numRegions = h->dcf.varRegionInfo.array[vsIndex].regionCount;
+                h->dcf.numRegions = 0;
+                if (h->dcf.varRegionInfo.cnt > 0) {
+                    unsigned long vsIndex;
+                    CHKUFLOW(1);
+                    vsIndex = (unsigned long)h->stack.array[h->stack.cnt - 1];
+                    if (vsIndex >= h->dcf.varRegionInfo.cnt) {
+                        message(h, "invalid vsindex\n");
+                    } else {
+                        h->dcf.numRegions = h->dcf.varRegionInfo.array[vsIndex].regionCount;
+                    }
+                }
                 flowCommand(h, opname[byte]);
                 break;
             }
@@ -3860,7 +3884,7 @@ static void dcf_DumpFDSelect(txCtx h, const ctlRegion *region) {
                 uint32_t gid;
                 flowTitle(h, "glyph[gid]=fd");
                 for (gid = 0; gid < h->top->sup.nGlyphs; gid++)
-                    flowBreak(h, "[%ld]=%u", gid, read1(h));
+                    flowBreak(h, "[%u]=%u", gid, read1(h));
                 flowEnd(h);
             } break;
             case 3: {
@@ -4552,7 +4576,7 @@ static void addNotdef(txCtx h) {
         callbackGlyph(h, sel_by_tag, 0, NULL);
 }
 
-/* Filter glyphs using the glyph list pararmeter. */
+/* Filter glyphs using the glyph list parameter. */
 void callbackSubset(txCtx h) {
     parseSubset(h, callbackGlyph);
     if (!((SUBSET_SKIP_NOTDEF & h->flags) || (SUBSET_HAS_NOTDEF & h->flags))) {
@@ -4801,7 +4825,7 @@ void prepOTF(txCtx h) {
     unsigned short winscore;
     unsigned short version;
     unsigned short nEncodings;
-    unsigned short i;
+    long i;
     sfrTable *table;
 
     /* Install new callback */
@@ -4881,7 +4905,7 @@ void ttrReadFont(txCtx h, long origin, int iTTC) {
             fatal(h, "(ttr) can't init lib");
     }
 
-    if (ttrBegFont(h->ttr.ctx, h->ttr.flags, origin, iTTC, &h->top))
+    if (ttrBegFont(h->ttr.ctx, h->ttr.flags, origin, iTTC, &h->top, getUDV(h)))
         fatal(h, NULL);
 
     prepSubset(h);

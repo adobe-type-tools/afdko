@@ -76,7 +76,7 @@ void cfwAddGlyph(cfwCtx g, abfGlyphInfo *info, float hAdv, long length,
    visible externally.
 
    The library context (cfwCtx) is public to the modules that make up the
-   libary (but not to the client) and is defined below. The library context
+   library (but not to the client) and is defined below. The library context
    contains a structure (called ctx) containing an opaque context pointer for
    each module.
 
@@ -125,7 +125,7 @@ struct cfwCtx_ {
         void *tmp;
         void *dbg;
     } stm;
-    struct /* Temorary stream */
+    struct /* Temporary stream */
     {
         long offset;   /* Buffer offset */
         size_t length; /* Buffer length */

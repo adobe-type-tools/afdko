@@ -98,6 +98,7 @@ typedef struct {
 struct GSUBCtx_ {
     SubtableInfo new;
     struct {
+        LOffset featParam;        /* (Cumulative.) Next subtable offset      */
         LOffset subtable;         /* (Cumulative.) Next subtable offset |->  */
                                   /* start of subtable section. LOffset to   */
                                   /* check for overflow                      */
@@ -109,10 +110,10 @@ struct GSUBCtx_ {
     dnaDCL(Subtable, subtables); /* Subtable list */
 
     /* Info for chaining contextual lookups */
-    dnaDCL(SubtableInfo, anonSubtable);     /* Anon subtbl accumulator       */
-    dnaDCL(SubstLookupRecord *, subLookup); /* Ptrs to all records that need */
-                                            /* to be adjusted                */
-    dnaDCL(GNode *, prod);                  /* Tmp for cross product         */
+    dnaDCL(SubtableInfo, anonSubtable);     /* Anon subtable accumulator         */
+    dnaDCL(SubstLookupRecord *, subLookup); /* Pointers to all records that need */
+                                            /* to be adjusted                    */
+    dnaDCL(GNode *, prod);                  /* Tmp for cross product             */
 
     /* info for feature names */
     dnaDCL(FeatureNameRec, featNameID);
@@ -196,7 +197,8 @@ void GSUBNew(hotCtx g) {
     h->new.script = h->new.language = h->new.feature = TAG_UNDEF;
 
     dnaINIT(g->dnaCtx, h->new.rules, 50, 200);
-    h->offset.subtable = h->offset.extension = h->offset.extensionSection = 0;
+    h->offset.featParam = h->offset.subtable = 0;
+    h->offset.extension = h->offset.extensionSection = 0;
     dnaINIT(g->dnaCtx, h->subtables, 10, 10);
     dnaINIT(g->dnaCtx, h->anonSubtable, 3, 10);
     h->anonSubtable.func = subtableInit;
@@ -230,6 +232,40 @@ int GSUBFill(hotCtx g) {
 #endif /* HOT_FEAT_SUPPORT */
 
     /* Add OTL features */
+
+    /* The font tables are in the order:
+     ScriptList
+     FeatureList
+     FeatureParams
+     LookupList
+     lookup subtables (with aalt subtables written last)
+     anon subtables (lookup subtables created by contextual rules)
+     coverage definition tables
+     class definition tables
+     extension sections.
+     Notes:
+     All directly defined lookup subtables are added in the order that they are
+     created by the feature file. The only exceptions are the subtables for
+     the aalt lookups, and anonymous subtables. 'aalt'subtables' are created
+     after the end of feature file parsing, in feat.c:featFill(), since the
+     aalt feature references can be used only after all the other features are
+     defined. Anonymous subtables, those implied by contextual rules rather
+     than being explicitly defined, are added at the end of the subtable list,
+     in createAnonLookups() above.
+
+     coverage and class subtables are seperately accumulated in otlTable
+     t->coverage.tables and t->class.tables, and are written after all the
+     lookup subtables, first coverage, then class subtables.
+
+     For featparams and lookup subtables, there are two parallel sets of arrays
+     of subtables. The GSUB arrays (h->*) contain the actual data to be
+     written, and is where the offsets are set. The other set is in the otl
+     table, and exists so that the GPOS and GSUB can share code for ordering
+     and writing feature and lookup indices. The latter inherit offset and
+     other data from the GSUB arrays. The GSUB arrays are created when the
+     feature file is processed, by all the fill* functions.  The otl table
+     arrays are created below.
+    */
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
         int isExt = sub->extension.use;
@@ -248,7 +284,7 @@ int GSUBFill(hotCtx g) {
     }
     DF(1, (stderr, "### GSUB:\n"));
 
-    otlTableFill(g, h->otl);
+    otlTableFill(g, h->otl, h->offset.featParam);
 
     h->offset.extensionSection = h->offset.subtable + otlGetCoverageSize(h->otl) + otlGetClassSize(h->otl);
 #if HOT_DEBUG
@@ -270,20 +306,45 @@ int GSUBFill(hotCtx g) {
     return 1;
 }
 
+static void featParamsWrite(hotCtx g, GSUBCtx h) {
+    int i;
+
+    for (i = 0; i < h->subtables.cnt; i++) {
+        Subtable *sub = &h->subtables.array[i];
+        if (IS_REF_LAB(sub->label)) {
+            continue;
+        }
+
+        switch (sub->lkpType) {
+                case GSUBFeatureNameParam:
+                    writeGSUBFeatNameParam(h, sub);
+                    break;
+
+                case GSUBCVParam:
+                    writeGSUBCVParam(h, sub);
+                    break;
+        }
+    }
+}
+
 void GSUBWrite(hotCtx g) {
     int i;
     GSUBCtx h = g->ctx.GSUB;
 
     /* Write OTL features */
     if (h->subtables.cnt == 0) {
-        /* When (h->subtables.cnt ==0), we get here only if teh -fs option has been specified. */
+        /* When (h->subtables.cnt ==0), we get here only if the -fs option has been specified. */
         h->otl = otlTableNew(g);
         otlTableFillStub(g, h->otl);
         otlTableWrite(g, h->otl);
+        /* don't need to call featParamsWrite(): no features without lookup subtables. */
+        otlLookupListWrite(g, h->otl);
         return;
     }
 
-    otlTableWrite(g, h->otl);
+    otlTableWrite(g, h->otl); /* write header, ScriptList and FeatureList.*/
+    featParamsWrite(g, h); /* write the feature param subtables after the FeatureList */
+    otlLookupListWrite(g, h->otl);
 
     /* Write main subtable section */
     for (i = 0; i < h->subtables.cnt; i++) {
@@ -325,13 +386,8 @@ void GSUBWrite(hotCtx g) {
                 writeReverseChain(g, h, sub);
                 break;
 
-            case GSUBFeatureNameParam:
-                writeGSUBFeatNameParam(h, sub);
-                break;
-
-            case GSUBCVParam:
-                writeGSUBCVParam(h, sub);
-                break;
+            /* We no longer write the feature param subtables as part of the LookupList
+             they are instead written above in featParamsWrite().*/
 
             /* Not supported
             case GSUBContext:
@@ -345,7 +401,7 @@ void GSUBWrite(hotCtx g) {
     otlCoverageWrite(g, h->otl);
     otlClassWrite(g, h->otl);
 
-    /* Write extension subtables section. Each subtable is immediatedly */
+    /* Write extension subtables section. Each subtable is immediately  */
     /* followed by its coverages and classes                            */
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
@@ -449,7 +505,8 @@ void GSUBReuse(hotCtx g) {
     }
 
     h->new.rules.cnt = 0;
-    h->offset.subtable = h->offset.extension = h->offset.extensionSection = 0;
+    h->offset.featParam = h->offset.subtable = 0;
+    h->offset.extension = h->offset.extensionSection = 0;
     h->subtables.cnt = 0;
 
     h->anonSubtable.cnt = 0;
@@ -506,6 +563,8 @@ void GSUBFeatureBegin(hotCtx g, Tag script, Tag language, Tag feature) {
 static void startNewSubtable(hotCtx g) {
     GSUBCtx h = g->ctx.GSUB;
     Subtable *sub = h->new.sub = dnaNEXT(h->subtables);
+    int hasFeatureParam = ((h->new.lkpType == GSUBFeatureNameParam) ||
+                           (h->new.lkpType == GSUBCVParam));
 
     sub->script = h->new.script;
     sub->language = h->new.language;
@@ -515,10 +574,14 @@ static void startNewSubtable(hotCtx g) {
     sub->lkpFlag = h->new.lkpFlag;
     sub->markSetIndex = h->new.markSetIndex;
     sub->label = h->new.label;
-    sub->offset = h->offset.subtable;
+    if (hasFeatureParam) {
+        sub->offset = h->offset.featParam;
+    } else {
+        sub->offset = h->offset.subtable;
+    }
 
     sub->extension.use = h->new.useExtension;
-    if (h->new.useExtension && !IS_REF_LAB(h->new.label)) {
+    if (h->new.useExtension && (!IS_REF_LAB(h->new.label)) && (!hasFeatureParam)) {
         sub->extension.otl = otlTableNew(g);
         sub->extension.offset = h->offset.extension; /* Not needed */
         sub->extension.tbl = fillExtension(g, h, h->new.lkpType);
@@ -738,7 +801,7 @@ void GSUBLookupEnd(hotCtx g, Tag feature) {
         featRecycleNodes(g, rule->repl);
     }
     h->new.rules.cnt = 0;
-    /* This prevents the rules from being re-used un-intentionally in the */
+    /* This prevents the rules from being re-used unintentionally in the  */
     /* case where an empty GSUB feature is called for; because it is      */
     /* empty, the table type doesn't get correctly assigned, and the code */
     /* comes through here.                                                */
@@ -809,7 +872,7 @@ void GSUBAddFeatureMenuParam(hotCtx g, void *param) {
     feat_param->version = 0;
     feat_param->nameID = *((unsigned short *)param);
     sub->tbl = feat_param;
-    h->offset.subtable += param_size;
+    h->offset.featParam += param_size;
 }
 
 static void fillGSUBCVParam(hotCtx g, GSUBCtx h, Subtable *sub) {
@@ -898,7 +961,7 @@ void GSUBAddCVParam(hotCtx g, void *param) {
     }
 
     sub->tbl = new_param;
-    h->offset.subtable += param_offset;
+    h->offset.featParam += param_offset;
 }
 
 /* -------------------------- Single Substitution -------------------------- */
@@ -2063,7 +2126,7 @@ typedef struct {
 
 typedef struct {
     unsigned short SubstFormat; /* =1 */
-    LOffset InputCoverage;      /* a single coverage table, for a singel glyph sub */
+    LOffset InputCoverage;      /* a single coverage table, for a single glyph sub */
     unsigned short BacktrackGlyphCount;
     LOffset *Backtrack; /* [BacktrackGlyphCount] offsets to coverage tables */
     unsigned short LookaheadGlyphCount;
@@ -2278,7 +2341,7 @@ static void createAnonLookups(hotCtx g, GSUBCtx h) {
     }
 }
 
-/* Change anon SubstLookupRecord labels to lookup inxs, now that they've been
+/* Change anon SubstLookupRecord labels to lookup indices, now that they've been
    calculated by otlFill() */
 
 static void setAnonLookupIndices(hotCtx g, GSUBCtx h) {

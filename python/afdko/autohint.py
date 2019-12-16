@@ -2,7 +2,7 @@ __copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.c
 """
 
 __usage__ = """
-autohint  AutoHinting program v1.6 Aug 28 2018
+autohint  AutoHinting program v1.6.1 Sep 25 2019
 autohint -h
 autohint -u
 autohint -hfd
@@ -443,18 +443,21 @@ import time
 import tempfile
 from fontTools.ttLib import TTFont, getTableModule
 import plistlib
-import warnings
 from afdko import fdkutils, ufotools
 from afdko.beztools import *
 import traceback
 import shutil
+import warnings
 
 try:
     from psautohint import AUTOHINTEXE
 except ImportError:
     AUTOHINTEXE = "autohintexe"
 
-# warnings.simplefilter("ignore", RuntimeWarning) # supress waring about use of os.tempnam().
+warnings.warn(
+	"autohint has been deprecated and will be removed from AFDKO soon. "
+	"Please update your code to use psautohint.",
+	category=FutureWarning)
 
 kACIDKey = "AutoHintKey"
 NEWBEZ_SUFFIX = '.new'
@@ -987,7 +990,11 @@ def openOpenTypeFile(path, outFilePath):
 			fontType = 1
 			tempPathCFF = path
 		else:  # It is a PS file. Convert to CFF.
-			fontType =  2
+			if head[0:2] == b'\x80\x01':  # PFB
+				fontType = 3
+			else:  # PFA
+				fontType = 2
+
 			print("Converting Type1 font to temp CFF font file...")
 			command="tx  -cff +b -std \"%s\" \"%s\" 2>&1" % (path, tempPathCFF)
 			report = fdkutils.runShellCmd(command)
@@ -1035,6 +1042,11 @@ def hintFile(options):
 		fontData.allowDecimalCoords = options.allowDecimalCoords
 		if options.writeToDefaultLayer and hasattr(fontData, "setWriteToDefault"): # UFO fonts only
 			fontData.setWriteToDefault()
+			# Check for processed glyphs directory and delete if present
+			pgd = os.path.join(path, "glyphs.com.adobe.type.processedglyphs")
+			if os.path.isdir(pgd):
+				shutil.rmtree(pgd)
+
 	except (IOError, OSError):
 		logMsg( traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1])
 		raise ACFontError("Error opening or reading from font file <%s>." % fontFileName)

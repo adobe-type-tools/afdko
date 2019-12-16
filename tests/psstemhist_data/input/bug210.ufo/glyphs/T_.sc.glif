@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="T.sc" format="1">
+	<advance width="466"/>
+	<outline>
+		<contour>
+			<point x="442" y="575" type="line"/>
+			<point x="24" y="575" type="line"/>
+			<point x="24" y="513" type="line"/>
+			<point x="188" y="513" type="line"/>
+			<point x="188" y="0" type="line"/>
+			<point x="278" y="0" type="line"/>
+			<point x="278" y="513" type="line"/>
+			<point x="442" y="513" type="line"/>
+		</contour>
+	</outline>
+</glyph>

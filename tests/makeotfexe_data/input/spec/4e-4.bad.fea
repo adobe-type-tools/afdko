@@ -1,0 +1,9 @@
+# Test not allowed script in standalone lookup
+lookup liga1 {
+    script latn;
+    sub f i by f_i;
+} liga1;
+
+feature liga {
+    lookup liga1;
+} liga;

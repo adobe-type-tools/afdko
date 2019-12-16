@@ -1,0 +1,5 @@
+# Alt replacement must be a glyph class.
+
+lookup test {
+  sub A from A.alt1;
+} test;

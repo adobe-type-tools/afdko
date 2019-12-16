@@ -189,7 +189,7 @@ static void caretoffCurveto(void *ctx, int flex, cffFixed x1, cffFixed y1,
 }
 
 /* Calculate caret offset for an italic font. Shear heuristic glyph upright,
-   calculate its left (a) and right (b) sidebearings. Return a-(a+b)/2 */
+   calculate its left (a) and right (b) side-bearings. Return a-(a+b)/2 */
 static short calcCaretOffset(hotCtx g) {
     hheaCtx h = g->ctx.hhea;
     unsigned int i;

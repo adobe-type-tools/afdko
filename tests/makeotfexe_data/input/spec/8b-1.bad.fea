@@ -1,0 +1,13 @@
+# Test lookup in size feature.
+
+feature size {
+  lookup test {
+    sub a by b;
+  } test;
+
+  lookup test;
+  parameters 10.0 3 80 139;
+  sizemenuname "Win MinionPro Size Name";
+  sizemenuname 1 "Mac MinionPro Size Name";
+  sizemenuname 1 21 0 "Mac MinionPro Size Name";
+} size;

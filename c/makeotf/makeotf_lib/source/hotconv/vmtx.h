@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef VMTX_H
-#define VMTX_H
+#ifndef HOTCONV_VMTX_H
+#define HOTCONV_VMTX_H
 
 #include "common.h"
 
@@ -19,4 +19,4 @@ void vmtxFree(hotCtx g);
 /* Supplementary Functions */
 int vmtxGetNLongVerMetrics(hotCtx g);
 
-#endif /* VMTX_H */
+#endif /* HOTCONV_VMTX_H */

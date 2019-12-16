@@ -109,7 +109,7 @@ static Simple *readSimple(IntX nContours) {
     Int16 coord;
     Simple *simple = memNew(sizeof(Simple));
 
-    /* Read countour end point indices */
+    /* Read contour end point indices */
     simple->endPtsOfContours =
         memNew(sizeof(simple->endPtsOfContours[0]) * nContours);
     for (i = 0; i < nContours; i++)
@@ -646,9 +646,9 @@ static void drawCntlPoint(IntX marks, Point *p) {
 
    p0   p1      Action
    --   --      ------
-   off  off     End one bezier curve and begin another.
-   off  on      End bezier curve.
-   on   off     Begin bezier curve.
+   off  off     End one Bezier curve and begin another.
+   off  on      End Bezier curve.
+   on   off     Begin Bezier curve.
    on   on      Draw line.
 
    The point after the current point (p2) is only used for determining tic mark
@@ -1268,8 +1268,11 @@ static IntX donedate = 0;
 static Byte8 *thedate(void) {
     static Byte8 date[64];
     if (!donedate) {
-        time_t now = time(NULL);
-        strftime(date, 64, "%m/%d/%y %H:%M", localtime(&now));
+        time_t seconds_since_epoch;
+        struct tm local_time;
+        time(&seconds_since_epoch);
+        SAFE_LOCALTIME(&seconds_since_epoch, &local_time);
+        strftime(date, 64, "%m/%d/%y %H:%M", &local_time);
         donedate = 1;
     }
     return date;
@@ -1374,7 +1377,7 @@ void glyfSynopsisFinish(void) {
     synopsis.title = NULL;
 }
 
-/* Draw glyph tile for font sysnopsis pages */
+/* Draw glyph tile for font synopsis pages */
 void glyfDrawTile(GlyphId glyphId, Byte8 *code) {
     IntX origShift;
     IntX lsb, rsb, tsb, bsb;

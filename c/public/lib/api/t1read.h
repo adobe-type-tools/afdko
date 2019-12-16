@@ -109,7 +109,7 @@ int t1rBegFont(t1rCtx h,
 
 int t1rIterateGlyphs(t1rCtx h, abfGlyphCallbacks *glyph_cb);
 
-/* t1rIterateGlyphs() is called to interate through all the glyph data in the
+/* t1rIterateGlyphs() is called to iterate through all the glyph data in the
    font. (The number of glyphs in the font is passed back to the client via the
    "top" parameter to t1rBegFont() in the "sup.nGlyphs" field.) Glyph data is
    passed back to the client via the callbacks specified via the "glyph_cb"

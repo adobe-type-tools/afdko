@@ -31,7 +31,9 @@ void abfAFMBegFont(abfAFMCtx h) {
 }
 
 void abfAFMEndFont(abfAFMCtx h, abfTopDict *top) {
-    time_t now = time(NULL);
+    time_t seconds_since_epoch = time(NULL);
+    struct tm local_time;
+    char time_text[32];
     int c;
 
     /* update top dict's font bounding box with aggregate values */
@@ -45,11 +47,13 @@ void abfAFMEndFont(abfAFMCtx h, abfTopDict *top) {
     else
         fprintf(h->fp, "StartFontMetrics 2.0\n");
 
+    SAFE_LOCALTIME(&seconds_since_epoch, &local_time);
     fprintf(h->fp,
             "Comment Copyright %d Adobe Systems Incorporated. "
             "All Rights Reserved.\n",
-            localtime(&now)->tm_year + 1900);
-    fprintf(h->fp, "Comment Creation Date: %s", ctime(&now));
+            local_time.tm_year + 1900);
+    SAFE_CTIME(&seconds_since_epoch, time_text);
+    fprintf(h->fp, "Comment Creation Date: %s", time_text);
     if (top->UniqueID != ABF_UNSET_INT)
         fprintf(h->fp, "Comment UniqueID %ld\n", top->UniqueID);
     if (top->sup.UnitsPerEm != 1000)

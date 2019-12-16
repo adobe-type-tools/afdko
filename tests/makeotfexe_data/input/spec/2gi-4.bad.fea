@@ -1,0 +1,8 @@
+# Test invalid glyph ranges, difference is more than 1 letter.
+
+@A = [d.alt - d.mid];
+@B = [B.alt1 - B.alt3];
+
+feature liga {
+  sub @A by @B;
+} liga;

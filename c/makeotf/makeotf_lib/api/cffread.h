@@ -1,10 +1,10 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-   This software is licensed as OpenSource, under the Apache License, Version 2.0. 
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef CFFREAD_H
-#define CFFREAD_H
+#ifndef MAKEOTF_CFFREAD_H
+#define MAKEOTF_CFFREAD_H
 
 #include <stddef.h> /* For [u]int32_t */
 #include <stdint.h> /* For size_t */
@@ -117,7 +117,7 @@ struct cffStdCallbacks_ {
     /* [Required] cffRefill() is called in order to refill the library's input
        buffer. It returns a pointer to the new data and the count of the number
        of bytes of new data available via the count parameter. (A file-based
-       client might map this function to fread().) 
+       client might map this function to fread().)
 
        It is important (for performance reasons) to choose an input buffer size
        that isn't too small. For file-based clients a buffer size of BUFSIZ
@@ -266,7 +266,7 @@ struct cffGlyphInfo_ /* Glyph information */
    Each disconnected subpath within a glyph is bracketed by calls to newpath()
    and closepath(). Each subpath begins with a single call to moveto()
    followed by calls to lineto(), curveto(), and hintmask() in any order. The
-   end of path information for a particular glyph is signalled by a call to
+   end of path information for a particular glyph is signaled by a call to
    endchar().
 
    The first subpath may be preceded by calls to hintstem() which can be used
@@ -305,7 +305,7 @@ struct cffPathCallbacks_ {
                     cffFixed x2, cffFixed y2,
                     cffFixed x3, cffFixed y3);
 
-    /* [optional] curveto() is called to add a cubic bezier curve segment to the
+    /* [optional] curveto() is called to add a cubic Bezier curve segment to the
    current path from the current point guided by control points (x1, y1) and
    (x2, y2) and terminating at point (x3, y3). The current point becomes (x3,
    y3). The flex argument is set to 1 if the curve is part of a flex feature
@@ -332,7 +332,7 @@ struct cffPathCallbacks_ {
    are organized by increasing values of the edge0 argument. The edge0 argument
    generally represents the left or bottom edge of a stem and the edge1
    argument generally represents the right or top edge of a stem. The width of
-   a stem is calculated as (egde1 - edge0). Edge (ghost) hints are represented
+   a stem is calculated as (edge1 - edge0). Edge (ghost) hints are represented
    by negative stem widths of -20 for a right or top edge and -21 for a left or
    bottom edge. */
 
@@ -417,4 +417,4 @@ void cffFree(cffCtx h);
 /* cffFree() destroys the library context and all the resources allocated to
    it. */
 
-#endif /* CFFREAD_H */
+#endif /* MAKEOTF_CFFREAD_H */

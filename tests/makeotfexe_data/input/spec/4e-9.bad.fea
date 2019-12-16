@@ -1,0 +1,4 @@
+# Bad syntax.
+lookup test useextension {
+  sub f i by f_i;
+} test;

@@ -1,0 +1,4 @@
+# Unknown keyword.
+lookup test {
+   subst A by B;
+} test;

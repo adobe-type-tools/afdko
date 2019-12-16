@@ -7,7 +7,7 @@
 
 #include "ctlshare.h"
 
-#define TTR_VERSION CTL_MAKE_VERSION(1, 0, 21)
+#define TTR_VERSION CTL_MAKE_VERSION(1, 0, 22)
 
 #include "absfont.h"
 
@@ -45,7 +45,7 @@ ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
    The TTR_CHECK_ARGS macro is passed as the last parameter to ttrNew() in
    order to perform a client/library compatibility check. */
 
-int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top);
+int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top, float *UDV);
 
 /* ttrBegFont() is called to initiate a new font parse. The source data stream
    (CFR_SRC_STREAM_ID) is opened, positioned and the offset specified by the
@@ -61,30 +61,34 @@ enum {
 /* TrueType curve segments are represented as quadratic Beziers but the path
    returned by the glyph callbacks described below represent curve segments
    using cubic Beziers. By default this conversion is approximated by combining
-   ajoining pairs of quadratic segments into a single cubic segment thus
+   adjoining pairs of quadratic segments into a single cubic segment thus
    significantly reducing the number of segments required to represent the
    glyph outline. If, for some reason, a client requires an exact conversion
    the TTR_EXACT_PATH may be specified via the "flags" parameter.
    TTR_BOTH_PATHS returns the combined approximate and exact path conversions.
    This is really only useful for comparing the quality of the approximate
    conversion compared to the exact conversion, by overprinting, for example.
-   
+
    When parsing a TrueType Collection (TTC) the "iTTC" parameter may be used to
    index a specific font within the TTC TableDirectory. The "iTTC" must be set
-   to zero when parsing regular TrueType fonts. */
+   to zero when parsing regular TrueType fonts.
+
+   The "UDV" parameter specifies the User Design Vector to be used in
+   flattening (snapshotting) a TrueType variable font. If NULL, the font is flattened at the
+   default instance. The parameter may be set to NULL for non-variable fonts. */
 
 int ttrIterateGlyphs(ttrCtx h, abfGlyphCallbacks *glyph_cb);
 
-/* ttrIterateGlyphs() is called to interate through all the glyph data in the
+/* ttrIterateGlyphs() is called to iterate through all the glyph data in the
    font. (The number of glyphs in the font is passed back to the client via the
    "top" parameter to ttrBegFont() in the sup.nGlyphs field.) Glyph data is
    passed back to the client via the callbacks specified via the "glyph_cb"
-   parameter (see absfont.h). 
+   parameter (see absfont.h).
 
    Glyphs are presented to the client in glyph index order. Each glyph may
    be identified from the "info" parameter that is passed back to the client
    via the beg() callback (the current glyph index is specified via the "tag"
-   field). 
+   field).
 
    The client can control whether path data is read or ignored by the value
    returned from beg() and can thus use this interface to select a subset of
@@ -134,7 +138,7 @@ enum {
 
 char *ttrErrStr(int err_code);
 
-/* ttrErrStr() maps the "err_code" parameter to a null-terminated error 
+/* ttrErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
 
 void ttrGetVersion(ctlVersionCallbacks *cb);

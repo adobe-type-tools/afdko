@@ -23,8 +23,10 @@
 #include <stdlib.h>
 #include <errno.h>
 
-/* Make uzoperator for internal use */
+/* Make operator for internal use */
 #define t2_cntroff t2_reservedESC33
+
+#define MAX_RECURSION_DEPTH 1000
 
 enum /* seac operator conversion phase */
 {
@@ -98,7 +100,7 @@ struct _t2cCtx {
         char *buf;      /* Buffer */
         long length;    /* Buffer length */
         long offset;    /* offset in file */
-        long endOffset; /* offset in file fo end of charstring */
+        long endOffset; /* offset in file for end of charstring */
         long left;      /* Bytes remaining in charstring */
     } src;
     short LanguageGroup;
@@ -123,7 +125,7 @@ struct _t2cCtx {
 /* Check stack has room for n elements. */
 #define CHKOFLOW(h, n)                                                                                                                                              \
     do {                                                                                                                                                            \
-        if (((h->aux->flags & T2C_IS_CFF2) && ((h->stack.blendCnt) + (n) > CFF2_MAX_OP_STACK)) || (h->stack.cnt) + (n) > h->maxOpStack) return t2cErrStackOverflow; \
+        if (((h->flags & IS_CFF2) && ((h->stack.blendCnt) + (n) > CFF2_MAX_OP_STACK)) || (h->stack.cnt) + (n) > h->maxOpStack) return t2cErrStackOverflow; \
     } while (0)
 
 /* Stack access without check. */
@@ -132,7 +134,7 @@ struct _t2cCtx {
 #define POP() (h->stack.array[--h->stack.cnt])
 #define PUSH(v)                                                                                       \
     {                                                                                                 \
-        if (h->aux->flags & T2C_IS_CFF2) h->stack.blendArray[h->stack.blendCnt++].value = (float)(v); \
+        if (h->flags & IS_CFF2) h->stack.blendArray[h->stack.blendCnt++].value = (float)(v); \
         h->stack.array[h->stack.cnt++] = (float)(v);                                                  \
     }
 
@@ -149,7 +151,7 @@ struct _t2cCtx {
 #define SX(x) RND(h->transformMatrix[0] * (x))
 #define SY(y) RND(h->transformMatrix[3] * (y))
 
-static int t2Decode(t2cCtx h, long offset);
+static int t2Decode(t2cCtx h, long offset, int depth);
 static void convertToAbsolute(t2cCtx h, float x1, float y1, abfBlendArg *blendArgs, int num);
 static void copyBlendArgs(t2cCtx h, abfBlendArg *blendArg, abfOpEntry *opEntry);
 
@@ -237,7 +239,7 @@ static int srcSeek(t2cCtx h, long offset) {
 }
 
 /* Check for the first of possibly multiple bytes for an operator or operand.
-   If we're curently empty, but more bytes are available, refill from buffer.
+   If we're currently empty, but more bytes are available, refill from buffer.
    If this is a CFF2 font and we're completely out of bytes,
    treat this condition as equivalent to an endchar in CFF. */
 
@@ -245,7 +247,7 @@ static int srcSeek(t2cCtx h, long offset) {
     do                                                              \
         if (next == end) {                                          \
             if (h->src.offset >= h->src.endOffset) {                \
-                if (h->aux->flags & T2C_IS_CFF2)                    \
+                if (h->flags & IS_CFF2)                             \
                     goto do_endchar;                                \
                 return t2cErrSrcStream;                             \
             }                                                       \
@@ -256,7 +258,7 @@ static int srcSeek(t2cCtx h, long offset) {
     while (0)
 
 /* Check for a byte that follows the first byte of an operator or operand.
-   If we're curently empty, but more bytes are available, refill from buffer.
+   If we're currently empty, but more bytes are available, refill from buffer.
    If we're completely out of bytes, throw an error.                         */
 
 #define CHECK_SUBSEQUENT_BYTE(h)                                    \
@@ -617,15 +619,15 @@ static void callbackFlex(t2cCtx h,
 }
 
 static void convertStemToAbsolute(t2cCtx h, float lastEdge, abfBlendArg *blendArgs) {
-    /* Convert only the default value. At some point, need to actaully convert the region
-     deltas to absolute values, but this requires referencing teh current point and the region weight map.
+    /* Convert only the default value. At some point, need to actually convert the region
+     deltas to absolute values, but this requires referencing the current point and the region weight map.
      */
 
     blendArgs->value += lastEdge;
 }
 
 /* Add stems to stem list. Return 1 on stem overflow else 0;
- This is called only on hstem(hm), vstem(hm), or tx_mask, so all args on teh stack are stems.
+ This is called only on hstem(hm), vstem(hm), or tx_mask, so all args on the stack are stems.
  */
 static int addStems(t2cCtx h, int vert) {
     int i;
@@ -735,8 +737,12 @@ static void callback_seac(t2cCtx h, float adx, float ady, int bchar, int achar) 
 /* ---------------------------- Charstring Parse --------------------------- */
 
 /* Parse seac component glyph. */
-static int parseSeacComponent(t2cCtx h, int stdcode) {
+static int parseSeacComponent(t2cCtx h, int stdcode, int depth) {
     long offset;
+
+    if (depth > MAX_RECURSION_DEPTH) {
+        fatal(h, t2cErrMaxRecursion);
+    }
 
     if (stdcode < 0 || stdcode > 255)
         return t2cErrBadSeacComp;
@@ -745,7 +751,7 @@ static int parseSeacComponent(t2cCtx h, int stdcode) {
         return t2cErrBadSeacComp;
 
     h->stack.cnt = 0;
-    return t2Decode(h, offset);
+    return t2Decode(h, offset, depth + 1);
 }
 
 /* Unbias subroutine number. Return -1 on error else subroutine number. */
@@ -804,8 +810,6 @@ static int handleBlend(t2cCtx h) {
     h->stack.cnt--;
     h->stack.blendCnt--;
 
-    if (numBlends < 0)
-        return t2cErrStackUnderflow;
     CHKUFLOW(h, numTotalBlends);
     firstItemIndex = (h->stack.blendCnt - numTotalBlends);
     if (firstItemIndex < 0)
@@ -950,9 +954,13 @@ static void setNumMasters(t2cCtx h) {
 }
 
 /* Decode Type 2 charstring. Return 0 to continue else error code. */
-static int t2Decode(t2cCtx h, long offset) {
+static int t2Decode(t2cCtx h, long offset, int depth) {
     unsigned char *end;
     unsigned char *next;
+
+    if (depth > MAX_RECURSION_DEPTH) {
+        fatal(h, t2cErrMaxRecursion);
+    }
 
     /* Fetch charstring */
     if (srcSeek(h, offset))
@@ -1067,7 +1075,7 @@ static int t2Decode(t2cCtx h, long offset) {
                     long saveoff = (long)(h->src.offset - (end - next));
                     long saveEndOff = h->src.endOffset;
                     long num = unbias((long)POP(), h->aux->subrs.cnt);
-                    h->stack.blendCnt--;  // we do not blend subr indicies.
+                    h->stack.blendCnt--;  // we do not blend subr indices.
                     if (num == -1)
                         return t2cErrCallsubr;
                     if ((num + 1) < h->aux->subrs.cnt)
@@ -1080,7 +1088,7 @@ static int t2Decode(t2cCtx h, long offset) {
                         return t2cErrSubrDepth;
                     }
 
-                    result = t2Decode(h, h->aux->subrs.offset[num]);
+                    result = t2Decode(h, h->aux->subrs.offset[num], depth + 1);
                     h->src.endOffset = saveEndOff;
                     h->subrDepth--;
 
@@ -1433,7 +1441,7 @@ static int t2Decode(t2cCtx h, long offset) {
                     if (h->aux->flags & T2C_UPDATE_OPS) {
                         /* Parse base component */
                         h->seac.phase = seacBase;
-                        result = parseSeacComponent(h, h->aux->bchar);
+                        result = parseSeacComponent(h, h->aux->bchar, depth + 1);
                         if (result)
                             return result;
 
@@ -1448,7 +1456,7 @@ static int t2Decode(t2cCtx h, long offset) {
 
                         /* Parse accent component */
                         h->seac.phase = seacAccentPreMove;
-                        result = parseSeacComponent(h, h->aux->achar);
+                        result = parseSeacComponent(h, h->aux->achar, depth + 1);
                         if (result)
                             return result;
                     } else
@@ -1588,7 +1596,7 @@ static int t2Decode(t2cCtx h, long offset) {
                     long saveoff = (long)(h->src.offset - (end - next));
                     long saveEndOff = h->src.endOffset;
                     long num = unbias((long)POP(), h->aux->gsubrs.cnt);
-                    h->stack.blendCnt--;  // we do not blend subr indicies.
+                    h->stack.blendCnt--;  // we do not blend subr indices.
                     if (num == -1)
                         return t2cErrCallgsubr;
                     if ((num + 1) < h->aux->gsubrs.cnt)
@@ -1602,7 +1610,7 @@ static int t2Decode(t2cCtx h, long offset) {
                         return t2cErrSubrDepth;
                     }
 
-                    result = t2Decode(h, h->aux->gsubrs.offset[num]);
+                    result = t2Decode(h, h->aux->gsubrs.offset[num], depth + 1);
                     h->src.endOffset = saveEndOff;
                     h->subrDepth--;
 
@@ -1737,7 +1745,7 @@ static int t2Decode(t2cCtx h, long offset) {
 
 #if 0
     /* for CFF2 Charstrings, we hit the end of the charstring without having seen endchar or return yet. Add it now. */
-    if ((h->aux->flags & T2C_IS_CFF2) && !(h->flags & SEEN_ENDCHAR))
+    if ((h->flags & IS_CFF2) && !(h->flags & SEEN_ENDCHAR))
 
     {
         /* if this was a subr, do return. */
@@ -1763,6 +1771,8 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
 
     /* Initialize */
     h->flags = PEND_WIDTH | PEND_MASK;
+    if (aux->flags & T2C_IS_CFF2)
+        h->flags |= IS_CFF2;
     h->stack.cnt = 0;
     h->stack.blendCnt = 0;
     memset(h->stack.blendArray, 0, sizeof(h->stack.blendArray));
@@ -1787,7 +1797,7 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
     memset(&h->BCA, 0, sizeof(h->BCA));
     aux->bchar = 0;
     aux->achar = 0;
-    if (aux->flags & T2C_IS_CFF2)
+    if (h->flags & IS_CFF2)
         h->maxOpStack = glyph->info->blendInfo.maxstack;
     else
         h->maxOpStack = T2_MAX_OP_STACK;
@@ -1811,13 +1821,11 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
         h->flags |= FLATTEN_BLEND;
         h->flags |= SEEN_BLEND;
     }
-    if (aux->flags & T2C_IS_CFF2)
-        h->flags |= IS_CFF2;
     h->src.endOffset = endOffset;
 
     DURING_EX(h->err.env)
 
-    retVal = t2Decode(h, offset);
+    retVal = t2Decode(h, offset, 0);
 
     HANDLER
     retVal = Exception.Code;

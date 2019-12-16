@@ -34,8 +34,8 @@ extern "C" {
    client-supplied callback functions passed to cfwNew() via the cfwCallbacks
    data structure.
 
-   Library I/O is performed on two abstract data streams: 
-   
+   Library I/O is performed on two abstract data streams:
+
    o cff FontSet data output
    o temporary data input and output
 
@@ -44,7 +44,7 @@ extern "C" {
    ranging from disk files to memory buffers.
 
    The temporary stream is used to keep the run-time memory usage within
-   resonable limits when handling large fonts. */
+   reasonable limits when handling large fonts. */
 
 typedef struct cfwCtx_ *cfwCtx;
 cfwCtx cfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
@@ -81,7 +81,8 @@ enum {
     /* When bit 10 is set, TopDict encoding vector is set to StandardEncoding,
        no matter what is in the font. This is useful for working with font
        sources that will be used for OpenType/CFF fonts */
-    CFW_NO_OPTIMIZATION =        1 << 12,
+    CFW_NO_OPTIMIZATION =        1 << 12, /* Suppress charstring optimizations, e.g.: */
+                                          /* x 0 rmoveto => x hmoveto */
     CFW_WRITE_CFF2 =             1 << 13
 };
 
@@ -92,7 +93,7 @@ enum {
    Conversely, if the CFW_PRESERVE_GLYPH_ORDER bit is set, the order in which
    glyphs are added to the font via the glyph callbacks is preserved. However,
    in either of these cases the .notdef glyph is special and is always assigned
-   a glyph index of 0. 
+   a glyph index of 0.
 
    The CFW_CHECK_IF_GLYPHS_DIFFER allows clients to merge two or more fonts
    together. Note that the client is responsible for ensuring that the fonts
@@ -101,7 +102,7 @@ enum {
    If the CFW_ENABLE_CMP_TEST bit is set, several necessary optimization are
    disabled so as to enable rendering tests to succeed. This must never be
    used by production code.
-   
+
    If the CFW_SUBRIZE bit is set, repeated patterns in charstrings are extracted
    as subroutines in order to minimize the total font size. Since this process
    is both memory and CPU intensive, this option should be used cautiously. */
@@ -140,7 +141,7 @@ extern const abfGlyphCallbacks cfwGlyphCallbacks;
 /* cfwGlyphCallbacks is a glyph callback set template that will add the data
    passed to these callbacks to the current font. Clients should make a copy of
    this data structure and set the "direct_ctx" field to the context returned
-   by cfwNew(). 
+   by cfwNew().
 
    The client must keep the glyph information, passed via the "info" parameter
    to the glyphBeg() callback, stable until after cfwEndFont() returns. */
@@ -178,7 +179,7 @@ int cfwMergeFDArray(cfwCtx h, abfTopDict *top, int *newFDIndex);
    FDArray index, as returned by cfwMergeDict, after reading from the source
    font, and before calling the destination font glyphBeg function.
 
-   Note! Once cfwMergeTopDict() has ben called, the cffwrite module will NOT
+   Note! Once cfwMergeTopDict() has been called, the cffwrite module will NOT
    merge in the original source font top dicts when fontEnd is called. If
    cfwMergeTopDict() is called for any font dict of any source font, then it
    must be called for every font dict of every source font, and the
@@ -187,7 +188,7 @@ int cfwMergeFDArray(cfwCtx h, abfTopDict *top, int *newFDIndex);
 
    Note! cfwMergeTopDict() should not be called for fonts which do not meet the
    test: font is not CID and both font have only one dict in the FDArray This
-   is becuase the cfwMergeTopDict() function assumes that fontDicts with
+   is because the cfwMergeTopDict() function assumes that fontDicts with
    different names must be treated as different font dicts. For non_CID fonts
    with one font dict, this is not the case; subset fonts will have fontDicts
    with different prefixes, but which should be considered equivalent. If
@@ -202,11 +203,11 @@ int cfwGetErrCode(cfwCtx h);
 int cfwEndFont(cfwCtx h, abfTopDict *top);
 
 /* cfwEndFont() completes the definition of the font that commenced with
-   cfwBegFont(). The "top" pararmeter specifies global font information via the
-   data structures described in absfont.h. 
+   cfwBegFont(). The "top" parameter specifies global font information via the
+   data structures described in absfont.h.
 
    A client can abandon a font part way through its definition by calling
-   cfwEndFont() with  a "top" parameter value of NULL. 
+   cfwEndFont() with  a "top" parameter value of NULL.
 
    When cfwEndFont() returns the client no longer needs to keep the glyph
    information, passed via the "info" parameter to the glyphBeg() callback,
@@ -235,7 +236,7 @@ enum {
 
 char *cfwErrStr(int err_code);
 
-/* cfwErrStr() maps the "err_code" parameter to a null-terminated error 
+/* cfwErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
 
 void cfwGetVersion(ctlVersionCallbacks *cb);

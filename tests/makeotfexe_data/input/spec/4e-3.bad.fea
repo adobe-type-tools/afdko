@@ -1,0 +1,9 @@
+# Different mark sets in lookup.
+@TOP_MARKS = [acute grave macron];
+@FRENCH_MARKS = [acute grave cedilla dieresis circumflex];
+lookup test {
+    lookupflag UseMarkFilteringSet @FRENCH_MARKS;
+    sub A by A.sc;
+    lookupflag UseMarkFilteringSet @TOP_MARKS;
+    sub B by B.sc;
+} test;

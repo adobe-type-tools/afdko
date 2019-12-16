@@ -44,7 +44,7 @@
 "used for all the source  fonts, at least one must contain a mapping for the\n",
 ".notdef glyph.\n",
 "\n",
-"If the output font is a CID-keyed font, the option  '-cid <cidfontifo>' may be\n",
+"If the output font is a CID-keyed font, the option  '-cid <cidfontinfo>' may be\n",
 "used. This option will use the key/value pairs in a text file to override the\n",
 "top PostScript FontDict values. This text file must contain the following\n",
 "key-words; example values are provided.\n",

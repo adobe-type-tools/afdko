@@ -1,0 +1,4 @@
+table head {
+    FontRevision 1.001;
+    UnitsPerEm 2000;
+} head;

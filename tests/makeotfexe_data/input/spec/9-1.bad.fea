@@ -1,0 +1,9 @@
+# Test "table already specified"
+
+table head {
+  FontRevision 1.0;
+} head;
+
+table head {
+  FontRevision 1.1;
+} head;

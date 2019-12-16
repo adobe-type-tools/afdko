@@ -20,7 +20,6 @@
 		BDB5C7560DAEC139003A4375 /* common.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = common.xcconfig; path = ../../../../public/config/xcconfig/common.xcconfig; sourceTree = SOURCE_ROOT; };
 		BDB5C7570DAEC139003A4375 /* debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../../../../public/config/xcconfig/debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		BDB5C7580DAEC139003A4375 /* release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = release.xcconfig; path = ../../../../public/config/xcconfig/release.xcconfig; sourceTree = SOURCE_ROOT; };
-		BDB5C75D0DAEC1E2003A4375 /* otter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = otter.h; path = ../../../source/otter.h; sourceTree = SOURCE_ROOT; };
 		BDB5C75E0DAEC1E2003A4375 /* Eda.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Eda.c; path = ../../../source/Eda.c; sourceTree = SOURCE_ROOT; };
 		BDB5C75F0DAEC1E2003A4375 /* Eda.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Eda.h; path = ../../../source/Eda.h; sourceTree = SOURCE_ROOT; };
 		BDB5C7600DAEC1E2003A4375 /* Efile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Efile.c; path = ../../../source/Efile.c; sourceTree = SOURCE_ROOT; };
@@ -59,7 +58,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				BDB5C75D0DAEC1E2003A4375 /* otter.h */,
 				BDB5C75E0DAEC1E2003A4375 /* Eda.c */,
 				BDB5C75F0DAEC1E2003A4375 /* Eda.h */,
 				BDB5C7600DAEC1E2003A4375 /* Efile.c */,

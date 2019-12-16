@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef _NUMTYPES_H
-#define _NUMTYPES_H
+#ifndef SFNTDIFF_NUMTYPES_H
+#define SFNTDIFF_NUMTYPES_H
 
 #define TYPEDEF_boolean 1
 /* import type definitions for Int16, Card16 etc from shared header file */
@@ -26,4 +26,4 @@ typedef double          DoubleN;
 
 #undef global /* global.h uses this name for a different purpose */
 
-#endif /*_NUMTYPES_H*/
+#endif /* SFNTDIFF_NUMTYPES_H */

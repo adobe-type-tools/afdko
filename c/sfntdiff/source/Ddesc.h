@@ -6,8 +6,8 @@
  * Platform/script/language/name description.
  */
 
-#ifndef DESC_H
-#define DESC_H
+#ifndef DDESC_H
+#define DDESC_H
 
 #include "Dglobal.h"
 
@@ -16,4 +16,4 @@ extern Byte8 *descScript(Card16 platformId, Card16 scriptId);
 extern Byte8 *descLang(Card16 cmap, Card16 platformId, Card16 languageId);
 extern Byte8 *descName(Card16 nameId);
 
-#endif /* DESC_H */
+#endif /* DDESC_H */

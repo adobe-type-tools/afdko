@@ -1,0 +1,26 @@
+## Filename SourceSansPro-Regular-cff2-unused-post.otf
+## Top Dict
+version             "2.0"
+Notice              " 2010 - 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name Source."
+Copyright           " 2010 - 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name Source."
+FullName            "Source Sans Pro"
+FamilyName          "Source Sans Pro"
+UnderlinePosition   -75
+FontBBox            {-454,-293,2159,968}
+FSType              0
+sup.srcFontType     CFF (name-keyed)
+sup.nGlyphs         2
+## FontDict[0]
+FontName            "SourceSansPro-Regular"
+## Private
+BlueValues          {-12,0,486,498,518,530,574,586,638,650,656,668,712,724}
+OtherBlues          {-217,-205}
+BlueScale           0.0625
+BlueFuzz            0
+StdHW               67
+StdVW               84
+StemSnapH           {67,78}
+StemSnapV           {84,95}
+## glyph[tag] {name,encoding}
+glyph[0] {.notdef,-}
+glyph[1] {USED_A,U+0041}

@@ -142,10 +142,10 @@ typedef struct {
 #define FORMAT14_SIZE(nUVSRecs) (uint16 + 2 * uint32 + nUVSRecs * (uint24 + 2 * uint32))
 
 typedef struct {
-    int16_t id; /* Internal use. All Encoding's that have the same id will end */
-                /* up pointing to the same subtable in the OTF. Of all the     */
-                /* Encoding's with the same id, exactly one will have a        */
-                /* non-NULL format field.                                      */
+    int16_t id; /* Internal use. All encodings that have the same id will end */
+                /* up pointing to the same subtable in the OTF. Of all the    */
+                /* encodings with the same id, exactly one will have a        */
+                /* non-NULL format field.                                     */
     uint16_t platformId;
     uint16_t scriptId;
     uint32_t offset;
@@ -717,16 +717,16 @@ static int partitionRanges(cmapCtx h, Mapping *mapping) {
     int i;
     int nSegments;
 
-    /* mapping is sorted by charCode, then by glyphID. If there is a break  */
-    /* on the character code sequence, we always make a new segment. If     */
-    /* there is a break in the glyph ID sequence, then we may make a        */
-    /* segment break, if doing so saves more bytes than not doing so.       */
-    /* If a segment has more than one glyph and no breaks in its glyphID    */
-    /* sequence, then it is set as  ordered. Ordered segments are dropped   */
-    /* only if keeping them costs less than the new segment cost. All other */
-    /* segments are merged togther. idRangeOffset for an ordered segment is */
-    /* set to 0, and its glyphID's are not added to the glyphId array, as   */
-    /* its glyphIDs can be calculated from startCode/endCode/idDelta alone. */
+    /* mapping is sorted by charCode, then by glyphID. If there is a break   */
+    /* on the character code sequence, we always make a new segment. If      */
+    /* there is a break in the glyph ID sequence, then we may make a         */
+    /* segment break, if doing so saves more bytes than not doing so.        */
+    /* If a segment has more than one glyph and no breaks in its glyphID     */
+    /* sequence, then it is set as  ordered. Ordered segments are dropped    */
+    /* only if keeping them costs less than the new segment cost. All other  */
+    /* segments are merged together. idRangeOffset for an ordered segment is */
+    /* set to 0, and its glyphID's are not added to the glyphId array, as    */
+    /* its glyphIDs can be calculated from startCode/endCode/idDelta alone.  */
 
     /* Create ordered partitioning. */
     span = 1;
@@ -761,7 +761,7 @@ static int partitionRanges(cmapCtx h, Mapping *mapping) {
         int codeBreak = mapping[i].flags & CODE_BREAK;
         ordered = mapping[i].ordered;
         span = mapping[i].span;
-        /* merge a segement with the previous segment if                  */
+        /* merge a segment with the previous segment if                   */
         /* 1) it does not start with a code break, and                    */
         /* 2) it is not ordered, and the previous segment is not ordered. */
         if ((!codeBreak) && (!ordered) && (!lastOrdered)) {
@@ -1071,7 +1071,7 @@ static void checkDuplicates(hotCtx g, cmapCtx h, int isMixedByte) {
             } else {
                 featGlyphDump(g, mapping[i - 1].glyphId, ',', 0);
                 featGlyphDump(g, mapping[i].glyphId, 0, 0);
-                cmapMsg(g, hotFATAL, "multiple glyphs (%s) mapped to code <%hX>",
+                cmapMsg(g, hotFATAL, "multiple glyphs (%s) mapped to code <%lX>",
                         g->note.array, mapping[i].code);
             }
         }
@@ -1176,7 +1176,7 @@ int cmapEndEncoding(hotCtx g) {
             FORMAT6_SIZE(h->mapping.array[h->mapping.cnt - 1].code -
                          h->mapping.array[0].code + 1);
 
-        if (h->maxCode < 256 && h->maxGlyphId < 256 /* ie if fmt 0 possible */
+        if (h->maxCode < 256 && h->maxGlyphId < 256 /* i.e. if fmt 0 possible */
             && (h->platformId == cmap_CUSTOM ||
                 (FORMAT0_SIZE <= format4Size && FORMAT0_SIZE <= format6Size))) {
             encoding->format = makeFormat0(h);
@@ -1537,8 +1537,8 @@ static void writeFormat14(cmapCtx h, Format14 *fmt) {
             }
         }
     }
-    cmapMsg(g, hotNOTE, "Number of default Unicode Variation Sequence values %d", numDefaultUVSEntries);
-    cmapMsg(g, hotNOTE, "Number of non-default UVS values %d", numExtUVSEntries);
+    cmapMsg(g, hotNOTE, "Number of default Unicode Variation Sequence values %lu", numDefaultUVSEntries);
+    cmapMsg(g, hotNOTE, "Number of non-default UVS values %lu", numExtUVSEntries);
 }
 
 void cmapWrite(hotCtx g) {

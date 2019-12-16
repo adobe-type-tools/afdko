@@ -1,0 +1,9 @@
+# Test only one run of marked glyphs is supported.
+
+lookup test {
+ pos A 10;
+} test;
+
+lookup test2 {
+ pos A' lookup test B C';
+} test2;

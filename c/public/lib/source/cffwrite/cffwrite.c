@@ -146,7 +146,7 @@ typedef struct /* Per-font data */
 struct controlCtx_ {
     long flags;                        /* FontSet specific flags */
 #define FONTSET_SUBRIZE       (1 << 0) /* Subroutinize */
-#define FONTSET_EMBED         (1 << 1) /* Peform embedding space optimization */
+#define FONTSET_EMBED         (1 << 1) /* Perform embedding space optimization */
 #define SEEN_NAME_KEYED_GLYPH (1 << 2) /* Seen name-keyed glyph */
 #define SEEN_CID_KEYED_GLYPH  (1 << 3) /* Seen cid-keyed glyph */
 #define FONTSET_CFF2          (1 << 4) /* We are writing a CFF2 font. */
@@ -1293,7 +1293,7 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
         chrstr_length = glyph->cstr.length;
         if (chrstr_length > 65535) {
             cfwMessage(g,
-                       "Warning: CharString of GID %d is %d bytes long. "
+                       "Warning: CharString of GID %ld is %ld bytes long. "
                        "CharStrings longer than 65535 bytes might not be "
                        "supported by some implementations.",
                        i, chrstr_length);
@@ -1472,7 +1472,7 @@ int cfwBegFont(cfwCtx g, cfwMapCallback *map, unsigned long maxNumSubrs) {
     h->_new->glyphs.array[0].info = NULL;
 
     /* For h->_new->seenGlyphs, we do NOT need to pre-allocate for .notdef
-       as we are not forcing it to the begining of the list */
+       as we are not forcing it to the beginning of the list */
 
     h->flags &= ~(SEEN_NAME_KEYED_GLYPH | SEEN_CID_KEYED_GLYPH);
     h->mergedDicts = 0;
@@ -1618,7 +1618,7 @@ static void orderNameKeyedGlyphs(controlCtx h) {
 
     if (!(g->flags & CFW_PRESERVE_GLYPH_ORDER)) {
         if (++j < nGlyphs) {
-            /* Font has unencoded glyphs; set sentinel for insetion sort */
+            /* Font has unencoded glyphs; set sentinel for insertion sort */
             k = j;
             for (i = j + 1; i < nGlyphs; i++) {
                 if (glyphs[i].info->gname.impl < glyphs[k].info->gname.impl) {
@@ -1810,7 +1810,7 @@ static int CTL_CDECL matchWidth(const void *key, const void *value, void *ctx) {
     }
 }
 
-/* Analyse width frequencies and assign default and nominal widths. */
+/* Analyze width frequencies and assign default and nominal widths. */
 static void analyzeWidths(controlCtx h) {
     long i;
 
@@ -1944,7 +1944,7 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
             {
             FDArray has already been added by client during glyph processing
             Warning: at this point, the  h->_new->FDArray is out of sync with the h->_new->top.FDArray!
-            There may ne more dicts in h->_new->FDArray.
+            There may be more dicts in h->_new->FDArray.
             }
          */
 
@@ -1964,7 +1964,7 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
         }
     }
 
-    /* The "glyph->info" field points to the client stucture that was supplied
+    /* The "glyph->info" field points to the client structure that was supplied
            to the glyphBeg() callback. This isn't required to be stable after
            returning from from this function so we set to null to ensure it isn't
            subsequently used by mistake. */
@@ -2133,7 +2133,7 @@ int cfwEndSet(cfwCtx g) {
         cfwCallSubrizer(g);
     }
 
-    fillSet(h); /* all subrs and charstrings must be inplace by the time this is called. */
+    fillSet(h); /* all subrs and charstrings must be in place by the time this is called. */
     writeSet(h);
 
     /* Prepare for reuse */

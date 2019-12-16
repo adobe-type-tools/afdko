@@ -54,7 +54,7 @@ struct tcCallbacks_ {
 
     /* [Required] fatal() is an exception handler that is called if an
    unrecoverable error is encountered during compaction. The client should
-   imediately call tcFree() to release the current context. This function must
+   immediately call tcFree() to release the current context. This function must
    NOT return and the client should use longjmp() to return control to a point
    prior to calling tcNew(). */
 
@@ -71,7 +71,7 @@ struct tcCallbacks_ {
     void *(*realloc)(void *ctx, void *old, size_t size);
     void (*free)(void *ctx, void *ptr);
 
-    /* [Required] The malloc(), realloc(), and free() fuctions manage memory in the
+    /* [Required] The malloc(), realloc(), and free() functions manage memory in the
    same manner as the Standard C Library functions of the same name. (This
    means that they must observe the alignment requirements imposed by the
    standard.) The client is required to handle any error conditions that may
@@ -161,7 +161,7 @@ struct tcCallbacks_ {
 
     void (*getAliasAndOrder)(void *ctx, char *oldName, char **newName, long int *order);
 
-   /* Optional. If present,  parse.c wil call it to get a new name, and an
+   /* Optional. If present,  parse.c will call it to get a new name, and an
       ordering index. These are used to rename the glyphs in the font, and
       establish a new glyph order. */
 };
@@ -183,7 +183,7 @@ void tcAddCopyright(tcCtx g, char *copyright);
 
 void tcSetMaxNumSubrsOverride(tcCtx g, unsigned long maxNumSubrs);
 
-/* tcSetMaxNumSubsOverride is used to set a maximum numbe of subroutines.*/
+/* tcSetMaxNumSubsOverride is used to set a maximum number of subroutines.*/
 
 void tcSetWeightOverride(tcCtx g, long syntheticWeight);
 
@@ -228,13 +228,13 @@ void tcCompactFont(tcCtx g, long flags);
 #define TC_NOOLDOPS     (1<<9)  /* Convert/remove old charstring operators */
 #define TC_IS_SERIF     (1<<10)  /* target font is serif */
 #define TC_DO_WARNINGS  (1<<11)  /* emit parse warnings */
-#define TC_FORCE_NOTDEF (1<<12)  /* Add marking notdf, even if font already has one */
+#define TC_FORCE_NOTDEF (1<<12)  /* Add marking notdef, even if font already has one */
 #define TC_IS_SANSSERIF (1<<13)  /* target font is sans-serif. If neither this nor TC_IS_SERIF is set, then a heuristic is used. Needed only for synthetic glyphs. */
-#define TC_RENAME       (1<<14)  /* Use glyph alais call-back to rename glyphs. */
+#define TC_RENAME       (1<<14)  /* Use glyph alias call-back to rename glyphs. */
 #define TC_SUBSET       (1<<15) /* Omit glyphs not named in the GOADB. */
-#define TC_SUPPRESS_HINT_WARNINGS (1<<16) /* Used to supress hitn warngins when buiulding a temp font from a TTF source font. */
+#define TC_SUPPRESS_HINT_WARNINGS (1<<16) /* Used to suppress hint warnings when building a temp font from a TTF source font. */
 
-#define TC_SUPPRESS_WIDTH_OPT     (1<<17) /* supress width optimization in CFF: makes it easier to poek at charstrings with other tools */
+#define TC_SUPPRESS_WIDTH_OPT     (1<<17) /* suppress width optimization in CFF: makes it easier to peek at charstrings with other tools */
 #define TC_VERBOSE      (1<<18) /* print all warnings and notes, including the annoyingly repetitive ones. */
 
 int tcSetStats(tcCtx g, int gather);

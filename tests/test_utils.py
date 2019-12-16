@@ -1,8 +1,41 @@
 import inspect
 import os
+import shutil
+import subprocess
 
-from fontTools.ttLib import TTFont
-from afdko.fdkutils import get_temp_file_path
+from fontTools.ttLib import TTCollection, TTFont, TTLibError
+from afdko.fdkutils import (get_temp_file_path, run_shell_command)
+
+TIMEOUT = 240  # seconds
+
+
+def generalizeCFF(otfPath, do_sfnt=True):
+    """
+    Adapted from similar routine in 'buildmasterotfs'. This uses
+    temp files for both tx output and sfntedit output instead of
+    overwriting 'otfPath', and also provides an option to skip
+    the sfntedit step (so 'otfPath' can be either a .otf file or
+    a .cff file).
+    """
+    tmp_tx_path = get_temp_file_path()
+    out_path = get_temp_file_path()
+    shutil.copyfile(otfPath, out_path, follow_symlinks=True)
+
+    if not run_shell_command(['tx', '-cff', '+b', '-std', '-no_opt',
+                              otfPath, tmp_tx_path]):
+        raise Exception
+
+    if do_sfnt:
+
+        if not run_shell_command(['sfntedit', '-a',
+                                  f'CFF ={tmp_tx_path}', out_path]):
+            raise Exception
+
+        return out_path
+
+    else:
+
+        return tmp_tx_path
 
 
 def get_data_dir():
@@ -24,10 +57,25 @@ def get_bad_input_path(file_name):
 
 
 def generate_ttx_dump(font_path, tables=None):
-    with TTFont(font_path) as font:
+    try:
+        font = TTFont(font_path)
+    except TTLibError:
+        font = TTCollection(font_path)
+
+    with font:
         temp_path = get_temp_file_path()
         font.saveXML(temp_path, tables=tables)
         return temp_path
+
+
+def generate_spot_dumptables(font_path, tables):
+    tmp_txt_path = get_temp_file_path()
+    myargs = ['spot', "-t" + ",".join(tables), font_path]
+    spot_txt = subprocess.check_output(myargs, timeout=TIMEOUT)
+    tf = open(tmp_txt_path, "wb")
+    tf.write(spot_txt)
+    tf.close()
+    return tmp_txt_path
 
 
 def generate_ps_dump(font_path):

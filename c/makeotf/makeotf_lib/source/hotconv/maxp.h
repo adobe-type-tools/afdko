@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef MAXP_H
-#define MAXP_H
+#ifndef HOTCONV_MAXP_H
+#define HOTCONV_MAXP_H
 
 #include "common.h"
 
@@ -18,4 +18,4 @@ void maxpFree(hotCtx g);
 
 /* Supplementary functions */
 
-#endif /* MAXP_H */
+#endif /* HOTCONV_MAXP_H */

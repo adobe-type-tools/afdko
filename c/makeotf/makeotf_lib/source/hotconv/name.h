@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef NAME_H
-#define NAME_H
+#ifndef HOTCONV_NAME_H
+#define HOTCONV_NAME_H
 
 #include "common.h"
 
@@ -31,4 +31,4 @@ unsigned short nameReserveUserID(hotCtx g);
 
 int nameVerifyDefaultNames(hotCtx g, unsigned short nameId);
 
-#endif /* NAME_H */
+#endif /* HOTCONV_NAME_H */

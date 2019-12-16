@@ -3,7 +3,7 @@
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
- * CID data table format defintion.
+ * CID data table format definition.
  */
 
 #ifndef FORMAT_CID__H

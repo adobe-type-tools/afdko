@@ -1,9 +1,15 @@
+[![PyPI](https://img.shields.io/pypi/v/afdko.svg)](https://pypi.org/project/afdko)
+
 [![Travis](https://travis-ci.org/adobe-type-tools/afdko.svg?branch=develop)](https://travis-ci.org/adobe-type-tools/afdko)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/qurx2si4x54b97mt/branch/develop?svg=true)](https://ci.appveyor.com/project/adobe-type-tools/afdko/branch/develop)
 [![CircleCI](https://circleci.com/gh/adobe-type-tools/afdko/tree/develop.svg?style=svg)](https://circleci.com/gh/adobe-type-tools/afdko/tree/develop)
-[![Codacy](https://api.codacy.com/project/badge/Grade/08ceff914833445685924ebb1f040070)](https://www.codacy.com/app/adobe-type-tools/afdko?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adobe-type-tools/afdko&amp;utm_campaign=Badge_Grade)
+[![Azure Pipelines](https://dev.azure.com/adobe-type-tools/afdko/_apis/build/status/adobe-type-tools.afdko?branchName=develop)](https://dev.azure.com/adobe-type-tools/afdko/_build/latest?definitionId=1&branchName=develop)
+
 [![Coverage](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop/graph/badge.svg)](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop)
-[![PyPI](https://img.shields.io/pypi/v/afdko.svg)](https://pypi.org/project/afdko)
+
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/adobe-type-tools/afdko.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe-type-tools/afdko/context:cpp)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/adobe-type-tools/afdko.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe-type-tools/afdko/context:python)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/adobe-type-tools/afdko.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe-type-tools/afdko/alerts/)
 
 Adobe Font Development Kit for OpenType (AFDKO)
 ===============================================

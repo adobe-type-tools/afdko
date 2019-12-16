@@ -1,0 +1,9 @@
+# Test wrong DFLT language.
+
+languagesystem latn ENG;
+
+feature liga {
+  script DFLT;
+  language DFLT;
+    sub f l by f_l;
+} liga;

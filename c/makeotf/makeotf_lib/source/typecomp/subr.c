@@ -24,11 +24,11 @@
    code. This idea may be extended to a number of fonts in a FontSet where
    repeated charstring code in different fonts is replaced. The single instance of
    charstring code is stored as a subroutine and is assigned a unique subroutine
-   number that may be used to indentify it.
+   number that may be used to identify it.
 
    In CFF technology charstring repeats that occur within a single font or across
    multiple fonts are stored in 2 separate data structures and are known as the
-   "local" and "global" subroutines, repectively. Local and global subroutines
+   "local" and "global" subroutines, respectively. Local and global subroutines
    are referenced by calling them with the callsubr or callgsubr operators,
    respectively. These operators take a subroutine number, which serves to
    identify the subroutine, as an argument. The local and global subroutine number
@@ -122,7 +122,7 @@ static unsigned char *gTestString = (unsigned char *)"Humpty Dumpty sat on a wal
 #define SEPARATOR t2_separator
 #endif
 
-#define MAX_NUM_SUBRS 32765L /* Maximum number of subroutines in one INDEX structure. 64K is valid by the spec, but but teh Google font validation tool OTS rejects fonts with subrs in a subrindex which is  over 32K -3.*/
+#define MAX_NUM_SUBRS 32765L /* Maximum number of subroutines in one INDEX structure. 64K is valid by the spec, but the Google font validation tool OTS rejects fonts with subrs in a subrindex which is over 32K -3.*/
 
 /* ------------------------------- CDAWG data ------------------------------- */
 typedef struct Edge_ Edge;
@@ -182,7 +182,7 @@ struct Subr_ {
     Subr *output;            /* Link to next subr for match trie output */
     unsigned char *cstr;     /* Charstring */
     uint32_t length;         /* Subr length (original bytes spanned) */
-    uint32_t count;          /* Occurance count */
+    uint32_t count;          /* Occurrence count */
     int32_t deltalen;        /* Delta length */
     short subrnum;           /* Biased subr number */
     short numsize;           /* Size of subr number (1, 2, or 3 bytes) */
@@ -274,7 +274,7 @@ struct subrCtx_ {
     dnaDCL(uint32_t, subrLenMap);                      /* boolean table where a value is set when any subr with the corresponding length is selected */
     dnaDCL(uint32_t, prefixLen);                       /* Prefix byte length for each byte in a charstring */
     unsigned maxSubrLen;                               /* Maximum subr length */
-    unsigned minSubrLen;                               /* Minimum subr lenth */
+    unsigned minSubrLen;                               /* Minimum subr length */
 
     unsigned long maxNumSubrs; /* Maximum number of subroutines (0 means default MAX_NUM_SUBRS) */
 
@@ -283,7 +283,7 @@ struct subrCtx_ {
 
 #define CALL_OP_SIZE 1 /* Size of call(g)subr (bytes) */
 
-/* xxx This copy of the module context make this module nonreentrant. It is
+/* xxx This copy of the module context make this module non-reentrant. It is
    required because the ANSI qsort() function doesn't allow a client to pass
    anything except array elements to the comparison routine. When I have time I
    will write one that does. */
@@ -684,7 +684,7 @@ static unsigned long gTotalEdgeMissCount;
 #endif
 
 /* Look up the edge table as a hash table for a given edge label
-   returns a ponter to an edge entry which may be empty if not found */
+   returns a pointer to an edge entry which may be empty if not found */
 static Edge *lookupEdgeTable(subrCtx h, Node *node, unsigned length, unsigned char *label) {
     unsigned tableSize = node->edgeTableSize;
     unsigned tableSizeMinus1 = tableSize - 1;
@@ -1037,7 +1037,7 @@ static void addFont(subrCtx h, Font *font, unsigned iFont, int multiFonts) {
     unsigned id;
     Node *s;          /* active point */
     unsigned char *k; /* beginning of the current reference point */
-    Node *e;          /* extention node */
+    Node *e;          /* extension node */
     Node *r, *oldr;
 
     if (font->chars.nStrings == 0) {
@@ -1188,7 +1188,7 @@ static unsigned countPaths(subrCtx h, Edge *edge) {
     node = edge->son;
 
     if (!(node->flags & NODE_COUNTED)) {
-        /* Count descendent paths */
+        /* Count descendant paths */
         long count = node->paths;
 
         /* Recursively descend complex node */
@@ -1404,7 +1404,7 @@ static void setTrieSuffixProc(subrCtx h, Edge *edge, long param1, long param2) {
         state = state->suffix;
     }
 
-    /* Chain the output subr of this node to the ouput subr of the suffix node */
+    /* Chain the output subr of this node to the output subr of the suffix node */
     if (node->misc >= 0) {
         Subr *subr = &h->subrs.array[node->misc];
 
@@ -1566,7 +1566,7 @@ static int CTL_CDECL cmpSubrLengths(const void *first, const void *second) {
 }
 
 /* Scan charstring and build call list of subrs */
-/* The same function is called with buildPhase = 0 for setting subr count duing
+/* The same function is called with buildPhase = 0 for setting subr count during
    overlap handling phase and called with buildPhase = 1 for building call list.
 
    The code looks for subrs with the longest length first, then try to cover
@@ -2319,7 +2319,7 @@ static unsigned char *subrizeCstr(subrCtx h,
         Subr *subr = call->subr;
 
         if (subr != NULL) {
-            /* Copy bytes preceeding subr */
+            /* Copy bytes preceding subr */
             pdst = t2cstrcpy(pdst, psrc, call->offset - offset);
 
             /* Add subr call */
@@ -2498,7 +2498,7 @@ static void reorderSubrs(subrCtx h, unsigned id) {
     long bias;
     SubrList *subrList = (id == NODE_GLOBAL)? &h->globalSubrs: &h->localSubrs.array[id];
 
-    /* Assign reording index */
+    /* Assign reordering index */
     dnaSET_CNT(*subrList, h->tmp.cnt);
     i = h->tmp.cnt - 1;
     if (h->tmp.cnt < 1240) {
@@ -2865,7 +2865,7 @@ static void removeFutileSubrs(subrCtx h, SubrList *list, unsigned id)
         }
     }
 
-    /* Reorder remaining subrs based on their acutal use counts */
+    /* Reorder remaining subrs based on their actual use counts */
     qsort(h->tmp.array, h->tmp.cnt, sizeof(h->tmp.array[0]), cmpSubrCount);
     reorderSubrs(h, id);
 }
@@ -2992,7 +2992,7 @@ void subrSubrize(tcCtx g, int nFonts, Font *fonts) {
 
             h->subrStackOvl = 0;
             if (font->flags & FONT_CID) {
-                /* Subrotinize CID-keyed font */
+                /* Subroutinize CID-keyed font */
                 int16_t iFD;
                 for (iFD = 0; iFD < h->fonts[i].fdCount; iFD++) {
                     buildSubrs(h, iFont + iFD);

@@ -60,11 +60,15 @@ typedef int32_t SInx;   /* Index into char da */
 #define SYMBOL_BIT 31    /* Symbol code page bit number */
 #define MAC_BIT 29       /* Symbol code page bit number */
 
-#define HIRAGANA_INX 45 /* Unicode blocks used in determining... */
-#define KATAKANA_INX 46
-#define BOPOMOFO_INX 47
-#define CJK_IDEO_INX 51
-#define HANGUL_SYL_INX 52
+/* NOTE: the *_INX values below refer to the *INDEX* of the corresponding
+         Unicode range in uniblock.h, and *NOT* the bit number of that range
+         in the OS/2 Unicode ranges bits. For example UnicodeBlock[97] is the
+         Bopomofo block, which corresponds to OS/2 Unicode range bit 51. */
+#define HIRAGANA_INX    95 /* Unicode blocks used in determining... */
+#define KATAKANA_INX    96
+#define BOPOMOFO_INX    97
+#define CJK_IDEO_INX   107
+#define HANGUL_SYL_INX 120
 
 #define JIS_CP 17 /* ... code page support for CJK */
 #define CHN_SIMP_CP 18
@@ -651,7 +655,7 @@ static void addUVToGlyph(hotCtx g, hotGlyphInfo *gi, UV uv) {
     if (IS_SUPP_UV(uv)) {
         h->nSuppUV++;
     } else if (!(gi->flags & GNAME_UNREC_HAS_SUPP)) {
-        /* Since we don't put GNAME_UNREC_HAS_SUPP glyphs in teh BMP-16 cmaps, we don't count them in min/maxBmpUV */
+        /* Since we don't put GNAME_UNREC_HAS_SUPP glyphs in the BMP-16 cmaps, we don't count them in min/maxBmpUV */
         if ((long)uv < h->minBmpUV) {
             h->minBmpUV = uv;
         }
@@ -1122,7 +1126,7 @@ void mapAddCMap(hotCtx g, hotCMapId id, hotCMapRefill refill) {
 
    Unicode Variation File format.
    ========================================
-   Theuvs file uses a simple line-oriented ASCII format.
+   The uvs file uses a simple line-oriented ASCII format.
 
    Lines are terminated by either a carriage return (13), a line feed (10), or
    a carriage return followed by a line feed. Lines may not exceed 255
@@ -1137,16 +1141,16 @@ void mapAddCMap(hotCtx g, hotCMapId id, hotCMapRefill refill) {
    Lines whose first non-blank character is hash (#) are treated as comment
    lines which extend to the line end and are ignored.
 
-   All other lines represnt a single UVS record, and must contain the following fields:
+   All other lines depressant a single UVS record, and must contain the following fields:
 
-   - base Unicode value as a decimal value, ro hex with a preceeding "0x".
+   - base Unicode value as a decimal value, or hex with a preceding "0x".
    - variation selector value as a hex value
-   - the supplment--order string, whcih may be empty
+   - the supplement-order string, which may be empty
    - the CID or glyph name for the glyph selected by the record.
 
    Fields are separated by semi-colons.
 
-   Valid char codeas areL
+   Valid char codes are
 
    A-Z  capital letters
    a-z  lowercase letters
@@ -1192,10 +1196,10 @@ static void gnameError(hotCtx g, char *message, char *token, char *filename, lon
 
     if (messageLen > (256 - 6)) {
         /* 6 is max probable max length of decimal line number in Glyph Name Alias Database file */
-        hotMsg(g, hotWARNING, "%s  at token %s [%s: line %d] (record skipped)", message, token, "UVS file", line);
+        hotMsg(g, hotWARNING, "%s  at token %s [%s: line %ld] (record skipped)", message, token, "UVS file", line);
         hotMsg(g, hotWARNING, "UVS  file path name  is too long to include in error message. Please move Unicode Variation Selector  file to shorter absolute path.\n");
     } else {
-        hotMsg(g, hotWARNING, "%s  at token %s [%s: line %d] (record skipped)", message, token, filename, line);
+        hotMsg(g, hotWARNING, "%s  at token %s [%s: line %ld] (record skipped)", message, token, filename, line);
     }
 }
 
@@ -1277,7 +1281,7 @@ void mapAddUVS(hotCtx g, char *uvsName) {
     int isCID = IS_CID(g);
 
     dnaSET_CNT(h->uvs.entries, 0);
-    g->cb.uvsOpen(g->cb.ctx, uvsName); /*jumps to fatal error if not opened succesfully */
+    g->cb.uvsOpen(g->cb.ctx, uvsName); /*jumps to fatal error if not opened successfully */
 
     /* uvsGetLine gets 1 line, of up to a max of 255 chars */
     for (lineno = 1; g->cb.uvsGetLine(g->cb.ctx, buf, &lineLen) != NULL; lineno++) {
@@ -1704,7 +1708,7 @@ static void setOS_2Fields(hotCtx g) {
     OS_2SetCharIndexRange(g, minBMP, maxBMP);
 
 
-    /* Xcode compiler kept complaining about signed/unsigned mistmach - can't figure out why. */
+    /* Xcode compiler kept complaining about signed/unsigned mismatch - can't figure out why. */
     /* OS_2SetCharIndexRange(g, (unsigned short)( (uvCnt == (unsigned)0) ? UV_UNDEF : h->minBmpUV),
                             (unsigned short)( ((uvCnt == (unsigned)0) || (h->nSuppUV > (unsigned)0)) ? UV_UNDEF : h->maxBmpUV)); */
     /* --- unicodeRange */
@@ -1789,7 +1793,7 @@ static void setOS_2Fields(hotCtx g) {
     /* If the mac bit is set make sure that the LATIN_BIT is set as well. */
     /* Otherwise, for a few fonts with just the basic latin set, like     */
     /* LucidaMathStd-italic, only the Mac bit gets set, and this seems to */
-    /* be ignored by Wdinows, so you can't type any test. with it.        */
+    /* be ignored by Windows, so you can't type any test. with it.        */
     if (TEST_BIT_ARR(codePageRange, MAC_BIT)) {
         SET_BIT_ARR(codePageRange, LATIN_BIT);
     }
@@ -1863,17 +1867,11 @@ static void setOS_2Fields(hotCtx g) {
 /* Create a custom cmap which stores the custom PS encoding. */
 static void makeCustomcmap(hotCtx g) {
     long i;
-    short charset = g->font.win.CharSet;
+    uint8_t charset = g->font.win.CharSet;
     unsigned platSpec = 0;
 
     /* Set lower byte of platSpec to charset */
-    if (charset != -1) {
-        if (charset > 0xFF) {
-            hotMsg(g, hotWARNING, "invalid charset <%d>", charset);
-        } else {
-            platSpec = charset;
-        }
-    }
+    platSpec = charset;
 
     cmapBeginEncoding(g, cmap_CUSTOM, platSpec, 0);
 

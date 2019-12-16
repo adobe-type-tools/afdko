@@ -2476,7 +2476,7 @@ static void decompileChainContext3(ChainContextSubstFormat3 *fmt) {
 
     for (i = 0; i < fmt->BacktrackGlyphCount; i++) {
         Card32 nitems;
-        IntX j = fmt->BacktrackGlyphCount - (i + 1); /* Backtrack is enumerated in the feaure syntax in reverse order form the offset order. */
+        IntX j = fmt->BacktrackGlyphCount - (i + 1); /* Backtrack is enumerated in the feature syntax in reverse order form the offset order. */
         GlyphId gId;
         ttoEnumRec *ter = da_INDEX(BacktrackGlyphCovListArray, i);
         ttoEnumerateCoverage(fmt->Backtrack[j], fmt->_Backtrack[j], ter, &nitems);
@@ -2681,7 +2681,7 @@ static void proofChainContext3(ChainContextSubstFormat3 *fmt) {
 
     for (i = 0; i < fmt->BacktrackGlyphCount; i++) {
         Card32 nitems;
-        IntX j = fmt->BacktrackGlyphCount - (i + 1); /* Backtack is enumerated in reverse order from the offset order */
+        IntX j = fmt->BacktrackGlyphCount - (i + 1); /* Backtrack is enumerated in reverse order from the offset order */
         GlyphId gId;
         char name[MAX_NAME_LEN];
         ttoEnumRec *ter = da_INDEX(BacktrackGlyphCovListArray, i);
@@ -2829,7 +2829,7 @@ static void proofChainContext3(ChainContextSubstFormat3 *fmt) {
 
     for (i = 0; i < fmt->BacktrackGlyphCount; i++) {
         Card32 nitems;
-        IntX j = fmt->BacktrackGlyphCount - (i + 1); /* Backtrack is enumerated in the feaure syntax in reverse order form the offset order. */
+        IntX j = fmt->BacktrackGlyphCount - (i + 1); /* Backtrack is enumerated in the feature syntax in reverse order form the offset order. */
         GlyphId gId;
         char name[MAX_NAME_LEN];
         ttoEnumRec *ter = da_INDEX(BacktrackGlyphCovListArray, i);
@@ -3194,7 +3194,7 @@ static void decompileReverseChainContext1(ReverseChainContextSubstFormat1 *fmt) 
         fprintf(OUTPUTBUFF, "rsub");
 
     for (i = 0; i < fmt->BacktrackGlyphCount; i++) {
-        IntX j = fmt->BacktrackGlyphCount - (i + 1); /* Backtrack is enumerated in the feaure syntax in reverse order form the offset order. */
+        IntX j = fmt->BacktrackGlyphCount - (i + 1); /* Backtrack is enumerated in the feature syntax in reverse order form the offset order. */
         GlyphId gId;
         ttoEnumRec *ter = da_INDEX(BacktrackGlyphCovListArray, i);
         ttoEnumerateCoverage(fmt->Backtrack[j], fmt->_Backtrack[j], ter, &nitems);
@@ -3289,7 +3289,7 @@ static void proofReverseChainContext1(ReverseChainContextSubstFormat1 *fmt) {
 
     for (i = 0; i < fmt->BacktrackGlyphCount; i++) {
         Card32 nitems;
-        IntX j = fmt->BacktrackGlyphCount - (i + 1); /* Backtrack is enumerated in the feaure syntax in reverse order form the offset order. */
+        IntX j = fmt->BacktrackGlyphCount - (i + 1); /* Backtrack is enumerated in the feature syntax in reverse order form the offset order. */
         GlyphId gId;
         char name[MAX_NAME_LEN];
         ttoEnumRec *ter = da_INDEX(BacktrackGlyphCovListArray, i);

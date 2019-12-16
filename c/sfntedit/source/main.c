@@ -20,7 +20,6 @@
 #include "Eglobal.h"
 #include "Efile.h"
 #include "Esys.h"
-#include "otter.h"
 #include "otftableeditor.h"
 #include "setjmp.h"
 

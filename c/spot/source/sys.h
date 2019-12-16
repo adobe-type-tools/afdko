@@ -28,4 +28,11 @@ FILE *sysPutMacDesktopFILE(Byte8 *defaultname, Byte8 *OUTfilename);
 IntX sysMacDesktopFileExists(Byte8 *defaultname, Byte8 *OUTfilename);
 #endif
 IntX sysOpenSearchpath(Byte8 *filename);
+
+#if WIN32
+#define SAFE_LOCALTIME(x, y) localtime_s(y, x)
+#else
+#define SAFE_LOCALTIME(x, y) localtime_r(x, y)
+#endif
+
 #endif /* SYS_H */

@@ -30,7 +30,7 @@ extern Global global;
 extern char *dateFormat;
 
 /* Global flags */
-#define SUPPRESS_GID_IN_NAME (1 << 0) /* Suppress the terminal gid on TTF glyoh names. */
+#define SUPPRESS_GID_IN_NAME (1 << 0) /* Suppress the terminal gid on TTF glyph names. */
 
 /* ### Constants */
 #define DEFAULT_YORIG_KANJI 880
@@ -93,7 +93,7 @@ extern char *dateFormat;
 #define DDLx(l, s, v) DDL(l, (OUTPUTBUFF, s "%04hx", (v)))
 #define DDLX(l, s, v) DDL(l, (OUTPUTBUFF, s "%08x", (v)))
 
-/* Convienence macros for dumping arguments */
+/* Convenience macros for dumping arguments */
 #define TAG_ARG(t) (char)((t) >> 24 & 0xff), (char)((t) >> 16 & 0xff), \
                    (char)((t) >> 8 & 0xff), (char)((t)&0xff)
 #define VERSION_ARG(v) (v) >> 16 & 0xffff, (v) >> 12 & 0xf, (v)

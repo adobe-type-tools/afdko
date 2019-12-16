@@ -4,7 +4,7 @@
 /***********************************************************************/
 
 /* This module provides a test client for the hot library. hot library clients
-   do not need to include this module; it is mearly provided for reference */
+   do not need to include this module; it is merely provided for reference */
 
 #if BUILDLIB
 #include "makeotflib.h"
@@ -30,7 +30,7 @@
 
 jmp_buf mark;
 
-#define MAKEOTF_VERSION "2.5.65597"
+#define MAKEOTF_VERSION "2.5.65598"
 /* Warning: this string is now part of heuristic used by CoolType to identify the
    first round of CoolType fonts which had the backtrack sequence of a chaining
    contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
@@ -66,7 +66,7 @@ static struct {
     long addGlyphWeight;        /* used when adding synthetic glyphs,            */
                                 /* to override heuristics for determining        */
                                 /* target weight for use with the FillinMM font. */
-    unsigned long maxNumSubrs;  /* if nto 0, caps the number of subrs used. */
+    unsigned long maxNumSubrs;  /* if not 0, caps the number of subrs used. */
     unsigned short os2_version; /* OS/2 table version override. Ignore if 0. */
     short fsSelectionMask_on;   /* mask for OR-ing with OS/2 table fsSelection.  */
     short fsSelectionMask_off;  /* mask for NAND-ing with OS/2 table fsSelection. */
@@ -572,7 +572,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                                 if (0 == strcmp(arg, "-osbOn")) {
                                     val = atoi(argv[++i]);
                                     if ((val < 0) || (val > 15)) {
-                                        cbFatal(cbctx, "The bit index value for option (-%s) must be an integer number between 0 and 15 (%s)", arg);
+                                        cbFatal(cbctx, "The bit index value for option (-%s) must be an integer number between 0 and 15 (%d)", arg, val);
                                     }
                                     if (convert.fsSelectionMask_on >= 0) {
                                         convert.fsSelectionMask_on |= 1 << val;
@@ -582,7 +582,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                                 } else if (0 == strcmp(arg, "-osbOff")) {
                                     val = atoi(argv[++i]);
                                     if (val < 1) {
-                                        cbFatal(cbctx, "The OS/2 table version value for option (-%s) must be an integer number greater than 0 (%s)", arg);
+                                        cbFatal(cbctx, "The OS/2 table version value for option (-%s) must be an integer number greater than 0 (%d)", arg, val);
                                     }
                                     if (convert.fsSelectionMask_off >= 0) {
                                         convert.fsSelectionMask_off |= 1 << val;
@@ -592,7 +592,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                                 } else if (0 == strcmp(arg, "-osv")) {
                                     val = atoi(argv[++i]);
                                     if (val < 1) {
-                                        cbFatal(cbctx, "The OS/2 table version value for option (-%s) must be an integer number greater than 0 (%s)", arg);
+                                        cbFatal(cbctx, "The OS/2 table version value for option (-%s) must be an integer number greater than 0 (%d)", arg, val);
                                     }
                                     convert.os2_version = val;
                                 } else {
@@ -704,7 +704,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                         break;
 
                     case 'V':
-                        convert.flags |= HOT_VERBOSE;              // controls warnigns during oparsing/conversion to CFF
+                        convert.flags |= HOT_VERBOSE;              // controls warnings during parsing/conversion to CFF
                         convert.otherflags |= OTHERFLAGS_VERBOSE;  // controls warnings during feature file processing
                         break;
 

@@ -6,8 +6,8 @@
  * Dictionary data.
  */
 
-#ifndef DICT_H
-#define DICT_H
+#ifndef CFFWRITE_DICT_H
+#define CFFWRITE_DICT_H
 
 #include "cffwrite_share.h"
 
@@ -36,4 +36,4 @@ void cfwDictSaveOp(DICT *dict, int op);
 void cfwDictSaveIntOp(DICT *dict, long i, int op);
 void cfwDictSaveRealOp(DICT *dict, float r, int op);
 
-#endif /* DICT_H */
+#endif /* CFFWRITE_DICT_H */

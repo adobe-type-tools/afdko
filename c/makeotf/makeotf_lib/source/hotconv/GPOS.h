@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef GPOS_H
-#define GPOS_H
+#ifndef HOTCONV_GPOS_H
+#define HOTCONV_GPOS_H
 
 #include "common.h"
 #include "feat.h"
@@ -53,4 +53,4 @@ void GPOSAddPair(hotCtx g, void *si, GNode *first, GNode *second, char *filename
 
 void GPOSPrintAFMKernData(hotCtx g);
 
-#endif /* GPOS_H */
+#endif /* HOTCONV_GPOS_H */

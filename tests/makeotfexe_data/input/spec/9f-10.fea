@@ -1,0 +1,6 @@
+# TABLES: OS/2
+# Test optical size fields.
+table OS/2 {
+    LowerOpSize 10;
+    UpperOpSize 20;
+} OS/2;

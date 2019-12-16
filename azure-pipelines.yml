@@ -1,0 +1,94 @@
+jobs:
+- job: Linux
+  pool:
+    vmImage: 'Ubuntu-16.04'
+  variables:
+    - name: PYTHON
+      value: python
+    - name: PIP
+      value: pip
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.7'
+    - bash: |
+        set -e
+        $PYTHON -m venv venv
+        source venv/bin/activate
+        $PIP install --disable-pip-version-check -U -q pip setuptools wheel pytest
+        $PYTHON --version
+        $PIP --version
+        $PIP list
+      displayName: Setup Python virtual environment
+    - bash: |
+        set -e
+        source venv/bin/activate
+        $PYTHON setup.py bdist_wheel
+        echo 'Installing afdko ...'
+        $PIP install dist/*.whl -q
+        $PIP list
+        $PYTHON -m pytest
+        $PIP uninstall --yes afdko
+      displayName: Build wheel, run tests, and uninstall
+    # - task: PublishBuildArtifacts@1
+    #   inputs:
+    #     pathtoPublish: 'dist'
+
+- job: macOS
+  pool:
+    vmImage: 'macOS-latest'
+  variables:
+    - name: PYTHON
+      value: python3
+    - name: PIP
+      value: pip3
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.7'
+    - bash: |
+        set -e
+        $PYTHON -m venv venv
+        source venv/bin/activate
+        $PIP install --disable-pip-version-check -U -q pip setuptools wheel pytest
+        $PYTHON --version
+        $PIP --version
+        $PIP list
+      displayName: Setup Python virtual environment
+    - bash: |
+        set -e
+        source venv/bin/activate
+        $PYTHON setup.py bdist_wheel
+        echo 'Installing afdko ...'
+        $PIP install dist/*.whl -q
+        $PIP list
+        $PYTHON -m pytest
+        $PIP uninstall --yes afdko
+      displayName: Build wheel, run tests, and uninstall
+    # - task: PublishBuildArtifacts@1
+    #   inputs:
+    #     pathtoPublish: 'dist'
+
+- job: Windows
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+    - {task: UsePythonVersion@0, inputs: {versionSpec: '3.7', architecture: x64, addToPath: true}}
+    - script: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        python --version
+        python -c "import struct; print(struct.calcsize('P') * 8)"
+        python -m pip install --disable-pip-version-check -U -q pip setuptools wheel pytest
+        python -m pip --version
+        python -m pip list
+        python setup.py bdist_wheel || EXIT /B 1
+      displayName: Build wheel
+    - script: |
+        for %%f in (dist\*.whl) do (set "WHEEL=%%f")
+        python -m pip install %WHEEL% || EXIT /B 1
+        python -m pytest || EXIT /B 1
+        python -m pip uninstall --yes afdko || EXIT /B 1
+      displayName: Install, test, and uninstall wheel
+    # - task: PublishBuildArtifacts@1
+    #   inputs:
+    #     pathtoPublish: 'dist'

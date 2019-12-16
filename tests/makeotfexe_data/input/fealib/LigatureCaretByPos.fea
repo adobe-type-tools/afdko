@@ -1,0 +1,6 @@
+table GDEF {
+    LigatureCaretByPos [c_h c_k] 500;
+
+    LigatureCaretByPos o_f_f_i 700 300;
+    LigatureCaretByPos o_f_f_i 900;
+} GDEF;

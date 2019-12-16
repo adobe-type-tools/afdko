@@ -1,0 +1,8 @@
+# Test include_dflt and exclude_dflt for the same language
+languagesystem DFLT dflt;
+feature liga {
+    language DEU include_dflt;
+    sub s s by germandbls;
+    language DEU exclude_dflt;
+    sub f f by f_f;
+} liga;

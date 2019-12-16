@@ -1,0 +1,5 @@
+# number of coordinates not equal to number of baseline tags.
+table BASE {
+    HorizAxis.BaseTagList    romn;
+    HorizAxis.BaseScriptList latn romn -120 0;
+} BASE;

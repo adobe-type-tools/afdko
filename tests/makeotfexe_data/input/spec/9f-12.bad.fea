@@ -1,0 +1,4 @@
+# Bad Panose value.
+table OS/2 {
+    Panose -1 15 0 0 2 2 8 2 9 4;
+} OS/2;

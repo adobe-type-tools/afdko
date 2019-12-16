@@ -48,7 +48,7 @@ typedef struct { /* Subtable record */
 } Subtable;
 
 typedef union {           /* Subtable record */
-    short numParams;      /* First two bytes is the length of the paramters */
+    short numParams;      /* First two bytes is the length of the parameters */
     char params[1];       /* A place holder */
 } FeatureParameterFormat; /* Special case format for subtable data. */
 
@@ -85,7 +85,7 @@ typedef struct {
 
 typedef struct {
     GNode *gnode;
-} MarKClassRec; /* used in markClassList, to provide a quick lookup fur the currently useds mark classes */
+} MarKClassRec; /* used in markClassList, to provide a quick lookup for the currently used mark classes */
 
 typedef struct {
     GID gid;
@@ -108,9 +108,9 @@ typedef struct { /* Kerning pair */
     KernGlyph second;
     unsigned long lineIndex; /* used to sort records in order of occurrence. */
                              /* Needed so keep first of conflicting records. */
-    short metricsCnt1;       /* Allowable values are 1 ( x advance adjsutment only) or 4. */
+    short metricsCnt1;       /* Allowable values are 1 ( x advance adjustment only) or 4. */
     short metricsRec1[4];
-    short metricsCnt2; /* Allowable values are 1 ( x advance adjsutment only) or 4. */
+    short metricsCnt2; /* Allowable values are 1 ( x advance adjustment only) or 4. */
     short metricsRec2[4];
 } KernRec;
 
@@ -152,6 +152,8 @@ typedef struct { /* New subtable data */
 struct GPOSCtx_ {
     SubtableInfo new;
     struct {
+        LOffset featParam;         /* (Cumulative.) Next subtable offset |->  */
+
         LOffset subtable;         /* (Cumulative.) Next subtable offset |->  */
                                   /* start of subtable section. LOffset to   */
                                   /* check for overflow                      */
@@ -171,8 +173,8 @@ struct GPOSCtx_ {
     short hadError; /* Flags if error occurred */
 
     /* Info for chaining contextual lookups */
-    dnaDCL(SubtableInfo, anonSubtable);   /* Anon subtbl accumulator */
-    dnaDCL(PosLookupRecord *, posLookup); /* Ptrs to all records that need to be adjusted */
+    dnaDCL(SubtableInfo, anonSubtable);   /* Anon subtable accumulator */
+    dnaDCL(PosLookupRecord *, posLookup); /* Pointers to all records that need to be adjusted */
     dnaDCL(GNode *, prod);                /* Tmp for cross product */
 
     unsigned short maxContext;
@@ -202,7 +204,7 @@ static void writeChainPos(hotCtx g, GPOSCtx h, Subtable *sub);
 static void freeChain3(hotCtx g, GPOSCtx h, Subtable *sub);
 static void freeChain(hotCtx g, GPOSCtx h, Subtable *sub);
 static void checkBaseAnchorConflict(hotCtx g, BaseGlyphRec *baseGlyphArray, long recCnt, char *fileName, int isMarkToLigature);
-static int findMarkClassIndex(SubtableInfo *si, GNode *markNode);
+static long findMarkClassIndex(SubtableInfo *si, GNode *markNode);
 static int addMarkClass(hotCtx g, SubtableInfo *si, GNode *markNode, char *filename, int lineNum);
 static void GPOSAdCursive(hotCtx g, SubtableInfo *si, GNode *targ, int anchorCount, AnchorMarkInfo *anchorMarkInfo, char *fileName, long lineNum);
 static void GPOSAddMark(hotCtx g, SubtableInfo *si, GNode *targ, int anchorCount, AnchorMarkInfo *anchorMarkInfo, char *fileName, long lineNum);
@@ -332,7 +334,8 @@ void GPOSNew(hotCtx g) {
 #if HOT_DEBUG
     h->new.single.func = initSingle;
 #endif
-    h->offset.subtable = h->offset.extension = h->offset.extensionSection = 0;
+    h->offset.subtable = h->offset.featParam = 0;
+    h->offset.extension = h->offset.extensionSection = 0;
     dnaINIT(g->dnaCtx, h->values, 1000, 500);
     dnaINIT(g->dnaCtx, h->subtables, 10, 10);
     dnaINIT(g->dnaCtx, h->anonSubtable, 3, 10);
@@ -373,6 +376,8 @@ int GPOSFill(hotCtx g) {
 #endif /* HOT_FEAT_SUPPORT */
 
     /* Add OTL features */
+    /* See GSUB.c::GSUBFill() for an explanation of the subtable order */
+
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
         int isExt = sub->extension.use;
@@ -388,7 +393,7 @@ int GPOSFill(hotCtx g) {
     }
     DF(1, (stderr, "### GPOS:\n"));
 
-    otlTableFill(g, h->otl);
+    otlTableFill(g, h->otl, h->offset.featParam);
 
     h->offset.extensionSection = h->offset.subtable + otlGetCoverageSize(h->otl) + otlGetClassSize(h->otl);
 
@@ -411,12 +416,35 @@ int GPOSFill(hotCtx g) {
     return 1;
 }
 
+static void featParamsWrite(hotCtx g, GPOSCtx h) {
+    int i;
+
+    for (i = 0; i < h->subtables.cnt; i++) {
+        Subtable *sub = &h->subtables.array[i];
+        if (IS_REF_LAB(sub->label)) {
+            continue;
+        }
+
+        switch (sub->lkpType) {
+                /* I am keep the case switch from GPOS Write in case
+                 we ever have  new GPOS feature param. */
+                case GPOSFeatureParam:
+                    writeFeatParam(h, sub);
+                    break;
+        }
+    }
+}
+
+
 void GPOSWrite(hotCtx g) {
     int i;
     GPOSCtx h = g->ctx.GPOS;
 
     /* Write OTL features */
     otlTableWrite(g, h->otl);
+    featParamsWrite(g, h);
+    otlLookupListWrite(g, h->otl);
+
 
     /* Write main subtable section */
     for (i = 0; i < h->subtables.cnt; i++) {
@@ -441,10 +469,6 @@ void GPOSWrite(hotCtx g) {
                 writePairPos(g, h, sub);
                 break;
 
-            case GPOSFeatureParam:
-                writeFeatParam(h, sub);
-                break;
-
             case GPOSChain:
                 writeChainPos(g, h, sub);
                 break;
@@ -467,6 +491,8 @@ void GPOSWrite(hotCtx g) {
 
             case GPOSContext:
                 break;
+            /* We do not write the feature param in this loop. That
+             happens in featParamsWrite(). */
         }
     }
 
@@ -475,7 +501,7 @@ void GPOSWrite(hotCtx g) {
     otlClassWrite(g, h->otl);
 
     /* Write extension subtables section.                                   */
-    /* Each subtable is immediatedly followed by its coverages and classes. */
+    /* Each subtable is immediately followed by its coverages and classes. */
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
 
@@ -524,7 +550,6 @@ void GPOSReuse(hotCtx g) {
 
     h->new.script = h->new.language = h->new.feature = TAG_UNDEF;
 
-    /* Free subtables */
     for (i = 0; i < h->subtables.cnt; i++) {
         Subtable *sub = &h->subtables.array[i];
 
@@ -578,7 +603,9 @@ void GPOSReuse(hotCtx g) {
     h->new.baseList.cnt = 0;
     h->new.single.cnt = 0;
     h->new.pairs.cnt = 0;
-    h->offset.subtable = h->offset.extension = h->offset.extensionSection = 0;
+    h->offset.featParam = h->offset.subtable = 0;
+    h->offset.extension = h->offset.extensionSection = 0;
+
     h->values.cnt = 0;
     h->subtables.cnt = 0;
 
@@ -606,7 +633,7 @@ void GPOSFree(hotCtx g) {
     dnaFREE(h->new.pairs);
     dnaFREE(h->values);
     dnaFREE(h->subtables);
-    /* anonSubtable has an init function, so uou need to deallcoate size number of rules */
+    /* anonSubtable has an init function, so you need to deallocate size number of rules */
     for (i = 0; i < h->anonSubtable.size; i++) {
         dnaFREE(h->anonSubtable.array[i].rules);
     }
@@ -665,7 +692,15 @@ static void reuseClassDefs(GPOSCtx h) {
 
 static void startNewSubtable(hotCtx g) {
     GPOSCtx h = g->ctx.GPOS;
-    Subtable *sub = h->new.sub = dnaNEXT(h->subtables);
+    Subtable *sub;
+    int hasFeatureParam = h->new.lkpType == GPOSFeatureParam;
+
+    sub = h->new.sub = dnaNEXT(h->subtables);
+    if (hasFeatureParam) {
+        sub->offset = h->offset.featParam;
+    } else {
+        sub->offset = h->offset.subtable;
+    }
 
     sub->script = h->new.script;
     sub->language = h->new.language;
@@ -675,10 +710,9 @@ static void startNewSubtable(hotCtx g) {
     sub->lkpFlag = h->new.lkpFlag;
     sub->markSetIndex = h->new.markSetIndex;
     sub->label = h->new.label;
-    sub->offset = h->offset.subtable;
 
     sub->extension.use = h->new.useExtension;
-    if (h->new.useExtension && !IS_REF_LAB(h->new.label)) {
+    if (h->new.useExtension && (!IS_REF_LAB(h->new.label)) && (!hasFeatureParam)) {
         sub->extension.otl = otlTableNew(g);
         sub->extension.offset = h->offset.extension; /* Not needed */
         sub->extension.tbl = fillExtensionPos(g, h, h->new.lkpType);
@@ -1027,7 +1061,7 @@ void GPOSAddSize(hotCtx g, short *params, unsigned short numParams) {
     }
 
     sub->tbl = feat_param;
-    h->offset.subtable += uint16 * 5; /* When we write it out, we leave off the initial numParams shart value.*/
+    h->offset.featParam += uint16 * 5; /* When we write it out, we leave off the initial numParams short value.*/
 }
 
 void GPOSSetSizeMenuNameID(hotCtx g, unsigned short nameID) {
@@ -1715,7 +1749,7 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second, char
     unsigned valFmt2 = 0;
 
     if (first->metricsInfo == NULL) {
-        /* If the only metrics record is appplied to the second glyph, then */
+        /* If the only metrics record is applied to the second glyph, then */
         /* this is shorthand for applying a single kern value to the first  */
         /* glyph. The parser enforces that if first->metricsInfo == null,   */
         /* then the second value record must exist.                         */
@@ -1771,7 +1805,7 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second, char
             if (valFmt2 == 0) {
                 /* If someone has specified a value of <0 0 0 0>, then      */
                 /* valFmt is 0. This will cause a subtable break, since the */
-                /* valFmt wil differ from any non-zero record. Set the val  */
+                /* valFmt will differ from any non-zero record. Set the val  */
                 /* fmt to the default value.                                */
                 if (isVertFeature(h->new.feature)) {
                     valFmt2 = (unsigned short)(IS_MM(g) ? ValueYIdAdvance : ValueYAdvance);
@@ -2029,14 +2063,18 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
 
             rule = dnaNEXT(si->rules);
             rule->targ = targ;
-            /*  add the lookupLabel. */
-            nextNode->lookupLabel = anon_si->label;
+            if (nextNode != NULL) {
+                /*  add the lookupLabel. */
+                nextNode->lookupLabel = anon_si->label;
+            } else {
+                hotMsg(g, hotFATAL, "aborting due to unexpected NULL nextNode pointer");
+            }
             /* is contextual */
         } else {
             /* isn't contextual */
             GPOSAdCursive(g, si, targ, anchorCount, anchorMarkInfo, fileName, lineNum);
             featRecycleNodes(g, targ); /* I do this here rather than in feat.c;                       */
-                                       /* addPos, as I have to NOT recyle htem if they are contextual */
+                                       /* addPos, as I have to NOT recycle them if they are contextual */
         }
     } else if ((lkpType == GPOSMarkToBase) || (lkpType == GPOSMarkToMark) || (lkpType == GPOSMarkToLigature)) {
         /* Add BaseGlyphRec records, making sure that there is no overlap in anchor and markClass */
@@ -2049,8 +2087,10 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
                 return;
             }
 
-            /* add the pos rule to the anonymous tables. First, find the base glyph */
-            while ((nextNode != NULL) && (!(nextNode->flags & FEAT_IS_BASE_NODE))) {
+            /* add the pos rule to the anonymous tables. First, find the base glyph.
+             In a chain contextual rule, this will be the one and only marked glyph
+             or glyph class. */
+            while ((nextNode != NULL) && (!(nextNode->flags & FEAT_MARKED))) {
                 nextNode = nextNode->nextSeq;
             }
 
@@ -2063,17 +2103,16 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
 
             rule = dnaNEXT(si->rules);
             rule->targ = targ;
-            /* find the mark class and add the lookupLabel. */
-            while ((nextNode != NULL) && (!(nextNode->flags & FEAT_IS_MARK_NODE))) {
-                nextNode = nextNode->nextSeq;
+            if (nextNode != NULL) {
+                nextNode->lookupLabel = anon_si->label;
+            } else {
+                hotMsg(g, hotFATAL, "aborting due to unexpected NULL nextNode pointer");
             }
-            nextNode->lookupLabel = anon_si->label;
-            /* is contextual */
         } else {
             /* isn't contextual */
             GPOSAddMark(g, si, targ, anchorCount, anchorMarkInfo, fileName, lineNum);
             featRecycleNodes(g, targ); /* I do this here rather than in feat.c;                       */
-                                       /* addPos, as I have to NOT recyle htem if they are contextual */
+                                       /* addPos, as I have to NOT recycle them if they are contextual */
         }
     } else {
         /* Add whole rule intact (no enumeration needed) */
@@ -2251,7 +2290,7 @@ static GNode *getGNodes(hotCtx g, unsigned class, int classDefInx) {
             return ci->gc;
         }
     }
-    /* can't get here: the class defintions have already been conditioned in feat.c::addPos().
+    /* can't get here: the class definitions have already been conditioned in feat.c::addPos().
     hotMsg(g, hotFATAL, "class <%u> not valid in classDef", class);
     */
     return NULL; /* Suppress compiler warning */
@@ -2493,7 +2532,7 @@ static Offset classDefMake(hotCtx g, GPOSCtx h, otlTbl t, int cdefInx,
     GNode *p;
     ClassDef *cdef = &h->classDef[cdefInx];
 
-    /* Can't get here - parser reports an error for an empty class defintion.
+    /* Can't get here - parser reports an error for an empty class definition.
     if (cdef->classInfo.cnt == 0 || cdef->cov.cnt == 0) {
         hotMsg(g, hotFATAL, "empty classdef");
     }
@@ -2555,7 +2594,7 @@ static void fillPairPos2(hotCtx g, GPOSCtx h) {
     fmt->Class1Record = MEM_NEW(g, fmt->Class1Count * sizeof(Class1Record));
 
     fmt->Class1Record[0].Class2Record =
-        MEM_NEW(g, fmt->Class1Count * fmt->Class2Count * sizeof(Class2Record));
+        MEM_NEW(g, (unsigned long)fmt->Class1Count * fmt->Class2Count * sizeof(Class2Record));
     for (i = 0; i < fmt->Class1Count; i++) {
         int j;
         if (i != 0) {
@@ -2633,7 +2672,7 @@ static void fillPairPos2(hotCtx g, GPOSCtx h) {
     sub->tbl = fmt;
 }
 
-/* Fill pair postioning subtable (last one if there were several) */
+/* Fill pair positioning subtable (last one if there were several) */
 
 static void fillPairPos(hotCtx g, GPOSCtx h) {
     if (h->otl == NULL) {
@@ -2765,7 +2804,7 @@ static int cmpWithPosRule(GNode *targ, SingleRec *cmpRec, int nFound) {
     for (; t1 != NULL; t1 = t1->nextCl) {
         if ((t1->gid == gid2) && (!(t1->flags & FEAT_MISC))) {
             if (!checkedMetrics) {
-                /* a test so that we only check the metrics for teh head node of the class */
+                /* a test so that we only check the metrics for the head node of the class */
                 if (metricsCnt1 != metricsCnt2) {
                     return -1;
                 }
@@ -2910,7 +2949,7 @@ static void createAnonLookups(hotCtx g, GPOSCtx h) {
     }
 }
 
-/* Change anon PosLookupRecord labels to lookup inxs, now that they've been
+/* Change anon PosLookupRecord labels to lookup indices, now that they've been
    calculated by otlFill() */
 
 static void setAnonLookupIndices(hotCtx g, GPOSCtx h) {
@@ -3316,7 +3355,7 @@ static void freePairPos2(hotCtx g, Subtable *sub) {
     MEM_FREE(g, fmt);
 }
 
-/* Free pair postioning subtable */
+/* Free pair positioning subtable */
 
 static void freePairPos(hotCtx g, Subtable *sub) {
     switch (*(unsigned short *)sub->tbl) {
@@ -3385,7 +3424,7 @@ typedef struct {
 } EntryExitRecord;
 
 typedef struct {
-    dnaDCL(AnchorListRec, anchorList); /* not part of the offical format - just used to hold the anchors. for the lookup */
+    dnaDCL(AnchorListRec, anchorList); /* not part of the official format - just used to hold the anchors. for the lookup */
     LOffset endArrays;                 /* not part of font data */
     unsigned short PosFormat;          /* =1 */
     LOffset Coverage;                  /* 32-bit for overflow check */
@@ -3439,7 +3478,7 @@ typedef struct {
 } LigatureArray;
 
 typedef struct {
-    dnaDCL(AnchorListRec, anchorList); /* not part of the offical format - just used to hold the anchors. for the lookup */
+    dnaDCL(AnchorListRec, anchorList); /* not part of the official format - just used to hold the anchors. for the lookup */
     LOffset endArrays;                 /* not part of font data */
     unsigned short PosFormat;          /* =1 */
     LOffset MarkCoverage;
@@ -3451,7 +3490,7 @@ typedef struct {
 #define MARK_TO_BASE_1_SIZE (uint16 * 6)
 
 typedef struct {
-    dnaDCL(AnchorListRec, anchorList); /* not part of the offical format - just used to hold the anchors. for the lookup */
+    dnaDCL(AnchorListRec, anchorList); /* not part of the official format - just used to hold the anchors. for the lookup */
     LOffset endArrays;                 /* not part of font data */
     unsigned short PosFormat;          /* =1 */
     LOffset MarkCoverage;
@@ -3631,8 +3670,8 @@ static void checkBaseLigatureConflict(hotCtx g, BaseGlyphRec *baseGlyphArray, lo
     return;
 }
 
-static int findMarkClassIndex(SubtableInfo *si, GNode *markNode) {
-    short i;
+static long findMarkClassIndex(SubtableInfo *si, GNode *markNode) {
+    long i;
 
     for (i = 0; i < si->markClassList.cnt; i++) {
         if (markNode == si->markClassList.array[i].gnode) {
@@ -3835,10 +3874,10 @@ static void fillMarkToBase(hotCtx g, GPOSCtx h) {
         fmt->MarkCoverage = otlCoverageEnd(g, otl); /* otlCoverageEnd does the sort by GID */
     }
 
-    /* Now we know how many mark nodes there are, we can buld the MarkArray */
-    /* table, and get its size. We will keep things simple, and write the   */
-    /* MarkArray right after the MarkToBase subtable, followed by the       */
-    /* BaseArray table, followed by a list of the anchor tables.            */
+    /* Now we know how many mark nodes there are, we can build the MarkArray */
+    /* table, and get its size. We will keep things simple, and write the    */
+    /* MarkArray right after the MarkToBase subtable, followed by the        */
+    /* BaseArray table, followed by a list of the anchor tables.             */
     {
         MarkRecord *nextRec;
         long markArraySize = uint16 + (numMarkGlyphs * (2 * uint16));
@@ -4093,10 +4132,10 @@ static void fillMarkToLigature(hotCtx g, GPOSCtx h) {
         fmt->MarkCoverage = otlCoverageEnd(g, otl); /* otlCoverageEnd does the sort by GID */
     }
 
-    /* Now we know how many mark nodes there are, we can buld the MarkArray */
-    /* table, and get its size. We will keep things simple, and write the   */
-    /* MarkArray right after the MarkLigature subtable, followed by the     */
-    /* LigatureArray table, followed by a list of the anchor tables.        */
+    /* Now we know how many mark nodes there are, we can build the MarkArray */
+    /* table, and get its size. We will keep things simple, and write the    */
+    /* MarkArray right after the MarkLigature subtable, followed by the      */
+    /* LigatureArray table, followed by a list of the anchor tables.         */
     {
         MarkRecord *nextRec;
         long markArraySize = uint16 + (numMarkGlyphs * (2 * uint16));
@@ -4119,7 +4158,7 @@ static void fillMarkToLigature(hotCtx g, GPOSCtx h) {
 
     /* Build ligature glyph coverage list from rules. First, we need to    */
     /* sort the base record list by GID, and make sure there are no errors */
-    /* Then we can simply step thorugh it to make the base coverage table. */
+    /* Then we can simply step through it to make the base coverage table. */
     /* sort the recs by base gid value, then by component index. */
     checkBaseLigatureConflict(g, h->new.baseList.array, h->new.baseList.cnt, h->new.fileName, 0);
     {
@@ -4268,7 +4307,7 @@ static void writeMarkToLigature(hotCtx g, GPOSCtx h, Subtable *sub) {
     OUT2((short)numLigatures);
     ligAttachOffsetSize = uint16 * numLigatures;
     /* fmt->endArrays is the position of the start of the anchor List. */
-    /* fmt->endArrays - fmt->LigatureArray is the offfset from the fmt->LigatureArray to the start of the anchor table. */
+    /* fmt->endArrays - fmt->LigatureArray is the offset from the fmt->LigatureArray to the start of the anchor table. */
     anchorListOffset = fmt->endArrays - fmt->LigatureArray;
 
     /*Now write out the offsets to the LigatureAttach recs*/

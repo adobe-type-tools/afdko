@@ -129,15 +129,15 @@ IntX sysRead(IntX fd, Card8 *buf, IntX size, Byte8 *filename) {
 Byte8 ourtday[32];
 
 Byte8 *sysOurtime(void) {
-    time_t secs;
     static IntX done = 0;
 
     if (!done) {
-        struct tm *tmp;
+        time_t seconds_since_epoch;
+        struct tm local_time;
         ourtday[0] = '\0';
-        (void)time(&secs);
-        tmp = localtime(&(secs));
-        if (strftime(ourtday, sizeof(ourtday), dateFormat, tmp) == 0) {
+        time(&seconds_since_epoch);
+        SAFE_LOCALTIME(&seconds_since_epoch, &local_time);
+        if (strftime(ourtday, sizeof(ourtday), dateFormat, &local_time) == 0) {
             fprintf(stderr, "strftime returned 0");
             exit(EXIT_FAILURE);
         }

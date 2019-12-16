@@ -597,15 +597,6 @@
 		BD55C9280DAD569C00CA71B7 /* mergeFonts.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mergeFonts.c; path = ../../../source/mergeFonts.c; sourceTree = SOURCE_ROOT; };
 		BD8A5AD90D6F915300301916 /* absfont.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = absfont.xcodeproj; path = ../../../../public/lib/build/absfont/osx/xcode/absfont.xcodeproj; sourceTree = SOURCE_ROOT; };
 		BDA33EA811AC30D2000A747B /* common.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = common.xcconfig; path = ../../../../public/config/xcconfig/common.xcconfig; sourceTree = SOURCE_ROOT; };
-		BDA34AF20D6F3F690009FF85 /* afm.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = afm.h; path = ../../../source/afm.h; sourceTree = SOURCE_ROOT; };
-		BDA34AF90D6F3F690009FF85 /* cef.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = cef.h; path = ../../../source/cef.h; sourceTree = SOURCE_ROOT; };
-		BDA34AFB0D6F3F690009FF85 /* cff.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = cff.h; path = ../../../source/cff.h; sourceTree = SOURCE_ROOT; };
-		BDA34B020D6F3F690009FF85 /* ps.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ps.h; path = ../../../source/ps.h; sourceTree = SOURCE_ROOT; };
-		BDA34B030D6F3F690009FF85 /* dump.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = dump.h; path = ../../../source/dump.h; sourceTree = SOURCE_ROOT; };
-		BDA34B060D6F3F690009FF85 /* mtx.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = mtx.h; path = ../../../source/mtx.h; sourceTree = SOURCE_ROOT; };
-		BDA34B070D6F3F690009FF85 /* pdf.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = pdf.h; path = ../../../source/pdf.h; sourceTree = SOURCE_ROOT; };
-		BDA34B120D6F3F690009FF85 /* t1.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = t1.h; path = ../../../source/t1.h; sourceTree = SOURCE_ROOT; };
-		BDA34B130D6F3F690009FF85 /* path.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = path.h; path = ../../../source/path.h; sourceTree = SOURCE_ROOT; };
 		BDA34B140D6F3F690009FF85 /* help.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = help.h; path = ../../../source/help.h; sourceTree = SOURCE_ROOT; };
 		BDA34B170D6F3F690009FF85 /* usage.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = usage.h; path = ../../../source/usage.h; sourceTree = SOURCE_ROOT; };
 		BDA34B5B0D6F3FDB0009FF85 /* release_tx.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = release_tx.xcconfig; path = ../../../../public/config/xcconfig/release_tx.xcconfig; sourceTree = SOURCE_ROOT; };
@@ -626,6 +617,19 @@
 		BDE02A17190F19940013858F /* ufowrite.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ufowrite.xcodeproj; path = ../../../../public/lib/build/ufowrite/osx/xcode/ufowrite.xcodeproj; sourceTree = "<group>"; };
 		BDEA9B4F1E499AF300EFF385 /* varread.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = varread.xcodeproj; path = ../../../../public/lib/build/varread/osx/xcode/varread.xcodeproj; sourceTree = "<group>"; };
 		BDEA9B551E499AFE00EFF385 /* nameread.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = nameread.xcodeproj; path = ../../../../public/lib/build/nameread/osx/xcode/nameread.xcodeproj; sourceTree = "<group>"; };
+		DE9917CA2319C7F7000DEEFA /* mtx.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mtx.h; path = ../../../../public/lib/source/tx_shared/mtx.h; sourceTree = "<group>"; };
+		DE9917CB2319C7F7000DEEFA /* path.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = path.h; path = ../../../../public/lib/source/tx_shared/path.h; sourceTree = "<group>"; };
+		DE9917CC2319C7F7000DEEFA /* t1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = t1.h; path = ../../../../public/lib/source/tx_shared/t1.h; sourceTree = "<group>"; };
+		DE9917CD2319C7F7000DEEFA /* ps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ps.h; path = ../../../../public/lib/source/tx_shared/ps.h; sourceTree = "<group>"; };
+		DE9917CE2319C7F7000DEEFA /* cff.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = cff.h; path = ../../../../public/lib/source/tx_shared/cff.h; sourceTree = "<group>"; };
+		DE9917CF2319C7F7000DEEFA /* pdf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = pdf.h; path = ../../../../public/lib/source/tx_shared/pdf.h; sourceTree = "<group>"; };
+		DE9917D02319C7F7000DEEFA /* dump.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = dump.h; path = ../../../../public/lib/source/tx_shared/dump.h; sourceTree = "<group>"; };
+		DE9917D12319C7F7000DEEFA /* afm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = afm.h; path = ../../../../public/lib/source/tx_shared/afm.h; sourceTree = "<group>"; };
+		DE9917D22319C7F7000DEEFA /* cef.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = cef.h; path = ../../../../public/lib/source/tx_shared/cef.h; sourceTree = "<group>"; };
+		DE9917D32319C806000DEEFA /* options.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = options.h; path = ../../../source/options.h; sourceTree = "<group>"; };
+		DE9917D42319C82F000DEEFA /* dcf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = dcf.h; path = ../../../../public/lib/source/tx_shared/dcf.h; sourceTree = "<group>"; };
+		DE9917D52319C843000DEEFA /* svg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = svg.h; path = ../../../../public/lib/source/tx_shared/svg.h; sourceTree = "<group>"; };
+		DE9917D62319C851000DEEFA /* ufo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ufo.h; path = ../../../../public/lib/source/tx_shared/ufo.h; sourceTree = "<group>"; };
 		DEE09B5A21935AD900B474B9 /* tx_shared.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = tx_shared.xcodeproj; path = ../../../../public/lib/build/tx_shared/osx/xcode/tx_shared.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -752,16 +756,20 @@
 		BDA34AEC0D6F3F530009FF85 /* Headers */ = {
 			isa = PBXGroup;
 			children = (
-				BDA34AF20D6F3F690009FF85 /* afm.h */,
-				BDA34AF90D6F3F690009FF85 /* cef.h */,
-				BDA34AFB0D6F3F690009FF85 /* cff.h */,
-				BDA34B020D6F3F690009FF85 /* ps.h */,
-				BDA34B030D6F3F690009FF85 /* dump.h */,
-				BDA34B060D6F3F690009FF85 /* mtx.h */,
-				BDA34B070D6F3F690009FF85 /* pdf.h */,
-				BDA34B120D6F3F690009FF85 /* t1.h */,
-				BDA34B130D6F3F690009FF85 /* path.h */,
+				DE9917D12319C7F7000DEEFA /* afm.h */,
+				DE9917D22319C7F7000DEEFA /* cef.h */,
+				DE9917CE2319C7F7000DEEFA /* cff.h */,
+				DE9917D42319C82F000DEEFA /* dcf.h */,
+				DE9917D02319C7F7000DEEFA /* dump.h */,
 				BDA34B140D6F3F690009FF85 /* help.h */,
+				DE9917CA2319C7F7000DEEFA /* mtx.h */,
+				DE9917D32319C806000DEEFA /* options.h */,
+				DE9917CB2319C7F7000DEEFA /* path.h */,
+				DE9917CF2319C7F7000DEEFA /* pdf.h */,
+				DE9917CD2319C7F7000DEEFA /* ps.h */,
+				DE9917D52319C843000DEEFA /* svg.h */,
+				DE9917CC2319C7F7000DEEFA /* t1.h */,
+				DE9917D62319C851000DEEFA /* ufo.h */,
 				BDA34B170D6F3F690009FF85 /* usage.h */,
 			);
 			name = Headers;
@@ -1558,6 +1566,12 @@
 			baseConfigurationReference = BDA34B5D0D6F3FE00009FF85 /* debug_tx.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/include",
+					"../../../../public/lib/api/**",
+					"../../../../public/lib/resource/**",
+					../../../../public/lib/source/tx_shared,
+				);
 			};
 			name = Debug;
 		};
@@ -1566,6 +1580,12 @@
 			baseConfigurationReference = BDA34B5B0D6F3FDB0009FF85 /* release_tx.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/include",
+					"../../../../public/lib/api/**",
+					"../../../../public/lib/resource/**",
+					../../../../public/lib/source/tx_shared,
+				);
 			};
 			name = Release;
 		};

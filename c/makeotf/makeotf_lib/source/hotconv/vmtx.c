@@ -74,7 +74,7 @@ int vmtxFill(hotCtx g) {
         }
     }
 
-    /* Construct top sidebearing array */
+    /* Construct top side-bearing array */
     dnaSET_CNT(h->tbl.topSideBearing, h->tbl.vMetrics.cnt - i - 2);
     j = 0;
     for (i += 2; i < h->tbl.vMetrics.cnt; i++) {
@@ -96,7 +96,7 @@ void vmtxWrite(hotCtx g) {
         OUT2(metric->tsb);
     }
 
-    /* Write top sidebearings */
+    /* Write top side-bearings */
     for (i = 0; i < h->tbl.topSideBearing.cnt; i++) {
         OUT2(h->tbl.topSideBearing.array[i]);
     }

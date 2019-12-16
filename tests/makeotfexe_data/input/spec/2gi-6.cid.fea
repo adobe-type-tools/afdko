@@ -1,0 +1,6 @@
+# Test duplicate CID glyphs in class
+@A = [\118-\120 \118];
+@B = [\121-\123];
+feature kern {
+    pos @A @B -10;
+} kern;

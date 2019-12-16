@@ -24,7 +24,7 @@ typedef struct
 #define TTC_HDR_SIZEV1 (SIZEOF(ttcfTbl, TTCTag) +  \
                         SIZEOF(ttcfTbl, Version) + \
                         SIZEOF(ttcfTbl, DirectoryCount))
-/* SIZEOF(ttcfTbl, TableDirectory) + \ The  dir table size is added in later */
+/* SIZEOF(ttcfTbl, TableDirectory) + \ The  directory table size is added in later */
 
 #define TTC_HDR_SIZEV2 (SIZEOF(ttcfTbl, TTCTag) +         \
                         SIZEOF(ttcfTbl, Version) +        \
@@ -32,7 +32,7 @@ typedef struct
                         SIZEOF(ttcfTbl, DSIGTag) +        \
                         SIZEOF(ttcfTbl, DSIGLength) +     \
                         SIZEOF(ttcfTbl, DSIGOffset))
-                    /* SIZEOF(ttcfTbl, TableDirectory) + \ The  dir table size is added in later */
+                    /* SIZEOF(ttcfTbl, TableDirectory) + \ The  directory table size is added in later */
 
 typedef struct
 {

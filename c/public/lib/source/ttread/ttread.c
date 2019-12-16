@@ -6,6 +6,7 @@
 #include "dynarr.h"
 #include "ctutil.h"
 #include "sfntread.h"
+#include "varread.h"
 #include "supportexcept.h"
 
 #include <string.h>
@@ -20,6 +21,15 @@ typedef unsigned short UV;  /* Unicode value */
 typedef unsigned short GID; /* Glyph index */
 typedef unsigned short STI; /* String index */
 #define STI_UNDEF 0xffff    /* Undefined string index */
+
+#define PHANTOM_COUNT       4   /* Number of phantom points */
+#define PHANTOM_HMTX_COUNT  2   /* LSB & RSB phantom points */
+#define PHANTOM_LSB_INDEX  -2
+#define PHANTOM_RSB_INDEX  -1
+
+/* variable font constants */
+#define VF_MAX_AXES     512     /* Max design axes */
+#define VF_MAX_MASTERS  512     /* Max masters (scalars) */
 
 /* Round to nearest integer */
 #define RND(v) ((float)floor((v) + 0.5))
@@ -49,6 +59,25 @@ typedef struct /* Coordinate point */
     float x;
     float y;
 } Point;
+
+/* --------------------------- variable font  --------------------------- */
+
+#define gvar_FLAG_SHARED_POINT_NUMBERS  0x8000
+#define gvar_FLAG_RESERVED_FLAGS        0x7000
+#define gvar_FLAG_COUNT_MASK            0x0FFF
+
+#define gvar_FLAG_POINTS_ARE_WORDS      0x80
+#define gvar_POINT_RUNCOUNT_MASK        0x7F
+
+#define gvar_FLAG_EMBEDDED_PEAK_TUPLE   0x8000
+#define gvar_FLAG_TUPLE_INDEX_MASK      0x0FFF
+#define gvar_FLAG_INTERMEDIATE_TUPLE    0x4000
+#define gvar_FLAG_PRIVATE_POINT_NUMBERS 0x2000
+#define gvar_FLAG_RESERVED_TUPLE        0x1000
+
+#define gvar_DELTAS_ARE_ZERO            0x80
+#define gvar_DELTAS_ARE_WORDS           0x40
+#define gvar_DELTA_RUNCOUNT_MASK        0x3F
 
 /* --------------------------- sfnt Definitions  --------------------------- */
 
@@ -189,6 +218,8 @@ typedef struct /* glyf table coordinate */
 #define glyf_NEXT_X_IS_ZERO (1<<4)
 #define glyf_SHORT_Y_IS_POS (1<<5)
 #define glyf_NEXT_Y_IS_ZERO (1<<5)
+#define glyf_PHANTOM_LSB    (1<<6)
+#define glyf_PHANTOM_RSB    (1<<7)
 } glyfCoord;
 
 /* Compound glyph component flags */
@@ -203,9 +234,15 @@ typedef struct /* glyf table coordinate */
 #define glyf_WE_HAVE_INSTRUCTIONS       (1<<8)
 #define glyf_USE_MY_METRICS             (1<<9)
 
+typedef struct
+{
+    int  begPt;
+    int  endPt;             /* endPt == begPt - 1 if empty range */
+} ptRange;
+
 typedef struct /* glyf table */
 {
-    dnaDCL(unsigned short, endPts);
+    dnaDCL(ptRange, ranges);
     dnaDCL(glyfCoord, coords);
     long offset;
 } glyfTbl;
@@ -302,9 +339,25 @@ typedef struct /* OS/2 table */
     unsigned short usMaxContext;    /* Version 2 */
 } OS_2Tbl;
 
+typedef struct  /* gvar table */
+{
+    unsigned long tableOffset;
+    long tableLength;
+    uint16_t version;
+    uint16_t axisCount;
+    uint16_t sharedTupleCount;
+    uint32_t sharedTuplesOffset;
+    uint16_t glyphCount;
+#define gvar_FLAG_32BIT_OFFSET  1
+    uint16_t flags;
+    uint32_t dataArrayOffset;
+    dnaDCL(uint32_t, dataOffsets);
+    dnaDCL(Fixed, sharedTuples);
+} gvarTbl;
+
 /* Glyph names for Standard Apple Glyph Ordering */
 static char *applestd[258] =
-    {
+{
 #include "applestd.h"
 };
 
@@ -312,9 +365,11 @@ static char *applestd[258] =
 
 typedef struct /* Glyph data */
 {
+    uint16_t flags;    /* Metrics */
+#define GLYPH_MTX_SET   (1<<0)  /* Metrics has been calculated */
     uFWord hAdv;       /* Horizontal advance */
     FWord xMin;        /* Left of bounding box */
-    FWord lsb;         /* Left sidebearing */
+    FWord lsb;         /* Left side-bearing */
     abfGlyphInfo info; /* Client glyph info */
 } Glyph;
 
@@ -333,6 +388,7 @@ struct ttrCtx_ {
     cmapTbl cmap;                /* cmap table */
     postTbl post;                /* post table */
     OS_2Tbl OS_2;                /* OS/2 table */
+    gvarTbl gvar;                /* gvar table */
     dnaDCL(Glyph, glyphs);       /* Glyph data */
     dnaDCL(GID, glyphsByName);   /* Glyphs sorted by name */
     dnaDCL(Encoding, encodings); /* Selected encoding */
@@ -357,10 +413,24 @@ struct ttrCtx_ {
         char *end;     /* Buffer end */
         char *next;    /* Next byte available */
     } src;
+    struct                  /* variable font tables */
+    {
+        /* Metrics will be computed using deltas provided for phantom points in the 'gvar' table */
+        #define VF_FLAG_HMETRICS (1 << 1)
+        long            flags;
+        float           *UDV;   /* From client */
+        Fixed           ndv[VF_MAX_AXES];               /* normalized weight vector */
+        uint16_t        axisCount;
+        var_axes        axes;
+        var_hmtx        hmtx;
+        var_MVAR        mvar;
+        var_itemVariationStore  varStore;
+    } vf;
     struct /* Client callbacks */
     {
         ctlMemoryCallbacks mem;
         ctlStreamCallbacks stm;
+        ctlSharedStmCallbacks shstm;
     } cb;
     struct /* Contexts */
     {
@@ -373,6 +443,10 @@ struct ttrCtx_ {
         int code;
     } err;
 };
+
+/* ----------------------------- forward declaration ---------------------------- */
+
+static void setupSharedStream(ttrCtx h);
 
 /* ----------------------------- Error Handling ---------------------------- */
 
@@ -458,8 +532,10 @@ ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h->encodings.size = 0;
     h->strings.index.size = 0;
     h->strings.buf.size = 0;
-    h->glyf.endPts.size = 0;
+    h->glyf.ranges.size = 0;
     h->glyf.coords.size = 0;
+    h->gvar.dataOffsets.size = 0;
+    h->gvar.sharedTuples.size = 0;
     h->tmp0.size = 0;
     h->tmp1.size = 0;
     h->stm.dbg = NULL;
@@ -489,17 +565,22 @@ ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     dnaINIT(h->ctx.dna, h->encodings, 256, 768);
     dnaINIT(h->ctx.dna, h->strings.index, 250, 500);
     dnaINIT(h->ctx.dna, h->strings.buf, 1000, 2000);
-    dnaINIT(h->ctx.dna, h->glyf.endPts, 10, 20);
+    dnaINIT(h->ctx.dna, h->glyf.ranges, 10, 20);
     dnaINIT(h->ctx.dna, h->glyf.coords, 500, 1000);
+    dnaINIT(h->ctx.dna, h->gvar.dataOffsets, 0, 500);
+    dnaINIT(h->ctx.dna, h->gvar.sharedTuples, 0, 500);
     dnaINIT(h->ctx.dna, h->tmp0, 200, 500);
     dnaINIT(h->ctx.dna, h->tmp1, 200, 500);
 
     /* Open debug stream */
     h->stm.dbg = h->cb.stm.open(&h->cb.stm, TTR_DBG_STREAM_ID, 0);
 
+    /* set up shared stream used for variable fonts */
+    setupSharedStream(h);
+
     HANDLER
 
-    /* Initilization failed */
+    /* Initialization failed */
     ttrFree(h);
     h = NULL;
 
@@ -524,8 +605,10 @@ void ttrFree(ttrCtx h) {
     dnaFREE(h->encodings);
     dnaFREE(h->strings.index);
     dnaFREE(h->strings.buf);
-    dnaFREE(h->glyf.endPts);
+    dnaFREE(h->glyf.ranges);
     dnaFREE(h->glyf.coords);
+    dnaFREE(h->gvar.dataOffsets);
+    dnaFREE(h->gvar.sharedTuples);
     dnaFREE(h->tmp0);
     dnaFREE(h->tmp1);
 
@@ -599,6 +682,7 @@ static void srcRead(ttrCtx h, size_t cnt, char *buf) {
 /* Read 1-byte unsigned number. */
 #define read1(h) \
     ((uint8_t)((h->src.next == h->src.end) ? nextbuf(h) : *h->src.next++))
+#define sread1(h) (int8_t)read1(h)
 
 /* Read 2-byte unsigned number. */
 static uint16_t read2(ttrCtx h) {
@@ -628,6 +712,92 @@ static int32_t sread4(ttrCtx h) {
     value |= (uint32_t)read1(h) << 8;
     value |= (uint32_t)read1(h);
     return (int32_t)value;
+}
+
+/* --------------------------- Memory Management --------------------------- */
+
+/* Allocate memory. */
+static void *memNew(ttrCtx h, size_t size)
+{
+    void *ptr = h->cb.mem.manage(&h->cb.mem, NULL, size);
+    if (ptr == NULL)
+        fatal(h, ttrErrNoMemory, NULL);
+
+    /* Safety initialization */
+    memset(ptr, 0, size);
+
+    return ptr;
+}
+
+/* Free memory. */
+static void memFree(ttrCtx h, void *ptr)
+{
+    h->cb.mem.manage(&h->cb.mem, ptr, 0);
+}
+
+/* --------------------------- Shared source stream  -------------------------- */
+
+static void* sharedSrcMemNew(ctlSharedStmCallbacks *h, size_t size)
+{
+    return memNew((ttrCtx)h->direct_ctx, size);
+}
+
+static void sharedSrcMemFree(ctlSharedStmCallbacks *h, void *ptr)
+{
+    memFree((ttrCtx)h->direct_ctx, ptr);
+}
+
+static void sharedSrcSeek(ctlSharedStmCallbacks *h, long offset)
+{
+    srcSeek((ttrCtx)h->direct_ctx, offset);
+}
+
+static long sharedSrcTell(ctlSharedStmCallbacks *h)
+{
+    return (long)srcTell(((ttrCtx)h->direct_ctx));
+}
+
+static void sharedSrcRead(ctlSharedStmCallbacks *h, size_t count, char *ptr)
+{
+    srcRead((ttrCtx)h->direct_ctx, count, ptr);
+}
+
+static uint8_t sharedSrcRead1(ctlSharedStmCallbacks *h)
+{
+    return read1(((ttrCtx)h->direct_ctx));
+}
+
+static uint16_t sharedSrcRead2(ctlSharedStmCallbacks *h)
+{
+    return read2(((ttrCtx)h->direct_ctx));
+}
+
+static uint32_t sharedSrcRead4(ctlSharedStmCallbacks *h)
+{
+    return read4(((ttrCtx)h->direct_ctx));
+}
+
+static void sharedSrcMessage(ctlSharedStmCallbacks *h, char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    vmessage((ttrCtx)h->direct_ctx, fmt, ap);
+    va_end(ap);
+}
+
+static void setupSharedStream(ttrCtx h)
+{
+    h->cb.shstm.direct_ctx = h;
+    h->cb.shstm.dna = h->ctx.dna;
+    h->cb.shstm.memNew = sharedSrcMemNew;
+    h->cb.shstm.memFree = sharedSrcMemFree;
+    h->cb.shstm.seek = sharedSrcSeek;
+    h->cb.shstm.tell = sharedSrcTell;
+    h->cb.shstm.read = sharedSrcRead;
+    h->cb.shstm.read1 = sharedSrcRead1;
+    h->cb.shstm.read2 = sharedSrcRead2;
+    h->cb.shstm.read4 = sharedSrcRead4;
+    h->cb.shstm.message = sharedSrcMessage;
 }
 
 /* ---------------------------- TrueType Reading --------------------------- */
@@ -792,7 +962,7 @@ static void locaRead(ttrCtx h) {
     for (i = 0; i < h->glyphs.cnt; i++) {
         Offset end;
         end = (h->head.indexToLocFormat == 0) ? 2 * read2(h) : read4(h);
-        if (end > begin) {
+        if (end >= begin) {
             abfGlyphInfo *info = &h->glyphs.array[i].info;
             info->sup.begin = begin;
             info->sup.end = end;
@@ -820,19 +990,546 @@ static void hmtxRead(ttrCtx h) {
 
     /* Read long horizontal metrics */
     for (i = 0; (i < h->hhea.numberOfLongHorMetrics) && (i < h->glyphs.cnt); i++) {
+        FWord hAdv = read2(h);
+        uFWord lsb = sread2(h);
         glyph = &h->glyphs.array[i];
-        glyph->hAdv = read2(h);
-        glyph->lsb = sread2(h);
+        if (!(glyph->flags & GLYPH_MTX_SET)) {
+            glyph->hAdv = hAdv;
+            glyph->lsb = lsb;
+        }
     }
     if (glyph != NULL)
         last = glyph->hAdv;
 
-    /* Read left sidebearings */
+    /* Read left side-bearings */
     for (; i < h->glyphs.cnt; i++) {
+        uFWord lsb = sread2(h);
         glyph = &h->glyphs.array[i];
-        glyph->hAdv = last;
-        glyph->lsb = sread2(h);
+        if (!(glyph->flags & GLYPH_MTX_SET)) {
+            glyph->hAdv = last;
+            glyph->lsb  = lsb;
+        }
     }
+}
+
+/* Read gvar table. */
+static void gvarRead(ttrCtx h) {
+    long i;
+    sfrTable *table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('g', 'v', 'a', 'r'));
+
+    if (table == NULL)
+        return;
+    srcSeek(h, table->offset);
+    h->gvar.tableOffset = table->offset;
+    h->gvar.tableLength = table->length;
+
+    h->gvar.version = read2(h);
+    if (h->gvar.version != 1) {
+        message(h, "invalid gvar table version");
+        return;
+    }
+    read2(h); /* minor version */
+    h->gvar.axisCount = read2(h);
+    h->gvar.sharedTupleCount = read2(h);
+    h->gvar.sharedTuplesOffset = read4(h);
+    h->gvar.glyphCount = read2(h);
+    h->gvar.flags = read2(h);
+    h->gvar.dataArrayOffset = read4(h);
+    dnaSET_CNT(h->gvar.dataOffsets, h->gvar.glyphCount + 1);
+
+    /* Read glyph variation data offsets */
+    for (i = 0; i < h->gvar.dataOffsets.cnt; i++) {
+        if (h->gvar.flags & gvar_FLAG_32BIT_OFFSET)
+            h->gvar.dataOffsets.array[i] = read4(h);
+        else  /* N.B. 16-bit offsets in table are divided by 2 */
+            h->gvar.dataOffsets.array[i] = read2(h) * 2;
+    }
+
+    /* Read shared tuples */
+    dnaSET_CNT(h->gvar.sharedTuples, h->gvar.sharedTupleCount * h->gvar.axisCount);
+    for (i = 0; i < h->gvar.sharedTuples.cnt; i++)
+        h->gvar.sharedTuples.array[i] = (Fixed)sread2(h) << 2; /* Fixed 2.14 to 16.16 */
+}
+
+static unsigned long gvarReadPackedPointNumbers(ttrCtx h, unsigned long pointCount, uint16_t* pnts, unsigned long maxPoints) {
+    unsigned long index = 0;
+    uint16_t runCount = 0;
+    uint16_t element = 0;
+    unsigned long i = 0;
+
+    if (pointCount & gvar_FLAG_POINTS_ARE_WORDS)
+        pointCount = ((pointCount & gvar_POINT_RUNCOUNT_MASK) << 8) | read1(h);
+
+    if (pointCount > maxPoints )
+        fatal(h, ttrErrBadGlyphData, "point count wrong in gvar");
+
+    while (index < pointCount) {
+        uint16_t controlByte = read1(h);
+        runCount = controlByte & gvar_POINT_RUNCOUNT_MASK;
+        if (controlByte & gvar_FLAG_POINTS_ARE_WORDS)
+            /* read 'runCount + 1' elements with each of two bytes. */
+            for (i = 0; i <= runCount && index < pointCount; i++)
+                pnts[index++] = (element += read2(h));
+        else
+            /* read 'runCount + 1' elements with each of one byte. */
+            for (i = 0; i <= runCount && index < pointCount; i++)
+                pnts[index++] = (element += read1(h));
+    }
+
+    if (i <= runCount)
+        fatal(h, ttrErrBadGlyphData, "run count error in gvar table");
+
+    return pointCount;
+}
+
+static Fixed calculateScalar(ttrCtx h, uint16_t tupleIndex, Fixed *peakTuple, Fixed *imStart, Fixed *imEnd) {
+    Fixed result = 0x10000L;
+    uint16_t i;
+
+    if (!peakTuple)
+        return result;
+    for (i = 0; i < h->vf.axisCount; i++) {
+        if (peakTuple[i] == 0) /* ignore if peak tuple value for this axis is zero. */
+            continue;
+        if (h->vf.ndv[i] == 0) { /* axis coordinate is zero. */
+            result = 0; break;
+        }
+        if (peakTuple[i] == h->vf.ndv[i]) /* means no change in scalar value. */
+            continue;
+        if (tupleIndex & gvar_FLAG_INTERMEDIATE_TUPLE) { /* check if its an intermediate tuple. */
+            if (h->vf.ndv[i] < imStart[i] ||  h->vf.ndv[i] > imEnd[i]) {
+                result = 0; break;
+            } else if (imStart[i] > peakTuple[i] || peakTuple[i] > imEnd[i])
+                continue;
+            else if (imStart[i] < 0 && imEnd[i] > 0 && peakTuple[i] != 0)
+                continue;
+            else if (h->vf.ndv[i] < peakTuple[i]) {
+                if (peakTuple[i] != imStart[i])
+                    result = fixmul(result, fixdiv((h->vf.ndv[i] - imStart[i]), (peakTuple[i] - imStart[i])));
+            } else if (peakTuple[i] != imEnd[i])
+                result = fixmul(result, fixdiv((imEnd[i] - h->vf.ndv[i]), (imEnd[i] - peakTuple[i])));
+        } else { /* not an intermediate tuple. */
+            /* if selected instance is out of range on any axis, then the overall scalar for that delta will be 0. */
+            if (h->vf.ndv[i] < MIN(0, peakTuple[i]) || h->vf.ndv[i] > MAX(0, peakTuple[i])) {
+                result = 0; break;
+            }
+            result = fixmul(result, fixdiv(h->vf.ndv[i], peakTuple[i])); /* peakTuple[i] cannot be zero here. */
+        }
+    }
+
+    return result;
+}
+
+static unsigned long gvarReadPackedDeltas(ttrCtx h, int16_t* deltas, long deltaCount) {
+    unsigned int index = 0;
+    unsigned int j;
+
+    while ( index < deltaCount ) {
+        uint16_t controlByte = read1(h);
+        uint16_t runCount = (controlByte & gvar_DELTA_RUNCOUNT_MASK);
+
+        if (controlByte & gvar_DELTAS_ARE_ZERO) {
+            /* 'runCount + 1' deltas are zero. */
+            for (j = 0; j <= runCount && index < deltaCount; j++)
+            deltas[index++] = 0;
+        } else if (controlByte & gvar_DELTAS_ARE_WORDS) {
+            /* read 'runCount + 1' deltas as two bytes. */
+            for (j = 0; j <= runCount && index < deltaCount; j++)
+                deltas[index++] = sread2(h);
+        } else {
+            /* read 'runCount + 1' deltas as one bytes. */
+            for (j = 0; j <= runCount && index < deltaCount; j++)
+                deltas[index++] = (int16_t)sread1(h);
+        }
+
+        if (j <= runCount)
+            fatal(h, ttrErrBadGlyphData, "invalid delta run count");
+    }
+
+    return deltaCount;
+}
+
+static void gvarInterpolateIntermCoord(
+    int untouch1, int untouch2,
+    int touch1, int touch2,
+    int16_t* coords,
+    Fixed *deltas) {
+    int p;
+    Fixed delta1, delta2;
+    Fixed scale = 0;
+
+    if (untouch1 > untouch2)
+        return;
+
+    if (coords[touch1] > coords[touch2]) {
+        p = touch1;
+        touch1 = touch2;
+        touch2 = p;
+    }
+
+    delta1 = deltas[touch1];
+    delta2 = deltas[touch2];
+
+    if (delta1 == delta2 || coords[touch1] != coords[touch2]) {
+        if (coords[touch1] != coords[touch2])
+            scale = fixdiv(delta2 - delta1, FixInt(coords[touch2] - coords[touch1]));
+        else
+            scale = 0;
+
+        for (p = untouch1; p <= untouch2; p++) {
+            Fixed delta;
+            int v = coords[p];
+
+            if (v <= coords[touch1])
+                delta = delta1;
+            else if (v >= coords[touch2])
+                delta = delta2;
+            else {
+                delta = delta1 + fixmul(FixInt(v - coords[touch1]), scale);
+            }
+
+            deltas[p] = delta;
+        }
+    }
+}
+
+static void gvarInterpolateDeltas(ttrCtx h, int nContours, ptRange *ranges, int ptBase,
+                                  int16_t *xorig, int16_t *yorig,
+                                  boolean *hasDelta, Fixed *xDeltas, Fixed *yDeltas) {
+    int iContour;
+
+    for (iContour = 0; iContour < nContours; iContour++) {
+        int iPt;                /* current point index */
+        int iStartPt;           /* start of contour */
+        int iEndPt;             /* end of contour */
+
+        iStartPt = ranges[iContour].begPt - ptBase;
+        iEndPt = ranges[iContour].endPt - ptBase;
+
+        iPt = iStartPt;
+        /* search first point which has delta */
+        while (iPt <= iEndPt && !hasDelta[iPt])
+            iPt++;
+
+        if (iPt <= iEndPt) {
+            int iTouch1;            /* first touched or reference point that has delta */
+            int iFirstDeltaPt;
+
+            iTouch1 = iPt;          /* first touched point which has delta. */
+            iFirstDeltaPt = iPt;    /* store the first point which has delta. */
+
+            iPt++;
+
+            /* search next touched point that has a delta */
+            while (iPt <= iEndPt) {
+                if (hasDelta[iPt]) {
+                    int iTouch2;            /* second touched or reference point that has delta */
+
+                    iTouch2 = iPt;
+
+                    /* interpolate intermediate points between iTouch1 and iTouch2.
+                     do it for x then for y coord. */
+                    gvarInterpolateIntermCoord(iTouch1 + 1, iTouch2 - 1, iTouch1, iTouch2, xorig, xDeltas);
+                    gvarInterpolateIntermCoord(iTouch1 + 1, iTouch2 - 1, iTouch1, iTouch2, yorig, yDeltas);
+
+                    iTouch1 = iPt;
+                }
+                iPt++;
+            }
+
+            /* if we have only single delta, shift all points with same difference as given by iTouch1. */
+            if (iFirstDeltaPt == iTouch1) {
+                Fixed deltaX = xDeltas[iTouch1];
+                Fixed deltaY = yDeltas[iTouch1];
+                int p;                  /* used as for loop index below */
+
+                for (p = iStartPt; p <= iEndPt; p++) {
+                    if (p != iTouch1) {
+                        xDeltas[p] = deltaX;
+                        yDeltas[p] = deltaY;
+                    }
+                }
+            } else {
+                /* interpolate remaining points at the end and beginning of the contour. */
+                gvarInterpolateIntermCoord(iTouch1 + 1, iEndPt, iTouch1, iFirstDeltaPt, xorig, xDeltas);
+                gvarInterpolateIntermCoord(iTouch1 + 1, iEndPt, iTouch1, iFirstDeltaPt, yorig, yDeltas);
+
+                if (iFirstDeltaPt > 0) {
+                    gvarInterpolateIntermCoord(iStartPt, iFirstDeltaPt - 1, iTouch1, iFirstDeltaPt, xorig, xDeltas);
+                    gvarInterpolateIntermCoord(iStartPt, iFirstDeltaPt - 1, iTouch1, iFirstDeltaPt, yorig, yDeltas);
+                }
+            }
+        }
+    }
+}
+
+/* apply glyph variation data to points in a glyph
+ * if nContours < 0, the glyph is a compound glyph
+ * delta values for a component apply to all its points */
+static void applyGlyphVariationDeltas(ttrCtx h, GID gid, int nContours, int nPoints, int nTotalPoints,
+                                      int ptBase, glyfCoord *coords, ptRange *ranges) {
+    Fixed imStart[VF_MAX_AXES];
+    Fixed imEnd[VF_MAX_AXES];
+    Fixed peakTupleCoords[VF_MAX_AXES];
+    Fixed *peakTupleCoordsToUse = peakTupleCoords;
+    uint16_t tupleCount;
+    uint16_t dataOffset;
+    unsigned long tupleHeaderOffset;
+    unsigned long serializedDataOffset;
+    unsigned long pntCount;
+    unsigned int bAllPoints = 0;
+    unsigned int bAllSharedPoints = 0;
+    dnaDCL(int16_t, xIntDeltas);
+    dnaDCL(int16_t, yIntDeltas);
+    dnaDCL(Fixed, xFixedDeltas);
+    dnaDCL(Fixed, yFixedDeltas);
+    dnaDCL(Fixed, xDeltaSums);
+    dnaDCL(Fixed, yDeltaSums);
+    dnaDCL(int16_t, xOrig);
+    dnaDCL(int16_t, yOrig);
+    dnaDCL(boolean, bHasDelta);
+    dnaDCL(uint16_t, sharedPoints);
+    dnaDCL(uint16_t, privatePoints);
+    long pointIndicesCount;
+    uint16_t *pointIndices;
+    int nComponents = nPoints;
+    int i, j;
+    long k, l;
+    uint16_t hmtxPhantomCnt = 0;
+    Fixed scalar;
+    uint16_t variationDataSize;
+
+    if (gid >= h->gvar.dataOffsets.cnt)
+        fatal(h, ttrErrBadGlyphData, "no gvar data for gid [%d]", gid);
+
+    if (h->gvar.dataOffsets.array[gid] >= h->gvar.dataOffsets.array[gid + 1])
+        return; /* ignore if glyph variation data for this glyph is empty */
+
+    if (h->vf.flags & VF_FLAG_HMETRICS)
+        hmtxPhantomCnt = PHANTOM_HMTX_COUNT;
+
+    nPoints += PHANTOM_COUNT; /* add phantom points */
+    nTotalPoints += PHANTOM_COUNT; /* add phantom points */
+    dnaINIT(h->ctx.dna, xIntDeltas, nPoints, 0);
+    dnaINIT(h->ctx.dna, yIntDeltas, nPoints, 0);
+    dnaINIT(h->ctx.dna, sharedPoints, nPoints, 0);
+    dnaINIT(h->ctx.dna, privatePoints, nPoints, 0);
+    dnaINIT(h->ctx.dna, xFixedDeltas, nTotalPoints, 0);
+    dnaINIT(h->ctx.dna, yFixedDeltas, nTotalPoints, 0);
+    dnaINIT(h->ctx.dna, xDeltaSums, nTotalPoints, 0);
+    dnaINIT(h->ctx.dna, yDeltaSums, nTotalPoints, 0);
+    dnaINIT(h->ctx.dna, xOrig, nTotalPoints, 0);
+    dnaINIT(h->ctx.dna, yOrig, nTotalPoints, 0);
+    dnaINIT(h->ctx.dna, bHasDelta, nTotalPoints, 0);
+    dnaSET_CNT(xIntDeltas, nPoints);
+    dnaSET_CNT(yIntDeltas, nPoints);
+    dnaSET_CNT(sharedPoints, nPoints);
+    dnaSET_CNT(privatePoints, nPoints);
+    dnaSET_CNT(xFixedDeltas, nTotalPoints);
+    dnaSET_CNT(yFixedDeltas, nTotalPoints);
+    dnaSET_CNT(xDeltaSums, nTotalPoints);
+    dnaSET_CNT(yDeltaSums, nTotalPoints);
+    dnaSET_CNT(xOrig, nTotalPoints);
+    dnaSET_CNT(yOrig, nTotalPoints);
+    dnaSET_CNT(bHasDelta, nTotalPoints);
+    memset(imStart, 0, sizeof(Fixed) * VF_MAX_AXES);
+    memset(imEnd, 0, sizeof(Fixed) * VF_MAX_AXES);
+    memset(peakTupleCoords, 0, sizeof(Fixed) * VF_MAX_AXES);
+    memset(xDeltaSums.array, 0, sizeof(Fixed) * nTotalPoints);
+    memset(yDeltaSums.array, 0, sizeof(Fixed) * nTotalPoints);
+    tupleHeaderOffset = h->gvar.tableOffset + h->gvar.dataArrayOffset + h->gvar.dataOffsets.array[gid];
+    srcSeek(h, tupleHeaderOffset);
+
+    tupleCount = read2(h);
+    dataOffset = (unsigned long)read2(h);
+    if (h->gvar.dataArrayOffset + dataOffset >= h->gvar.tableLength)
+        fatal(h, ttrErrBadGlyphData, "variation data offset for gid [%d] beyond gvar end", gid);
+
+    serializedDataOffset = tupleHeaderOffset + dataOffset;
+    tupleHeaderOffset = srcTell(h);
+
+    /* get the shared point numbers if present. */
+    if (tupleCount & gvar_FLAG_SHARED_POINT_NUMBERS) {
+        srcSeek(h, serializedDataOffset);
+        /* deltas are applied to ALL the points if points count is zero. */
+        pntCount = (unsigned long)read1(h);
+
+        if (pntCount == 0) {
+            bAllSharedPoints = 1;
+        } else {
+            dnaSET_CNT(sharedPoints, gvarReadPackedPointNumbers(h, pntCount, &sharedPoints.array[0], nPoints));
+            pointIndices = privatePoints.array;
+        }
+        serializedDataOffset = srcTell(h);
+    }
+
+    /* original outline points are used to interpolate untouched points */
+    for (j = 0; j < nPoints; j++) {
+        xOrig.array[j] = coords[j].x;
+        yOrig.array[j] = coords[j].y;
+    }
+
+    tupleCount &= gvar_FLAG_COUNT_MASK;
+    for (i = 0; i < tupleCount; i++, serializedDataOffset += variationDataSize) {
+        uint16_t tupleIndex;
+
+        memset(xFixedDeltas.array, 0, sizeof(Fixed) * nTotalPoints);
+        memset(yFixedDeltas.array, 0, sizeof(Fixed) * nTotalPoints);
+
+        srcSeek(h, tupleHeaderOffset);
+        variationDataSize = read2(h);
+        tupleIndex = read2(h);
+
+        if (tupleIndex & gvar_FLAG_EMBEDDED_PEAK_TUPLE) {
+            for (j = 0; j < h->gvar.axisCount; j++)
+                peakTupleCoords[j] = (Fixed)sread2(h) << 2; /* Fixed 2.14 to 16.16 */
+        } else {
+        /* The low 12 bits are an index into a shared tuple records array.
+        so check whether the index is out of range. */
+            uint16_t index = tupleIndex & gvar_FLAG_TUPLE_INDEX_MASK;
+            if (index >= h->gvar.sharedTupleCount)
+                fatal(h, ttrErrBadGlyphData, "tuple count out of range in gvar");
+            if (h->gvar.sharedTuples.cnt > 0)
+                peakTupleCoordsToUse = &h->gvar.sharedTuples.array[index * h->gvar.axisCount];
+            else
+                goto exit; /* Return from here as we don't have peakTupleCoords. */
+        }
+
+        if (tupleIndex & gvar_FLAG_INTERMEDIATE_TUPLE) {
+            /* First read intermediate start coords and then read intermediate end coords for each axis. */
+            for (j = 0; j < h->gvar.axisCount; j++)
+                imStart[j] = (Fixed)sread2(h) << 2; /* convert Fixed 2.14 to 16.16 */
+            for (j = 0; j < h->gvar.axisCount; j++)
+                imEnd[j] = (Fixed)sread2(h) << 2; /* convert Fixed 2.14 to 16.16 */
+        }
+        tupleHeaderOffset = srcTell(h);
+
+        scalar = calculateScalar(h, tupleIndex, peakTupleCoordsToUse, imStart, imEnd);
+
+        if (scalar == 0)
+            continue;
+
+        srcSeek(h, serializedDataOffset);
+        if (tupleIndex & gvar_FLAG_PRIVATE_POINT_NUMBERS) {
+            pntCount = (unsigned long)read1(h);
+
+            /* check whether deltas are applied to all points. */
+            if (pntCount == 0) {
+                bAllPoints = 1;
+                pointIndicesCount = 0;
+            } else {
+                dnaSET_CNT(privatePoints, gvarReadPackedPointNumbers(h, pntCount, &privatePoints.array[0], nPoints));
+                bAllPoints = 0;
+                pointIndices = privatePoints.array;
+                pointIndicesCount = privatePoints.cnt;
+            }
+        } else {
+            if (!bAllSharedPoints) {
+                pointIndices = sharedPoints.array;
+                pointIndicesCount = sharedPoints.cnt;
+            } else
+                pointIndicesCount = 0;
+
+            bAllPoints = bAllSharedPoints;
+        }
+
+        /* read deltas for x and y coordinates. */
+        xIntDeltas.cnt = gvarReadPackedDeltas(h, xIntDeltas.array, pointIndicesCount ? pointIndicesCount : nPoints);
+        if (!xIntDeltas.cnt)
+            continue;
+
+        yIntDeltas.cnt = gvarReadPackedDeltas(h, yIntDeltas.array, pointIndicesCount ? pointIndicesCount : nPoints);
+        if (!yIntDeltas.cnt)
+            continue;
+
+        if (bAllPoints) {
+            if (nContours >= 0) { /* simple glyph */
+                for (j = 0; j < nPoints - PHANTOM_COUNT; j++) {
+                    xFixedDeltas.array[j] = fixmul(FixInt(xIntDeltas.array[j]), scalar);
+                    yFixedDeltas.array[j] = fixmul(FixInt(yIntDeltas.array[j]), scalar);
+                }
+                /* apply deltas to phantom points of a simple glyph */
+                for (l = 0; l < hmtxPhantomCnt; l++, j++) {
+                    xFixedDeltas.array[j] = fixmul(FixInt(xIntDeltas.array[j]), scalar);
+                    yFixedDeltas.array[j] = fixmul(FixInt(yIntDeltas.array[j]), scalar);
+                }
+            } else {  /* compound glyph */
+                for (j = 0; j < nComponents; j++) {
+                    k = ranges[j].begPt-ptBase;
+                    for (; k <= ranges[j].endPt-ptBase; k++) {
+                        xFixedDeltas.array[k] = fixmul(FixInt(xIntDeltas.array[j]), scalar);
+                        yFixedDeltas.array[k] = fixmul(FixInt(yIntDeltas.array[j]), scalar);
+                    }
+                    /* apply deltas to phantom points of a component glyph */
+                    for (l = 0; l < hmtxPhantomCnt; l++, k++) {
+                        xFixedDeltas.array[k] = fixmul(FixInt(xIntDeltas.array[j]), scalar);
+                        yFixedDeltas.array[k] = fixmul(FixInt(yIntDeltas.array[j]), scalar);
+                    }
+                }
+            }
+        } else if (nContours >= 0) {
+            /* simple glyph, apply delta to some points */
+            for (j = 0; j < nPoints; j++) {
+                bHasDelta.array[j] = 0;
+            }
+
+            /* apply delta values to points whose delta values are given in 'gvar' table. */
+            for (j = 0; j < pointIndicesCount; j++) {
+                uint16_t index = pointIndices[j];
+
+                if (index >= nPoints)
+                    continue;
+
+                xFixedDeltas.array[index] = fixmul(FixInt(xIntDeltas.array[j]), scalar);
+                yFixedDeltas.array[index] = fixmul(FixInt(yIntDeltas.array[j]), scalar);
+
+                bHasDelta.array[index] = 1;
+            }
+
+            /* interpolate untouched points similar to 'iup' instruction. */
+            gvarInterpolateDeltas(h, nContours, ranges, ptBase, xOrig.array, yOrig.array, bHasDelta.array, xFixedDeltas.array, yFixedDeltas.array);
+        } else {
+            /* compound glyph, apply delta to some components */
+            for (j = 0; j < pointIndicesCount; j++) {
+                uint16_t index = pointIndices[j];
+
+                if (index >= nPoints)
+                    continue;
+
+                if (index < nComponents) {
+                    k = ranges[index].begPt-ptBase;
+                    for (; k <= ranges[index].endPt-ptBase; k++) {
+                        xFixedDeltas.array[k] = fixmul(FixInt(xIntDeltas.array[j]), scalar);
+                        yFixedDeltas.array[k] = fixmul(FixInt(yIntDeltas.array[j]), scalar);
+                    }
+                } else if (index < nPoints + hmtxPhantomCnt) {
+                    long phantomIndex = (index - nComponents) + ranges[nComponents-1].endPt - ptBase + 1;
+                    xFixedDeltas.array[phantomIndex] = fixmul(FixInt(xIntDeltas.array[j]), scalar);
+                    yFixedDeltas.array[phantomIndex] = fixmul(FixInt(yIntDeltas.array[j]), scalar);
+                }
+            }
+        }
+        for (j = 0; j < nTotalPoints; j++) {
+            xDeltaSums.array[j] += xFixedDeltas.array[j];
+            yDeltaSums.array[j] += yFixedDeltas.array[j];
+        }
+    }
+
+    for (j = 0; j < nTotalPoints; j++) {
+        coords[j].x += FRound(xDeltaSums.array[j]);
+        coords[j].y += FRound(yDeltaSums.array[j]);
+    }
+
+exit: /* free the memory if any. */
+    dnaFREE(xIntDeltas);
+    dnaFREE(yIntDeltas);
+    dnaFREE(xDeltaSums);
+    dnaFREE(yDeltaSums);
+    dnaFREE(xOrig);
+    dnaFREE(yOrig);
+    dnaFREE(bHasDelta);
+    dnaFREE(sharedPoints);
+    dnaFREE(privatePoints);
 }
 
 /* Read name table. */
@@ -1171,7 +1868,7 @@ static void cmapReadFmt4(ttrCtx h) {
         unsigned short idRangeOffset = read2(h);
         if (idRangeOffset == 0xffff) {
             idRangeOffset = 0; /* Fix Fontographer bug */
-            message(h, "cmap: invalid idRangeOffset in segment[%d] (fixed)", i);
+            message(h, "cmap: invalid idRangeOffset in segment[%ld] (fixed)", i);
         }
         h->cmap.segments.array[i].idRangeOffset =
             (idRangeOffset == 0) ? 0 : offset + idRangeOffset;
@@ -1402,7 +2099,7 @@ static void addSortedGID(ttrCtx h, GID gid, size_t index) {
     *new = gid;
 }
 
-/* Create and then add unique glyph name. Trial names are created by 
+/* Create and then add unique glyph name. Trial names are created by
    adding: ., .2, .3, etc. to the glyph name until it is unique. */
 /* Performance fix: append gid before a unique number suffix otherwise
    the code may spend O(N^2*log(N)) time if we start out with
@@ -1569,7 +2266,7 @@ static void assignAGLNames(ttrCtx h) {
                         bsearch(&dblmap->pri, h->encodings.array,
                                 h->encodings.cnt, sizeof(Encoding), matchCode);
                     if (pri != NULL && pri->gid == enc->gid)
-                        /* Same GID is encodied at the primary UV */
+                        /* Same GID is encoded at the primary UV */
                         assignGlyphNameRef(h, enc->gid, aglmap->gname);
                     else
                         assignUnicodeName(h, enc->gid, enc->code);
@@ -1844,7 +2541,7 @@ static void fillClientData(ttrCtx h) {
 }
 
 /* Read TrueType font. */
-int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top) {
+int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top, float *UDV) {
     sfrTable *table;
     long i;
 
@@ -1878,12 +2575,58 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top) {
     postRead(h);
     OS_2Read(h);
 
+    h->gvar.axisCount = 0;
+    h->vf.UDV = UDV;
+
+    /* Load variable font tables */
+    if (h->vf.UDV) {
+        gvarRead(h);
+        h->vf.axes = var_loadaxes(h->ctx.sfr, &h->cb.shstm);
+        h->vf.hmtx = var_loadhmtx(h->ctx.sfr, &h->cb.shstm);
+        h->vf.mvar = var_loadMVAR(h->ctx.sfr, &h->cb.shstm);
+        h->vf.axisCount = var_getAxisCount(h->vf.axes);
+
+        if (h->vf.axisCount > 0) {
+            Fixed   userCoords[VF_MAX_AXES];
+            unsigned short  axis;
+
+            if (h->vf.axisCount > VF_MAX_AXES)
+                fatal(h, ttrErrGeometry, "axisCount %hu too large", h->vf.axisCount);
+            if (h->vf.axisCount != h->gvar.axisCount)
+                fatal(h, ttrErrGeometry, "fvar.axisCount %hu != gvar.axisCount %hu", h->vf.axisCount, h->gvar.axisCount);
+
+            /* normalize the variable font design vector */
+            for (axis = 0; axis < h->vf.axisCount; axis++)
+                h->vf.ndv[axis] = 0;
+
+            for (axis = 0; axis < h->vf.axisCount; axis++)
+                userCoords[axis] = pflttofix(&h->vf.UDV[axis]);
+
+            if (var_normalizeCoords(&h->cb.shstm, h->vf.axes, userCoords, h->vf.ndv))
+                fatal(h, ttrErrGeometry, "failed to normalize design vector");
+
+            /* check HVAR table's availability */
+            h->vf.flags = 0;
+            if (!sfrGetTableByTag(h->ctx.sfr, CTL_TAG('H', 'V', 'A', 'R')))
+                h->vf.flags |= VF_FLAG_HMETRICS;
+        }
+    }
+
     /* Initialize glyph array */
     dnaSET_CNT(h->glyphs, h->maxp.numGlyphs);
     for (i = 0; i < h->glyphs.cnt; i++) {
-        abfGlyphInfo *info = &h->glyphs.array[i].info;
+        Glyph *glyph = &h->glyphs.array[i];
+        abfGlyphInfo *info = &glyph->info;
         abfInitGlyphInfo(info);
         info->tag = (unsigned short)i;
+        if (h->vf.UDV && h->vf.axisCount > 0 && !(h->vf.flags & VF_FLAG_HMETRICS)) {
+            var_glyphMetrics    metrics;
+            if (!var_lookuphmtx(&h->cb.shstm, h->vf.hmtx, h->vf.axisCount, h->vf.ndv, (unsigned short)i, &metrics)) {
+                glyph->flags |= GLYPH_MTX_SET;
+                glyph->hAdv = (uFWord)round(metrics.width);
+                glyph->lsb = (FWord)round(metrics.sideBearing);
+            }
+        }
     }
 
     /* Read auxiliary glyph info */
@@ -1905,20 +2648,35 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top) {
     return ttrSuccess;
 }
 
+static void addPhantomPoints(ttrCtx h, GID gid, glyfCoord *phantom) {
+    /* add phantom points for glyph metrics; only two used */
+    phantom[0].flags = glyf_PHANTOM_LSB;
+    phantom[0].x = 0;
+    phantom[0].y = 0;
+    phantom[1].flags = glyf_PHANTOM_RSB;
+    phantom[1].x = h->glyphs.array[gid].hAdv;
+    phantom[1].y = 0;
+}
+
 /* Read simple glyph (header already read). */
 static void glyfReadSimple(ttrCtx h, GID gid, int nContours, int iStart) {
     long i;
     long where;
     short x;
     short y;
-    unsigned short *endPts;
+    ptRange *ranges;
+    int lastPt = iStart;
+    int nCoords;
     int nPoints;
     glyfCoord *coords;
 
     /* Read countour end point indices */
-    endPts = dnaEXTEND(h->glyf.endPts, nContours);
-    for (i = 0; i < nContours; i++)
-        endPts[i] = read2(h) + iStart;
+    ranges = dnaEXTEND(h->glyf.ranges, nContours);
+    for (i = 0; i < nContours; i++) {
+        ranges[i].begPt = lastPt;
+        ranges[i].endPt = read2(h) + iStart;
+        lastPt = ranges[i].endPt + 1;
+    }
 
     /* Skip instructions */
     where = srcTell(h);
@@ -1926,13 +2684,16 @@ static void glyfReadSimple(ttrCtx h, GID gid, int nContours, int iStart) {
 
     /* Read flags */
     if (nContours > 0)
-        nPoints = endPts[nContours - 1] + 1 - iStart;
+        nPoints = ranges[nContours - 1].endPt + 1 - iStart;
     else
         nPoints = 0;
     if (nPoints > h->maxp.maxPoints)
         fatal(h, ttrErrTooManyPoints,
               "gid[%hu]: max points exceeded (%d > max %d)", gid, nPoints, h->maxp.maxPoints);
-    coords = dnaEXTEND(h->glyf.coords, nPoints);
+    nCoords = nPoints;
+    if (h->vf.flags & VF_FLAG_HMETRICS)
+        nCoords += PHANTOM_HMTX_COUNT;
+    coords = dnaEXTEND(h->glyf.coords, nCoords);
     i = 0;
     while (i < nPoints) {
         char flags = read1(h);
@@ -1965,6 +2726,12 @@ static void glyfReadSimple(ttrCtx h, GID gid, int nContours, int iStart) {
             y += read2(h);
         coords[i].y = y;
     }
+
+    if (h->vf.axisCount > 0) {
+        if (h->vf.flags & VF_FLAG_HMETRICS)
+            addPhantomPoints(h, gid, &coords[nPoints]);
+        applyGlyphVariationDeltas(h, gid, nContours, nPoints, (int)h->glyf.coords.cnt-iStart, iStart, coords, ranges);
+    }
 }
 
 /* Read glyph header (discarding glyph bounding box). */
@@ -1972,12 +2739,18 @@ static short glyfReadHdr(ttrCtx h, GID gid) {
     short nContours;
     Glyph *glyph = &h->glyphs.array[gid];
 
-    srcSeek(h, h->glyf.offset + glyph->info.sup.begin);
-    nContours = sread2(h);
-    glyph->xMin = sread2(h); /* xMin */
-    (void)read2(h);          /* yMin */
-    (void)read2(h);          /* xMax */
-    (void)read2(h);          /* yMax */
+    if (glyph->info.sup.begin == glyph->info.sup.end) {
+      /* no outline */
+      nContours = 0;
+      glyph->xMin = 0;
+    } else {
+      srcSeek(h, h->glyf.offset + glyph->info.sup.begin);
+      nContours = sread2(h);
+      glyph->xMin = sread2(h); /* xMin */
+      (void)read2(h);          /* yMin */
+      (void)read2(h);          /* xMax */
+      (void)read2(h);          /* yMax */
+    }
 
     if (nContours > h->maxp.maxContours)
         fatal(h, ttrErrTooManyContours,
@@ -1990,10 +2763,17 @@ static short glyfReadHdr(ttrCtx h, GID gid) {
 
 /* Read compound glyph. Header already read. */
 static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
+    short nComponents = 0;
+    int ptBase = (int)h->glyf.coords.cnt;
+    int lastPt = ptBase;
+    dnaDCL(ptRange, ranges); /* point ranges of component glyphs including optional phantom points */
+
+    if (h->vf.axisCount > 0)
+        dnaINIT(h->ctx.dna, ranges, 4, 4);
     for (;;) {
         unsigned short flags; /* Control flags */
         Offset saveoff;
-        int i;
+        long i;
         long iStart;
         short nContours;
         int translate;
@@ -2008,7 +2788,7 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
         flags = read2(h);
         component = read2(h);
 
-        iStart = h->glyf.coords.cnt;  // compound glyphs can be nested; iStart is not necessarily 0 here.
+        iStart = h->glyf.coords.cnt; /* compound glyphs can be nested; iStart is not necessarily 0 here. */
 
         /* Validate component's glyph index */
         if (component >= h->glyphs.cnt)
@@ -2019,7 +2799,7 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
         if (flags & glyf_ARG_1_AND_2_ARE_WORDS) {
             /* Short word args */
             if (translate) {
-                /* Position component by explict offsets */
+                /* Position component by explicit offsets */
                 x = sread2(h);
                 y = sread2(h);
             } else {
@@ -2066,29 +2846,40 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
         saveoff = srcTell(h);
 
         /* Read component glyph */
-        if (h->glyphs.array[component].info.sup.begin == ABF_UNSET_INT)
-            break; /* Missing component glyph! */
-
-        nContours = glyfReadHdr(h, component);
-        if (nContours >= 0) {
+        if (h->glyphs.array[component].info.sup.begin == ABF_UNSET_INT) {
             iStart = h->glyf.coords.cnt;
-            glyfReadSimple(h, gid, nContours, iStart);
         } else {
-            if (depth == h->maxp.maxComponentDepth)
-                message(h, "gid[%hu]: max component depth exceeded (ignored)",
-                        gid);
-            if (depth >= GLYF_MAX_COMPONENT_DEPTH)
-                fatal(h, ttrErrBadGlyphData,
-                      "gid[%hu]: component depth over %d",
-                      gid, GLYF_MAX_COMPONENT_DEPTH);
-            else
-                glyfReadCompound(h, gid, mtx_gid, ++depth);
+            nContours = glyfReadHdr(h, component);
+            if (nContours >= 0) {
+                iStart = h->glyf.coords.cnt;
+                    glyfReadSimple(h, component, nContours, (int)iStart);
+            } else {
+                if (depth == h->maxp.maxComponentDepth)
+                    message(h, "gid[%hu]: max component depth exceeded (ignored)",
+                            gid);
+                if (depth >= GLYF_MAX_COMPONENT_DEPTH)
+                    fatal(h, ttrErrBadGlyphData,
+                          "gid[%hu]: component depth over %d",
+                          gid, GLYF_MAX_COMPONENT_DEPTH);
+                else
+                    glyfReadCompound(h, component, mtx_gid, depth + 1);
+            }
+        }
+
+        /* get variable font metrics from phantom points */
+        if (h->vf.flags & VF_FLAG_HMETRICS) {
+            Glyph *glyph = &h->glyphs.array[component];
+            if (!(glyph->flags & GLYPH_MTX_SET)) {
+                glyph->hAdv = h->glyf.coords.array[h->glyf.coords.cnt + PHANTOM_RSB_INDEX].x - h->glyf.coords.array[h->glyf.coords.cnt + PHANTOM_LSB_INDEX].x;
+                glyph->flags |= GLYPH_MTX_SET;
+            }
+            h->glyf.coords.cnt -= PHANTOM_HMTX_COUNT;   /* remove phantom points for this component */
         }
 
         if (!translate) {
             /* Validate point indexes */
             if ((long)p1 >= iStart || (long)p2 + iStart >= h->glyf.coords.cnt)
-                fatal(h, ttrErrNoPoints, "gid[%hu]: invalid compound points");
+                fatal(h, ttrErrNoPoints, "gid[%hu]: invalid compound points", gid);
 
             /* Convert matched points to a translation */
             x = h->glyf.coords.array[p1].x -
@@ -2114,11 +2905,28 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
                 coord->y += y;
             }
         }
+
+        if (h->vf.axisCount > 0) {
+            ptRange *range = dnaNEXT(ranges);
+            range->begPt = lastPt;
+            range->endPt = (int)h->glyf.coords.cnt - 1;
+            lastPt = range->endPt + 1;
+        }
+        nComponents++;
+
         if (!(flags & glyf_MORE_COMPONENTS))
             break;
 
         /* Restore offset for next component */
         srcSeek(h, saveoff);
+    }
+
+    /* apply deltas to component glyphs */
+    if (h->vf.axisCount > 0) {
+        if (h->vf.flags & VF_FLAG_HMETRICS)
+            addPhantomPoints(h, gid, dnaEXTEND(h->glyf.coords, PHANTOM_HMTX_COUNT));
+        if (h->glyf.coords.cnt > 0)
+            applyGlyphVariationDeltas(h, gid, -1, nComponents, (int)h->glyf.coords.cnt-ptBase, ptBase,  h->glyf.coords.array+ptBase, ranges.array);
     }
 }
 
@@ -2127,8 +2935,8 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
 static void callbackExactPath(ttrCtx h, GID gid, abfGlyphCallbacks *glyph_cb) {
     int i;
     int iBeg = 0;
-    for (i = 0; i < h->glyf.endPts.cnt; i++) {
-        int iEnd = h->glyf.endPts.array[i];
+    for (i = 0; i < h->glyf.ranges.cnt; i++) {
+        int iEnd = h->glyf.ranges.array[i].endPt;
         if (iBeg == iEnd)
             ; /* Skip single point contour */
         else if (iEnd >= h->glyf.coords.cnt || iBeg > iEnd)
@@ -2155,7 +2963,7 @@ static void callbackExactPath(ttrCtx h, GID gid, abfGlyphCallbacks *glyph_cb) {
                            RND((end->x + beg->x) / 2.0f),
                            RND((end->y + beg->y) / 2.0f));
 
-            /* Compute start of next bezier */
+            /* Compute start of next Bezier */
             x1 = (end->x + 5 * beg->x) / 6.0f;
             y1 = (end->y + 5 * beg->y) / 6.0f;
 
@@ -2174,7 +2982,7 @@ static void callbackExactPath(ttrCtx h, GID gid, abfGlyphCallbacks *glyph_cb) {
                         if (p1 != first)
                             glyph_cb->line(glyph_cb, p1->x, p1->y);
                     } else {
-                        /* [on off] compute start of next bezier */
+                        /* [on off] compute start of next Bezier */
                         x1 = (p0->x + 2 * p1->x) / 3.0f;
                         y1 = (p0->y + 2 * p1->y) / 3.0f;
                     }
@@ -2262,7 +3070,7 @@ static int combinePair(Point *p, abfGlyphCallbacks *glyph_cb) {
 }
 
 /* Convert path using an approximate conversion of quadratic curve segments to
-   cubic curve segments and send it via callbacks. 
+   cubic curve segments and send it via callbacks.
 
    Points are either on or off the curve and are accumulated in an array until
    there is enough context to make a decision about how to convert the point
@@ -2277,10 +3085,10 @@ static int combinePair(Point *p, abfGlyphCallbacks *glyph_cb) {
    4        1 0 1 0         0-3
 
    One curve is described by points 0-2 and another by point 2-4. Point 5 is a
-   temporary. 
+   temporary.
 
    States 2 and 4 are complicated by the fact that a test must be performed to
-   decide if the 2 curves decribed by the point data can be combined into a
+   decide if the 2 curves described by the point data can be combined into a
    single curve or must retained as 2 curves. */
 static void callbackApproxPath(ttrCtx h, GID gid, abfGlyphCallbacks *glyph_cb) {
 /* Save current point at index n */
@@ -2294,8 +3102,8 @@ static void callbackApproxPath(ttrCtx h, GID gid, abfGlyphCallbacks *glyph_cb) {
 
     int i;
     int iBeg = 0;
-    for (i = 0; i < h->glyf.endPts.cnt; i++) {
-        int iEnd = h->glyf.endPts.array[i];
+    for (i = 0; i < h->glyf.ranges.cnt; i++) {
+        int iEnd = h->glyf.ranges.array[i].endPt;
         if (iBeg == iEnd)
             ; /* Skip single point contour */
         else if (iEnd >= h->glyf.coords.cnt || iBeg > iEnd)
@@ -2426,7 +3234,7 @@ static void callbackApproxPath(ttrCtx h, GID gid, abfGlyphCallbacks *glyph_cb) {
 static void readGlyph(ttrCtx h,
                       unsigned short gid, abfGlyphCallbacks *glyph_cb) {
     int result;
-    long nContours;
+    int nContours = 0;
     Glyph *glyph = &h->glyphs.array[gid];
 
     /* Begin glyph and mark it as seen */
@@ -2448,20 +3256,31 @@ static void readGlyph(ttrCtx h,
             fatal(h, ttrErrCstrFail, NULL);
     }
 
-    glyph_cb->width(glyph_cb, glyph->hAdv);
-    if (glyph->info.sup.begin != ABF_UNSET_INT &&
-        (nContours = glyfReadHdr(h, gid)) != 0) {
+    if ((glyph->info.sup.begin != ABF_UNSET_INT &&
+        (nContours = glyfReadHdr(h, gid)) != 0) ||
+        (h->vf.flags & VF_FLAG_HMETRICS)) {
         short xshift;
         GID mtx_gid = gid;
 
         /* Callback path */
-        h->glyf.endPts.cnt = 0;
+        h->glyf.ranges.cnt = 0;
         h->glyf.coords.cnt = 0;
 
         if (nContours >= 0)
             glyfReadSimple(h, gid, nContours, 0);
         else
             glyfReadCompound(h, gid, &mtx_gid, 0);
+
+        /* get variable font metrics from phantom points */
+        if (h->vf.flags & VF_FLAG_HMETRICS) {
+            if (!(glyph->flags & GLYPH_MTX_SET)) {
+                glyph->hAdv = h->glyf.coords.array[h->glyf.coords.cnt + PHANTOM_RSB_INDEX].x - h->glyf.coords.array[h->glyf.coords.cnt + PHANTOM_LSB_INDEX].x;
+                glyph->flags |= GLYPH_MTX_SET;
+            }
+            h->glyf.coords.cnt -= PHANTOM_HMTX_COUNT;   /* remove phantom points */
+        }
+
+        glyph_cb->width(glyph_cb, glyph->hAdv);
 
         xshift = h->glyphs.array[mtx_gid].lsb - h->glyphs.array[mtx_gid].xMin;
         if (xshift != 0) {
@@ -2479,7 +3298,8 @@ static void readGlyph(ttrCtx h,
             callbackExactPath(h, gid, glyph_cb);
         else
             callbackApproxPath(h, gid, glyph_cb);
-    }
+    } else
+        glyph_cb->width(glyph_cb, glyph->hAdv);
 
     /* End glyph */
     glyph_cb->end(glyph_cb);
@@ -2561,6 +3381,12 @@ int ttrEndFont(ttrCtx h) {
     if (result) {
         message(h, "(sfr) %s", sfrErrStr(result));
         return ttrErrSfntread;
+    }
+
+    if (h->vf.UDV) {
+        var_freeaxes(&h->cb.shstm, h->vf.axes);
+        var_freehmtx(&h->cb.shstm, h->vf.hmtx);
+        var_freeMVAR(&h->cb.shstm, h->vf.mvar);
     }
 
     /* Close source stream */

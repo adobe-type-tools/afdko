@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="acutecmb.cap" format="1">
-  <advance width="0"/>
   <outline>
     <contour>
       <point x="-67" y="745" type="curve" name="hintSet0000"/>
@@ -25,8 +24,6 @@
     <dict>
       <key>com.adobe.type.autohint.v2</key>
       <dict>
-        <key>id</key>
-        <string>w0c-67745l-49720-774235765c77788115809127825c127843127863110877c898777287755867c27839-5809-36778</string>
         <key>hintSetList</key>
         <array>
           <dict>
@@ -39,6 +36,8 @@
             </array>
           </dict>
         </array>
+        <key>id</key>
+        <string>w0c-67745l-49720-774235765c77788115809127825c127843127863110877c898777287755867c27839-5809-36778</string>
       </dict>
     </dict>
   </lib>

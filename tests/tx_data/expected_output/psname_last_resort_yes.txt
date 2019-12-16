@@ -1,0 +1,13 @@
+## Filename cff2_vf_many_axes.otf
+## Top Dict
+version             "1.0"
+FullName            "JustAFamilyName"
+FamilyName          "JustAFamilyName"
+FontBBox            {70,384,260,586}
+FSType              4
+sup.srcFontType     CFF (name-keyed)
+sup.nGlyphs         2
+## FontDict[0]
+FontName            "ExtremelyLongVariationsPostScriptNamePrefixBlahBlahBlahBlahBlahB-CBD051D0C66E3F67B9EF60A52A8AC77FC8E8152A..."
+## Private
+BlueValues          {0,0}

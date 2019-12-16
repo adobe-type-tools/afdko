@@ -7,7 +7,7 @@
 */
 
 /*
-  Charter -- Provide an abnormal terminiation facility, which can identify the
+  Charter -- Provide an abnormal termination facility, which can identify the
   source of the fatal error location by source file name and line number, and
   which supports a programmer-generated termination message, incorporating
   formatted values of execution data.

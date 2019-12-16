@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef FEAT_H
-#define FEAT_H
+#ifndef HOTCONV_FEAT_H
+#define HOTCONV_FEAT_H
 
 #include "common.h"
 
@@ -39,7 +39,7 @@
    Both kinds of lookups can be referred to later on, when sharing them; e.g.
    specified by the font editor explicitly by "lookup ZERO;" or implicitly by
    "language DEU;" where the hotlib includes the default lookups. These lookup
-   "references" are stored as the original loookup's label with bit 15 set.
+   "references" are stored as the original lookup's label with bit 15 set.
  */
 
 #define FEAT_NAMED_LKP_BEG 0
@@ -122,8 +122,6 @@ void featReuse(hotCtx g);
 void featFree(hotCtx g);
 
 /* --- Supplementary functions --- */
-int featDefined(hotCtx g, Tag feat);
-
 GNode *featSetNewNode(hotCtx g, GID gid);
 void featRecycleNodes(hotCtx g, GNode *node);
 GNode **featGlyphClassCopy(hotCtx g, GNode **dst, GNode *src);
@@ -167,4 +165,4 @@ int featValidateGPOSChain(hotCtx g, GNode *targ, int lookupType);
 
 #endif /* HOT_FEAT_SUPPORT */
 
-#endif /* FEAT_H */
+#endif /* HOTCONV_FEAT_H */

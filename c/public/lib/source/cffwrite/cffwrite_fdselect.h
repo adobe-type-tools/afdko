@@ -3,8 +3,8 @@
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef FDSELECT_H
-#define FDSELECT_H
+#ifndef CFFWRITE_FDSELECT_H
+#define CFFWRITE_FDSELECT_H
 
 #include "cffwrite_share.h"
 
@@ -20,4 +20,4 @@ long cfwFdselectFill(cfwCtx g);
 void cfwFdselectWrite(cfwCtx g);
 Offset cfwFdselectGetOffset(cfwCtx g, int iSelector, Offset base);
 
-#endif /* FDSELECT_H */
+#endif /* CFFWRITE_FDSELECT_H */

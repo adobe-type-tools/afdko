@@ -1,10 +1,12 @@
+import glob
+import os
 import pytest
 import subprocess
 
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
 from test_utils import (get_input_path, get_expected_path, get_temp_file_path,
-                        generate_ttx_dump)
+                        generate_ttx_dump, generate_spot_dumptables)
 
 TOOL = 'makeotfexe'
 CMD = ['-t', TOOL]
@@ -424,22 +426,6 @@ def test_overflow_bug731():
            b"lookup 0 type 3") in output
 
 
-def test_parameter_offset_overflow_bug746():
-    input_filename = 'bug746/font.pfa'
-    feat_filename = 'bug746/feat.fea'
-    otf_path = get_temp_file_path()
-
-    stderr_path = runner(
-        CMD + ['-s', '-e', '-o', 'shw',
-               'f', f'_{get_input_path(input_filename)}',
-               'ff', f'_{get_input_path(feat_filename)}',
-               'o', f'_{otf_path}'])
-
-    with open(stderr_path, 'rb') as f:
-        output = f.read()
-    assert(b"[FATAL] <bug746> feature parameter offset too large") in output
-
-
 def test_base_anchor_bug811():
     input_filename = 'bug811/font.pfa'
     feat_filename = 'bug811/feat.fea'
@@ -469,3 +455,213 @@ def test_max_revision_bug876():
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value='])
+
+
+def test_infinite_loop_with_dflt_lookups_bug965():
+    input_filename = 'bug965/font.pfa'
+    feat_filename = 'bug965/feat.fea'
+    ttx_filename = 'bug965.ttx'
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'ff', f'_{get_input_path(feat_filename)}',
+                        'o', f'_{actual_path}'])
+    actual_ttx = generate_ttx_dump(actual_path, ['GSUB'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value='])
+
+
+def test_bug993():
+    input_filename = 'fealib/font.pfa'
+    feat_filename = 'bug993/feat.fea'
+    ttx_filename = 'bug993.ttx'
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'ff', f'_{get_input_path(feat_filename)}',
+                        'o', f'_{actual_path}'])
+    actual_ttx = generate_ttx_dump(actual_path, ['GPOS'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value='])
+
+
+def test_bug1006():
+    input_filename = 'fealib/font.pfa'
+    feat_filename = 'bug1006/feat.fea'
+    ttx_filename = 'bug1006.ttx'
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'ff', f'_{get_input_path(feat_filename)}',
+                        'o', f'_{actual_path}'])
+    actual_ttx = generate_ttx_dump(actual_path, ['GPOS'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value='])
+
+
+@pytest.mark.parametrize(
+    'cmap_filename, cs, expectedOS2',
+    [('UniCN-UTF32-H', '25', 'expected_OS2_SC.ttx'),
+     ('UniJP-UTF32-H', '1', 'expected_OS2_JP.ttx'),
+     ('UniKR-UTF32-H', '3', 'expected_OS2_KR.ttx'),
+     ('UniTW-UTF32-H', '2', 'expected_OS2_TC.ttx')])
+def test_bug1040(cmap_filename, cs, expectedOS2):
+    out_path = get_temp_file_path()
+    cmd = CMD + ['-o', 'f', f'_{get_input_path("bug1040/cidfont.ps")}',
+                       'cs', f'_{cs}',
+                       'o', f'_{out_path}',
+                       'ch', f'_{get_input_path("bug1040/" + cmap_filename)}']
+    runner(cmd)
+
+    actual_ttx = generate_ttx_dump(out_path, ["OS/2"])
+    expected_ttx = get_expected_path("bug1040/" + expectedOS2)
+
+    assert differ([expected_ttx, actual_ttx, '-l', '2'])
+
+
+def test_parameter_offset_overflow_bug1017():
+    # Since the fix for issue 1017, it is not practical to actually cause
+    # this overflow, which used to be tested as bug746.  What we do
+    # instead is to verify that the FeatParams blocks are written right
+    # after the FeatureList, and before the LookupList, by comparing with
+    # the expected low level spot GSUB dump.
+    input_filename = 'bug1017/font.pfa'
+    feat_filename = 'bug1017/feat.fea'
+    txt_filename = 'bug1017.GSUB.txt'
+    otf_path = get_temp_file_path()
+
+    runner(
+        CMD + ['-s', '-e', '-o', 'shw',
+               'f', f'_{get_input_path(input_filename)}',
+               'ff', f'_{get_input_path(feat_filename)}',
+               'o', f'_{otf_path}'])
+
+    actual_txt = generate_spot_dumptables(otf_path, ['GSUB'])
+    expected_txt = get_expected_path(txt_filename)
+    assert differ([expected_txt, actual_txt])
+
+
+TEST_FEATURE_FILES = [
+    "Attach", "enum", "markClass", "language_required", "GlyphClassDef",
+    "LigatureCaretByIndex", "LigatureCaretByPos", "lookup", "lookupflag",
+    "feature_aalt", "ignore_pos", "GPOS_1", "GPOS_1_zero", "GPOS_2", "GPOS_2b",
+    "GPOS_3", "GPOS_4", "GPOS_5", "GPOS_6", "GPOS_8", "GSUB_2", "GSUB_3",
+    "GSUB_6", "GSUB_8", "spec4h1", "spec4h2", "spec5d1", "spec5d2", "spec5fi1",
+    "spec5fi2", "spec5fi3", "spec5fi4", "spec5f_ii_1", "spec5f_ii_2",
+    "spec5f_ii_3", "spec5f_ii_4", "spec5h1", "spec6b_ii", "spec6d2", "spec6e",
+    "spec6f", "spec6h_ii", "spec6h_iii_1", "spec6h_iii_3d", "spec8a", "spec8b",
+    "spec8c", "spec8d", "spec9a", "spec9b", "spec9c1", "spec9c2", "spec9c3",
+    "spec9d", "spec9e", "spec9f", "spec9g", "spec10", "bug453", "bug457",
+    "bug463", "bug501", "bug502", "bug504", "bug505", "bug506", "bug509",
+    "bug512", "bug514", "bug568", "bug633", "bug1307", "bug1459", "name",
+    "size", "size2", "multiple_feature_blocks", "omitted_GlyphClassDef",
+    "ZeroValue_SinglePos_horizontal", "ZeroValue_SinglePos_vertical",
+    "ZeroValue_PairPos_horizontal", "ZeroValue_PairPos_vertical",
+    "ZeroValue_ChainSinglePos_horizontal", "ZeroValue_ChainSinglePos_vertical",
+    "PairPosSubtable",
+]
+
+TEST_FEATURE_FILES_XFAIL = [
+    "GPOS_1",            # <device>
+    "GSUB_6",            # Contextual alternate rule not yet supported
+    "bug1459",           # <NULL>
+    "language_required",  # required
+    "PairPosSubtable",   # https://github.com/adobe-type-tools/afdko/issues/971
+    "bug1307",           # https://github.com/adobe-type-tools/afdko/issues/966
+]
+
+TEST_FEATURE_FILES_TABLES = {
+    "name": ["name"],
+    "spec8b": ["name", "GPOS"],
+    "spec8c": ["name", "GSUB"],
+    "spec8d": ["name", "GSUB"],
+    "spec9c1": ["head"],
+    "spec9c2": ["head"],
+    "spec9c3": ["head"],
+    "spec9d": ["hhea"],
+    "spec9e": ["name"],
+    "spec9f": ["OS/2"],
+    "spec9g": ["vhea"],
+}
+
+TEST_TABLES = ['BASE', 'GDEF', 'GSUB', 'GPOS']
+
+
+@pytest.mark.parametrize('name', TEST_FEATURE_FILES)
+def test_feature_file(name):
+    try:
+        input_filename = "fealib/font.pfa"
+        feat_filename = f"fealib/{name}.fea"
+        ttx_filename = f"fealib/{name}.ttx"
+        actual_path = get_temp_file_path()
+
+        runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                            'ff', f'_{get_input_path(feat_filename)}',
+                            'o', f'_{actual_path}'])
+
+        tables = TEST_FEATURE_FILES_TABLES.get(name, TEST_TABLES)
+        actual_ttx = generate_ttx_dump(actual_path, tables)
+        expected_ttx = get_expected_path(ttx_filename)
+        assert differ([expected_ttx, actual_ttx, '-l', '2',
+                       '-s',
+                       '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                       '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                       '    <created value=' + SPLIT_MARKER +
+                       '    <modified value=',
+                       '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+    except Exception:
+        if name in TEST_FEATURE_FILES_XFAIL:
+            pytest.xfail()
+        raise
+
+
+@pytest.mark.parametrize('path', glob.glob(get_input_path("spec/*.fea")))
+def test_spec(path):
+    name = os.path.splitext(os.path.basename(path))[0]
+    if ".cid" in name:
+        input_filename = "spec/fontcid.ps"
+    else:
+        input_filename = "spec/font.pfa"
+    feat_filename = f"spec/{name}.fea"
+    ttx_filename = f"spec/{name}.ttx"
+    cmap_filename = f"spec/Identity-H"
+    actual_path = get_temp_file_path()
+
+    cmd = CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                       'ff', f'_{get_input_path(feat_filename)}',
+                       'o', f'_{actual_path}',
+                       'ch', f'_{get_input_path(cmap_filename)}']
+
+    if name.endswith(".bad"):
+        with pytest.raises(subprocess.CalledProcessError):
+            runner(cmd)
+        return
+    runner(cmd)
+
+    tables = TEST_TABLES
+    with open(get_input_path(feat_filename)) as fp:
+        line = fp.readline()
+        if line.startswith("#") and "TABLES" in line:
+            tables = line.split("# TABLES:")[1].strip().split(",")
+
+    actual_ttx = generate_ttx_dump(actual_path, tables)
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-l', '2',
+                   '-s',
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value=',
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])

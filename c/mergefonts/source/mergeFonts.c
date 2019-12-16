@@ -86,13 +86,13 @@ typedef struct
     dnaDCL(int, newiFDArray);          /* Array holding the destination font iFD for each source font dict. */
     dnaDCL(int, glyph);                /* Array holding the destination font iFD for each source font dict. */
     dnaDCL(GAFileInfo, glyphAliasSet); /* Array of dynamic arrays, one for each font. */
-    CIDInfo cidinfo;                   /* info used to convert a non-CID font to a cID fontl. */
+    CIDInfo cidinfo;                   /* info used to convert a non-CID font to a CID font. */
     unsigned short fileIndex;
     unsigned short curGAEIndex; /* current index of the GAE entry  Must be set in */
     bool seenNotdef;
-    int mode;                /* the file type of the first font. Thsi is what sets the outptu font file type. */
+    int mode;                /* the file type of the first font. This is what sets the output font file type. */
     bool hintsOnly;       /* copy hints only */
-    bool compareNameOnly; /* compare hint dict to source font dict by name only. Not yet used - at the moment, mergeFonts compares teh fontName only. */
+    bool compareNameOnly; /* compare hint dict to source font dict by name only. Not yet used - at the moment, mergeFonts compares the fontName only. */
     struct
     {
         long cnt; /* ABF_EMPTY_ARRAY */
@@ -328,7 +328,7 @@ static void callbackMergeGASubset(txCtx h, GAFileInfo *gaf) {
         i++;
     }
 
-    /* Unlike the regular callbackSubset funtion, we do NOT add a not def glyph is one is missing - we add only the specified glyphs in the mapping file. */
+    /* Unlike the regular callbackSubset function, we do NOT add a not def glyph is one is missing - we add only the specified glyphs in the mapping file. */
 }
 
 /* ----------------------------- t1read Library ---------------------------- */
@@ -373,10 +373,10 @@ static void t1rMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
         if (mergeInfo->hintsOnly && parentIsCID)
             fatal(h, "Error. The -hints option cannot be used with CID fonts.");
 
-        /* Apply the CIDFontInfo file, if oen was specified. */
+        /* Apply the CIDFontInfo file, if one was specified. */
         parentIsCID = applyCIDFontInfo(h, parentIsCID); /* can set parentIsCID true, if it was false */
 
-        /* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
+        /* If there is a glyph alias file for the first font, make sure it is the right type, or that both fonts are name keyed or CID. */
         gaf = checkIFParentCIDCompatible(h, h->top, parentIsCID, parentIsCID);
 
         prepSubset(h);
@@ -439,7 +439,7 @@ static void t1rMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
             int k;
             if (fileIndex > 1)
                 fatal(h, "Error. When merging hint dict only, only two font arguments are allowed, the source font for the hints and the source font for the glyphs..");
-            /* The modified font inherits the entire font dict of the source hint dict. We jsut copy back the original font names. */
+            /* The modified font inherits the entire font dict of the source hint dict. We just copy back the original font names. */
             h->top->FDArray.array[0].FontName.ptr = local_top->FDArray.array[0].FontName.ptr;
             h->top->FullName.ptr = local_top->FullName.ptr;
             h->top->FamilyName.ptr = local_top->FullName.ptr;
@@ -447,7 +447,7 @@ static void t1rMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
                 h->top->FontBBox[k] = local_top->FontBBox[k];
         }
 
-        /* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
+        /* If there is a glyph alias file for the first font, make sure it is the right type, or that both fonts are name keyed or CID. */
         gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
 
         /* provide data for mergeGlyphBegin function,
@@ -507,7 +507,7 @@ static void svrMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
             fatal(h, NULL);
 
         localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
-        /* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
+        /* If there is a glyph alias file for the first font, make sure it is the right type, or that both fonts are name keyed or CID. */
         gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
 
         /* provide data for mergeGlyphBegin function,
@@ -568,10 +568,10 @@ static void ufoMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
 
         parentIsCID = h->top->sup.flags & ABF_CID_FONT;
 
-        /* Apply the CIDFontInfo file, if oen was specified. */
+        /* Apply the CIDFontInfo file, if one was specified. */
         parentIsCID = applyCIDFontInfo(h, parentIsCID); /* can set parentIsCID true, if it was false */
 
-        /* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
+        /* If there is a glyph alias file for the first font, make sure it is the right type, or that both fonts are name keyed or CID. */
         gaf = checkIFParentCIDCompatible(h, h->top, parentIsCID, parentIsCID);
 
         prepSubset(h);
@@ -622,7 +622,7 @@ static void ufoMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
             fatal(h, NULL);
 
         localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
-        /* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
+        /* If there is a glyph alias file for the first font, make sure it is the right type, or that both fonts are name keyed or CID. */
         gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
 
         /* provide data for mergeGlyphBegin function,
@@ -728,10 +728,10 @@ static void cfrMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
             fatal(h, NULL);
 
         parentIsCID = h->top->sup.flags & ABF_CID_FONT;
-        /* Apply the CIDFontInfo file, if oen was specified. */
+        /* Apply the CIDFontInfo file, if one was specified. */
         parentIsCID = applyCIDFontInfo(h, parentIsCID); /* can set parentIsCID true, if it was false */
 
-        /* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
+        /* If there is a glyph alias file for the first font, make sure it is the right type, or that both fonts are name keyed or CID. */
         gaf = checkIFParentCIDCompatible(h, h->top, parentIsCID, parentIsCID);
 
         /* For first font, apply the glyph selection options. */
@@ -786,7 +786,7 @@ static void cfrMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
         /* provide data for mergeGlyphBegin function,
         which is patched over the &h->cb.glyph.beg() function ptr */
 
-        /* If there is a glyph alias file for the first font, make sure it is the right type, or that baoth fonts are name keyed or CID. */
+        /* If there is a glyph alias file for the first font, make sure it is the right type, or that both fonts are name keyed or CID. */
         gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
 
         mergeInfo->srcTopDict = local_top;
@@ -1041,7 +1041,7 @@ static void doFile(txCtx h, char *srcname) {
         fprintf(stderr, "--- Filename: %s\n", h->src.stm.filename);
     }
 
-    /* The font file we are reading may contain muliple fonts, e.g. a TTC or
+    /* The font file we are reading may contain multiple fonts, e.g. a TTC or
        multiple sfnt resources, so keep open until the last font processed */
     h->src.stm.flags |= STM_DONT_CLOSE;
 
@@ -1312,7 +1312,7 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
                                 fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. There are more than 16 values in the array.", filePath, lineno - 1);
                             mergeInfo->XUID.array[cnt] = atoi(startp);
                             if ((0 != strcmp("0", startp)) && (mergeInfo->XUID.array[cnt] == 0))
-                                fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The %d 'th XIUD value (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
+                                fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The %ld'th XIUD value (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
                             startp = NULL;
                             cnt++;
                         }
@@ -1328,7 +1328,7 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
                         fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. There are more than 16 values in the array.", filePath, lineno - 1);
                     mergeInfo->XUID.array[cnt] = atoi(startp);
                     if ((0 != strcmp("0", startp)) && (mergeInfo->XUID.array[cnt] == 0))
-                        fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The %d 'th XIUD value (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
+                        fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The %ld'th XIUD value (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
                     cnt++;
                 }
                 mergeInfo->XUID.cnt = cnt;
@@ -1494,7 +1494,7 @@ static void mergeFile(txCtx h, char *srcname, bool isFirstFont, sourceCtx *srcCt
 
     h->src.print_file = 1;
 
-    /* The font file we are reading may contain muliple fonts, e.g. a TTC or
+    /* The font file we are reading may contain multiple fonts, e.g. a TTC or
        multiple sfnt resources, so keep open until the last font processed */
     h->src.stm.flags |= STM_DONT_CLOSE;
 
@@ -1569,6 +1569,7 @@ static bool readGlyphAliasFile(txCtx h, int fileIndex, char *filePath) {
     unsigned short lineno = 0;
     GAFileInfo *gaf = NULL;
     MergeInfo *mergeInfo = (MergeInfo *)h->appSpecificInfo;
+    char *p;
 
     /* Always make a  glyphAliasSet entry - even if we are skipping a GA file
        and the current file turns out to be a font. we still need an empty
@@ -1601,6 +1602,10 @@ static bool readGlyphAliasFile(txCtx h, int fileIndex, char *filePath) {
         fclose(ga_fp);
         return isGA;
     }
+
+    /* convert to lower case to allow for old uses of "mergeFonts" */
+    for (p = progName; *p != 0; p++)
+        *p = tolower(*p);
 
     if (strcmp(progName, "mergefonts")) {
         fclose(ga_fp);
@@ -1866,7 +1871,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 break;
             case opt_bc:
                 goto bc_gone;
-                break;
             case opt_dcf:
                 setMode(h, mode_dcf);
                 break;
@@ -1943,10 +1947,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 switch (h->mode) {
                     case mode_dump:
                         h->abf.dump.level = 2;
-                        break;
-                    case mode_pdf:
-                        fatal(h, "unimplemented option (-2) for mode (-pdf)");
-                        h->pdw.level = 2;
                         break;
                     case mode_mtx:
                         h->mtx.level = 2;
@@ -2092,10 +2092,11 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 }
                 break;
             case opt_Z:
-#if 0
-                /* Although CFW_NO_DEP_OPS is defined in cffwrite.h, it is not used anywhere. */
                 if (h->mode != mode_cff)
                     goto wrongmode;
+#if 0
+                /* Although CFW_NO_DEP_OPS is defined in cffwrite.h,
+                   it is not used anywhere. */
                 h->cfw.flags |= CFW_NO_DEP_OPS;
 #endif
                 h->t1r.flags |= T1R_UPDATE_OPS;
@@ -2261,9 +2262,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                         h->t1w.flags &= ~T1W_ENCODE_MASK;
                         h->t1w.flags |= T1W_ENCODE_ASCII85;
                         break;
-                    case mode_bc:
-                        goto bc_gone;
-                        break;
                     default:
                         goto wrongmode;
                 }
@@ -2345,9 +2343,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                                     goto badarg;
                             }
                         }
-                        break;
-                    case mode_bc:
-                        goto bc_gone;
                         break;
                     default:
                         goto wrongmode;
@@ -2799,7 +2794,7 @@ int CTL_CDECL main(int argc, char *argv[]) {
         /* Option list ends with script option */
         int i;
 
-        /* Copy args preceeding -s */
+        /* Copy args preceding -s */
         for (i = 0; i < argc - 2; i++)
             *dnaNEXT(h->script.args) = argv[i];
 

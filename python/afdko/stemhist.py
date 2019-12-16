@@ -109,6 +109,7 @@ import os
 import sys
 import time
 import traceback
+import warnings
 
 from fontTools.ttLib import TTFont, getTableModule
 from afdko.autohint import (
@@ -116,6 +117,11 @@ from afdko.autohint import (
 	ACOptionParseError, ACFontError, logMsg, ACreport, expandNames,
 	AUTOHINTEXE)
 from afdko import fdkutils, ufotools
+
+warnings.warn(
+	"stemhist has been deprecated and will be removed from AFDKO soon. "
+	"Please update your code to use psstemhist.",
+	category=FutureWarning)
 
 
 rawData = []

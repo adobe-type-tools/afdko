@@ -1,0 +1,4 @@
+# Bad syntax.
+lookup test {
+    sub A "with" A.alt1;
+} test;

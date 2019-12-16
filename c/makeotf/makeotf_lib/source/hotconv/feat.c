@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "map.h"
 #include "otl.h"
 #include "GPOS.h"
@@ -195,7 +196,7 @@ struct featCtx_ {
 #define GF_SEEN_LANGSYS (1 << 1)              /* A languagesystem keyword has been seen */
 #define GF_SEEN_GDEF_GLYPHCLASS (1 << 2)      /* An explicit GDEF glyph class has been seen. */
 #define GF_SEEN_IGNORE_CLASS_FLAG (1 << 3)    /* any lookup flag has been seen for ignoring any GDEF class. */
-#define GF_SEEN_MARK_CLASS_FLAG (1 << 4)      /* With above, used to check if we need to make a GDEF table to hold mark clases */
+#define GF_SEEN_MARK_CLASS_FLAG (1 << 4)      /* With above, used to check if we need to make a GDEF table to hold mark classes */
 #define GF_SEEN_NON_DFLT_SCRIPT_FLAG (1 << 5) /* Allows us to issue an error if the 'DFLT' script flag is seen after any other script tag. */
 
     short fFlags;                /* Feature flags: set to 0 at every feat start: */
@@ -294,7 +295,7 @@ enum {
 
 #endif /* HOT_FEAT_SUPPORT */
 
-int setVendId_str(hotCtx g, char *vend);
+void setVendId_str(hotCtx g, char *vend);
 
 void featSetUnicodeRange(hotCtx g, short unicodeList[kLenUnicodeList]);
 
@@ -642,7 +643,7 @@ static void addNameString(long platformId, long platspecId,
     }
     if (nameError) {
         hotMsg(g, hotWARNING,
-               "name id %d cannot be set from the feature file. "
+               "name id %ld cannot be set from the feature file. "
                "ignoring record [%s %d]",
                nameId,
                INCL.file, h->linenum);
@@ -873,9 +874,7 @@ static void addVendorString(hotCtx g) {
     }
 
     *dnaNEXT(h->nameString) = '\0';
-    if (setVendId_str(g, h->nameString.array)) {
-        featMsg(hotERROR, "Bad string");
-    }
+    setVendId_str(g, h->nameString.array);
 }
 
 /* Return 1 if last line was seen. isEOL indicates whether ch is the last char
@@ -1048,11 +1047,11 @@ static Tag str2tag(char *tagName) {
 
 void zzcr_attr(Attrib *attr, int type, char *text) {
     if (type == T_NUM) {
-        attr->lval = strtol(text, NULL, 10);
+        attr->lval = strtoll(text, NULL, 10);
     } else if (type == T_NUMEXT) {
-        attr->lval = strtol(text, NULL, 0);
+        attr->lval = strtoll(text, NULL, 0);
     } else if (type == T_CID) {
-        attr->lval = strtol(text + 1, NULL, 10); /* Skip initial '\' */
+        attr->lval = strtoll(text + 1, NULL, 10); /* Skip initial '\' */
         if (attr->lval < 0 || attr->lval > 65535) {
             zzerr("not in range 0 .. 65535");
         }
@@ -1352,7 +1351,7 @@ GNode **featGlyphClassCopy(hotCtx g, GNode **dst, GNode *src) {
     return newDst;
 }
 
-/* Make a copy of src pattern. If num != -1, copy upto num nodes only       */
+/* Make a copy of src pattern. If num != -1, copy up to num nodes only       */
 /* (assumes they exist); set the last nextSeq to NULL. Preserves all flags. */
 /* Return address of last nextSeq (so that client may add on to the end).   */
 
@@ -1438,7 +1437,6 @@ void featAddValRecDef(short *metrics, char *valueName) {
 
     if (vd != NULL) {
         featMsg(hotFATAL, "Named value record definition '%s' is a a duplicate of an earlier named value record definition.", valueName);
-        return;
     }
 
     vd = (ValueDef *)dnaNEXT(h->valueDefs);
@@ -1487,7 +1485,6 @@ void featAddAnchorDef(short x, short y, unsigned short contourIndex, int hasCont
 
     if (ad != NULL) {
         featMsg(hotFATAL, "Named anchor definition '%s' is a a duplicate of an earlier named anchor definition.", anchorName);
-        return;
     }
 
     ad = (AnchorDef *)dnaNEXT(h->anchorDefs);
@@ -1515,7 +1512,6 @@ static void featAddAnchor(short xVal, short yVal, unsigned short contourIndex, i
 
         if (ad == NULL) {
             featMsg(hotFATAL, "Named anchor reference '%s' is not in list of named anchors.", anchorName);
-            return;
         }
         anchorMarkInfo->x = ad->x;
         anchorMarkInfo->y = ad->y;
@@ -1566,10 +1562,10 @@ static void featAddMark(GNode *targ, char *markClassName) {
     }
 
     if (*gcInsert == markNode) {
-        /* this is the first time this mark class name has been refererenced; save the class name in the head node. */
+        /* this is the first time this mark class name has been referenced; save the class name in the head node. */
         copyStr(g, &markNode->markClassName, markClassName);
         *dnaNEXT(h->markClasses) = markNode; /* This is an array that captures all the named mark classes referenced in the feature file.                 */
-                                             /* This is not the same as the list in the GPOS.c file, which isa list only of mark classes used the lookup. */
+                                             /* This is not the same as the list in the GPOS.c file, which is a list only of mark classes used the lookup. */
     }
 
     /* add mark glyphs to default base class */
@@ -1820,8 +1816,8 @@ static void gcDefine(char *gcname) {
 }
 
 /* Start defining a mark glyph class; finds or create a new glyph class, then
-   sets  h->gcInsert to teh nextClass of the last current defintion.
-   Used when adding to a class definiton. */
+   sets  h->gcInsert to the nextClass of the last current definition.
+   Used when adding to a class definition. */
 
 static GNode **gcOpen(char *gcname) {
     h->he = hashInstallElement(gcname + 1, 1);
@@ -2238,18 +2234,18 @@ static void addLangSys(Tag script, Tag language, int checkBeforeFeature) {
         h->gFlags |= GF_SEEN_LANGSYS;
     } else if (script == DFLT_) {
         if (h->gFlags & GF_SEEN_NON_DFLT_SCRIPT_FLAG)
-            featMsg(hotERROR, "All references to the script tag DFLT must preceed all other script references.");
+            featMsg(hotERROR, "All references to the script tag DFLT must precede all other script references.");
     } else {
         h->gFlags |= GF_SEEN_NON_DFLT_SCRIPT_FLAG;
     }
 
     if (script == dflt_) {
-        featMsg(hotWARNING, "'dflt' is not a valid script tag for a languagesystem  statement; using 'DFLT'.");
+        featMsg(hotWARNING, "'dflt' is not a valid script tag for a languagesystem statement; using 'DFLT'.");
         script = DFLT_;
     }
 
     if (language == DFLT_) {
-        featMsg(hotWARNING, "'DFLT' is not a valid language tag for a languagesystem  statement; using 'dflt'.");
+        featMsg(hotWARNING, "'DFLT' is not a valid language tag for a languagesystem statement; using 'dflt'.");
         language = dflt_;
     }
 
@@ -2286,7 +2282,7 @@ static int tagAssign(Tag tag, int type, int checkIfDef) {
     } else if (type == scriptTag) {
         ta = &h->script;
         if (tag == dflt_) {
-            tag = dflt_;
+            tag = DFLT_;
             featMsg(hotWARNING, "'dflt' is not a valid tag for a script statement; using 'DFLT'.");
         }
         curr = &h->curr.script;
@@ -2935,6 +2931,21 @@ static void setIDText(hotCtx g, featCtx h)
     }
 }
 
+/* check if h->curr is in h->DFLTLkps,
+   return true if it is, false otherwise */
+static bool curr_in_default_lookups() {
+    long i;
+    for (i = 0; i < h->DFLTLkps.cnt; i++) {
+        if (memcmp((void *)&h->curr,
+                   (void *)&h->DFLTLkps.array[i],
+                   sizeof(h->curr))
+            == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static void prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
     int accumDFLTLkps = 1;
 
@@ -2946,7 +2957,7 @@ static void prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
         h->curr.lkpType = newlkpType;
     }
 
-    /* Proceed in language sytem mode for this feature if (1) languagesystem */
+    /* Proceed in language system mode for this feature if (1) languagesystem */
     /* specified at global scope and (2) this feature did not start with an  */
     /* explicit script or language statement                                 */
     if (!(h->fFlags & FF_LANGSYS_MODE) &&
@@ -3026,7 +3037,7 @@ static void prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
         accumDFLTLkps = 0;
     }
 
-    if (accumDFLTLkps) {
+    if ((accumDFLTLkps) && (!curr_in_default_lookups())) {
         /* Save for possible inclusion later in lang-specific stuff */
         *dnaNEXT(h->DFLTLkps) = h->curr;
     }
@@ -3332,7 +3343,7 @@ static int validateGSUBLigature(hotCtx g, GNode *targ, GNode *repl,
     return valid;
 }
 
-/* Analyse GSUBChain targ and repl. Return 1 if valid, else 0 */
+/* Analyze GSUBChain targ and repl. Return 1 if valid, else 0 */
 
 static int validateGSUBReverseChain(hotCtx g, GNode *targ, GNode *repl) {
     int state;
@@ -3430,7 +3441,7 @@ static int validateGSUBReverseChain(hotCtx g, GNode *targ, GNode *repl) {
     return 1;
 }
 
-/* Analyse GSUBChain targ and repl. Return 1 if valid, else 0 */
+/* Analyze GSUBChain targ and repl. Return 1 if valid, else 0 */
 
 static int validateGSUBChain(hotCtx g, GNode *targ, GNode *repl) {
     int state;
@@ -3572,7 +3583,7 @@ static void addSub(GNode *targ, GNode *repl, int lkpType, int targLine) {
     }
 
     if ((repl == NULL) || lkpType == GSUBChain || (targ->flags & FEAT_IGNORE_CLAUSE)) {
-        /* Chain sub exceptions (further analysed below).                */
+        /* Chain sub exceptions (further analyzed below).                */
         /* "sub f i by fi;" will be here if there was an "except" clause */
 
         if (!g->hadError) {
@@ -3607,13 +3618,13 @@ static void addSub(GNode *targ, GNode *repl, int lkpType, int targLine) {
             make a default GDEF table. Note that we may make a lot of
             duplicated. These get weeded out later. The components are
             linked by the next->nextSeq fields. For each component*/
-            gcInsert = gcOpen(kDEFAULT_COMPONENTCLASS_NAME); /* looks up class, making if needed. Sets h->gcInsert to adress of nextCl of last node, and returns it.*/
+            gcInsert = gcOpen(kDEFAULT_COMPONENTCLASS_NAME); /* looks up class, making if needed. Sets h->gcInsert to address of nextCl of last node, and returns it.*/
             next = targ;
             while (next != NULL) {
                 if (next->nextCl != NULL) {
                     /* the current target node is a glyph class. Need to add all members of the class to the kDEFAULT_COMPONENTCLASS_NAME. */
                     head = gcLookup(kDEFAULT_COMPONENTCLASS_NAME);          /* Finds the named class, returns the ptr to head node. Does not set  h->gcInsert */
-                    h->gcInsert = featGlyphClassCopy(g, h->gcInsert, next); /* copies contents of next to gcInsert, creating new nodes.  returns adress of last ndoe's nextCl.*/
+                    h->gcInsert = featGlyphClassCopy(g, h->gcInsert, next); /* copies contents of next to gcInsert, creating new nodes.  returns address of last ndoe's nextCl.*/
                 } else {
                     gcAddGlyph(next->gid); /* adds new node at h->gcInsert, sets h->gcInsert to address of new node's nextCl */
                 }
@@ -3634,7 +3645,7 @@ static void addSub(GNode *targ, GNode *repl, int lkpType, int targLine) {
     }
 }
 
-/* Analyse featValidateGPOSChain targ metrics. Return 1 if valid, else 0 */
+/* Analyze featValidateGPOSChain targ metrics. Return 1 if valid, else 0 */
 /* Also sets flags in backtrack and look-ahead sequences */
 
 int featValidateGPOSChain(hotCtx g, GNode *targ, int lkpType) {
@@ -3664,7 +3675,7 @@ int featValidateGPOSChain(hotCtx g, GNode *targ, int lkpType) {
             }
         } else {
             if (p->lookupLabel >= 0) {
-                featMsg(hotERROR, "Lookup references are allowed only in the input sequencee: this is the sequence of marked glyphs.");
+                featMsg(hotERROR, "Lookup references are allowed only in the input sequence: this is the sequence of marked glyphs.");
             }
 
             if (p->flags & FEAT_IS_MARK_NODE) {
@@ -3676,10 +3687,10 @@ int featValidateGPOSChain(hotCtx g, GNode *targ, int lkpType) {
                 return 0;
             }
 
-            /* We actiually do allow  a value records after the last glyoh node, if there is only one marked glyph */
+            /* We actually do allow  a value records after the last glyph node, if there is only one marked glyph */
             if (p->metricsInfo != NULL) {
                 if (nMarked == 0) {
-                    featMsg(hotERROR, "Positioning cannot be applied in the bactrack glyph sequence, before the marked glyph sequence.");
+                    featMsg(hotERROR, "Positioning cannot be applied in the backtrack glyph sequence, before the marked glyph sequence.");
                     return 0;
                 }
                 if ((p->nextSeq != NULL) || (nMarked > 1)) {
@@ -3718,7 +3729,7 @@ int featValidateGPOSChain(hotCtx g, GNode *targ, int lkpType) {
             nMarked = 1;
         }
     } else if ((nNodesWithMetrics == 0) && (nBaseGlyphs == 0) && (nLookupRefs == 0)) {
-        featMsg(hotERROR, "Contextual positioning rule must specify a positioning value or a mark attachent rule ro a direct lookup reference.");
+        featMsg(hotERROR, "Contextual positioning rule must specify a positioning value or a mark attachment rule or a direct lookup reference.");
         return 0;
     }
 
@@ -3847,7 +3858,7 @@ static void addPos(GNode *targ, int type, int enumerate) {
     if ((glyphCount == 2) && (markedCount == 0) && (type == GPOSSingle)) {
         type = GPOSPair;
     } else if (enumerate) {
-        featMsg(hotERROR, "\"enumerate\" only allowed with pair positionings,");
+        featMsg(hotERROR, "\"enumerate\" only allowed with pair positioning,");
     }
 
     if (type == GPOSSingle) {
@@ -3864,7 +3875,7 @@ static void addPos(GNode *targ, int type, int enumerate) {
             featGlyphClassCopy(h->g, &copyHeadNode, targ);
             targ = copyHeadNode;
             featGlyphClassSort(g, &targ, 1, 1);
-            targ->nextSeq = next_targ; /* featGlyphClassCopy zeroes the  nextSeq field in all nodes.*/
+            targ->nextSeq = next_targ; /* featGlyphClassCopy zeros the  nextSeq field in all nodes.*/
         }
         if (next_targ->nextCl != NULL) {
             /* In order to sort and remove duplicates, I need to copy the    */
@@ -3882,7 +3893,7 @@ static void addPos(GNode *targ, int type, int enumerate) {
         /* These nodes are recycled in GPOS.c due to some complicated copying of nodes. */
     } else if (type == GPOSCursive) {
         if (h->anchorMarkInfo.cnt != 2) {
-            featMsg(hotERROR, "The 'cursive' statement requires two anchors. This has %d. Skipping rule.", h->anchorMarkInfo.cnt);
+            featMsg(hotERROR, "The 'cursive' statement requires two anchors. This has %ld. Skipping rule.", h->anchorMarkInfo.cnt);
         } else if ((!(targ->flags & FEAT_HAS_MARKED)) && ((!(targ->flags & FEAT_IS_BASE_NODE)) || (targ->nextSeq != NULL))) {
             featMsg(hotERROR, "This statement has contextual glyphs around the cursive statement, but no glyphs are marked as part of the input sequence. Skipping rule.", h->anchorMarkInfo.cnt);
         } else {
@@ -3919,10 +3930,10 @@ static void addPos(GNode *targ, int type, int enumerate) {
                 prevNode = markClassNode;
                 markClassNode = markClassNode->nextSeq;
             }
-            if (markClassNode->flags & FEAT_IS_MARK_NODE) {
+            if ((markClassNode != NULL) && (markClassNode->flags & FEAT_IS_MARK_NODE)) {
                 featGlyphClassCopy(h->g, &copyHeadNode, markClassNode);
                 markClassNode = copyHeadNode;
-                featGlyphClassSort(g, &markClassNode, 1, 0); /* changes value of markClassNode. I specify to NOT warn of duplicates, beacuse they can happen with correct syntax. */
+                featGlyphClassSort(g, &markClassNode, 1, 0); /* changes value of markClassNode. I specify to NOT warn of duplicates, because they can happen with correct syntax. */
                 prevNode->nextSeq = markClassNode;
             }
         }
@@ -3944,7 +3955,7 @@ static void addPos(GNode *targ, int type, int enumerate) {
             featValidateGPOSChain(g, targ, type);
             addGPOS(GPOSChain, targ, INCL.file, zzline, h->anchorMarkInfo.cnt, &h->anchorMarkInfo.array[0]);
         }
-        /* These nodes are recycled in GPOS.c, as they are used in the fill phase, some tim eafter this function returns. */
+        /* These nodes are recycled in GPOS.c, as they are used in the fill phase, some time after this function returns. */
     } else {
         featMsg(hotERROR, "This rule type is not recognized..");
     }
@@ -3965,7 +3976,7 @@ static void setFontRev(char *rev) {
             featMsg(hotWARNING, "head FontRevision entry <%s> should have 3 fractional decimal places. Stored as <%.3f>", rev, version);
         }
     } else {
-        featMsg(hotWARNING, "head FontRevision entry <%d> should have 3 fractional decimal places; it now has none.", major);
+        featMsg(hotWARNING, "head FontRevision entry <%ld> should have 3 fractional decimal places; it now has none.", major);
     }
 
     /* limit of 32767 as anything higher sets the sign bit to negative */
@@ -4130,8 +4141,7 @@ static Label featGetLabelIndex(char *name) {
 
     curr = name2NamedLkp(name);
     if (curr == NULL) {
-        featMsg(hotFATAL, "lookup name \"%s\" already defined", name);
-        return -1;
+        featMsg(hotFATAL, "lookup name \"%s\" not defined", name);
     }
     return curr->state.label;
 }
@@ -4484,15 +4494,6 @@ void featFree(hotCtx g) {
 #endif /* HOT_FEAT_SUPPORT */
 
     MEM_FREE(g, g->ctx.feat);
-}
-
-int featDefined(hotCtx g, Tag feat) {
-#if HOT_FEAT_SUPPORT
-    featCtx h = g->ctx.feat;
-    return featFileExists(g) && tagDefined(feat, &h->feature);
-#else
-    return 0;
-#endif
 }
 
 #if HOT_FEAT_SUPPORT

@@ -1,0 +1,4 @@
+# Test bad CodePageRange
+table OS/2 {
+    CodePageRange 128;
+} OS/2;

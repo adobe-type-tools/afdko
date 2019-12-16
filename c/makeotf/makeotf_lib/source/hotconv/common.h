@@ -6,8 +6,8 @@
  * Common definitions.
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef HOTCONV_COMMON_H
+#define HOTCONV_COMMON_H
 
 #include "hotconv.h"
 #include "dynarr.h"
@@ -308,8 +308,8 @@ typedef struct { /* Font information */
 #define FI_CUSTOM_CS 3         /* Custom (defined by font) */
     struct {
         /* Windows-specific data */
-        unsigned char Family;
-        unsigned char CharSet;
+        uint8_t Family;
+        uint8_t CharSet;
         UV_BMP DefaultChar;
         UV_BMP BreakChar;
         FWord AvgWidth;
@@ -461,4 +461,4 @@ char *bcopy(const void *src, void *dst, int len);
 
 #define OVERRIDE(field) ((field) != SHRT_MAX)
 
-#endif /* COMMON_H */
+#endif /* HOTCONV_COMMON_H */

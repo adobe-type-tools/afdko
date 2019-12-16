@@ -1,0 +1,5 @@
+# no glyphs are marked as part of the input sequence.
+markClass [acute grave] <anchor 150 -10> @TOP_MARKS;
+lookup mark {
+    position base X <anchor 250 450> mark @TOP_MARKS Y Z;
+} mark;

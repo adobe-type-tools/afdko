@@ -413,7 +413,7 @@ void cfrFree(cfrCtx h) {
 
     if (h->cff2.varStore != NULL) {
         /* Call this here rather than end cfrEndFont, so that
-        the allocated memory will be available to aby client modules
+        the allocated memory will be available to any client modules
          */
         var_freeItemVariationStore(&h->cb.shstm, h->cff2.varStore);
     }
@@ -443,7 +443,7 @@ static void fillbuf(cfrCtx h, long offset) {
     h->src.end = h->src.buf + h->src.length;
 }
 
-/* Perform intial seek and buffer fill. */
+/* Perform initial seek and buffer fill. */
 static void seekbuf(cfrCtx h, long offset) {
     if (h->cb.stm.seek(&h->cb.stm, h->stm.src, offset))
         fatal(h, cfrErrSrcStream);
@@ -930,7 +930,7 @@ static void saveDeltaArray(cfrCtx h, size_t max, long *cnt, float *array, long *
                     i++;
                 }
                 /* now, copy the blend deltas default values to blendArray[i]. 
-                We write all the absolute values for region 0, then for region 1, ...,r egion n.*/
+                We write all the absolute values for region 0, then for region 1, ..., region n.*/
                 l = numBlends;
                 for (j = 0; j < numRegions; j++) {
                     float diff = 0;
@@ -959,9 +959,9 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
 
     if (numBlends == 0) {
         blendEntry->value = *realValue;
-        blendEntry->numBlends = 0; /* shows there is no blend value, and the regular value shoud be used instead. */
+        blendEntry->numBlends = 0; /* shows there is no blend value, and the regular value should be used instead. */
         blendEntry->blendValues = NULL;
-    } else {
+    } else if (numBlends == 1) {
         int i;
         float defaultValue;
         signed int numRegions = h->stack.numRegions;
@@ -971,10 +971,10 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
         blendEntry->numBlends = (unsigned short)numBlends;
         blendEntry->blendValues = blendValues;
 
-        // copy the defaul region value
+        // copy the default region value
         blendValues[0] = defaultValue = INDEX_REAL(0);
 
-        /* now, copy the blend abusolate values to blendArray[i].
+        /* now, copy the blend absolute values to blendArray[i].
         The default region value is in stackEntry->int_val or real_val
         The region delta values are in the stackEntry->blend_val array.
         */
@@ -982,7 +982,8 @@ static void saveBlend(cfrCtx h, float *realValue, abfOpEntry *blendEntry) {
         for (i = 0; i < numRegions; i++) {
             blendValues[i + 1] = stackEntry->blend_val[i] + defaultValue;
         }
-    }
+    } else
+        fatal(h, cfrErrDICTOp);
 }
 
 /* Save integer array operands. */
@@ -1049,7 +1050,7 @@ static char *savePostScript(cfrCtx h, char *str) {
         q = p + sizeof("/FSType") - 1;
         if (SSCANF_S(q, " %d def%n", &value, &n) == 1 && n != -1 &&
             0 <= value && value < 65536) {
-            /* Sucessfully parsed value; remove definition from string */
+            /* Successfully parsed value; remove definition from string */
             memmove(p, q + n, strlen(p) + 1 - (q - p + n));
 
             if (h->top.FSType != ABF_UNSET_INT)
@@ -1080,7 +1081,7 @@ static char *savePostScript(cfrCtx h, char *str) {
         else
             fatal(h, cfrErrOrigFontType);
 
-        /* Sucessfully parsed value; remove definition from string */
+        /* Successfully parsed value; remove definition from string */
         memmove(p, q + n, strlen(p) + 1 - (q - p + n));
     }
 
@@ -1795,6 +1796,11 @@ static void readCharStringsINDEX(cfrCtx h, short flags) {
         fatal(h, cfrErrNoCharStrings);
     readINDEX(h, &h->region.CharStringsINDEX, &index);
 
+    /* Check for case of CFF2 table containing more 
+       glyphs than other tables can handle. */
+    if (index.count > 0xFFFF)
+        fatal(h, cfrErrTooManyGlyphs);
+
     /* Allocate and initialize glyphs array */
     dnaSET_CNT(h->glyphs, index.count);
     if (index.count == 0)
@@ -1815,7 +1821,7 @@ static void readCharStringsINDEX(cfrCtx h, short flags) {
         length = info->sup.end - info->sup.begin;
         if (length > 65535) {
             message(h,
-                    "Warning: CharString of GID %d is %d bytes long. "
+                    "Warning: CharString of GID %ld is %ld bytes long. "
                     "CharStrings longer than 65535 bytes might not be "
                     "supported by some implementations.",
                     i, length);
@@ -1906,7 +1912,7 @@ static void buildGIDNames(cfrCtx h) {
     char *p;
     long length;
     long numGlyphs = h->glyphs.cnt;
-    unsigned short i;
+    long i;
 
     if (numGlyphs <= 0)
         fatal(h, cfrErrNoGlyph);
@@ -1926,7 +1932,7 @@ static void buildGIDNames(cfrCtx h) {
     p += length + 1;
     for (i = 1; i < numGlyphs; i++) {
         h->post.fmt2.strings.array[i] = p;
-        sprintf(p, "gid%05d", i);
+        sprintf(p, "gid%05ld", i);
         length = (long)strlen(p);
         p += length + 1;
     }
@@ -2001,7 +2007,7 @@ static void postRead(cfrCtx h) {
             message(h, "post 2.0: invalid name id (table ignored)");
             goto parseError;
         } else if (nid > 257)
-            strCount++;
+            strCount = MAX(strCount, nid-257);
     }
 
     /* Read string data */
@@ -2590,7 +2596,7 @@ static void makeupCFF2Info(cfrCtx h) {
     if (lenFontName > 0)
         addString(h, &strPtrs, &h->top.Copyright, stringBuffer1);
     lenTrademark = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer2, sizeof(stringBuffer2), NAME_ID_TRADEMARK, 0);
-    if (lenFontName > 0 && lenTrademark > 0 && ((unsigned long)(lenFontName + lenTrademark) + 2 < sizeof(stringBuffer1))) { /* concatename copyright and trademark strings */
+    if (lenFontName > 0 && lenTrademark > 0 && ((unsigned long)(lenFontName + lenTrademark) + 2 < sizeof(stringBuffer1))) { /* concatenate copyright and trademark strings */
         STRCAT_S(stringBuffer1, STRING_BUFFER_LIMIT, " ");
         STRCAT_S(stringBuffer1, STRING_BUFFER_LIMIT, stringBuffer2);
     }

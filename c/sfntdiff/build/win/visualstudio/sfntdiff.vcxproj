@@ -179,7 +179,6 @@
     <ClInclude Include="..\..\..\source\Dsys.h" />
     <ClInclude Include="..\..\..\source\Dtto.h" />
     <ClInclude Include="..\..\..\source\numtypes.h" />
-    <ClInclude Include="..\..\..\source\sfntdiff.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,6 @@
+# Bad language syntax.
+languagesystem DFLT dflt;
+feature liga {
+    language DEU ENG;
+    sub s s by germandbls;
+} liga;

@@ -191,7 +191,7 @@ static unsigned long read24(void) {
 static Format14 *readFormat14(void) {
     IntX i;
     Format14 *fmt = memNew(sizeof(Format14));
-    Card32 tableOffset = TELL() - 2; /* -2 becuase we have already red in the format record. */
+    Card32 tableOffset = TELL() - 2; /* -2 because we have already red in the format record. */
     fmt->format = 14;
 
     IN1(fmt->length);
@@ -466,7 +466,7 @@ static void dumpMapping2(Format2 *fmt, IntX level) {
 
                 if (glyphId != 0) {
                     glyphId = (glyphId + segment->idDelta) & 0x0FFFF;
-                    printMapping(code, glyphId, (hi == 0) ? 2 : 4, level);
+                    printMapping(code, glyphId, 4, level);
                 }
             }
             seen[key] = 1;
@@ -537,9 +537,10 @@ static void dumpMapping14(Format14 *fmt, IntX level) {
     Card32 i, j, k;
     Card32 numEntries;
 
-    /* Do print header */
     if (level > 8)
         return;
+
+    /* Do print header */
     fprintf(OUTPUTBUFF, "--- [UVS]= %s\n",
             (level == 7 || level == 8) ? "<name/CID>" : "glyphId");
 
@@ -563,8 +564,6 @@ static void dumpMapping14(Format14 *fmt, IntX level) {
     }
 
     /* do print end */
-    if (level > 8)
-        return;
     fprintf(OUTPUTBUFF, "\n");
 }
 

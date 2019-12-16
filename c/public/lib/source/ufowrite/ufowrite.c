@@ -49,7 +49,7 @@ struct ufwCtx_ {
     int state;             /* 0 == writing to tmp; 1 == writing to dst */
     abfTopDict *top;       /* Top Dict data */
     dnaDCL(Glyph, glyphs); /* Glyph data */
-    int lastiFD;           /* The index into teh FD array of the last glyph seen. Used only when the source is a CID font.*/
+    int lastiFD;           /* The index into the FD array of the last glyph seen. Used only when the source is a CID font.*/
     struct                 /* Client-specified data */
     {
         long flags; /* See ufowrite.h for flags */
@@ -479,7 +479,7 @@ static void setStyleName(char *dst, char *postScriptName) {
 }
 
 static void setVersionMajor(char *dst, char *version) {
-    /* Copy text up to '.' Skip leading zeroes.*/
+    /* Copy text up to '.' Skip leading zeros.*/
     int seenNonZero = 0;
     char *p = &version[0];
     while ((*p != '.') && (*p != 0x00)) {
@@ -774,7 +774,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
         sprintf(valueBuffer, "%.8f", privateDict->BlueScale);
         p = strchr(valueBuffer, '.');
         if (p != NULL) {
-            /* Have decimal point. Remove trailing zeroes.*/
+            /* Have decimal point. Remove trailing zeros.*/
             size_t l = strlen(p);
             p += l - 1;
             while (*p == '0') {

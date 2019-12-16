@@ -25,7 +25,7 @@ extern "C" {
 typedef int(CTL_CDECL *ctuCmpFunc)(const void *first, const void *second, void *ctx);
 void ctuQSort(void *base, size_t count, size_t size, ctuCmpFunc cmp, void *ctx);
 
-/* Sort array. 
+/* Sort array.
 
    CTUQSort() is modeled on the ANSI C library qsort() function and all
    arguments and semantics, except the "ctx" arguments, match those of the
@@ -59,7 +59,7 @@ typedef unsigned char ctuLongDateTime[8];
 
 /* Apple's LongDateTime is a 64-bit number representing the number of seconds
    since 1 Jan 1904 00:00:00 local time. This value is stored in an 8 byte
-   array, most significant byte first. 
+   array, most significant byte first.
 
    The conversions performed by the functions in this library are use the long
    data type, which is assumed to hold at least 32-bits, and do not check for
@@ -94,7 +94,7 @@ void ctuDtostr(char *buf, size_t bufLen, double value, int width, int precision)
 
 /* ctuDtostr() converts the "value" parameter into a string and stores the
    result into the buffer pointed to by the "buf" parameter. The conversion is
-   performed using the "%g" print format and if the "width" or "percision"
+   performed using the "%g" print format and if the "width" or "precision"
    parameters are non-0 they are used to control the minimum field width and
    precision, respectively. This function behaves as though it was using the C
    locale and thus the decimal point character is always a period and not

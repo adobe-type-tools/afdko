@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef GDEF_H
-#define GDEF_H
+#ifndef HOTCONV_GDEF_H
+#define HOTCONV_GDEF_H
 
 #include "common.h"
 #include "feat.h"
@@ -29,4 +29,4 @@ unsigned short addGlyphMarkClassGDEF(hotCtx g, GNode *markClass);
 
 unsigned short addMarkSetClassGDEF(hotCtx g, GNode *markClass);
 
-#endif /* GDEF_H */
+#endif /* HOTCONV_GDEF_H */

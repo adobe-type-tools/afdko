@@ -1,0 +1,9 @@
+# Test undefined glyph class.
+
+@Vowels.lc = [a e i o u];
+@Vowels.uc = [A E I O U];
+@Vowels.uc = @Vowels.uc
+
+feature liga {
+  sub @Vowels.lc by @Vowels.uc;
+} liga;

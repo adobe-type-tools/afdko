@@ -34,7 +34,7 @@ from afdko.fdkutils import (
 )
 from afdko.makeotf import main as makeotf
 
-__version__ = '1.9.3'
+__version__ = '1.10.0'
 
 logger = logging.getLogger(__name__)
 
@@ -93,24 +93,20 @@ def build_masters(opts):
     master_paths = [s.path for s in ds.sources]
 
     logger.info("Building local OTFs for master font paths...")
-    curDir = os.getcwd()
     dsDir = os.path.dirname(opts.dsPath)
 
     for master_path in master_paths:
         master_path = os.path.join(dsDir, master_path)
-        masterDir = os.path.dirname(master_path)
-        ufoName = os.path.basename(master_path)
-        otfName = os.path.splitext(ufoName)[0]
-        otfName = f"{otfName}.otf"
+        otf_path = f"{os.path.splitext(master_path)[0]}.otf"
 
-        if masterDir:
-            os.chdir(masterDir)
+        result = makeotf(['-nshw', '-f', master_path, '-o', otf_path,
+                          '-r', '-nS'] + opts.mkot)
 
-        makeotf(['-nshw', '-f', ufoName, '-o', otfName,
-                 '-r', '-nS'] + opts.mkot)
+        if result:
+            raise Exception(f'makeotf return value: {result}')
+
         logger.info(f"Built OTF font for {master_path}")
-        generalizeCFF(otfName)
-        os.chdir(curDir)
+        generalizeCFF(otf_path)
 
 
 def get_options(args):
@@ -132,6 +128,13 @@ def get_options(args):
              'Use -vv for debug mode'
     )
     parser.add_argument(
+        MKOT_OPT,
+        metavar='OPTIONS',
+        help="comma-separated set of 'makeotf' options",
+        type=_split_makeotf_options,
+        default=[]
+    )
+    parser.add_argument(
         '-d',
         '--designspace',
         metavar='PATH',
@@ -139,13 +142,6 @@ def get_options(args):
         type=validate_path,
         help='path to design space file',
         required=True
-    )
-    parser.add_argument(
-        MKOT_OPT,
-        metavar='OPTIONS',
-        help="comma-separated set of 'makeotf' options",
-        type=_split_makeotf_options,
-        default=[]
     )
     options = parser.parse_args(args)
 

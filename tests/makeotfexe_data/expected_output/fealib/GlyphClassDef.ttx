@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont>
+
+  <GDEF>
+    <Version value="0x00010000"/>
+    <GlyphClassDef Format="1">
+      <ClassDef glyph="i" class="1"/>
+      <ClassDef glyph="j" class="2"/>
+      <ClassDef glyph="k" class="3"/>
+      <ClassDef glyph="l" class="4"/>
+    </GlyphClassDef>
+  </GDEF>
+
+</ttFont>

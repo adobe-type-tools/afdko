@@ -1,0 +1,7 @@
+# Test wrong dflt script and DFLT language.
+
+languagesystem dflt DFLT;
+
+feature liga {
+    sub f l by f_l;
+} liga;

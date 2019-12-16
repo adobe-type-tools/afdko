@@ -1,0 +1,51 @@
+## glyph[tag] {name,encoding,path}
+glyph[0] {.notdef,-,
+  600 width
+  endchar}
+glyph[1] {A,U+0041,
+  600 width
+  0 47 hstem
+  186 230 hstem
+  516 563 hstem
+  10 590 vstem
+  113 563 move
+  113 516 line
+  256 516 line
+  newhints
+  0 47 hstem
+  186 230 hstem
+  516 563 hstem
+  10 215 vstem
+  385 590 vstem
+  63 47 line
+  10 47 line
+  10 0 line
+  215 0 line
+  215 47 line
+  113 47 line
+  169 186 line
+  430 186 line
+  487 47 line
+  385 47 line
+  385 0 line
+  590 0 line
+  590 47 line
+  539 47 line
+  328 563 line
+  413 230 move
+  187 230 line
+  300 504 line
+  endchar}
+glyph[2] {acute,U+00B4,
+  600 width
+  503 618 hstem
+  215 411 vstem
+  411 618 move
+  304 618 line
+  215 503 line
+  268 503 line
+  endchar}
+glyph[3] {Aacute,U+00C1,
+  600 width
+  0 133 65 194 seac
+  endchar}

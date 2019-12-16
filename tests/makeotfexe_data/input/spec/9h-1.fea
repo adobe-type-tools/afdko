@@ -1,0 +1,8 @@
+# TABLES: vmtx
+
+table vmtx {
+    VertOriginY A 864;
+    VertAdvanceY A 964;
+    VertOriginY B 867;
+    VertAdvanceY B 867;
+} vmtx;

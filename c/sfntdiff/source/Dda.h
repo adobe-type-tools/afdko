@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef DA_H
-#define DA_H
+#ifndef DDA_H
+#define DDA_H
 
 #include <stdlib.h>
 
@@ -12,7 +12,7 @@
 Overview
 ========
 The da (dynamic array) library provides simple and flexible support for
-homogeneous arrays that automatically grow to accomodate new elements. da's are
+homogeneous arrays that automatically grow to accommodate new elements. da's are
 particularly useful in situations where the size of the array isn't known at
 compile or run time until the last element has been stored and no suitable
 default size can be determined. Such situations occur, for example, when data
@@ -20,7 +20,7 @@ is being read from a file and loaded into an array.
 
 The da object
 =============
-A da is implemented as a C stucture that contains a pointer to a dynamically
+A da is implemented as a C structure that contains a pointer to a dynamically
 allocated array and a few fields to control (re)allocation, and optional
 initialization, of elements of that array.
 
@@ -43,11 +43,11 @@ long cnt                        This is a count of the number of elements of
                                 the array that are in use which is also the
                                 index of the next free element of the array.
 
-unsigned long size              This is the total number of elements avilable
+unsigned long size              This is the total number of elements available
                                 in the array.
 
 unsigned long incr              This is the number of elements by which the
-                                array grows in order to accomodate a new index.
+                                array grows in order to accommodate a new index.
 
 int (*init)(<type> *element)    This is the address of a client-supplied
                                 function that initializes new elements of the
@@ -143,4 +143,4 @@ extern void da_SetMemFuncs(void *(*alloc)(size_t size),
                                                                  &(da).array[(da).cnt += (len), (da).cnt - (len)])                    \
                                                               : &(da).array[(da).cnt += (len), (da).cnt - (len)])
 
-#endif /* DA_H */
+#endif /* DDA_H */

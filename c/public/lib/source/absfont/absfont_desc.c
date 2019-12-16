@@ -91,7 +91,7 @@ static void fillFontDescElementSizes(abfFontDict *font,
     elem->StemSnapH = (unsigned char)Private->StemSnapH.cnt;
     elem->StemSnapV = (unsigned char)Private->StemSnapV.cnt;
 
-    /* Totalize values */
+    /* Total values */
     elem->valueCnt += (elem->BlueValues +
                        elem->OtherBlues +
                        elem->FamilyBlues +

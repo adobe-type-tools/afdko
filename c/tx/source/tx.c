@@ -54,6 +54,13 @@ static void cff_Help(txCtx h) {
     printText(ARRAY_LEN(text), text);
 }
 
+static void cff2_Help(txCtx h) {
+    static char *text[] = {
+#include "cff2.h"
+    };
+    printText(ARRAY_LEN(text), text);
+}
+
 static void dcf_Help(txCtx h) {
     static char *text[] = {
 #include "dcf.h"
@@ -194,7 +201,11 @@ static void help(txCtx h) {
                 afm_Help(h);
                 break;
             case mode_cff:
-                cff_Help(h);
+                if (h->cfw.flags & CFW_WRITE_CFF2) {
+                    cff2_Help(h);
+                } else {
+                    cff_Help(h);
+                }
                 break;
             case mode_cef:
                 cef_Help(h);
@@ -395,7 +406,7 @@ static void doFile(txCtx h, char *srcname) {
         fprintf(stderr, "--- Filename: %s\n", h->src.stm.filename);
     }
 
-    /* The font file we are reading may contain muliple fonts, e.g. a TTC or
+    /* The font file we are reading may contain multiple fonts, e.g. a TTC or
        multiple sfnt resources, so keep open until the last font processed */
     h->src.stm.flags |= STM_DONT_CLOSE;
 
@@ -601,7 +612,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 break;
             case opt_bc:
                 goto bc_gone;
-                break;
             case opt_dcf:
                 setMode(h, mode_dcf);
                 break;
@@ -679,10 +689,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                     case mode_dump:
                         h->abf.dump.level = 2;
                         break;
-                    case mode_pdf:
-                        fatal(h, "unimplemented option (-2) for mode (-pdf)");
-                        h->pdw.level = 2;
-                        break;
                     case mode_mtx:
                         h->mtx.level = 2;
                         break;
@@ -737,7 +743,7 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 h->flags |= PATH_SUPRESS_HINTS;
                 /* Setting the hint callbacks to NULL works for the most common
                    case where the callbacks have already been assigned by
-                   setMode. Hwoever, in a number of cases, the call backs are
+                   setMode. However, in a number of cases, the call backs are
                    assigned later, within beginFont. This, we need the flag, so
                    we can do the right thing there.*/
                 switch (h->mode) {
@@ -871,11 +877,11 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 }
                 break;
             case opt_Z:
+                if (h->mode != mode_cff)
+                    goto wrongmode;
 #if 0
                 /* Although CFW_NO_DEP_OPS is defined in cffwrite.h,
                   it is not used anywhere. */
-                if (h->mode != mode_cff)
-                    goto wrongmode;
                 h->cfw.flags |= CFW_NO_DEP_OPS;
 #endif
                 h->t1r.flags |= T1R_UPDATE_OPS;
@@ -1035,9 +1041,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                         h->t1w.flags &= ~T1W_ENCODE_MASK;
                         h->t1w.flags |= T1W_ENCODE_ASCII85;
                         break;
-                    case mode_bc:
-                        goto bc_gone;
-                        break;
                     default:
                         goto wrongmode;
                 }
@@ -1119,9 +1122,6 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                                     goto badarg;
                             }
                         }
-                        break;
-                    case mode_bc:
-                        goto bc_gone;
                         break;
                     default:
                         goto wrongmode;
@@ -1575,7 +1575,7 @@ int CTL_CDECL main(int argc, char *argv[]) {
         /* Option list ends with script option */
         int i;
 
-        /* Copy args preceeding -s */
+        /* Copy args preceding -s */
         for (i = 0; i < argc - 2; i++)
             *dnaNEXT(h->script.args) = argv[i];
 

@@ -14,7 +14,7 @@ typedef enum _proofOutputType {
 } proofOutputType;
 
 typedef struct _proofOptions {
-    /* the following are in Character-space coords */
+    /* the following are in Character-space coordinates */
     Int16 vorigin;
     Card16 voriginflags;
     Int16 baseline;

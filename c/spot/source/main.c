@@ -1084,7 +1084,7 @@ IntN main(IntN argc, Byte8 *argv[]) {
     cmdlinetype *cmdl;
     Byte8 foundXswitch = 0;
 #endif
-    int status = 0; /* = setjmp(global.env); only ued when compiled as lib */
+    int status = 0; /* = setjmp(global.env); only used when compiled as lib */
 
     if (status) {
 #if AUTOSCRIPT
@@ -1095,7 +1095,7 @@ IntN main(IntN argc, Byte8 *argv[]) {
             exit(status - 1); /* Finish processing */
     }
     gcr.reportNumber = 0;
-    /*  value = setjmp(mark); only used when comiled as lib */
+    /*  value = setjmp(mark); only used when compiled as lib */
 
     if (value == -1)
         exit(1);

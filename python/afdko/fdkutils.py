@@ -9,7 +9,7 @@ import os
 import subprocess
 import tempfile
 
-__version__ = '1.3.5'
+__version__ = '1.3.7'
 
 
 def validate_path(path_str):
@@ -57,6 +57,8 @@ def get_font_format(font_file_path):
                 return 'OTF'
             elif head in (b'\x00\x01\x00\x00', b'true'):
                 return 'TTF'
+            elif head == b'ttcf':
+                return 'TTC'
             elif head[0:2] == b'\x01\x00':
                 return 'CFF'
             elif head[0:2] == b'\x80\x01':
@@ -89,20 +91,26 @@ def run_shell_command(args, suppress_output=False):
 
 
 def run_shell_command_logging(args):
+    """
+    Runs a shell command while logging both standard output and standard error.
+
+    An earlier version of this function that used Popen.stdout.readline()
+    was failing intermittently in CI, so now we're trying this version that
+    uses Popen.communicate().
+    """
     try:
         proc = subprocess.Popen(args,
                                 stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT)
-        while True:
-            out = proc.stdout.readline().rstrip()
-            if out:
-                print(out.decode())
-            if proc.poll() is not None:
-                out = proc.stdout.readline().rstrip()
-                if out:
-                    print(out.decode())
-                break
-        return True
+                                stderr=subprocess.STDOUT,
+                                universal_newlines=True)
+        out = proc.communicate()[0]
+        print(out, end='')
+        if proc.returncode != 0:
+            msg = " ".join(args)
+            print(f"Error executing command '{msg}'")
+            return False
+        else:
+            return True
     except (subprocess.CalledProcessError, OSError) as err:
         msg = " ".join(args)
         print(f"Error executing command '{msg}'\n{err}")
@@ -133,24 +141,32 @@ def get_shell_command_output(args, std_error=False):
     return success, str_output
 
 
-def runShellCmd(cmd):
+def runShellCmd(cmd, shell=True, timeout=None):
     try:
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+        p = subprocess.Popen(cmd, shell=shell, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
-        stdoutdata, _ = p.communicate()
+        stdoutdata, _ = p.communicate(timeout=timeout)
         str_output = stdoutdata.decode('utf-8', 'backslashreplace')
 
+        if p.returncode != 0:  # must be called *after* communicate()
+            print(f"Error executing command '{cmd}'\n{str_output}")
+            str_output = ""
+
+    except subprocess.TimeoutExpired as err:
+        p.kill()
+        print(f"{err}")  # the 'err' will contain the command
+        str_output = ""
+
     except (subprocess.CalledProcessError, OSError) as err:
-        msg = f"Error executing command '{cmd}'\n{err}"
-        print(msg)
+        print(f"Error executing command '{cmd}'\n{err}")
         str_output = ""
 
     return str_output
 
 
-def runShellCmdLogging(cmd):
+def runShellCmdLogging(cmd, shell=True):
     try:
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+        proc = subprocess.Popen(cmd, shell=shell, stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT)
         while 1:
             output = proc.stdout.readline().rstrip()
@@ -158,14 +174,17 @@ def runShellCmdLogging(cmd):
                 print(output.decode('utf-8', 'backslashreplace'))
 
             if proc.poll() is not None:
+                if proc.returncode != 0:  # must be called *after* poll()
+                    print(f"Error executing command '{cmd}'")
+                    return 1
+
                 output = proc.stdout.readline().rstrip()
                 if output:
                     print(output.decode('utf-8', 'backslashreplace'))
                 break
 
     except (subprocess.CalledProcessError, OSError) as err:
-        msg = f"Error executing command '{cmd}'\n{err}"
-        print(msg)
+        print(f"Error executing command '{cmd}'\n{err}")
         return 1
 
     return 0

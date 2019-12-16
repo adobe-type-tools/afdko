@@ -515,19 +515,16 @@ long nam_generateLastResortInstancePSName(nam_name nameTbl,
 
     familyNameLen = (unsigned long)nameLen;
 
-    /* generate a SHA1 value of the generated name as the identififier in a last resort name.
+    /* generate a SHA1 value of the generated name as the identifier in a last resort name.
      */
     hashLen = sizeof(sha1_hash);
-    for (i = 0; i < 2; i++) {
-        if (familyNameLen + hashLen * 2 + 5 < instanceNameLen)
-            break;
-
-        if (i >= 1) {
+    if (familyNameLen + hashLen * 2 + 5 >= instanceNameLen) {
+        hashLen /= 2; /* give it another chance by halving the hash length */
+        if (familyNameLen + hashLen * 2 + 5 >= instanceNameLen) {
             sscb->message(sscb, "name buffer not long enough to generate a last resort variable font instance name");
             nameLen = -2;
             goto cleanup;
         }
-        hashLen /= 2; /* give it another chance by halvening the hash length */
     }
     nameLen = familyNameLen;
     STRNCPY_S(instanceName, instanceNameLen, buffer, nameLen);

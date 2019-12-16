@@ -1,0 +1,7 @@
+# no glyphs are marked as part of the input sequence.
+markClass [acute grave] <anchor 500 700> @TOP_MARKS;
+markClass [cedilla] <anchor 500 -10> @BOTTOM_MARKS;
+feature test {
+    pos ligature c_t <anchor 500 800> mark @TOP_MARKS <anchor 500 -200> mark @BOTTOM_MARKS
+        ligComponent <anchor 1500 800> mark @TOP_MARKS <anchor 1500 -200> mark @BOTTOM_MARKS A B;
+} test;

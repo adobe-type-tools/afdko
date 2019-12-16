@@ -209,8 +209,8 @@ static DictKeyMap keyMap[] = {
     {"FontMatrix", iFontMatrix},
     {"FontName", iFontName},
     {"FontType", iFontType},
-    {"ForceBold", iignore},          /* As of 5/20/2010, Adobe is supressing ForceBold operators in CFF fonts. */
-    {"ForceBoldThreshold", iignore}, /* As of 5/20/2010, Adobe is supressing ForceBold operators in CFF fonts. */
+    {"ForceBold", iignore},          /* As of 5/20/2010, Adobe is suppressing ForceBold operators in CFF fonts. */
+    {"ForceBoldThreshold", iignore}, /* As of 5/20/2010, Adobe is suppressing ForceBold operators in CFF fonts. */
     {"FullName", iFullName},
     {"GDBytes", iGDBytes},
     {"ICSdict", iignore},  /* JensonMM */
@@ -278,7 +278,7 @@ typedef struct {
     psToken value;                                  /* PostScript token corresponding to key */
     short flags;                                    /* Control flags */
 #define KEY_SEEN (1 << 0)                           /* Key seen in font */
-#define KEY_NOEMBED (1 << 1)                        /* Don't save key in embeded font (TC_EMBED set) */
+#define KEY_NOEMBED (1 << 1)                        /* Don't save key in embedded font (TC_EMBED set) */
     short op;                                       /* CFF operator associated with key */
 } Key;
 
@@ -610,7 +610,7 @@ static void readChars(parseCtx h) {
         }
 #if TC_EURO_SUPPORT
         else if ((g->flags & TC_FORCE_NOTDEF) && (tc_strncmp(name.data, name.length, ".notdef") == 0)) {
-            parseWarning(g, ".notdef in source font supressed.");
+            parseWarning(g, ".notdef in source font suppressed.");
             seenNotdef = 1;
         }
 #endif /* TC_EURO_SUPPORT */
@@ -673,10 +673,8 @@ static void readChars(parseCtx h) {
 
                 if (g->flags & TC_NOOLDOPS && sid < TABLE_LEN(stdcodes)) {
                     /* Save standard-encoded char index */
-                    int code = stdcodes[sid];
-                    if (code != -1) {
-                        h->component.stdindex[code] = h->chars.cnt - 1;
-                    }
+                    uint8_t code = stdcodes[sid];
+                    h->component.stdindex[code] = h->chars.cnt - 1;
                 }
             } /* end if-else sid == SID_UNDEF */
         } else {
@@ -688,20 +686,18 @@ static void readChars(parseCtx h) {
                 (h->encoding.std ||
                  ((bname = h->encoding.custom[stdcodes[sid]]) != NULL &&
                   tc_strncmp(name.data, name.length, bname) == 0))) {
-                int code = stdcodes[sid];
-                if (code != -1) {
-                    /* Standard encoded glyph save as possible component */
-                    new = dnaNEXT(h->component.chars);
-                    new->index = h->buf.cnt;
-                    new->length = binlen;
-                    new->code = code;
-                    new->id = sid;
-                    new->encrypted = 1;
+                uint8_t code = stdcodes[sid];
+                /* Standard encoded glyph save as possible component */
+                new = dnaNEXT(h->component.chars);
+                new->index = h->buf.cnt;
+                new->length = binlen;
+                new->code = code;
+                new->id = sid;
+                new->encrypted = 1;
 
-                    /* Save standard-encoded char index */
-                    h->component.stdindex[code] =
-                        COMP_CHAR | (h->component.chars.cnt - 1);
-                }
+                /* Save standard-encoded char index */
+                h->component.stdindex[code] =
+                    COMP_CHAR | (h->component.chars.cnt - 1);
             }
         }
 
@@ -817,7 +813,7 @@ static void saveEncoding(parseCtx h, Encoding *encoding) {
     }
 }
 
-/* Read Chameleon data. The descriptor is represernted in the font dict of a
+/* Read Chameleon data. The descriptor is represented in the font dict of a
    Type 1 wrapped font as: /Chameleon N RD ~N~binary~bytes~ def */
 static void readChameleon(parseCtx h) {
     static char *name[] = {
@@ -961,7 +957,7 @@ static int CDECL cmpChars(const void *first, const void *second) {
     if (a->aliasOrder != -1 && b->aliasOrder != -1) {
         return a->aliasOrder - b->aliasOrder; /* Both have an order from the glyph alias file: sort by aliasOrder */
     } else if (a->aliasOrder != -1 || b->aliasOrder != -1) {
-        return b->aliasOrder - a->aliasOrder + 1; /* Mixed: aliasOrder preceeds encoding */
+        return b->aliasOrder - a->aliasOrder + 1; /* Mixed: aliasOrder precedes encoding */
     } else
 #endif
         if (a->code != -1 && b->code != -1) {
@@ -969,7 +965,7 @@ static int CDECL cmpChars(const void *first, const void *second) {
     } else if (a->code == -1 && b->code == -1) {
         return a->id - b->id; /* Both unencoded: sort by SID */
     } else {
-        return b->code - a->code + 1; /* Mixed: encoded preceeds unencoded */
+        return b->code - a->code + 1; /* Mixed: encoded precedes unencoded */
     }
 }
 
@@ -1356,7 +1352,7 @@ static void addFont(parseCtx h) {
 
 #if TC_EURO_SUPPORT
     char_reorder_index = i; /* This is the next-glyph index for adding glyphs.               */
-                            /* Needs to be one more than the number of glypsh added to date. */
+                            /* Needs to be one more than the number of glyphs added to date. */
 
     /* add chars from FillInMM and Euro built-in fonts */
     /* ---------------------------------------------------------------------- */
@@ -1415,7 +1411,7 @@ static void addFont(parseCtx h) {
             if (sindexSeenGlyphNameId(g, SID_LOWERCASE_X)) {
                 unsigned gl_id = 1;        /* skip .notdef, gl_id 0. Either we don't add it at all, or we did it above. */
                 char **charListptr = NULL; /* pointer to an array of string pointers. Last one is NULL. */
-                                           /* List of glyph names which correspond to the synethetic glyph */
+                                           /* List of glyph names which correspond to the synthetic glyph */
 
                 /* addStdGlyph may or may not increment char_reorder_index, depending on whether the glyph needed to be added. */
                 /* getNextStdGlyph returns 0 on the call after the last glyphs in the list has been processed, else it returns 1. */
@@ -1891,7 +1887,7 @@ static void saveMM(parseCtx h, DICT *dict, int iKey) {
     /* Check consistency of WeightVector and BlendDesignPositions arrays */
     nAxes = cnt / g->nMasters;
     if (nAxes > T1_MAX_AXES || nAxes * g->nMasters != cnt) {
-        parseFatal(g, "inconsitent WeightVector/BlendDesignPositions");
+        parseFatal(g, "inconsistent WeightVector/BlendDesignPositions");
     }
 
     /* Parse and check BlendDesignMap */
@@ -2366,7 +2362,7 @@ static void saveDelta(parseCtx h, DICT *dict, int iKey) {
     }
 }
 
-/* If we are flattening a syntheticly obliqued font, it becomes an italic font,
+/* If we are flattening a synthetically obliqued font, it becomes an italic font,
    and the stem snapV width must be saved as an empty array. */
 static void saveStemSnapV(parseCtx h, DICT *dict, int iKey) {
     if (h->font->synthetic.oblique_term == 0.0) {
@@ -2374,7 +2370,7 @@ static void saveStemSnapV(parseCtx h, DICT *dict, int iKey) {
     }
 }
 
-/* If we are flattening a syntheticly obliqued font, it becomes an italic font,
+/* If we are flattening a synthetically obliqued font, it becomes an italic font,
    then the stem stdVW width must be set to (original StdVW * cos(italic-angle) */
 static void saveStdVW(parseCtx h, DICT *dict, int iKey) {
     if (h->font->synthetic.oblique_term == 0.0) {
@@ -2385,7 +2381,7 @@ static void saveStdVW(parseCtx h, DICT *dict, int iKey) {
         int cnt = parseArray(h, iKey, TX_MAX_BLUE_VALUES * h->g->nMasters, array);
         int i;
 
-        /* fix array values to account for obliqueing */
+        /* fix array values to account for obliquing */
         for (i = 0; i < cnt; i++) {
             double width, angleRadians = atan(h->font->synthetic.oblique_term);
             width = floor(array[i] * cos(angleRadians));
@@ -2422,7 +2418,7 @@ static void saveForceBold(parseCtx h, DICT *dict, int iKey) {
     psToken *token = &key->value;
     char *p = psGetValue(h->ps, token);
 
-    /* As of 5/20/2010. we are diabling the ForceBold keyword. */
+    /* As of 5/20/2010. we are disabling the ForceBold keyword. */
     return;
 
     if (token->type == PS_ARRAY || token->type == PS_PROCEDURE) {
@@ -2577,7 +2573,7 @@ static void dictInit(parseCtx h) {
     }
 }
 
-/* Save key if key seen and has save function and embedable (if embedding) */
+/* Save key if key seen and has save function and embeddable (if embedding) */
 static void saveDictKey(parseCtx h, DICT *dict, int iKey) {
     Key *key = &h->keys[iKey];
     if ((key->flags & KEY_SEEN) && key->save != NULL &&
@@ -2889,7 +2885,7 @@ static void cidReadSubrs(parseCtx h, int fd) {
 
         subrLength = nextSubrOffset - thisSubrOffset;
         if (subrLength == 0 || subrLength > CS_MAX_SIZE) {
-            tcFatal(h->g, "bad subr length fd[%d].subr[%u]", fd, i);
+            tcFatal(h->g, "bad subr length fd[%d].subr[%ld]", fd, i);
         }
 
         csAddSubr(h->g,
@@ -2927,7 +2923,7 @@ static void cidReadChars(parseCtx h) {
         /* Use subset list or enumerate entire range. */
         Char *new;
         unsigned CID = icid;
-        char *pOffset = &h->buf.array[h->cid.MapOffset + CID * tableBytes];
+        char *pOffset = &h->buf.array[h->cid.MapOffset + (long)CID * tableBytes];
         long thisCSOffset =
             getOffset(h, pOffset + h->cid.FDBytes, h->cid.GDBytes);
         long nextCSOffset =

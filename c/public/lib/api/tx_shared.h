@@ -6,6 +6,9 @@
  Code shared by tx, rotatefont, and mergefonts.
  */
 
+#ifndef TX_SHARED_H
+#define TX_SHARED_H
+
 #include "ctlshare.h"
 #include "cfembed.h"
 #include "cffread.h"
@@ -122,7 +125,7 @@ typedef struct /* Data stream */
 {
     short type;
     short flags;
-#define STM_TMP_ERR    (1 << 0) /* Temporary stream error occured */
+#define STM_TMP_ERR    (1 << 0) /* Temporary stream error occurred */
 #define STM_DONT_CLOSE (1 << 1) /* Don't close stream */
     char *filename;
     FILE *fp;
@@ -232,7 +235,7 @@ struct txCtx_ {
 #define NO_UDV_CLAMPING     (1 << 10) /* Don't clamp UVD's */
 #define SUBSET__EXCLUDE_OPT (1 << 11) /* use glyph list to exclude glyphs, instead of including them */
 #define SUBSET_SKIP_NOTDEF  (1 << 12) /* While this is set, don't force the notdef into the current subset. */
-#define SUBSET_HAS_NOTDEF   (1 << 13) /* Indcates that notdef has been added, no need to force it in.*/
+#define SUBSET_HAS_NOTDEF   (1 << 13) /* Indicates that notdef has been added, no need to force it in.*/
 #define PATH_REMOVE_OVERLAP (1 << 14) /* Do not remove path overlaps */
 #define PATH_SUPRESS_HINTS  (1 << 15) /* Do not remove path overlaps */
     int mode;                         /* Current mode */
@@ -267,8 +270,8 @@ struct txCtx_ {
     dnaDCL(FontRec, fonts); /* Source font records */
     struct                  /* Macintosh resources */
     {
-        dnaDCL(ResInfo, map); /* Resouce map */
-        dnaDCL(char, names);  /* Resouce names */
+        dnaDCL(ResInfo, map); /* Resource map */
+        dnaDCL(char, names);  /* Resource names */
     } res;
     struct /* AppleSingle/Double data */
     {
@@ -580,3 +583,5 @@ void svrReadFont(txCtx h, long origin);
 void t1rReadFont(txCtx h, long origin);
 void ttrReadFont(txCtx h, long origin, int iTTC);
 void ufoReadFont(txCtx h, long origin);
+
+#endif /* TX_SHARED_H */

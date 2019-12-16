@@ -168,7 +168,7 @@ typedef struct /* Per-glyph objects */
         OBJ mtx_value;
         OBJ obj;
     } page;
-    OBJ bearings; /* Sidebearing tics */
+    OBJ bearings; /* Side-bearing tics */
 } Glyph;
 
 enum /* Object streams */
@@ -194,7 +194,7 @@ struct pdwCtx_ {
     struct            /* Document objects */
     {
         OBJ init_page;    /* Initialize page state */
-        OBJ root;         /* Catolog */
+        OBJ root;         /* Catalog */
         OBJ header;       /* Page header */
         OBJ info;         /* Document info */
         OBJ tile_mtx_key; /* Tile metrics key */
@@ -231,7 +231,7 @@ struct pdwCtx_ {
     } path;
     dnaDCL(Layer, layers); /* Hint layers */
     dnaDCL(Glyph, glyphs); /* Glyph data */
-    struct                 /* Temorary glyph data */
+    struct                 /* Temporary glyph data */
     {
         float hAdv;
         float scale;
@@ -364,16 +364,24 @@ int pdwFree(pdwCtx h) {
 
 /* Set time fields. */
 static void settime(pdwCtx h) {
-    time_t now = time(NULL);
-    struct tm utc = *gmtime(&now);
-    struct tm local = *localtime(&now);
-    double tzoff = difftime(mktime(&utc), mktime(&local));
-    long tzmins = (long)fabs(tzoff) / 60;
+    time_t seconds_since_epoch;
+    struct tm utc_time;
+    struct tm local_time;
+    double tzoff;
+    long tzmins;
 
-    strftime(h->date, sizeof(h->date), "%d %b %y", &local);
-    strftime(h->time, sizeof(h->time), "%H:%M", &local);
+    time(&seconds_since_epoch);
 
-    strftime(h->pdfdate, sizeof(h->pdfdate), "D:%Y%m%d%H%M%S", &local);
+    SAFE_GMTIME(&seconds_since_epoch, &utc_time);
+    SAFE_LOCALTIME(&seconds_since_epoch, &local_time);
+
+    tzoff = difftime(mktime(&utc_time), mktime(&local_time));
+    tzmins = (long)fabs(tzoff) / 60;
+
+    strftime(h->date, sizeof(h->date), "%d %b %y", &local_time);
+    strftime(h->time, sizeof(h->time), "%H:%M", &local_time);
+
+    strftime(h->pdfdate, sizeof(h->pdfdate), "D:%Y%m%d%H%M%S", &local_time);
     sprintf(&h->pdfdate[strlen(h->pdfdate)], "%c%02ld'%02ld'",
             (tzoff == 0) ? 'Z' : (tzoff < 0) ? '-' : '+', tzmins / 60L, tzmins % 60L);
 }
@@ -750,7 +758,7 @@ static void drawCoord(pdwCtx h, float ax, float ay) {
         float y;
         char buf[15];
 
-        /* Make vector 90 degress counter clockwise to a->c */
+        /* Make vector 90 degrees counter clockwise to a->c */
         Vector s = makeVec(h->path.bx - ax, h->path.by - ay);
         Vector t = makeVec(h->path.cx - h->path.bx, h->path.cy - h->path.by);
         Vector u = makeVec(s.x + t.x, s.y + t.y);
@@ -794,7 +802,7 @@ static void drawCoord(pdwCtx h, float ax, float ay) {
     savePt(h, ax, ay);
 }
 
-/* Draw circle of radius r center x,y using 4 bezier curves. */
+/* Draw circle of radius r center x,y using 4 Bezier curves. */
 static void drawCircle(pdwCtx h, int iStm, float x, float y, float r) {
     double left = RND(1, x - r);
     double bottom = RND(1, y - r);

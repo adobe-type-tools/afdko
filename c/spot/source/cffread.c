@@ -47,7 +47,7 @@ typedef Int32 Fixed;
 #define FixedHalf ((Fixed)0x00008000)
 
 /* Type conversions */
-#define INT(f) (((f)&0xffff0000) >> 16)
+#define INT(f) ((int16_t)(((f)&0xffff0000) >> 16))
 #define FRAC(f) ((f)&0x0000ffff)
 #define INT2FIX(i) ((Fixed)((Card32)i) << 16)
 #define FIX2INT(f) ((short)(((f) + FixedHalf) >> 16))
@@ -404,7 +404,7 @@ static Fixed popFix(cffCtx h) {
             return h->stack.array[h->stack.cnt].f;
         case STK_LONG: {
             long l = h->stack.array[h->stack.cnt].l;
-            if (l < (long)INT(FixedMin) || l > (long)INT(FixedMax))
+            if (l < INT(FixedMin) || l > INT(FixedMax))
                 fatal(h, "range check\n");
             else
                 return INT2FIX(l);
@@ -1806,11 +1806,11 @@ static void DICTRead(cffCtx h, int length, Offset offset, int enable) {
                         h->stack.cnt = 0;
                         if (!(h->flags & WV_SET)) {
                             /* Convert UDV to WV if WV not already set */
-                            unsigned length;
+                            unsigned string_length;
                             Offset save = TELL(h);
-                            t2Read(h, getProcOffset(h, h->font.mm.NDV, &length),
+                            t2Read(h, getProcOffset(h, h->font.mm.NDV, &string_length),
                                    cstr_DICT, INT_MAX);
-                            t2Read(h, getProcOffset(h, h->font.mm.CDV, &length),
+                            t2Read(h, getProcOffset(h, h->font.mm.CDV, &string_length),
                                    cstr_DICT, INT_MAX);
                             h->flags |= WV_SET;
                             seekbyte(h, save);

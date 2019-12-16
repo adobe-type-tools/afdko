@@ -1,0 +1,4 @@
+# Test positioning values are allowed only in the marked glyph sequence.
+lookup test {
+    pos A' B' C 10;
+} test;

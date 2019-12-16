@@ -84,8 +84,8 @@ static void drawTile(abfDrawCtx h, float x, float y,
 static void pageBeg(abfDrawCtx h, abfGlyphInfo *info) {
     char datestr[20];
     char timestr[20];
-    time_t now;
-    struct tm *tm;
+    time_t seconds_since_epoch;
+    struct tm local_time;
     float y;
     char *fontname;
 
@@ -97,10 +97,10 @@ static void pageBeg(abfDrawCtx h, abfGlyphInfo *info) {
         fontname = "<unknown>";
 
     /* Make formatted date and time string */
-    now = time(NULL);
-    tm = localtime(&now);
-    strftime(datestr, sizeof(datestr), "Date: %m/%d/%y", tm);
-    strftime(timestr, sizeof(timestr), "Time: %H:%M", tm);
+    seconds_since_epoch = time(NULL);
+    SAFE_LOCALTIME(&seconds_since_epoch, &local_time);
+    strftime(datestr, sizeof(datestr), "Date: %m/%d/%y", &local_time);
+    strftime(timestr, sizeof(timestr), "Time: %H:%M", &local_time);
 
     fprintf(h->fp,
             "%% page: %d\n"
@@ -397,7 +397,7 @@ static void drawLabel(abfDrawCtx h, float ax, float ay) {
         return; /* Tile mode */
 
     if (h->path.cnt >= 2) {
-        /* Make vector 90 degress counter clockwise to a->c */
+        /* Make vector 90 degrees counter clockwise to a->c */
         Vector s = makeVec(h->path.bx - ax, h->path.by - ay);
         Vector t = makeVec(h->path.cx - h->path.bx, h->path.cy - h->path.by);
         Vector u = makeVec(s.x + t.x, s.y + t.y);

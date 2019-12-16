@@ -98,6 +98,21 @@ def test_fontplot2_lf_option(font_filename, glyphs):
                    '-s', '/CreationDate', '-e', 'macroman'])
 
 
+def test_fontsetplot():
+    f1 = 'SourceSansPro-Black.otf'
+    f2 = 'SourceSansPro-BlackIt.otf'
+    pdf_filename = "fontsetplot_otf_glyphs_2-7.pdf"
+    fp1 = get_input_path(f1)
+    fp2 = get_input_path(f2)
+    save_path = get_temp_file_path()
+    runner(['-t', 'fontsetplot', '-o', 'o', f'_{save_path}', 'dno',
+            'g', '_2-7', '=pageIncludeTitle', '_0', f'_{fp1}', f'_{fp2}'])
+    expected_path = get_expected_path(pdf_filename)
+
+    assert(differ([expected_path, save_path,
+                   '-s', '/CreationDate', '-e', 'macroman']))
+
+
 @pytest.mark.parametrize('filename', ['SourceSansPro-Black',
                                       'SourceSansPro-BlackIt'])
 def test_waterfallplot(filename):

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="Udieresis" format="1">
+	<advance width="661"/>
+	<outline>
+		<contour>
+			<point x="582" y="719" type="line"/>
+			<point x="490" y="719" type="line"/>
+			<point x="490" y="255" type="line"/>
+			<point x="490" y="120"/>
+			<point x="458" y="51"/>
+			<point x="329" y="51" type="curve"/>
+			<point x="202" y="51"/>
+			<point x="170" y="122"/>
+			<point x="170" y="255" type="curve"/>
+			<point x="170" y="719" type="line"/>
+			<point x="79" y="719" type="line"/>
+			<point x="79" y="260" type="line"/>
+			<point x="79" y="57"/>
+			<point x="154" y="-14"/>
+			<point x="329" y="-14" type="curve"/>
+			<point x="509" y="-14"/>
+			<point x="582" y="60"/>
+			<point x="582" y="259" type="curve"/>
+		</contour>
+		<contour>
+			<point x="198" y="836" type="line"/>
+			<point x="198" y="747" type="line"/>
+			<point x="265" y="747" type="line"/>
+			<point x="265" y="836" type="line"/>
+		</contour>
+		<contour>
+			<point x="396" y="836" type="line"/>
+			<point x="396" y="747" type="line"/>
+			<point x="463" y="747" type="line"/>
+			<point x="463" y="836" type="line"/>
+		</contour>
+	</outline>
+</glyph>

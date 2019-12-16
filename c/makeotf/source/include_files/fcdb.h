@@ -66,7 +66,7 @@ struct fcdbCallbacks_ {
    successive calls to refill() return consecutive blocks of data starting with
    the first byte in the database file. The fileid argument is a copy of the
    argument of the same name passed to fcdbAddFile(). The end-of-file
-   condition is signalled to the library by appending a null byte to the
+   condition is signaled to the library by appending a null byte to the
    returned buffer. (A client might implement refill() with fread() and fill
    buffers of BUFSIZ bytes.) */
 
@@ -310,7 +310,7 @@ void fcdbFree(fcdbCtx h);
    from Windows font data. Such fonts may be correctly supported by specifying
    an encoding in the font record using the the macenc keyword. Each Macintosh
    encoding line specifies a single code to glyph name mapping. Normally, many
-   such lines must be specifed in order to build up the complete encoding for
+   such lines must be specified in order to build up the complete encoding for
    one font.
 
    The value specified with the macenc keyword consists of a code number in the

@@ -1307,7 +1307,7 @@ static void ttParse(cefCtx h) {
     }
 
     /* Parse font */
-    if (ttrBegFont(h->ctx.ttr, TTR_EXACT_PATH, h->src.origin, 0, &h->top))
+    if (ttrBegFont(h->ctx.ttr, TTR_EXACT_PATH, h->src.origin, 0, &h->top, 0))
         fatal(h, cefErrTTParse);
 
     /* Check name override */
@@ -1470,13 +1470,13 @@ static void coverageSafe(cefCtx h) {
     h->coverage.fmt2.RangeRecord.size = 0;
 }
 
-/* Initialize converage-specific data. */
+/* Initialize coverage-specific data. */
 static void coverageNew(cefCtx h) {
     dnaINIT(h->ctx.dna, h->coverage.gids, 100, 200);
     dnaINIT(h->ctx.dna, h->coverage.fmt2.RangeRecord, 50, 100);
 }
 
-/* Free converage-specific data. */
+/* Free coverage-specific data. */
 static void coverageFree(cefCtx h) {
     dnaFREE(h->coverage.gids);
     dnaFREE(h->coverage.fmt2.RangeRecord);
@@ -1975,8 +1975,8 @@ int cefMakeEmbeddingFont(cefCtx h, cefEmbedSpec *spec, cefMapCallback *map) {
 
         /* Add glyph names to subset */
         for (i = 0; i < h->subset.cnt; i++) {
-            GlyphMap *map = &h->subset.array[i];
-            map->gname = spec->subset.names[map->id];
+            GlyphMap *glyph_map = &h->subset.array[i];
+            glyph_map->gname = spec->subset.names[glyph_map->id];
         }
 
         /* Sort subset by glyph name */
@@ -2143,7 +2143,7 @@ cefCtx cefNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 
     HANDLER
 
-    /* Initilization failed */
+    /* Initialization failed */
     cefFree(h);
     h = NULL;
 
