@@ -6,7 +6,7 @@ Following are some guidelines and information about contributing, mostly so you 
 
 ## Project Goals
  - Maintain a _high-quality_, useful set of tools for working with OpenType fonts
- - Keep the toolset current with changes related standards (Unicode, OpenType, etc.)
+ - Keep the toolset current with changes to related standards (Unicode, OpenType, etc.)
  - Promote the use of the AFDKO for creating and editing OpenType fonts
 
 ## How to contribute
