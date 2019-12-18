@@ -19,7 +19,7 @@ If you'd like to contribute but are not sure where or how, here are some suggest
  - Improve [test coverage](https://codecov.io/gh/adobe-type-tools/afdko/branch/develop), particularly modules that have very low or no coverage currently.
 
 ### What if I just have a question?
-Please open an [Issue](https://github.com/adobe-type-tools/afdko/issues/new) and ask your question there. It is helpful to label questions with the "question" label.
+First, **please check whether [someone else has already asked a similar question](https://github.com/adobe-type-tools/afdko/issues?utf8=%E2%9C%93&q=is%3Aissue+label%3Aquestion)**. If you don't see anything related to your question, open a new [Issue](https://github.com/adobe-type-tools/afdko/issues/new) and ask there.
 
 ### Branches and Pull Requests
 All contributions are handled through the GitHub Pull Request process. You may do this directly via a branch of AFDKO's `develop` branch or via a fork of AFDKO.
