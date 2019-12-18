@@ -14,8 +14,10 @@ from fontTools.ttLib import TTFont, getTableModule
 from fontTools.ufoLib.errors import UFOLibError
 from defcon import Font
 
+from afdko.fdkutils import get_font_format
 
-__version__ = '0.2.2'
+
+__version__ = '0.2.3'
 
 
 PUBLIC_PSNAMES = "public.postscriptNames"
@@ -273,14 +275,6 @@ def get_glyph_names_mapping(ufo_path):
         return ufo, ufo.lib[PUBLIC_PSNAMES]
 
     return ufo, get_goadb_names_mapping(ufo_path)
-
-
-def get_font_format(font_file_path):
-    with open(font_file_path, "rb") as f:
-        head = f.read(4).decode()
-        if head in ("\0\1\0\0", "true"):
-            return "TTF"
-        return None
 
 
 def validate_font_path(path):
