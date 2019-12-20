@@ -278,13 +278,12 @@ def get_glyph_names_mapping(ufo_path):
     return ufo, get_goadb_names_mapping(ufo_path)
 
 
-def validate_font_path(path):
-    path = os.path.realpath(path)
-    if not (os.path.isfile(path) and get_font_format(path) == 'TTF'):
-        print(f"ERROR: {path} is not a valid TrueType font file path.",
-              file=sys.stderr)
-        return None
-    return path
+def _validate_font_path(path_str):
+    vpath = os.path.abspath(os.path.realpath(path_str))
+    if os.path.isfile(vpath) and (get_font_format(vpath) == 'TTF'):
+        return vpath
+    raise argparse.ArgumentTypeError(
+        f"'{path_str}' is not a valid TrueType font file path.")
 
 
 def get_options(args):
@@ -306,21 +305,18 @@ def get_options(args):
     parser.add_argument(
         'input_path',
         metavar='FONT',
+        type=_validate_font_path,
         help='TTF font file.',
     )
     options = parser.parse_args(args)
-    options.font_path = validate_font_path(options.input_path)
     return options
 
 
 def main(args=None):
     opts = get_options(args)
 
-    if not opts.font_path:
-        return 1
-
     # Find UFO file in the same directory
-    ufo_path = get_ufo_path(opts.font_path)
+    ufo_path = get_ufo_path(opts.input_path)
     if not ufo_path:
         print(f"ERROR: No UFO font was found for {opts.input_path}",
               file=sys.stderr)
