@@ -35,10 +35,6 @@ EMPTY_LIB = b"""<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-class Object(object):
-    pass
-
-
 def _get_test_ttf_path():
     return get_input_path(TEST_TTF_FILENAME)
 
@@ -222,11 +218,8 @@ def test_get_glyph_names_mapping_names_from_goadb():
 def test_componentize():
     ttf_path = _get_test_ttf_path()
     save_path = get_temp_file_path()
-    opts = Object()
-    setattr(opts, 'font_path', ttf_path)
-    setattr(opts, 'output_path', save_path)
     ufo, ps_names = ttfcomp.get_glyph_names_mapping(_get_test_ufo_path())
-    ttcomp_obj = ttfcomp.TTComponentizer(ufo, ps_names, opts)
+    ttcomp_obj = ttfcomp.TTComponentizer(ufo, ps_names, ttf_path, save_path)
     ttcomp_obj.componentize()
 
     # 'get_composites_data' method

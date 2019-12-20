@@ -17,7 +17,7 @@ from defcon import Font
 from afdko.fdkutils import get_font_format
 
 
-__version__ = '0.2.3'
+__version__ = '0.3.0'
 
 
 PUBLIC_PSNAMES = "public.postscriptNames"
@@ -36,10 +36,11 @@ class ComponentsData(object):
 
 
 class TTComponentizer(object):
-    def __init__(self, ufo, ps_names, options):
+    def __init__(self, ufo, ps_names, input_path, output_path=None):
         self.ufo = ufo
         self.ps_names = ps_names
-        self.opts = options
+        self.input_path = input_path
+        self.output_path = output_path
         self.composites_data = {}
         self.comp_count = 0
 
@@ -105,7 +106,7 @@ class TTComponentizer(object):
 
         Updates a count of the glyphs that got componentized.
         """
-        font = TTFont(self.opts.font_path)
+        font = TTFont(self.input_path)
         glyf_table = font['glyf']
 
         for gname in self.composites_data:
@@ -123,10 +124,10 @@ class TTComponentizer(object):
             glyph.numberOfContours = -1
             self.comp_count += 1
 
-        if self.opts.output_path:
-            font.save(os.path.realpath(self.opts.output_path))
+        if self.output_path:
+            font.save(os.path.realpath(self.output_path))
         else:
-            font.save(self.opts.font_path)
+            font.save(self.input_path)
 
     @staticmethod
     def assemble_components(comps_data):
@@ -330,7 +331,7 @@ def main(args=None):
     if not ufo:
         return 1
 
-    ttcomp = TTComponentizer(ufo, ps_names, opts)
+    ttcomp = TTComponentizer(ufo, ps_names, opts.input_path, opts.output_path)
     ttcomp.componentize()
 
 
