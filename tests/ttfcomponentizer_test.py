@@ -69,8 +69,16 @@ def test_run_cli_no_args():
     assert exc_info.value.returncode == 2
 
 
-def test_run_invalid_font():
-    assert ttfcomp.main(['not_a_file']) == 1
+def test_run_invalid_font_path():
+    with pytest.raises(SystemExit) as exc_info:
+        ttfcomp.main(['not_a_file'])
+    assert exc_info.value.code == 2
+
+
+def test_run_invalid_font_file():
+    with pytest.raises(SystemExit) as exc_info:
+        ttfcomp.main(['not_a_font.ttf'])
+    assert exc_info.value.code == 2
 
 
 def test_run_ufo_not_found():
@@ -140,21 +148,6 @@ def test_options_bogus_option():
     with pytest.raises(SystemExit) as exc_info:
         ttfcomp.main(['--bogus'])
     assert exc_info.value.code == 2
-
-
-def test_options_invalid_font_path():
-    assert ttfcomp.get_options(['not_a_file']).font_path is None
-
-
-def test_options_invalid_font():
-    path = get_input_path('not_a_font.ttf')
-    assert ttfcomp.get_options([path]).font_path is None
-
-
-def test_options_valid_font():
-    path = _get_test_ttf_path()
-    assert os.path.basename(
-        ttfcomp.get_options([path]).font_path) == TEST_TTF_FILENAME
 
 
 def test_get_ufo_path_found():
