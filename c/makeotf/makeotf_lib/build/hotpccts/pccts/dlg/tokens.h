@@ -118,7 +118,6 @@ void anychar(void);
 extern void anychar();
 #endif
 
-#endif
 extern SetWordType zzerr1[];
 extern SetWordType zzerr2[];
 extern SetWordType zzerr3[];
@@ -131,3 +130,5 @@ extern SetWordType zzerr7[];
 extern SetWordType zzerr8[];
 extern SetWordType zzerr9[];
 extern SetWordType setwd3[];
+
+#endif
