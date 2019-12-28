@@ -1208,7 +1208,10 @@ cleanUp( void )
 cleanUp( )
 #endif
 {
-	if ( DefFile != NULL) fclose( DefFile );
+	if ( DefFile != NULL) {
+		fprintf(DefFile, "\n#endif\n");
+		fclose( DefFile );
+	}
 }
 
 /* sprintf up to 3 strings */

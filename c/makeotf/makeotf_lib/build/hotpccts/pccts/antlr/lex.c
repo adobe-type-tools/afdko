@@ -341,8 +341,6 @@ genDefFile( )
 	}
 
 	if ( !GenCC ) GenRulePrototypes(DefFile, SynDiag);
-
-	fprintf(DefFile, "\n#endif\n");
 }
 
 void

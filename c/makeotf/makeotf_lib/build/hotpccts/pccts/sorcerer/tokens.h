@@ -114,8 +114,6 @@ void enum_def(AST**_root);
 #else
 extern void enum_def();
 #endif
-
-#endif
 extern SetWordType zzerr1[];
 extern SetWordType zzerr2[];
 extern SetWordType setwd1[];
@@ -172,3 +170,5 @@ extern SetWordType zzerr46[];
 extern SetWordType zzerr47[];
 extern SetWordType zzerr48[];
 extern SetWordType setwd8[];
+
+#endif
