@@ -54,7 +54,8 @@ PS_SKIP2 = [
 ]
 
 PFA_SKIP = [
-    '%ADOt1write:'
+    '%ADOt1write:' + SPLIT_MARKER +
+    '%%Copyright:' + SPLIT_MARKER
 ]
 
 
@@ -285,7 +286,7 @@ def test_V_option(arg, exp_filename):
     if arg:
         args.insert(2, arg)
     subprocess.call(args)
-    assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
+    assert differ([expected_path, output_path] + ['-s'] + PFA_SKIP)
 
 
 # -------------
@@ -773,8 +774,7 @@ def test_ufo_self_closing_dict_element_bug701():
 def test_ufo3_guideline_bug705():
     actual_path = runner(CMD + ['-s', '-o', 't1', '-f', 'bug705.ufo'])
     expected_path = get_expected_path('bug705.pfa')
-    skip = ['-s'] + PFA_SKIP[:]
-    assert differ([expected_path, actual_path] + skip)
+    assert differ([expected_path, actual_path] + ['-s'] + PFA_SKIP)
 
 
 def test_ufo_vertical_advance_bug786():
