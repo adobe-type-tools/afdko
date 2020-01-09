@@ -66,6 +66,15 @@
       <point x="168" y="53"/>
       <point x="134" y="74"/>
     </contour>
+    <contour>
+      <point x="245" y="507" type="move" name="aboveLC"/>
+    </contour>
+    <contour>
+      <point x="447" y="0" type="move" name="ogonek"/>
+    </contour>
+    <contour>
+      <point x="244" y="-22" type="move" name="belowLC"/>
+    </contour>
   </outline>
   <lib>
     <dict>
