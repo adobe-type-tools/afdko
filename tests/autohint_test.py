@@ -9,6 +9,7 @@ from afdko.fdkutils import (
 from test_utils import (
     get_input_path,
     get_expected_path,
+    generalizeCFF,
     generate_ttx_dump,
     generate_ps_dump,
 )
@@ -50,15 +51,20 @@ def teardown_function():
     ('font.cff', ''),
     ('cidfont.otf', ''),
     ('cidfont.ps', ''),
-    ('ufo2.ufo', ''),
-    ('ufo2.ufo', 'wd'),
+    pytest.param(
+        'ufo2.ufo', '',
+        marks=pytest.mark.skip(reason='UFO2 non-default layer not supported')),
+    pytest.param(
+        'ufo2.ufo', 'wd',),
     ('ufo3.ufo', ''),
     ('ufo3.ufo', 'wd'),
     ('font.pfa', 'fi'),
     ('font.pfb', 'fi'),
     ('font.otf', 'fi'),
     ('font.cff', 'fi'),
-    ('ufo2.ufo', 'fi'),
+    pytest.param(
+        'ufo2.ufo', 'fi',
+        marks=pytest.mark.skip(reason='UFO2 non-default layer not supported')),
     ('ufo3.ufo', 'fi'),
 ])
 def test_basic_hinting(font_filename, opt):
@@ -92,13 +98,16 @@ def test_basic_hinting(font_filename, opt):
         if opt == 'fi':
             fi = '-' + opt
         expected_filename = os.path.splitext(font_filename)[0] + fi + '.ttx'
-        actual_path = generate_ttx_dump(actual_path, ['CFF '])
+        actual_path = generate_ttx_dump(
+            generalizeCFF(actual_path), ['CFF '])
         skip = ['-l', '2']  # <ttFont sfntVersion=
     elif tail in {'.pfa', '.pfb'}:
         skip = ['-s', r'%ADOt1write:']
     elif tail == '.ps':
         actual_path = generate_ps_dump(actual_path)
         skip = ['-s', r'%ADOt1write:']
+    elif tail == '.cff':
+        actual_path = generalizeCFF(actual_path, do_sfnt=False)
 
     expected_path = get_expected_path(expected_filename)
     if tail == '.ps':

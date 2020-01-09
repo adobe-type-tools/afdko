@@ -36,6 +36,12 @@
       <point x="0" y="-222" name="hintSet0021"/>
       <point x="42" y="-249"/>
     </contour>
+    <contour>
+      <point x="271" y="507" type="move" name="aboveLC"/>
+    </contour>
+    <contour>
+      <point x="124" y="-254" type="move" name="belowLC"/>
+    </contour>
   </outline>
   <lib>
     <dict>

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="exclam" format="2">
-  <advance width="235.0"/>
+  <advance width="235"/>
   <outline>
     <contour>
       <point x="99" y="398" type="line" name="hintSet0000"/>
