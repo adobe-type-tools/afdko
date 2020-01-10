@@ -58,7 +58,7 @@ deploy:
   # deploy wheels to GitHub on tags
   provider: GitHub
   auth_token:
-    secure: UyKfsObr/shlpP+0U5Zb3EPvmXt0kyKYu940CFNFdNZ8J7Fu54k415R0UNP78t0j
+    secure: gphVmCqGEPVTMMEJt3OJbUPUaFl7ALwWN+cJjyxW80+Z3ZpWbq0eUxs5naCcmNiT
   artifact: Wheels
   draft: false
   prerelease: true
