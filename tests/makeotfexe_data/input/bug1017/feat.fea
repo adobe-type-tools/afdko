@@ -1,4 +1,6 @@
 languagesystem DFLT dflt;
+languagesystem latn dflt;
+languagesystem grek dflt;
 
 
 feature ss05 {

@@ -1,13 +1,13 @@
 ### [GSUB] (00000544)
 Version    =1.0 (00010000)
 ScriptList =000a
-FeatureList=001e
-LookupList =0030
+FeatureList=0042
+LookupList =006c
 --- ScriptList (000a)
-ScriptCount=1
+ScriptCount=3
 --- ScriptRecord[index]={ScriptTag,Script}
-[0]={DFLT,0008} 
---- Script [0] (0008)
+[0]={DFLT,0014} [1]={grek,0020} [2]={latn,002c} 
+--- Script [0] (0014)
 DefaultLangSys=0004
 LangSysCount  =0
 
@@ -17,19 +17,53 @@ ReqFeatureIndex=65535
 FeatureCount   =1
 --- FeatureIndex[index]=value
 [0]=0 
+--- Script [1] (0020)
+DefaultLangSys=0004
+LangSysCount  =0
 
---- FeatureList (001e)
-FeatureCount=1
+--- LangSys [-1] (0004)
+LookupOrder    =0000
+ReqFeatureIndex=65535
+FeatureCount   =1
+--- FeatureIndex[index]=value
+[0]=1 
+--- Script [2] (002c)
+DefaultLangSys=0004
+LangSysCount  =0
+
+--- LangSys [-1] (0004)
+LookupOrder    =0000
+ReqFeatureIndex=65535
+FeatureCount   =1
+--- FeatureIndex[index]=value
+[0]=2 
+
+--- FeatureList (0042)
+FeatureCount=3
 --- FeatureRecord[index]={FeatureTag,Feature}
-[0]={'ss05',0008} 
---- FeatureTable (0008)
-FeatureParam=0006
+[0]={'ss05',0014} [1]={'ss05',001a} [2]={'ss05',0020} 
+--- FeatureTable (0014)
+FeatureParam=0012
    Stylistic Alternate name parameter version: 0
    Stylistic Alternate name parameter name table name ID: 256
 LookupCount =1
 --- LookupListIndex[index]=value
 [0]=0 
---- LookupList (0030)
+--- FeatureTable (001a)
+FeatureParam=000c
+
+# Skipping stylistic alternate parameter block in feature 'ss05' offset 001a. It was previously reported for feature 'ss05' offset 0014.
+LookupCount =1
+--- LookupListIndex[index]=value
+[0]=0 
+--- FeatureTable (0020)
+FeatureParam=0006
+
+# Skipping stylistic alternate parameter block in feature 'ss05' offset 0020. It was previously reported for feature 'ss05' offset 0014.
+LookupCount =1
+--- LookupListIndex[index]=value
+[0]=0 
+--- LookupList (006c)
 LookupCount=2
 --- Lookup[index]=offset
 [0]=0006 [1]=000e 
