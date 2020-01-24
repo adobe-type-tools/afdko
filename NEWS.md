@@ -1,6 +1,19 @@
 Changelog
 =========
 
+3.2.0 (released 2020-01-24)
+---------------------------
+- [ttfcomponentizer] minor updates and improvements
+  ([#1069](https://github.com/adobe-type-tools/afdko/pull/1069),
+   [#1072](https://github.com/adobe-type-tools/afdko/pull/1072))
+- [tests] fix date-based bug in tx tests
+  ([#1076](https://github.com/adobe-type-tools/afdko/pull/1076))
+- [autohint] and [stemhist] now simply redirect input to psautohint/psstemhist
+  ([#1077](https://github.com/adobe-type-tools/afdko/pull/1077))
+- [makeotfexe] fix bug in font generation with multiple `langugesystem` entries
+  ([#1080](https://github.com/adobe-type-tools/afdko/issues/1080),
+   [#1081](https://github.com/adobe-type-tools/afdko/pull/1081))
+
 3.1.0 (released 2019-12-16)
 ---------------------------
 - [ci] updates and maintenance on several CI services:

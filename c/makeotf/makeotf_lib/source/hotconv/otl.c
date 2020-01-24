@@ -2033,22 +2033,18 @@ void otlSubtableAdd(hotCtx g, otlTbl t, Tag script, Tag language, Tag feature,
         sub->seenInFeature = 1;
     }
 
-    if (isFeatParam) {
-        t->nFeatParams++;
+    if (script == TAG_UNDEF) {
+         t->nAnonSubtables++;
+     }
+     if (feature == (Tag)TAG_STAND_ALONE) {
+         t->nStandAloneSubtables++;
+     }
 
-        if (IS_REF_LAB(label)) {
-          t->nRefLookups++;
-        }
-    } else {
-        if (script == TAG_UNDEF) {
-          t->nAnonSubtables++;
-        }
-        if (feature == (Tag)TAG_STAND_ALONE) {
-          t->nStandAloneSubtables++;
-        }
-
-        if (IS_REF_LAB(label)) {
-          t->nRefLookups++;
-        }
-    }
+     /* FeatParam subtables may be labeled, but should NOT be added */
+     /* to the list of real look ups.                               */
+     if (IS_REF_LAB(label)) {
+         t->nRefLookups++;
+     } else if (isFeatParam) {
+         t->nFeatParams++;
+     }
 }

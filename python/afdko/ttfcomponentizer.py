@@ -14,8 +14,10 @@ from fontTools.ttLib import TTFont, getTableModule
 from fontTools.ufoLib.errors import UFOLibError
 from defcon import Font
 
+from afdko.fdkutils import get_font_format
 
-__version__ = '0.2.2'
+
+__version__ = '0.3.0'
 
 
 PUBLIC_PSNAMES = "public.postscriptNames"
@@ -34,10 +36,11 @@ class ComponentsData(object):
 
 
 class TTComponentizer(object):
-    def __init__(self, ufo, ps_names, options):
+    def __init__(self, ufo, ps_names, input_path, output_path=None):
         self.ufo = ufo
         self.ps_names = ps_names
-        self.opts = options
+        self.input_path = input_path
+        self.output_path = output_path
         self.composites_data = {}
         self.comp_count = 0
 
@@ -103,7 +106,7 @@ class TTComponentizer(object):
 
         Updates a count of the glyphs that got componentized.
         """
-        font = TTFont(self.opts.font_path)
+        font = TTFont(self.input_path)
         glyf_table = font['glyf']
 
         for gname in self.composites_data:
@@ -121,10 +124,10 @@ class TTComponentizer(object):
             glyph.numberOfContours = -1
             self.comp_count += 1
 
-        if self.opts.output_path:
-            font.save(os.path.realpath(self.opts.output_path))
+        if self.output_path:
+            font.save(os.path.realpath(self.output_path))
         else:
-            font.save(self.opts.font_path)
+            font.save(self.input_path)
 
     @staticmethod
     def assemble_components(comps_data):
@@ -275,21 +278,12 @@ def get_glyph_names_mapping(ufo_path):
     return ufo, get_goadb_names_mapping(ufo_path)
 
 
-def get_font_format(font_file_path):
-    with open(font_file_path, "rb") as f:
-        head = f.read(4).decode()
-        if head in ("\0\1\0\0", "true"):
-            return "TTF"
-        return None
-
-
-def validate_font_path(path):
-    path = os.path.realpath(path)
-    if not (os.path.isfile(path) and get_font_format(path) == 'TTF'):
-        print(f"ERROR: {path} is not a valid TrueType font file path.",
-              file=sys.stderr)
-        return None
-    return path
+def _validate_font_path(path_str):
+    vpath = os.path.abspath(os.path.realpath(path_str))
+    if os.path.isfile(vpath) and (get_font_format(vpath) == 'TTF'):
+        return vpath
+    raise argparse.ArgumentTypeError(
+        f"'{path_str}' is not a valid TrueType font file path.")
 
 
 def get_options(args):
@@ -311,21 +305,18 @@ def get_options(args):
     parser.add_argument(
         'input_path',
         metavar='FONT',
+        type=_validate_font_path,
         help='TTF font file.',
     )
     options = parser.parse_args(args)
-    options.font_path = validate_font_path(options.input_path)
     return options
 
 
 def main(args=None):
     opts = get_options(args)
 
-    if not opts.font_path:
-        return 1
-
     # Find UFO file in the same directory
-    ufo_path = get_ufo_path(opts.font_path)
+    ufo_path = get_ufo_path(opts.input_path)
     if not ufo_path:
         print(f"ERROR: No UFO font was found for {opts.input_path}",
               file=sys.stderr)
@@ -336,7 +327,7 @@ def main(args=None):
     if not ufo:
         return 1
 
-    ttcomp = TTComponentizer(ufo, ps_names, opts)
+    ttcomp = TTComponentizer(ufo, ps_names, opts.input_path, opts.output_path)
     ttcomp.componentize()
 
 
