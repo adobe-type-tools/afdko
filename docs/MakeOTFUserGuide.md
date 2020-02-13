@@ -70,9 +70,10 @@ makeotf –fp myproject.fpr
 ```
 
 ## **MakeOTF options**
+
 | Option | Setting | Description |
 |--------|---------|-------------|
-|<div style="width:5em">`–fp`</div> | <div style="width:10em">`<file path>`</div> | Specify path to project file. If no path is given, the default is `current.fpr.` MakeOTF will read the options from this project file. The project file contains values only when they differ from the default value. The `–fp` option can be used with other options, but must always be first. Additional options will override those read from the project file. For example, `–fp release.fpr –o test.otf` will build an OpenType font with all the options in the release.fpr project file, but will write the output file as test.otf, instead of <PostScript-Name>.otf.
+|`–fp`| `<file path>` | Specify path to project file. If no path is given, the default is `current.fpr.` MakeOTF will read the options from this project file. The project file contains values only when they differ from the default value. The `–fp` option can be used with other options, but must always be first. Additional options will override those read from the project file. For example, `–fp release.fpr –o test.otf` will build an OpenType font with all the options in the release.fpr project file, but will write the output file as test.otf, instead of <PostScript-Name>.otf.|
 |`–f` | `<file path>` | Specify path to input font. If not provided, MakeOTF assumes the file name is font.pfa.|
 |`–o` | `<file path>` | Specify path to output font. If not provided, MakeOTF assumes the file name is `<PostScript-Name>.otf`.|
 |`–b` | | Set style to Bold. Affects style-linking. If not provided, MakeOTF assumes that the font is not bold.|
@@ -83,7 +84,7 @@ makeotf –fp myproject.fpr
 |`–gf` | `<file path>` | Specify path to GlyphOrderAndAliasDB file. If not provided, MakeOTF will look in the current directory for a file named GlyphOrderAndAliasDB, and then one directory up, and finally two directories up. Also, if this option is specified, and the `–r` or `–ga` options are NOT specified, the effect is to use the Unicode assignments from the third column of the GOADB without renaming the glyphs.|
 |`–r` | | Set release mode. This option turns on subroutinization, applies the GlyphOrderAndAliasDB file, and removes the word Development from the name table Version (Name ID 5) string.|
 |`–S` | | Turn on subroutinization.|
-|`–ga` | | Apply the GlyphOrderAndAliasDB file. Use when the `–r` option is NOT specified.
+|`–ga` | | Apply the GlyphOrderAndAliasDB file. Use when the `–r` option is NOT specified.|
 |`-rev` | `[<number>]` | Attempts to edit the feature file before makeotfexe is run, in order to increment the head table fontRevision field. This only works if the head table override is already defined in the features file. Without the optional version number, increments the version number by 5. With an integer argument, it increments the minor version by that number. With a fractional argument, it sets the version to the fractional argument; the number must then be decimal with three decimal places, e.g. “1.045”, not ‘1.45’.|
 |`–osbOn` | `<number>` | Turn on the specified bit number(s) in the OS/2 table fsSelection field. In order to turn on more than one bit, must be used more than once. `–osbOn 7 –osbOn 8` will turn on bits 7 and 8. See section below on New OS/2 Bits.|
 |`–osbOff` | `<number>` | Turn off the specified bit number(s) in the OS/2 table fsSelection field. Can be used more than once to turn OFF more than one bit at a time. `–osbOff 7 –osbOff 8` will turn off bits 7 and 8. See section below on New OS/2 Bits.|
@@ -92,22 +93,22 @@ makeotf –fp myproject.fpr
 |`-adds` | | Create any Apple Mac Symbol glyphs missing from the font. Added glyphs will match the font’s weight and width.|
 |`-serif` | | Specify that any added glyph will use the serif Multiple Master built-in glyph data.|
 |`-sans` | | Specify that any added glyphs will use the sans-serif Multiple Master builtin glyph data.|
-|`-cs` | | Override the heuristics, and specify the script ID for the Mac cmap subtable.
+|`-cs` | | Override the heuristics, and specify the script ID for the Mac cmap subtable.|
 |`-cl`| | Override the heuristics, and specify the language ID for the Mac cmap subtable.|
 |`-cm` |`<file path>` | Specify path to CID CMap encoding file for the font Mac encoding. (CIDkeyed fonts only)|
 |`-ch`|`<file path>`| Specify path to CID CMap encoding file for the font Unicode UTF-32 encoding for horizontal glyphs. (CID-keyed fonts only)|
 |`-cv`|`<file path>`| Specify path to CID CMap encoding file for the font Unicode UTF-32 encoding for vertical glyphs. (CID-keyed fonts only)|
 |`-ci`|`<file path>`| Specify path to Unicode Variation Sequence specification file.|
-|`-dbl`| |Map glyph names to two Unicode values rather than one. This was the default behaviour of makeotf in FDK 1.6 and earlier. The Adobe Type Department now discourages this practice. The option exists only to allow building fonts that match original versions. See `makeotf –h` for the hard-coded list of glyphs.
-|`-dcs`| |Set OS/2.DefaultChar to the Unicode value for `space`, rather than `.notdef`. The latter is correct by the OT spec, but QuarkXPress 6.5 requires the former in order to print OTF/CFF fonts.
+|`-dbl`| |Map glyph names to two Unicode values rather than one. This was the default behaviour of makeotf in FDK 1.6 and earlier. The Adobe Type Department now discourages this practice. The option exists only to allow building fonts that match original versions. See `makeotf –h` for the hard-coded list of glyphs.|
+|`-dcs`| |Set OS/2.DefaultChar to the Unicode value for `space`, rather than `.notdef`. The latter is correct by the OT spec, but QuarkXPress 6.5 requires the former in order to print OTF/CFF fonts.|
 |`-fi` |`<file path>`| Path to the `fontinfo` file. If no path is given, the default is to look for first `fontinfo`, then `cidfontinfo`, in the current directory. Used to set some default values. This are overridden by any conflicting settings in the project file and then by command-line options. This option is processed before any others, so if the path is relative, it is relative to the current working directory. All other relative paths are relative so the source font’s parent directory.|
-|`-sp`|`<file path>`|Save the current options to the file path provided, as well as to the current.fpr file.
+|`-sp`|`<file path>`|Save the current options to the file path provided, as well as to the current.fpr file.|
 |`-nb`| |Turn off the Bold style. Can be used to override a project file setting, otherwise has no effect.|
 |`-ni`| |Turn off the Italic style. Can be used to override a project file setting, otherwise has no effect.|
 |`-nS`| |Turn off subroutinization.|
 |`-nga`| |Turn off applying the GlyphOrderAndAliasDB file|
 |`-naddn`| |Turn off adding a standard .notdef. Can be used to override a project file setting, otherwise has no effect.|
-|`-nadds`| |Turn off adding Apple symbol glyphs. Can be used to override a project file setting, otherwise has no effect. 
+|`-nadds`| |Turn off adding Apple symbol glyphs. Can be used to override a project file setting, otherwise has no effect.| 
 | | | |
 
 Options are applied in the order in which they are specified: `–r –nS` will not subroutinize a font, but `–nS –r` will subroutinize a font. Option values are read (in order of increasing priority) from first the fontinfo file keyword/value pairs, then the specified project file, if any, and then from the command line, in order from left to right. 
