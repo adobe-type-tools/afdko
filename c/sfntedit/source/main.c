@@ -274,7 +274,6 @@ static void showHelp(void) {
         "    \n"
         "- Copy font to new file fixing checksums and reordering tables.\n"
         "    sfntedit -f helv.ttf newhelv.ttf\n\n");
-
 }
 
 static void makeArgs(char *filename) {
@@ -636,21 +635,21 @@ static void sfntReadHdr(void) {
 static void sfntDumpHdr(void) {
     int i;
 
-    printf( "--- sfnt header [%s]\n", srcfile.name);
+    printf("--- sfnt header [%s]\n", srcfile.name);
     if (sfnt.version == 0x00010000)
-        printf( "version      =1.0 (00010000)\n");
+        printf("version      =1.0 (00010000)\n");
     else
-        printf( "version      =%c%c%c%c (%08x)\n",
+        printf("version      =%c%c%c%c (%08x)\n",
                 TAG_ARG(sfnt.version), sfnt.version);
-    printf( "numTables    =%hu\n", sfnt.numTables);
-    printf( "searchRange  =%hu\n", sfnt.searchRange);
-    printf( "entrySelector=%hu\n", sfnt.entrySelector);
-    printf( "rangeShift   =%hu\n", sfnt.rangeShift);
+    printf("numTables    =%hu\n", sfnt.numTables);
+    printf("searchRange  =%hu\n", sfnt.searchRange);
+    printf("entrySelector=%hu\n", sfnt.entrySelector);
+    printf("rangeShift   =%hu\n", sfnt.rangeShift);
 
-    printf( "--- table directory [index]={tag,checksum,offset,length}\n");
+    printf("--- table directory [index]={tag,checksum,offset,length}\n");
     for (i = 0; i < sfnt.numTables; i++) {
         Table *tbl = &sfnt.directory[i];
-        printf( "[%2d]={%c%c%c%c,%08x,%08x,%08x}\n", i,
+        printf("[%2d]={%c%c%c%c,%08x,%08x,%08x}\n", i,
                 TAG_ARG(tbl->tag), tbl->checksum, tbl->offset, tbl->length);
     }
 }
