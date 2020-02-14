@@ -184,7 +184,7 @@ static void cleanup(int code) {
 
 /* Print usage information */
 static void printUsage(void) {
-    fprintf(stdout,
+    printf(
             "Usage:\n"
             "    %s [options] <srcfile> [<dstfile>]\n"
             "OR: %s  -X <scriptfile>\n\n"
@@ -213,14 +213,14 @@ static void showUsage(void) {
 /* Show usage and help information */
 static void showHelp(void) {
     printUsage();
-    fprintf(stdout,
+    printf(
             "Notes:\n"
             "    This program supports table-editing, listing, and checksumming options\n"
             "on sfnt-formatted files such as OpenType Format (OTF) or TrueType. The\n"
             "mandatory source file is specified as an argument to the program. An\n"
             "optional destination file may also be specified which receives the edited\n"
             "data otherwise the source data is edited in-place thus modifying the source\n");
-    fprintf(stdout,
+    printf(
             "file. In-place editing is achieved by the use of a temporary file called\n"
             "%s that is created in the directory of execution (requiring you\n"
             "to have write permission to that directory).\n"
@@ -228,42 +228,42 @@ static void showHelp(void) {
             "with a table tag argument that is nominally 4 characters long. If fewer\n"
             "than 4 characters are specified the tag is padded with spaces (more than 4\n",
             tmpname);
-    fprintf(stdout,
+    printf(
             "characters is a fatal error). Multiple tables may be specified as a single\n"
             "argument composed from a comma-separated list of tags.\n"
             "    The extract option (-x) copies the table data into a file whose default\n"
             "name is the concatenation of the source filename (less its .otf or .ttf\n"
             "extension), a period character (.), and the table tag. If the tag contains\n"
             "non-alphanumeric characters they are replaced by underscore characters (_)\n");
-    fprintf(stdout,
+    printf(
             "and finally trailing underscores are removed. The default filename may be\n"
             "overridden by appending an equals character (=) followed by an alternate\n"
             "filename to the table tag argument. The delete option (-d) deletes a table.\n"
             "Unlike the -x option no files may be specified in the table tag list. The\n"
             "add option (-a) adds a table or replaces one if the table already exists.\n"
             "The source file containing the table data is specified by appending an\n");
-    fprintf(stdout,
+    printf(
             "equals character (=) followed by a filename to the table tag.\n"
             "    The 3 editing options may be specified together as acting on the same\n"
             "table. In such cases the -x option is applied before the -d option which is\n"
             "applied before the -a option. (The -d option applied to the same table as a\n"
             "subsequent -a option is permitted but redundant.) The -d and -a options\n"
             "change the contents of the sfnt and cause the table checksums and the head\n");
-    fprintf(stdout,
+    printf(
             "table's checksum adjustment field to be recomputed.\n"
             "    The list option (-l) simply lists the contents of the sfnt table\n"
             "directory. This is the default action if no other options are specified.\n"
             "The check checksum option (-c) performs a check of all the table checksums\n"
             "and the head table's checksum adjustment field and reports any errors. The\n"
             "fix checksum option (-f) fixes any checksum errors.\n");
-    fprintf(stdout,
+    printf(
             "    The -d, -a, and -f options create a new sfnt file by copying tables\n"
             "from the source file to the destination file. The tables are copied in the\n"
             "order recommended in the OpenType specification. A side effect of copying\n"
             "is that all table information including checksums and sfnt search fields\n"
             "is recalculated.\n"
             "Examples:\n");
-    fprintf(stdout,
+    printf(
             "o Extract GPOS and GSUB tables to files minion.GPOS and minion.GSUB.\n"
             "    sfntedit -x GPOS,GSUB minion.otf\n"
             "o Add tables extracted previously to different font.\n"
@@ -633,21 +633,21 @@ static void sfntReadHdr(void) {
 static void sfntDumpHdr(void) {
     int i;
 
-    fprintf(stdout, "--- sfnt header [%s]\n", srcfile.name);
+    printf( "--- sfnt header [%s]\n", srcfile.name);
     if (sfnt.version == 0x00010000)
-        fprintf(stdout, "version      =1.0 (00010000)\n");
+        printf( "version      =1.0 (00010000)\n");
     else
-        fprintf(stdout, "version      =%c%c%c%c (%08x)\n",
+        printf( "version      =%c%c%c%c (%08x)\n",
                 TAG_ARG(sfnt.version), sfnt.version);
-    fprintf(stdout, "numTables    =%hu\n", sfnt.numTables);
-    fprintf(stdout, "searchRange  =%hu\n", sfnt.searchRange);
-    fprintf(stdout, "entrySelector=%hu\n", sfnt.entrySelector);
-    fprintf(stdout, "rangeShift   =%hu\n", sfnt.rangeShift);
+    printf( "numTables    =%hu\n", sfnt.numTables);
+    printf( "searchRange  =%hu\n", sfnt.searchRange);
+    printf( "entrySelector=%hu\n", sfnt.entrySelector);
+    printf( "rangeShift   =%hu\n", sfnt.rangeShift);
 
-    fprintf(stdout, "--- table directory [index]={tag,checksum,offset,length}\n");
+    printf( "--- table directory [index]={tag,checksum,offset,length}\n");
     for (i = 0; i < sfnt.numTables; i++) {
         Table *tbl = &sfnt.directory[i];
-        fprintf(stdout, "[%2d]={%c%c%c%c,%08x,%08x,%08x}\n", i,
+        printf( "[%2d]={%c%c%c%c,%08x,%08x,%08x}\n", i,
                 TAG_ARG(tbl->tag), tbl->checksum, tbl->offset, tbl->length);
     }
 }
