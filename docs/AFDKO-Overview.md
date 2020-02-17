@@ -23,11 +23,19 @@ This program is the Adobe auto-hinter. It can be applied to both OpenType/CFF an
 
 ### `makeotf`
 
-This program will build an OpenType/CFF font from a feature file that defines the OpenType layout rules, and overrides for default values, and a font file: a Type 1 font, TrueType font, 'detype1' text version of a Type 1 font, or UFO font and It also requires some other meta-data files. It will also build an OpenType/TTF font from a TrueType source font file.
+This program will build an OpenType/CFF font from a feature file that defines the OpenType layout rules, and overrides for default values, and a font file (Type 1 font, TrueType font, 'detype1' text version of a Type 1 font, or UFO font). It also requires some other meta-data files. It will also build an OpenType/TTF font from a TrueType source font file.
+
+### `buildmasterotfs`
+
+This script uses `makeotf` to build OTF files from a .designspace file with compatible UFO masters. These OTF files represent the first step toward building a CFF2 variable font.
+
+### `buildcff2vf`
+
+This script will use a .designspace file and the output OTFs of `buildmasterotfs` to assemble a CFF2 variable font file.
 
 ### `makeinstancesufo`
 
-This script will generate UFO fonts from a set of [Superpolator](http://superpolator.com/) master designs.
+This script will generate UFO instances from a .designspace file, and a set of compatible UFO masters. More info on designspace files and interpolation systems can be found at [Superpolator.com](http://superpolator.com/).
 
 ### `mergefonts`
 
@@ -71,7 +79,7 @@ This tool can be used to convert most font formats to CFF or Type 1 fonts. TrueT
 
 ### `type1`/`detype1`
 
-These two programs will respectively compile and decompile a Type 1 font from a plain-text representation that is easy to edit. This is good for fixing individual fields. It is also good for copying a specific path element to many glyphs.
+These two programs will respectively compile and decompile a Type 1 font to and from a plain-text representation that is easy to edit. This is good for fixing individual fields. It is also good for copying a specific path element to many glyphs.
 
 ## 2.2 Proofing
 
