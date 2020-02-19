@@ -1993,7 +1993,7 @@ def makeWaterfallPDF(params, pdfFont, doProgressBar):
 	if numWaterfallsOnPage > 0:
 		numPages = int(ceil(float(numWaterFalls) / numWaterfallsOnPage))
 	else:
-		numPages = int(ceil(float(numWaterFalls)*pageHeight / waterfallHeight))
+		numPages = int(ceil(float(numWaterFalls) * waterfallHeight / pageHeight))
 
 	if numPages == 0:
 		numPages = 1
