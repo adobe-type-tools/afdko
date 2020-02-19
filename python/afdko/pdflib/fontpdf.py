@@ -1989,7 +1989,12 @@ def makeWaterfallPDF(params, pdfFont, doProgressBar):
 
 	numWaterfallsOnPage = int(pageHeight / waterfallHeight)
 	numWaterFalls = len(glyphLists)
-	numPages = int(ceil(float(numWaterFalls) / numWaterfallsOnPage))
+
+	if numWaterfallsOnPage > 0:
+		numPages = int(ceil(float(numWaterFalls) / numWaterfallsOnPage))
+	else:
+		numPages = int(ceil(float(numWaterFalls)*pageHeight / waterfallHeight))
+
 	if numPages == 0:
 		numPages = 1
 	doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages)
