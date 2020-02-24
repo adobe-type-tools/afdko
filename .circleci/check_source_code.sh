@@ -19,6 +19,7 @@ flake8 otc2otf.py
 flake8 otf2ttf.py
 flake8 pdflib/otfpdf.py
 flake8 pdflib/pdfmetrics.py
+flake8 ttfdecomponentizer.py
 flake8 ttfcomponentizer.py
 flake8 ttxn.py
 flake8 ufotools.py
