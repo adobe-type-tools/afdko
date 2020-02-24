@@ -158,6 +158,7 @@ def _get_console_scripts():
         ('otf2ttf', 'otf2ttf:main'),
         ('stemhist', 'stemhist:main'),
         ('ttfcomponentizer', 'ttfcomponentizer:main'),
+        ('ttfdecomponentizer', 'ttfdecomponentizer:main'),
         ('ttxn', 'ttxn:main'),
         ('charplot', 'proofpdf:charplot'),
         ('digiplot', 'proofpdf:digiplot'),
