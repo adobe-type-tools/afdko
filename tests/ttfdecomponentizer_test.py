@@ -21,17 +21,6 @@ TOOL = 'ttfdecomponentizer'
 CMD = ['-t', TOOL]
 
 TEST_TTF_FILENAME = 'hascomponents.ttf'
-DESIGN_NAMES_LIST = ['acaron', 'acutecmb', 'caroncmb', 'design_name',
-                     'gravecmb', 'tildecmb']
-PRODCT_NAMES_LIST = ['production_name', 'uni01CE', 'uni0300', 'uni0301',
-                     'uni0303', 'uni030C']
-EMPTY_LIB = b"""<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-    <dict/>
-</plist>
-"""
 
 
 def _get_test_ttf_path():
@@ -79,7 +68,6 @@ def test_run_invalid_font_file():
 def test_run_with_output_path():
     ttf_path = _get_test_ttf_path()
     save_path = get_temp_file_path()
-    print(save_path)
     ttfdecomp.main(['-o', save_path, ttf_path])
     font = TTFont(save_path)
     gtable = font['glyf']
@@ -124,4 +112,30 @@ def test_options_version():
 def test_options_bogus_option():
     with pytest.raises(SystemExit) as exc_info:
         ttfdecomp.main(['--bogus'])
+    assert exc_info.value.code == 2
+
+
+def test_options_dir():
+    input_dir = get_temp_dir_path()
+    output_dir = get_temp_dir_path()
+    font_path = _get_test_ttf_path()
+    in_font_path = copy2(font_path, input_dir)
+    ttfdecomp.main(['-d', input_dir, '-o', output_dir, '-v'])
+    out_file = in_font_path.replace(input_dir, output_dir)
+    font = TTFont(out_file)
+    assert font['maxp'].maxComponentElements == 0
+
+
+def test_options_bad_dir():
+    with pytest.raises(SystemExit) as exc_info:
+        input_dir = _get_test_ttf_path()
+        ttfdecomp.main(['-d', input_dir])
+    assert exc_info.value.code == 2
+
+
+def test_options_bad_dir_output():
+    with pytest.raises(SystemExit) as exc_info:
+        input_dir = get_temp_dir_path()
+        output_dir = _get_test_ttf_path()
+        ttfdecomp.main(['-d', input_dir, '-o', output_dir])
     assert exc_info.value.code == 2
