@@ -146,6 +146,8 @@ def main(args=None):
     if opts.directory:
         print(f"Done! {font_count} fonts in {opts.input_path} were processed.")
 
+    return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
