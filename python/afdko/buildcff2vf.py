@@ -18,7 +18,8 @@ from fontTools.designspaceLib import DesignSpaceDocument
 from fontTools.misc.fixedTools import otRound
 from fontTools.misc.psCharStrings import T2OutlineExtractor, T2CharString
 from fontTools.ttLib import TTFont
-from fontTools.varLib.cff import CFF2CharStringMergePen
+from fontTools.varLib.cff import (CFF2CharStringMergePen,
+                                  VarLibCFFPointTypeMergeError)
 
 from afdko.fdkutils import validate_path
 
@@ -91,10 +92,6 @@ def subset_masters(designspace, subsetDict):
         ds_source.font = TTFont(subset_path)
 
 
-class MergeTypeError(Exception):
-    pass
-
-
 class CompatibilityPen(CFF2CharStringMergePen):
     def __init__(self, default_commands,
                  glyphName, num_masters, master_idx, roundTolerance=0.5):
@@ -131,7 +128,7 @@ class CompatibilityPen(CFF2CharStringMergePen):
                         if cmd[0] != point_type:
                             success = False
                 if not success:
-                    raise MergeTypeError(
+                    raise VarLibCFFPointTypeMergeError(
                         point_type, self.pt_index, self.m_index, cmd[0],
                         self.glyphName)
                 self.fixed = True
@@ -472,7 +469,7 @@ def main(args=None):
     # fonts without having to recompile and save them.
     try:
         varFont, _, _ = varLib.build(designspace, otfFinder)
-    except varLib.cff.MergeTypeError:
+    except VarLibCFFPointTypeMergeError:
         logger.error("The input set requires compatibilization. Please try "
                      "again with the -c (--check-compat) option.")
         return 0
