@@ -10,7 +10,7 @@ from fontTools.misc import etree as ET
 from fontTools.misc import plistlib
 from fontTools.ufoLib import UFOReader
 
-from psautohint.ufoFont import (norm_float, HashPointPen)
+from psautohint.ufoFont import norm_float
 
 from afdko import fdkutils
 
