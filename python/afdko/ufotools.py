@@ -19,20 +19,14 @@ __version__ = '1.35.0'
 __doc__ = """
 ufotools.py v1.35.0 Mar 03 2020
 
-This module supports using the Adobe FDK tools which operate on 'bez'
-files with UFO fonts. It provides low level utilities to manipulate UFO
-data without fully parsing and instantiating UFO objects, and without
-requiring that the AFDKO contain the robofab libraries.
+Originally developed to work with 'bez' files and UFO fonts in support of
+the autohint tool, ufotools.py is now only used in checkoutlinesufo (since
+autohint has been dropped in favor of psautohint). Some references to "bez"
+and "autohint" remain in the tool its documentation.
 
-Modified in Nov 2014, when AFDKO added the robofab libraries. It can now
-be used with UFO fonts only to support the hash mechanism.
-
-Developed in order to support checkoutlines and autohint, the code
-supports two main functions:
-- convert between UFO GLIF and bez formats
-- keep a history of processing in a hash map, so that the (lengthy)
-processing by autohint and checkoutlines can be avoided if the glyph has
-already been processed, and the source data has not changed.
+Users should *NOT* rely on long-term support of methods or classes within
+this module directly. It is intended for AFDKO-internal use and not as a
+general-purpose library outside of AFDKO.
 
 The basic model is:
  - read GLIF file
@@ -314,12 +308,6 @@ Example from "B" in SourceCodePro-Regular
 
 """
 
-XML = ET.XML
-XMLElement = ET.Element
-xmlToString = ET.tostring
-debug = 0
-
-
 # UFO names
 kDefaultGlyphsLayerName = "public.default"
 kDefaultGlyphsLayer = "glyphs"
@@ -343,30 +331,6 @@ kCheckOutlineNameUFO = "checkOutlines"
 
 kOutlinePattern = re.compile(r"<outline.+?outline>", re.DOTALL)
 
-kStemHintsName = "stemhints"
-kStemListName = "stemList"
-kStemPosName = "pos"
-kStemWidthName = "width"
-kHStemName = "hstem"
-kVStemName = "vstem"
-kHStem3Name = "hstem3"
-kVStem3Name = "vstem3"
-kStem3Pos = "stem3List"
-kHintSetListName = "hintSetList"
-kFlexListName = "hintSetList"
-kHintSetName = "hintset"
-kBaseFlexName = "flexCurve"
-kPointTag = "pointTag"
-kStemIndexName = "stemindex"
-kFlexIndexListName = "flexList"
-kHintDomainName1 = "com.adobe.type.autohint"
-kHintDomainName2 = "com.adobe.type.autohint.v2"
-kPointName = "name"
-# Hint stuff
-kStackLimit = 46
-kStemLimit = 96
-kHashIdPlaceholder = "HASH_ID_PLACEHOLDER"
-
 COMP_TRANSFORM = OrderedDict([
     ('xScale', '1'),
     ('xyScale', '0'),
@@ -378,10 +342,6 @@ COMP_TRANSFORM = OrderedDict([
 
 
 class UFOParseError(Exception):
-    pass
-
-
-class BezParseError(Exception):
     pass
 
 
@@ -823,23 +783,6 @@ def parsePList(filePath, dictKey=None):
         plistKeys = list(plistDict.keys())
 
     return plistDict, plistKeys
-
-
-bezToUFOPoint = {
-    "mt": 'move',
-    "rmt": 'move',
-    "hmt": 'move',
-    "vmt": 'move',
-    "rdt": 'line',
-    "dt": 'line',
-    "hdt": "line",
-    "vdt": "line",
-    "rct": 'curve',
-    "ct": 'curve',
-    "rcv": 'curve',  # Morisawa's alternate name for 'rct'.
-    "vhct": 'curve',
-    "hvct": 'curve',
-}
 
 
 def addWhiteSpace(parent, level):
