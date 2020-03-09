@@ -951,7 +951,8 @@ language systems of the feature, or whose language systems vary from the set
 of language systems of the rest of the features in the file, as specified by
 the `languagesystem` statements. In these cases, `script` and `language`
 statements will need to be used within the feature block itself.
-Such statements affect only that feature.
+Such statements affect only that feature. **Note**: you may not use the `script`
+or `language` keywords within a standalone lookup block.
 
 Rules that are specified after the start of a feature and before the first
 `script` and/or `language` statement will be included in all the language
@@ -1178,8 +1179,9 @@ defined outside a feature block, is is referred to as a ‘standalone’ lookup.
 The lookup will be created with a GSUB or GPOS Extension lookup type if and only
 if the optional `useExtension` keyword is used.
 
-A lookup block may be defined either inside or outside of feature blocks. You
-may not use the script or language keywords within a standalone lookup block.
+A lookup block may be defined either inside or outside of feature blocks.
+**Note**: you may not use the `script` or `language` keywords within a standalone
+lookup block.
 
 The `useExtension` keyword has two effects: all the records of all types that
 are referenced by a lookup qualifier are placed in one contiguous block of data,
