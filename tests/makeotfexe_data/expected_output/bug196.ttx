@@ -33,7 +33,7 @@
       <!-- LookupCount=5 -->
       <Lookup index="0">
         <LookupType value="6"/>
-        <LookupFlag value="16"/>
+        <LookupFlag value="16"/><!-- useMarkFilteringSet -->
         <!-- SubTableCount=1 -->
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=0 -->
@@ -60,7 +60,7 @@
       </Lookup>
       <Lookup index="1">
         <LookupType value="6"/>
-        <LookupFlag value="16"/>
+        <LookupFlag value="16"/><!-- useMarkFilteringSet -->
         <!-- SubTableCount=1 -->
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=0 -->
@@ -87,7 +87,7 @@
       </Lookup>
       <Lookup index="2">
         <LookupType value="6"/>
-        <LookupFlag value="16"/>
+        <LookupFlag value="16"/><!-- useMarkFilteringSet -->
         <!-- SubTableCount=1 -->
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=2 -->
@@ -114,7 +114,7 @@
       </Lookup>
       <Lookup index="3">
         <LookupType value="1"/>
-        <LookupFlag value="16"/>
+        <LookupFlag value="16"/><!-- useMarkFilteringSet -->
         <!-- SubTableCount=1 -->
         <SingleSubst index="0" Format="1">
           <Substitution in="a" out="c"/>
@@ -123,7 +123,7 @@
       </Lookup>
       <Lookup index="4">
         <LookupType value="1"/>
-        <LookupFlag value="16"/>
+        <LookupFlag value="16"/><!-- useMarkFilteringSet -->
         <!-- SubTableCount=1 -->
         <SingleSubst index="0" Format="2">
           <Substitution in="b" out="b"/>
