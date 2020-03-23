@@ -4,7 +4,7 @@
 # NOTE: hard-pinning (==) here gets relaxed to >= in setup.py
 lxml==4.5.0
 booleanOperations==0.9.0
-cu2qu[cli]==1.6.6
+cu2qu[cli]==1.6.7
 defcon[lxml,pens]==0.6.0
 fontMath==0.5.2
 fontTools[ufo,unicode,lxml,woff]==4.4.3
