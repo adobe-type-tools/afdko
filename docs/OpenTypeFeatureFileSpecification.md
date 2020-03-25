@@ -1436,11 +1436,12 @@ feature liga {
     script latn;
         language dflt;
         # default lookup for latn included under all languages for the latn script
-
         sub f l by f_l;
+
         language DEU;
         # default lookups included under the DEU language.
-        sub s s by germandbls;   # This is also included.
+        sub c h by c_h;
+        sub c k by c_k;
 
         language TRK exclude_dflt;   # default lookups are excluded.
             lookup NO_I;             # Only this lookup is included under the TRK language
@@ -1458,7 +1459,7 @@ feature liga {
 *   Under the `latn` script, all languages but TRK will contain the default
     lookups, and the f_l ligature rule.
 
-*   The germandbls ligature will apply only for the `latn`/`DEU ` language
+*   The c_h and c_k ligatures will apply only for the `latn`/`DEU ` language
     system.
 
 *   The `latn`/`TRK ` language system will contain only the NO_I lookup.
