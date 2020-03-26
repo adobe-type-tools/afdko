@@ -10,7 +10,7 @@ Changelog
   ([#1076](https://github.com/adobe-type-tools/afdko/pull/1076))
 - [autohint] and [stemhist] now simply redirect input to psautohint/psstemhist
   ([#1077](https://github.com/adobe-type-tools/afdko/pull/1077))
-- [makeotfexe] fix bug in font generation with multiple `langugesystem` entries
+- [makeotfexe] fix bug in font generation with multiple `languagesystem` entries
   ([#1080](https://github.com/adobe-type-tools/afdko/issues/1080),
    [#1081](https://github.com/adobe-type-tools/afdko/pull/1081))
 
