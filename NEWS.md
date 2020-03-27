@@ -1,6 +1,35 @@
 Changelog
 =========
 
+3.2.1 (released 2020-03-27)
+---------------------------
+- [sfntedit] cleaned up help string
+  ([#1084](https://github.com/adobe-type-tools/afdko/pull/1084))
+- [docs] Updated AFDKO Overview doc
+  ([#1091](https://github.com/adobe-type-tools/afdko/pull/1091))
+- [waterfallplot] fixed crash
+  ([#1094](https://github.com/adobe-type-tools/afdko/pull/1094),
+   [#1092](https://github.com/adobe-type-tools/afdko/issues/1092))
+- [ttfdecomponentizer] add ttfdecomponentizer tool
+  ([#1096](https://github.com/adobe-type-tools/afdko/pull/1096))
+- [buildcff2vf] update to use new `fontTools.varLib` exceptions
+  ([#1097](https://github.com/adobe-type-tools/afdko/pull/1097),
+   [#1088](https://github.com/adobe-type-tools/afdko/issues/1088))
+- [ufotools] clean up (remove unused code)
+  ([#1098](https://github.com/adobe-type-tools/afdko/pull/1098))
+- [docs] clarify allowed use of `script` and `language` keywords in feature files
+  ([#1099](https://github.com/adobe-type-tools/afdko/pull/1099),
+   [#990](https://github.com/adobe-type-tools/afdko/issues/990))
+- [requirements] fix issue with PyUp configuration (re-enable automatic updates)
+- [requirements] relax constraints on `ufoProcessor` version
+  ([#1102](https://github.com/adobe-type-tools/afdko/issues/1102))
+- [spec] replace invalid example in OpenType Feature File specification
+  ([#1106](https://github.com/adobe-type-tools/afdko/issues/1106),
+   [#1107](https://github.com/adobe-type-tools/afdko/pull/1107))
+- [makeotfexe] fix bug which could cause a crash with some fonts
+  ([#1108](https://github.com/adobe-type-tools/afdko/issues/1108),
+   [#1109](https://github.com/adobe-type-tools/afdko/pull/1109))
+
 3.2.0 (released 2020-01-24)
 ---------------------------
 - [ttfcomponentizer] minor updates and improvements
