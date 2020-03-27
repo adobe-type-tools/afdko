@@ -2,13 +2,13 @@
 # we want to have control over the version and guarantee that the XML output
 # of our tools is stable
 # NOTE: hard-pinning (==) here gets relaxed to >= in setup.py
-lxml==4.4.2
-booleanOperations==0.8.2
-cu2qu[cli]==1.6.6
+lxml==4.5.0
+booleanOperations==0.9.0
+cu2qu[cli]==1.6.7
 defcon[lxml,pens]==0.6.0
-fontMath==0.5.0
-fontTools[ufo,unicode,lxml,woff]==4.2.2
+fontMath==0.5.2
+fontTools[woff,unicode,ufo,lxml]==4.5.0
 mutatorMath==2.1.2
-psautohint==2.0.0
+psautohint==2.0.1
 ufonormalizer==0.3.6
-ufoProcessor>=1.0.5,<=1.0.6
+ufoProcessor==1.9.0

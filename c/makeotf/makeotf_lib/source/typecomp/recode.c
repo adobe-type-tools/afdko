@@ -984,7 +984,7 @@ static long sizeFDWidths(recodeCtx h, int fd) {
         }
 
         /* Find best combination of nominal and default widths */
-        minsize = SHRT_MAX;
+        minsize = INT_MAX;
         for (i = 0; i < wfd->total.cnt; i++) {
             int j;
             int nomsize;

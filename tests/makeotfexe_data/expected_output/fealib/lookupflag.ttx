@@ -83,7 +83,7 @@
       <!-- LookupCount=14 -->
       <Lookup index="0">
         <LookupType value="1"/>
-        <LookupFlag value="1"/>
+        <LookupFlag value="1"/><!-- rightToLeft -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -95,7 +95,7 @@
       </Lookup>
       <Lookup index="1">
         <LookupType value="1"/>
-        <LookupFlag value="2"/>
+        <LookupFlag value="2"/><!-- ignoreBaseGlyphs -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -107,7 +107,7 @@
       </Lookup>
       <Lookup index="2">
         <LookupType value="1"/>
-        <LookupFlag value="4"/>
+        <LookupFlag value="4"/><!-- ignoreLigatures -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -119,7 +119,7 @@
       </Lookup>
       <Lookup index="3">
         <LookupType value="1"/>
-        <LookupFlag value="7"/>
+        <LookupFlag value="7"/><!-- rightToLeft ignoreBaseGlyphs ignoreLigatures -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -131,7 +131,7 @@
       </Lookup>
       <Lookup index="4">
         <LookupType value="1"/>
-        <LookupFlag value="8"/>
+        <LookupFlag value="8"/><!-- ignoreMarks -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -143,7 +143,7 @@
       </Lookup>
       <Lookup index="5">
         <LookupType value="1"/>
-        <LookupFlag value="256"/>
+        <LookupFlag value="256"/><!-- markAttachmentType[1] -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -155,7 +155,7 @@
       </Lookup>
       <Lookup index="6">
         <LookupType value="1"/>
-        <LookupFlag value="512"/>
+        <LookupFlag value="512"/><!-- markAttachmentType[2] -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -167,7 +167,7 @@
       </Lookup>
       <Lookup index="7">
         <LookupType value="1"/>
-        <LookupFlag value="260"/>
+        <LookupFlag value="260"/><!-- ignoreLigatures markAttachmentType[1] -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -179,7 +179,7 @@
       </Lookup>
       <Lookup index="8">
         <LookupType value="1"/>
-        <LookupFlag value="16"/>
+        <LookupFlag value="16"/><!-- useMarkFilteringSet -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -192,7 +192,7 @@
       </Lookup>
       <Lookup index="9">
         <LookupType value="1"/>
-        <LookupFlag value="16"/>
+        <LookupFlag value="16"/><!-- useMarkFilteringSet -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -205,7 +205,7 @@
       </Lookup>
       <Lookup index="10">
         <LookupType value="1"/>
-        <LookupFlag value="20"/>
+        <LookupFlag value="20"/><!-- ignoreLigatures useMarkFilteringSet -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -230,7 +230,7 @@
       </Lookup>
       <Lookup index="12">
         <LookupType value="1"/>
-        <LookupFlag value="16"/>
+        <LookupFlag value="16"/><!-- useMarkFilteringSet -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
@@ -243,7 +243,7 @@
       </Lookup>
       <Lookup index="13">
         <LookupType value="1"/>
-        <LookupFlag value="768"/>
+        <LookupFlag value="768"/><!-- markAttachmentType[3] -->
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
           <Coverage Format="1">
