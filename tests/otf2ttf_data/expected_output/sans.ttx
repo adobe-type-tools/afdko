@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="\x00\x01\x00\x00" ttLibVersion="3.30">
+<ttFont sfntVersion="\x00\x01\x00\x00" ttLibVersion="4.7">
 
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
@@ -13,18 +13,19 @@
     <GlyphID id="7" name="A.sc"/>
     <GlyphID id="8" name="B.sc"/>
     <GlyphID id="9" name="C.sc"/>
+    <GlyphID id="10" name="GID10"/>
   </GlyphOrder>
 
   <head>
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="1.0"/>
     <fontRevision value="2.01999"/>
-    <checkSumAdjustment value="0xc60d1852"/>
+    <checkSumAdjustment value="0x1c15edb4"/>
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00000011"/>
     <unitsPerEm value="1000"/>
     <created value="Mon Aug 31 14:44:55 2015"/>
-    <modified value="Sat Sep 22 16:17:35 2018"/>
+    <modified value="Mon Apr  6 20:07:43 2020"/>
     <xMin value="8"/>
     <yMin value="-12"/>
     <xMax value="538"/>
@@ -53,13 +54,13 @@
     <reserved2 value="0"/>
     <reserved3 value="0"/>
     <metricDataFormat value="0"/>
-    <numberOfHMetrics value="10"/>
+    <numberOfHMetrics value="11"/>
   </hhea>
 
   <maxp>
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="0x10000"/>
-    <numGlyphs value="10"/>
+    <numGlyphs value="11"/>
     <maxPoints value="40"/>
     <maxContours value="5"/>
     <maxCompositePoints value="0"/>
@@ -136,6 +137,7 @@
     <mtx name="B.sc" width="514" lsb="97"/>
     <mtx name="C" width="564" lsb="55"/>
     <mtx name="C.sc" width="494" lsb="55"/>
+    <mtx name="GID10" width="172" lsb="14"/>
     <mtx name="a" width="491" lsb="58"/>
     <mtx name="b" width="542" lsb="92"/>
     <mtx name="c" width="449" lsb="52"/>
@@ -432,6 +434,56 @@
       <instructions/>
     </TTGlyph>
 
+    <TTGlyph name="GID10" xMin="14" yMin="0" xMax="150" yMax="666">
+      <contour>
+        <pt x="86" y="568" on="1"/>
+        <pt x="111" y="568" on="0"/>
+        <pt x="139" y="517" on="0"/>
+        <pt x="150" y="395" on="0"/>
+        <pt x="150" y="290" on="1"/>
+        <pt x="150" y="179" on="0"/>
+        <pt x="139" y="52" on="0"/>
+        <pt x="111" y="0" on="0"/>
+        <pt x="86" y="0" on="1"/>
+        <pt x="61" y="0" on="0"/>
+        <pt x="33" y="52" on="0"/>
+        <pt x="22" y="179" on="0"/>
+        <pt x="22" y="290" on="1"/>
+        <pt x="22" y="395" on="0"/>
+        <pt x="33" y="517" on="0"/>
+        <pt x="61" y="568" on="0"/>
+      </contour>
+      <contour>
+        <pt x="86" y="538" on="1"/>
+        <pt x="75" y="538" on="0"/>
+        <pt x="66" y="493" on="0"/>
+        <pt x="64" y="385" on="0"/>
+        <pt x="64" y="290" on="1"/>
+        <pt x="64" y="185" on="0"/>
+        <pt x="66" y="73" on="0"/>
+        <pt x="75" y="30" on="0"/>
+        <pt x="86" y="30" on="1"/>
+        <pt x="97" y="30" on="0"/>
+        <pt x="106" y="73" on="0"/>
+        <pt x="108" y="185" on="0"/>
+        <pt x="108" y="290" on="1"/>
+        <pt x="108" y="385" on="0"/>
+        <pt x="106" y="493" on="0"/>
+        <pt x="97" y="538" on="0"/>
+      </contour>
+      <contour>
+        <pt x="87" y="594" on="1"/>
+        <pt x="33" y="632" on="1"/>
+        <pt x="14" y="646" on="0"/>
+        <pt x="27" y="660" on="1"/>
+        <pt x="32" y="666" on="0"/>
+        <pt x="49" y="665" on="0"/>
+        <pt x="55" y="657" on="1"/>
+        <pt x="99" y="606" on="1"/>
+      </contour>
+      <instructions/>
+    </TTGlyph>
+
     <TTGlyph name="a" xMin="58" yMin="-12" xMax="412" yMax="492">
       <contour>
         <pt x="197" y="-12" on="1"/>
@@ -648,6 +700,7 @@
       <psName name="A.sc"/>
       <psName name="B.sc"/>
       <psName name="C.sc"/>
+      <psName name="GID10"/>
     </extraNames>
   </post>
 
