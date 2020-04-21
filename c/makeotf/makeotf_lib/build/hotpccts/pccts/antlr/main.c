@@ -1209,7 +1209,7 @@ cleanUp( )
 #endif
 {
 	if ( DefFile != NULL) {
-		fprintf(DefFile, "\n#endif\n");
+		fprintf(DefFile, "\n#endif /* %s */\n", gate_symbol(DefFileName));
 		fclose( DefFile );
 	}
 }
