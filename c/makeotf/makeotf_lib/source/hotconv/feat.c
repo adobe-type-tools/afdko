@@ -1062,6 +1062,7 @@ void zzcr_attr(Attrib *attr, int type, char *text) {
                type == K_hhea ||
                type == K_name ||
                type == K_OS_2 ||
+               type == K_STAT ||
                type == K_vhea ||
                type == K_vmtx) {
         attr->ulval = str2tag(text);

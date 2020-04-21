@@ -266,6 +266,13 @@ hotCtx g;
 #token K_WidthClass		"WidthClass"
 #token K_Vendor			"Vendor"
 
+#token K_STAT				"STAT"		/* Added tag to list in zzcr_attr() */
+#token K_ElidedFallbackName	"ElidedFallbackName"
+#token K_DesignAxis			"DesignAxis"
+#token K_AxisValue			"AxisValue"
+#token K_flag				"flag"
+#token K_location			"location"
+
 #token K_vhea               "vhea"		/* Added tag to list in zzcr_attr() */
 #token K_VertTypoAscender	"VertTypoAscender"
 #token K_VertTypoDescender	"VertTypoDescender"
@@ -1915,6 +1922,14 @@ table_OS_2
 		";"
 	;
 
+table_STAT
+	: t:K_STAT			<<checkTag($t.ulval, tableTag, 1);>>
+		"\{"
+		"\}"			<<zzmode(TAG_MODE);>>
+		u:T_TAG			<<checkTag($u.ulval, tableTag, 0);>>
+		";"
+	;
+
 glyphClassOptional>[GNode *gnode]
 	:	<<$gnode = NULL;>> /* Suppress optimizer warning */
 
@@ -2119,6 +2134,7 @@ tableBlock
 		|	table_hhea
 		|	table_name
 		|	table_OS_2
+		|	table_STAT
 		|	table_vhea
 		|	table_vmtx
 		)
