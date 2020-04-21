@@ -47,6 +47,7 @@ LIB_SRCS = \
 	$(SRCDIR)/otl.c \
 	$(SRCDIR)/post.c \
 	$(SRCDIR)/sfnt.c \
+	$(SRCDIR)/STAT.c \
 	$(SRCDIR)/vhea.c \
 	$(SRCDIR)/vmtx.c \
 	$(SRCDIR)/VORG.c
@@ -76,6 +77,7 @@ LIB_OBJS = \
 	$(OBJECT_DIR)/otl.o \
 	$(OBJECT_DIR)/post.o \
 	$(OBJECT_DIR)/sfnt.o \
+	$(OBJECT_DIR)/STAT.o \
 	$(OBJECT_DIR)/vhea.o \
 	$(OBJECT_DIR)/vmtx.o \
 	$(OBJECT_DIR)/VORG.o
@@ -156,6 +158,9 @@ post.o:
 
 sfnt.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sfnt.c -o $@
+
+STAT.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/STAT.c -o $@
 
 vhea.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/vhea.c -o $@

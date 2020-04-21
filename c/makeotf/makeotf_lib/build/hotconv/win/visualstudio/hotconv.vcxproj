@@ -160,6 +160,7 @@
     <ClCompile Include="..\..\..\..\source\hotconv\otl.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\post.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\sfnt.c" />
+    <ClCompile Include="..\..\..\..\source\hotconv\STAT.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\vhea.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\vmtx.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\VORG.c" />
