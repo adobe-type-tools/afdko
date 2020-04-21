@@ -214,7 +214,8 @@ char *gcname;
 
                                             gcAddGlyphClass(b.text, named);
                                             zzCONSUME;
-                                        } /* MR10 ()+ */ else {
+
+                                        } else {
                                             if (zzcnt > 1)
                                                 break;
                                             else {
@@ -3503,7 +3504,7 @@ lookupflagAssign()
                     } else {
                         if ((setwd13[LA(1)] & 0x1)) {
                             namedLookupFlagValue(&val);
-                        } /* MR10 ()+ */ else {
+                        } else {
                             if (zzcnt > 1)
                                 break;
                             else {
@@ -3986,7 +3987,7 @@ featureBlock()
                         } else {
                             if ((LA(1) == K_cv_params)) {
                                 cvParameterBlock();
-                            } /* MR10 ()+ */ else {
+                            } else {
                                 if (zzcnt > 1)
                                     break;
                                 else {
