@@ -105,20 +105,26 @@
 #define K_WeightClass 123
 #define K_WidthClass 124
 #define K_Vendor 125
-#define K_vhea 126
-#define K_VertTypoAscender 127
-#define K_VertTypoDescender 128
-#define K_VertTypoLineGap 129
-#define K_vmtx 130
-#define K_VertOriginY 131
-#define K_VertAdvanceY 132
-#define T_FONTREV 133
-#define T_NUMEXT 134
-#define T_NUM 135
-#define T_GCLASS 136
-#define T_CID 137
-#define T_GNAME 138
-#define T_STRING 139
+#define K_STAT 126
+#define K_ElidedFallbackName 127
+#define K_DesignAxis 128
+#define K_AxisValue 129
+#define K_flag 130
+#define K_location 131
+#define K_vhea 132
+#define K_VertTypoAscender 133
+#define K_VertTypoDescender 134
+#define K_VertTypoLineGap 135
+#define K_vmtx 136
+#define K_VertOriginY 137
+#define K_VertAdvanceY 138
+#define T_FONTREV 139
+#define T_NUMEXT 140
+#define T_NUM 141
+#define T_GCLASS 142
+#define T_CID 143
+#define T_GNAME 144
+#define T_STRING 145
 
 #ifdef __USE_PROTOS
 extern GID glyph(char* tok, int allowNotdef);
@@ -406,6 +412,12 @@ extern void table_BASE();
 void table_OS_2(void);
 #else
 extern void table_OS_2();
+#endif
+
+#ifdef __USE_PROTOS
+void table_STAT(void);
+#else
+extern void table_STAT();
 #endif
 
 #ifdef __USE_PROTOS
