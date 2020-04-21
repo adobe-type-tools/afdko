@@ -15,6 +15,7 @@
 #include "GSUB.h"
 #include "GDEF.h"
 #include "BASE.h"
+#include "STAT.h"
 #include "name.h"
 
 #define MAX_NUM_LEN 3 /* For glyph ranges */

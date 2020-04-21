@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		29B88DDE244FA4DD006F259E /* STAT.h in Headers */ = {isa = PBXBuildFile; fileRef = 29B88DDC244FA4DC006F259E /* STAT.h */; };
+		29B88DE1244FA500006F259E /* STAT.c in Sources */ = {isa = PBXBuildFile; fileRef = 29B88DE0244FA500006F259E /* STAT.c */; };
 		BD1F638E0E26B32700A4E4C9 /* GDEF.h in Headers */ = {isa = PBXBuildFile; fileRef = BD1F638D0E26B32700A4E4C9 /* GDEF.h */; };
 		BD1F63900E26B33800A4E4C9 /* GDEF.c in Sources */ = {isa = PBXBuildFile; fileRef = BD1F638F0E26B33800A4E4C9 /* GDEF.c */; };
 		BD6159A50D2DC53300C1E0CA /* post.c in Sources */ = {isa = PBXBuildFile; fileRef = BD61598E0D2DC53300C1E0CA /* post.c */; };
@@ -76,6 +78,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		29B88DDC244FA4DC006F259E /* STAT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = STAT.h; path = ../../../../source/hotconv/STAT.h; sourceTree = "<group>"; };
+		29B88DE0244FA500006F259E /* STAT.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = STAT.c; path = ../../../../source/hotconv/STAT.c; sourceTree = "<group>"; };
 		BD1F638D0E26B32700A4E4C9 /* GDEF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GDEF.h; path = ../../../../source/hotconv/GDEF.h; sourceTree = SOURCE_ROOT; };
 		BD1F638F0E26B33800A4E4C9 /* GDEF.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = GDEF.c; path = ../../../../source/hotconv/GDEF.c; sourceTree = SOURCE_ROOT; };
 		BD61598E0D2DC53300C1E0CA /* post.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = post.c; path = ../../../../source/hotconv/post.c; sourceTree = SOURCE_ROOT; };
@@ -173,6 +177,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				29B88DE0244FA500006F259E /* STAT.c */,
 				BD6159BC0D2DC54200C1E0CA /* CFF_.c */,
 				BD6159BE0D2DC54200C1E0CA /* BASE.c */,
 				BD6159BF0D2DC54200C1E0CA /* anon.c */,
@@ -224,6 +229,7 @@
 		BD6159C40D2DC55D00C1E0CA /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				29B88DDC244FA4DC006F259E /* STAT.h */,
 				BD9DCE190DB540DE00192F3D /* hotconv.h */,
 				BDE662050D329ED5005FE583 /* feat.c */,
 				BD6159C50D2DC56500C1E0CA /* post.h */,
@@ -281,6 +287,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				29B88DDE244FA4DD006F259E /* STAT.h in Headers */,
 				BD6159E90D2DC56500C1E0CA /* post.h in Headers */,
 				BD6159EA0D2DC56500C1E0CA /* otl.h in Headers */,
 				BD6159EC0D2DC56500C1E0CA /* map.h in Headers */,
@@ -387,6 +394,7 @@
 				BD6159B00D2DC53300C1E0CA /* hmtx.c in Sources */,
 				BD6159B10D2DC53300C1E0CA /* GSUB.c in Sources */,
 				BD6159B20D2DC53300C1E0CA /* MMSD.c in Sources */,
+				29B88DE1244FA500006F259E /* STAT.c in Sources */,
 				BD6159B30D2DC53300C1E0CA /* sfnt.c in Sources */,
 				BD6159B40D2DC53300C1E0CA /* OS_2.c in Sources */,
 				BD6159B50D2DC53300C1E0CA /* name.c in Sources */,
