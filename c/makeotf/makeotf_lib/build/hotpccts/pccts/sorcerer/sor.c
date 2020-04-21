@@ -6,7 +6,7 @@
  * With AHPCRC, University of Minnesota
  * ANTLR Version 1.33MR33
  *
- *   ..\bin\antlr -gh -k 2 -gt sor.g
+ *   ../bin/antlr -gh -k 2 -gt sor.g
  *
  */
 
@@ -668,7 +668,7 @@ AST **_root;
               if ( (LA(1)==BT) ) {
                 tree(zzSTR,  no_copy||local_no_copy ); zzlink(_root, &_sibling, &_tail);
               }
-              /* MR10 ()+ */ else {
+              else {
                 if ( zzcnt > 1 ) break;
                 else {zzFAIL(2,zzerr9,zzerr10,&zzMissSet,&zzMissText,&zzBadTok,&zzBadText,&zzErrk); goto fail;}
               }

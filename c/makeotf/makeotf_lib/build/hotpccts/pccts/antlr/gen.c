@@ -3161,13 +3161,13 @@ Junction *q;
 /* MR6    Failed to turn off guess mode when leaving block		*/
 /* MR6				                           					*/
 /* MR6  */ if ( has_guess_block_as_last_item(q) ) {
-/* MR10 */   gen("/* MR10 ()+ */ else {\n");
+/* MR10 */   gen("else {\n");
 /* MR10 */   tabs++;
 /* MR10 */   need_right_curly++;
-/* MR10 */   gen("/* MR10 ()+ */ if ( !zzrv ) zzGUESS_DONE;\n");
-/* MR6  */   gen("/* MR10 ()+ */ if ( zzcnt > 1 ) break;\n");
+/* MR10 */   gen("if ( !zzrv ) zzGUESS_DONE;\n");
+/* MR6  */   gen("if ( zzcnt > 1 ) break;\n");
 /* MR10 */ } else {
-/* MR10 */   gen("/* MR10 ()+ */ else {\n");
+/* MR10 */   gen("else {\n");
 /* MR10 */   tabs++;
 /* MR10 */   need_right_curly++;
 /* MR10 */   gen("if ( zzcnt > 1 ) break;\n");
