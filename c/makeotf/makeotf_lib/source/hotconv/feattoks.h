@@ -282,6 +282,18 @@ void parameters(void);
 extern void parameters();
 #endif
 
+struct _rv27 {
+    long plat;
+    long spec;
+    long lang;
+};
+
+#ifdef __USE_PROTOS
+extern struct _rv27 nameEntry(void);
+#else
+extern struct _rv27 nameEntry();
+#endif
+
 #ifdef __USE_PROTOS
 void featureNameEntry(void);
 #else
@@ -415,6 +427,12 @@ extern void table_OS_2();
 #endif
 
 #ifdef __USE_PROTOS
+void designAxis(void);
+#else
+extern void designAxis();
+#endif
+
+#ifdef __USE_PROTOS
 void table_STAT(void);
 #else
 extern void table_STAT();
@@ -541,15 +559,15 @@ extern SetWordType setwd7[];
 extern SetWordType zzerr41[];
 extern SetWordType zzerr42[];
 extern SetWordType zzerr43[];
-extern SetWordType zzerr44[];
 extern SetWordType setwd8[];
+extern SetWordType zzerr44[];
 extern SetWordType zzerr45[];
 extern SetWordType zzerr46[];
 extern SetWordType zzerr47[];
 extern SetWordType zzerr48[];
 extern SetWordType zzerr49[];
-extern SetWordType zzerr50[];
 extern SetWordType setwd9[];
+extern SetWordType zzerr50[];
 extern SetWordType zzerr51[];
 extern SetWordType zzerr52[];
 extern SetWordType zzerr53[];
@@ -560,8 +578,8 @@ extern SetWordType zzerr56[];
 extern SetWordType zzerr57[];
 extern SetWordType zzerr58[];
 extern SetWordType zzerr59[];
-extern SetWordType zzerr60[];
 extern SetWordType setwd11[];
+extern SetWordType zzerr60[];
 extern SetWordType zzerr61[];
 extern SetWordType zzerr62[];
 extern SetWordType zzerr63[];
@@ -578,8 +596,8 @@ extern SetWordType zzerr71[];
 extern SetWordType zzerr72[];
 extern SetWordType zzerr73[];
 extern SetWordType zzerr74[];
-extern SetWordType zzerr75[];
 extern SetWordType setwd14[];
+extern SetWordType zzerr75[];
 extern SetWordType zzerr76[];
 extern SetWordType zzerr77[];
 extern SetWordType zzerr78[];
@@ -595,9 +613,11 @@ extern SetWordType zzerr85[];
 extern SetWordType zzerr86[];
 extern SetWordType zzerr87[];
 extern SetWordType zzerr88[];
-extern SetWordType zzerr89[];
 extern SetWordType setwd17[];
+extern SetWordType zzerr89[];
 extern SetWordType zzerr90[];
+extern SetWordType zzerr91[];
 extern SetWordType setwd18[];
+extern SetWordType setwd19[];
 
 #endif /* feattoks_h */

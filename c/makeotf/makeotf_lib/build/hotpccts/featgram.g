@@ -268,7 +268,7 @@ hotCtx g;
 
 #token K_STAT				"STAT"		/* Added tag to list in zzcr_attr() */
 #token K_ElidedFallbackName	"ElidedFallbackName"
-#token K_DesignAxis			"DesignAxis"
+#token K_DesignAxis			"DesignAxis"	<<zzmode(TAG_MODE);>>
 #token K_AxisValue			"AxisValue"
 #token K_flag				"flag"
 #token K_location			"location"
@@ -1099,37 +1099,43 @@ parameters
 					)+
 					<<addFeatureParam(g, params, index);>>
 	;
-	
-featureNameEntry
-	:	
+
+nameEntry>[long plat, long spec, long lang]
+	:
 		<<
-		long plat = -1;		/* Suppress optimizer warning */
-		long spec = -1;		/* Suppress optimizer warning */
-		long lang = -1;		/* Suppress optimizer warning */
-		
+		$plat = -1;		/* Suppress optimizer warning */
+		$spec = -1;		/* Suppress optimizer warning */
+		$lang = -1;		/* Suppress optimizer warning */
+
 		h->nameString.cnt = 0;
 		>>
 		(
 			K_name					
 			{
-				numUInt16Ext>[plat]
+				numUInt16Ext>[$plat]
 					<<
-					if (plat != HOT_NAME_MS_PLATFORM &&
-						plat != HOT_NAME_MAC_PLATFORM)
+					if ($plat != HOT_NAME_MS_PLATFORM &&
+						$plat != HOT_NAME_MAC_PLATFORM)
 						hotMsg(g, hotFATAL,
 							   "platform id must be %d or %d [%s %d]",
 							   HOT_NAME_MS_PLATFORM, HOT_NAME_MAC_PLATFORM,
 							   INCL.file, h->linenum);
 					>>
 					{
-					numUInt16Ext>[spec]
-					numUInt16Ext>[lang]
+					numUInt16Ext>[$spec]
+					numUInt16Ext>[$lang]
 					}
 			}
 			T_STRING
 			";"
 		)
-	<< addFeatureNameString(plat, spec, lang);>>
+	;
+
+featureNameEntry
+	:
+		<< long plat, spec, lang; >>
+		nameEntry>[plat, spec, lang]
+		<< addFeatureNameString(plat, spec, lang);>>
 	;
 
 featureNames
@@ -1922,9 +1928,36 @@ table_OS_2
 		";"
 	;
 
+designAxis
+	:
+		<<
+		uint16_t nameID, ordering;
+		long plat, spec, lang;
+		h->featNameID = 0;
+		>>
+		K_DesignAxis t:T_TAG numUInt16>[ordering]
+		"\{"
+			(
+				nameEntry>[plat, spec, lang]
+				<< addAxisNameString(plat, spec, lang); >>
+			)+
+		"\}"
+		<<
+		STATAddDesignAxis(g, $t.ulval, h->featNameID, ordering);
+		h->featNameID = 0;
+		>>
+	;
+
 table_STAT
 	: t:K_STAT			<<checkTag($t.ulval, tableTag, 1);>>
 		"\{"
+		(
+			(
+			designAxis
+			|
+			)
+			";"
+		)+
 		"\}"			<<zzmode(TAG_MODE);>>
 		u:T_TAG			<<checkTag($u.ulval, tableTag, 0);>>
 		";"

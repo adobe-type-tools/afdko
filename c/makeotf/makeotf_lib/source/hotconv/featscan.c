@@ -492,6 +492,7 @@ static void act99() {
 
 static void act100() {
     NLA = K_DesignAxis;
+    zzmode(TAG_MODE);
 }
 
 static void act101() {
