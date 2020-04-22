@@ -719,6 +719,21 @@ static void addFeatureNameString(long platformId, long platspecId,
     addNameString(platformId, platspecId, languageId, nameID);
 }
 
+static void addAxisNameString(long platformId, long platspecId,
+                              long languageId) {
+    unsigned short nameID;
+
+    /* We only need to reserve a name ID *once* per axis. */
+    if (h->featNameID == 0) {
+        nameID = nameReserveUserID(g);
+        h->featNameID = nameID;
+    } else {
+        nameID = h->featNameID;
+    }
+
+    addNameString(platformId, platspecId, languageId, nameID);
+}
+
 /* Add Unicode and CodePage ranges to  OS/2 table. */
 /* ------------------------------------------------------------------- */
 /* ------------------------------------------------------------------- */

@@ -1,4 +1,9 @@
-# TABLES: STAT
+# TABLES: name,STAT
 
 table STAT {
+   DesignAxis wght 0 {
+      name "Weight";
+      name 3 1 0x411 "Weight";
+   };
+   DesignAxis ital 1 { name "Italic"; };
 } STAT;

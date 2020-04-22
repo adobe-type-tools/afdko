@@ -585,6 +585,7 @@ ElidedFallbackName
 DesignAxis
 	<<
 		NLA = K_DesignAxis;
+    zzmode(TAG_MODE);  
 	>>
 
 AxisValue
