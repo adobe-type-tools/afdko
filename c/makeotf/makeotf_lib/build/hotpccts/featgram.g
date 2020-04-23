@@ -1931,7 +1931,7 @@ table_OS_2
 designAxis
 	:
 		<<
-		uint16_t nameID, ordering;
+		uint16_t ordering;
 		long plat, spec, lang;
 		h->featNameID = 0;
 		>>
@@ -1948,12 +1948,33 @@ designAxis
 		>>
 	;
 
+elidedFallbackName
+	:
+		<<
+		long plat, spec, lang;
+		h->featNameID = 0;
+		>>
+		K_ElidedFallbackName
+		"\{"
+			(
+				nameEntry>[plat, spec, lang]
+				<< addElidedFallbackNameString(plat, spec, lang); >>
+			)+
+		"\}"
+		<<
+		STATSetElidedFallbackNameID(g, h->featNameID);
+		h->featNameID = 0;
+		>>
+	;
+
 table_STAT
 	: t:K_STAT			<<checkTag($t.ulval, tableTag, 1);>>
 		"\{"
 		(
 			(
 			designAxis
+			|
+			elidedFallbackName
 			|
 			)
 			";"

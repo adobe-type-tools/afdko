@@ -60,7 +60,7 @@ void STATNew(hotCtx g) {
 int STATFill(hotCtx g) {
     STATCtx h = g->ctx.STAT;
 
-    if (h->designAxes.cnt == 0) {
+    if (h->designAxes.cnt == 0 && h->tbl.elidedFallbackNameID == 0) {
         return 0;
     }
 
@@ -120,4 +120,14 @@ void STATAddDesignAxis(hotCtx g, Tag tag, uint16_t nameID, uint16_t ordering) {
     ar->axisTag = tag;
     ar->axisNameID = nameID;
     ar->axisOrdering = ordering;
+}
+
+void STATSetElidedFallbackNameID(hotCtx g, uint16_t nameID) {
+    STATCtx h = g->ctx.STAT;
+
+    if (h->tbl.elidedFallbackNameID) {
+        /* XXX: error? */
+        return;
+    }
+    h->tbl.elidedFallbackNameID = nameID;
 }
