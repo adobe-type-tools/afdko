@@ -19,5 +19,6 @@ void STATFree(hotCtx g);
 /* Supplementary functions */
 
 void STATAddDesignAxis(hotCtx g, Tag tag, uint16_t nameID, uint16_t ordering);
+void STATSetElidedFallbackNameID(hotCtx g, uint16_t nameID);
 
 #endif /* HOTCONV_STAT_H */

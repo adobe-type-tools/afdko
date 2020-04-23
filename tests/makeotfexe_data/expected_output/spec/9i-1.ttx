@@ -39,12 +39,15 @@
       Untitled1
     </namerecord>
     <namerecord nameID="256" platformID="3" platEncID="1" langID="0x409">
-      Weight
+      Regular
     </namerecord>
     <namerecord nameID="257" platformID="3" platEncID="1" langID="0x409">
+      Weight
+    </namerecord>
+    <namerecord nameID="258" platformID="3" platEncID="1" langID="0x409">
       Italic
     </namerecord>
-    <namerecord nameID="256" platformID="3" platEncID="1" langID="0x411">
+    <namerecord nameID="257" platformID="3" platEncID="1" langID="0x411">
       Weight
     </namerecord>
   </name>
@@ -56,17 +59,17 @@
     <DesignAxisRecord>
       <Axis index="0">
         <AxisTag value="wght"/>
-        <AxisNameID value="256"/>  <!-- Weight -->
+        <AxisNameID value="257"/>  <!-- Weight -->
         <AxisOrdering value="0"/>
       </Axis>
       <Axis index="1">
         <AxisTag value="ital"/>
-        <AxisNameID value="257"/>  <!-- Italic -->
+        <AxisNameID value="258"/>  <!-- Italic -->
         <AxisOrdering value="1"/>
       </Axis>
     </DesignAxisRecord>
     <!-- AxisValueCount=0 -->
-    <ElidedFallbackNameID value="0"/>
+    <ElidedFallbackNameID value="256"/>  <!-- Regular -->
   </STAT>
 
 </ttFont>

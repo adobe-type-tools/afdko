@@ -433,6 +433,12 @@ extern void designAxis();
 #endif
 
 #ifdef __USE_PROTOS
+void elidedFallbackName(void);
+#else
+extern void elidedFallbackName();
+#endif
+
+#ifdef __USE_PROTOS
 void table_STAT(void);
 #else
 extern void table_STAT();
@@ -606,8 +612,8 @@ extern SetWordType setwd15[];
 extern SetWordType zzerr80[];
 extern SetWordType zzerr81[];
 extern SetWordType zzerr82[];
-extern SetWordType zzerr83[];
 extern SetWordType setwd16[];
+extern SetWordType zzerr83[];
 extern SetWordType zzerr84[];
 extern SetWordType zzerr85[];
 extern SetWordType zzerr86[];
