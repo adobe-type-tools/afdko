@@ -21,7 +21,6 @@ typedef struct {
     uint16_t axisValueCount;
     LOffset  offsetToAxisValueOffsets;
     uint16_t elidedFallbackNameID;
-    dnaDCL(Offset, axisValueOffsets);
 } STATTbl;
 #define TBL_HDR_SIZE (int32 + uint16 * 4 + uint32 * 2)
 
@@ -35,12 +34,19 @@ typedef struct {
 #define AXIS_RECORD_SIZE (uint32 + uint16 * 2)
 
 typedef struct {
-    Tag axisTag;
-    uint16_t axisIndex;
-    uint16_t flags;
-    uint16_t valueNameID;
-    Fixed value;
+    uint16_t format;
+    uint16_t size;
+    union {
+        struct {
+            uint16_t axisIndex;
+            uint16_t flags;
+            uint16_t valueNameID;
+            Fixed value;
+            Tag axisTag;
+        } format1;
+    };
 } AxisValue;
+#define AXIS_VALUE1_SIZE (uint16 * 4 + int32)
 
 struct STATCtx_ {
     dnaDCL(AxisRecord, designAxes);
@@ -55,7 +61,6 @@ struct STATCtx_ {
 void STATNew(hotCtx g) {
     STATCtx h = MEM_NEW(g, sizeof(struct STATCtx_));
 
-    dnaINIT(g->dnaCtx, h->tbl.axisValueOffsets, 5, 5);
     dnaINIT(g->dnaCtx, h->designAxes, 5, 5);
     dnaINIT(g->dnaCtx, h->axisValues, 5, 5);
 
@@ -64,10 +69,24 @@ void STATNew(hotCtx g) {
     g->ctx.STAT = h;
 }
 
+bool axisIndexOfTag(STATCtx h, Tag tag, uint16_t *index) {
+    long i;
+
+    for (i = 0; i < h->designAxes.cnt; i++) {
+        AxisRecord *ar = &h->designAxes.array[i];
+        if (ar->axisTag == tag) {
+            *index = i;
+            return true;
+        }
+    }
+
+    return false;
+}
+
 int STATFill(hotCtx g) {
     STATCtx h = g->ctx.STAT;
     Offset currOff = 0;
-    long i, j;
+    long i;
 
     if (h->designAxes.cnt == 0 && h->axisValues.cnt == 0 &&
         h->tbl.elidedFallbackNameID == 0) {
@@ -91,21 +110,21 @@ int STATFill(hotCtx g) {
 
     if (h->tbl.axisValueCount) {
         h->tbl.offsetToAxisValueOffsets = currOff;
-        dnaSET_CNT(h->tbl.axisValueOffsets, h->tbl.axisValueCount);
 
         for (i = 0; i < h->axisValues.cnt; i++) {
-            bool found = false;
             AxisValue *av = &h->axisValues.array[i];
-            for (j = 0; j < h->designAxes.cnt; j++) {
-                AxisRecord *ar = &h->designAxes.array[j];
-                if (ar->axisTag == av->axisTag) {
-                    av->axisIndex = j;
-                    found = true;
+            switch (av->format) {
+                case 1:
+                    if (!axisIndexOfTag(h, av->format1.axisTag,
+                        &av->format1.axisIndex)) {
+                        /* XXX error */
+                    }
                     break;
-                }
-            }
-            if (!found) {
-                /* XXX error */
+                default:
+                    hotMsg(g, hotFATAL,
+                           "[internal] unknown STAT AxisValue format <%d> in %s.",
+                           av->format, g->error_id_text);
+                    break;
             }
         }
     }
@@ -115,7 +134,7 @@ int STATFill(hotCtx g) {
 
 void STATWrite(hotCtx g) {
     STATCtx h = g->ctx.STAT;
-    Offset start, end;
+    Offset offset;
     long i;
 
     OUT2(h->tbl.majorVersion);
@@ -134,29 +153,30 @@ void STATWrite(hotCtx g) {
         OUT2(ar->axisOrdering);
     }
 
-    start = TELL();
-    for (i = 0; i < h->tbl.axisValueOffsets.cnt; i++) {
-        OUT2(0);
+    offset = h->axisValues.cnt * uint16;
+    for (i = 0; i < h->axisValues.cnt; i++) {
+        AxisValue *av = &h->axisValues.array[i];
+        OUT2(offset);
+        offset += av->size;
     }
 
     for (i = 0; i < h->axisValues.cnt; i++) {
         AxisValue *av = &h->axisValues.array[i];
-
-        h->tbl.axisValueOffsets.array[i] = TELL() - start;
-
-        OUT2(1);
-        OUT2(av->axisIndex);
-        OUT2(av->flags);
-        OUT2(av->valueNameID);
-        OUT4(av->value);
+        OUT2(av->format);
+        switch (av->format) {
+            case 1:
+                OUT2(av->format1.axisIndex);
+                OUT2(av->format1.flags);
+                OUT2(av->format1.valueNameID);
+                OUT4(av->format1.value);
+                break;
+            default:
+                hotMsg(g, hotFATAL,
+                       "[internal] unknown STAT AxisValue format <%d> in %s.",
+                       av->format, g->error_id_text);
+                break;
+        }
     }
-
-    end = TELL();
-    SEEK(start);
-    for (i = 0; i < h->tbl.axisValueOffsets.cnt; i++) {
-        OUT2(h->tbl.axisValueOffsets.array[i]);
-    }
-    SEEK(end);
 }
 
 void STATReuse(hotCtx g) {
@@ -187,10 +207,12 @@ void STATAddAxisValue(hotCtx g, Tag axisTag, uint16_t flags, uint16_t nameID,
     STATCtx h = g->ctx.STAT;
 
     AxisValue *av = dnaNEXT(h->axisValues);
-    av->axisTag = axisTag;
-    av->flags = flags;
-    av->valueNameID = nameID;
-    av->value = value;
+    av->format = 1; /* XXX */
+    av->size = AXIS_VALUE1_SIZE;
+    av->format1.axisTag = axisTag;
+    av->format1.flags = flags;
+    av->format1.valueNameID = nameID;
+    av->format1.value = value;
 }
 
 void STATSetElidedFallbackNameID(hotCtx g, uint16_t nameID) {
