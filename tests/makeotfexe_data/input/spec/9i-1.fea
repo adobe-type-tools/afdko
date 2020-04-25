@@ -7,4 +7,22 @@ table STAT {
       name 3 1 0x411 "Weight";
    };
    DesignAxis ital 1 { name "Italic"; };
+   # format 1
+   AxisValue {
+      location wght 400;
+      name "Regular";
+      name 3 1 0x411 "\5B9A\671F\7684";
+   };
+   AxisValue {
+      location ital 400;
+      name 3 1 0x411 "\5B9A\671F\7684";
+      flag ElidableAxisValueName;
+   };
+  #AxisValue {
+  #   location wght 400;
+  #   flag ElidableAxisValueName;
+  #};
+  #AxisValue {
+  #   flag ElidableAxisValueName;
+  #};
 } STAT;

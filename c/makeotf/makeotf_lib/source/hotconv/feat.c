@@ -719,7 +719,7 @@ static void addFeatureNameString(long platformId, long platspecId,
     addNameString(platformId, platspecId, languageId, nameID);
 }
 
-static void addAxisNameString(long platformId, long platspecId,
+static void addSTATNameString(long platformId, long platspecId,
                               long languageId) {
     unsigned short nameID;
 

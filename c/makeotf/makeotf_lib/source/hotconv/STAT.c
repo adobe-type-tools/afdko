@@ -5,18 +5,12 @@
  * Style Attributes Table
  */
 
-#include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "STAT.h"
 
 /* ---------------------------- Table Definition --------------------------- */
-
-typedef struct {
-    Tag axisTag;
-    uint16_t axisNameID;
-    uint16_t axisOrdering;
-} AxisRecord;
-#define AXIS_RECORD_SIZE (uint32 + uint16 * 2)
 
 typedef struct {
     uint16_t majorVersion;
@@ -27,19 +21,30 @@ typedef struct {
     uint16_t axisValueCount;
     LOffset  offsetToAxisValueOffsets;
     uint16_t elidedFallbackNameID;
-    Offset *axisValueOffsets;
+    dnaDCL(Offset, axisValueOffsets);
 } STATTbl;
 #define TBL_HDR_SIZE (int32 + uint16 * 4 + uint32 * 2)
 
 /* --------------------------- Context Definition ---------------------------*/
 
+typedef struct {
+    Tag axisTag;
+    uint16_t axisNameID;
+    uint16_t axisOrdering;
+} AxisRecord;
+#define AXIS_RECORD_SIZE (uint32 + uint16 * 2)
+
+typedef struct {
+    Tag axisTag;
+    uint16_t axisIndex;
+    uint16_t flags;
+    uint16_t valueNameID;
+    Fixed value;
+} AxisValue;
+
 struct STATCtx_ {
     dnaDCL(AxisRecord, designAxes);
-
-    struct {
-        Offset curr;
-        Offset shared;
-    } offset;
+    dnaDCL(AxisValue, axisValues);
 
     STATTbl tbl; /* Table data */
     hotCtx g;    /* Package context */
@@ -50,7 +55,9 @@ struct STATCtx_ {
 void STATNew(hotCtx g) {
     STATCtx h = MEM_NEW(g, sizeof(struct STATCtx_));
 
+    dnaINIT(g->dnaCtx, h->tbl.axisValueOffsets, 5, 5);
     dnaINIT(g->dnaCtx, h->designAxes, 5, 5);
+    dnaINIT(g->dnaCtx, h->axisValues, 5, 5);
 
     /* Link contexts */
     h->g = g;
@@ -59,8 +66,11 @@ void STATNew(hotCtx g) {
 
 int STATFill(hotCtx g) {
     STATCtx h = g->ctx.STAT;
+    Offset currOff = 0;
+    long i, j;
 
-    if (h->designAxes.cnt == 0 && h->tbl.elidedFallbackNameID == 0) {
+    if (h->designAxes.cnt == 0 && h->axisValues.cnt == 0 &&
+        h->tbl.elidedFallbackNameID == 0) {
         return 0;
     }
 
@@ -68,19 +78,44 @@ int STATFill(hotCtx g) {
     h->tbl.minorVersion = 2;
     h->tbl.designAxisSize = AXIS_RECORD_SIZE;
     h->tbl.designAxisCount = h->designAxes.cnt;
+    h->tbl.designAxesOffset = NULL_OFFSET;
+    h->tbl.axisValueCount = h->axisValues.cnt;
+    h->tbl.offsetToAxisValueOffsets = NULL_OFFSET;
 
-    h->offset.curr = TBL_HDR_SIZE;
+    currOff = TBL_HDR_SIZE;
 
-    h->tbl.designAxesOffset = h->designAxes.cnt ? h->offset.curr : NULL_OFFSET;
-    h->offset.curr += h->designAxes.cnt * AXIS_RECORD_SIZE;
+    if (h->tbl.designAxisCount) {
+        h->tbl.designAxesOffset = currOff;
+        currOff += h->tbl.designAxisCount * AXIS_RECORD_SIZE;
+    }
 
-    h->offset.shared = h->offset.curr;
+    if (h->tbl.axisValueCount) {
+        h->tbl.offsetToAxisValueOffsets = currOff;
+        dnaSET_CNT(h->tbl.axisValueOffsets, h->tbl.axisValueCount);
+
+        for (i = 0; i < h->axisValues.cnt; i++) {
+            bool found = false;
+            AxisValue *av = &h->axisValues.array[i];
+            for (j = 0; j < h->designAxes.cnt; j++) {
+                AxisRecord *ar = &h->designAxes.array[j];
+                if (ar->axisTag == av->axisTag) {
+                    av->axisIndex = j;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                /* XXX error */
+            }
+        }
+    }
 
     return 1;
 }
 
 void STATWrite(hotCtx g) {
     STATCtx h = g->ctx.STAT;
+    Offset start, end;
     long i;
 
     OUT2(h->tbl.majorVersion);
@@ -98,6 +133,30 @@ void STATWrite(hotCtx g) {
         OUT2(ar->axisNameID);
         OUT2(ar->axisOrdering);
     }
+
+    start = TELL();
+    for (i = 0; i < h->tbl.axisValueOffsets.cnt; i++) {
+        OUT2(0);
+    }
+
+    for (i = 0; i < h->axisValues.cnt; i++) {
+        AxisValue *av = &h->axisValues.array[i];
+
+        h->tbl.axisValueOffsets.array[i] = TELL() - start;
+
+        OUT2(1);
+        OUT2(av->axisIndex);
+        OUT2(av->flags);
+        OUT2(av->valueNameID);
+        OUT4(av->value);
+    }
+
+    end = TELL();
+    SEEK(start);
+    for (i = 0; i < h->tbl.axisValueOffsets.cnt; i++) {
+        OUT2(h->tbl.axisValueOffsets.array[i]);
+    }
+    SEEK(end);
 }
 
 void STATReuse(hotCtx g) {
@@ -107,6 +166,7 @@ void STATFree(hotCtx g) {
     STATCtx h = g->ctx.STAT;
 
     dnaFREE(h->designAxes);
+    dnaFREE(h->axisValues);
 
     MEM_FREE(g, g->ctx.STAT);
 }
@@ -120,6 +180,17 @@ void STATAddDesignAxis(hotCtx g, Tag tag, uint16_t nameID, uint16_t ordering) {
     ar->axisTag = tag;
     ar->axisNameID = nameID;
     ar->axisOrdering = ordering;
+}
+
+void STATAddAxisValue(hotCtx g, Tag axisTag, uint16_t flags, uint16_t nameID,
+                      Fixed value) {
+    STATCtx h = g->ctx.STAT;
+
+    AxisValue *av = dnaNEXT(h->axisValues);
+    av->axisTag = axisTag;
+    av->flags = flags;
+    av->valueNameID = nameID;
+    av->value = value;
 }
 
 void STATSetElidedFallbackNameID(hotCtx g, uint16_t nameID) {

@@ -601,6 +601,17 @@ flag
 location
 	<<
 		NLA = K_location;
+    zzmode(TAG_MODE);  
+	>>
+
+ElidableAxisValueName
+	<<
+		NLA = K_ElidableAxisValueName;
+	>>
+
+OlderSiblingFontAttribute
+	<<
+		NLA = K_OlderSiblingFontAttribute;
 	>>
 
 vhea
@@ -676,52 +687,52 @@ VertAdvanceY
 
 \[
 	<<
-		NLA = 146;
+		NLA = 148;
 	>>
 
 \-
 	<<
-		NLA = 147;
+		NLA = 149;
 	>>
 
 \]
 	<<
-		NLA = 148;
+		NLA = 150;
 	>>
 
 0
 	<<
-		NLA = 149;
+		NLA = 151;
 	>>
 
 ,
 	<<
-		NLA = 150;
+		NLA = 152;
 	>>
 
 '
 	<<
-		NLA = 151;
+		NLA = 153;
 	>>
 
 ;
 	<<
-		NLA = 152;
+		NLA = 154;
 	>>
 
 \{
 	<<
-		NLA = 153;
+		NLA = 155;
 	>>
 
 \}
 	<<
-		NLA = 154;
+		NLA = 156;
 	>>
 
 =
 	<<
-		NLA = 155;
+		NLA = 157;
 	>>
 
 

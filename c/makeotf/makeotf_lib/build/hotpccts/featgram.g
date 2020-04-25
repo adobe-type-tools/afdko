@@ -266,12 +266,14 @@ hotCtx g;
 #token K_WidthClass		"WidthClass"
 #token K_Vendor			"Vendor"
 
-#token K_STAT				"STAT"		/* Added tag to list in zzcr_attr() */
-#token K_ElidedFallbackName	"ElidedFallbackName"
-#token K_DesignAxis			"DesignAxis"	<<zzmode(TAG_MODE);>>
-#token K_AxisValue			"AxisValue"
-#token K_flag				"flag"
-#token K_location			"location"
+#token K_STAT						"STAT"		/* Added tag to list in zzcr_attr() */
+#token K_ElidedFallbackName			"ElidedFallbackName"
+#token K_DesignAxis					"DesignAxis"	<<zzmode(TAG_MODE);>>
+#token K_AxisValue					"AxisValue"
+#token K_flag						"flag"
+#token K_location					"location"		<<zzmode(TAG_MODE);>>
+#token K_ElidableAxisValueName		"ElidableAxisValueName"
+#token K_OlderSiblingFontAttribute	"OlderSiblingFontAttribute"
 
 #token K_vhea               "vhea"		/* Added tag to list in zzcr_attr() */
 #token K_VertTypoAscender	"VertTypoAscender"
@@ -420,6 +422,16 @@ numUInt16>[unsigned value]
 					$value = (unsigned)($n).lval;
 					>>
 	;		
+
+numInt32>[int32_t value]
+	:	<<$value = 0; /* Suppress optimizer warning */>>
+		n:T_NUM		<<
+					if ($n.lval < -0x7fffffff || $n.lval > 0x7fffffff)
+						zzerr("not in range -0x7fffffff .. 0x7fffffff");
+					$value = (short)($n).lval;
+					>>
+	;
+
 
 parameterValue>[short value]
 	:	<<
@@ -1928,23 +1940,66 @@ table_OS_2
 		";"
 	;
 
+statNameEntry
+	:
+		<< long plat, spec, lang; >>
+		nameEntry>[plat, spec, lang]
+		<< addSTATNameString(plat, spec, lang);>>
+	;
+
 designAxis
 	:
 		<<
 		uint16_t ordering;
-		long plat, spec, lang;
 		h->featNameID = 0;
 		>>
 		K_DesignAxis t:T_TAG numUInt16>[ordering]
 		"\{"
-			(
-				nameEntry>[plat, spec, lang]
-				<< addAxisNameString(plat, spec, lang); >>
-			)+
+			(statNameEntry)+
 		"\}"
 		<<
 		STATAddDesignAxis(g, $t.ulval, h->featNameID, ordering);
 		h->featNameID = 0;
+		>>
+	;
+
+axisValueFlag[uint16_t *flags]
+	:
+		K_ElidableAxisValueName     << *flags |= 0x0001; >>
+		|
+		K_OlderSiblingFontAttribute << *flags |= 0x0002; >>
+	;
+
+axisValueFlags>[uint16_t flags]
+	:
+		<< $flags = 0; >>
+		K_flag (axisValueFlag[&$flags])+
+		";"
+	;
+
+axisValueLocation>[Tag tag, Fixed value]
+	:
+		K_location t:T_TAG numInt32>[$value] ";"
+		<< $tag = $t.ulval; >>
+	;
+
+axisValue
+	:
+		<<
+		uint16_t flags = 0;
+		Fixed value;
+		Tag axisTag;
+		h->featNameID = 0;
+		>>
+		K_AxisValue
+		"\{"
+			( statNameEntry
+			| axisValueFlags>[flags]
+			| axisValueLocation>[axisTag, value]
+			)+
+		"\}"
+		<<
+		STATAddAxisValue(g, axisTag, flags, h->featNameID, value);
 		>>
 	;
 
@@ -1973,6 +2028,8 @@ table_STAT
 		(
 			(
 			designAxis
+			|
+			axisValue
 			|
 			elidedFallbackName
 			|
