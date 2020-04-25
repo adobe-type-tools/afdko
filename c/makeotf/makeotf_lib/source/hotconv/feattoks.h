@@ -111,20 +111,22 @@
 #define K_AxisValue 129
 #define K_flag 130
 #define K_location 131
-#define K_vhea 132
-#define K_VertTypoAscender 133
-#define K_VertTypoDescender 134
-#define K_VertTypoLineGap 135
-#define K_vmtx 136
-#define K_VertOriginY 137
-#define K_VertAdvanceY 138
-#define T_FONTREV 139
-#define T_NUMEXT 140
-#define T_NUM 141
-#define T_GCLASS 142
-#define T_CID 143
-#define T_GNAME 144
-#define T_STRING 145
+#define K_ElidableAxisValueName 132
+#define K_OlderSiblingFontAttribute 133
+#define K_vhea 134
+#define K_VertTypoAscender 135
+#define K_VertTypoDescender 136
+#define K_VertTypoLineGap 137
+#define K_vmtx 138
+#define K_VertOriginY 139
+#define K_VertAdvanceY 140
+#define T_FONTREV 141
+#define T_NUMEXT 142
+#define T_NUM 143
+#define T_GCLASS 144
+#define T_CID 145
+#define T_GNAME 146
+#define T_STRING 147
 
 #ifdef __USE_PROTOS
 extern GID glyph(char* tok, int allowNotdef);
@@ -154,6 +156,12 @@ extern short numInt16();
 extern unsigned numUInt16(void);
 #else
 extern unsigned numUInt16();
+#endif
+
+#ifdef __USE_PROTOS
+extern int32_t numInt32(void);
+#else
+extern int32_t numInt32();
 #endif
 
 #ifdef __USE_PROTOS
@@ -282,16 +290,16 @@ void parameters(void);
 extern void parameters();
 #endif
 
-struct _rv27 {
+struct _rv28 {
     long plat;
     long spec;
     long lang;
 };
 
 #ifdef __USE_PROTOS
-extern struct _rv27 nameEntry(void);
+extern struct _rv28 nameEntry(void);
 #else
-extern struct _rv27 nameEntry();
+extern struct _rv28 nameEntry();
 #endif
 
 #ifdef __USE_PROTOS
@@ -427,9 +435,44 @@ extern void table_OS_2();
 #endif
 
 #ifdef __USE_PROTOS
+void statNameEntry(void);
+#else
+extern void statNameEntry();
+#endif
+
+#ifdef __USE_PROTOS
 void designAxis(void);
 #else
 extern void designAxis();
+#endif
+
+#ifdef __USE_PROTOS
+void axisValueFlag(uint16_t* flags);
+#else
+extern void axisValueFlag();
+#endif
+
+#ifdef __USE_PROTOS
+extern uint16_t axisValueFlags(void);
+#else
+extern uint16_t axisValueFlags();
+#endif
+
+struct _rv55 {
+    Tag tag;
+    Fixed value;
+};
+
+#ifdef __USE_PROTOS
+extern struct _rv55 axisValueLocation(void);
+#else
+extern struct _rv55 axisValueLocation();
+#endif
+
+#ifdef __USE_PROTOS
+void axisValue(void);
+#else
+extern void axisValue();
 #endif
 
 #ifdef __USE_PROTOS
@@ -520,21 +563,21 @@ extern SetWordType zzerr2[];
 extern SetWordType zzerr3[];
 extern SetWordType zzerr4[];
 extern SetWordType zzerr5[];
-extern SetWordType zzerr6[];
 extern SetWordType setwd1[];
+extern SetWordType zzerr6[];
 extern SetWordType zzerr7[];
 extern SetWordType zzerr8[];
 extern SetWordType zzerr9[];
 extern SetWordType zzerr10[];
 extern SetWordType zzerr11[];
-extern SetWordType zzerr12[];
 extern SetWordType setwd2[];
+extern SetWordType zzerr12[];
 extern SetWordType zzerr13[];
 extern SetWordType zzerr14[];
 extern SetWordType zzerr15[];
 extern SetWordType zzerr16[];
-extern SetWordType zzerr17[];
 extern SetWordType setwd3[];
+extern SetWordType zzerr17[];
 extern SetWordType zzerr18[];
 extern SetWordType zzerr19[];
 extern SetWordType setwd4[];
@@ -545,10 +588,10 @@ extern SetWordType zzerr23[];
 extern SetWordType zzerr24[];
 extern SetWordType zzerr25[];
 extern SetWordType zzerr26[];
+extern SetWordType setwd5[];
 extern SetWordType zzerr27[];
 extern SetWordType zzerr28[];
 extern SetWordType zzerr29[];
-extern SetWordType setwd5[];
 extern SetWordType zzerr30[];
 extern SetWordType zzerr31[];
 extern SetWordType zzerr32[];
@@ -564,8 +607,8 @@ extern SetWordType zzerr40[];
 extern SetWordType setwd7[];
 extern SetWordType zzerr41[];
 extern SetWordType zzerr42[];
-extern SetWordType zzerr43[];
 extern SetWordType setwd8[];
+extern SetWordType zzerr43[];
 extern SetWordType zzerr44[];
 extern SetWordType zzerr45[];
 extern SetWordType zzerr46[];
@@ -578,21 +621,21 @@ extern SetWordType zzerr51[];
 extern SetWordType zzerr52[];
 extern SetWordType zzerr53[];
 extern SetWordType zzerr54[];
-extern SetWordType zzerr55[];
 extern SetWordType setwd10[];
+extern SetWordType zzerr55[];
 extern SetWordType zzerr56[];
 extern SetWordType zzerr57[];
 extern SetWordType zzerr58[];
-extern SetWordType zzerr59[];
 extern SetWordType setwd11[];
+extern SetWordType zzerr59[];
 extern SetWordType zzerr60[];
 extern SetWordType zzerr61[];
 extern SetWordType zzerr62[];
 extern SetWordType zzerr63[];
 extern SetWordType zzerr64[];
+extern SetWordType setwd12[];
 extern SetWordType zzerr65[];
 extern SetWordType zzerr66[];
-extern SetWordType setwd12[];
 extern SetWordType zzerr67[];
 extern SetWordType zzerr68[];
 extern SetWordType zzerr69[];
@@ -601,8 +644,8 @@ extern SetWordType zzerr70[];
 extern SetWordType zzerr71[];
 extern SetWordType zzerr72[];
 extern SetWordType zzerr73[];
-extern SetWordType zzerr74[];
 extern SetWordType setwd14[];
+extern SetWordType zzerr74[];
 extern SetWordType zzerr75[];
 extern SetWordType zzerr76[];
 extern SetWordType zzerr77[];
@@ -611,19 +654,22 @@ extern SetWordType zzerr79[];
 extern SetWordType setwd15[];
 extern SetWordType zzerr80[];
 extern SetWordType zzerr81[];
-extern SetWordType zzerr82[];
 extern SetWordType setwd16[];
+extern SetWordType zzerr82[];
 extern SetWordType zzerr83[];
 extern SetWordType zzerr84[];
 extern SetWordType zzerr85[];
+extern SetWordType setwd17[];
 extern SetWordType zzerr86[];
 extern SetWordType zzerr87[];
 extern SetWordType zzerr88[];
-extern SetWordType setwd17[];
 extern SetWordType zzerr89[];
 extern SetWordType zzerr90[];
-extern SetWordType zzerr91[];
 extern SetWordType setwd18[];
+extern SetWordType zzerr91[];
+extern SetWordType zzerr92[];
+extern SetWordType zzerr93[];
 extern SetWordType setwd19[];
+extern SetWordType setwd20[];
 
 #endif /* feattoks_h */

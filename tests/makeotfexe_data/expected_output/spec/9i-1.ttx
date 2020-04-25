@@ -47,8 +47,17 @@
     <namerecord nameID="258" platformID="3" platEncID="1" langID="0x409">
       Italic
     </namerecord>
+    <namerecord nameID="259" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
     <namerecord nameID="257" platformID="3" platEncID="1" langID="0x411">
       Weight
+    </namerecord>
+    <namerecord nameID="259" platformID="3" platEncID="1" langID="0x411">
+      定期的
+    </namerecord>
+    <namerecord nameID="260" platformID="3" platEncID="1" langID="0x411">
+      定期的
     </namerecord>
   </name>
 
@@ -68,7 +77,21 @@
         <AxisOrdering value="1"/>
       </Axis>
     </DesignAxisRecord>
-    <!-- AxisValueCount=0 -->
+    <!-- AxisValueCount=2 -->
+    <AxisValueArray>
+      <AxisValue index="0" Format="1">
+        <AxisIndex value="0"/>
+        <Flags value="0"/>
+        <ValueNameID value="259"/>  <!-- Regular -->
+        <Value value="0.0061"/>
+      </AxisValue>
+      <AxisValue index="1" Format="1">
+        <AxisIndex value="1"/>
+        <Flags value="1"/>
+        <ValueNameID value="260"/>  <!-- 定期的 -->
+        <Value value="0.0061"/>
+      </AxisValue>
+    </AxisValueArray>
     <ElidedFallbackNameID value="256"/>  <!-- Regular -->
   </STAT>
 
