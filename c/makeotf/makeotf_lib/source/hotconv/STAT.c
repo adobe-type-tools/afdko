@@ -63,9 +63,9 @@ typedef struct {
         } format3;
     };
 } AxisValueTable;
-#define AXIS_VALUE1_SIZE (uint16 * 4 + int32)
-#define AXIS_VALUE2_SIZE (uint16 * 4 + int32 * 3)
-#define AXIS_VALUE3_SIZE (uint16 * 4 + int32 * 2)
+#define AXIS_VALUE_TABLE1_SIZE (uint16 * 4 + int32)
+#define AXIS_VALUE_TABLE2_SIZE (uint16 * 4 + int32 * 3)
+#define AXIS_VALUE_TABLE3_SIZE (uint16 * 4 + int32 * 2)
 
 struct STATCtx_ {
     dnaDCL(AxisRecord, designAxes);
@@ -254,7 +254,7 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag axisTag,
 
     switch (format) {
         case 1:
-            av->size = AXIS_VALUE1_SIZE;
+            av->size = AXIS_VALUE_TABLE1_SIZE;
             av->format1.axisTag = axisTag;
             av->format1.flags = flags;
             av->format1.valueNameID = nameID;
@@ -262,7 +262,7 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag axisTag,
             break;
 
         case 2:
-            av->size = AXIS_VALUE2_SIZE;
+            av->size = AXIS_VALUE_TABLE2_SIZE;
             av->format2.axisTag = axisTag;
             av->format2.flags = flags;
             av->format2.valueNameID = nameID;
@@ -272,7 +272,7 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag axisTag,
             break;
 
         case 3:
-            av->size = AXIS_VALUE3_SIZE;
+            av->size = AXIS_VALUE_TABLE3_SIZE;
             av->format3.axisTag = axisTag;
             av->format3.flags = flags;
             av->format3.valueNameID = nameID;
