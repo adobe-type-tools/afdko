@@ -34,6 +34,13 @@ typedef struct {
 #define AXIS_RECORD_SIZE (uint32 + uint16 * 2)
 
 typedef struct {
+    Tag axisTag; /* used internally, not part of the format */
+    uint16_t axisIndex;
+    Fixed value;
+} AxisValue;
+#define AXIS_VALUE_SIZE (uint16 + int32)
+
+typedef struct {
     uint16_t format;
     uint16_t size;
     union {
@@ -61,11 +68,18 @@ typedef struct {
             Fixed value;
             Fixed linkedValue;
         } format3;
+        struct {
+            uint16_t axisCount;
+            uint16_t flags;
+            uint16_t valueNameID;
+            AxisValue* axisValues;
+        } format4;
     };
 } AxisValueTable;
 #define AXIS_VALUE_TABLE1_SIZE (uint16 * 4 + int32)
 #define AXIS_VALUE_TABLE2_SIZE (uint16 * 4 + int32 * 3)
 #define AXIS_VALUE_TABLE3_SIZE (uint16 * 4 + int32 * 2)
+#define AXIS_VALUE_TABLE4_SIZE(n) (uint16 * 4 + AXIS_VALUE_SIZE * n)
 
 struct STATCtx_ {
     dnaDCL(AxisRecord, designAxes);
@@ -105,7 +119,7 @@ bool axisIndexOfTag(STATCtx h, Tag tag, uint16_t *index) {
 int STATFill(hotCtx g) {
     STATCtx h = g->ctx.STAT;
     Offset currOff = 0;
-    long i;
+    long i, j;
 
     if (h->designAxes.cnt == 0 && h->axisValues.cnt == 0 &&
         h->tbl.elidedFallbackNameID == 0) {
@@ -144,6 +158,18 @@ int STATFill(hotCtx g) {
                     }
                     break;
 
+                case 4:
+                    for (j = 0; j < av->format4.axisCount; j++) {
+                        if (!axisIndexOfTag(h,
+                                av->format4.axisValues[j].axisTag,
+                                &av->format4.axisValues[j].axisIndex)) {
+                            hotMsg(g, hotFATAL,
+                                   "No STAT DesignAxis defined for \"%c%c%c%c\".",
+                                   TAG_ARG(av->format4.axisValues[j].axisTag));
+                        }
+                    }
+                    break;
+
                 default:
                     hotMsg(g, hotFATAL,
                            "[internal] unknown STAT Axis Value Table format <%d>.",
@@ -159,7 +185,7 @@ int STATFill(hotCtx g) {
 void STATWrite(hotCtx g) {
     STATCtx h = g->ctx.STAT;
     Offset offset;
-    long i;
+    long i, j;
 
     OUT2(h->tbl.majorVersion);
     OUT2(h->tbl.minorVersion);
@@ -212,6 +238,16 @@ void STATWrite(hotCtx g) {
                 OUT4(av->format3.linkedValue);
                 break;
 
+            case 4:
+                OUT2(av->format4.axisCount);
+                OUT2(av->format4.flags);
+                OUT2(av->format4.valueNameID);
+                for (j = 0; j < av->format4.axisCount; j++) {
+                    OUT2(av->format4.axisValues[j].axisIndex);
+                    OUT4(av->format4.axisValues[j].value);
+                }
+                break;
+
             default:
                 hotMsg(g, hotFATAL,
                        "[internal] unknown STAT Axis Value Table format <%d>.",
@@ -226,9 +262,17 @@ void STATReuse(hotCtx g) {
 
 void STATFree(hotCtx g) {
     STATCtx h = g->ctx.STAT;
+    long i;
 
     dnaFREE(h->designAxes);
     dnaFREE(h->axisValues);
+
+    for (i = 0; i < h->axisValues.cnt; i++) {
+        AxisValueTable *av = &h->axisValues.array[i];
+        if (av->format == 4) {
+            MEM_FREE(g, av->format4.axisValues);
+        }
+    }
 
     MEM_FREE(g, g->ctx.STAT);
 }
@@ -244,40 +288,57 @@ void STATAddDesignAxis(hotCtx g, Tag tag, uint16_t nameID, uint16_t ordering) {
     ar->axisOrdering = ordering;
 }
 
-void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag axisTag,
-                           uint16_t flags, uint16_t nameID, Fixed value,
-                           Fixed minValue, Fixed maxValue) {
+void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
+                           Fixed *values, long count, uint16_t flags,
+                           uint16_t nameID, Fixed minValue, Fixed maxValue) {
     STATCtx h = g->ctx.STAT;
+    long i;
 
     AxisValueTable *av = dnaNEXT(h->axisValues);
+
+    if (count > 1 && format == 1)
+        format = 4;
+
     av->format = format;
 
     switch (format) {
         case 1:
             av->size = AXIS_VALUE_TABLE1_SIZE;
-            av->format1.axisTag = axisTag;
+            av->format1.axisTag = axisTags[0];
             av->format1.flags = flags;
             av->format1.valueNameID = nameID;
-            av->format1.value = value;
+            av->format1.value = values[0];
             break;
 
         case 2:
             av->size = AXIS_VALUE_TABLE2_SIZE;
-            av->format2.axisTag = axisTag;
+            av->format2.axisTag = axisTags[0];
             av->format2.flags = flags;
             av->format2.valueNameID = nameID;
-            av->format2.nominalValue = value;
+            av->format2.nominalValue = values[0];
             av->format2.rangeMinValue = minValue;
             av->format2.rangeMaxValue = maxValue;
             break;
 
         case 3:
             av->size = AXIS_VALUE_TABLE3_SIZE;
-            av->format3.axisTag = axisTag;
+            av->format3.axisTag = axisTags[0];
             av->format3.flags = flags;
             av->format3.valueNameID = nameID;
-            av->format3.value = value;
+            av->format3.value = values[0];
             av->format3.linkedValue = minValue;
+            break;
+
+        case 4:
+            av->size = AXIS_VALUE_TABLE4_SIZE(count);
+            av->format4.axisCount = count;
+            av->format4.flags = flags;
+            av->format4.valueNameID = nameID;
+            av->format4.axisValues = MEM_NEW(g, sizeof(AxisValue) * count);
+            for (i = 0; i < count; i++) {
+                av->format4.axisValues[i].axisTag = axisTags[i];
+                av->format4.axisValues[i].value = values[i];
+            }
             break;
 
         default:

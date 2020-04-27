@@ -1982,7 +1982,7 @@ axisValueLocation>[uint16_t format, Tag tag, Fixed value, Fixed min, Fixed max]
 		K_location t:T_TAG << $tag = $t.ulval; >> numInt32>[$value]
 		( ";" << $format = 1; >>
 		| numInt32>[$min] << $format = 3; >>
-		  {"\-" numInt32>[$max] <<$format = 2;>> } ";"
+		  {"\-" numInt32>[$max] << $format = 2; >> } ";"
 		)
 	;
 
@@ -1990,21 +1990,36 @@ axisValue
 	:
 		<<
 		uint16_t flags = 0;
-		uint16_t format;
+		uint16_t format = 0, prev = 0;
+		dnaDCL(Tag, axisTags);
+		dnaDCL(Fixed, values);
 		Fixed value, min, max;
 		Tag axisTag;
 		h->featNameID = 0;
+		dnaINIT(g->dnaCtx, axisTags, 1, 5);
+		dnaINIT(g->dnaCtx, values, 1, 5);
 		>>
 		K_AxisValue
 		"\{"
 			( statNameEntry
 			| axisValueFlags>[flags]
 			| axisValueLocation>[format, axisTag, value, min, max]
+			  <<
+			  if (prev && (prev != 1 || format != prev))
+				zzerr("unsupported multiple location "
+				      "statements in STAT AxisValue");
+			  *dnaNEXT(axisTags) = axisTag;
+			  *dnaNEXT(values) = value;
+			  prev = format;
+			  >>
 			)+
 		"\}"
 		<<
-		STATAddAxisValueTable(g, format, axisTag, flags,
-                                      h->featNameID, value, min, max);
+		STATAddAxisValueTable(g, format, axisTags.array, values.array,
+				      values.cnt, flags, h->featNameID,
+				      min, max);
+		dnaFREE(axisTags);
+		dnaFREE(values);
 		>>
 	;
 
