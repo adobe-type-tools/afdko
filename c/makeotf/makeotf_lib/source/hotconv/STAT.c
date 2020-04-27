@@ -62,14 +62,14 @@ typedef struct {
             Fixed linkedValue;
         } format3;
     };
-} AxisValue;
+} AxisValueTable;
 #define AXIS_VALUE1_SIZE (uint16 * 4 + int32)
 #define AXIS_VALUE2_SIZE (uint16 * 4 + int32 * 3)
 #define AXIS_VALUE3_SIZE (uint16 * 4 + int32 * 2)
 
 struct STATCtx_ {
     dnaDCL(AxisRecord, designAxes);
-    dnaDCL(AxisValue, axisValues);
+    dnaDCL(AxisValueTable, axisValues);
 
     STATTbl tbl; /* Table data */
     hotCtx g;    /* Package context */
@@ -131,7 +131,7 @@ int STATFill(hotCtx g) {
         h->tbl.offsetToAxisValueOffsets = currOff;
 
         for (i = 0; i < h->axisValues.cnt; i++) {
-            AxisValue *av = &h->axisValues.array[i];
+            AxisValueTable *av = &h->axisValues.array[i];
             switch (av->format) {
                 case 1:
                 case 2:
@@ -144,7 +144,7 @@ int STATFill(hotCtx g) {
 
                 default:
                     hotMsg(g, hotFATAL,
-                           "[internal] unknown STAT AxisValue format <%d> in %s.",
+                           "[internal] unknown STAT Axis Value Table format <%d> in %s.",
                            av->format, g->error_id_text);
                     break;
             }
@@ -177,13 +177,13 @@ void STATWrite(hotCtx g) {
 
     offset = h->axisValues.cnt * uint16;
     for (i = 0; i < h->axisValues.cnt; i++) {
-        AxisValue *av = &h->axisValues.array[i];
+        AxisValueTable *av = &h->axisValues.array[i];
         OUT2(offset);
         offset += av->size;
     }
 
     for (i = 0; i < h->axisValues.cnt; i++) {
-        AxisValue *av = &h->axisValues.array[i];
+        AxisValueTable *av = &h->axisValues.array[i];
         OUT2(av->format);
         switch (av->format) {
             case 1:
@@ -212,7 +212,7 @@ void STATWrite(hotCtx g) {
 
             default:
                 hotMsg(g, hotFATAL,
-                       "[internal] unknown STAT AxisValue format <%d> in %s.",
+                       "[internal] unknown STAT Axis Value Table format <%d> in %s.",
                        av->format, g->error_id_text);
                 break;
         }
@@ -242,12 +242,12 @@ void STATAddDesignAxis(hotCtx g, Tag tag, uint16_t nameID, uint16_t ordering) {
     ar->axisOrdering = ordering;
 }
 
-void STATAddAxisValue(hotCtx g, uint16_t format, Tag axisTag, uint16_t flags,
-                      uint16_t nameID, Fixed value, Fixed minValue,
-                      Fixed maxValue) {
+void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag axisTag,
+                           uint16_t flags, uint16_t nameID, Fixed value,
+                           Fixed minValue, Fixed maxValue) {
     STATCtx h = g->ctx.STAT;
 
-    AxisValue *av = dnaNEXT(h->axisValues);
+    AxisValueTable *av = dnaNEXT(h->axisValues);
     av->format = format;
 
     switch (format) {
@@ -280,7 +280,7 @@ void STATAddAxisValue(hotCtx g, uint16_t format, Tag axisTag, uint16_t flags,
 
         default:
             hotMsg(g, hotFATAL,
-                   "[internal] unknown STAT AxisValue format <%d> in %s.",
+                   "[internal] unknown STAT Axis Value Table format <%d> in %s.",
                    av->format, g->error_id_text);
             break;
     }

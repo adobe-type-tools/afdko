@@ -2003,7 +2003,8 @@ axisValue
 			)+
 		"\}"
 		<<
-		STATAddAxisValue(g, format, axisTag, flags, h->featNameID, value, min, max);
+		STATAddAxisValueTable(g, format, axisTag, flags,
+                                      h->featNameID, value, min, max);
 		>>
 	;
 
