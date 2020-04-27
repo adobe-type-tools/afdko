@@ -4763,13 +4763,41 @@ axisValueLocation()
         zzCONSUME;
         zzmatch(T_TAG);
         t = zzaCur;
-        zzCONSUME;
-        _retv.value = numInt32();
 
-        zzmatch(154);
         _retv.tag = t.ulval;
         zzCONSUME;
 
+        _retv.value = numInt32();
+
+        {
+            zzBLOCK(zztasp2);
+            zzMake0;
+            {
+                if ((LA(1) == 154)) {
+                    zzmatch(154);
+                    _retv.format = 1;
+                    zzCONSUME;
+
+                } else {
+                    if ((LA(1) == T_NUM)) {
+                        _retv.min = numInt32();
+
+                        zzmatch(149);
+                        zzCONSUME;
+                        _retv.max = numInt32();
+
+                        zzmatch(154);
+                        _retv.format = 2;
+                        zzCONSUME;
+
+                    } else {
+                        zzFAIL(1, zzerr81, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                        goto fail;
+                    }
+                }
+                zzEXIT(zztasp2);
+            }
+        }
         zzEXIT(zztasp1);
         return _retv;
     fail:
@@ -4792,7 +4820,8 @@ axisValue()
     zzMake0;
     {
         uint16_t flags = 0;
-        Fixed value;
+        uint16_t format;
+        Fixed value, min, max;
         Tag axisTag;
         h->featNameID = 0;
         zzmatch(K_AxisValue);
@@ -4817,14 +4846,17 @@ axisValue()
                                     struct _rv55 _trv;
                                     _trv = axisValueLocation();
 
+                                    format = _trv.format;
                                     axisTag = _trv.tag;
                                     value = _trv.value;
+                                    min = _trv.min;
+                                    max = _trv.max;
                                 }
                             } else {
                                 if (zzcnt > 1)
                                     break;
                                 else {
-                                    zzFAIL(1, zzerr81, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                    zzFAIL(1, zzerr82, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                     goto fail;
                                 }
                             }
@@ -4838,7 +4870,7 @@ axisValue()
         }
         zzmatch(156);
 
-        STATAddAxisValue(g, axisTag, flags, h->featNameID, value);
+        STATAddAxisValue(g, format, axisTag, flags, h->featNameID, value, min, max);
         zzCONSUME;
 
         zzEXIT(zztasp1);
@@ -4943,7 +4975,7 @@ table_STAT()
                                     } else {
                                         if ((LA(1) == 154)) {
                                         } else {
-                                            zzFAIL(1, zzerr82, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                            zzFAIL(1, zzerr83, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                             goto fail;
                                         }
                                     }
@@ -5001,7 +5033,7 @@ glyphClassOptional()
             if ((setwd17[LA(1)] & 0x10)) {
                 _retv = NULL;
             } else {
-                zzFAIL(1, zzerr83, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                zzFAIL(1, zzerr84, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                 goto fail;
             }
         }
@@ -5152,7 +5184,7 @@ table_GDEF()
                                         } else {
                                             if ((LA(1) == 154)) {
                                             } else {
-                                                zzFAIL(1, zzerr84, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                                zzFAIL(1, zzerr85, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                 goto fail;
                                             }
                                         }
@@ -5226,7 +5258,7 @@ table_head()
                 } else {
                     if ((LA(1) == 154)) {
                     } else {
-                        zzFAIL(1, zzerr85, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                        zzFAIL(1, zzerr86, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                         goto fail;
                     }
                 }
@@ -5317,7 +5349,7 @@ table_hhea()
                                         } else {
                                             if ((LA(1) == 154)) {
                                             } else {
-                                                zzFAIL(1, zzerr86, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                                zzFAIL(1, zzerr87, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                 goto fail;
                                             }
                                         }
@@ -5427,7 +5459,7 @@ table_name()
                                                     } else {
                                                         if ((LA(1) == T_STRING)) {
                                                         } else {
-                                                            zzFAIL(1, zzerr87, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                                            zzFAIL(1, zzerr88, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                             goto fail;
                                                         }
                                                     }
@@ -5437,7 +5469,7 @@ table_name()
                                         } else {
                                             if ((LA(1) == T_STRING)) {
                                             } else {
-                                                zzFAIL(1, zzerr88, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                                zzFAIL(1, zzerr89, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                 goto fail;
                                             }
                                         }
@@ -5449,7 +5481,7 @@ table_name()
                             } else {
                                 if ((LA(1) == 154)) {
                                 } else {
-                                    zzFAIL(1, zzerr89, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                    zzFAIL(1, zzerr90, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                     goto fail;
                                 }
                             }
@@ -5540,7 +5572,7 @@ table_vhea()
                                     } else {
                                         if ((LA(1) == 154)) {
                                         } else {
-                                            zzFAIL(1, zzerr90, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                            zzFAIL(1, zzerr91, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                             goto fail;
                                         }
                                     }
@@ -5629,7 +5661,7 @@ table_vmtx()
                                 } else {
                                     if ((LA(1) == 154)) {
                                     } else {
-                                        zzFAIL(1, zzerr91, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                        zzFAIL(1, zzerr92, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                         goto fail;
                                     }
                                 }
@@ -5709,7 +5741,7 @@ tableBlock()
                                                 if ((LA(1) == K_vmtx)) {
                                                     table_vmtx();
                                                 } else {
-                                                    zzFAIL(1, zzerr92, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                                    zzFAIL(1, zzerr93, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                     goto fail;
                                                 }
                                             }
@@ -5799,7 +5831,7 @@ topLevelStatement()
                                 } else {
                                     if ((LA(1) == 154)) {
                                     } else {
-                                        zzFAIL(1, zzerr93, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                        zzFAIL(1, zzerr94, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                         goto fail;
                                     }
                                 }

@@ -1977,17 +1977,20 @@ axisValueFlags>[uint16_t flags]
 		";"
 	;
 
-axisValueLocation>[Tag tag, Fixed value]
+axisValueLocation>[uint16_t format, Tag tag, Fixed value, Fixed min, Fixed max]
 	:
-		K_location t:T_TAG numInt32>[$value] ";"
-		<< $tag = $t.ulval; >>
+		K_location t:T_TAG << $tag = $t.ulval; >> numInt32>[$value]
+		( ";" << $format = 1; >>
+		| numInt32>[$min] "\-" numInt32>[$max] ";" << $format = 2; >>
+		)
 	;
 
 axisValue
 	:
 		<<
 		uint16_t flags = 0;
-		Fixed value;
+		uint16_t format;
+		Fixed value, min, max;
 		Tag axisTag;
 		h->featNameID = 0;
 		>>
@@ -1995,11 +1998,11 @@ axisValue
 		"\{"
 			( statNameEntry
 			| axisValueFlags>[flags]
-			| axisValueLocation>[axisTag, value]
+			| axisValueLocation>[format, axisTag, value, min, max]
 			)+
 		"\}"
 		<<
-		STATAddAxisValue(g, axisTag, flags, h->featNameID, value);
+		STATAddAxisValue(g, format, axisTag, flags, h->featNameID, value, min, max);
 		>>
 	;
 
