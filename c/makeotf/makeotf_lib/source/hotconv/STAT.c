@@ -138,7 +138,9 @@ int STATFill(hotCtx g) {
                 case 3:
                     if (!axisIndexOfTag(h, av->format1.axisTag,
                         &av->format1.axisIndex)) {
-                        /* XXX error */
+                        hotMsg(g, hotFATAL,
+                               "No STAT DesignAxis defined for \"%c%c%c%c\"",
+                               TAG_ARG(av->format1.axisTag));
                     }
                     break;
 
@@ -290,8 +292,7 @@ void STATSetElidedFallbackNameID(hotCtx g, uint16_t nameID) {
     STATCtx h = g->ctx.STAT;
 
     if (h->tbl.elidedFallbackNameID) {
-        /* XXX: error? */
-        return;
+        hotMsg(g, hotFATAL, "ElidedFallbackName already defined in STAT table.");
     }
     h->tbl.elidedFallbackNameID = nameID;
 }
