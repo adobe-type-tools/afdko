@@ -25,4 +25,10 @@ table STAT {
   #AxisValue {
   #   flag ElidableAxisValueName;
   #};
+   # format 2
+   AxisValue {
+      location ital 400 300 - -500;
+      name "Regular";
+      flag ElidableAxisValueName;
+   };
 } STAT;

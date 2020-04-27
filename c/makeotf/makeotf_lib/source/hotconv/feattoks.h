@@ -459,8 +459,11 @@ extern uint16_t axisValueFlags();
 #endif
 
 struct _rv55 {
+    uint16_t format;
     Tag tag;
     Fixed value;
+    Fixed min;
+    Fixed max;
 };
 
 #ifdef __USE_PROTOS
@@ -654,21 +657,22 @@ extern SetWordType zzerr79[];
 extern SetWordType setwd15[];
 extern SetWordType zzerr80[];
 extern SetWordType zzerr81[];
-extern SetWordType setwd16[];
 extern SetWordType zzerr82[];
+extern SetWordType setwd16[];
 extern SetWordType zzerr83[];
 extern SetWordType zzerr84[];
 extern SetWordType zzerr85[];
-extern SetWordType setwd17[];
 extern SetWordType zzerr86[];
+extern SetWordType setwd17[];
 extern SetWordType zzerr87[];
 extern SetWordType zzerr88[];
 extern SetWordType zzerr89[];
 extern SetWordType zzerr90[];
-extern SetWordType setwd18[];
 extern SetWordType zzerr91[];
+extern SetWordType setwd18[];
 extern SetWordType zzerr92[];
 extern SetWordType zzerr93[];
+extern SetWordType zzerr94[];
 extern SetWordType setwd19[];
 extern SetWordType setwd20[];
 

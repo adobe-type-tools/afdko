@@ -38,15 +38,25 @@ typedef struct {
     uint16_t size;
     union {
         struct {
+            Tag axisTag; /* used internally, not part of the format */
             uint16_t axisIndex;
             uint16_t flags;
             uint16_t valueNameID;
             Fixed value;
-            Tag axisTag;
         } format1;
+        struct {
+            Tag axisTag; /* used internally, not part of the format */
+            uint16_t axisIndex;
+            uint16_t flags;
+            uint16_t valueNameID;
+            Fixed nominalValue;
+            Fixed rangeMinValue;
+            Fixed rangeMaxValue;
+        } format2;
     };
 } AxisValue;
 #define AXIS_VALUE1_SIZE (uint16 * 4 + int32)
+#define AXIS_VALUE2_SIZE (uint16 * 4 + int32 * 3)
 
 struct STATCtx_ {
     dnaDCL(AxisRecord, designAxes);
@@ -115,11 +125,13 @@ int STATFill(hotCtx g) {
             AxisValue *av = &h->axisValues.array[i];
             switch (av->format) {
                 case 1:
+                case 2:
                     if (!axisIndexOfTag(h, av->format1.axisTag,
                         &av->format1.axisIndex)) {
                         /* XXX error */
                     }
                     break;
+
                 default:
                     hotMsg(g, hotFATAL,
                            "[internal] unknown STAT AxisValue format <%d> in %s.",
@@ -170,6 +182,16 @@ void STATWrite(hotCtx g) {
                 OUT2(av->format1.valueNameID);
                 OUT4(av->format1.value);
                 break;
+
+            case 2:
+                OUT2(av->format2.axisIndex);
+                OUT2(av->format2.flags);
+                OUT2(av->format2.valueNameID);
+                OUT4(av->format2.nominalValue);
+                OUT4(av->format2.rangeMinValue);
+                OUT4(av->format2.rangeMaxValue);
+                break;
+
             default:
                 hotMsg(g, hotFATAL,
                        "[internal] unknown STAT AxisValue format <%d> in %s.",
@@ -202,17 +224,39 @@ void STATAddDesignAxis(hotCtx g, Tag tag, uint16_t nameID, uint16_t ordering) {
     ar->axisOrdering = ordering;
 }
 
-void STATAddAxisValue(hotCtx g, Tag axisTag, uint16_t flags, uint16_t nameID,
-                      Fixed value) {
+void STATAddAxisValue(hotCtx g, uint16_t format, Tag axisTag, uint16_t flags,
+                      uint16_t nameID, Fixed value, Fixed minValue,
+                      Fixed maxValue) {
     STATCtx h = g->ctx.STAT;
 
     AxisValue *av = dnaNEXT(h->axisValues);
-    av->format = 1; /* XXX */
-    av->size = AXIS_VALUE1_SIZE;
-    av->format1.axisTag = axisTag;
-    av->format1.flags = flags;
-    av->format1.valueNameID = nameID;
-    av->format1.value = value;
+    av->format = format;
+
+    switch (format) {
+        case 1:
+            av->size = AXIS_VALUE1_SIZE;
+            av->format1.axisTag = axisTag;
+            av->format1.flags = flags;
+            av->format1.valueNameID = nameID;
+            av->format1.value = value;
+            break;
+
+        case 2:
+            av->size = AXIS_VALUE2_SIZE;
+            av->format2.axisTag = axisTag;
+            av->format2.flags = flags;
+            av->format2.valueNameID = nameID;
+            av->format2.nominalValue = value;
+            av->format2.rangeMinValue = minValue;
+            av->format2.rangeMaxValue = maxValue;
+            break;
+
+        default:
+            hotMsg(g, hotFATAL,
+                   "[internal] unknown STAT AxisValue format <%d> in %s.",
+                   av->format, g->error_id_text);
+            break;
+    }
 }
 
 void STATSetElidedFallbackNameID(hotCtx g, uint16_t nameID) {
