@@ -300,7 +300,7 @@ static void vmessage(ufoCtx h, char* fmt, va_list ap) {
     if (h->stm.dbg == NULL)
         return; /* Debug stream not available */
 
-    vsprintf(text, fmt, ap);
+    vsnprintf(text, sizeof(text), fmt, ap);
     (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
 }
 

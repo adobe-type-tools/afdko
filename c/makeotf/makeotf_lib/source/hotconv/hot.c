@@ -1851,9 +1851,13 @@ void CDECL hotMsg(hotCtx g, int level, char *fmt, ...) {
 #define MAX_NOTE_LEN 1024
             char message[MAX_NOTE_LEN + 1024];
             char *p;
+            size_t p_size;
+
+            p_size = sizeof(message);
             if ((g->font.FontName.cnt != 0) && (lenName < MAX_NOTE_LEN)) {
                 sprintf(message, "<%s> ", g->font.FontName.array);
                 p = &message[lenName];
+                p_size -= lenName;
             } else {
                 p = message;
             }
@@ -1867,7 +1871,7 @@ void CDECL hotMsg(hotCtx g, int level, char *fmt, ...) {
             }
 
             va_start(ap, fmt);
-            vsprintf(p, fmt, ap);
+            vsnprintf(p, p_size, fmt, ap);
             va_end(ap);
             g->cb.message(g->cb.ctx, level, message);
         }

@@ -2281,12 +2281,11 @@ void cfwFree(cfwCtx g) {
 /* Write message to debug stream from va_list. */
 static void vmessage(cfwCtx g, char *fmt, va_list ap) {
     char text[500];
-    const size_t textLen = sizeof(text);
 
     if (g->stm.dbg == NULL) {
         return; /* Debug stream not available */
     }
-    VSPRINTF_S(text, textLen, fmt, ap);
+    vsnprintf(text, sizeof(text), fmt, ap);
     (void)g->cb.stm.write(&g->cb.stm, g->stm.dbg, strlen(text), text);
 }
 
