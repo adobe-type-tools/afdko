@@ -8,7 +8,7 @@ cu2qu[cli]==1.6.7
 defcon[lxml,pens]==0.6.0
 fontMath==0.5.2
 fontTools[woff,ufo,unicode,lxml]==4.8.1
-mutatorMath==2.1.2
+mutatorMath==3.0.1
 psautohint==2.0.1
 ufonormalizer==0.4.1
 ufoProcessor==1.9.0
