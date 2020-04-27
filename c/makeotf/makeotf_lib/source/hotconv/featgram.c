@@ -4885,7 +4885,8 @@ axisValue()
         }
         zzmatch(156);
 
-        STATAddAxisValue(g, format, axisTag, flags, h->featNameID, value, min, max);
+        STATAddAxisValueTable(g, format, axisTag, flags,
+                              h->featNameID, value, min, max);
         zzCONSUME;
 
         zzEXIT(zztasp1);
