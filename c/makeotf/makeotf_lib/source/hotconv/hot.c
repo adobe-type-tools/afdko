@@ -1871,7 +1871,7 @@ void CDECL hotMsg(hotCtx g, int level, char *fmt, ...) {
             }
 
             va_start(ap, fmt);
-            vsnprintf(p, p_size, fmt, ap);
+            VSPRINTF_S(p, p_size, fmt, ap);
             va_end(ap);
             g->cb.message(g->cb.ctx, level, message);
         }

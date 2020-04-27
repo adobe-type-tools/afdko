@@ -2285,7 +2285,7 @@ static void vmessage(cfwCtx g, char *fmt, va_list ap) {
     if (g->stm.dbg == NULL) {
         return; /* Debug stream not available */
     }
-    vsnprintf(text, sizeof(text), fmt, ap);
+    VSPRINTF_S(text, sizeof(text), fmt, ap);
     (void)g->cb.stm.write(&g->cb.stm, g->stm.dbg, strlen(text), text);
 }
 

@@ -457,7 +457,7 @@ static void vmessage(ttrCtx h, char *fmt, va_list ap) {
     if (h->stm.dbg == NULL)
         return; /* Debug stream not available */
 
-    vsnprintf(text, sizeof(text), fmt, ap);
+    VSPRINTF_S(text, sizeof(text), fmt, ap);
     (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
 }
 

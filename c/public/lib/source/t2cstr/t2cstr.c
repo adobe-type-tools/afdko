@@ -164,7 +164,7 @@ static void vmessage(t2cCtx h, char *fmt, va_list ap) {
     if (h->aux->dbg == NULL)
         return; /* Debug stream not available */
 
-    vsnprintf(text, sizeof(text), fmt, ap);
+    VSPRINTF_S(text, sizeof(text), fmt, ap);
     (void)h->aux->stm->write(h->aux->stm, h->aux->dbg, strlen(text), text);
 }
 

@@ -18,7 +18,7 @@ void cbFatal(cbCtx h, char *fmt, ...) {
     char text[512];
     va_list ap;
     va_start(ap, fmt);
-    vsnprintf(text, sizeof(text), fmt, ap);
+    VSPRINTF_S(text, sizeof(text), fmt, ap);
     message(h, hotFATAL, text);
     va_end(ap);
     if (!KeepGoing) {
@@ -31,7 +31,7 @@ void cbWarning(cbCtx h, char *fmt, ...) {
     char text[512];
     va_list ap;
     va_start(ap, fmt);
-    vsnprintf(text, sizeof(text), fmt, ap);
+    VSPRINTF_S(text, sizeof(text), fmt, ap);
     message(h, hotWARNING, text);
     va_end(ap);
 }

@@ -1060,7 +1060,7 @@ void CDECL tcFatal(tcCtx g, char *fmt, ...) {
         va_list ap;
 
         va_start(ap, fmt);
-        vsnprintf(text, sizeof(text), fmt, ap);
+        VSPRINTF_S(text, sizeof(text), fmt, ap);
 
         if (g->cb.psId != NULL) {
             /* Append source data id */
@@ -1081,7 +1081,7 @@ void CDECL tcWarning(tcCtx g, char *fmt, ...) {
         va_list ap;
 
         va_start(ap, fmt);
-        vsnprintf(text, sizeof(text), fmt, ap);
+        VSPRINTF_S(text, sizeof(text), fmt, ap);
 
         if (g->cb.psId != NULL) {
             /* Append source data id */
@@ -1101,7 +1101,7 @@ void CDECL tcNote(tcCtx g, char *fmt, ...) {
         va_list ap;
 
         va_start(ap, fmt);
-        vsnprintf(text, sizeof(text), fmt, ap);
+        VSPRINTF_S(text, sizeof(text), fmt, ap);
 
         if (g->cb.psId != NULL) {
             /* Append source data id */

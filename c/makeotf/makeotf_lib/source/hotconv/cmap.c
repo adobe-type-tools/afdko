@@ -291,7 +291,7 @@ static void CDECL cmapMsg(hotCtx g, int msgType, char *fmt, ...) {
     char msg[1024];
 
     va_start(ap, fmt);
-    vsnprintf(msgVar, sizeof(msgVar), fmt, ap);
+    VSPRINTF_S(msgVar, sizeof(msgVar), fmt, ap);
     va_end(ap);
     sprintf(msg, "cmap{plat=%u,script=%u,lang=%u}: %s", h->platformId,
             h->scriptId, h->language, msgVar);
