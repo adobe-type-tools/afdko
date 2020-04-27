@@ -445,7 +445,7 @@ static void CDECL zzerrVA(char *fmt, ...) {
     char msg[1024];
 
     va_start(ap, fmt);
-    vsnprintf(msg, sizeof(msg), fmt, ap);
+    VSPRINTF_S(msg, sizeof(msg), fmt, ap);
     va_end(ap);
     zzerr(msg);
 }
@@ -458,7 +458,7 @@ static void CDECL featMsg(int msgType, char *fmt, ...) {
     char msg[1024];
 
     va_start(ap, fmt);
-    vsnprintf(msgVar, sizeof(msgVar), fmt, ap);
+    VSPRINTF_S(msgVar, sizeof(msgVar), fmt, ap);
     va_end(ap);
     sprintf(msg, "%s [%s %d]", msgVar, INCL.file, zzline);
 

@@ -794,7 +794,7 @@ void CDECL psWarning(psCtx h, char *fmt, ...) {
 
         /* Format message */
         va_start(ap, fmt);
-        vsnprintf(text, sizeof(text), fmt, ap);
+        VSPRINTF_S(text, sizeof(text), fmt, ap);
 
         if (h->cb.psId != NULL) {
             /* Append source data id */
@@ -816,7 +816,7 @@ void CDECL psFatal(psCtx h, char *fmt, ...) {
         char text[513];
 
         va_start(ap, fmt);
-        vsnprintf(text, sizeof(text), fmt, ap);
+        VSPRINTF_S(text, sizeof(text), fmt, ap);
 
         if (h->cb.psId != NULL) {
             /* Append source data id */

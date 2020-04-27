@@ -265,7 +265,7 @@ static void CTL_CDECL writeFmt(svwCtx h, char *fmt, ...) {
     char buf[200];
     va_list ap;
     va_start(ap, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, ap);
+    VSPRINTF_S(buf, sizeof(buf), fmt, ap);
     writeStr(h, buf);
     va_end(ap);
 }

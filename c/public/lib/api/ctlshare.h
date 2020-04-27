@@ -521,6 +521,7 @@ enum {
 #define FPRINTF_S fprintf_s
 #define VFPRINTF_S vfprintf_s
 #define SPRINTF_S sprintf_s
+#define VSPRINTF_S vsprintf_s
 #define SSCANF_S sscanf_s
 #define STRCPY_S(d, ds, s) strcpy_s(d, ds, s)
 #define STRNCPY_S(d, ds, s, n) strncpy_s(d, ds, s, n)
@@ -534,6 +535,9 @@ enum {
 #endif
 #ifndef SPRINTF_S
 #define SPRINTF_S(b, l, f, ...) sprintf(b, f, ##__VA_ARGS__)
+#endif
+#ifndef VSPRINTF_S
+#define VSPRINTF_S vsnprintf
 #endif
 #ifndef SSCANF_S
 #define SSCANF_S sscanf

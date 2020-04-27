@@ -674,7 +674,7 @@ static void CDECL CMapMsg(mapCtx h, int msgType, char *fmt, ...) {
     char msg[2048];
 
     va_start(ap, fmt);
-    vsnprintf(msgVar, sizeof(msgVar), fmt, ap);
+    VSPRINTF_S(msgVar, sizeof(msgVar), fmt, ap);
     va_end(ap);
     sprintf(msg, "%s [%s]", msgVar, h->ps.cb.psId ? h->ps.cb.psId(h->ps.cb.ctx) : "");
 
