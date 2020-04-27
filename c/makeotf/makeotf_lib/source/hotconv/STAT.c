@@ -139,15 +139,15 @@ int STATFill(hotCtx g) {
                     if (!axisIndexOfTag(h, av->format1.axisTag,
                         &av->format1.axisIndex)) {
                         hotMsg(g, hotFATAL,
-                               "No STAT DesignAxis defined for \"%c%c%c%c\"",
+                               "No STAT DesignAxis defined for \"%c%c%c%c\".",
                                TAG_ARG(av->format1.axisTag));
                     }
                     break;
 
                 default:
                     hotMsg(g, hotFATAL,
-                           "[internal] unknown STAT Axis Value Table format <%d> in %s.",
-                           av->format, g->error_id_text);
+                           "[internal] unknown STAT Axis Value Table format <%d>.",
+                           av->format);
                     break;
             }
         }
@@ -214,8 +214,8 @@ void STATWrite(hotCtx g) {
 
             default:
                 hotMsg(g, hotFATAL,
-                       "[internal] unknown STAT Axis Value Table format <%d> in %s.",
-                       av->format, g->error_id_text);
+                       "[internal] unknown STAT Axis Value Table format <%d>.",
+                       av->format);
                 break;
         }
     }
@@ -282,8 +282,8 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag axisTag,
 
         default:
             hotMsg(g, hotFATAL,
-                   "[internal] unknown STAT Axis Value Table format <%d> in %s.",
-                   av->format, g->error_id_text);
+                   "[internal] unknown STAT Axis Value Table format <%d>.",
+                   av->format);
             break;
     }
 }
