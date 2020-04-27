@@ -53,10 +53,19 @@ typedef struct {
             Fixed rangeMinValue;
             Fixed rangeMaxValue;
         } format2;
+        struct {
+            Tag axisTag; /* used internally, not part of the format */
+            uint16_t axisIndex;
+            uint16_t flags;
+            uint16_t valueNameID;
+            Fixed value;
+            Fixed linkedValue;
+        } format3;
     };
 } AxisValue;
 #define AXIS_VALUE1_SIZE (uint16 * 4 + int32)
 #define AXIS_VALUE2_SIZE (uint16 * 4 + int32 * 3)
+#define AXIS_VALUE3_SIZE (uint16 * 4 + int32 * 2)
 
 struct STATCtx_ {
     dnaDCL(AxisRecord, designAxes);
@@ -126,6 +135,7 @@ int STATFill(hotCtx g) {
             switch (av->format) {
                 case 1:
                 case 2:
+                case 3:
                     if (!axisIndexOfTag(h, av->format1.axisTag,
                         &av->format1.axisIndex)) {
                         /* XXX error */
@@ -192,6 +202,14 @@ void STATWrite(hotCtx g) {
                 OUT4(av->format2.rangeMaxValue);
                 break;
 
+            case 3:
+                OUT2(av->format3.axisIndex);
+                OUT2(av->format3.flags);
+                OUT2(av->format3.valueNameID);
+                OUT4(av->format3.value);
+                OUT4(av->format3.linkedValue);
+                break;
+
             default:
                 hotMsg(g, hotFATAL,
                        "[internal] unknown STAT AxisValue format <%d> in %s.",
@@ -249,6 +267,15 @@ void STATAddAxisValue(hotCtx g, uint16_t format, Tag axisTag, uint16_t flags,
             av->format2.nominalValue = value;
             av->format2.rangeMinValue = minValue;
             av->format2.rangeMaxValue = maxValue;
+            break;
+
+        case 3:
+            av->size = AXIS_VALUE3_SIZE;
+            av->format3.axisTag = axisTag;
+            av->format3.flags = flags;
+            av->format3.valueNameID = nameID;
+            av->format3.value = value;
+            av->format3.linkedValue = minValue;
             break;
 
         default:

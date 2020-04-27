@@ -1981,7 +1981,8 @@ axisValueLocation>[uint16_t format, Tag tag, Fixed value, Fixed min, Fixed max]
 	:
 		K_location t:T_TAG << $tag = $t.ulval; >> numInt32>[$value]
 		( ";" << $format = 1; >>
-		| numInt32>[$min] "\-" numInt32>[$max] ";" << $format = 2; >>
+		| numInt32>[$min] << $format = 3; >>
+		  {"\-" numInt32>[$max] <<$format = 2;>> } ";"
 		)
 	;
 
