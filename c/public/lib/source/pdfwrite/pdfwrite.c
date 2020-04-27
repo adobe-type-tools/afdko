@@ -504,7 +504,7 @@ static void CTL_CDECL dstPrint(pdwCtx h, char *fmt, ...) {
     char buf[500];
     va_list ap;
     va_start(ap, fmt);
-    vsprintf(buf, fmt, ap);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
     dstWrite(h, strlen(buf), buf);
     va_end(ap);
 }
@@ -541,7 +541,7 @@ static void CTL_CDECL stmPrint(pdwCtx h, long iStm, char *fmt, ...) {
     long length;
     va_list ap;
     va_start(ap, fmt);
-    vsprintf(buf, fmt, ap);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
     va_end(ap);
     length = (long)strlen(buf);
     memcpy(dnaEXTEND(h->stms[iStm], length), buf, length);
@@ -617,7 +617,7 @@ static void CTL_CDECL textShow(pdwCtx h, char *fmt, ...) {
 
     /* Format text */
     va_start(ap, fmt);
-    vsprintf(src, fmt, ap);
+    vsnprintf(src, sizeof(src), fmt, ap);
     va_end(ap);
 
     /* Double backslashes */

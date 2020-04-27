@@ -422,7 +422,7 @@ static void CTL_CDECL dumpInstr(abfGlyphCallbacks *cb, char *fmt, ...) {
             int length;
             char buf[128];
             const size_t bufLen = sizeof(buf);
-            VSPRINTF_S(buf, bufLen, fmt, ap);
+            vsnprintf(buf, bufLen, fmt, ap);
             length = (int)strnlen(buf, bufLen);
             if (length > h->left) {
                 char *p;

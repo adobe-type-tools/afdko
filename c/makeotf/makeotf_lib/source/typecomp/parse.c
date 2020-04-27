@@ -388,7 +388,7 @@ void CDECL parseWarning(tcCtx g, char *fmt, ...) {
 
         /* Format and report message */
         va_start(ap, fmt);
-        vsprintf(text, fmt, ap);
+        vsnprintf(text, sizeof(text), fmt, ap);
         g->cb.message(g->cb.ctx, tcWARNING, text);
         va_end(ap);
     }
@@ -404,7 +404,7 @@ void CDECL parseNewGlyphReport(tcCtx g, char *fmt, ...) {
 
         /* Format and report message */
         va_start(ap, fmt);
-        vsprintf(text, fmt, ap);
+        vsnprintf(text, sizeof(text), fmt, ap);
         g->cb.message(g->cb.ctx, tcNOTE, text);
         va_end(ap);
     }
@@ -423,7 +423,7 @@ void CDECL parseFatal(tcCtx g, char *fmt, ...) {
 
         /* Format and report message */
         va_start(ap, fmt);
-        vsprintf(text, fmt, ap);
+        vsnprintf(text, sizeof(text), fmt, ap);
         g->cb.message(ctx, tcFATAL, text);
         va_end(ap);
     }
