@@ -4835,10 +4835,14 @@ axisValue()
     zzMake0;
     {
         uint16_t flags = 0;
-        uint16_t format;
+        uint16_t format = 0, prev = 0;
+        dnaDCL(Tag, axisTags);
+        dnaDCL(Fixed, values);
         Fixed value, min, max;
         Tag axisTag;
         h->featNameID = 0;
+        dnaINIT(g->dnaCtx, axisTags, 1, 5);
+        dnaINIT(g->dnaCtx, values, 1, 5);
         zzmatch(K_AxisValue);
         zzCONSUME;
         zzmatch(155);
@@ -4867,6 +4871,14 @@ axisValue()
                                     min = _trv.min;
                                     max = _trv.max;
                                 }
+
+                                if (prev && (prev != 1 || format != prev))
+                                    zzerr(
+                                        "unsupported multiple location "
+                                        "statements in STAT AxisValue");
+                                *dnaNEXT(axisTags) = axisTag;
+                                *dnaNEXT(values) = value;
+                                prev = format;
                             } else {
                                 if (zzcnt > 1)
                                     break;
@@ -4885,8 +4897,11 @@ axisValue()
         }
         zzmatch(156);
 
-        STATAddAxisValueTable(g, format, axisTag, flags,
-                              h->featNameID, value, min, max);
+        STATAddAxisValueTable(g, format, axisTags.array, values.array,
+                              values.cnt, flags, h->featNameID,
+                              min, max);
+        dnaFREE(axisTags);
+        dnaFREE(values);
         zzCONSUME;
 
         zzEXIT(zztasp1);
