@@ -1095,7 +1095,7 @@ static int t1Decode(t1cCtx h, long offset) {
                             int iTop = h->stack.cnt - 1;
                             int iBottom = h->stack.cnt - n;
 
-                            if (n < 0 || iBottom < 0)
+                            if (n <= 0 || iBottom < 0)
                                 return t1cErrRollBounds;
 
                             /* Constrain j to [0,n) */

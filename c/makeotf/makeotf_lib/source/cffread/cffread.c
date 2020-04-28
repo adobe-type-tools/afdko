@@ -1533,7 +1533,7 @@ static void t2Read(cffCtx h, Offset offset, int init) {
                         int iTop = h->stack.cnt - 1;
                         int iBottom = h->stack.cnt - n;
 
-                        if (n < 0 || iBottom < 0) {
+                        if (n <= 0 || iBottom < 0) {
                             fatal(h, "limit check (roll)");
                         }
 
