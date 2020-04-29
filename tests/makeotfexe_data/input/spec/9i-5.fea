@@ -1,0 +1,5 @@
+# TABLES: STAT
+
+table STAT {
+   ElidedFallbackName { name "Regular"; };
+} STAT;

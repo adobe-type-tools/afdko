@@ -115,7 +115,7 @@
       </AxisValue>
       <AxisValue index="4" Format="4">
         <!-- AxisCount=2 -->
-        <Flags value="0"/>
+        <Flags value="1"/>
         <ValueNameID value="263"/>  <!-- Mediumitalic -->
         <AxisValueRecord index="0">
           <AxisIndex value="0"/>

@@ -1,0 +1,19 @@
+# TABLES: STAT
+
+table STAT {
+   ElidedFallbackName { name "Regular"; };
+
+   DesignAxis wght 0 { name "Weight"; };
+
+   AxisValue {
+      location wght 400;
+      name "Regular";
+      flag OlderSiblingFontAttribute;
+   };
+
+   AxisValue {
+      location wght 400 300 - 500;
+      name "Regular";
+      flag ElidableAxisValueName OlderSiblingFontAttribute;
+   };
+} STAT;

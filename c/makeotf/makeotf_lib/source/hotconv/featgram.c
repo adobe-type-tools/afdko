@@ -4897,6 +4897,10 @@ axisValue()
         }
         zzmatch(157);
 
+        if (!format)
+            zzerr("Missing location statement in STAT AxisValue");
+        if (!h->featNameID)
+            zzerr("Missing name entry in STAT AxisValue");
         STATAddAxisValueTable(g, format, axisTags.array, values.array,
                               values.cnt, flags, h->featNameID,
                               min, max);

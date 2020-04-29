@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont>
+
+  <STAT>
+    <Version value="0x00010002"/>
+    <DesignAxisRecordSize value="8"/>
+    <!-- DesignAxisCount=0 -->
+    <!-- AxisValueCount=0 -->
+    <ElidedFallbackNameID value="256"/>  <!-- Regular -->
+  </STAT>
+
+</ttFont>

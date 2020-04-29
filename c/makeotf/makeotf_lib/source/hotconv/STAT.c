@@ -281,8 +281,17 @@ void STATFree(hotCtx g) {
 
 void STATAddDesignAxis(hotCtx g, Tag tag, uint16_t nameID, uint16_t ordering) {
     STATCtx h = g->ctx.STAT;
+    AxisRecord *ar;
+    long i;
 
-    AxisRecord *ar = dnaNEXT(h->designAxes);
+    for (i = 0; i < h->designAxes.cnt; i++) {
+        AxisRecord *ar = &h->designAxes.array[i];
+        if (ar->axisTag == tag)
+            hotMsg(g, hotFATAL, "STAT DesignAxis with \"%c%c%c%c\" tag "
+                   "is already defined.", TAG_ARG(tag));
+    }
+
+    ar = dnaNEXT(h->designAxes);
     ar->axisTag = tag;
     ar->axisNameID = nameID;
     ar->axisOrdering = ordering;
