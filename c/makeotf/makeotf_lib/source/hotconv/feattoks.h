@@ -107,26 +107,27 @@
 #define K_Vendor 125
 #define K_STAT 126
 #define K_ElidedFallbackName 127
-#define K_DesignAxis 128
-#define K_AxisValue 129
-#define K_flag 130
-#define K_location 131
-#define K_ElidableAxisValueName 132
-#define K_OlderSiblingFontAttribute 133
-#define K_vhea 134
-#define K_VertTypoAscender 135
-#define K_VertTypoDescender 136
-#define K_VertTypoLineGap 137
-#define K_vmtx 138
-#define K_VertOriginY 139
-#define K_VertAdvanceY 140
-#define T_FONTREV 141
-#define T_NUMEXT 142
-#define T_NUM 143
-#define T_GCLASS 144
-#define T_CID 145
-#define T_GNAME 146
-#define T_STRING 147
+#define K_ElidedFallbackNameID 128
+#define K_DesignAxis 129
+#define K_AxisValue 130
+#define K_flag 131
+#define K_location 132
+#define K_ElidableAxisValueName 133
+#define K_OlderSiblingFontAttribute 134
+#define K_vhea 135
+#define K_VertTypoAscender 136
+#define K_VertTypoDescender 137
+#define K_VertTypoLineGap 138
+#define K_vmtx 139
+#define K_VertOriginY 140
+#define K_VertAdvanceY 141
+#define T_FONTREV 142
+#define T_NUMEXT 143
+#define T_NUM 144
+#define T_GCLASS 145
+#define T_CID 146
+#define T_GNAME 147
+#define T_STRING 148
 
 #ifdef __USE_PROTOS
 extern GID glyph(char* tok, int allowNotdef);
@@ -485,6 +486,12 @@ extern void elidedFallbackName();
 #endif
 
 #ifdef __USE_PROTOS
+void elidedFallbackNameID(void);
+#else
+extern void elidedFallbackNameID();
+#endif
+
+#ifdef __USE_PROTOS
 void table_STAT(void);
 #else
 extern void table_STAT();
@@ -663,8 +670,8 @@ extern SetWordType setwd16[];
 extern SetWordType zzerr84[];
 extern SetWordType zzerr85[];
 extern SetWordType zzerr86[];
-extern SetWordType zzerr87[];
 extern SetWordType setwd17[];
+extern SetWordType zzerr87[];
 extern SetWordType zzerr88[];
 extern SetWordType zzerr89[];
 extern SetWordType zzerr90[];

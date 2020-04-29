@@ -582,6 +582,11 @@ ElidedFallbackName
 		NLA = K_ElidedFallbackName;
 	>>
 
+ElidedFallbackNameID
+	<<
+		NLA = K_ElidedFallbackNameID;
+	>>
+
 DesignAxis
 	<<
 		NLA = K_DesignAxis;
@@ -687,52 +692,52 @@ VertAdvanceY
 
 \[
 	<<
-		NLA = 148;
+		NLA = 149;
 	>>
 
 \-
 	<<
-		NLA = 149;
+		NLA = 150;
 	>>
 
 \]
 	<<
-		NLA = 150;
+		NLA = 151;
 	>>
 
 0
 	<<
-		NLA = 151;
+		NLA = 152;
 	>>
 
 ,
 	<<
-		NLA = 152;
+		NLA = 153;
 	>>
 
 '
 	<<
-		NLA = 153;
+		NLA = 154;
 	>>
 
 ;
 	<<
-		NLA = 154;
+		NLA = 155;
 	>>
 
 \{
 	<<
-		NLA = 155;
+		NLA = 156;
 	>>
 
 \}
 	<<
-		NLA = 156;
+		NLA = 157;
 	>>
 
 =
 	<<
-		NLA = 157;
+		NLA = 158;
 	>>
 
 
