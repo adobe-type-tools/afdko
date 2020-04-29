@@ -268,6 +268,7 @@ hotCtx g;
 
 #token K_STAT						"STAT"		/* Added tag to list in zzcr_attr() */
 #token K_ElidedFallbackName			"ElidedFallbackName"
+#token K_ElidedFallbackNameID		"ElidedFallbackNameID"
 #token K_DesignAxis					"DesignAxis"	<<zzmode(TAG_MODE);>>
 #token K_AxisValue					"AxisValue"
 #token K_flag						"flag"
@@ -2042,6 +2043,13 @@ elidedFallbackName
 		>>
 	;
 
+elidedFallbackNameID
+	:
+		<< long nameID; >>
+		K_ElidedFallbackNameID numUInt16Ext>[nameID]
+		<< STATSetElidedFallbackNameID(g, nameID); >>
+	;
+
 table_STAT
 	: t:K_STAT			<<checkTag($t.ulval, tableTag, 1);>>
 		"\{"
@@ -2052,6 +2060,8 @@ table_STAT
 			axisValue
 			|
 			elidedFallbackName
+			|
+			elidedFallbackNameID
 			|
 			)
 			";"
