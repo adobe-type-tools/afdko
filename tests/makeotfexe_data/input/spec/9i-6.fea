@@ -1,0 +1,6 @@
+# TABLES: STAT
+
+table STAT {
+   ElidedFallbackName { name "Regular"; };
+   DesignAxis wght 0 { name "Weight"; };
+} STAT;

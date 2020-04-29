@@ -1,0 +1,11 @@
+table STAT {
+   ElidedFallbackName { name "Regular"; };
+
+   DesignAxis ital 1 { name "Italic"; };
+
+   AxisValue {
+      location wght 500;
+      location ital 1;
+      name "Mediumitalic";
+   };
+} STAT;

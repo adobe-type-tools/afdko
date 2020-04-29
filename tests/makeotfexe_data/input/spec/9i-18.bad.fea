@@ -1,0 +1,14 @@
+table STAT {
+   ElidedFallbackName { name "Regular"; };
+
+   DesignAxis wght 0 { name "Weight"; };
+   DesignAxis ital 1 { name "Italic"; };
+
+   AxisValue {
+      location wght 500;
+      location ital 1;
+      location wght 400 700;
+      name "Mediumitalic";
+      flag ElidableAxisValueName;
+   };
+} STAT;
