@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>ascender</key>
+		<integer>644</integer>
+		<key>capHeight</key>
+		<integer>615</integer>
+		<key>descender</key>
+		<integer>-211</integer>
+		<key>familyName</key>
+		<string>bend_test</string>
+		<key>openTypeHeadCreated</key>
+		<string>2020/04/25 12:55:01</string>
+		<key>openTypeNamePreferredSubfamilyName</key>
+		<string>Black Condensed Caption</string>
+		<key>openTypeOS2WeightClass</key>
+		<integer>400</integer>
+		<key>openTypeOS2WidthClass</key>
+		<integer>5</integer>
+		<key>postscriptBlueValues</key>
+		<array>
+			<integer>-20</integer>
+			<integer>0</integer>
+			<integer>427</integer>
+			<integer>447</integer>
+			<integer>498</integer>
+			<integer>518</integer>
+			<integer>594</integer>
+			<integer>608</integer>
+			<integer>611</integer>
+			<integer>627</integer>
+			<integer>630</integer>
+			<integer>650</integer>
+		</array>
+		<key>postscriptFontName</key>
+		<string>bend_test_BlackCondCapt</string>
+		<key>postscriptOtherBlues</key>
+		<array>
+			<integer>-222</integer>
+			<integer>-202</integer>
+		</array>
+		<key>postscriptStemSnapH</key>
+		<array>
+			<integer>45</integer>
+		</array>
+		<key>postscriptStemSnapV</key>
+		<array>
+			<integer>148</integer>
+		</array>
+		<key>styleMapFamilyName</key>
+		<string>bend_test Black Cond Caption</string>
+		<key>styleMapStyleName</key>
+		<string>regular</string>
+		<key>styleName</key>
+		<string>Black Condensed Caption</string>
+		<key>unitsPerEm</key>
+		<integer>1000</integer>
+		<key>versionMajor</key>
+		<integer>2</integer>
+		<key>versionMinor</key>
+		<integer>0</integer>
+		<key>xHeight</key>
+		<integer>437</integer>
+	</dict>
+</plist>

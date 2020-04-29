@@ -29,7 +29,7 @@ from afdko.fdkutils import (
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.4.2'
+__version__ = '2.4.3'
 
 logger = logging.getLogger(__name__)
 
@@ -301,7 +301,7 @@ def run(options):
     ufoProcessorBuild(documentPath=dsPath,
                       outputUFOFormatVersion=options.ufo_version,
                       roundGeometry=(not options.no_round),
-                      logger=logger)
+                      logger=logger, useVarlib=options.useVarlib)
 
     # Remove temporary designspace file
     if (dsPath != options.dsPath) and os.path.exists(dsPath):
@@ -409,6 +409,12 @@ def get_options(args):
         dest='doNormalize',
         action='store_false',
         help='do NOT normalize the instances'
+    )
+    parser.add_argument(
+        '--use-varlib',
+        dest='useVarlib',
+        action='store_false',
+        help='Use varLib instead of MutatorMath'
     )
     parser.add_argument(
         '-r',
