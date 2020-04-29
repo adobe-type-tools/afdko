@@ -29,6 +29,7 @@
     </axes>
     <sources>
         <source filename="bend_master_0/master_0.ufo">
+            <lib copy="1"/>
             <info copy="1"/>
             <location>
                 <dimension name="weight" xvalue="275"/>
