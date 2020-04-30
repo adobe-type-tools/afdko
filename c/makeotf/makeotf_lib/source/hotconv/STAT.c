@@ -84,6 +84,7 @@ typedef struct {
 struct STATCtx_ {
     dnaDCL(AxisRecord, designAxes);
     dnaDCL(AxisValueTable, axisValues);
+    uint16_t elidedFallbackNameID;
 
     STATTbl tbl; /* Table data */
     hotCtx g;    /* Package context */
@@ -96,6 +97,7 @@ void STATNew(hotCtx g) {
 
     dnaINIT(g->dnaCtx, h->designAxes, 5, 5);
     dnaINIT(g->dnaCtx, h->axisValues, 5, 5);
+    h->elidedFallbackNameID = 0;
 
     /* Link contexts */
     h->g = g;
@@ -122,7 +124,7 @@ int STATFill(hotCtx g) {
     long i, j;
 
     if (h->designAxes.cnt == 0 && h->axisValues.cnt == 0 &&
-        h->tbl.elidedFallbackNameID == 0) {
+        h->elidedFallbackNameID == 0) {
         return 0;
     }
 
@@ -133,6 +135,7 @@ int STATFill(hotCtx g) {
     h->tbl.designAxesOffset = NULL_OFFSET;
     h->tbl.axisValueCount = h->axisValues.cnt;
     h->tbl.offsetToAxisValueOffsets = NULL_OFFSET;
+    h->tbl.elidedFallbackNameID = h->elidedFallbackNameID;
 
     currOff = TBL_HDR_SIZE;
 
@@ -361,8 +364,8 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
 void STATSetElidedFallbackNameID(hotCtx g, uint16_t nameID) {
     STATCtx h = g->ctx.STAT;
 
-    if (h->tbl.elidedFallbackNameID) {
+    if (h->elidedFallbackNameID) {
         hotMsg(g, hotFATAL, "ElidedFallbackName already defined in STAT table.");
     }
-    h->tbl.elidedFallbackNameID = nameID;
+    h->elidedFallbackNameID = nameID;
 }
