@@ -261,14 +261,8 @@ void STATWrite(hotCtx g) {
 }
 
 void STATReuse(hotCtx g) {
-}
-
-void STATFree(hotCtx g) {
     STATCtx h = g->ctx.STAT;
     long i;
-
-    dnaFREE(h->designAxes);
-    dnaFREE(h->axisValues);
 
     for (i = 0; i < h->axisValues.cnt; i++) {
         AxisValueTable *av = &h->axisValues.array[i];
@@ -276,6 +270,17 @@ void STATFree(hotCtx g) {
             MEM_FREE(g, av->format4.axisValues);
         }
     }
+
+    h->designAxes.cnt = 0;
+    h->axisValues.cnt = 0;
+    h->elidedFallbackNameID = 0;
+}
+
+void STATFree(hotCtx g) {
+    STATCtx h = g->ctx.STAT;
+
+    dnaFREE(h->designAxes);
+    dnaFREE(h->axisValues);
 
     MEM_FREE(g, g->ctx.STAT);
 }
