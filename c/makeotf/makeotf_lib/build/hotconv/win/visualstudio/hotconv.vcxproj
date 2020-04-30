@@ -81,7 +81,6 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <DisableLanguageExtensions>true</DisableLanguageExtensions>
     </ClCompile>
     <Lib>
       <ExportNamedFunctions>%(ExportNamedFunctions)</ExportNamedFunctions>
@@ -97,7 +96,6 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableLanguageExtensions>true</DisableLanguageExtensions>
     </ClCompile>
     <Lib>
       <ExportNamedFunctions>%(ExportNamedFunctions)</ExportNamedFunctions>
@@ -113,7 +111,6 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableLanguageExtensions>true</DisableLanguageExtensions>
     </ClCompile>
     <Lib>
       <ExportNamedFunctions>%(ExportNamedFunctions)</ExportNamedFunctions>
@@ -129,7 +126,6 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableLanguageExtensions>true</DisableLanguageExtensions>
     </ClCompile>
     <Lib>
       <ExportNamedFunctions>%(ExportNamedFunctions)</ExportNamedFunctions>
