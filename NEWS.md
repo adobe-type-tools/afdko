@@ -1,6 +1,20 @@
 Changelog
 =========
 
+3.3.0 (released 2020-05-01)
+---------------------------
+- [otf2ttf] update LSB in hmtx to match glyph xMin
+  ([#1114](https://github.com/adobe-type-tools/afdko/pull/1114))
+- [dependencies] update to latest fontTools, MutatorMath, ufonormalizer
+  ([#1113](https://github.com/adobe-type-tools/afdko/pull/1117),
+   [#1120](https://github.com/adobe-type-tools/afdko/pull/1120))
+- [c tools] improved robustness
+  ([#1121](https://github.com/adobe-type-tools/afdko/pull/1121),
+   [#1122](https://github.com/adobe-type-tools/afdko/pull/1122),
+   [#1123](https://github.com/adobe-type-tools/afdko/pull/1123))
+- [makeinstancesufo] add option to use varLib instead of MutatorMath
+  ([#1126](https://github.com/adobe-type-tools/afdko/pull/1126))
+
 3.2.1 (released 2020-03-27)
 ---------------------------
 - [sfntedit] cleaned up help string

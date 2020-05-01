@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='utf-8'?>
+<designspace format="3">
+    <axes>
+        <axis default="275" maximum="900" minimum="275" name="weight" tag="wght">
+            <map input="275" output="275" />
+            <map input="300" output="300" />
+            <map input="400" output="410" />
+            <map input="500" output="460" />
+            <map input="600" output="560" />
+            <map input="700" output="625" />
+            <map input="900" output="775" />
+        </axis>
+        <axis default="80" maximum="125" minimum="80" name="width" tag="wdth">
+            <map input="80"  output="350" />
+            <map input="90"  output="480" />
+            <map input="100" output="575" />
+            <map input="125" output="850" />
+        </axis>
+        <axis default="5" maximum="72" minimum="5" name="optical" tag="opsz">
+            <map input= "5" output="0.000"/>
+            <map input= "6" output="0.150"/>
+            <map input= "7" output="0.240"/>
+            <map input= "8" output="0.300"/>
+            <map input="10" output="0.440"/>
+            <map input="13" output="0.500"/>
+            <map input="18" output="0.800"/>
+            <map input="72" output="1.000"/>
+        </axis>
+    </axes>
+    <sources>
+        <source filename="bend_master_0/master_0.ufo">
+            <lib copy="1"/>
+            <info copy="1"/>
+            <location>
+                <dimension name="weight" xvalue="275"/>
+                <dimension name="width" xvalue="350"/>
+                <dimension name="optical" xvalue="0"/>
+            </location>
+        </source>
+        <source filename="bend_master_1/master_1.ufo">
+            <location>
+                <dimension name="weight" xvalue="775"/>
+                <dimension name="width" xvalue="350"/>
+                <dimension name="optical" xvalue="0"/>
+            </location>
+        </source>
+        <source filename="bend_master_2/master_2.ufo">
+            <location>
+                <dimension name="weight" xvalue="275"/>
+                <dimension name="width" xvalue="850"/>
+                <dimension name="optical" xvalue="0"/>
+            </location>
+        </source>
+        <source filename="bend_master_3/master_3.ufo">
+            <location>
+                <dimension name="weight" xvalue="775"/>
+                <dimension name="width" xvalue="850"/>
+                <dimension name="optical" xvalue="0"/>
+            </location>
+        </source>
+    </sources>
+
+    <instances>
+		 <instance familyname="bend_test" filename="../temp_output/bend1.ufo" postscriptfontname="bend_test-Regular" stylename="Regular">
+            <location>
+                <dimension name="weight" xvalue="410"/>
+                <dimension name="width" xvalue="575"/>
+                <dimension name="optical" xvalue="0.46"/>
+            </location>
+            <kerning/>
+            <info/>
+        </instance>
+        <instance familyname="bend_test" filename="../temp_output/bend2.ufo" postscriptfontname="bend_test-Disp" stylename="Display">
+            <location>
+                <dimension name="weight" xvalue="410"/>
+                <dimension name="width" xvalue="640"/>
+                <dimension name="optical" xvalue="1.0"/>
+            </location>
+            <kerning/>
+            <info/>
+        </instance>
+        <instance familyname="bend_test" filename="../temp_output/bend3.ufo" postscriptfontname="bend_test-Bold" stylename="Bold">
+            <location>
+                <dimension name="weight" xvalue="675"/>
+                <dimension name="width" xvalue="575"/>
+                <dimension name="optical" xvalue="0.46"/>
+            </location>
+            <kerning/>
+            <info/>
+        </instance>
+    </instances>
+</designspace>

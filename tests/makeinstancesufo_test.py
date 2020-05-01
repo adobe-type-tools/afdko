@@ -156,3 +156,32 @@ def test_features_copy(filename):
     # assert the expected results
     for expected_path, actual_path in paths:
         assert differ([expected_path, actual_path])
+
+
+@pytest.mark.parametrize('args, ufo_filename', [
+    (['_0'], 'bend1.ufo'),
+    (['_1'], 'bend2.ufo'),
+    (['_2'], 'bend3.ufo'),
+])
+def test_bend_masters_mutator_math(args, ufo_filename):
+    # MutatorMath 2.1.2 did not handle location bending properly which resulted
+    # in incorrect interpolation outlines. This was fixed in 3.0.1.
+    runner(['-t', TOOL, '-o', 'a', 'c', 'n', 'd',
+            f'_{get_input_path("bend_test.designspace")}', 'i'] + args)
+    expected_path = _get_output_path(ufo_filename, 'expected_output')
+    actual_path = _get_output_path(ufo_filename, 'temp_output')
+    assert differ([expected_path, actual_path])
+
+
+@pytest.mark.parametrize('args, ufo_filename', [
+    (['_0'], 'bend1.ufo'),
+    (['_1'], 'bend2.ufo'),
+    (['_2'], 'bend3.ufo'),
+])
+def test_bend_masters_varlib(args, ufo_filename):
+    # We should get the same output passing through varLib
+    runner(['-t', TOOL, '-o', 'a', 'c', 'n', '=use-varlib', 'd',
+            f'_{get_input_path("bend_test.designspace")}', 'i'] + args)
+    expected_path = _get_output_path(ufo_filename, 'expected_output')
+    actual_path = _get_output_path(ufo_filename, 'temp_output')
+    assert differ([expected_path, actual_path])

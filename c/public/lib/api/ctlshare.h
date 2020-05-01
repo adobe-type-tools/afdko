@@ -537,7 +537,7 @@ enum {
 #define SPRINTF_S(b, l, f, ...) sprintf(b, f, ##__VA_ARGS__)
 #endif
 #ifndef VSPRINTF_S
-#define VSPRINTF_S(b, l, f, ...) vsprintf(b, f, ##__VA_ARGS__)
+#define VSPRINTF_S vsnprintf
 #endif
 #ifndef SSCANF_S
 #define SSCANF_S sscanf

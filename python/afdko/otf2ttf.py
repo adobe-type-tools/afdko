@@ -40,6 +40,13 @@ def glyphs_to_quadratic(
     return quadGlyphs
 
 
+def update_hmtx(ttFont, glyf):
+    hmtx = ttFont["hmtx"]
+    for glyphName, glyph in glyf.glyphs.items():
+        if hasattr(glyph, 'xMin'):
+            hmtx[glyphName] = (hmtx[glyphName][0], glyph.xMin)
+
+
 @singledispatch
 def otf_to_ttf(ttFont, post_format=POST_FORMAT, **kwargs):
     if ttFont.sfntVersion != "OTTO":
@@ -56,6 +63,7 @@ def otf_to_ttf(ttFont, post_format=POST_FORMAT, **kwargs):
     if "VORG" in ttFont:
         del ttFont["VORG"]
     glyf.compile(ttFont)
+    update_hmtx(ttFont, glyf)
 
     ttFont["maxp"] = maxp = newTable("maxp")
     maxp.tableVersion = 0x00010000

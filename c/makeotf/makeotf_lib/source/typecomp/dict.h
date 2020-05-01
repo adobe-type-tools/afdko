@@ -30,6 +30,7 @@ typedef dnaDCL(char, DICT);
 
 void dictSaveInt(DICT *dict, long i);
 void dictSaveNumber(DICT *dict, double d);
+void dictSaveNumberAsShortInt(DICT *dict, double d);
 void dictSaveT2Number(DICT *dict, double d);
 
 #if TC_DEBUG

@@ -10,3 +10,7 @@ extraction:
     - "export PATH=\"$HOME/.local/bin:$PATH\""
     index:
       build_command: "python3 setup.py build"
+path_classifiers:
+  generated:
+    # Classify featgram.c as generated code so that it won't get alerts:
+    - root/c/makeotf/makeotf_lib/source/hotconv/featgram.c
