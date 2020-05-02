@@ -2007,8 +2007,7 @@ axisValue
 			| axisValueLocation>[format, axisTag, value, min, max]
 			  <<
 			  if (prev && (prev != 1 || format != prev))
-				zzerr("unsupported multiple location "
-				      "statements in STAT AxisValue");
+				zzerr("AxisValue with unsupported multiple location statements");
 			  *dnaNEXT(axisTags) = axisTag;
 			  *dnaNEXT(values) = value;
 			  prev = format;
@@ -2017,9 +2016,9 @@ axisValue
 		"\}"
 		<<
 		if (!format)
-			zzerr("Missing location statement in STAT AxisValue");
+			zzerr("AxisValue missing location statement");
 		if (!h->featNameID)
-			zzerr("Missing name entry in STAT AxisValue");
+			zzerr("AxisValue missing name entry");
 		STATAddAxisValueTable(g, format, axisTags.array, values.array,
 				      values.cnt, flags, h->featNameID,
 				      min, max);
@@ -2042,7 +2041,8 @@ elidedFallbackName
 			)+
 		"\}"
 		<<
-		STATSetElidedFallbackNameID(g, h->featNameID);
+		if (!STATSetElidedFallbackNameID(g, h->featNameID))
+			zzerr("ElidedFallbackName already defined.");
 		h->featNameID = 0;
 		>>
 	;
@@ -2051,7 +2051,10 @@ elidedFallbackNameID
 	:
 		<< long nameID; >>
 		K_ElidedFallbackNameID numUInt16Ext>[nameID]
-		<< STATSetElidedFallbackNameID(g, nameID); >>
+		<<
+		if (!STATSetElidedFallbackNameID(g, nameID))
+			zzerr("ElidedFallbackName already defined.");
+		>>
 	;
 
 table_STAT

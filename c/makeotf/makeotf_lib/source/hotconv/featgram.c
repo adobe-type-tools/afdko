@@ -4873,9 +4873,7 @@ axisValue()
                                 }
 
                                 if (prev && (prev != 1 || format != prev))
-                                    zzerr(
-                                        "unsupported multiple location "
-                                        "statements in STAT AxisValue");
+                                    zzerr("AxisValue with unsupported multiple location statements");
                                 *dnaNEXT(axisTags) = axisTag;
                                 *dnaNEXT(values) = value;
                                 prev = format;
@@ -4898,9 +4896,9 @@ axisValue()
         zzmatch(157);
 
         if (!format)
-            zzerr("Missing location statement in STAT AxisValue");
+            zzerr("AxisValue missing location statement");
         if (!h->featNameID)
-            zzerr("Missing name entry in STAT AxisValue");
+            zzerr("AxisValue missing name entry");
         STATAddAxisValueTable(g, format, axisTags.array, values.array,
                               values.cnt, flags, h->featNameID,
                               min, max);
@@ -4956,7 +4954,8 @@ elidedFallbackName()
         }
         zzmatch(157);
 
-        STATSetElidedFallbackNameID(g, h->featNameID);
+        if (!STATSetElidedFallbackNameID(g, h->featNameID))
+            zzerr("ElidedFallbackName already defined.");
         h->featNameID = 0;
         zzCONSUME;
 
@@ -4985,7 +4984,8 @@ elidedFallbackNameID()
         zzCONSUME;
         nameID = numUInt16Ext();
 
-        STATSetElidedFallbackNameID(g, nameID);
+        if (!STATSetElidedFallbackNameID(g, nameID))
+            zzerr("ElidedFallbackName already defined.");
         zzEXIT(zztasp1);
         return;
     fail:

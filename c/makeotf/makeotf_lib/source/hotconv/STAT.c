@@ -5,7 +5,6 @@
  * Style Attributes Table
  */
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "STAT.h"
@@ -366,11 +365,11 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
     }
 }
 
-void STATSetElidedFallbackNameID(hotCtx g, uint16_t nameID) {
+bool STATSetElidedFallbackNameID(hotCtx g, uint16_t nameID) {
     STATCtx h = g->ctx.STAT;
 
-    if (h->elidedFallbackNameID) {
-        hotMsg(g, hotFATAL, "ElidedFallbackName already defined in STAT table.");
-    }
+    if (h->elidedFallbackNameID)
+        return false;
     h->elidedFallbackNameID = nameID;
+    return true;
 }
