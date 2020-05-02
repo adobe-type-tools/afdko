@@ -9,6 +9,8 @@
 #ifndef HOTCONV_COMMON_H
 #define HOTCONV_COMMON_H
 
+#include <stdbool.h>
+
 #include "hotconv.h"
 #include "dynarr.h"
 #include "txops.h"
