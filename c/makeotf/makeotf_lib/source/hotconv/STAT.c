@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "name.h"
 #include "STAT.h"
 
 /* ---------------------------- Table Definition --------------------------- */
@@ -126,6 +127,10 @@ int STATFill(hotCtx g) {
         h->elidedFallbackNameID == 0) {
         return 0;
     }
+
+    if (!nameVerifyIDExists(g, h->elidedFallbackNameID))
+        hotMsg(g, hotFATAL, "ElidedFallbackNameID points to a nameID that "
+                            "does not exist in \"name\" table.");
 
     h->tbl.majorVersion = 1;
     h->tbl.minorVersion = 2;
