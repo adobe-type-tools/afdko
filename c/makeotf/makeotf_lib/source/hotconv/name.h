@@ -30,5 +30,6 @@ unsigned short nameAddUser(hotCtx g, char *str);
 unsigned short nameReserveUserID(hotCtx g);
 
 int nameVerifyDefaultNames(hotCtx g, unsigned short nameId);
+bool nameVerifyIDExists(hotCtx g, unsigned short nameId);
 
 #endif /* HOTCONV_NAME_H */

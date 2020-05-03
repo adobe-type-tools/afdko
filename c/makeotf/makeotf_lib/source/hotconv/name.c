@@ -1151,3 +1151,8 @@ int nameVerifyDefaultNames(hotCtx g, unsigned short nameId) {
 
     return returnVal;
 }
+
+bool nameVerifyIDExists(hotCtx g, unsigned short nameId) {
+    nameCtx h = g->ctx.name;
+    return enumNames(h, 0, MATCH_ANY, MATCH_ANY, MATCH_ANY, nameId) != -1;
+}
