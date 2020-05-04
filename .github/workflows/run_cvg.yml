@@ -25,7 +25,7 @@ jobs:
 
     - name: Build and install AFDKO wheel
       env:
-        CFLAGS: '--coverage'
+        XFLAGS: '--coverage'
       run: |
         python -m pip install --upgrade pip
         pip install wheel
@@ -37,4 +37,4 @@ jobs:
       run: |
         pip install pytest pytest-cov
         python -m pytest --cov=python/afdko --cov-report=xml
-        bash <(curl -s https://codecov.io/bash -y .codecov.yml)
+        bash <(curl -s https://codecov.io/bash) -y .codecov.yml
