@@ -719,26 +719,10 @@ static void addFeatureNameString(long platformId, long platspecId,
     addNameString(platformId, platspecId, languageId, nameID);
 }
 
-static void addSTATNameString(long platformId, long platspecId,
+static void addUserNameString(long platformId, long platspecId,
                               long languageId) {
     unsigned short nameID;
 
-    /* We only need to reserve a name ID *once* per axis. */
-    if (h->featNameID == 0) {
-        nameID = nameReserveUserID(g);
-        h->featNameID = nameID;
-    } else {
-        nameID = h->featNameID;
-    }
-
-    addNameString(platformId, platspecId, languageId, nameID);
-}
-
-static void addElidedFallbackNameString(long platformId, long platspecId,
-                                        long languageId) {
-    unsigned short nameID;
-
-    /* XXX: search for existing identical name ID */
     /* We only need to reserve a name ID *once*. */
     if (h->featNameID == 0) {
         nameID = nameReserveUserID(g);

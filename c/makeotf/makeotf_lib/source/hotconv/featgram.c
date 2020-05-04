@@ -4608,7 +4608,7 @@ statNameEntry()
             spec = _trv.spec;
             lang = _trv.lang;
         }
-        addSTATNameString(plat, spec, lang);
+        addUserNameString(plat, spec, lang);
         zzEXIT(zztasp1);
         return;
     fail:
@@ -4946,7 +4946,7 @@ elidedFallbackName()
                         spec = _trv.spec;
                         lang = _trv.lang;
                     }
-                    addElidedFallbackNameString(plat, spec, lang);
+                    addUserNameString(plat, spec, lang);
                     zzLOOP(zztasp2);
                 } while ((LA(1) == K_name));
                 zzEXIT(zztasp2);

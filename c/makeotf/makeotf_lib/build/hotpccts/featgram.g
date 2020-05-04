@@ -1945,7 +1945,7 @@ statNameEntry
 	:
 		<< long plat, spec, lang; >>
 		nameEntry>[plat, spec, lang]
-		<< addSTATNameString(plat, spec, lang);>>
+		<< addUserNameString(plat, spec, lang);>>
 	;
 
 designAxis
@@ -2037,7 +2037,7 @@ elidedFallbackName
 		"\{"
 			(
 				nameEntry>[plat, spec, lang]
-				<< addElidedFallbackNameString(plat, spec, lang); >>
+				<< addUserNameString(plat, spec, lang); >>
 			)+
 		"\}"
 		<<
