@@ -36,5 +36,5 @@ jobs:
     - name: Generate and upload Python and C coverage
       run: |
         pip install pytest pytest-cov
-        python -m pytest --cov=python/afdko --cov-report=xml
+        python -m pytest --cov --cov-report=xml
         bash <(curl -s https://codecov.io/bash) -y .codecov.yml
