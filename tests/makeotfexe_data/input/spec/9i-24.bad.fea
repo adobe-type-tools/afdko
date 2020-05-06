@@ -1,0 +1,10 @@
+table STAT {
+   ElidedFallbackName { name "Regular"; };
+
+   DesignAxis wght 0 { name "Weight"; };
+
+   AxisValue {
+      location wght 400 0 - 0x80000000;
+      name "Regular";
+   };
+} STAT;
