@@ -18,8 +18,8 @@
 
 #include <stdlib.h> /* For exit in err.h xxx */
 #include <string.h>
-
 #include <stdio.h>
+#include <limits.h>
 
 #include "common.h"
 #include "feat.h"
@@ -372,9 +372,9 @@ numInt32()
         zzmatch(T_NUM);
         n = zzaCur;
 
-        if (n.lval < -0x7fffffff || n.lval > 0x7fffffff)
-            zzerr("not in range -0x7fffffff .. 0x7fffffff");
-        _retv = (short)(n).lval;
+        if (n.lval < INT_MIN || n.lval > INT_MAX)
+            zzerr("not in range -(1<<31) .. ((1<<31) -1)");
+        _retv = (int32_t)(n).lval;
         zzCONSUME;
 
         zzEXIT(zztasp1);
