@@ -286,7 +286,7 @@ hotCtx g;
 #token K_VertAdvanceY		"VertAdvanceY"
 
 #token T_FONTREV	"[0-9]+.[0-9]+"
-#token T_NUMEXT		"0x[0-9a-fA-F]+|0[0-7]+"
+#token T_NUMEXT		"({\-}0x[0-9a-fA-F]+)|0[0-7]+"
 #token T_NUM		"({\-}[1-9][0-9]*)|0"
 
 #token T_GCLASS  	"\@[A-Za-z_0-9.\-]+"
@@ -424,16 +424,6 @@ numUInt16>[unsigned value]
 					>>
 	;		
 
-numInt32>[int32_t value]
-	:	<<$value = 0; /* Suppress optimizer warning */>>
-		n:T_NUM		<<
-					if ($n.lval < INT_MIN || $n.lval > INT_MAX)
-						zzerr("not in range -(1<<31) .. ((1<<31) -1)");
-					$value = (int32_t)($n).lval;
-					>>
-	;
-
-
 parameterValue>[short value]
 	:	<<
 		long retval = 0;
@@ -469,6 +459,23 @@ numUInt16Ext>[unsigned value]
 					if ($n.lval < 0 || $n.lval > 65535)
 						zzerr("not in range 0 .. 65535");
 					$value = (unsigned)($n).lval;
+					>>
+	;
+
+/* Extended format: hex, oct also allowed */
+numInt32Ext>[int32_t value]
+	:	<<$value = 0; /* Suppress optimizer warning */
+		  h->linenum = zzline;>>
+		m:T_NUMEXT	<<
+					if ($m.lval < INT_MIN || $m.lval > INT_MAX)
+						zzerr("not in range -(1<<31) .. ((1<<31) -1)");
+					$value = (int32_t)($m).lval;
+					>>
+		|
+		n:T_NUM		<<
+					if ($n.lval < INT_MIN || $n.lval > INT_MAX)
+						zzerr("not in range -(1<<31) .. ((1<<31) -1)");
+					$value = (int32_t)($n).lval;
 					>>
 	;
 
@@ -1980,10 +1987,10 @@ axisValueFlags>[uint16_t flags]
 
 axisValueLocation>[uint16_t format, Tag tag, Fixed value, Fixed min, Fixed max]
 	:
-		K_location t:T_TAG << $tag = $t.ulval; >> numInt32>[$value]
+		K_location t:T_TAG << $tag = $t.ulval; >> numInt32Ext>[$value]
 		( ";" << $format = 1; >>
-		| numInt32>[$min] << $format = 3; >>
-		  {"\-" numInt32>[$max] << $format = 2; >> } ";"
+		| numInt32Ext>[$min] << $format = 3; >>
+		  {"\-" numInt32Ext>[$max] << $format = 2; >> } ";"
 		)
 	;
 

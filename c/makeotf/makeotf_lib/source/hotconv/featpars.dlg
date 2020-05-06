@@ -659,7 +659,7 @@ VertAdvanceY
 		NLA = T_FONTREV;
 	>>
 
-0x[0-9a-fA-F]+|0[0-7]+
+({\-}0x[0-9a-fA-F]+)|0[0-7]+
 	<<
 		NLA = T_NUMEXT;
 	>>
