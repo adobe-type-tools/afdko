@@ -13,8 +13,8 @@
 
 #include <stdlib.h>	/* For exit in err.h xxx */
 #include <string.h>
-
 #include <stdio.h>
+#include <limits.h>
 
 #include "common.h"
 #include "feat.h"
@@ -427,9 +427,9 @@ numUInt16>[unsigned value]
 numInt32>[int32_t value]
 	:	<<$value = 0; /* Suppress optimizer warning */>>
 		n:T_NUM		<<
-					if ($n.lval < -0x7fffffff || $n.lval > 0x7fffffff)
-						zzerr("not in range -0x7fffffff .. 0x7fffffff");
-					$value = (short)($n).lval;
+					if ($n.lval < INT_MIN || $n.lval > INT_MAX)
+						zzerr("not in range -(1<<31) .. ((1<<31) -1)");
+					$value = (int32_t)($n).lval;
 					>>
 	;
 

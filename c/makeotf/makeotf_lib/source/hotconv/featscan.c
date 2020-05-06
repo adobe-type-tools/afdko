@@ -17,8 +17,8 @@
 
 #include <stdlib.h> /* For exit in err.h xxx */
 #include <string.h>
-
 #include <stdio.h>
+#include <limits.h>
 
 #include "common.h"
 #include "feat.h"
