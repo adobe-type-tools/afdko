@@ -1229,7 +1229,7 @@ static GNode *newNode(featCtx h) {
     ret->flags = 0;
     ret->nextSeq = NULL;
     ret->nextCl = NULL;
-    ret->lookupLabel = -1;
+    ret->lookupLabelCount = 0;
     ret->metricsInfo = NULL;
     ret->aaltIndex = 0;
     ret->markClassName = NULL;
@@ -3517,7 +3517,7 @@ static int validateGSUBChain(hotCtx g, GNode *targ, GNode *repl) {
             if (++nMarked == 1) {
                 m = p;
             }
-        } else if (p->lookupLabel >= 0) {
+        } else if (p->lookupLabelCount > 0) {
             featMsg(hotERROR, "The  direct lookup reference in a contextual substitution clause must be marked as part of a contextual input sequence.");
             return 0;
         } else if (p->nextSeq != NULL && p->nextSeq->flags & FEAT_MARKED && nMarked > 0) {
@@ -3687,11 +3687,11 @@ int featValidateGPOSChain(hotCtx g, GNode *targ, int lkpType) {
             if (p->metricsInfo != NULL) {
                 nNodesWithMetrics++;
             }
-            if (p->lookupLabel >= 0) {
+            if (p->lookupLabelCount > 0) {
                 nLookupRefs++;
             }
         } else {
-            if (p->lookupLabel >= 0) {
+            if (p->lookupLabelCount > 0) {
                 featMsg(hotERROR, "Lookup references are allowed only in the input sequence: this is the sequence of marked glyphs.");
             }
 
@@ -3850,7 +3850,7 @@ static void addPos(GNode *targ, int type, int enumerate) {
         if (next_targ->flags & FEAT_MARKED) {
             markedCount++;
         }
-        if (next_targ->lookupLabel >= 0) {
+        if (next_targ->lookupLabelCount > 0) {
             lookupLabelCnt++;
             if (!(next_targ->flags & FEAT_MARKED)) {
                 featMsg(hotERROR, "the glyph which precedes the 'lookup' keyword must be marked as part of the contextual input sequence");

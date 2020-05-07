@@ -109,7 +109,8 @@ struct GNode_ {
     signed aaltIndex; /* index of contributing feature, in order of the aalt definitions. */
                       /* Used only within aalCreate.                                      */
     MetricsInfo *metricsInfo;
-    int lookupLabel;
+    int lookupLabelCount;
+    int lookupLabels[255];
     char *markClassName;
     AnchorMarkInfo markClassAnchorInfo; /* Used only be mark class definitions */
 };

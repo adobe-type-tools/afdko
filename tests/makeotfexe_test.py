@@ -570,7 +570,7 @@ TEST_FEATURE_FILES = [
     "ZeroValue_SinglePos_horizontal", "ZeroValue_SinglePos_vertical",
     "ZeroValue_PairPos_horizontal", "ZeroValue_PairPos_vertical",
     "ZeroValue_ChainSinglePos_horizontal", "ZeroValue_ChainSinglePos_vertical",
-    "PairPosSubtable",
+    "PairPosSubtable", "MultipleLookupsPerGlyph"
 ]
 
 TEST_FEATURE_FILES_XFAIL = [

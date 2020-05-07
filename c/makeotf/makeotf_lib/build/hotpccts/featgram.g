@@ -742,7 +742,7 @@ pattern[int markedOK]>[GNode *pat]
 						zzerr("cannot mark a replacement glyph pattern");
 				>>
 			}
-			{
+			(
 				K_lookup
 				t:T_LABEL
 					<<
@@ -752,11 +752,15 @@ pattern[int markedOK]>[GNode *pat]
 						zzerr("Glyph or glyph class must precede a lookup reference in a contextual rule.");
 						
 					labelIndex = featGetLabelIndex($t.text);
-					(*insert)->lookupLabel = labelIndex;
+					(*insert)->lookupLabels[(*insert)->lookupLabelCount] = labelIndex;
+					(*insert)->lookupLabelCount++;
+					if ((*insert)->lookupLabelCount > 255)
+						zzerr("Too many lookup references in one glyph position.");
+					printf("Lookup label count is %i, index is %i\n", (*insert)->lookupLabelCount, (*insert)->lookupLabels[(*insert)->lookupLabelCount-1]);
 					$pat->flags |= FEAT_LOOKUP_NODE; /* used to flag that lookup key was used.  */
 					}
 					>>
-			}
+			)*
 			<<insert = &(*insert)->nextSeq;
 			>>
 		)+
@@ -1032,7 +1036,10 @@ position
 						zzerr("Glyph or glyph class must precede a lookup reference in a contextual rule.");
 						
 					labelIndex = featGetLabelIndex($t.text);
-					ruleHead->lookupLabel = labelIndex;
+					ruleHead->lookupLabels[ruleHead->lookupLabelCount] = labelIndex;
+					ruleHead->lookupLabelCount++;
+					if (ruleHead->lookupLabelCount > 255)
+						zzerr("Too many lookup references in one glyph position.");
 					type = 0;
 					ruleHead = lastNodeP;
 					type = GPOSChain;
@@ -1047,7 +1054,10 @@ position
 								zzerr("Glyph or glyph class must precede a lookup reference in a contextual rule.");
 								
 							labelIndex = featGetLabelIndex($t2.text);
-							ruleHead->lookupLabel = labelIndex;
+							ruleHead->lookupLabels[ruleHead->lookupLabelCount] = labelIndex;
+							ruleHead->lookupLabelCount++;
+							if (ruleHead->lookupLabelCount > 255)
+								zzerr("Too many lookup references in one glyph position.");
 							ruleHead = lastNodeP;
 							>>
 					}
