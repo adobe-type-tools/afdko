@@ -2445,9 +2445,7 @@ static void fillChain3(hotCtx g, GSUBCtx h, otlTbl otl, Subtable *sub,
                     iSeq = seqCnt;
                 }
                 nMarked++;
-                if (p->lookupLabel >= 0) {
-                    nSubst++;
-                }
+                nSubst += p->lookupLabelCount;
             }
             seqCnt++;
         } else if (p->flags & FEAT_LOOKAHEAD) {
@@ -2492,18 +2490,21 @@ static void fillChain3(hotCtx g, GSUBCtx h, otlTbl otl, Subtable *sub,
             SubstLookupRecord **slr;
             int nRec = 0;
             unsigned i;
+            unsigned j;
             fmt->SubstLookupRecord = MEM_NEW(g, sizeof(SubstLookupRecord) *
                                                     nSubst);
             for (i = 0; i < nMarked; i++) {
-                if (nextNode->lookupLabel < 0) {
+                if (nextNode->lookupLabelCount == 0) {
                     nextNode = nextNode->nextSeq;
                     continue;
                 }
-                slr = dnaNEXT(h->subLookup);
-                *slr = &(fmt->SubstLookupRecord[nRec]);
-                (*slr)->SequenceIndex = i;
-                (*slr)->LookupListIndex = nextNode->lookupLabel;
-                nRec++;
+                for (j = 0; j < nextNode->lookupLabelCount; j++) {
+                    slr = dnaNEXT(h->subLookup);
+                    *slr = &(fmt->SubstLookupRecord[nRec]);
+                    (*slr)->SequenceIndex = i;
+                    (*slr)->LookupListIndex = nextNode->lookupLabels[j];
+                    nRec++;
+                }
                 nextNode = nextNode->nextSeq;
             }
         }

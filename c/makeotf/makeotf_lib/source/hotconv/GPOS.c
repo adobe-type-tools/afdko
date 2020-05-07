@@ -2012,7 +2012,13 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
                     GPOSAddSingle(g, anon_si, nextNode, metrics[0], metrics[1],
                                   metrics[2], metrics[3]);
                 }
-                nextNode->lookupLabel = anon_si->label;
+
+                if (nextNode->lookupLabelCount > 255)
+                    hotMsg(g, hotFATAL, "Anonymous lookup in chain caused overflow.");
+
+                nextNode->lookupLabels[nextNode->lookupLabelCount] = anon_si->label;
+                nextNode->lookupLabelCount++;
+
                 nextNode = nextNode->nextSeq;
             }
             /* now add the nodes to the contextual rule list. */
@@ -2065,7 +2071,11 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
             rule->targ = targ;
             if (nextNode != NULL) {
                 /*  add the lookupLabel. */
-                nextNode->lookupLabel = anon_si->label;
+                if (nextNode->lookupLabelCount > 255)
+                    hotMsg(g, hotFATAL, "Anonymous lookup in chain caused overflow.");
+
+                nextNode->lookupLabels[nextNode->lookupLabelCount] = anon_si->label;
+                nextNode->lookupLabelCount++;
             } else {
                 hotMsg(g, hotFATAL, "aborting due to unexpected NULL nextNode pointer");
             }
@@ -2104,7 +2114,11 @@ static void addPosRule(hotCtx g, GPOSCtx h, SubtableInfo *si, GNode *targ, char 
             rule = dnaNEXT(si->rules);
             rule->targ = targ;
             if (nextNode != NULL) {
-                nextNode->lookupLabel = anon_si->label;
+                if (nextNode->lookupLabelCount > 255)
+                    hotMsg(g, hotFATAL, "Anonymous lookup in chain caused overflow.");
+
+                nextNode->lookupLabels[nextNode->lookupLabelCount] = anon_si->label;
+                nextNode->lookupLabelCount++;
             } else {
                 hotMsg(g, hotFATAL, "aborting due to unexpected NULL nextNode pointer");
             }
@@ -3027,9 +3041,7 @@ static void fillChain3(hotCtx g, GPOSCtx h, otlTbl otl, Subtable *sub,
                     pMarked = p;
                 }
                 nMarked++;
-                if (p->lookupLabel >= 0) {
-                    nPos++;
-                }
+                nPos += p->lookupLabelCount;
             }
             seqCnt++;
         } else if (p->flags & FEAT_LOOKAHEAD) {
@@ -3055,25 +3067,27 @@ static void fillChain3(hotCtx g, GPOSCtx h, otlTbl otl, Subtable *sub,
         fmt->PosLookupRecord = NULL; /* no action */
     } else {
         int posIndex = 0;
+        unsigned j;
         GNode *nextNode = pInput;
 
         fmt->PosLookupRecord = MEM_NEW(g, sizeof(PosLookupRecord) *
                                               nPos);
         for (i = 0; i < seqCnt; i++) {
             PosLookupRecord **slr;
-            if (nextNode->lookupLabel < 0) {
+            if (nextNode->lookupLabelCount == 0) {
                 nextNode = nextNode->nextSeq;
                 continue;
             }
             /* Store ptr for easy access later on when lkpInx's are available */
-            slr = dnaNEXT(h->posLookup);
-            *slr = &fmt->PosLookupRecord[posIndex];
-
-            (*slr)->SequenceIndex = i;
-            (*slr)->LookupListIndex = nextNode->lookupLabel;
+            for (j = 0; j < nextNode->lookupLabelCount; j++) {
+                slr = dnaNEXT(h->posLookup);
+                *slr = &(fmt->PosLookupRecord[posIndex]);
+                (*slr)->SequenceIndex = i;
+                (*slr)->LookupListIndex = nextNode->lookupLabels[j];
+                posIndex++;
+            }
 
             nextNode = nextNode->nextSeq;
-            posIndex++;
             if (nextNode == NULL) {
                 break;
             }
