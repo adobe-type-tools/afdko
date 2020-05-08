@@ -1029,6 +1029,7 @@ position
 			)
 			|
 			(
+			  (
 				K_lookup 		<<labelLine = zzline;>>
 				t:T_LABEL
 					<<
@@ -1044,9 +1045,10 @@ position
 					ruleHead = lastNodeP;
 					type = GPOSChain;
 					>>
+				)+
 				(
 					pattern3[&ruleHead]>[lastNodeP] <<ruleHead = lastNodeP;>>
-					{
+					(
 						K_lookup 		<<labelLine = zzline;>>
 						t2:T_LABEL
 							<<
@@ -1060,7 +1062,7 @@ position
 								zzerr("Too many lookup references in one glyph position.");
 							ruleHead = lastNodeP;
 							>>
-					}
+					)*
 				)*
             )
 			|
