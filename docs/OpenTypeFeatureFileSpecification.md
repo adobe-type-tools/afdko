@@ -1657,11 +1657,11 @@ sequence are written in reverse order from the text to be matched. Developers of
 font editing tools who know this are sometimes confused by the FEA syntax.
 
 For each glyph or glyph class in the input sequence, the contextual rule may
-specify one lookup (§[4.e](#4.e)) to be applied at that position. Note that the
-specified lookup may contain many rules; the implementation must ensure that
-only one rule in a referenced lookup will match at that position in the input
-sequence. Lookups cannot be specified for the glyphs or glyph classes in the
-backtrack and lookahead sequences.
+specify one or more lookups (§[4.e](#4.e)) to be applied at that position.
+Note that the specified lookup may contain many rules; the implementation
+must ensure that only one rule in a referenced lookup will match at that
+position in the input sequence. Lookups cannot be specified for the glyphs
+or glyph classes in the backtrack and lookahead sequences.
 
 The input sequence is defined by appending the mark (`'`) character to all the
 glyph names and class names within the input sequence.
@@ -2289,11 +2289,11 @@ sequence are written in reverse order from the text to be matched. Developers of
 font editing tools who know this are sometimes confused by the FEA syntax.
 
 For each glyph or glyph class in the input sequence, the contextual rule may
-specify one lookup (§[4.e](#4.e)) to be applied at that position. Note that the
-specified lookup may contain many rules; the implementation must ensure that
-only one rule in a referenced lookup will match at that position in the input
-sequence. Lookups cannot be specified for the glyphs or glyph classes in the
-backtrack and lookahead sequences.
+specify one or more lookups (§[4.e](#4.e)) to be applied at that position. Note
+that the specified lookup may contain many rules; the implementation must
+ensure that only one rule in a referenced lookup will match at that position
+in the input sequence. Lookups cannot be specified for the glyphs or glyph
+classes in the backtrack and lookahead sequences.
 
 The input sequence is defined by appending the mark (`'`) character to all the
 glyph names and class names (and only these names) within the input sequence.
