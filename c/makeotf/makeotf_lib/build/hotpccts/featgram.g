@@ -756,7 +756,6 @@ pattern[int markedOK]>[GNode *pat]
 					(*insert)->lookupLabelCount++;
 					if ((*insert)->lookupLabelCount > 255)
 						zzerr("Too many lookup references in one glyph position.");
-					printf("Lookup label count is %i, index is %i\n", (*insert)->lookupLabelCount, (*insert)->lookupLabels[(*insert)->lookupLabelCount-1]);
 					$pat->flags |= FEAT_LOOKUP_NODE; /* used to flag that lookup key was used.  */
 					}
 					>>
