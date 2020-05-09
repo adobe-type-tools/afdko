@@ -1658,7 +1658,7 @@ font editing tools who know this are sometimes confused by the FEA syntax.
 
 For each glyph or glyph class in the input sequence, the contextual rule may
 specify one or more lookups (§[4.e](#4.e)) to be applied at that position.
-Note that the specified lookup may contain many rules; the implementation
+Note that the specified lookups may contain many rules; the implementation
 must ensure that only one rule in a referenced lookup will match at that
 position in the input sequence. Lookups cannot be specified for the glyphs
 or glyph classes in the backtrack and lookahead sequences.
@@ -2290,7 +2290,7 @@ font editing tools who know this are sometimes confused by the FEA syntax.
 
 For each glyph or glyph class in the input sequence, the contextual rule may
 specify one or more lookups (§[4.e](#4.e)) to be applied at that position. Note
-that the specified lookup may contain many rules; the implementation must
+that the specified lookups may contain many rules; the implementation must
 ensure that only one rule in a referenced lookup will match at that position
 in the input sequence. Lookups cannot be specified for the glyphs or glyph
 classes in the backtrack and lookahead sequences.
