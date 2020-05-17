@@ -1,6 +1,6 @@
 #ifndef feattoks_h
 #define feattoks_h
-/* feattoks.h -- List of labeled tokens and stuff
+/* feattoks.h -- List of labelled tokens and stuff
  *
  * Generated from: featgram.g
  *
