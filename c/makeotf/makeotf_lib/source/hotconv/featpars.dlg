@@ -984,7 +984,7 @@ include
     zzskip(); zzline++;  
 	>>
 
-[\0x20-\0x7E]
+[\0x20-\0x7E\0x80-\0xF7]
 	<<
 		NLA = 30;
     featAddNameStringChar(zzlextext[0]); zzskip();  

@@ -3289,16 +3289,16 @@ that are assigned.
     nameid 1 1 <string>;        1   1           0           0
     nameid 1 1 S L <string>;    1   1           S           L
 
-A string is composed of 1-byte ASCII characters enclosed by ASCII double quote
+A string is composed of UTF-8 characters enclosed by ASCII double quote
 characters (`"`). Newlines embedded within the string are removed from the
 character sequence to be stored.
 
-Strings are converted to Unicode for the Windows platform by adding a high byte
-of 0. 2-byte Unicode values for the Windows platform may be specified using a
-special character sequence of a backslash character (`\`) followed by exactly
-four hexadecimal numbers (of either case) which may not all be zero, e.g. \4e2d.
-The ASCII backslash character must be represented as the sequence \005c or \005C
-and the ASCII double quote character must be represented as the sequence \0022.
+Strings are converted to UTF-16 for the Windows platform. Unicode values for
+the Windows platform may also be specified using a special character sequence
+of a backslash character (`\`) followed by exactly four hexadecimal numbers (of
+either case) which may not all be zero, e.g. \4e2d.  The ASCII backslash
+character must be represented as the sequence \005c or \005C and the ASCII
+double quote character must be represented as the sequence \0022.
 
 There is no corresponding conversion to Unicode for the Macintosh platform but
 character codes in the range 128-255 may be specified using a special character
@@ -3311,7 +3311,13 @@ double quote character must be represented as the sequence \22.
 
 ```fea
 table name {
-    nameid 9 "Joachim M\00fcller-Lanc\00e9";    # Windows (Unicode)
+    nameid 9 "Joachim Müller-Lancé";            # Windows (Unicode), UTF-8 input
+} name;
+```
+
+```fea
+table name {
+    nameid 9 "Joachim M\00fcller-Lanc\00e9";    # Windows (Unicode), escaped Unicode values
     nameid 9 1 "Joachim M\9fller-Lanc\8e";      # Macintosh (Mac Roman)
 } name;
 ```
