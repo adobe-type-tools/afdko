@@ -1429,6 +1429,10 @@ static int prepMacName(hotCtx g, char *src) {
         int actn;       /* Action flags */
         int c = *src++;
 
+        /* Direct UTF-8 input is not supported. */
+        if (c < 0)
+            return 1;
+
         switch (c) {
             case '\\':
                 class = 0;

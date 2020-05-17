@@ -139,7 +139,7 @@ hotCtx g;
 #token	"\r\n"		<<zzskip(); zzline++;>>
 #token	"[\r\n]"	<<zzskip(); zzline++;>>
 
-#token "[\0x20-\0x7E]"  <<featAddNameStringChar(zzlextext[0]); zzskip();>>
+#token "[\0x20-\0x7E\0x80-\0xF7]"  <<featAddNameStringChar(zzlextext[0]); zzskip();>>
 
 #lexclass START // ------------------------------------------------------------
 
