@@ -554,8 +554,8 @@ def ruleMarkLigPos(subtable, otlConv, context=None):
 
     subsequentIndent = indent + INDENT
 
-    for l, ligAttach in enumerate(subtable.LigatureArray.LigatureAttach):
-        ligGlyph = ligGlyphList[l]
+    for lidx, ligAttach in enumerate(subtable.LigatureArray.LigatureAttach):
+        ligGlyph = ligGlyphList[lidx]
         tokenList = ["pos ligature ", ligGlyph]
         if context and (not checkGlyphInSequence(ligGlyph, inputSeqList, 0)):
             note = " # Note! Not in input sequence"

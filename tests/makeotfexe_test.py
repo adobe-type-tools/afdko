@@ -636,7 +636,7 @@ def test_spec(path):
         input_filename = "spec/font.pfa"
     feat_filename = f"spec/{name}.fea"
     ttx_filename = f"spec/{name}.ttx"
-    cmap_filename = f"spec/Identity-H"
+    cmap_filename = "spec/Identity-H"
     actual_path = get_temp_file_path()
 
     cmd = CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
