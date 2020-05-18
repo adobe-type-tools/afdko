@@ -17,7 +17,7 @@ import textwrap
 import booleanOperations.booleanGlyph
 import defcon
 from fontPens.digestPointPen import DigestPointPen
-from fontTools.ufoLib import UFOWriter, UFOLibError
+from fontTools.ufoLib import UFOWriter, UFOLibError, UFOFormatVersion
 
 from afdko import ufotools
 from afdko.ufotools import (
@@ -119,8 +119,12 @@ class FontFile(object):
             only the processed layer.
             This hack is only performed if the original UFO is format 2.
             """
+            fmt_ver = {
+                1: UFOFormatVersion.FORMAT_1_0,
+                2: UFOFormatVersion.FORMAT_2_0,
+                3: UFOFormatVersion.FORMAT_3_0}.get(self.ufo_format)
             writer = UFOWriter(
-                self.defcon_font.path, formatVersion=self.ufo_format)
+                self.defcon_font.path, formatVersion=fmt_ver)
             writer.layerContents[
                 PROCD_GLYPHS_LAYER_NAME] = PROCD_GLYPHS_LAYER
             layers = self.defcon_font.layers
@@ -130,7 +134,7 @@ class FontFile(object):
                 # Override the UFO's formatVersion. This disguises a UFO2 to
                 # be seen as UFO3 by ufoLib, thus enabling it to write the
                 # layer without raising an error.
-                writer._formatVersion = 3
+                writer._formatVersion = UFOFormatVersion.FORMAT_3_0
 
             glyph_set = writer.getGlyphSet(
                 layerName=PROCD_GLYPHS_LAYER_NAME, defaultLayer=False)
@@ -139,7 +143,7 @@ class FontFile(object):
             if self.ufo_format == 2:
                 # Restore the UFO's formatVersion to the original value.
                 # This makes the glif files be set to format 1 instead of 2.
-                glyph_set.ufoFormatVersion = self.ufo_format
+                glyph_set.ufoFormatVersionTuple = UFOFormatVersion.FORMAT_2_0
 
             layer.save(glyph_set)
 
