@@ -39,7 +39,7 @@ jmp_buf mark;
 
 #endif /* SUNOS */
 
-#define VERSION "1.4"
+#define VERSION "1.4.1"
 
 /* Data type sizes (bytes) */
 #define uint16_ 2
@@ -179,6 +179,29 @@ static void cleanup(int code) {
 
     longjmp(mark, 1);
 }
+
+
+/* ----------------------------- Portable Rename --------------------------- */
+int p_rename(const char *old_filename, const char *new_filename) {
+    File src;
+    File dst;
+    long srcsize;
+
+    fileOpenRead(old_filename, &src);
+    fileOpenWrite(new_filename, &dst);
+
+    srcsize = fileLength(&src);
+    fileCopy(&src, &dst, srcsize);
+
+    fileClose(&src);
+    fileClose(&dst);
+
+    if (remove(old_filename) == -1)
+        fatal(SFED_MSG_REMOVEERR, strerror(errno), old_filename);
+
+    return 0;
+}
+
 
 /* ----------------------------- Usage and Help ---------------------------- */
 
@@ -1154,9 +1177,9 @@ int main(int argc, char *argv[]) {
                 if (remove(dstfile.name) == -1)
                     fatal(SFED_MSG_REMOVEERR, strerror(errno), dstfile.name);
             } else if (strcmp(dstfile.name + strlen(dstfile.name) - strlen(tmpname), tmpname) == 0) { /* Rename tmp file to source file */
-                if (rename(srcfile.name, BACKUPNAME) == -1)
+                if (p_rename(srcfile.name, BACKUPNAME) == -1)
                     fatal(SFED_MSG_BADRENAME, strerror(errno), srcfile.name);
-                if (rename(dstfile.name, srcfile.name) == -1)
+                if (p_rename(dstfile.name, srcfile.name) == -1)
                     fatal(SFED_MSG_BADRENAME, strerror(errno), dstfile.name);
                 if (remove(BACKUPNAME) == -1)
                     fatal(SFED_MSG_REMOVEERR, strerror(errno), BACKUPNAME);
@@ -1247,9 +1270,9 @@ int main(int argc, char *argv[]) {
                     if (remove(dstfile.name) == -1)
                         fatal(SFED_MSG_REMOVEERR, strerror(errno), dstfile.name);
                 } else if (strcmp(dstfile.name + strlen(dstfile.name) - strlen(tmpname), tmpname) == 0) { /* Rename tmp file to source file */
-                    if (rename(srcfile.name, fullbackupname) == -1)
+                    if (p_rename(srcfile.name, fullbackupname) == -1)
                         fatal(SFED_MSG_BADRENAME, strerror(errno), srcfile.name);
-                    if (rename(dstfile.name, srcfile.name) == -1)
+                    if (p_rename(dstfile.name, srcfile.name) == -1)
                         fatal(SFED_MSG_BADRENAME, strerror(errno), dstfile.name);
                     if (remove(fullbackupname) == -1)
                         fatal(SFED_MSG_REMOVEERR, strerror(errno), fullbackupname);
