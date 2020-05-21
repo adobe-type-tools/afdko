@@ -2351,8 +2351,7 @@ def adjustPaths(makeOTFParams):
     always absolute paths.)
     """
     inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
-    inputFilePath = os.path.abspath(inputFilePath)
-    fontDir = os.path.dirname()
+    fontDir = os.path.dirname(os.path.abspath(inputFilePath))
 
     setattr(makeOTFParams, kFileOptPrefix + kInputFont, inputFilePath)
 
