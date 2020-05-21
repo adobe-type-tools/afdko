@@ -2343,19 +2343,6 @@ def copy_tables(temp_font, font, tags):
         print('    copied "%s"' % tag)
 
 
-def makeRelativePath(curDir, targetPath):
-    if targetPath is None:
-        return
-
-    abs_targetPath = os.path.abspath(targetPath)
-    abs_curDir = os.path.abspath(curDir)
-    try:
-        return os.path.relpath(abs_targetPath, abs_curDir)
-    except ValueError:
-        # the paths are on different drives/mounts
-        return targetPath
-
-
 def adjustPaths(makeOTFParams):
     """
     Change file paths to be relative to fontDir,
@@ -2364,19 +2351,19 @@ def adjustPaths(makeOTFParams):
     always absolute paths.)
     """
     inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
-    fontDir = os.path.dirname(os.path.abspath(inputFilePath))
+    inputFilePath = os.path.abspath(inputFilePath)
+    fontDir = os.path.dirname()
 
-    inputFilePath = makeRelativePath(fontDir, inputFilePath)
     setattr(makeOTFParams, kFileOptPrefix + kInputFont, inputFilePath)
 
-    outputFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kOutputFont))
+    outputFilePath = getattr(makeOTFParams, kFileOptPrefix + kOutputFont)
     if outputFilePath:
+        outputFilePath = os.path.abspath(outputFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kOutputFont, outputFilePath)
 
-    featuresFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kFeature))
+    featuresFilePath = getattr(makeOTFParams, kFileOptPrefix + kFeature)
     if featuresFilePath:
+        featuresFilePath = os.path.abspath(featuresFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kFeature, featuresFilePath)
 
     fmndbFilePath = getattr(makeOTFParams, kFileOptPrefix + kFMB)
@@ -2384,24 +2371,24 @@ def adjustPaths(makeOTFParams):
         fmndbFilePath = os.path.abspath(fmndbFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kFMB, fmndbFilePath)
 
-    goadbFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kGOADB))
+    goadbFilePath = getattr(makeOTFParams, kFileOptPrefix + kGOADB)
     if goadbFilePath:
+        goadbFilePath = os.path.abspath(goadbFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kGOADB, goadbFilePath)
 
-    maccmapFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath))
+    maccmapFilePath = getattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath)
     if maccmapFilePath:
+        maccmapFilePath = os.path.abspath(maccmapFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath, maccmapFilePath)
 
-    uniHFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath))
+    uniHFilePath = getattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath)
     if uniHFilePath:
+        uniHFilePath = os.path.abspath(uniHFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath, uniHFilePath)
 
-    uvsFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kUVSPath))
+    uvsFilePath = getattr(makeOTFParams, kFileOptPrefix + kUVSPath)
     if uvsFilePath:
+        uvsFilePath = os.path.abspath(uvsFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kUVSPath, uvsFilePath)
 
     if makeOTFParams.tempFontPath:
