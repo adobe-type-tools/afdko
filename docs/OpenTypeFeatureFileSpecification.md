@@ -6,12 +6,12 @@ layout: default
 OpenType™ Feature File Specification
 ---
 
-Copyright 2015-2019 Adobe. All Rights Reserved. This software is licensed as
+Copyright 2015-2020 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
-Document version 1.24.1
-Last updated 12 June 2019
+Document version 1.25
+Last updated 22 May 2020
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
 
@@ -314,7 +314,7 @@ _[ Note: Multiple master support has been withdrawn as of OpenType specification
 #### 2.e.iii. Device table _[ Currently not implemented. ]_
 
 A `<device>` represents a single device table or a null offset to it. It is used
-in value records [§[2.e.iv](#2.e.iv)], anchors [§[2.e.vii](#2.e.vii)], and and
+in value records [§[2.e.iv](#2.e.iv)], anchors [§[2.e.vii](#2.e.vii)], and
 the GDEF table LigatureCaret statements [§[9.b](#9.b)].
 
 ##### Device format A:
@@ -340,7 +340,7 @@ For example:
 <device NULL>
 ```
 
-This format is used when an undefined `<device>` is needed in a list of `<device>`s.
+This format is used when an undefined `<device>` is needed in a list of `<device>` tables.
 
 <a name="2.e.iv"></a>
 #### 2.e.iv. Value record
@@ -381,7 +381,7 @@ the vertical metric features.
 <<metric> <metric> <metric> <metric>>
 ```
 
-Here, the `<metric>`s represent adjustments for x placement, y placement, x
+Here, the `<metric>` values represent adjustments for x placement, y placement, x
 advance, and y advance, in that order. For example:
 
 ```fea
@@ -394,8 +394,8 @@ advance, and y advance, in that order. For example:
 <<metric> <metric> <metric> <metric> <device> <device> <device> <device>>
 ```
 
-Here, the `<metric>`s represent the same adjustments as in format B. The
-`<device>`s represent device tables [§[2.e.iii](#2.e.iii)] for x placement, Y
+Here, the `<metric>` values represent the same adjustments as in format B. The
+`<device>` values represent device tables [§[2.e.iii](#2.e.iii)] for x placement, y
 placement, x advance, and y advance, in that order. This format lets the editor
 express the full functionality of an OpenType value record. For example:
 
@@ -1345,7 +1345,7 @@ this lookup type, in order to reduce lookup size.
 <a name="4.h"></a>
 ### 4.h. Examples
 
-###### Example 1.
+###### Example 1:
 The following is an example of an entire feature file and demonstrates the two
 ways to register features under language systems (see §[4.b](#4.b) above):
 
@@ -1416,7 +1416,7 @@ will be applied under all languages of the script latn, but not under any other
 scripts. The c_h and c_k ligature substitutions will be applied when the
 language is German (i.e. they are registered only under `latn`/`DEU `).
 
-###### Example 2.
+###### Example 2:
 The following example illustrates labeled lookup blocks and the use of the
 `exclude_dflt` keyword:
 
@@ -1669,7 +1669,7 @@ glyph names and class names within the input sequence.
 The most general form of the contextual substitution rule is to explicitly
 reference named lookups in the rule.
 
-###### Example 1.
+###### Example 1:
 Define two standalone lookups (§[4.e](#4.e)), and then reference them in the
 input sequence of contextual substitution rules with the keyword `lookup` and
 the lookup name.
@@ -1717,7 +1717,7 @@ in-line and its type will be auto-detected from the input and replacement
 sequence in the same way as in their corresponding standalone (i.e.
 non-contextual) statements.
 
-###### Example 2.
+###### Example 2:
 This calls a Single Sub rule. The rule below means: in sequences “a d” or “e d”
 or “n d”, substitute “d” by “d.alt”.
 
@@ -1725,10 +1725,10 @@ or “n d”, substitute “d” by “d.alt”.
 substitute [a e n] d' by d.alt;
 ```
 
-This format requires that there be only one glyph of glyph class in the input
+This format requires that there be only one glyph or glyph class in the input
 sequence.
 
-###### Example 3.
+###### Example 3:
 This also calls a Single Sub rule. The rule below means: if a capital letter is
 followed by a small capital, then replace the small capital by its corresponding
 lowercase letter.
@@ -1737,10 +1737,10 @@ lowercase letter.
 substitute [A-Z] [A.sc-Z.sc]' by [a-z];
 ```
 
-This format requires that there be only one glyph of glyph class in the input
+This format requires that there be only one glyph or glyph class in the input
 sequence.
 
-###### Example 4.
+###### Example 4:
 This calls a Ligature Sub lookup. The rule below means: in sequences “e t c” or
 “e.begin t c”, substitute the first two glyphs by the ampersand.
 
@@ -1748,8 +1748,27 @@ This calls a Ligature Sub lookup. The rule below means: in sequences “e t c”
 substitute [e e.begin]' t' c by ampersand;
 ```
 
-This format will assume that entire input sequence is the sequence of ligature
+This format will assume that the entire input sequence is a sequence of ligature
 components.
+
+###### Example 5:
+In this example two Multiple Sub lookups are applied to the same input. The rule below means: 
+in lookup `REORDER_CHAIN` the sequence “ka ka.pas_cakra.ns” is first substituted 
+by “ka” and then a second lookup subsitutes the remaining “ka” by the sequence “ka.pas_cakra ka”. 
+
+```fea
+lookup REMOVE_CAKRA {
+    sub ka ka.pas_cakra.ns by ka;
+} REMOVE_CAKRA;
+
+lookup REORDER_CAKRA {
+    sub ka by ka.pas_cakra ka;
+} REORDER_CAKRA;
+
+lookup REORDER_CHAIN {
+    sub ka' lookup REMOVE_CAKRA lookup REORDER_CAKRA ka.pas_cakra.ns' ;
+} REORDER_CHAIN;
+```
 
 <a name="5.f.ii"></a>
 #### 5.f.ii. Specifying exceptions to the Chain Sub rule
@@ -1792,7 +1811,7 @@ perform any substitutions on them. As a result of the match, remaining rules
 (i.e. subtables) in the lookup will be skipped when the rule matches.
 (See [OT layout algorithm](#7.a).)
 
-###### Example 1.
+###### Example 1:
 Ignoring specific sequences:
 The `ignore substitute` rules below will block any subsequent rules that specify
 a substitution for “d” when the context around “d” matches any of the sequences
@@ -1808,8 +1827,8 @@ ignore substitute a d' d;
 substitute [a e n] d' by d.alt;
 ```
 
-###### Example 2.
 Matching a beginning-of-word boundary:
+###### Example 2:
 
 ```fea
 ignore substitute @LETTER f' i';
@@ -1821,7 +1840,7 @@ The example above shows how a ligature may be substituted at a word boundary.
 The substitute statement will get applied only if the sequence doesn't match
 "@LETTER f i"; i.e. only at the beginning of a word.
 
-###### Example 3.
+###### Example 3:
 Matching a whole word boundary:
 
 ```fea
@@ -1839,7 +1858,7 @@ ignore substitute a' n' d' @LETTER;
 substitute a' n' d' by a_n_d;
 ```
 
-###### Example 4.
+###### Example 4:
 This shows a specification for the contextual swashes feature:
 
 ```fea
@@ -2253,7 +2272,7 @@ as:
 # 1. Define name mark class:
 markClass damma <anchor 189 -103> @MARK_CLASS_1;
 # 2. Define mark-to-mark rule:
-position mark hanza <anchor 221 301> mark @MARK_CLASS_1;
+position mark hamza <anchor 221 301> mark @MARK_CLASS_1;
 ```
 
 <a name="6.g"></a>
@@ -2367,7 +2386,7 @@ specifies a value for only a change to the x value of the advance width. Note
 that the value record modifies the glyph which it follows. These both increase
 the advance width of Y or T by 20, when preceded by either quoteleft or
 quotedblleft, and followed by quoteright or quotedblright. Note that not all
-marked glyphs or glyphclasses in the input sequence must be followed by a value
+marked glyphs or glyph classes in the input sequence must be followed by a value
 record; if this is omitted, then the item’s positioning info will not be
 affected.
 
@@ -2421,9 +2440,9 @@ first glyph or glyph class of each pair positioning rule. Since all the kern
 rules will then be in a single lookup, only one rule will match in any context,
 and there is no need to figure out which rules add up. This solution is shown in
 example 3B using feature file syntax for contextual positioning. Notice,
-however, that the triplet rule had to defined before the other two rules.
-Otherwise, the pair positioning rules would have blocked the triplet’s
-positioning adjustment.
+however, that the triplet rule has to be defined before the other two rules.
+Otherwise, the pair positioning rules will block the triplet’s positioning 
+adjustment.
 
 ###### Example 3B:
 
@@ -2489,6 +2508,57 @@ The rule in lookup MARK_POS will position sukun over lam_meem_jeem when followed
 by alef. The second rule will add 5 to the advance width of lam_meem_jeem when
 followed by sukun and then by alef.
 
+###### Example 6:
+
+```fea
+lookup a_reduce_sb {
+    pos a <-80 0 -160 0>;
+} a_reduce_sb;
+
+lookup a_raise {
+    pos a <0 100 0 0>;
+} a_raise;
+
+feature kern {
+    pos a' lookup a_reduce_sb lookup a_raise b;
+} test;
+```
+
+In this example the rule in the kern feature will match the sequence “a b” and apply 
+multiple lookups to the input “a”. The first lookup will subtract 80 units from the 
+x placement and 160 units from the x advance of “a”. The second lookup will adjust 
+the y placement of “a” by 100 units. 
+
+
+###### Example 7:
+
+```fea
+lookup REPHA_SPACE {
+    pos ka-gran <0 0 644 0>;
+} REPHA_SPACE;
+
+lookup ANUSVARA_SPACE {
+    pos ka-gran <0 0 510 0>;
+} ANUSVARA_SPACE;
+
+lookup ADD70 {
+    pos ka-gran <0 0 70 0>;
+} ADD70;
+
+lookup ADD_ADVANCE_WIDTH {
+    pos ka-gran' lookup REPHA_SPACE lookup ANUSVARA_SPACE lookup ADD70 repha-gran anusvara-gran;
+    pos ka-gran' lookup REPHA_SPACE lookup ADD70 repha-gran;
+    pos ka-gran' lookup ANUSVARA_SPACE lookup ADD70 anusvara-gran;
+} ADD_ADVANCE_WIDTH;
+
+feature dist {
+    lookup ADD_ADVANCE_WIDTH;
+} dist;
+```
+In this example the rules in `ADD_ADVANCE_WIDTH` will match the sequences “ka-gran repha-gran anusvara-gran”, 
+“ka-gran repha-gran”, or “ka-gran anusvara-gran” and apply multiple lookups to the input. Here
+each lookup adds advance width to “ka-gran” based on the following glyphs. 
+
 <a name="6.h.iv"></a>
 #### 6.h.iv. Specifying Contextual Positioning with in-line cursive positioning rules
 
@@ -2509,9 +2579,9 @@ For all three forms of the mark attachment rules - Mark-To-Base,
 Mark-To-Ligature, and Mark-To-Mark - the contextual form of the positioning
 rules consist of inserting glyph sequences in one or more of three places in the
 rule:
-    1. before the initial 'base | ligature | mark' keyword,
-    2. after the base glyph or glyph class, and
-    3. after all the anchor-mark class clauses.
+   1. before the initial 'base | ligature | mark' keyword
+   2. after the base glyph or glyph class
+   3. after all the anchor-mark class clauses
 
 At least one of the mark classes must be marked as part of the input sequence;
 the other glyphs or glyph classes in the contextual sequence may or may not be
@@ -2568,31 +2638,31 @@ over the glyph run (see step 4 below). Thus, each lookup has as input the
 accumulated result of all previous lookups in the LookupList (whether in the
 same feature or in other features).
 
-1.  All glyphs in the client’s glyph run must belong to the same language system.
+1\.  All glyphs in the client’s glyph run must belong to the same language system.
     (Glyph sequence matching may not occur across language systems.)
 
 ----
 Do the following first for the GSUB and then for the GPOS:
 
-2.  Assemble all features (including any required feature) for the glyph run’s
+2\.  Assemble all features (including any required feature) for the glyph run’s
 language system.
 
-3.  Assemble all lookups in these features, in LookupList order, removing any
+3\.  Assemble all lookups in these features, in LookupList order, removing any
     duplicates. (All features and thus all lookups needn't be applied to every glyph
     in the run.)
 
-4.  For each lookup:
+4\.  For each lookup:
 
-5.  For each glyph in the glyph run:
+5\.  For each glyph in the glyph run:
 
-6.  If the lookup is applied to that glyph and the lookupflag doesn't indicate
+6\.  If the lookup is applied to that glyph and the lookupflag doesn't indicate
     that that glyph is to be ignored:
 
-7.  For each subtable in the lookup:
+7\.  For each subtable in the lookup:
 
-8.  If the subtable’s target context is matched:
+8\.  If the subtable’s target context is matched:
 
-9.  Do the glyph substitution or positioning,
+9\.  Do the glyph substitution or positioning,
 
 ----
 OR:
@@ -2600,12 +2670,12 @@ OR:
 If this is a (chain) contextual lookup do the following [(10)-(11)] in the
 subtable’s Subst/PosLookupRecord order:
 
-10. For each (sequenceIndex, lookupListIndex) pair:
+10\. For each (sequenceIndex, lookupListIndex) pair:
 
-11. Apply lookup[lookupListIndex] at input sequence[sequenceIndex]
+11\. Apply lookup[lookupListIndex] at input sequence[sequenceIndex]
     [steps(7)-(11)]
 
-12. Goto the glyph after the input sequence matched in (8)
+12\. Goto the glyph after the input sequence matched in (8)
     (i.e. skip any remaining subtables in the lookup).
 
 The “target context” in step 8 above comprises the input sequence and any
@@ -2825,9 +2895,9 @@ If the font is part of such a group, then the `sizemenuname` statement must be
 provided in order for the members of the group to be grouped together in a
 sub-menu under the specified menu name.
 
-In the this case, we strongly recommend providing at least the two entries for
+In this case, we strongly recommend providing at least the two entries for
 Windows and Macintosh platform Roman script name strings. You may also include
-as any another localized name strings that may be useful.
+any another localized name strings that may be useful.
 
 If the font is not part of such a group, then the `sizemenuname` statements must
 be omitted, and all fields but the first (design size) for the parameter
@@ -3561,16 +3631,16 @@ Format for `axisTag` and the other values as above.
 There can be only one `location` statement when this format is used (the axis
 value will be `STAT` format 3 `AxisValue`).
 
-#### Example:
+#### Example 1:
+These examples are for illustrative purposes only; they won’t all be in a 
+single STAT table. See Example 2 for a fully defined STAT table. 
+
 ```fea
 table STAT {
    ElidedFallbackName { name "Regular"; };
 
    DesignAxis wght 0 { name "Weight"; };
    DesignAxis ital 1 { name "Italic"; };
-
-   # These examples are for illustrative purposes only;
-   # they won’t all be in a single STAT table:
 
    # format 1
    AxisValue {
@@ -3608,6 +3678,69 @@ table STAT {
       name "MediumItalic";
       flag ElidableAxisValueName;
    };
+} STAT;
+```
+#### Example 2:
+This example shows a fully defined STAT table with two axes in format 2. 
+
+```fea
+table STAT {
+
+   ElidedFallbackName { name "Regular"; };
+
+   DesignAxis wght 0 { name "Weight"; };
+   DesignAxis opsz 1 { name "Optical"; };
+
+   AxisValue {
+      location wght 200 200 - 250;
+      name "ExtraLight";
+   };
+
+   AxisValue {
+      location wght 300 250 - 350;
+      name "Light";
+   };
+
+   AxisValue {
+      location wght 400 350 - 450;
+      name "Regular";
+      flag ElidableAxisValueName;
+   };
+
+   AxisValue {
+      location wght 600 550 - 650;
+      name "Semibold";
+   };
+
+   AxisValue {
+      location wght 700 650 - 750;
+      name "Bold";
+   };
+
+   AxisValue {
+      location wght 900 800 - 900;
+      name "Black";
+   };
+
+   AxisValue {
+      location
+      opsz 6 0 - 8;
+      name "Caption";
+   };
+
+   AxisValue {
+      location
+      opsz 10 8 - 24;
+      name "Text";
+      flag ElidableAxisValueName;
+   };
+
+   AxisValue {
+      location
+      opsz 60 24 - 100;
+      name "Display";
+   };
+
 } STAT;
 ```
 
@@ -3666,6 +3799,17 @@ along with the tag `sbit`.
 
 <a name="11"></a>
 ## 11. Document revisions
+
+**v1.25 [22 May 2020]:**
+
+*   Added syntax for STAT table as discussed in
+    [GitHub issue #176](https://github.com/adobe-type-tools/afdko/issues/176).
+*   Updated Chaining Contextual lookups to allow application of more than one 
+    lookup at the same position as explained in
+    [GitHub issue #1119](https://github.com/adobe-type-tools/afdko/issues/1119).
+    See [GSUB LookupType 6](##5.f.i) and [GPOS LookupType 8](##6.h.i).
+*   Fixed numbering on [Summary of OpenType layout algorithm](##7.a).
+*   Fixed typos.
 
 **v1.24 [21 Mar 2019]:**
 
@@ -3734,7 +3878,7 @@ along with the tag `sbit`.
 **v1.16 [9 Dec 2015]:**
 
 *   For value record format A, specify that the single value represents a y
-    advance change for vpal, vhal, and valt features, as well as vkern.
+    advance change for vpal, vhal, and valt features, as well as vkrn.
 
 **v1.15 [12 June 2015]:**
 
