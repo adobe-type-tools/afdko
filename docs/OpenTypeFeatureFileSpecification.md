@@ -10,7 +10,7 @@ Copyright 2015-2020 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
-Document version 1.25
+Document version 1.25.0
 Last updated 22 May 2020
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
@@ -3800,7 +3800,7 @@ along with the tag `sbit`.
 <a name="11"></a>
 ## 11. Document revisions
 
-**v1.25 [22 May 2020]:**
+**v1.25.0 [22 May 2020]:**
 
 *   Added syntax for STAT table as discussed in
     [GitHub issue #176](https://github.com/adobe-type-tools/afdko/issues/176).
