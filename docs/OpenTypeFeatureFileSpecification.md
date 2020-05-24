@@ -3807,8 +3807,8 @@ along with the tag `sbit`.
 *   Updated Chaining Contextual lookups to allow application of more than one 
     lookup at the same position as explained in
     [GitHub issue #1119](https://github.com/adobe-type-tools/afdko/issues/1119).
-    See [GSUB LookupType 6](##5.f.i) and [GPOS LookupType 8](##6.h.i).
-*   Fixed numbering on [Summary of OpenType layout algorithm](##7.a).
+    See [GSUB LookupType 6](#5.f.i) and [GPOS LookupType 8](#6.h.i).
+*   Fixed numbering on [Summary of OpenType layout algorithm](#7.a).
 *   Fixed typos.
 
 **v1.24 [21 Mar 2019]:**
@@ -3843,7 +3843,7 @@ along with the tag `sbit`.
 *   Updated description of the `UseMarkFilteringSet` lookup flag.
     It is now widely supported. See [lookupflag](#4.d).
 *   Relaxed limitations on name table name IDs: only 2 and 6 are now reserved.
-    See [name table](##9.e).
+    See [name table](#9.e).
 
 **v1.20 [6 Feb 2017]:**
 
@@ -3866,14 +3866,14 @@ along with the tag `sbit`.
 **v1.18 [16 Mar 2016]:**
 
 *   Clarified use of commas in ignore statement.
-*   Fixed spelling errors: example at end of section 9.e name table, example 1
-    in section 5.f.ii ignore sub.
+*   Fixed spelling errors: example at end of section [9.e](#9.e) name table, example 1
+    in section [5.f.ii](#5.f.ii) ignore sub.
 *   Increased maximum length of glyph names and named glyph classes from 31 to 63.
 
 **v1.17 [6 Jan 2016]:**
 
-*   Fixed bug in example for salt feature in section 8.a, and in example for
-    contextual lookup specification in section 6.h.ii.
+    contextual lookup specification in section [6.h.ii](#6.h.ii).
+*   Fixed bug in example for salt feature in section [8.a](#8.a), and in example for
 
 **v1.16 [9 Dec 2015]:**
 
@@ -3897,8 +3897,8 @@ along with the tag `sbit`.
 
 **v1.12 [21 March 2014]:**
 
-*   Clarified that specific glyph pairs should precede class kern pairs, in section 6.b.i.
-*   Removed excessive white space in section 4.d. lookupflag.
+*   Clarified that specific glyph pairs should precede class kern pairs, in section [6.b.i](#6.b.i).
+*   Removed excessive white space in section [4.d](#4.d) lookupflag.
 *   Added two new keywords to set the OS/2 table fields usLowerOpticalPointSize
     and usUpperOpticalPointSize. These fields were added in version 5 of the
     OS/2 table.
@@ -3910,11 +3910,11 @@ along with the tag `sbit`.
 
 **v1.10 [31 March 2010]:**
 
-*   Fixed typo in example in section 4.d: lookFlag values are separated by
+*   Fixed typo in example in section [4.d](#4.d): lookFlag values are separated by
     spaces, not commas.
-*   Fixed typo in example in section 8.c on stylistic names; examples:
+*   Fixed typo in example in section [8.c](#8.c) on stylistic names; examples:
     quotes around name string need to be matching double quotes.
-*   Fixed typo in example in section 5.f.i on Chain Sub rules; second line
+*   Fixed typo in example in section [5.f.i](#5.f.i) on Chain Sub rules; second line
     was missing the target glyph “s”.
 
 **v1.9 [4 May 2009]:**
