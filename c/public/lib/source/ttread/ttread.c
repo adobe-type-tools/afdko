@@ -534,6 +534,14 @@ ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h->strings.buf.size = 0;
     h->glyf.ranges.size = 0;
     h->glyf.coords.size = 0;
+    h->gvar.tableLength = 0;
+    h->gvar.tableOffset = 0;
+    h->gvar.version = 0;
+    h->gvar.sharedTupleCount = 0;
+    h->gvar.sharedTuplesOffset = 0;
+    h->gvar.glyphCount = 0;
+    h->gvar.flags = 0;
+    h->gvar.dataArrayOffset = 0;
     h->gvar.dataOffsets.size = 0;
     h->gvar.sharedTuples.size = 0;
     h->tmp0.size = 0;
@@ -541,6 +549,12 @@ ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h->stm.dbg = NULL;
     h->ctx.dna = NULL;
     h->ctx.sfr = NULL;
+    h->vf.axisCount = 0;
+    h->vf.flags = 0;
+    h->vf.axes = 0;
+    h->vf.hmtx = 0;
+    h->vf.mvar = 0;
+    h->vf.varStore = 0;
 
     /* Copy callbacks */
     h->cb.mem = *mem_cb;
