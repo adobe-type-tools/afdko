@@ -1,6 +1,27 @@
 Changelog
 =========
 
+3.4.0 (released 2020-05-26)
+---------------------------
+- [makeotf] STAT table support (thanks @khaledhosny!)
+  ([#176](https://github.com/adobe-type-tools/afdko/issues/176),
+   [#1127](https://github.com/adobe-type-tools/afdko/pull/1127))
+- [makeotf] Support multiple chained lookups per position (thanks @simoncozens!)
+  ([#1119](https://github.com/adobe-type-tools/afdko/issues/1119),
+   [#1132](https://github.com/adobe-type-tools/afdko/pull/1132))
+- [makeotf] Allow UTF-8 input for name strings (thanks @khaledhosny!)
+  ([#165](https://github.com/adobe-type-tools/afdko/issues/165),
+   [#1133](https://github.com/adobe-type-tools/afdko/pull/1133))
+- [spot] prevent string overflow
+  ([#1136](https://github.com/adobe-type-tools/afdko/pull/1136))
+- [spec] Update STAT examples, multiple lookup documentation, fix broken links
+  ([#1137](https://github.com/adobe-type-tools/afdko/pull/1137),
+   [#1140](https://github.com/adobe-type-tools/afdko/pull/1140))
+- [sfntedit] Use portable `rename`
+  ([#1138](https://github.com/adobe-type-tools/afdko/pull/1138))
+- [absfont, ttread] Initialize variables before use (thanks @antlarr-suse!)
+  ([#1141](https://github.com/adobe-type-tools/afdko/pull/1141))
+
 3.3.0 (released 2020-05-01)
 ---------------------------
 - [otf2ttf] update LSB in hmtx to match glyph xMin
