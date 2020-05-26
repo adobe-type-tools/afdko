@@ -6,7 +6,6 @@
  */
 
 #include "GPOS.h"
-#include "MMFX.h"
 #include "OS_2.h"
 
 #include "otl.h"
@@ -882,12 +881,6 @@ void GPOSFeatureEnd(hotCtx g) {
 #define ValueXAdvDevice (1 << 6)
 #define ValueYAdvDevice (1 << 7)
 
-/* MM extensions */
-#define ValueXIdPlacement (1 << 8)
-#define ValueYIdPlacement (1 << 9)
-#define ValueXIdAdvance (1 << 10)
-#define ValueYIdAdvance (1 << 11)
-
 #define VAL_REC_UNDEF (-1)
 typedef int32_t ValueRecord; /* Stores index into h->values, which is read at write time. If -1, then write 0; */
 
@@ -941,20 +934,20 @@ static unsigned makeValueFormat(hotCtx g, int xPla, int yPla, int xAdv, int yAdv
     GPOSCtx h = g->ctx.GPOS;
 
     if (xPla) {
-        val |= IS_MM(g) ? ValueXIdPlacement : ValueXPlacement;
+        val |= ValueXPlacement;
     }
     if (yPla) {
-        val |= IS_MM(g) ? ValueYIdPlacement : ValueYPlacement;
+        val |= ValueYPlacement;
     }
     if (yAdv) {
-        val |= IS_MM(g) ? ValueYIdAdvance : ValueYAdvance;
+        val |= ValueYAdvance;
     }
 
     if (xAdv) {
         if ((val == 0) && (isVertFeature(h->new.feature)))
-            val = (IS_MM(g) ? ValueYIdAdvance : ValueYAdvance);
+            val = ValueYAdvance;
         else
-            val |= IS_MM(g) ? ValueXIdAdvance : ValueXAdvance;
+            val |= ValueXAdvance;
     }
 
     return val;
@@ -964,16 +957,16 @@ static void recordValues(GPOSCtx h, unsigned valFmt, int xPla, int yPla, int xAd
     if (valFmt == 0) {
         return;
     }
-    if (valFmt & ValueXPlacement || valFmt & ValueXIdPlacement) {
+    if (valFmt & ValueXPlacement) {
         *dnaNEXT(h->values) = xPla;
     }
-    if (valFmt & ValueYPlacement || valFmt & ValueYIdPlacement) {
+    if (valFmt & ValueYPlacement) {
         *dnaNEXT(h->values) = yPla;
     }
-    if (valFmt & ValueXAdvance || valFmt & ValueXIdAdvance) {
+    if (valFmt & ValueXAdvance) {
         *dnaNEXT(h->values) = xAdv;
     }
-    if (valFmt & ValueYAdvance || valFmt & ValueYIdAdvance) {
+    if (valFmt & ValueYAdvance) {
         *dnaNEXT(h->values) = yAdv;
     }
 }
@@ -1774,9 +1767,9 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second, char
 
     if (first->metricsInfo->cnt == 1) {
         if (isVertFeature(h->new.feature)) {
-            valFmt1 = (unsigned short)(IS_MM(g) ? ValueYIdAdvance : ValueYAdvance);
+            valFmt1 = (unsigned short) ValueYAdvance;
         } else {
-            valFmt1 = (unsigned short)(IS_MM(g) ? ValueXIdAdvance : ValueXAdvance);
+            valFmt1 = (unsigned short) ValueXAdvance;
         }
     } else {
         valFmt1 = makeValueFormat(g, values1[0], values1[1], values1[2], values1[3]);
@@ -1786,9 +1779,9 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second, char
             /* will differ from any non-zero record. Set the val fmt to the */
             /* default value.                                               */
             if (isVertFeature(h->new.feature)) {
-                valFmt1 = (unsigned short)(IS_MM(g) ? ValueYIdAdvance : ValueYAdvance);
+                valFmt1 = (unsigned short) ValueYAdvance;
             } else {
-                valFmt1 = (unsigned short)(IS_MM(g) ? ValueXIdAdvance : ValueXAdvance);
+                valFmt1 = (unsigned short) ValueXAdvance;
             }
         }
     }
@@ -1796,9 +1789,9 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second, char
     if (second->metricsInfo != NULL) {
         if (second->metricsInfo->cnt == 1) {
             if (isVertFeature(h->new.feature)) {
-                valFmt2 = (unsigned short)(IS_MM(g) ? ValueYIdAdvance : ValueYAdvance);
+                valFmt2 = (unsigned short) ValueYAdvance;
             } else {
-                valFmt2 = (unsigned short)(IS_MM(g) ? ValueXIdAdvance : ValueXAdvance);
+                valFmt2 = (unsigned short) ValueXAdvance;
             }
         } else {
             valFmt2 = makeValueFormat(g, values2[0], values2[1], values2[2], values2[3]);
@@ -1808,9 +1801,9 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second, char
                 /* valFmt will differ from any non-zero record. Set the val  */
                 /* fmt to the default value.                                */
                 if (isVertFeature(h->new.feature)) {
-                    valFmt2 = (unsigned short)(IS_MM(g) ? ValueYIdAdvance : ValueYAdvance);
+                    valFmt2 = (unsigned short) ValueYAdvance;
                 } else {
-                    valFmt2 = (unsigned short)(IS_MM(g) ? ValueXIdAdvance : ValueXAdvance);
+                    valFmt2 = (unsigned short) ValueXAdvance;
                 }
             }
         }
@@ -2389,27 +2382,24 @@ static void checkAndSortPairPos(hotCtx g, GPOSCtx h, SubtableInfo *si) {
             } else if ((curr->metricsCnt2 == prev->metricsCnt2) && ((curr->metricsCnt2 == 1) && (curr->metricsRec2[0] == prev->metricsRec2[0]))) {
                 isDuplicate = 1;
             }
-            if (isDuplicate) {
 #if REPORT_DUPE_KERN
+            if (isDuplicate) {
                 printKernPair(g, curr1, curr2, curr->metricsRec1[0], prev->metricsRec1[0], fmt1);
                 hotMsg(g, hotNOTE,
                        "Removing duplicate pair positioning in %s: %s",
                        g->error_id_text,
                        g->note.array);
-#endif /* REPORT_DUPE_KERN */
             } else {
-                int currVal = IS_MM(g) ? FIX2INT(MMFXExecMetric(g, curr->metricsRec1[0])) : curr->metricsRec1[0];
-                int prevVal = IS_MM(g) ? FIX2INT(MMFXExecMetric(g, prev->metricsRec1[0])) : prev->metricsRec1[0];
-#if REPORT_DUPE_KERN
+                int currVal = curr->metricsRec1[0];
+                int prevVal = prev->metricsRec1[0];
                 printKernPair(g, curr1, curr2, currVal, prevVal, fmt1);
                 hotMsg(g, hotWARNING,
                        "Pair positioning has conflicting statements in "
                        "%s; choosing the first "
                        "value: %s",
                        g->error_id_text, g->note.array);
-                /* ... for MMs, at default instance */
-#endif /* REPORT_DUPE_KERN */
             }
+#endif /* REPORT_DUPE_KERN */
             /* Mark cur (unless samePrev) record for deletion */
             delete = curr;
             if (fmt1) {

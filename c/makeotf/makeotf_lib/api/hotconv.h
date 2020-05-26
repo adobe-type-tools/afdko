@@ -84,23 +84,6 @@ inside the (1,0,0) nameID 5 "Version: string. */
    hotConvert(ctx);
    hotFree(ctx);
 
-   Additional information required by multiple master fonts is added by calls
-   to hotAddAxisData(), hotAddStyleData(), and hotAddInstance(). Thus, a
-   multiple master conversion follows the following call sequence.
-
-   ctx = hotNew(...);
-   hotSetConvertFlags(ctx, hotConvFlags) // set flags before any hot unctions are called.
-   FontName = hotReadFont(ctx, ...);
-   hotAddName(ctx, ...);       // repeat for each name
-   hotAddMiscData(ctx, ...);
-   hotAddAxisData(ctx, ...);   // repeat for each axis
-   hotAddStyleData(ctx, ...);  // repeat for each style
-   hotAddInstance(ctx, ...);   // repeat for each instance
-   hotAddKernPair(ctx, ...);   // repeat for each pair
-   hotAddKernValue(ctx, ...);  // repeat for each value for each master
-   hotConvert(ctx);
-   hotFree(ctx);
-
    CJK fonts must specify horizontal and (optional) vertical Unicode
    information, as well as Macintosh encoding information. This is introduced
    by calls to hotAddCMap(). Thus, a CJK conversion has the following call
@@ -425,7 +408,6 @@ struct hotReadFontOverrides_           /* Record for instructions to modify font
 enum /* Font types */
 {
     hotSingleMaster,
-    hotMultipleMaster,
     hotCID
 };
 #define HOT_TYPE_MASK 0x0f /* Type returned in low 4 bits */
@@ -492,8 +474,6 @@ struct hotCommonData_ /* Miscellaneous data record */
 #define HOT_EURO_ADDED (1 << 8)        /* Flags Euro glyph added to CFF data */
     char *clientVers;
     long nKernPairs;
-    short nStyles;
-    short nInstances;
     hotEncoding *encoding;
     short fsSelectionMask_on;
     short fsSelectionMask_off;
@@ -509,14 +489,6 @@ struct hotCommonData_ /* Miscellaneous data record */
 
    The nKernPairs field specifies the number of kerning pairs to be
    subsequently added with hotAddKernPair().
-
-   The nStyles field specifies the number of styles to be subsequently
-   described with hotAddStyleData() and should be set to 0 for non-multiple
-   master fonts.
-
-   The nInstances field specifies the number of instances to be subsequently
-   added with hotAddInstance() and should be set to 0 for non-multiple master
-   fonts.
 
    The encoding field, along with hotMacData.encoding described below,
    specifies the encoding that the library should use to decode kern pairs
@@ -619,12 +591,10 @@ void hotAddKernPair(hotCtx g, long iPair, unsigned first, unsigned second);
    hotCommonData. (Unencoded character names are provided by calls to
    hotAddUnencChar().) */
 
-void hotAddKernValue(hotCtx g, long iPair, int iMaster, short value);
+void hotAddKernValue(hotCtx g, long iPair, short value);
 
 /* hotAddKernValue() adds a kerning value to the kerning pair specified by the
-   iPair argument for the master specified by the iMaster argument which
-   must have the value 0 for a single master font or in the range: 0 <= iMaster
-   < nMasters for multiple master fonts. */
+   iPair argument. */
 
 void hotAddUnencChar(hotCtx g, int iChar, char *name);
 
@@ -634,38 +604,6 @@ void hotAddUnencChar(hotCtx g, int iChar, char *name);
    iChar < nUnencChars. Unencoded characters are used to associate member
    glyphs of a kern pair with a name when one or both glyphs are unencoded.
    This name is subsequently converted into a glyph id by the library. */
-
-typedef int32_t hotFixed; /* 16.16 fixed point */
-void hotAddAxisData(hotCtx g, int iAxis,
-                    char *type, char *longLabel, char *shortLabel,
-                    hotFixed minRange, hotFixed maxRange);
-
-/* hotAddAxisData() adds information to an OTF font for the axis selected by
-   the iAxis argument which must be in the range: 0 <= iAxis < nAxes. The type
-   argument specifies the kind of axis as one of: "Weight", "Width",
-   "OpticalSize", or "Serif". The "longLabel" and "shortLabel" arguments
-   specify long and short name tags to be used in construction menu and font
-   names, e.g. "Weight" and " wt ". */
-
-void hotAddStyleData(hotCtx g, int iStyle, int iAxis, char *type,
-                     hotFixed point0, hotFixed delta0,
-                     hotFixed point1, hotFixed delta1);
-
-/* hotAddStyleData() adds style information to an OTF font for the axis
-   selected by the iAxis argument. The type argument specifies the style type
-   as one of: "Bold", "Italic", "Condensed", and "Extended". The point
-   arguments specify a coordinate on the axis and the "delta" arguments specify
-   the coordinate change from that point to a new coordinate that represents
-   the applied style. */
-
-void hotAddInstance(hotCtx g, int iInstance, char *suffix);
-
-/* hotAddInstance() adds instance information to an OTF font for the instance
-   selected by the "iInstance" argument which must be in the range: 0 <=
-   iInstance < nInstances. iInstance 0 must specify the default instance; other
-   instances may be added in any order. The "suffix" argument specifies an name
-   that may be concatenated with the 5-3-3 FontName to create an instance
-   FontName, e.g.  "367 RG 465 CN 11 OP". */
 
 typedef char *(*hotCMapId)(void *ctx);
 typedef char *(*hotCMapRefill)(void *ctx, long *count);

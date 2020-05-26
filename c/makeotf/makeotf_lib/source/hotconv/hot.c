@@ -12,7 +12,6 @@
 #include "name.h"
 #include "GPOS.h"
 #include "OS_2.h"
-#include "MMFX.h"
 #include "dictops.h"
 
 #include <stdlib.h>
@@ -40,17 +39,6 @@ static void initCharName(void *ctx, long count, CharName *charname) {
     return;
 }
 
-/* Initialize instance */
-static void initInstance(void *ctx, long count, MMInstance *instance) {
-    hotCtx g = ctx;
-    long i;
-    for (i = 0; i < count; i++) {
-        dnaINIT(g->dnaCtx, instance->name, 32, 32);
-        instance++;
-    }
-    return;
-}
-
 static void initOverrides(hotCtx g) {
     FontInfo_ *font = &g->font;
 
@@ -60,8 +48,6 @@ static void initOverrides(hotCtx g) {
         = font->VertTypoLineGap = font->winAscent = font->winDescent
         = font->win.XHeight = font->win.CapHeight
         = SHRT_MAX;
-
-    font->mm.overrideMtx = 0;
 }
 
 static ctlMemoryCallbacks hot_dna_memcb;
@@ -133,11 +119,8 @@ hotCtx hotNew(hotCallbacks *hotcb) {
     g->ctx.GDEF = NULL;
     g->ctx.GPOS = NULL;
     g->ctx.GSUB = NULL;
-    g->ctx.MMFX = NULL;
-    g->ctx.MMSD = NULL;
     g->ctx.OS_2 = NULL;
     g->ctx.cmap = NULL;
-    g->ctx.fvar = NULL;
     g->ctx.head = NULL;
     g->ctx.hhea = NULL;
     g->ctx.hmtx = NULL;
@@ -166,11 +149,6 @@ hotCtx hotNew(hotCallbacks *hotcb) {
     dnaINIT(g->dnaCtx, g->font.kern.values, 1500, 8500);
     dnaINIT(g->dnaCtx, g->font.unenc, 30, 70);
     g->font.unenc.func = initCharName;
-    g->font.mm.nMasters = 1;
-    dnaINIT(g->dnaCtx, g->font.mm.axis, 4, 11);
-    dnaINIT(g->dnaCtx, g->font.mm.style, 2, 2);
-    dnaINIT(g->dnaCtx, g->font.mm.instance, 12, 12);
-    g->font.mm.instance.func = initInstance;
     dnaINIT(g->dnaCtx, g->font.glyphs, 315, 350);
 
     initOverrides(g);
@@ -447,15 +425,7 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOv
         strcpy(g->font.version.PS, "(version unavailable)");
     }
 
-    /* Copy multiple master information */
-    g->font.mm.nMasters = fi->mm.nMasters;
-    COPY(g->font.mm.UDV, fi->mm.UDV, fi->mm.nAxes);
-    if (fi->mm.nMasters > 1) {
-        g->font.flags |= FI_MM;
-    }
-    dnaSET_CNT(g->font.mm.axis, fi->mm.nAxes);
-
-    /* Get and copy glyph information (at dflt instance for MMs) */
+    /* Get and copy glyph information */
     dnaSET_CNT(g->font.glyphs, fi->nGlyphs);
     for (gid = 0; gid < fi->nGlyphs; gid++) {
         cffGlyphInfo *cffgi = cffGetGlyphInfo(g->ctx.cff, gid, NULL);
@@ -474,7 +444,7 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOv
     setVendId(g);
 
     /* Prepare result */
-    *psinfo = IS_CID(g) ? hotCID : IS_MM(g) ? hotMultipleMaster : hotSingleMaster;
+    *psinfo = IS_CID(g) ? hotCID : hotSingleMaster;
     if (g->font.Encoding == FI_STD_ENC) {
         *psinfo |= HOT_STD_ENC;
     }
@@ -533,32 +503,6 @@ void hotAddVertAdvanceY(hotCtx g, GID gid, short value,
     } else {
         hotgi->vAdv = -value;
     }
-}
-
-/* Compare instances */
-static int CDECL cmpInstance(const void *first, const void *second, void *ctx) {
-    long i;
-    const MMInstance *a = first;
-    const MMInstance *b = second;
-    long nAxes = *(long *)ctx;
-
-    for (i = 0; i < nAxes; i++) {
-        if (a->UDV[i] < b->UDV[i]) {
-            return -1;
-        } else if (a->UDV[i] > b->UDV[i]) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-/* Sort instances (except for the first). */
-static void sortInstances(hotCtx g) {
-    FontInfo_ *font = &g->font;
-
-    ctuQSort(&font->mm.instance.array[1], font->mm.instance.cnt - 1,
-             sizeof(MMInstance), cmpInstance, &font->mm.axis.cnt);
 }
 
 /* Set font bounding metrics from glyph bounding boxes */
@@ -849,110 +793,6 @@ static void prepWinData(hotCtx g) {
     }
 }
 
-/* Compute named MMFX table metrics */
-static void calcNamedMMFXMetrics(hotCtx g) {
-#define OVERRIDE_MM(id) (font->mm.overrideMtx & 1 << (id))
-    typedef struct {
-        FWord metric[TX_MAX_MASTERS];
-        GID gid;
-    } NamedMetric;
-    NamedMetric namedMtx[MMFXNamedMetricCnt];
-    long i;
-    long sum;
-    Fixed WV[TX_MAX_MASTERS];
-    FontInfo_ *font = &g->font;
-    long nGlyphs = font->glyphs.cnt;
-
-    /* Initialize */
-    for (i = 0; i < g->font.mm.nMasters; i++) {
-        WV[i] = 0;
-        namedMtx[MMFXZero].metric[i] = 0;
-        namedMtx[MMFXAscender].metric[i] = 0;
-        namedMtx[MMFXDescender].metric[i] = 0;
-        namedMtx[MMFXLineGap].metric[i] = g->font.unitsPerEm / 12;
-        namedMtx[MMFXXHeight].metric[i] = 0;
-        namedMtx[MMFXCapHeight].metric[i] = 0;
-    }
-    namedMtx[MMFXZero].gid = GID_UNDEF;
-    namedMtx[MMFXAscender].gid = mapUV2GID(g, UV_ASCENT);
-    namedMtx[MMFXDescender].gid = mapUV2GID(g, UV_DESCENT);
-    namedMtx[MMFXLineGap].gid = GID_UNDEF;
-    namedMtx[MMFXAdvanceWidthMax].gid = GID_UNDEF;
-    namedMtx[MMFXAvgCharWidth].gid = GID_UNDEF;
-    namedMtx[MMFXXHeight].gid = OVERRIDE_MM(MMFXXHeight) ? GID_UNDEF : mapUV2GID(g, UV_X_HEIGHT_1);
-    namedMtx[MMFXCapHeight].gid = OVERRIDE_MM(MMFXCapHeight) ? GID_UNDEF : mapUV2GID(g, UV_CAP_HEIGHT);
-
-    /* Set specific glyph-related metrics */
-    for (i = 0; i < g->font.mm.nMasters; i++) {
-        int j;
-        /* Set weight vector for this master */
-        WV[i] = INT2FIX(1);
-        cffSetWV(g->ctx.cff, g->font.mm.nMasters, WV);
-
-        for (j = 0; j < MMFXNamedMetricCnt; j++) {
-            NamedMetric *metric = &namedMtx[j];
-            if (metric->gid != GID_UNDEF) {
-                /* Metric glyph; save value */
-                cffGlyphInfo *gi =
-                    cffGetGlyphInfo(g->ctx.cff, metric->gid, NULL);
-                metric->metric[i] =
-                    (j == MMFXDescender) ? gi->bbox.bottom : gi->bbox.top;
-            }
-        }
-        WV[i] = 0;
-    }
-
-    /* Set max width */
-    for (i = 0; i < g->font.mm.nMasters; i++) {
-        cffFWord hAdv;
-        long gid;
-        FWord maxWidth;
-
-        /* Set weight vector for this master */
-        WV[i] = INT2FIX(1);
-        cffSetWV(g->ctx.cff, g->font.mm.nMasters, WV);
-
-        /* Start maxWidth with .notdef glyph */
-        cffGetGlyphWidth(g->ctx.cff, 0, &hAdv, NULL);
-        maxWidth = hAdv;
-
-        /* Get info on all glyphs (except .notdef) */
-        for (gid = 1; gid < g->font.glyphs.cnt; gid++) {
-            cffGetGlyphWidth(g->ctx.cff, gid, &hAdv, NULL);
-            if (hAdv > maxWidth) {
-                maxWidth = hAdv;
-            }
-        }
-        namedMtx[MMFXAdvanceWidthMax].metric[i] = maxWidth;
-        WV[i] = 0;
-    }
-
-    /* Compute average char width as for g->font.win.AvgWidth above */
-    for (i = 0; i < g->font.mm.nMasters; i++) {
-        int j;
-        cffFWord hAdv;
-
-        /* Set weight vector for this master */
-        WV[i] = INT2FIX(1);
-        cffSetWV(g->ctx.cff, g->font.mm.nMasters, WV);
-
-        sum = 0;
-        for (j = 0; j < nGlyphs; j++) {
-            cffGetGlyphWidth(g->ctx.cff, j, &hAdv, NULL);
-            sum += hAdv;
-        }
-        namedMtx[MMFXAvgCharWidth].metric[i] = (unsigned short)(sum / nGlyphs);
-        WV[i] = 0;
-    }
-
-    /* Save metric values */
-    for (i = 0; i < MMFXNamedMetricCnt; i++) {
-        if (!OVERRIDE_MM(i)) {
-            MMFXAddNamedMetric(g, i, namedMtx[i].metric);
-        }
-    }
-}
-
 /* Must be called after featFill(), since TypoAscender/TypoDescender could have
    been overwritten */
 static void setVBounds(hotCtx g) {
@@ -1136,9 +976,6 @@ void patch_cff_fontbbox(hotCtx g) {
 void hotConvert(hotCtx g) {
     BBox old_bbox;
 
-    if (IS_MM(g)) {
-        sortInstances(g);
-    }
     old_bbox = g->font.bbox;
     setBounds(g);
     if (bbox_changed(&old_bbox, &g->font.bbox)) {
@@ -1148,9 +985,6 @@ void hotConvert(hotCtx g) {
     featFill(g);
 
     prepWinData(g);
-    if (IS_MM(g)) {
-        calcNamedMMFXMetrics(g);
-    }
 
     setVBounds(g);
 
@@ -1193,17 +1027,6 @@ void hotFree(hotCtx g) {
         }
         dnaFREE(g->font.unenc);
     }
-
-    dnaFREE(g->font.mm.axis);
-    dnaFREE(g->font.mm.style);
-    dnaFREE(g->font.glyphs);
-
-    if (g->font.mm.instance.size != 0) {
-        for (i = 0; i < g->font.mm.instance.size; i++) {
-            dnaFREE(g->font.mm.instance.array[i].name);
-        }
-    }
-    dnaFREE(g->font.mm.instance);
 
     MEM_FREE(g, g);
 }
@@ -1250,10 +1073,8 @@ void hotAddMiscData(hotCtx g,
 
     /* Initialize data arrays */
     dnaSET_CNT(g->font.kern.pairs, common->nKernPairs);
-    dnaSET_CNT(g->font.kern.values, common->nKernPairs * g->font.mm.nMasters);
+    dnaSET_CNT(g->font.kern.values, common->nKernPairs);
     dnaSET_CNT(g->font.unenc, win->nUnencChars);
-    dnaSET_CNT(g->font.mm.style, common->nStyles);
-    dnaSET_CNT(g->font.mm.instance, common->nInstances);
 
     mapApplyReencoding(g, common->encoding, mac->encoding);
 }
@@ -1527,229 +1348,6 @@ int hotAddName(hotCtx g,
     return 0;
 }
 
-/* Add axis data */
-void hotAddAxisData(hotCtx g, int iAxis,
-                    char *type, char *longLabel, char *shortLabel,
-                    Fixed minRange, Fixed maxRange) {
-    static struct {
-        char *name;
-        Tag tag;
-    } types[] = {
-        {"Weight", TAG('w', 'g', 'h', 't')},
-        {"Width", TAG('w', 'd', 't', 'h')},
-        {"OpticalSize", TAG('o', 'p', 's', 'z')},
-        {"Serif", TAG('s', 'e', 'r', 'f')},
-        {"Style", TAG('s', 't', 'y', 'l')},
-    };
-    unsigned int i;
-    unsigned int length;
-    MMAxis *axis = &g->font.mm.axis.array[iAxis];
-
-    /* Copy labels */
-    strcpy(axis->longLabel, longLabel);
-    strcpy(axis->shortLabel, shortLabel);
-
-    /* Save ranges */
-    axis->minRange = minRange;
-    axis->maxRange = maxRange;
-
-    /* Convert axis type name to tag */
-    for (i = 0; i < ARRAY_LEN(types); i++) {
-        if (strcmp(type, types[i].name) == 0) {
-            axis->tag = types[i].tag;
-            return;
-        }
-    }
-
-    hotMsg(g, hotWARNING, "unrecognized axis type [%s]", type);
-
-    /* Make tag from truncated, down-cased, and space-padded axis type */
-    length = strlen(type);
-    if (length > 4) {
-        length = 4;
-    }
-    axis->tag = 0;
-    for (i = 0; i < length; i++) {
-        axis->tag = axis->tag << 8 |
-                    (isupper(type[i]) ? tolower(type[i]) : type[i]);
-    }
-    for (; i < 4; i++) {
-        axis->tag = axis->tag << 8 | ' ';
-    }
-}
-
-/* Add style data */
-void hotAddStyleData(hotCtx g, int iStyle, int iAxis, char *type,
-                     Fixed point0, Fixed delta0,
-                     Fixed point1, Fixed delta1) {
-    static struct {
-        char *name;
-        unsigned short flags;
-    } styles[] = {
-        {"Bold", MM_BOLD},
-        {"Italic", MM_ITALIC},
-        {"Condensed", MM_CONDENSED},
-        {"Extended", MM_EXTENDED},
-    };
-    unsigned int i;
-    MMStyle *style = &g->font.mm.style.array[iStyle];
-
-    style->axis = iAxis;
-
-    /* Copy actions */
-    style->action[0].point = point0;
-    style->action[0].delta = delta0;
-    style->action[1].point = point1;
-    style->action[1].delta = delta1;
-
-    /* Convert style type name to flags */
-    for (i = 0; i < ARRAY_LEN(styles); i++) {
-        if (strcmp(type, styles[i].name) == 0) {
-            style->flags = styles[i].flags;
-            return;
-        }
-    }
-
-    hotMsg(g, hotFATAL, "unrecognized style type [%s]", type);
-}
-
-/* Add instance data */
-void hotAddInstance(hotCtx g, int iInstance, char *suffix) {
-    static struct {
-        char *label;
-        char *name;
-    } styles[] = {
-        {"CN", "Condensed"},
-        {"BD", "Bold"},
-        {"LT", "Light"},
-        {"SB", "Semibold"},
-        {"EX", "Extended"},
-        {"NR", "Narrow"},
-        {"SE", "Semi Extended"},
-        {"BL", "Black"},
-        {"UL", "Ultra"},
-        {"BK", "Book"},
-        {"XL", "Extra Light"},
-        {"SA", "Sans Serif"},
-        {"SR", "Serif"},
-        {"HS", "Half Serif"},
-        {"FS", "Flare Serif"},
-        {"XE", "Extra Extended"},
-        {"WI", "Wide"},
-        {"SC", "Semi Condensed"},
-        {"XC", "Extra Condensed"},
-        {"TH", "Thin"},
-        {"MD", "Medium"},
-        {"DM", "Demi"},
-        {"HV", "Heavy"},
-        {"SU", "Super"},
-        {"EB", "Extra Bold"},
-        {"XB", "Extra Black"},
-        {"ND", "Nord"},
-        {"CM", "Compressed"},
-        {"CT", "Compact"},
-        {"PO", "Poster"},
-        {"DS", "Display"},
-        {"IN", "Inline"},
-        {"OU", "Outline"},
-        {"SH", "Shaded"},
-        {"TX", "Text"},
-    };
-    int i;
-    unsigned int j;
-    int unrec;
-    int length;
-    char *p;
-    char *separator = "";
-    MMInstance *instance = &g->font.mm.instance.array[iInstance];
-
-    strcpy(instance->suffix, suffix);
-
-    /* Parse suffix and extract UDV and create full style menu name */
-    unrec = 0;
-    p = suffix;
-    instance->name.cnt = 0;
-    for (i = 0; i < g->font.mm.axis.cnt; i++) {
-        char *q;
-
-        /* Parse number */
-        instance->UDV[i] = INT2FIX(strtol(p, &q, 10));
-        if (q == p) {
-            goto error;
-        }
-
-        /* Skip space */
-        while (*q == ' ') {
-            q++;
-        }
-        if (*q == '\0') {
-            goto error;
-        }
-
-        /* Parse label */
-        p = q;
-        while (*p != '\0' && *p != ' ' && !isdigit(*p)) {
-            p++;
-        }
-
-        if (!unrec &&
-            strncmp("NO", q, p - q) != 0 &&
-            strncmp("RG", q, p - q) != 0) {
-            /* Not unrecognized, "Normal", or "Regular" */
-            char opstyle[12];
-            char *style;
-
-            if (strncmp("OP", q, p - q) == 0) {
-                /* Add optical size style */
-                sprintf(opstyle, "%d-point", FIX2INT(instance->UDV[i]));
-                style = opstyle;
-            } else {
-                for (j = 0; j < ARRAY_LEN(styles); j++) {
-                    if (strncmp(styles[j].label, q, p - q) == 0) {
-                        /* Add matched style name */
-                        style = styles[j].name;
-                        goto matched;
-                    }
-                }
-
-                /* Not found in list */
-                unrec = 1;
-                continue;
-
-            matched:;
-            }
-
-            /* Append separator */
-            length = strlen(separator);
-            memcpy(dnaEXTEND(instance->name, length), separator, length);
-            separator = " ";
-
-            /* Append style */
-            length = strlen(style);
-            memcpy(dnaEXTEND(instance->name, length), style, length);
-        }
-    }
-
-    if (unrec) {
-        /* Unrecognized style(s); use suffix for instance name */
-        length = strlen(suffix) + 1;
-        dnaSET_CNT(instance->name, length);
-        strcpy(instance->name.array, suffix);
-        return;
-    } else if (instance->name.cnt == 0) {
-        /* Empty name; add "Regular" style */
-        dnaSET_CNT(instance->name, sizeof("Regular") - 1);
-        strcpy(instance->name.array, "Regular");
-    }
-
-    /* Terminate menu name */
-    *dnaNEXT(instance->name) = '\0';
-    return;
-
-error:
-    hotMsg(g, hotFATAL, "invalid instance name");
-}
-
 /* Add encoded kern pair to accumulator */
 void hotAddKernPair(hotCtx g, long iPair, unsigned first, unsigned second) {
     if (iPair >= g->font.kern.pairs.cnt) {
@@ -1765,14 +1363,14 @@ void hotAddKernPair(hotCtx g, long iPair, unsigned first, unsigned second) {
 }
 
 /* Add encoded kern value to accumulator */
-void hotAddKernValue(hotCtx g, long iPair, int iMaster, short value) {
+void hotAddKernValue(hotCtx g, long iPair, short value) {
     if (iPair >= g->font.kern.pairs.cnt) {
         hotMsg(g, hotFATAL,
                "invalid kern value index: %ld; expecting maximum "
                "index: %ld",
                iPair, g->font.kern.pairs.cnt - 1);
     }
-    g->font.kern.values.array[(iPair * g->font.mm.nMasters) + iMaster] = value;
+    g->font.kern.values.array[iPair] = value;
 }
 
 /* Add unencoded char */
@@ -1982,33 +1580,6 @@ static int encInteger(short i, unsigned char *cstr) {
     }
 }
 
-/* Make metric charstring and return its length */
-int hotMakeMetric(hotCtx g, FWord *metric, char *cstr) {
-    int i;
-    FWord first;
-    unsigned char *p = (unsigned char *)cstr;
-
-    first = metric[0];
-    for (i = 1; i < g->font.mm.nMasters; i++) {
-        if (first != metric[i]) {
-            /* Make delta-encoded blend arguments */
-            p += encInteger(first, p);
-            for (i = 1; i < g->font.mm.nMasters; i++) {
-                p += encInteger((short)(metric[i] - first), p);
-            }
-            p += encInteger(1, p); /* Argument count */
-            *p++ = t2_blend;
-            *p++ = tx_endchar;
-            return (char *)p - cstr; /* Return length */
-        }
-    }
-
-    /* All masters have same value; no blending required */
-    p += encInteger(first, p);
-    *p++ = tx_endchar;
-    return (char *)p - cstr; /* Return length */
-}
-
 /* --------------------- Temporary Debugging Functions --------------------- */
 
 #if 0
@@ -2088,54 +1659,6 @@ static BBox calcFontBBox(hotCtx g, unsigned *left, unsigned *bottom,
 
     return bbox;
 }
-
-#if 0
-static void checkFontBBox(hotCtx g) {
-    int i;
-    int j;
-    Fixed UDV[TX_MAX_AXES];
-    Fixed wts[] = {
-        INT2FIX(110), INT2FIX(200), INT2FIX(300), INT2FIX(400),
-        INT2FIX(500), INT2FIX(600), INT2FIX(700), INT2FIX(790),
-    };
-    Fixed wds[] = {
-        INT2FIX(100), INT2FIX(200), INT2FIX(300), INT2FIX(400),
-        INT2FIX(500), INT2FIX(600), INT2FIX(700), INT2FIX(800),
-        INT2FIX(900),
-    };
-
-    for (i = 0; i < TABLE_LEN(wts); i++) {
-        UDV[0] = wts[i];
-        for (j = 0; j < TABLE_LEN(wds); j++) {
-            BBox bbox;
-            unsigned left;
-            unsigned bottom;
-            unsigned right;
-            unsigned top;
-            unsigned length;
-            char *p;
-
-            UDV[1] = wds[j];
-            cffSetUDV(g->ctx.cff, g->font.mm.nAxes, UDV);
-
-            bbox = calcFontBBox(g, &left, &bottom, &right, &top);
-
-            printf("[%3g,%3g]={%4hd,%4hd,%4hd,%4hd} ",
-                   UDV[0] / 65536.0, UDV[1] / 65536.0,
-                   bbox.left, bbox.bottom, bbox.right, bbox.top);
-            p = hotGetString(g, left, &length);
-            printf("{%.*s,", (int)length, p);
-            p = hotGetString(g, bottom, &length);
-            printf("%.*s,", (int)length, p);
-            p = hotGetString(g, right, &length);
-            printf("%.*s,", (int)length, p);
-            p = hotGetString(g, top, &length);
-            printf("%.*s}\n", (int)length, p);
-        }
-    }
-}
-
-#endif
 
 static void newpath(void *ctx) {
     printf("newpath ");

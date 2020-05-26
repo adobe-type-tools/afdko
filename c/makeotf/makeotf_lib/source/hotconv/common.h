@@ -95,8 +95,6 @@ typedef uint32_t Tag;
 #define RAD_DEG 57.2958
 #define INT2FIX(i) ((Fixed)(i) << 16)
 #define FIX2DBL(f) ((f) / 65536.0)
-#define FIX2INT(f) ((short)(((f) + 0x00008000) >> 16)) /* xxx Doesn't round correctly for -ve numbers, */
-                                                       /* but OK since used only with MMs              */
 
 #define RND(d) ((int32_t)(((d) > 0) ? (d) + 0.5 : (d)-0.5))
 #define ABS(v) ((v) < 0 ? -(v) : (v))
@@ -192,35 +190,6 @@ typedef struct { /* Horizontal and vertical metric */
     FWord v;
 } hvMetric;
 
-typedef struct {    /* MM: axis data */
-    Tag tag;        /* Identifying tag */
-    Fixed minRange; /* Minimum user coord */
-    Fixed maxRange; /* Maximum user coord */
-    char longLabel[HOT_MAX_MENU_NAME];
-    char shortLabel[HOT_MAX_SHORT_STR];
-} MMAxis;
-
-typedef struct {
-    Fixed point;
-    Fixed delta;
-} MMAction;
-
-typedef struct { /* MM: Axis style data */
-    short axis;
-    short flags;
-#define MM_BOLD (1 << 0)
-#define MM_ITALIC (1 << 1)
-#define MM_CONDENSED (1 << 5)
-#define MM_EXTENDED (1 << 6)
-    MMAction action[2];
-} MMStyle;
-
-typedef struct { /* MM: instance data */
-    Fixed UDV[TX_MAX_AXES];
-    dnaDCL(char, name);             /* Menu name */
-    char suffix[HOT_MAX_MENU_NAME]; /* Suffix name */
-} MMInstance;
-
 typedef dnaDCL(char, CharName);
 
 typedef struct AddlUV_ AddlUV;
@@ -273,7 +242,6 @@ typedef struct { /* Font information */
     unsigned short flags;
 #define FI_MISC_FLAGS_MASK 0x01ff /* Flags from client via hotAddMiscData()*/
 #define FI_FIXED_PITCH (1 << 13)  /* Fixed pitch font */
-#define FI_MM (1 << 14)           /* MM font */
 #define FI_CID (1 << 15)          /* CID font */
     dnaDCL(char, FontName);
     SID Notice;
@@ -337,17 +305,9 @@ typedef struct { /* Font information */
     } mac;
     struct { /* --- Kerning data */
         dnaDCL(KernPair_, pairs);
-        dnaDCL(short, values); /* [nPairs*nMasters] */
+        dnaDCL(short, values); /* [nPairs] */
     } kern;
     dnaDCL(CharName, unenc);       /* Unencoded chars */
-    struct {                       /* --- MM-specific data */
-        short nMasters;            /* 1 for unimaster, > 1 for MM */
-        cffFixed UDV[TX_MAX_AXES]; /* Default User design vector */
-        dnaDCL(MMAxis, axis);
-        dnaDCL(MMStyle, style);
-        dnaDCL(MMInstance, instance);
-        short overrideMtx; /* Flags named mtx overrides seen in feat file */
-    } mm;
     struct { /* --- CID-specific data */
         SID registry;
         SID ordering;
@@ -360,7 +320,6 @@ typedef struct { /* Font information */
 /* The Mac pollutes my namespace with FontInfo already, hence the underscore */
 
 /* Convenience macros */
-#define IS_MM(g) ((g)->font.flags & FI_MM)
 #define IS_CID(g) ((g)->font.flags & FI_CID)
 
 /* -------------------------------- Contexts ------------------------------- */
@@ -372,14 +331,11 @@ typedef struct CFF_Ctx_ *CFF_Ctx;
 typedef struct GDEFCtx_ *GDEFCtx;
 typedef struct GPOSCtx_ *GPOSCtx;
 typedef struct GSUBCtx_ *GSUBCtx;
-typedef struct MMFXCtx_ *MMFXCtx;
-typedef struct MMSDCtx_ *MMSDCtx;
 typedef struct OS_2Ctx_ *OS_2Ctx;
 typedef struct STATCtx_ *STATCtx;
 typedef struct VORGCtx_ *VORGCtx;
 typedef struct anonCtx_ *anonCtx;
 typedef struct cmapCtx_ *cmapCtx;
-typedef struct fvarCtx_ *fvarCtx;
 typedef struct headCtx_ *headCtx;
 typedef struct hheaCtx_ *hheaCtx;
 typedef struct hmtxCtx_ *hmtxCtx;
@@ -409,14 +365,11 @@ struct hotCtx_ {
         GDEFCtx GDEF;
         GPOSCtx GPOS;
         GSUBCtx GSUB;
-        MMFXCtx MMFX;
-        MMSDCtx MMSD;
         OS_2Ctx OS_2;
         STATCtx STAT;
         VORGCtx VORG;
         anonCtx anon;
         cmapCtx cmap;
-        fvarCtx fvar;
         headCtx head;
         hheaCtx hhea;
         hmtxCtx hmtx;
@@ -451,7 +404,6 @@ void hotCalcSearchParams(unsigned unitSize, long nUnits,
 void hotWritePString(hotCtx g, char *string);
 char *hotGetString(hotCtx g, SID sid, unsigned *length);
 
-int hotMakeMetric(hotCtx g, FWord *metric, char cstr[64]);
 void hotAddVertOriginY(hotCtx g, GID gid, short value,
                        char *filename, int linenum);
 void hotAddVertAdvanceY(hotCtx g, GID gid, short value,
