@@ -23,7 +23,6 @@
 
 #include "common.h"
 #include "feat.h"
-#include "MMFX.h"
 #include "OS_2.h"
 #include "hhea.h"
 #include "vmtx.h"

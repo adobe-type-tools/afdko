@@ -139,7 +139,6 @@
     <ClCompile Include="..\..\..\..\source\hotconv\featerr.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\featgram.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\featscan.c" />
-    <ClCompile Include="..\..\..\..\source\hotconv\fvar.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\GDEF.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\GPOS.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\GSUB.c" />
@@ -149,8 +148,6 @@
     <ClCompile Include="..\..\..\..\source\hotconv\hot.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\map.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\maxp.c" />
-    <ClCompile Include="..\..\..\..\source\hotconv\MMFX.c" />
-    <ClCompile Include="..\..\..\..\source\hotconv\MMSD.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\name.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\OS_2.c" />
     <ClCompile Include="..\..\..\..\source\hotconv\otl.c" />

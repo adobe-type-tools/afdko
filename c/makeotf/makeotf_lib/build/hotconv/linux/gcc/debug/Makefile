@@ -30,7 +30,6 @@ LIB_SRCS = \
 	$(SRCDIR)/featerr.c \
 	$(SRCDIR)/featgram.c \
 	$(SRCDIR)/featscan.c \
-	$(SRCDIR)/fvar.c \
 	$(SRCDIR)/GDEF.c \
 	$(SRCDIR)/GPOS.c \
 	$(SRCDIR)/GSUB.c \
@@ -40,8 +39,6 @@ LIB_SRCS = \
 	$(SRCDIR)/hot.c \
 	$(SRCDIR)/map.c \
 	$(SRCDIR)/maxp.c \
-	$(SRCDIR)/MMFX.c \
-	$(SRCDIR)/MMSD.c \
 	$(SRCDIR)/name.c \
 	$(SRCDIR)/OS_2.c \
 	$(SRCDIR)/otl.c \
@@ -60,7 +57,6 @@ LIB_OBJS = \
 	$(OBJECT_DIR)/featerr.o \
 	$(OBJECT_DIR)/featgram.o \
 	$(OBJECT_DIR)/featscan.o \
-	$(OBJECT_DIR)/fvar.o \
 	$(OBJECT_DIR)/GDEF.o \
 	$(OBJECT_DIR)/GPOS.o \
 	$(OBJECT_DIR)/GSUB.o \
@@ -70,8 +66,6 @@ LIB_OBJS = \
 	$(OBJECT_DIR)/hot.o \
 	$(OBJECT_DIR)/map.o \
 	$(OBJECT_DIR)/maxp.o \
-	$(OBJECT_DIR)/MMFX.o \
-	$(OBJECT_DIR)/MMSD.o \
 	$(OBJECT_DIR)/name.o \
 	$(OBJECT_DIR)/OS_2.o \
 	$(OBJECT_DIR)/otl.o \
@@ -108,9 +102,6 @@ featgram.o:
 featscan.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/featscan.c -o $@
 
-fvar.o:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/fvar.c -o $@
-
 GDEF.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/GDEF.c -o $@
 
@@ -137,12 +128,6 @@ map.o:
 
 maxp.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/maxp.c -o $@
-
-MMFX.o:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/MMFX.c -o $@
-
-MMSD.o:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/MMSD.c -o $@
 
 name.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/name.c -o $@

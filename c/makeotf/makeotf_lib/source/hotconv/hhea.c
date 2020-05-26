@@ -50,7 +50,7 @@ struct hheaCtx_ {
 static short calcCaretOffset(hotCtx g);
 
 #if HOT_DEBUG
-static void printCaretOffset(hotCtx g, short caretoff, int iMaster);
+static void printCaretOffset(hotCtx g, short caretoff);
 
 #endif
 
@@ -228,9 +228,6 @@ static short calcCaretOffset(hotCtx g) {
     h->caretoff.bboxLeft = DBL_MAX;
     h->caretoff.bboxRight = 0;
 
-    if (IS_MM(g)) {
-        cffSetUDV(g->ctx.cff, g->font.mm.axis.cnt, g->font.mm.UDV);
-    }
     hAdv = cffGetGlyphInfo(g->ctx.cff, gid, &pathcb)->hAdv;
 
     if (h->caretoff.bboxLeft == DBL_MAX) {
@@ -243,21 +240,7 @@ static short calcCaretOffset(hotCtx g) {
 
 #if HOT_DEBUG
 #if 0
-    printCaretOffset(g, caretoff, -1);
-    if (IS_MM(g)) {
-        Fixed WV[TX_MAX_MASTERS];
-        int i;
-        for (i = 0; i < g->font.mm.nMasters; i++) {
-            WV[i] = 0;
-        }
-
-        for (i = 0; i < g->font.mm.nMasters; i++) {
-            WV[i] = INT2FIX(1);
-            cffSetWV(g->ctx.cff, g->font.mm.nMasters, WV);
-            printCaretOffset(g, caretoff, i);
-            WV[i] = 0;
-        }
-    }
+    printCaretOffset(g, caretoff);
 #endif
 #endif
 
@@ -267,6 +250,7 @@ static short calcCaretOffset(hotCtx g) {
 /* ------------------------- Caret offset dump ----------------------------- */
 
 #if HOT_DEBUG
+#define FIX2INT(f) ((short)(((f) + 0x00008000) >> 16)) /* xxx Doesn't round correctly for -ve numbers, */
 /* [cffread path callback] Add moveto to path */
 static void dumpMoveto(void *ctx, cffFixed x1, cffFixed y1) {
     printf("%d %d _MT\n", FIX2INT(x1), FIX2INT(y1));
@@ -362,7 +346,7 @@ static void printGlyphRun(hotCtx g, int *xLine, int lineMax, int caretoff,
 }
 
 /* Print proofs at the current UDV */
-static void printCaretOffset(hotCtx g, short caretoff, int iMaster) {
+static void printCaretOffset(hotCtx g, short caretoff) {
 #define IN2PIX(a) ((a)*72)
 #define MARGIN IN2PIX(.25)
 #define PTSIZE (60)
@@ -415,14 +399,6 @@ static void printCaretOffset(hotCtx g, short caretoff, int iMaster) {
 
     /* Prepare message */
     sprintf(msg, "%d %s", caretoff, g->font.FontName.array);
-    if (IS_MM(g)) {
-        if (iMaster == -1) {
-            sprintf(&msg[strlen(msg)], "[dflt]");
-        } else {
-            sprintf(&msg[strlen(msg)], "[%d/%d]",
-                    iMaster, g->font.mm.nMasters);
-        }
-    }
 
     printf("0 -20 _MT (%s) show\n", msg);
     fprintf(stderr, "%s\n", msg);
