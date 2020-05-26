@@ -3872,8 +3872,8 @@ along with the tag `sbit`.
 
 **v1.17 [6 Jan 2016]:**
 
-    contextual lookup specification in section [6.h.ii](#6.h.ii).
 *   Fixed bug in example for salt feature in section [8.a](#8.a), and in example for
+    contextual lookup specification in section [6.h.ii](#6.h.ii).
 
 **v1.16 [9 Dec 2015]:**
 
