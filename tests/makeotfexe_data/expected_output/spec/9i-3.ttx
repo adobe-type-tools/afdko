@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont>
+
+  <STAT>
+    <Version value="0x00010002"/>
+    <DesignAxisRecordSize value="8"/>
+    <!-- DesignAxisCount=2 -->
+    <DesignAxisRecord>
+      <Axis index="0">
+        <AxisTag value="wght"/>
+        <AxisNameID value="257"/>  <!-- Weight -->
+        <AxisOrdering value="0"/>
+      </Axis>
+      <Axis index="1">
+        <AxisTag value="ital"/>
+        <AxisNameID value="258"/>  <!-- Italic -->
+        <AxisOrdering value="1"/>
+      </Axis>
+    </DesignAxisRecord>
+    <!-- AxisValueCount=5 -->
+    <AxisValueArray>
+      <AxisValue index="0" Format="1">
+        <AxisIndex value="0"/>
+        <Flags value="0"/>
+        <ValueNameID value="259"/>  <!-- Regular -->
+        <Value value="0.0061"/>
+      </AxisValue>
+      <AxisValue index="1" Format="2">
+        <AxisIndex value="0"/>
+        <Flags value="0"/>
+        <ValueNameID value="260"/>  <!-- Regular -->
+        <NominalValue value="0.0061"/>
+        <RangeMinValue value="0.00458"/>
+        <RangeMaxValue value="0.00763"/>
+      </AxisValue>
+      <AxisValue index="2" Format="3">
+        <AxisIndex value="0"/>
+        <Flags value="0"/>
+        <ValueNameID value="261"/>  <!-- Regular -->
+        <Value value="0.0061"/>
+        <LinkedValue value="0.01068"/>
+      </AxisValue>
+      <AxisValue index="3" Format="3">
+        <AxisIndex value="1"/>
+        <Flags value="0"/>
+        <ValueNameID value="262"/>  <!-- Regular -->
+        <Value value="0.0"/>
+        <LinkedValue value="0.00002"/>
+      </AxisValue>
+      <AxisValue index="4" Format="4">
+        <!-- AxisCount=2 -->
+        <Flags value="0"/>
+        <ValueNameID value="263"/>  <!-- Mediumitalic -->
+        <AxisValueRecord index="0">
+          <AxisIndex value="0"/>
+          <Value value="0.00763"/>
+        </AxisValueRecord>
+        <AxisValueRecord index="1">
+          <AxisIndex value="1"/>
+          <Value value="0.00002"/>
+        </AxisValueRecord>
+      </AxisValue>
+    </AxisValueArray>
+    <ElidedFallbackNameID value="256"/>  <!-- Regular -->
+  </STAT>
+
+</ttFont>

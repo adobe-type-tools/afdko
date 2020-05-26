@@ -570,7 +570,7 @@ TEST_FEATURE_FILES = [
     "ZeroValue_SinglePos_horizontal", "ZeroValue_SinglePos_vertical",
     "ZeroValue_PairPos_horizontal", "ZeroValue_PairPos_vertical",
     "ZeroValue_ChainSinglePos_horizontal", "ZeroValue_ChainSinglePos_vertical",
-    "PairPosSubtable",
+    "PairPosSubtable", "MultipleLookupsPerGlyph", "MultipleLookupsPerGlyph2"
 ]
 
 TEST_FEATURE_FILES_XFAIL = [
@@ -636,7 +636,7 @@ def test_spec(path):
         input_filename = "spec/font.pfa"
     feat_filename = f"spec/{name}.fea"
     ttx_filename = f"spec/{name}.ttx"
-    cmap_filename = f"spec/Identity-H"
+    cmap_filename = "spec/Identity-H"
     actual_path = get_temp_file_path()
 
     cmd = CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',

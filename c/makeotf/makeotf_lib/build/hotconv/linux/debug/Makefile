@@ -32,12 +32,13 @@ LIB_SRCS = \
 	$(SRC_DIR)/map.c \
 	$(SRC_DIR)/otl.c \
 	$(SRC_DIR)/sfnt.c \
+	$(SRC_DIR)/STAT.c \
 	$(SRC_DIR)/featerr.c \
 	$(SRC_DIR)/featgram.c \
 	$(SRC_DIR)/featscan.c
 LIB_OBJS = hot.o BASE.o CFF_.o cmap.o fvar.o GPOS.o GSUB.o head.o hhea.o \
 	hmtx.o maxp.o MMFX.o MMSD.o name.o OS_2.o post.o vhea.o vmtx.o VORG.o \
-	anon.o map.o otl.o sfnt.o featerr.o featgram.o featscan.o
+	anon.o map.o otl.o sfnt.o STAT.o featerr.o featgram.o featscan.o
 LIB_TARGET = $(LIB_DIR)/hotconv.a
 
 # Build targets
@@ -118,6 +119,9 @@ otl.o:
 
 sfnt.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sfnt.c -o $@
+
+STAT.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/STAT.c -o $@
 
 featerr.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/featerr.c -o $@

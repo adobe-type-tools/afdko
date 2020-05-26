@@ -1,6 +1,13 @@
 name: Test Python Package
 
-on: [push]
+on:
+  push:
+    paths-ignore: 
+      - docs/*
+      - CONTRIBUTING.md
+      - LICENSE.md
+      - NEWS.md
+      - README.md
 
 jobs:
   build:
@@ -39,6 +46,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt .
+        pip freeze --all
     
     - name: Lint with flake8
       run: |

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont>
+
+  <STAT>
+    <Version value="0x00010002"/>
+    <DesignAxisRecordSize value="8"/>
+    <!-- DesignAxisCount=1 -->
+    <DesignAxisRecord>
+      <Axis index="0">
+        <AxisTag value="wght"/>
+        <AxisNameID value="257"/>  <!-- Weight -->
+        <AxisOrdering value="0"/>
+      </Axis>
+    </DesignAxisRecord>
+    <!-- AxisValueCount=2 -->
+    <AxisValueArray>
+      <AxisValue index="0" Format="1">
+        <AxisIndex value="0"/>
+        <Flags value="2"/>
+        <ValueNameID value="258"/>  <!-- Regular -->
+        <Value value="0.0061"/>
+      </AxisValue>
+      <AxisValue index="1" Format="2">
+        <AxisIndex value="0"/>
+        <Flags value="3"/>
+        <ValueNameID value="259"/>  <!-- Regular -->
+        <NominalValue value="0.0061"/>
+        <RangeMinValue value="0.00458"/>
+        <RangeMaxValue value="0.00763"/>
+      </AxisValue>
+    </AxisValueArray>
+    <ElidedFallbackNameID value="256"/>  <!-- Regular -->
+  </STAT>
+
+</ttFont>

@@ -1,0 +1,40 @@
+name: Coverage
+
+on:
+  push:
+    branches:
+      - '*'
+  repository_dispatch:
+    types: manual-trigger
+
+jobs:
+  build:
+    if: contains(toJson(github.event.commits), '[skip ci]') == false && contains(toJson(github.event.commits), '[skip github]') == false
+
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Build and install AFDKO wheel
+      env:
+        XFLAGS: '--coverage'
+      run: |
+        python -m pip install --upgrade pip
+        pip install wheel
+        python setup.py bdist_wheel
+        echo 'Installing AFDKO wheel...'
+        pip install dist/*.whl -q
+        
+    - name: Generate and upload Python and C coverage
+      run: |
+        pip install pytest pytest-cov
+        python -m pytest --cov --cov-report=xml
+        bash <(curl -s https://codecov.io/bash) -y .codecov.yml

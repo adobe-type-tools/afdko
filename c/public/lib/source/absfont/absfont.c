@@ -100,6 +100,8 @@ static void initPrivateDict(abfPrivateDict *priv) {
     priv->LanguageGroup = cff_DFLT_LanguageGroup;
     priv->ExpansionFactor = (float)cff_DFLT_ExpansionFactor;
     priv->initialRandomSeed = cff_DFLT_initialRandomSeed;
+    priv->vsindex = ABF_UNSET_INT;
+    priv->numRegions = ABF_UNSET_INT;
     memset(&priv->blendValues, 0, sizeof(priv->blendValues));
 }
 

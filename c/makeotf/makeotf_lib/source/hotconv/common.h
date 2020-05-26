@@ -9,6 +9,8 @@
 #ifndef HOTCONV_COMMON_H
 #define HOTCONV_COMMON_H
 
+#include <stdbool.h>
+
 #include "hotconv.h"
 #include "dynarr.h"
 #include "txops.h"
@@ -373,6 +375,7 @@ typedef struct GSUBCtx_ *GSUBCtx;
 typedef struct MMFXCtx_ *MMFXCtx;
 typedef struct MMSDCtx_ *MMSDCtx;
 typedef struct OS_2Ctx_ *OS_2Ctx;
+typedef struct STATCtx_ *STATCtx;
 typedef struct VORGCtx_ *VORGCtx;
 typedef struct anonCtx_ *anonCtx;
 typedef struct cmapCtx_ *cmapCtx;
@@ -409,6 +412,7 @@ struct hotCtx_ {
         MMFXCtx MMFX;
         MMSDCtx MMSD;
         OS_2Ctx OS_2;
+        STATCtx STAT;
         VORGCtx VORG;
         anonCtx anon;
         cmapCtx cmap;

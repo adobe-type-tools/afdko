@@ -17,8 +17,8 @@
 
 #include <stdlib.h>	/* For exit in err.h xxx */
 #include <string.h>
-
 #include <stdio.h>
+#include <limits.h>
 
 #include "common.h"
 #include "feat.h"
@@ -572,6 +572,53 @@ Vendor
 		NLA = K_Vendor;
 	>>
 
+STAT
+	<<
+		NLA = K_STAT;
+	>>
+
+ElidedFallbackName
+	<<
+		NLA = K_ElidedFallbackName;
+	>>
+
+ElidedFallbackNameID
+	<<
+		NLA = K_ElidedFallbackNameID;
+	>>
+
+DesignAxis
+	<<
+		NLA = K_DesignAxis;
+    zzmode(TAG_MODE);  
+	>>
+
+AxisValue
+	<<
+		NLA = K_AxisValue;
+	>>
+
+flag
+	<<
+		NLA = K_flag;
+	>>
+
+location
+	<<
+		NLA = K_location;
+    zzmode(TAG_MODE);  
+	>>
+
+ElidableAxisValueName
+	<<
+		NLA = K_ElidableAxisValueName;
+	>>
+
+OlderSiblingFontAttribute
+	<<
+		NLA = K_OlderSiblingFontAttribute;
+	>>
+
 vhea
 	<<
 		NLA = K_vhea;
@@ -612,7 +659,7 @@ VertAdvanceY
 		NLA = T_FONTREV;
 	>>
 
-0x[0-9a-fA-F]+|0[0-7]+
+({\-}0x[0-9a-fA-F]+)|0[0-7]+
 	<<
 		NLA = T_NUMEXT;
 	>>
@@ -645,52 +692,52 @@ VertAdvanceY
 
 \[
 	<<
-		NLA = 140;
+		NLA = 149;
 	>>
 
 \-
 	<<
-		NLA = 141;
+		NLA = 150;
 	>>
 
 \]
 	<<
-		NLA = 142;
+		NLA = 151;
 	>>
 
 0
 	<<
-		NLA = 143;
+		NLA = 152;
 	>>
 
 ,
 	<<
-		NLA = 144;
+		NLA = 153;
 	>>
 
 '
 	<<
-		NLA = 145;
+		NLA = 154;
 	>>
 
 ;
 	<<
-		NLA = 146;
+		NLA = 155;
 	>>
 
 \{
 	<<
-		NLA = 147;
+		NLA = 156;
 	>>
 
 \}
 	<<
-		NLA = 148;
+		NLA = 157;
 	>>
 
 =
 	<<
-		NLA = 149;
+		NLA = 158;
 	>>
 
 
@@ -937,7 +984,7 @@ include
     zzskip(); zzline++;  
 	>>
 
-[\0x20-\0x7E]
+[\0x20-\0x7E\0x80-\0xF7]
 	<<
 		NLA = 30;
     featAddNameStringChar(zzlextext[0]); zzskip();  

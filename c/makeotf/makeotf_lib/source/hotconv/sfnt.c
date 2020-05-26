@@ -16,6 +16,7 @@
 #include "MMFX.h"
 #include "MMSD.h"
 #include "OS_2.h"
+#include "STAT.h"
 #include "VORG.h"
 #include "anon.h"
 #include "cmap.h"
@@ -68,6 +69,7 @@ static Funcs g_funcs[] = {
     {GPOS_, GPOSNew, GPOSFill, GPOSWrite, GPOSReuse, GPOSFree, 1, 17, 0},
     {BASE_, BASENew, BASEFill, BASEWrite, BASEReuse, BASEFree, 1, 18, 0},
     {VORG_, VORGNew, VORGFill, VORGWrite, VORGReuse, VORGFree, 1, 19, 0},
+    {STAT_, STATNew, STATFill, STATWrite, STATReuse, STATFree, 1, 20, 0},
 };
 #define SFNT_TABLE_CNT ARRAY_LEN(g_funcs)
 

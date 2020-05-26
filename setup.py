@@ -176,7 +176,7 @@ def _get_console_scripts():
 
 def _get_requirements():
     with io.open("requirements.txt", encoding="utf-8") as requirements:
-        return [l.replace("==", ">=") for l in requirements.readlines()]
+        return [rl.replace("==", ">=") for rl in requirements.readlines()]
 
 
 def main():

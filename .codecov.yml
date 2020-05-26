@@ -10,3 +10,6 @@ codecov:
   ci:
     - !appveyor
     - !travis
+
+fixes:
+  - "/home/runner/work/afdko/::"

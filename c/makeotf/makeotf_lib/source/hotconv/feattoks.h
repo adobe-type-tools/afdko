@@ -1,6 +1,6 @@
 #ifndef feattoks_h
 #define feattoks_h
-/* feattoks.h -- List of labeled tokens and stuff
+/* feattoks.h -- List of labelled tokens and stuff
  *
  * Generated from: featgram.g
  *
@@ -105,20 +105,29 @@
 #define K_WeightClass 123
 #define K_WidthClass 124
 #define K_Vendor 125
-#define K_vhea 126
-#define K_VertTypoAscender 127
-#define K_VertTypoDescender 128
-#define K_VertTypoLineGap 129
-#define K_vmtx 130
-#define K_VertOriginY 131
-#define K_VertAdvanceY 132
-#define T_FONTREV 133
-#define T_NUMEXT 134
-#define T_NUM 135
-#define T_GCLASS 136
-#define T_CID 137
-#define T_GNAME 138
-#define T_STRING 139
+#define K_STAT 126
+#define K_ElidedFallbackName 127
+#define K_ElidedFallbackNameID 128
+#define K_DesignAxis 129
+#define K_AxisValue 130
+#define K_flag 131
+#define K_location 132
+#define K_ElidableAxisValueName 133
+#define K_OlderSiblingFontAttribute 134
+#define K_vhea 135
+#define K_VertTypoAscender 136
+#define K_VertTypoDescender 137
+#define K_VertTypoLineGap 138
+#define K_vmtx 139
+#define K_VertOriginY 140
+#define K_VertAdvanceY 141
+#define T_FONTREV 142
+#define T_NUMEXT 143
+#define T_NUM 144
+#define T_GCLASS 145
+#define T_CID 146
+#define T_GNAME 147
+#define T_STRING 148
 
 #ifdef __USE_PROTOS
 extern GID glyph(char* tok, int allowNotdef);
@@ -160,6 +169,12 @@ extern short parameterValue();
 extern unsigned numUInt16Ext(void);
 #else
 extern unsigned numUInt16Ext();
+#endif
+
+#ifdef __USE_PROTOS
+extern int32_t numInt32Ext(void);
+#else
+extern int32_t numInt32Ext();
 #endif
 
 #ifdef __USE_PROTOS
@@ -274,6 +289,18 @@ extern void position();
 void parameters(void);
 #else
 extern void parameters();
+#endif
+
+struct _rv28 {
+    long plat;
+    long spec;
+    long lang;
+};
+
+#ifdef __USE_PROTOS
+extern struct _rv28 nameEntry(void);
+#else
+extern struct _rv28 nameEntry();
 #endif
 
 #ifdef __USE_PROTOS
@@ -409,6 +436,68 @@ extern void table_OS_2();
 #endif
 
 #ifdef __USE_PROTOS
+void statNameEntry(void);
+#else
+extern void statNameEntry();
+#endif
+
+#ifdef __USE_PROTOS
+void designAxis(void);
+#else
+extern void designAxis();
+#endif
+
+#ifdef __USE_PROTOS
+void axisValueFlag(uint16_t* flags);
+#else
+extern void axisValueFlag();
+#endif
+
+#ifdef __USE_PROTOS
+extern uint16_t axisValueFlags(void);
+#else
+extern uint16_t axisValueFlags();
+#endif
+
+struct _rv55 {
+    uint16_t format;
+    Tag tag;
+    Fixed value;
+    Fixed min;
+    Fixed max;
+};
+
+#ifdef __USE_PROTOS
+extern struct _rv55 axisValueLocation(void);
+#else
+extern struct _rv55 axisValueLocation();
+#endif
+
+#ifdef __USE_PROTOS
+void axisValue(void);
+#else
+extern void axisValue();
+#endif
+
+#ifdef __USE_PROTOS
+void elidedFallbackName(void);
+#else
+extern void elidedFallbackName();
+#endif
+
+#ifdef __USE_PROTOS
+void elidedFallbackNameID(void);
+#else
+extern void elidedFallbackNameID();
+#endif
+
+#ifdef __USE_PROTOS
+void table_STAT(void);
+#else
+extern void table_STAT();
+#endif
+
+#ifdef __USE_PROTOS
 extern GNode* glyphClassOptional(void);
 #else
 extern GNode* glyphClassOptional();
@@ -479,7 +568,6 @@ void featureFile(void);
 #else
 extern void featureFile();
 #endif
-
 extern SetWordType zzerr1[];
 extern SetWordType zzerr2[];
 extern SetWordType zzerr3[];
@@ -525,68 +613,74 @@ extern SetWordType zzerr36[];
 extern SetWordType zzerr37[];
 extern SetWordType zzerr38[];
 extern SetWordType zzerr39[];
-extern SetWordType zzerr40[];
 extern SetWordType setwd7[];
+extern SetWordType zzerr40[];
 extern SetWordType zzerr41[];
 extern SetWordType zzerr42[];
 extern SetWordType zzerr43[];
-extern SetWordType zzerr44[];
 extern SetWordType setwd8[];
+extern SetWordType zzerr44[];
 extern SetWordType zzerr45[];
 extern SetWordType zzerr46[];
 extern SetWordType zzerr47[];
 extern SetWordType zzerr48[];
 extern SetWordType zzerr49[];
-extern SetWordType zzerr50[];
 extern SetWordType setwd9[];
+extern SetWordType zzerr50[];
 extern SetWordType zzerr51[];
 extern SetWordType zzerr52[];
 extern SetWordType zzerr53[];
 extern SetWordType zzerr54[];
-extern SetWordType zzerr55[];
 extern SetWordType setwd10[];
+extern SetWordType zzerr55[];
 extern SetWordType zzerr56[];
 extern SetWordType zzerr57[];
 extern SetWordType zzerr58[];
 extern SetWordType zzerr59[];
-extern SetWordType zzerr60[];
 extern SetWordType setwd11[];
+extern SetWordType zzerr60[];
 extern SetWordType zzerr61[];
 extern SetWordType zzerr62[];
 extern SetWordType zzerr63[];
 extern SetWordType zzerr64[];
 extern SetWordType zzerr65[];
-extern SetWordType zzerr66[];
 extern SetWordType setwd12[];
+extern SetWordType zzerr66[];
 extern SetWordType zzerr67[];
 extern SetWordType zzerr68[];
-extern SetWordType zzerr69[];
 extern SetWordType setwd13[];
+extern SetWordType zzerr69[];
 extern SetWordType zzerr70[];
 extern SetWordType zzerr71[];
 extern SetWordType zzerr72[];
 extern SetWordType zzerr73[];
 extern SetWordType zzerr74[];
-extern SetWordType zzerr75[];
 extern SetWordType setwd14[];
+extern SetWordType zzerr75[];
 extern SetWordType zzerr76[];
 extern SetWordType zzerr77[];
 extern SetWordType zzerr78[];
-extern SetWordType zzerr79[];
 extern SetWordType setwd15[];
+extern SetWordType zzerr79[];
 extern SetWordType zzerr80[];
 extern SetWordType zzerr81[];
 extern SetWordType zzerr82[];
-extern SetWordType zzerr83[];
 extern SetWordType setwd16[];
+extern SetWordType zzerr83[];
 extern SetWordType zzerr84[];
 extern SetWordType zzerr85[];
 extern SetWordType zzerr86[];
+extern SetWordType setwd17[];
 extern SetWordType zzerr87[];
 extern SetWordType zzerr88[];
 extern SetWordType zzerr89[];
-extern SetWordType setwd17[];
 extern SetWordType zzerr90[];
+extern SetWordType zzerr91[];
 extern SetWordType setwd18[];
+extern SetWordType zzerr92[];
+extern SetWordType zzerr93[];
+extern SetWordType zzerr94[];
+extern SetWordType setwd19[];
+extern SetWordType setwd20[];
 
 #endif /* feattoks_h */

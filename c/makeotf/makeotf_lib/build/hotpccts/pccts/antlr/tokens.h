@@ -167,7 +167,6 @@ void enum_def(char * fname);
 extern void enum_def();
 #endif
 
-#endif
 extern SetWordType zzerr1[];
 extern SetWordType zzerr2[];
 extern SetWordType zzerr3[];
@@ -244,3 +243,5 @@ extern SetWordType zzerr64[];
 extern SetWordType zzerr65[];
 extern SetWordType setwd10[];
 extern SetWordType setwd11[];
+
+#endif

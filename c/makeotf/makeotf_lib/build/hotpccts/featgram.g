@@ -13,8 +13,8 @@
 
 #include <stdlib.h>	/* For exit in err.h xxx */
 #include <string.h>
-
 #include <stdio.h>
+#include <limits.h>
 
 #include "common.h"
 #include "feat.h"
@@ -139,7 +139,7 @@ hotCtx g;
 #token	"\r\n"		<<zzskip(); zzline++;>>
 #token	"[\r\n]"	<<zzskip(); zzline++;>>
 
-#token "[\0x20-\0x7E]"  <<featAddNameStringChar(zzlextext[0]); zzskip();>>
+#token "[\0x20-\0x7E\0x80-\0xF7]"  <<featAddNameStringChar(zzlextext[0]); zzskip();>>
 
 #lexclass START // ------------------------------------------------------------
 
@@ -266,6 +266,16 @@ hotCtx g;
 #token K_WidthClass		"WidthClass"
 #token K_Vendor			"Vendor"
 
+#token K_STAT						"STAT"		/* Added tag to list in zzcr_attr() */
+#token K_ElidedFallbackName			"ElidedFallbackName"
+#token K_ElidedFallbackNameID		"ElidedFallbackNameID"
+#token K_DesignAxis					"DesignAxis"	<<zzmode(TAG_MODE);>>
+#token K_AxisValue					"AxisValue"
+#token K_flag						"flag"
+#token K_location					"location"		<<zzmode(TAG_MODE);>>
+#token K_ElidableAxisValueName		"ElidableAxisValueName"
+#token K_OlderSiblingFontAttribute	"OlderSiblingFontAttribute"
+
 #token K_vhea               "vhea"		/* Added tag to list in zzcr_attr() */
 #token K_VertTypoAscender	"VertTypoAscender"
 #token K_VertTypoDescender	"VertTypoDescender"
@@ -276,7 +286,7 @@ hotCtx g;
 #token K_VertAdvanceY		"VertAdvanceY"
 
 #token T_FONTREV	"[0-9]+.[0-9]+"
-#token T_NUMEXT		"0x[0-9a-fA-F]+|0[0-7]+"
+#token T_NUMEXT		"({\-}0x[0-9a-fA-F]+)|0[0-7]+"
 #token T_NUM		"({\-}[1-9][0-9]*)|0"
 
 #token T_GCLASS  	"\@[A-Za-z_0-9.\-]+"
@@ -449,6 +459,23 @@ numUInt16Ext>[unsigned value]
 					if ($n.lval < 0 || $n.lval > 65535)
 						zzerr("not in range 0 .. 65535");
 					$value = (unsigned)($n).lval;
+					>>
+	;
+
+/* Extended format: hex, oct also allowed */
+numInt32Ext>[int32_t value]
+	:	<<$value = 0; /* Suppress optimizer warning */
+		  h->linenum = zzline;>>
+		m:T_NUMEXT	<<
+					if ($m.lval < INT_MIN || $m.lval > INT_MAX)
+						zzerr("not in range -(1<<31) .. ((1<<31) -1)");
+					$value = (int32_t)($m).lval;
+					>>
+		|
+		n:T_NUM		<<
+					if ($n.lval < INT_MIN || $n.lval > INT_MAX)
+						zzerr("not in range -(1<<31) .. ((1<<31) -1)");
+					$value = (int32_t)($n).lval;
 					>>
 	;
 
@@ -715,7 +742,7 @@ pattern[int markedOK]>[GNode *pat]
 						zzerr("cannot mark a replacement glyph pattern");
 				>>
 			}
-			{
+			(
 				K_lookup
 				t:T_LABEL
 					<<
@@ -725,11 +752,14 @@ pattern[int markedOK]>[GNode *pat]
 						zzerr("Glyph or glyph class must precede a lookup reference in a contextual rule.");
 						
 					labelIndex = featGetLabelIndex($t.text);
-					(*insert)->lookupLabel = labelIndex;
+					(*insert)->lookupLabels[(*insert)->lookupLabelCount] = labelIndex;
+					(*insert)->lookupLabelCount++;
+					if ((*insert)->lookupLabelCount > 255)
+						zzerr("Too many lookup references in one glyph position.");
 					$pat->flags |= FEAT_LOOKUP_NODE; /* used to flag that lookup key was used.  */
 					}
 					>>
-			}
+			)*
 			<<insert = &(*insert)->nextSeq;
 			>>
 		)+
@@ -998,6 +1028,7 @@ position
 			)
 			|
 			(
+			  (
 				K_lookup 		<<labelLine = zzline;>>
 				t:T_LABEL
 					<<
@@ -1005,14 +1036,18 @@ position
 						zzerr("Glyph or glyph class must precede a lookup reference in a contextual rule.");
 						
 					labelIndex = featGetLabelIndex($t.text);
-					ruleHead->lookupLabel = labelIndex;
+					ruleHead->lookupLabels[ruleHead->lookupLabelCount] = labelIndex;
+					ruleHead->lookupLabelCount++;
+					if (ruleHead->lookupLabelCount > 255)
+						zzerr("Too many lookup references in one glyph position.");
 					type = 0;
 					ruleHead = lastNodeP;
 					type = GPOSChain;
 					>>
+				)+
 				(
 					pattern3[&ruleHead]>[lastNodeP] <<ruleHead = lastNodeP;>>
-					{
+					(
 						K_lookup 		<<labelLine = zzline;>>
 						t2:T_LABEL
 							<<
@@ -1020,10 +1055,13 @@ position
 								zzerr("Glyph or glyph class must precede a lookup reference in a contextual rule.");
 								
 							labelIndex = featGetLabelIndex($t2.text);
-							ruleHead->lookupLabel = labelIndex;
+							ruleHead->lookupLabels[ruleHead->lookupLabelCount] = labelIndex;
+							ruleHead->lookupLabelCount++;
+							if (ruleHead->lookupLabelCount > 255)
+								zzerr("Too many lookup references in one glyph position.");
 							ruleHead = lastNodeP;
 							>>
-					}
+					)*
 				)*
             )
 			|
@@ -1092,37 +1130,43 @@ parameters
 					)+
 					<<addFeatureParam(g, params, index);>>
 	;
-	
-featureNameEntry
-	:	
+
+nameEntry>[long plat, long spec, long lang]
+	:
 		<<
-		long plat = -1;		/* Suppress optimizer warning */
-		long spec = -1;		/* Suppress optimizer warning */
-		long lang = -1;		/* Suppress optimizer warning */
-		
+		$plat = -1;		/* Suppress optimizer warning */
+		$spec = -1;		/* Suppress optimizer warning */
+		$lang = -1;		/* Suppress optimizer warning */
+
 		h->nameString.cnt = 0;
 		>>
 		(
 			K_name					
 			{
-				numUInt16Ext>[plat]
+				numUInt16Ext>[$plat]
 					<<
-					if (plat != HOT_NAME_MS_PLATFORM &&
-						plat != HOT_NAME_MAC_PLATFORM)
+					if ($plat != HOT_NAME_MS_PLATFORM &&
+						$plat != HOT_NAME_MAC_PLATFORM)
 						hotMsg(g, hotFATAL,
 							   "platform id must be %d or %d [%s %d]",
 							   HOT_NAME_MS_PLATFORM, HOT_NAME_MAC_PLATFORM,
 							   INCL.file, h->linenum);
 					>>
 					{
-					numUInt16Ext>[spec]
-					numUInt16Ext>[lang]
+					numUInt16Ext>[$spec]
+					numUInt16Ext>[$lang]
 					}
 			}
 			T_STRING
 			";"
 		)
-	<< addFeatureNameString(plat, spec, lang);>>
+	;
+
+featureNameEntry
+	:
+		<< long plat, spec, lang; >>
+		nameEntry>[plat, spec, lang]
+		<< addFeatureNameString(plat, spec, lang);>>
 	;
 
 featureNames
@@ -1915,6 +1959,143 @@ table_OS_2
 		";"
 	;
 
+statNameEntry
+	:
+		<< long plat, spec, lang; >>
+		nameEntry>[plat, spec, lang]
+		<< addUserNameString(plat, spec, lang);>>
+	;
+
+designAxis
+	:
+		<<
+		uint16_t ordering;
+		h->featNameID = 0;
+		>>
+		K_DesignAxis t:T_TAG numUInt16>[ordering]
+		"\{"
+			(statNameEntry)+
+		"\}"
+		<<
+		STATAddDesignAxis(g, $t.ulval, h->featNameID, ordering);
+		h->featNameID = 0;
+		>>
+	;
+
+axisValueFlag[uint16_t *flags]
+	:
+		K_ElidableAxisValueName     << *flags |= 0x0001; >>
+		|
+		K_OlderSiblingFontAttribute << *flags |= 0x0002; >>
+	;
+
+axisValueFlags>[uint16_t flags]
+	:
+		<< $flags = 0; >>
+		K_flag (axisValueFlag[&$flags])+
+		";"
+	;
+
+axisValueLocation>[uint16_t format, Tag tag, Fixed value, Fixed min, Fixed max]
+	:
+		K_location t:T_TAG << $tag = $t.ulval; >> numInt32Ext>[$value]
+		( ";" << $format = 1; >>
+		| numInt32Ext>[$min] << $format = 3; >>
+		  {"\-" numInt32Ext>[$max] << $format = 2; >> } ";"
+		)
+	;
+
+axisValue
+	:
+		<<
+		uint16_t flags = 0;
+		uint16_t format = 0, prev = 0;
+		dnaDCL(Tag, axisTags);
+		dnaDCL(Fixed, values);
+		Fixed value, min, max;
+		Tag axisTag;
+		h->featNameID = 0;
+		dnaINIT(g->dnaCtx, axisTags, 1, 5);
+		dnaINIT(g->dnaCtx, values, 1, 5);
+		>>
+		K_AxisValue
+		"\{"
+			( statNameEntry
+			| axisValueFlags>[flags]
+			| axisValueLocation>[format, axisTag, value, min, max]
+			  <<
+			  if (prev && (prev != 1 || format != prev))
+				zzerr("AxisValue with unsupported multiple location statements");
+			  *dnaNEXT(axisTags) = axisTag;
+			  *dnaNEXT(values) = value;
+			  prev = format;
+			  >>
+			)+
+		"\}"
+		<<
+		if (!format)
+			zzerr("AxisValue missing location statement");
+		if (!h->featNameID)
+			zzerr("AxisValue missing name entry");
+		STATAddAxisValueTable(g, format, axisTags.array, values.array,
+				      values.cnt, flags, h->featNameID,
+				      min, max);
+		dnaFREE(axisTags);
+		dnaFREE(values);
+		>>
+	;
+
+elidedFallbackName
+	:
+		<<
+		long plat, spec, lang;
+		h->featNameID = 0;
+		>>
+		K_ElidedFallbackName
+		"\{"
+			(
+				nameEntry>[plat, spec, lang]
+				<< addUserNameString(plat, spec, lang); >>
+			)+
+		"\}"
+		<<
+		if (!STATSetElidedFallbackNameID(g, h->featNameID))
+			zzerr("ElidedFallbackName already defined.");
+		h->featNameID = 0;
+		>>
+	;
+
+elidedFallbackNameID
+	:
+		<< long nameID; >>
+		K_ElidedFallbackNameID numUInt16Ext>[nameID]
+		<<
+		if (!STATSetElidedFallbackNameID(g, nameID))
+			zzerr("ElidedFallbackName already defined.");
+		>>
+	;
+
+table_STAT
+	: t:K_STAT			<<checkTag($t.ulval, tableTag, 1);>>
+		"\{"
+		(
+			(
+			designAxis
+			|
+			axisValue
+			|
+			elidedFallbackName
+			|
+			elidedFallbackNameID
+			|
+			)
+			";"
+		)+
+		"\}"			<<zzmode(TAG_MODE);>>
+		u:T_TAG			<<checkTag($u.ulval, tableTag, 0);>>
+		";"
+	;
+
 glyphClassOptional>[GNode *gnode]
 	:	<<$gnode = NULL;>> /* Suppress optimizer warning */
 
@@ -2119,6 +2300,7 @@ tableBlock
 		|	table_hhea
 		|	table_name
 		|	table_OS_2
+		|	table_STAT
 		|	table_vhea
 		|	table_vmtx
 		)

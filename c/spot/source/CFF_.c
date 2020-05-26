@@ -119,6 +119,7 @@ static char *syntheticGlyphs[] = {"Delta", "Euro", "Omega", "approxequal", "asci
                                   "quotesingle", "radical", "section", "summation", "threequarters", ""};
 #define NUM_SYN_GLYPHS 46
 
+#define WORKSTR_BUF_SIZE 1024
 static Byte8 *workstr = NULL;
 
 static void CFFfatal(void *ctx) {
@@ -301,7 +302,7 @@ void CFF_Read(LongN start, Card32 length) {
     CFF_.dumpcb.hintstem = NULL;
     CFF_.dumpcb.hintmask = NULL;
 
-    workstr = (Byte8 *)memNew(sizeof(Byte8) * 256);
+    workstr = (Byte8 *)memNew(WORKSTR_BUF_SIZE);
     loaded = 1;
 }
 
@@ -327,7 +328,7 @@ static void drawSingleInit(void) {
                                    10.0, unitsPerEm,
                                    1, 1, "CFF_");
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "/cntlpt {gsave newpath %g 0 360 arc fill grestore} bind def\n"
             "/arrow {\n"
             "newpath 0 0 moveto -15 -5 rlineto 0 10 rlineto closepath fill\n"
@@ -358,14 +359,14 @@ static void drawText(GlyphId glyphId, IntX lsb, IntX rsb, IntX width) {
     nowstr = sysOurtime();
     cffgi = cffGetGlyphInfo(CFF_.cff, glyphId, NULL);
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "/Helvetica findfont 12 scalefont setfont\n"
             "72 764 moveto (Outline Instructions:  CFF/Type2) show\n"
             "318 764 moveto (%s) show\n",
             nowstr);
     proofPSOUT(cffproofctx, workstr);
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "72 750 moveto (%s  %s  [@%u]) show\n"
             "gsave\n"
             "newpath 72 745 moveto 504 0 rlineto 2 setlinewidth stroke\n"
@@ -374,7 +375,7 @@ static void drawText(GlyphId glyphId, IntX lsb, IntX rsb, IntX width) {
     proofPSOUT(cffproofctx, workstr);
 
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "318 96 moveto (BBox:  min = %.0f, %.0f  max = %.0f, %.0f) show\n"
             "318 84 moveto "
             "(SideBearings:  L = %.0f  R = %.0f  Width = %.0f) show\n",
@@ -383,7 +384,7 @@ static void drawText(GlyphId glyphId, IntX lsb, IntX rsb, IntX width) {
             round(OUTPUT(h, lsb)), round(OUTPUT(h, rsb)), round(OUTPUT(h, width)));
     proofPSOUT(cffproofctx, workstr);
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "318 72 moveto "
             "(Parts:  mt = %d  dt = %d  ct = %d Total = %d) show\n"
             "318 60 moveto (Paths:  %d  Labels:  %s%d units/em) show\n"
@@ -432,7 +433,7 @@ static void newPage(IntX page) {
     /* Initialize synopsis mode */
     workstr[0] = '\0';
     if (opt_Present("-br")) {
-        sprintf(workstr,
+        snprintf(workstr, WORKSTR_BUF_SIZE,
                 "%% page %hu\n"
                 "<</PageSize [%g %g]>> setpagedevice\n"
                 "%g %g translate\n"
@@ -443,7 +444,7 @@ static void newPage(IntX page) {
                 INCH(0.125), INCH(0.125),
                 TILE_HEIGHT + 9);
     } else {
-        sprintf(workstr,
+        snprintf(workstr, WORKSTR_BUF_SIZE,
                 "%% page %hu\n"
                 "%g %g translate\n"
                 "/Helvetica findfont 12 scalefont setfont\n"
@@ -466,13 +467,13 @@ static void newPage(IntX page) {
 
     if (OUTPUT(h, unitsPerEm) == 1000) {
         if (opt_Present("-br"))
-            sprintf(workstr,
+            snprintf(workstr, WORKSTR_BUF_SIZE,
                     "%g (%hu) stringwidth pop sub %g moveto\n"
                     "/Helvetica-Narrow findfont %d scalefont setfont\n",
                     PAGE_WIDTH, synopsis.page, PAGE_HEIGHT + 9,
                     TEXT_SIZE);
         else if (opt_Present("-d"))
-            sprintf(workstr,
+            snprintf(workstr, WORKSTR_BUF_SIZE,
                     "(  [%s] ) show\n"
                     "%g (%hu) stringwidth pop sub %g moveto (%hu) show\n"
                     "/Helvetica-Narrow findfont %d scalefont setfont\n",
@@ -480,7 +481,7 @@ static void newPage(IntX page) {
                     PAGE_WIDTH, synopsis.page, PAGE_HEIGHT + 9, synopsis.page,
                     TEXT_SIZE);
         else
-            sprintf(workstr,
+            snprintf(workstr, WORKSTR_BUF_SIZE,
                     "(CFF:%s  head vers: %.3f   %s) show\n"
                     "%g (%hu) stringwidth pop sub %g moveto (%hu) show\n"
                     "/Helvetica-Narrow findfont %d scalefont setfont\n",
@@ -489,13 +490,13 @@ static void newPage(IntX page) {
                     TEXT_SIZE);
     } else {
         if (opt_Present("-br"))
-            sprintf(workstr,
+            snprintf(workstr, WORKSTR_BUF_SIZE,
                     "%g (%hu) stringwidth pop sub %g moveto\n"
                     "/Helvetica-Narrow findfont %d scalefont setfont\n",
                     PAGE_WIDTH, synopsis.page, PAGE_HEIGHT + 9,
                     TEXT_SIZE);
         else if (opt_Present("-d"))
-            sprintf(workstr,
+            snprintf(workstr, WORKSTR_BUF_SIZE,
                     "(Widths: %.0f units/em   [%s] ) show\n"
                     "%g (%hu) stringwidth pop sub %g moveto (%hu) show\n"
                     "/Helvetica-Narrow findfont %d scalefont setfont\n",
@@ -503,7 +504,7 @@ static void newPage(IntX page) {
                     PAGE_WIDTH, synopsis.page, PAGE_HEIGHT + 9, synopsis.page,
                     TEXT_SIZE);
         else
-            sprintf(workstr,
+            snprintf(workstr, WORKSTR_BUF_SIZE,
                     "(CFF:%s  head vers: %.3f  Widths: %.0f units/em   %s) show\n"
                     "%g (%hu) stringwidth pop sub %g moveto (%hu) show\n"
                     "/Helvetica-Narrow findfont %d scalefont setfont\n",
@@ -526,7 +527,7 @@ static void gcrnewPage(IntX page) {
 
     /* Initialize synopsis mode */
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "%% page %hu\n"
             "<</PageSize [%d %d]>> setpagedevice\n"
             "%g %g translate\n"
@@ -540,7 +541,7 @@ static void gcrnewPage(IntX page) {
     proofPSOUT(cffproofctx, workstr);
     workstr[0] = '\0';
 
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "%d (%hu) stringwidth pop sub %d moveto (%hu) show\n"
             "/Helvetica-Narrow findfont %d scalefont setfont\n",
             synopsis.pagewidth, synopsis.page, synopsis.pageheight + ((Card32)9), synopsis.page,
@@ -591,11 +592,11 @@ static void CFFproofFontName() {
 
     headGetFontRevision(&fontRevision, 0);
 
-    sprintf(workstr, "/Helvetica-Narrow findfont %d scalefont setfont\n", 10);
+    snprintf(workstr, WORKSTR_BUF_SIZE, "/Helvetica-Narrow findfont %d scalefont setfont\n", 10);
 
     proofPSOUT(cffproofctx, workstr);
 
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "%d %g moveto (%s) show\n"
             "%d %g moveto (%s) show\n"
             "%d %g moveto (Rev.%.3f) show\n",
@@ -605,7 +606,7 @@ static void CFFproofFontName() {
 
     proofPSOUT(cffproofctx, workstr);
 
-    sprintf(workstr, "/Helvetica-Narrow findfont %d scalefont setfont\n", TEXT_SIZE);
+    snprintf(workstr, WORKSTR_BUF_SIZE, "/Helvetica-Narrow findfont %d scalefont setfont\n", TEXT_SIZE);
 
     proofPSOUT(cffproofctx, workstr);
 
@@ -652,7 +653,7 @@ static void drawTic(IntX marks, Pelt A) {
         v.y = -u.x * PTS(v, 5.5);
 
         workstr[0] = '\0';
-        sprintf(workstr,
+        snprintf(workstr, WORKSTR_BUF_SIZE,
                 "gsave %% tic\n"
                 "newpath\n"
                 "%g %g moveto\n"
@@ -663,17 +664,17 @@ static void drawTic(IntX marks, Pelt A) {
         y = (v.y > 0.0) ? 0.0 : -(PTS(v, NUMERIC_LABEL_SIZE) * 2.0) / 3.0;
         if (v.x >= 0.0) {
             workstr[0] = '\0';
-            sprintf(workstr, "0 %g rmoveto\n", y);
+            snprintf(workstr, WORKSTR_BUF_SIZE, "0 %g rmoveto\n", y);
             proofPSOUT(cffproofctx, workstr);
         } else {
             workstr[0] = '\0';
-            sprintf(workstr, "(%.0f %.0f) stringwidth pop neg %g rmoveto\n",
+            snprintf(workstr, WORKSTR_BUF_SIZE, "(%.0f %.0f) stringwidth pop neg %g rmoveto\n",
                     round(OUTPUT(h, Bx)), round(OUTPUT(v, By)), y);
             proofPSOUT(cffproofctx, workstr);
         }
 
         workstr[0] = '\0';
-        sprintf(workstr,
+        snprintf(workstr, WORKSTR_BUF_SIZE,
                 "(%.0f %.0f) show\n"
                 "0 setlinewidth stroke\n"
                 "grestore %% tic\n",
@@ -689,7 +690,7 @@ static void setMatrix(Pelt last, double x, double y) {
     double hyp = sqrt(dx * dx + dy * dy);
 
     workstr[0] = '\0';
-    sprintf(workstr, "[%g %g %g %g %g %g] concat\n",
+    snprintf(workstr, WORKSTR_BUF_SIZE, "[%g %g %g %g %g %g] concat\n",
             STD2FNT(h, dx / hyp), STD2FNT(v, dy / hyp),
             -STD2FNT(v, dy / hyp), STD2FNT(h, dx / hyp), x, y);
     proofPSOUT(cffproofctx, workstr);
@@ -717,7 +718,7 @@ static void drawCurveClosePath(IntX marks, Pelt last, Pelt p) {
 static void drawCntlPoint(IntX marks, IntX x, IntX y) {
     if (marks) {
         workstr[0] = '\0';
-        sprintf(workstr, "%d %d cntlpt\n", x, y);
+        snprintf(workstr, WORKSTR_BUF_SIZE, "%d %d cntlpt\n", x, y);
         proofPSOUT(cffproofctx, workstr);
     }
 }
@@ -727,7 +728,7 @@ static void drawCross(IntX dataOrig, double x, double y) {
     double length = PTS(h, 25.0);
 
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "%% width cross\n"
             "gsave\n"
             "newpath\n"
@@ -743,7 +744,7 @@ static void drawCross(IntX dataOrig, double x, double y) {
 
     if (dataOrig) {
         workstr[0] = '\0';
-        sprintf(workstr, "[%g %g] 0 setdash\n",
+        snprintf(workstr, WORKSTR_BUF_SIZE, "[%g %g] 0 setdash\n",
                 PTS(h, 0.3), PTS(h, 2.0));
         proofPSOUT(cffproofctx, workstr);
     }
@@ -765,7 +766,7 @@ static void CFFdrawGlyph(GlyphId glyphId, IntX marks, IntX fill) {
     int dx1, dy1, dx2, dy2;
 
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "%% drawPath(%hu)\n"
             "newpath\n",
             glyphId);
@@ -827,7 +828,7 @@ static void CFFdrawGlyph(GlyphId glyphId, IntX marks, IntX fill) {
     }
 
     workstr[0] = '\0';
-    sprintf(workstr, "0 setlinewidth %s\n", fill ? "fill" : "stroke");
+    snprintf(workstr, WORKSTR_BUF_SIZE, "0 setlinewidth %s\n", fill ? "fill" : "stroke");
     proofPSOUT(cffproofctx, workstr);
     free_Outlines(&dumpOutline);
 }
@@ -839,7 +840,7 @@ static void drawOutline(GlyphId glyphId, IntX origShift, IntX width) {
     double v = scale.v * 500.0 / unitsPerEm;
 
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "gsave\n"
             "%g 300 translate\n"
             "%g %g scale\n"
@@ -861,7 +862,7 @@ static void drawFilled(GlyphId glyphId, IntX origShift, IntX width) {
     double v = (scale.v * 5.0 * 72) / (2.54 * unitsPerEm);
 
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "gsave\n"
             "%g 60 translate\n"
             "%g %g scale\n",
@@ -883,7 +884,7 @@ static void drawSingle(GlyphId glyphId) {
     Byte8 *name = getGlyphName(glyphId, 1);
 
     workstr[0] = '\0';
-    sprintf(workstr, "%% SINGLE PLOT OF:  %s\n", name);
+    snprintf(workstr, WORKSTR_BUF_SIZE, "%% SINGLE PLOT OF:  %s\n", name);
     proofPSOUT(cffproofctx, workstr);
     CFF_getMetrics(glyphId, &origShift, &lsb, &rsb, &hwidth, &tsb, &bsb, &vwidth, NULL);
 
@@ -1071,14 +1072,14 @@ int CFF_DrawTile(GlyphId glyphId, Byte8 *code) {
 
     /* Draw box and width */
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "newpath\n"
             "%g %g moveto %g 0 rlineto 0 -%g rlineto -%g 0 rlineto\n",
             synopsis.hTile, synopsis.vTile,
             TILE_WIDTH, TILE_HEIGHT, TILE_WIDTH);
     proofPSOUT(cffproofctx, workstr);
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "closepath 0 setlinewidth stroke\n"
             "%g (%.0f) stringwidth pop sub %g moveto (%.0f) show\n",
             synopsis.hTile + TILE_WIDTH - 1, round(OUTPUT(h, width)),
@@ -1087,24 +1088,24 @@ int CFF_DrawTile(GlyphId glyphId, Byte8 *code) {
 
     /* Draw [code/]glyphId */
     workstr[0] = '\0';
-    sprintf(workstr, "%g %g moveto\n",
+    snprintf(workstr, WORKSTR_BUF_SIZE, "%g %g moveto\n",
             synopsis.hTile + 1, synopsis.vTile - (TEXT_BASE + 1));
     proofPSOUT(cffproofctx, workstr);
 
     if (code == NULL) {
         workstr[0] = '\0';
-        sprintf(workstr, "(%hu) show\n", glyphId);
+        snprintf(workstr, WORKSTR_BUF_SIZE, "(%hu) show\n", glyphId);
         proofPSOUT(cffproofctx, workstr);
     } else {
         workstr[0] = '\0';
-        sprintf(workstr, "(%s/%hu) show\n", code, glyphId);
+        snprintf(workstr, WORKSTR_BUF_SIZE, "(%s/%hu) show\n", code, glyphId);
         proofPSOUT(cffproofctx, workstr);
     }
 
     if (name[0] != '@') {
         /* Draw glyph name */
         workstr[0] = '\0';
-        sprintf(workstr, "%g %g moveto (%s) show\n",
+        snprintf(workstr, WORKSTR_BUF_SIZE, "%g %g moveto (%s) show\n",
                 synopsis.hTile + 1,
                 synopsis.vTile - TILE_HEIGHT + TEXT_SIZE / 3.0,
                 name);
@@ -1114,7 +1115,7 @@ int CFF_DrawTile(GlyphId glyphId, Byte8 *code) {
     delt = (MARGIN_HEIGHT + (double)font.yMax / (font.yMax - font.yMin) * GLYPH_SIZE);
 
     workstr[0] = '\0';
-    sprintf(workstr,
+    snprintf(workstr, WORKSTR_BUF_SIZE,
             "gsave\n"
             "%g %g translate\n"
             "%g %g scale\n",

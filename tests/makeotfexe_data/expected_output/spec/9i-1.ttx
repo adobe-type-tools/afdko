@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont>
+
+  <name>
+    <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      1.000;UKWN;Untitled1
+    </namerecord>
+    <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
+
+    </namerecord>
+    <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
+      1.000;UKWN;Untitled1
+    </namerecord>
+    <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
+
+    </namerecord>
+    <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
+      Untitled1
+    </namerecord>
+    <namerecord nameID="256" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="257" platformID="3" platEncID="1" langID="0x409">
+      Weight
+    </namerecord>
+    <namerecord nameID="258" platformID="3" platEncID="1" langID="0x409">
+      Italic
+    </namerecord>
+    <namerecord nameID="259" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="260" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="261" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="262" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="263" platformID="3" platEncID="1" langID="0x409">
+      Mediumitalic
+    </namerecord>
+    <namerecord nameID="259" platformID="3" platEncID="1" langID="0x411">
+      定期的
+    </namerecord>
+  </name>
+
+  <STAT>
+    <Version value="0x00010002"/>
+    <DesignAxisRecordSize value="8"/>
+    <!-- DesignAxisCount=2 -->
+    <DesignAxisRecord>
+      <Axis index="0">
+        <AxisTag value="wght"/>
+        <AxisNameID value="257"/>  <!-- Weight -->
+        <AxisOrdering value="0"/>
+      </Axis>
+      <Axis index="1">
+        <AxisTag value="ital"/>
+        <AxisNameID value="258"/>  <!-- Italic -->
+        <AxisOrdering value="1"/>
+      </Axis>
+    </DesignAxisRecord>
+    <!-- AxisValueCount=5 -->
+    <AxisValueArray>
+      <AxisValue index="0" Format="1">
+        <AxisIndex value="0"/>
+        <Flags value="1"/>
+        <ValueNameID value="259"/>  <!-- Regular -->
+        <Value value="0.0061"/>
+      </AxisValue>
+      <AxisValue index="1" Format="2">
+        <AxisIndex value="0"/>
+        <Flags value="1"/>
+        <ValueNameID value="260"/>  <!-- Regular -->
+        <NominalValue value="0.0061"/>
+        <RangeMinValue value="0.00458"/>
+        <RangeMaxValue value="0.00763"/>
+      </AxisValue>
+      <AxisValue index="2" Format="3">
+        <AxisIndex value="0"/>
+        <Flags value="1"/>
+        <ValueNameID value="261"/>  <!-- Regular -->
+        <Value value="0.0061"/>
+        <LinkedValue value="0.01068"/>
+      </AxisValue>
+      <AxisValue index="3" Format="3">
+        <AxisIndex value="1"/>
+        <Flags value="1"/>
+        <ValueNameID value="262"/>  <!-- Regular -->
+        <Value value="0.0"/>
+        <LinkedValue value="0.00002"/>
+      </AxisValue>
+      <AxisValue index="4" Format="4">
+        <!-- AxisCount=2 -->
+        <Flags value="1"/>
+        <ValueNameID value="263"/>  <!-- Mediumitalic -->
+        <AxisValueRecord index="0">
+          <AxisIndex value="0"/>
+          <Value value="0.00763"/>
+        </AxisValueRecord>
+        <AxisValueRecord index="1">
+          <AxisIndex value="1"/>
+          <Value value="0.00002"/>
+        </AxisValueRecord>
+      </AxisValue>
+    </AxisValueArray>
+    <ElidedFallbackNameID value="256"/>  <!-- Regular -->
+  </STAT>
+
+</ttFont>
