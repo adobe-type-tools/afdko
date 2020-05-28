@@ -13,6 +13,7 @@ import re
 from shutil import copy2
 import sys
 import textwrap
+import warnings
 
 import booleanOperations.booleanGlyph
 import defcon
@@ -21,6 +22,7 @@ from fontTools.ufoLib import UFOWriter, UFOLibError, UFOFormatVersion
 
 from afdko import ufotools
 from afdko.ufotools import (
+    thresholdAttrGlyph,
     kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER,
     kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME,
 )
@@ -118,6 +120,8 @@ class FontFile(object):
             To achieve this, the code below hacks ufoLib to surgically save
             only the processed layer.
             This hack is only performed if the original UFO is format 2.
+
+            NOTE: this is deprecated and will be removed from AFDKO.
             """
             fmt_ver = {
                 1: UFOFormatVersion.FORMAT_1_0,
@@ -134,6 +138,14 @@ class FontFile(object):
                 # Override the UFO's formatVersion. This disguises a UFO2 to
                 # be seen as UFO3 by ufoLib, thus enabling it to write the
                 # layer without raising an error.
+                warn_txt = ("Using a ‘hybrid’ UFO2-as-UFO3 is deprecated and "
+                            "will be removed from AFDKO by the end of 2020. "
+                            "This behavior (hack) was primarily to support "
+                            "older versions of RoboFont which did not support "
+                            "UFO3/layers. RoboFont 3 now supports UFO3 so the "
+                            "hack is no longer required. Please update your "
+                            "toolchain as needed.")
+                warnings.warn(warn_txt, category=FutureWarning)
                 writer._formatVersion = UFOFormatVersion.FORMAT_3_0
 
             glyph_set = writer.getGlyphSet(
@@ -910,6 +922,8 @@ def restore_contour_order(fixed_glyph, original_contours):
     num_contours = len(new_list)
     # Check each extreme for a match.
     if num_contours > 0:
+        # ctr_starts tracks start points per contour
+        ctr_starts = {n: [] for n in range(num_contours)}
         for i in range(num_contours):
             ci, contour = new_list[i]
             max_p = contour.maxP
@@ -933,7 +947,12 @@ def restore_contour_order(fixed_glyph, original_contours):
                                 if (point.x == old_start_point.x) \
                                         and (point.y == old_start_point.y) \
                                         and point.segmentType is not None:
+                                    assert not(ctr_starts[ci]), "Can't happen: duplicated start point!"  # noqa: E501
+                                    # if the above assertion fails, it means
+                                    # coincident points were not correctly
+                                    # removed prior to this method.
                                     contour.setStartPoint(pi)
+                                    ctr_starts[ci].append(pi)
 
                         break
                 if matched:
@@ -1075,7 +1094,14 @@ def run(args=None):
                     for point in contour:
                         point.x = int(round(point.x))
                         point.y = int(round(point.y))
+
+            # JH May 2020: remove overlap can leave some coincident points
+            # we use thresholdAttrGlyph (modified thresholdPen) to remove them
+            # prior to restore_contour_order.
+            thresholdAttrGlyph(fixed_glyph, 1)
+
             restore_contour_order(fixed_glyph, original_contours)
+
         # The following is needed when the script is called from another
         # script with Popen():
         sys.stdout.flush()
