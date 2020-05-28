@@ -6,8 +6,10 @@ import os
 import re
 from collections import OrderedDict
 
+from fontPens.thresholdPen import ThresholdPen
 from fontTools.misc import etree as ET
 from fontTools.misc import plistlib
+from fontTools.pens.recordingPen import RecordingPen
 from fontTools.ufoLib import UFOReader
 
 from psautohint.ufoFont import norm_float
@@ -1081,3 +1083,24 @@ def makeUFOFMNDB(srcFontPath):
     with open(fmndbPath, "w") as fp:
         fp.write(data)
     return fmndbPath
+
+
+def thresholdAttrGlyph(aGlyph, threshold=0):
+    """
+    Like fontPens.thresholdPen.thresholdGlyph, but preserves attributes that
+    get removed by that method (so far, just 'anchors', but can be expanded
+    if needed).
+    """
+    preservedAttrNames = ['anchors']
+    preservedAttrs = {k: getattr(aGlyph, k, None) for k in preservedAttrNames if hasattr(aGlyph, k)}  # noqa: E501
+
+    recorder = RecordingPen()
+    filterpen = ThresholdPen(recorder, threshold)
+    aGlyph.draw(filterpen)
+    aGlyph.clear()
+    recorder.replay(aGlyph.getPen())
+
+    for k, v in preservedAttrs.items():
+        setattr(aGlyph, k, v)
+
+    return aGlyph
