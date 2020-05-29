@@ -1087,20 +1087,40 @@ def makeUFOFMNDB(srcFontPath):
 
 def thresholdAttrGlyph(aGlyph, threshold=0):
     """
-    Like fontPens.thresholdPen.thresholdGlyph, but preserves attributes that
-    get removed by that method (so far, just 'anchors', but can be expanded
-    if needed).
+    Like fontPens.thresholdPen.thresholdGlyph, but preserves some glyph- and
+    point-level attributes that are not preserved by that method.
     """
-    preservedAttrNames = ['anchors']
-    preservedAttrs = {k: getattr(aGlyph, k, None) for k in preservedAttrNames if hasattr(aGlyph, k)}  # noqa: E501
+    # preserve glyph-level attributes
+    attrnames = ['anchors']
+    attrs = {k: getattr(aGlyph, k, None) for k in attrnames if hasattr(aGlyph, k)}  # noqa: E501
 
+    # preserve Point.smooth attributes
+    smoothed = {(ci, (p.x, p.y)): p for ci, p in PointIterator(aGlyph) if p.smooth}  # noqa: E501
+
+    # filter with ThresholdPen into recording pen
     recorder = RecordingPen()
     filterpen = ThresholdPen(recorder, threshold)
     aGlyph.draw(filterpen)
     aGlyph.clear()
     recorder.replay(aGlyph.getPen())
 
-    for k, v in preservedAttrs.items():
+    # restore Point.smooth attributes
+    for ci, p in PointIterator(aGlyph):
+        if (ci, (p.x, p.y)) in smoothed:
+            p.smooth = True
+
+    # restore glyph-level attributes
+    for k, v in attrs.items():
         setattr(aGlyph, k, v)
 
     return aGlyph
+
+
+class PointIterator(object):
+    def __init__(self, aGlyph):
+        self.glyph = aGlyph
+
+    def __iter__(self):
+        for ci, c in enumerate(self.glyph._contours):
+            for p in c._points:
+                yield (ci, p)
