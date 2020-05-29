@@ -88,3 +88,17 @@ def test_remove_overlap_otf():
     actual_ttx = generate_ttx_dump(actual_path, ['CFF '])
     expected_ttx = get_expected_path('font.ttx')
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_bug790():
+    """
+    Test case where the result of overlap removal resulted in coincident points
+    at contour start. Previously caused a crash when attempting to set start
+    point on the second point.
+    """
+    ufoname = 'bug790.ufo'
+    actual_path = get_temp_dir_path(ufoname)
+    copytree(get_input_path(ufoname), actual_path)
+    runner(CMD + ['-f', actual_path, '-o', 'e'])
+    expected_path = get_expected_path(ufoname)
+    assert differ([expected_path, actual_path])
