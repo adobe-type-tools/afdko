@@ -159,3 +159,15 @@ def test_round_glyph_bounds_values_bug128(font_format):
     expected_path = get_expected_path(pdf_filename)
     assert differ([expected_path, save_path,
                    '-s', '/CreationDate', '-e', 'macroman'])
+
+
+def test_fontsetplot_ttf_with_components_bug1125():
+    pdf_filename = "bug1125.pdf"
+    font_path = get_input_path('bug1125.ttf')
+    save_path = get_temp_file_path()
+    runner(['-t', 'fontsetplot', '-o', 'o', f'_{save_path}', 'dno',
+            '=pageIncludeTitle', '_0', f'_{font_path}'])
+    expected_path = get_expected_path(pdf_filename)
+
+    assert(differ([expected_path, save_path,
+                   '-s', '/CreationDate', '-e', 'macroman']))
