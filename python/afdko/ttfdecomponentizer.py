@@ -36,18 +36,18 @@ def get_options(args):
     )
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument(
+        "-d",
+        "--directory",
+        action="store_true",
+        help="indicates that the input is a directory, rather than a file.\n"
+             "The program will process any valid TrueType files in the "
+             "specified directory."
+    )
+    parser.add_argument(
         "-o",
         metavar="OUTPUT_PATH",
         dest="output_path",
         help="path to output TTF file OR directory if -d specified.",
-    )
-    parser.add_argument(
-        "-d",
-        "--directory",
-        action="store_true",
-        help="Indicates that the input is a directory, rather than a file. "
-             "The program will process any valid TrueType files in the "
-             "specified directory."
     )
     parser.add_argument(
         "input_path",
@@ -71,6 +71,8 @@ def get_options(args):
             parser.error(f'{options.input_path} is not a directory.')
         if options.output_path and not output_path_is_dir:
             parser.error(f'{options.output_path} is not a directory')
+        if options.output_path is None:
+            options.output_path = options.input_path
     else:
         if not _validate_font_path(options.input_path):
             parser.error(f'{options.input_path} is not a TTF font file.')
