@@ -115,7 +115,16 @@ def test_options_bogus_option():
     assert exc_info.value.code == 2
 
 
-def test_options_dir():
+def test_options_dir_input():
+    input_dir = get_temp_dir_path()
+    font_path = _get_test_ttf_path()
+    in_font_path = copy2(font_path, input_dir)
+    ttfdecomp.main(['-d', input_dir, '-v'])
+    font = TTFont(in_font_path)
+    assert font['maxp'].maxComponentElements == 0
+
+
+def test_options_dir_input_with_dir_output():
     input_dir = get_temp_dir_path()
     output_dir = get_temp_dir_path()
     font_path = _get_test_ttf_path()
