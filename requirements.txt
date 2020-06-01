@@ -7,7 +7,7 @@ booleanOperations==0.9.0
 cu2qu[cli]==1.6.7
 defcon[pens,lxml]==0.7.2
 fontMath==0.6.0
-fontTools[unicode,lxml,ufo,woff]==4.10.2
+fontTools[woff,ufo,lxml,unicode]==4.11.0
 mutatorMath==3.0.1
 psautohint==2.0.1
 ufonormalizer==0.4.1
