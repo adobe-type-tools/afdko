@@ -5,7 +5,7 @@
 lxml==4.5.1
 booleanOperations==0.9.0
 cu2qu[cli]==1.6.7
-defcon[lxml,pens]==0.6.0
+defcon[pens,lxml]==0.7.2
 fontMath==0.6.0
 fontTools[unicode,lxml,ufo,woff]==4.10.2
 mutatorMath==3.0.1
