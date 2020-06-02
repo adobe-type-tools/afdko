@@ -457,7 +457,7 @@ These named value coordinates can then be used in value records. For example:
 pos T V <SECOND_KERN>;
 ```
 
-Note than when the value record name is used, it must be enclosed by angle
+Note that when the value record name is used, it must be enclosed by angle
 brackets, whether it is a single value or four value record. The
 `valueRecordDef` is a top level statement, and must be defined outside of
 feature blocks. It also must be defined before it is used.
@@ -1696,7 +1696,7 @@ because there is more than one rule in each referenced lookup, and different
 rules within the referenced lookups will match in the different contexts. In the
 first contextual substitution rule, the lookup `CNTXT_LIGS`will be applied at
 the input sequence glyph “f”, and the glyphs “f” and “i” will be replaced by
-“f_i”. The lookup `CNTXT_SUB`will be applied at the input sequence glyph “n”,
+“f_i”. The lookup `CNTXT_SUB` will be applied at the input sequence glyph “n”,
 and the glyph “n” will be replaced by “n.end”. This will happen only when the
 sequence “f i n” is preceded by any one of the glyphs “a e i o u”. Likewise, in
 the second contextual substitution rule the glyphs “c” and “t” will be replaced
@@ -1754,7 +1754,7 @@ components.
 ###### Example 5:
 In this example two Multiple Sub lookups are applied to the same input. The rule below means: 
 in lookup `REORDER_CHAIN` the sequence “ka ka.pas_cakra.ns” is first substituted 
-by “ka” and then a second lookup subsitutes the remaining “ka” by the sequence “ka.pas_cakra ka”. 
+by “ka” and then a second lookup substitutes the remaining “ka” by the sequence “ka.pas_cakra ka”. 
 
 ```fea
 lookup REMOVE_CAKRA {
@@ -3193,7 +3193,7 @@ specification, any glyph not included in one of the class definitions will be
 assigned glyph class index 0, and will not be included in any of the `GlyphClassDef`
 classes.
 
-The **MarkAttach** classes of the GDEF table may not be specified explicitly in
+The **MarkAttachment** classes of the GDEF table may not be specified explicitly in
 feature file syntax. They are instead created by the implementation from use of
 the `lookupflag MarkAttachmentType <class name>` statements. The class names may
 be from either regular classes definitions or mark class definitions.

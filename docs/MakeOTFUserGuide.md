@@ -1,7 +1,7 @@
 # MakeOTF OpenType/CFF compiler - User Guide
 
 ## **Overview**
-MakeOTF is a tool designed to create an OpenType® font from a source font file and from a text file containing high-level descriptions of OpenType layout features. It is designed to run as commandline tool: a command typed into the Terminal window on Mac OS® X, or in the DOS window on Windows®. Note that MakeOTF is only a compiler of font data, not a font editor.
+MakeOTF is a tool designed to create an OpenType® font from a source font file and from a text file containing high-level descriptions of OpenType layout features. It is designed to run as a command line tool: a command typed into the Terminal window on Mac OS® X, or in the DOS window on Windows®. Note that MakeOTF is only a compiler of font data, not a font editor.
 
 MakeOTF requires a number of source files that can all be specified through options for the makeotf command:
   * **`font`** - usually named `font.pfa` or `cidfont.ps`. This can be either a Type 1 or CID font file, a TrueType font file, or an OpenType/CFF font file. Note that only the glyph outlines are taken from the source font.
@@ -54,7 +54,7 @@ MyFontFamily/
 ```
 The idea is that some data, such as the files `FontMenuNameDB` and `GlyphOrderAndAliasDB`, will be shared between all members of the type family, whereas other data will only apply to a subgroup of the family. By placing the shareable data at a higher level in the directory tree, one can avoid having multiple copies of the same data, which means there will be less files to edit, in case the data needs to be changed. This is most important for the `features.family` file.
 
-Usually, positioning rules such as kerning (`features.kern`) are specific to each font, but most (or all) of the substitution rules are likely to be the same for all fonts. A good practice is to have a features file for each family member, in the same directory as the source font file, and then use an include statement to reference feature files located higher in the directory tree. In the example above, there are two separate `features.family` files, one for Roman and another for Italic. These can, in turn, be shared between all family members under each branch. The need for two different `features.family` files comes from the fact that Roman and Italic styles might not have the same number of substitution (GSUB) rules — Italic tends to have more.
+Usually, positioning rules such as kerning (`features.kern`) are specific to each font, but most (or all) of the substitution rules are likely to be the same for all fonts. A good practice is to have a feature file for each family member, in the same directory as the source font file, and then use an include statement to reference feature files located higher in the directory tree. In the example above, there are two separate `features.family` files, one for Roman and another for Italic. These can, in turn, be shared between all family members under each branch. The need for two different `features.family` files comes from the fact that Roman and Italic styles might not have the same number of substitution (GSUB) rules — Italic tends to have more.
 
 Once one has assembled all the necessary files, the next step is to open a command window — the Terminal program on Mac OS X, or the Command program on Windows —, and use the cd command to set the current working directory to the directory which contains the set of source files to compile the OpenType font:
 ```
@@ -95,13 +95,13 @@ makeotf –fp myproject.fpr
 |`-sans` | | Specify that any added glyphs will use the sans-serif Multiple Master builtin glyph data.|
 |`-cs` | | Override the heuristics, and specify the script ID for the Mac cmap subtable.|
 |`-cl`| | Override the heuristics, and specify the language ID for the Mac cmap subtable.|
-|`-cm` |`<file path>` | Specify path to CID CMap encoding file for the font Mac encoding. (CIDkeyed fonts only)|
+|`-cm` |`<file path>` | Specify path to CID CMap encoding file for the font Mac encoding. (CID-keyed fonts only)|
 |`-ch`|`<file path>`| Specify path to CID CMap encoding file for the font Unicode UTF-32 encoding for horizontal glyphs. (CID-keyed fonts only)|
 |`-cv`|`<file path>`| Specify path to CID CMap encoding file for the font Unicode UTF-32 encoding for vertical glyphs. (CID-keyed fonts only)|
 |`-ci`|`<file path>`| Specify path to Unicode Variation Sequence specification file.|
-|`-dbl`| |Map glyph names to two Unicode values rather than one. This was the default behaviour of makeotf in FDK 1.6 and earlier. The Adobe Type Department now discourages this practice. The option exists only to allow building fonts that match original versions. See `makeotf –h` for the hard-coded list of glyphs.|
+|`-dbl`| |Map glyph names to two Unicode values rather than one. This was the default behavior of makeotf in FDK 1.6 and earlier. The Adobe Type Department now discourages this practice. The option exists only to allow building fonts that match original versions. See `makeotf –h` for the hard-coded list of glyphs.|
 |`-dcs`| |Set OS/2.DefaultChar to the Unicode value for `space`, rather than `.notdef`. The latter is correct by the OT spec, but QuarkXPress 6.5 requires the former in order to print OTF/CFF fonts.|
-|`-fi` |`<file path>`| Path to the `fontinfo` file. If no path is given, the default is to look for first `fontinfo`, then `cidfontinfo`, in the current directory. Used to set some default values. This are overridden by any conflicting settings in the project file and then by command-line options. This option is processed before any others, so if the path is relative, it is relative to the current working directory. All other relative paths are relative so the source font’s parent directory.|
+|`-fi` |`<file path>`| Path to the `fontinfo` file. If no path is given, the default is to look for first `fontinfo`, then `cidfontinfo`, in the current directory. Used to set some default values. This are overridden by any conflicting settings in the project file and then by command line options. This option is processed before any others, so if the path is relative, it is relative to the current working directory. All other relative paths are relative so the source font’s parent directory.|
 |`-sp`|`<file path>`|Save the current options to the file path provided, as well as to the current.fpr file.|
 |`-nb`| |Turn off the Bold style. Can be used to override a project file setting, otherwise has no effect.|
 |`-ni`| |Turn off the Italic style. Can be used to override a project file setting, otherwise has no effect.|
@@ -211,7 +211,7 @@ To use accented characters in Latin menu names, one needs two `f=` entries: one 
 |`f=Arnold B`**`\00f6`**`cklin` | Windows |
 |`f=1,Arnold B`**`\9a`**`cklin` | Mac     |
 
-`00f6` is the hex representation of the Unicode for odieresis (`ö`). Unicode hex values must have 4 digits. `9a` is MacRoman encoding for `odieresis`. Mac char code hex values must have 2 digits for Western cript encodings, and may have 2 or 4 digits for CJK encodings.
+`00f6` is the hex representation of the Unicode for odieresis (`ö`). Unicode hex values must have 4 digits. `9a` is MacRoman encoding for `odieresis`. Mac char code hex values must have 2 digits for Western script encodings, and may have 2 or 4 digits for CJK encodings.
 
 In general, the `f=`, `s=`, and `l=` can be extended to set non-Latin strings by adding the triplet (platform code, script code, language code) after the equal sign (=). The values are the same as described for the name table name ID strings. For example:
 
@@ -223,7 +223,7 @@ In general, the `f=`, `s=`, and `l=` can be extended to set non-Latin strings by
 
 
 ## **FontMenuNameDB - Version 1**
-Versions of MakeOTF prior to FDK 2.5 used a similar synax in the FontMenuNameDB file. When this older version syntax is used, MakeOTF will build the name table font menu names as it did in FDK version 2.0 and earlier. These earlier versions built the Windows platform names the same. However, only the Preferred Family and Style names were written in the Mac platform name strings, and in respectively name ID 1 and name ID 2. The key “c=” set the compatbile family name for the Windows platform. There was no way to specify a compatible family name for the Mac platform. The key `c=1,` set instead a compatible value for the Mac platform Full Name String, name ID 18.
+Versions of MakeOTF prior to FDK 2.5 used a similar syntax in the FontMenuNameDB file. When this older version syntax is used, MakeOTF will build the name table font menu names as it did in FDK version 2.0 and earlier. These earlier versions built the Windows platform names the same. However, only the Preferred Family and Style names were written in the Mac platform name strings, and in respectively name ID 1 and name ID 2. The key “c=” set the compatible family name for the Windows platform. There was no way to specify a compatible family name for the Mac platform. The key `c=1,` set instead a compatible value for the Mac platform Full Name String, name ID 18.
 
 |**Font Entry Description**|
 |--------------------------|
@@ -236,7 +236,7 @@ Versions of MakeOTF prior to FDK 2.5 used a similar synax in the FontMenuNameDB 
 If the key `c=` is used, then MakeOTF will build the older style name table. If the keys `l=` or `m=` are present, it will build the newer style name table . If none of these are present, then there is no difference in how the name table is built.
 
 ## **GlyphOrderAndAliasDB** (GOADB)
-The GOADB file is used to rename and to establish an order for the glyphs in a font. It is a simple text file with one line per glyph name. Each line contains at least two fields, and optionally three fields. The first field is the final glyph name to be used in the output font. The second field is the ‘friendly’ name used in the source font data. The third field is a Unicode value, specified in the form `uniXXXX` or `uXXXX`, where `XXXX` is a Unicode value (hexadecimal). One may specify more than one Unicode value for a glyph by giving a comma seperated list of values, for example: `uni0020,uni00A0`. The `XXXX` hexidecimal values *must* be either numerals (0-9) or uppercase letters. Values containing lowercase letters will be ignored. The source font is not required to have any glyphs that are named in the `GlyphOrderAndAliasDB` file.
+The GOADB file is used to rename and to establish an order for the glyphs in a font. It is a simple text file with one line per glyph name. Each line contains at least two fields, and optionally three fields. The first field is the final glyph name to be used in the output font. The second field is the ‘friendly’ name used in the source font data. The third field is a Unicode value, specified in the form `uniXXXX` or `uXXXX`, where `XXXX` is a Unicode value (hexadecimal). One may specify more than one Unicode value for a glyph by giving a comma separated list of values, for example: `uni0020,uni00A0`. The `XXXX` hexadecimal values *must* be either numerals (0-9) or uppercase letters. Values containing lowercase letters will be ignored. The source font is not required to have any glyphs that are named in the `GlyphOrderAndAliasDB` file.
 
 It should be noted that the ordering, renaming, and Unicode override operations are applied only if the `–r` option or the `-ga` option is specified. These operations work as follows:
 
@@ -259,15 +259,15 @@ Note that MakeOTF cannot re-order glyphs when the source font is a TrueType or O
 Note that MakeOTF no longer assigns glyphs Unicode values from the Private Use Area (PUA) block. If such Unicode values are needed, they must be specified in a `GOADB` file.
 
 ## **fontinfo**
-The fontinfo file is a simple text file containing key-value pairs. Each line contains two white-space separated fields. The first field is a keyword, and the second field is the value. makeotf will look for a fontinfo file in the same directory as the source font file, and, if found, use it to set some default values. These values will be overridden if they are also set by a project file, and then by any `makeotf` command-line options. The keywords and values currently supported are:
+The fontinfo file is a simple text file containing key-value pairs. Each line contains two white-space separated fields. The first field is a keyword, and the second field is the value. makeotf will look for a fontinfo file in the same directory as the source font file, and, if found, use it to set some default values. These values will be overridden if they are also set by a project file, and then by any `makeotf` command line options. The keywords and values currently supported are:
 
 | Keyword | Values | Effect |
 |---------|--------|--------|
-|`IsBoldStyle`|`true/false` | Set the font style to Bold. Same as the commandline option `–b`|
-|`IsItalicStyle`|`true/false` | Set the font style to Italic. Same as the commandline option `–i`|
-|`PreferOS/2TypoMetrics`|`true/false` | Set the OS/2 table fsSelection bit 7, `USE_TYPO_METRICS`. Same as the command-line option `–osbOn 7`.|
-|`IsOS/2WidthWeigthSlopeOnly`|`true/false` | Set the OS/2 table fsSelection bit 8, `WEIGHT_WIDTH_SLOPE_ONLY`. Same as the command-line option `–osbOn 8`.|
-|`IsOS/2OBLIQUE`|`true/false` | Set the OS/2 table fsSelection bit 9, `OBLIQUE`. Same as the command-line option `–osbOn 9`.|
+|`IsBoldStyle`|`true/false` | Set the font style to Bold. Same as the command line option `–b`|
+|`IsItalicStyle`|`true/false` | Set the font style to Italic. Same as the command line option `–i`|
+|`PreferOS/2TypoMetrics`|`true/false` | Set the OS/2 table fsSelection bit 7, `USE_TYPO_METRICS`. Same as the command line option `–osbOn 7`.|
+|`IsOS/2WidthWeigthSlopeOnly`|`true/false` | Set the OS/2 table fsSelection bit 8, `WEIGHT_WIDTH_SLOPE_ONLY`. Same as the command line option `–osbOn 8`.|
+|`IsOS/2OBLIQUE`|`true/false` | Set the OS/2 table fsSelection bit 9, `OBLIQUE`. Same as the command line option `–osbOn 9`.|
 
 ## **Adobe character code map** (CMap)
 A CMap file maps character codes to glyph selectors. It is only necessary for CID fonts. This file may be located anywhere within the file system, as long as the directory path is stored in the `FontEnvironment.txt` file, or the file is chosen explicitly via the UI. The default CMap files are automatically selected by MakeOTF when the `cidfontinfo` file is selected.
@@ -291,17 +291,17 @@ When looking for default CID CMap files, MakeOTF uses the following rules:
   | Adobe-CNS1:   | B5pc-H      | UniCNS-UTF32-H | UniCNS-UTF32-V |
   | Adobe-Korea1: | KSCpc-EUC-H | UniKS-UTF32-H  | UniKS-UTF32-V  |
 
-  If one wants to use a CMap, which would not be found by these assumptions, one must specify them explicitly on the command-line while using `makeotf`.
+  If one wants to use a CMap, which would not be found by these assumptions, one must specify them explicitly on the command line while using `makeotf`.
 
-For further information on CMaps, please read the many [Adobe’s Technical Notes](https://github.com/adobe-type-tools/cmap-resources)
+For further information on CMaps, please read the many [Adobe Technical Notes](https://github.com/adobe-type-tools/cmap-resources)
 
 ## **Unicode Variation Sequence (UVS) File**
-A UVS file is a list of records, each of which specifies the glyph which should be displayed for a given combination of a Unicode encoding value and a Unicode Variation Selector. You can read about Unicode Variation Sequence in the publication “Unicode Technical Stadard #37 , Ideographic Variation Database , at http://unicode.org/reports/tr37/. The format depends on the source font format: CID-keyed fonts require three fields in each record, non-CID fonts require only two.
+A UVS file is a list of records, each of which specifies the glyph which should be displayed for a given combination of a Unicode encoding value and a Unicode Variation Selector. You can read about Unicode Variation Sequence in the publication “Unicode Technical Standard #37 , Ideographic Variation Database , at http://unicode.org/reports/tr37/. The format depends on the source font format: CID-keyed fonts require three fields in each record, non-CID fonts require only two.
 
 #### For CID-keyed fonts:
 The `makeotf` command will look for a UVS file under FDK/Tools/SharedData/Adobe CMAPS/<R-OS>, where <R-O-S> stands for the font’s CID Registry-Order-Supplement. The file will be assumed to be named “`<R-O>_sequences.txt`. For a CID font with the R-O-S “Adobe-Japan1-6”. the default UVS file path would be “FDK/Tools/SharedData/Adobe CMAPS/Adobe-Japan1-6/Adobe-Japan1_sequences.txt“ . The option `-ci <path>` may be used to specify a UVS file path other than the default.
 
-The file format is an ASCII text file. Each line represents one Unicode Variation Sequence(UVS). A line may be blank, or contain a comment that starts with the charater “#”.
+The file format is an ASCII text file. Each line represents one Unicode Variation Sequence(UVS). A line may be blank, or contain a comment that starts with the character “#”.
 
 Each line contains three fields. Fields are separated by a semicolon followed by whitespace. The fields are:
   1) Variation Sequence. Two hexadecimal value, with no leading “x” or “0x, separated by a space. The first is the Base Unicode Value, and the second is the Variation Selector value..
@@ -312,7 +312,7 @@ Each line contains three fields. Fields are separated by a semicolon followed by
 ```
 # Registered Adobe-Japan1 sequences
 # Version 07/30/2007
-# Prepared by Ken Lunde (lunde@adobe.com), Adobe Systems Incorporated
+# Prepared by Ken Lunde, Adobe Systems Incorporated
 3402 E0100; Adobe-Japan1; CID+13698
 3402 E0101; Adobe-Japan1; CID+13697
 3402 E0102; Adobe-Japan1; CID+13699
@@ -336,9 +336,9 @@ In 2006, Microsoft and Adobe began discussions to define three new bit values in
 These bits have meaning only in OS/2 table version 4 and later; in earlier versions, they are reserved, and should be set off. The Adobe Type Department will set the bits in our new fonts.
 
 #### `USE_TYPO_METRICS`
-When bit 7 is on, programs are supposed to use the OS/2 table sTypoAscent/Descent/LineGap for vertical line spacing. This bit was defined because the Windows layout libraries have been using the OS/2 table winAscent/Descent values instead. The next release of Windows Presentation Foundation, on which new versions of Microsoft programs such as Word will be based, and which is due in late 2006, will use the sTypo values instead – but only if this bit is on. This bit certifies that the OS/2 sTypo values are good, and have the side effect of being present only in new fonts, so that reflow of documents will happen less often than if Microsoft just changed the behaviour for all fonts. For example, it is rumored that some TrueType fonts have bad values for the sTypo values, making it undesirable to apply the sTypo values for all existing fonts.
+When bit 7 is on, programs are supposed to use the OS/2 table sTypoAscent/Descent/LineGap for vertical line spacing. This bit was defined because the Windows layout libraries have been using the OS/2 table winAscent/Descent values instead. The next release of Windows Presentation Foundation, on which new versions of Microsoft programs such as Word will be based, and which is due in late 2006, will use the sTypo values instead – but only if this bit is on. This bit certifies that the OS/2 sTypo values are good, and have the side effect of being present only in new fonts, so that reflow of documents will happen less often than if Microsoft just changed the behavior for all fonts. For example, it is rumored that some TrueType fonts have bad values for the sTypo values, making it undesirable to apply the sTypo values for all existing fonts.
 
-The next two bits have to do with the fact that future generations of Microsoft programs, and programs from other vendors that use the Windows Presentation Foundation (WPF) libraries, will use the Cascading Style Sheet (CSS) v.2 specification for specifying fonts. The provisions of this specification can be seen at https://www.w3.org/TR/css-fonts-3/. In brief, a CSS font declaration within a document will describe a font by specifying the family name, and one or more properties; there is no way to refer directly to a specific font. The possible styles are Regular, Italic and Oblique. Weight and width are specified with separate keywords, with a limited and defined set of possible values. An example (in a simplified syntax) is `font-family: TimesStd, style: italic, weight: 700, width: normal`. One requirement of a CSS family is that each font has to have a different set of properties. There cannot be two fonts in a CSS font family which both have the properties `style: italic, weight: 700, width: normal`. For OpenType fonts, the name table Preferred Family Name is used as the CSS family name. Nonetheless, OpenType font families may well contain more than one font with a particular set of properties, but this fact will create a conflict in a CSSbased environment. When WPF encounters one of such families, it will divide the family into groups, so that only one font in each group has a given set of properties. However, that will allow WPF to provide new family names for each group, and these might not correspond to the type designer’s initial intentions.
+The next two bits have to do with the fact that future generations of Microsoft programs, and programs from other vendors that use the Windows Presentation Foundation (WPF) libraries, will use the Cascading Style Sheet (CSS) v.2 specification for specifying fonts. The provisions of this specification can be seen at https://www.w3.org/TR/css-fonts-3/. In brief, a CSS font declaration within a document will describe a font by specifying the family name, and one or more properties; there is no way to refer directly to a specific font. The possible styles are Regular, Italic and Oblique. Weight and width are specified with separate keywords, with a limited and defined set of possible values. An example (in a simplified syntax) is `font-family: TimesStd, style: italic, weight: 700, width: normal`. One requirement of a CSS family is that each font has to have a different set of properties. There cannot be two fonts in a CSS font family which both have the properties `style: italic, weight: 700, width: normal`. For OpenType fonts, the name table Preferred Family Name is used as the CSS family name. Nonetheless, OpenType font families may well contain more than one font with a particular set of properties, but this fact will create a conflict in a CSS-based environment. When WPF encounters one of such families, it will divide the family into groups, so that only one font in each group has a given set of properties. However, that will allow WPF to provide new family names for each group, and these might not correspond to the type designer’s initial intentions.
 
 Similarly, WPF will infer the font’s properties by analyzing its Preferred Family and Style names, and may mistakenly conclude that any two fonts in a family cannot be uniquely assigned different sets of font properties. In this case, WPF will also divide the family into groups, and generate new family names for them. The `WEIGHT_WIDTH_SLOPE_ONLY` bit was added to deal with this latter case. When this bit is set in a font’s OS/2 table fsSelection field, the application is requested to trust that all fonts sharing the same Preferred Family name, will differ from all the remaining with respect to their CSS properties. That given, the application can use the OpenType name table font menu names.
 

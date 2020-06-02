@@ -60,7 +60,7 @@ Choose “Buffer” from the drop-down menu, and set the scrollback number of li
 
 Now, at the bottom of the dialog, click on the button “Use Settings as Defaults”. This makes your changes apply to new command windows.
 
-To change the prompt, you need to edit an obscure file that sets parameters for the *Terminal* program when it starts up. Unfortunately, the way the *Terminal* program works depends on which command line program, or "shell" it is setup to use. There are several, and each one uses a different name for its startup file, and requires a different line of text added to change the prompt. To see which one you have, under the *Terminal* menu option, choose “Preferences…”, and note the line of text in the top text field. The default under Mac OS X 10.14 and earlier is `bash`, while under Mac OS X 10.15 ("Catalina") is `zsh`.
+To change the prompt, you need to edit an obscure file that sets parameters for the *Terminal* program when it starts up. Unfortunately, the way the *Terminal* program works depends on which command line program, or “shell” it is setup to use. There are several, and each one uses a different name for its startup file, and requires a different line of text added to change the prompt. To see which one you have, under the *Terminal* menu option, choose “Preferences…”, and note the line of text in the top text field. The default under Mac OS X 10.14 and earlier is `bash`, while under Mac OS X 10.15 (“Catalina”) is `zsh`.
 
 |Program name|Startup file name|Line to add        |
 |------------|-----------------|-------------------|
@@ -90,7 +90,7 @@ Commands which operate on files require that you specify the directory path of t
 ```
 open /Users/rroberts/.bash_profile # Mac
 start C:\adobe\FDK\FDKReleaseNotes.txt # Windows
-autohint -a MyFont.pfa # any system
+psautohint -a MyFont.pfa # any system
 ```
 
 The easiest way to get a file path into the command line is to drag its icon from a *Finder/Explorer* window onto the *Terminal/Command Prompt* window. When you do this, the absolute path — the complete path from the computer’s root directory — is copied. However, a command window always has a “current” directory. If the file is in the current directory, then you only need to type the file’s name, as in the third example above. To see the absolute path of the current directory, type the following command:
@@ -107,13 +107,13 @@ If you leave off the initial slash (/), then the path is assumed to be relative 
 
 Some commands produce a lot of text output, so much that it would be more convenient to look at the output in a text editor with good search functions. To send the output of a command to a file, add a greater-than sign (`>`) followed by a file path, to the command line. For example:
 ```
-autohint -a MyFont.pfa
+psautohint -a MyFont.pfa
 ```
 is likely to produce several hundred lines of output. To browse this more easily, enter:
 ```
-autohint -a MyFont.pfa > MyFont_autohint.txt
+psautohint -a MyFont.pfa > MyFont_autohint.txt
 ```
-This will “re-direct” the output of the autohint command into the file `MyFont_autohint.txt`. You
+This will “re-direct” the output of the psautohint command into the file `MyFont_autohint.txt`. You
 can then open this file in your favorite text editor, and search for interesting notes.
 
 ## **Favorite AFDKO (Adobe® Font Development Kit for OpenType®) commands**
@@ -131,13 +131,13 @@ Run `checkOutlines` QA tool on the font MinionPro-Bold.otf present in the Bold s
 ```
 checkOutlines Bold/MinionPro-Bold.otf
 ```
-Autohint only unhinted glyphs in a font: (This allows you to manually hint some glyphs in FontLab without overwriting that work when using the autohint program)
+Autohint only unhinted glyphs in a font: (This allows you to manually hint some glyphs in FontLab without overwriting that work when using the psautohint program)
 ```
-autohint font.pfa
+psautohint font.pfa
 ```
 Autohint all glyphs in a font: (This will remove any hints that existed before)
 ```
-autohint -a font.pfa
+psautohint -a font.pfa
 ```
 Build and OpenType CFF font in release mode, assuming that all the input files (font.pfa, features, fontinfo, FontMenuNameDB and GlyphOrderAndAliasDB) have default names, and default locations relative to the current directory: (The resulting OpenType font file, will be named according to the font’s PostScript® name)
 ```
@@ -177,7 +177,7 @@ spot -t GPOS=7 MinionPro-Regular.otf > gpos.txt
 ```
 
 ## **Recommendations for text editing applications**
-Large log files and the urge to build lists of command lines require a text editor with excellent search-and-replace abilities. For example, it is useful to be able to search the `compareFamily` report for all lines containing the word “Error”, and show them all in a window. For Windows, the clear low-cost leader is [UltraEdit®](https://www.ultraedit.com/); for Mac, an excellent choice is [BBedit®](https://www.barebones.com/products/bbedit/). There are lots of other options, free and paid. Get one, and read the program help about *Regular Expressions* (sometimes referenced as grep or regexp). *Regular Expressions* is a programmer term for wide-spread standard for wild cards on steroids. These let you do things like “find all lines beginning with ‘error’, containing MinionPro-Bold, not containing ‘width’ after MinionPro-Bold, and not containing ‘ligature’”. The very complex forms are mind-bending, but you can do very useful things with the simple wild-cards. MS Word, WordPad and TextEdit are woefully insufficient for finding useful information and for building command line batch files.
+Large log files and the urge to build lists of command lines require a text editor with excellent search-and-replace abilities. For example, it is useful to be able to search the `compareFamily` report for all lines containing the word “Error”, and show them all in a window. For Windows, the clear low-cost leader is [UltraEdit®](https://www.ultraedit.com/); for Mac, an excellent choice is [BBEdit®](https://www.barebones.com/products/bbedit/). There are lots of other options, free and paid. Get one, and read the program help about *Regular Expressions* (sometimes referenced as grep or regexp). *Regular Expressions* is a programmer term for wide-spread standard for wild cards on steroids. These let you do things like “find all lines beginning with ‘error’, containing MinionPro-Bold, not containing ‘width’ after MinionPro-Bold, and not containing ‘ligature’”. The very complex forms are mind-bending, but you can do very useful things with the simple wild-cards. MS Word, WordPad and TextEdit are woefully insufficient for finding useful information and for building command line batch files.
 
 A real example of the power of command line tools plus good editors with regular expression support is the following story on Mac OS X:
 1) Discover that for a library of hundreds of fonts, the copyright string needs to have “, 2007” added to the list of copyright years.
