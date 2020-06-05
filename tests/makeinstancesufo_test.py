@@ -209,5 +209,6 @@ def test_extrapolate(capfd, use_varlib):
 
         if use_varlib:
             assert not differ([expected_path, actual_path])
+            assert "Extrapolation is not supported with varlib (Dummy Extra Plus weight: 1500.0)" in captured.err  # noqa: E501
         else:
             assert differ([expected_path, actual_path])
