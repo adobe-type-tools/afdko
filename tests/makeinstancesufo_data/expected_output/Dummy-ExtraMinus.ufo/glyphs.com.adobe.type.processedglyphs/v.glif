@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="v" format="2">
+	<unicode hex="0076"/>
+	<advance width="398"/>
+	<outline>
+		<contour>
+			<point name="hintSet0000" x="198" y="0" type="line"/>
+			<point x="201" y="0" type="line"/>
+			<point x="386" y="474" type="line"/>
+			<point x="380" y="474" type="line"/>
+			<point x="254" y="145" type="line"/>
+			<point x="237" y="100"/>
+			<point x="218" y="53"/>
+			<point x="201" y="13" type="curve"/>
+			<point x="197" y="13" type="line"/>
+			<point x="180" y="53"/>
+			<point x="161" y="100"/>
+			<point x="144" y="145" type="curve"/>
+			<point x="18" y="474" type="line"/>
+			<point x="12" y="474" type="line"/>
+		</contour>
+	</outline>
+	<anchor name="aboveLC" x="200" y="498"/>
+	<anchor name="belowLC" x="200" y="-22"/>
+	<lib>
+		<dict>
+			<key>com.adobe.type.autohint.v2</key>
+			<dict>
+				<key>hintSetList</key>
+				<array>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0000</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 0 13</string>
+							<string>hstem 474 -20</string>
+							<string>vstem 12 374</string>
+						</array>
+					</dict>
+				</array>
+				<key>id</key>
+				<string>w398l1980l2010l386474l380474l25414523710021853c20113l1971318053161100c144145l18474l12474</string>
+			</dict>
+		</dict>
+	</lib>
+</glyph>

@@ -185,3 +185,29 @@ def test_bend_masters_varlib(args, ufo_filename):
     expected_path = _get_output_path(ufo_filename, 'expected_output')
     actual_path = _get_output_path(ufo_filename, 'temp_output')
     assert differ([expected_path, actual_path])
+
+
+@pytest.mark.parametrize('use_varlib', [False, True])
+def test_extrapolate(capfd, use_varlib):
+    """
+    Test extrapolating, with default (MutatorMath) and with varlib.
+    Using varlib should fail (output should not be extrapolated) because
+    extrapolation is not supported by varlib.
+    """
+    runner_args = ['-t', TOOL, '-o', 'v', 'd', f'_{get_input_path("extrapolation.designspace")}']  # noqa: E501
+    if use_varlib:
+        runner_args.append('=use-varlib')
+    runner(runner_args)
+    captured = capfd.readouterr()
+
+    tool = "fontTools.varlib" if use_varlib else "MutatorMath"
+    assert f"Building 2 instances with {tool}..." in captured.err
+
+    for ufo_filename in ("Dummy-ExtraPlus.ufo", "Dummy-ExtraMinus.ufo"):
+        expected_path = _get_output_path(ufo_filename, 'expected_output')
+        actual_path = _get_output_path(ufo_filename, 'temp_output')
+
+        if use_varlib:
+            assert not differ([expected_path, actual_path])
+        else:
+            assert differ([expected_path, actual_path])
