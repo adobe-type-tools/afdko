@@ -29,7 +29,7 @@ from afdko.fdkutils import (
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.4.3'
+__version__ = '2.4.4'
 
 logger = logging.getLogger(__name__)
 
@@ -294,10 +294,10 @@ def run(options):
     newInstancesList = [inst.path for inst in ds_doc.instances]
     newInstancesCount = len(newInstancesList)
 
-    if newInstancesCount == 1:
-        logger.info("Building 1 instance...")
-    else:
-        logger.info("Building %s instances..." % newInstancesCount)
+    icnt_str = f'instance{"" if newInstancesCount == 1 else "s"}'
+    tool_str = "fontTools.varlib" if options.useVarlib else "MutatorMath"
+    info_str = f"Building {newInstancesCount} {icnt_str} with {tool_str}..."
+    logger.info(info_str)
     ufoProcessorBuild(documentPath=dsPath,
                       outputUFOFormatVersion=options.ufo_version,
                       roundGeometry=(not options.no_round),
@@ -413,7 +413,7 @@ def get_options(args):
     parser.add_argument(
         '--use-varlib',
         dest='useVarlib',
-        action='store_false',
+        action='store_true',
         help='Use varLib instead of MutatorMath'
     )
     parser.add_argument(

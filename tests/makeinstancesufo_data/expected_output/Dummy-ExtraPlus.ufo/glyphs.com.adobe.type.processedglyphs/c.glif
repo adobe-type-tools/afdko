@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="c" format="2">
+	<unicode hex="0063"/>
+	<advance width="485"/>
+	<outline>
+		<contour>
+			<point name="hintSet0000" x="292" y="-12" type="curve"/>
+			<point x="339" y="-12"/>
+			<point x="410" y="-5"/>
+			<point x="465" y="43" type="curve"/>
+			<point name="hintSet0002" x="375" y="200" type="line"/>
+			<point x="356" y="189"/>
+			<point x="337" y="181"/>
+			<point x="322" y="181" type="curve"/>
+			<point x="296" y="181"/>
+			<point x="269" y="208"/>
+			<point x="269" y="256" type="curve"/>
+			<point x="269" y="304"/>
+			<point x="286" y="330"/>
+			<point x="331" y="330" type="curve"/>
+			<point x="333" y="330"/>
+			<point x="338" y="333"/>
+			<point x="355" y="321" type="curve"/>
+			<point x="465" y="475" type="line"/>
+			<point x="424" y="508"/>
+			<point x="373" y="523"/>
+			<point x="316" y="523" type="curve"/>
+			<point x="160" y="523"/>
+			<point x="21" y="425"/>
+			<point x="21" y="256" type="curve"/>
+			<point name="hintSet0010" x="21" y="86"/>
+			<point x="140" y="-12"/>
+		</contour>
+	</outline>
+	<anchor name="aboveLC" x="286" y="532"/>
+	<anchor name="belowLC" x="281" y="-22"/>
+	<anchor name="baseLC" x="281" y="0"/>
+	<lib>
+		<dict>
+			<key>com.adobe.type.autohint.v2</key>
+			<dict>
+				<key>hintSetList</key>
+				<array>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0000</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 9 -21</string>
+							<string>hstem 523 -20</string>
+							<string>vstem 21 248</string>
+						</array>
+					</dict>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0002</string>
+						<key>stems</key>
+						<array>
+							<string>hstem -12 193</string>
+							<string>hstem 330 193</string>
+							<string>vstem 21 248</string>
+						</array>
+					</dict>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0010</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 9 -21</string>
+							<string>hstem 523 -20</string>
+							<string>vstem 21 248</string>
+						</array>
+					</dict>
+				</array>
+				<key>id</key>
+				<string>5216991a7e54afafef3d23555782cb87df04aa1cf166b9819a04e870d8c2bce6a215122dd8dc1d41834e5412d29c61b1dddaf95ff6a6dbb5d943825f40a11120</string>
+			</dict>
+		</dict>
+	</lib>
+</glyph>

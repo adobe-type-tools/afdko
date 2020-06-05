@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="r" format="2">
+	<unicode hex="0072"/>
+	<advance width="284"/>
+	<outline>
+		<contour>
+			<point name="hintSet0000" x="104" y="0" type="line"/>
+			<point x="105" y="0" type="line"/>
+			<point x="105" y="343" type="line"/>
+			<point name="hintSet0003" x="146" y="443"/>
+			<point x="200" y="480"/>
+			<point x="245" y="480" type="curve"/>
+			<point x="262" y="480"/>
+			<point x="269" y="478"/>
+			<point x="284" y="472" type="curve"/>
+			<point x="288" y="476" type="line"/>
+			<point x="272" y="484"/>
+			<point x="259" y="486"/>
+			<point x="246" y="486" type="curve"/>
+			<point x="186" y="486"/>
+			<point x="142" y="439"/>
+			<point x="111" y="383" type="curve"/>
+			<point x="109" y="383" type="line"/>
+			<point name="hintSet0009" x="107" y="474" type="line"/>
+			<point x="104" y="474" type="line"/>
+		</contour>
+	</outline>
+	<anchor name="aboveLC" x="179" y="498"/>
+	<anchor name="belowLC" x="103" y="-22"/>
+	<lib>
+		<dict>
+			<key>com.adobe.type.autohint.v2</key>
+			<dict>
+				<key>hintSetList</key>
+				<array>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0000</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 21 -21</string>
+							<string>hstem 476 -20</string>
+							<string>vstem 104 184</string>
+						</array>
+					</dict>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0003</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 21 -21</string>
+							<string>hstem 472 14</string>
+							<string>vstem 104 184</string>
+						</array>
+					</dict>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0009</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 21 -21</string>
+							<string>hstem 474 -20</string>
+							<string>vstem 104 184</string>
+						</array>
+					</dict>
+				</array>
+				<key>id</key>
+				<string>w284l1040l1050l105343146443200480c245480262480269478c284472l288476272484259486c246486186486142439c111383l109383l107474l104474</string>
+			</dict>
+		</dict>
+	</lib>
+</glyph>

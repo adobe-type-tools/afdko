@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<designspace format="4">
+  <axes>
+    <axis tag="wght" name="weight" minimum="0" maximum="1000" default="0"/>
+  </axes>
+  <sources>
+    <source filename="dummy_0.ufo">
+      <location>
+        <dimension name="weight" xvalue="0"/>
+      </location>
+      <lib copy='1'/>
+    </source>
+    <source filename="dummy_1.ufo">
+      <location>
+        <dimension name="weight" xvalue="1000"/>
+      </location>
+    </source>
+  </sources>
+  <instances>
+    <instance familyname="Dummy" stylename="Extra Plus" filename="../temp_output/Dummy-ExtraPlus.ufo" postscriptfontname="Dummy-ExtraPlus">
+      <location>
+        <dimension name="weight" xvalue="1500"/>
+      </location>
+      <kerning/>
+      <info/>
+    </instance>
+    <instance familyname="Dummy" stylename="Extra Minus" filename="../temp_output/Dummy-ExtraMinus.ufo" postscriptfontname="Dummy-ExtraMinus">
+      <location>
+        <dimension name="weight" xvalue="-200"/>
+      </location>
+      <kerning/>
+      <info/>
+    </instance>
+  </instances>
+</designspace>
