@@ -232,6 +232,12 @@ def validateDesignspaceDoc(dsDoc, dsoptions, **kwArgs):
             "Designspace file contains no instances."
         )
 
+    if dsoptions.useVarlib:
+        axis_map = dict()
+        for axis in dsDoc.axes:
+            ad = axis.asdict()
+            axis_map[ad['name']] = axis
+
     for i, inst in enumerate(dsDoc.instances):
         if dsoptions.indexList and i not in dsoptions.indexList:
             continue
@@ -242,6 +248,17 @@ def validateDesignspaceDoc(dsDoc, dsoptions, **kwArgs):
         if inst.path is None:
             raise DesignSpaceDocumentError(
                 f"Instance at index {i} has no 'filename' attribute.")
+
+        if dsoptions.useVarlib:
+            # check for extrapolation, which is not supported by varLib
+            # for these only warn, do not raise exception
+            for dim, val in inst.location.items():
+                axis = axis_map[dim]
+                mval = axis.map_backward(val)
+                if mval < axis.minimum or mval > axis.maximum:
+                    logger.warning("Extrapolation is not supported with varlib"
+                                   f" ({inst.familyName} {inst.styleName} "
+                                   f"{dim}: {val})")
 
 
 def collect_features_content(instances, inst_idx_lst):
