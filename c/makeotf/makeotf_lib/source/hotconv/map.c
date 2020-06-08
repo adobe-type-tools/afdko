@@ -1845,7 +1845,7 @@ static void setOS_2Fields(hotCtx g) {
         }
     }
 
-    /* if no code page range bits are set, then set the Symbol code page. */
+    /* if no code page range bits are set, then set the Latin (Windows 1252) code page. */
     {
         int somePage = 0;
         for (i = 0; i < ARRAY_LEN(codePage); i++) {
