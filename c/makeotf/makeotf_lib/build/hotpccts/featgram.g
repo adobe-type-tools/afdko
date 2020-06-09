@@ -907,11 +907,7 @@ substitute
 				pattern[1]>[targ]	<<targLine = zzline;>>
 				{
 					K_by 
-					(
-					K_NULL						<<addSub(targ, NULL, type, targLine);>>
-					|
 					pattern[0]>[repl]			<<addSub(targ, repl, type, targLine);>>
-					)
 				}
 			)
 			|
@@ -924,10 +920,7 @@ substitute
 					|
 					K_from						<<type = GSUBAlternate;>>
 					)
-					(
-					K_NULL
-					| pattern[0]>[repl]			
-					)
+					pattern[0]>[repl]
 				}
 				<<addSub(targ, repl, type, targLine);>>
 			)
