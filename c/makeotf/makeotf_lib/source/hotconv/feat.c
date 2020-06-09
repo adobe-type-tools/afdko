@@ -3369,7 +3369,7 @@ static int validateGSUBReverseChain(hotCtx g, GNode *targ, GNode *repl) {
     int nMarked = 0;
     GNode *m = NULL; /* Suppress optimizer warning */
 
-    if (repl == NULL) {
+    if (targ->flags & FEAT_IGNORE_CLAUSE) {
         /* Except clause */
         if (targ->flags & FEAT_HAS_MARKED) {
             /* Mark backtrack */
@@ -3397,6 +3397,9 @@ static int validateGSUBReverseChain(hotCtx g, GNode *targ, GNode *repl) {
             }
         }
         return 1;
+    } else if (repl == NULL) {
+        featMsg(hotERROR, "reverse contextual substitution clause must have a replacement rule.");
+        return 0;
     }
 
     /* At most one run of marked positions supported, for now */
@@ -3599,17 +3602,9 @@ static void addSub(GNode *targ, GNode *repl, int lkpType, int targLine) {
         }
     }
 
-    if ((repl == NULL) || lkpType == GSUBChain || (targ->flags & FEAT_IGNORE_CLAUSE)) {
-        /* Chain sub exceptions (further analyzed below).                */
-        /* "sub f i by fi;" will be here if there was an "except" clause */
-
-        if (!g->hadError) {
-            if (validateGSUBChain(g, targ, repl)) {
-                if (lkpType != GSUBReverse) {
-                    lkpType = GSUBChain;
-                }
-                addGSUB(lkpType, targ, repl);
-            }
+    if (lkpType == GSUBChain) {
+        if (validateGSUBChain(g, targ, repl)) {
+            addGSUB(GSUBChain, targ, repl);
         }
     } else if (lkpType == GSUBReverse) {
         if (validateGSUBReverseChain(g, targ, repl)) {

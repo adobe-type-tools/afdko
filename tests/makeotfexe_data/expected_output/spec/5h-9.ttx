@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont>
+
+  <GSUB>
+    <Version value="0x00010000"/>
+    <ScriptList>
+      <!-- ScriptCount=1 -->
+      <ScriptRecord index="0">
+        <ScriptTag value="DFLT"/>
+        <Script>
+          <DefaultLangSys>
+            <ReqFeatureIndex value="65535"/>
+            <!-- FeatureCount=1 -->
+            <FeatureIndex index="0" value="0"/>
+          </DefaultLangSys>
+          <!-- LangSysCount=0 -->
+        </Script>
+      </ScriptRecord>
+    </ScriptList>
+    <FeatureList>
+      <!-- FeatureCount=1 -->
+      <FeatureRecord index="0">
+        <FeatureTag value="rlig"/>
+        <Feature>
+          <!-- LookupCount=1 -->
+          <LookupListIndex index="0" value="0"/>
+        </Feature>
+      </FeatureRecord>
+    </FeatureList>
+    <LookupList>
+      <!-- LookupCount=1 -->
+      <Lookup index="0">
+        <LookupType value="8"/>
+        <LookupFlag value="0"/>
+        <!-- SubTableCount=2 -->
+        <ReverseChainSingleSubst index="0" Format="1">
+          <Coverage Format="1">
+            <Glyph value="B"/>
+          </Coverage>
+          <!-- BacktrackGlyphCount=1 -->
+          <BacktrackCoverage index="0" Format="1">
+            <Glyph value="A"/>
+          </BacktrackCoverage>
+          <!-- LookAheadGlyphCount=1 -->
+          <LookAheadCoverage index="0" Format="1">
+            <Glyph value="C"/>
+          </LookAheadCoverage>
+          <!-- GlyphCount=0 -->
+        </ReverseChainSingleSubst>
+        <ReverseChainSingleSubst index="1" Format="1">
+          <Coverage Format="1">
+            <Glyph value="A"/>
+          </Coverage>
+          <!-- BacktrackGlyphCount=0 -->
+          <!-- LookAheadGlyphCount=0 -->
+          <!-- GlyphCount=1 -->
+          <Substitute index="0" value="A.alt1"/>
+        </ReverseChainSingleSubst>
+      </Lookup>
+    </LookupList>
+  </GSUB>
+
+</ttFont>
