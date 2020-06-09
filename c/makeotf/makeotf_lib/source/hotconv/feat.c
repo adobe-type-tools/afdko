@@ -3605,8 +3605,10 @@ static void addSub(GNode *targ, GNode *repl, int lkpType, int targLine) {
 
         if (!g->hadError) {
             if (validateGSUBChain(g, targ, repl)) {
-                lkpType = GSUBChain;
-                addGSUB(GSUBChain, targ, repl);
+                if (lkpType != GSUBReverse) {
+                    lkpType = GSUBChain;
+                }
+                addGSUB(lkpType, targ, repl);
             }
         }
     } else if (lkpType == GSUBReverse) {

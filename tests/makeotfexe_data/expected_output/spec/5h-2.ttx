@@ -22,36 +22,29 @@
       <FeatureRecord index="0">
         <FeatureTag value="rlig"/>
         <Feature>
-          <!-- LookupCount=2 -->
+          <!-- LookupCount=1 -->
           <LookupListIndex index="0" value="0"/>
-          <LookupListIndex index="1" value="1"/>
         </Feature>
       </FeatureRecord>
     </FeatureList>
     <LookupList>
-      <!-- LookupCount=2 -->
+      <!-- LookupCount=1 -->
       <Lookup index="0">
-        <LookupType value="6"/>
+        <LookupType value="8"/>
         <LookupFlag value="0"/>
-        <!-- SubTableCount=1 -->
-        <ChainContextSubst index="0" Format="3">
-          <!-- BacktrackGlyphCount=0 -->
-          <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0" Format="1">
+        <!-- SubTableCount=2 -->
+        <ReverseChainSingleSubst index="0" Format="1">
+          <Coverage Format="1">
             <Glyph value="A"/>
-          </InputCoverage>
+          </Coverage>
+          <!-- BacktrackGlyphCount=0 -->
           <!-- LookAheadGlyphCount=1 -->
           <LookAheadCoverage index="0" Format="1">
             <Glyph value="B"/>
           </LookAheadCoverage>
-          <!-- SubstCount=0 -->
-        </ChainContextSubst>
-      </Lookup>
-      <Lookup index="1">
-        <LookupType value="8"/>
-        <LookupFlag value="0"/>
-        <!-- SubTableCount=1 -->
-        <ReverseChainSingleSubst index="0" Format="1">
+          <!-- GlyphCount=0 -->
+        </ReverseChainSingleSubst>
+        <ReverseChainSingleSubst index="1" Format="1">
           <Coverage Format="1">
             <Glyph value="A"/>
           </Coverage>
