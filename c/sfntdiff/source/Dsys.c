@@ -50,6 +50,8 @@
 #include <sys/stat.h>
 #endif
 
+#define FILESTR_BUF_SIZE 1024
+
 static void error(Byte8 *filename) {
 #ifdef __MWERKS__
     switch (errno) {
@@ -141,13 +143,13 @@ IntX sysOpenSearchpath(Byte8 *filename) {
         "c:/psfonts/%s",
         "c:/temp/%s",
         NULL};
+    static char file[FILESTR_BUF_SIZE];
 
     for (p = path; *p != NULL; p++) {
         struct stat st;
-        char file[256];
 
         file[0] = '\0';
-        sprintf(file, *p, filename);
+        snprintf(file, FILESTR_BUF_SIZE, *p, filename);
         fd = OPEN(file, OMODE);
         if ((fd == (-1)) ||
             (fstat(fd, &st) == (-1)) || ((st.st_mode & S_IFMT) == S_IFDIR))
