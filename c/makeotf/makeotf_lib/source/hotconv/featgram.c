@@ -1620,7 +1620,6 @@ substitute()
                                         zzCONSUME;
                                         repl = pattern(0);
 
-                                        addSub(targ, repl, type, targLine);
                                     } else {
                                         if ((LA(1) == 155)) {
                                         } else {
@@ -1631,6 +1630,7 @@ substitute()
                                     zzEXIT(zztasp4);
                                 }
                             }
+                            addSub(targ, repl, type, targLine);
                             zzEXIT(zztasp3);
                         }
                     }

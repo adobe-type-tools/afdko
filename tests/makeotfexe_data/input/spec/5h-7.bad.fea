@@ -1,0 +1,5 @@
+# Test reverse contextual substitution clause must have a replacement.
+
+lookup test {
+  rsub A';
+} test;

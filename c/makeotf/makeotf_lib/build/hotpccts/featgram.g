@@ -907,8 +907,9 @@ substitute
 				pattern[1]>[targ]	<<targLine = zzline;>>
 				{
 					K_by 
-					pattern[0]>[repl]			<<addSub(targ, repl, type, targLine);>>
+					pattern[0]>[repl]
 				}
+				<<addSub(targ, repl, type, targLine);>>
 			)
 			|
 			(
