@@ -1523,7 +1523,7 @@ ignoresub_or_pos()
 
                     targ->flags |= FEAT_IGNORE_CLAUSE;
                     if (doSub)
-                        addSub(targ, NULL, GSUBChain, zzline);
+                        addSub(targ, NULL, typeGSUB, zzline);
                     else
                         addPos(targ, 0, 0);
                     zzLOOP(zztasp2);

@@ -878,7 +878,7 @@ ignoresub_or_pos
 		(
 		","
         pattern[1]>[targ]   <<targ->flags |= FEAT_IGNORE_CLAUSE;
-        					if (doSub) addSub(targ, NULL, GSUBChain, zzline);
+        					if (doSub) addSub(targ, NULL, typeGSUB, zzline);
 							  else       addPos(targ, 0, 0);>>
 		)*
 	;
