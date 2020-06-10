@@ -1,4 +1,4 @@
-# Test comma-separated ingore sub statements.
+# Test comma-separated ignore sub statements.
 feature rlig {
     ignore sub A' B, A' C;
     sub A' by A.alt1;

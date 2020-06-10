@@ -1,4 +1,4 @@
-# Test comma-separated ingore rsub statements.
+# Test comma-separated ignore rsub statements.
 feature rlig {
     ignore rsub A' B, A' C;
     rsub A' by A.alt1;
