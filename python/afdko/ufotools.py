@@ -16,10 +16,10 @@ from psautohint.ufoFont import norm_float
 
 from afdko import fdkutils
 
-__version__ = '1.35.0'
+__version__ = '1.35.1'
 
 __doc__ = """
-ufotools.py v1.35.0 Mar 03 2020
+ufotools.py v1.35.1 Jun 11 2020
 
 Originally developed to work with 'bez' files and UFO fonts in support of
 the autohint tool, ufotools.py is now only used in checkoutlinesufo (since
@@ -1085,7 +1085,7 @@ def makeUFOFMNDB(srcFontPath):
     return fmndbPath
 
 
-def thresholdAttrGlyph(aGlyph, threshold=0):
+def thresholdAttrGlyph(aGlyph, threshold=0.5):
     """
     Like fontPens.thresholdPen.thresholdGlyph, but preserves some glyph- and
     point-level attributes that are not preserved by that method.
@@ -1094,20 +1094,12 @@ def thresholdAttrGlyph(aGlyph, threshold=0):
     attrnames = ['anchors']
     attrs = {k: getattr(aGlyph, k, None) for k in attrnames if hasattr(aGlyph, k)}  # noqa: E501
 
-    # preserve Point.smooth attributes
-    smoothed = {(ci, (p.x, p.y)): p for ci, p in PointIterator(aGlyph) if p.smooth}  # noqa: E501
-
     # filter with ThresholdPen into recording pen
     recorder = RecordingPen()
     filterpen = ThresholdPen(recorder, threshold)
     aGlyph.draw(filterpen)
     aGlyph.clear()
     recorder.replay(aGlyph.getPen())
-
-    # restore Point.smooth attributes
-    for ci, p in PointIterator(aGlyph):
-        if (ci, (p.x, p.y)) in smoothed:
-            p.smooth = True
 
     # restore glyph-level attributes
     for k, v in attrs.items():
