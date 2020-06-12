@@ -1,0 +1,19 @@
+## Filename tests/tx_data/expected_output/nonstdfmtx.cff
+## Top Dict
+version             "0.0"
+FullName            "New Font Regular"
+FamilyName          "New Font"
+UnderlinePosition   -150
+UnderlineThickness  100
+FontBBox            {0,-400,900,1600}
+sup.srcFontType     CFF (name-keyed)
+sup.UnitsPerEm      2000
+sup.nGlyphs         3
+## FontDict[0]
+FontName            "NewFont-Regular"
+FontMatrix          {0.00050000002,0,0,0.00050000002,0,0}
+## Private
+## glyph[tag] {name,encoding}
+glyph[0] {.notdef,-}
+glyph[1] {space,-}
+glyph[2] {A,-}

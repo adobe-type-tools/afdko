@@ -1,0 +1,11 @@
+## Filename tests/tx_data/expected_output/nonstdfmtx.cff2
+## Top Dict
+sup.srcFontType     CFF (name-keyed)
+sup.UnitsPerEm      2000
+sup.nGlyphs         3
+## FontDict[0]
+## Private
+## glyph[tag] {name,encoding}
+glyph[0] {(missing),-}
+glyph[1] {(missing),-}
+glyph[2] {(missing),-}

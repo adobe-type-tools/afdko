@@ -1058,13 +1058,18 @@ def test_overlap_removal():
     assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
 
 
-@pytest.mark.parametrize("flag, outfile", [
-    ("cff", "nonstdfmtx.cff"),
-    ("cff2", "nonstdfmtx.cff2"),
+@pytest.mark.parametrize("fmt", [
+    "cff",
+    "cff2",
 ])
-def test_nonstd_fontmatrix(flag, outfile):
+def test_nonstd_fontmatrix(fmt):
     input_path = get_input_path("nonstdfmtx.otf")
-    expected_path = get_expected_path(outfile)
-    output_path = get_temp_file_path()
-    runner(CMD + ['-a', '-o', flag, '*S', '*b', '-f', input_path, output_path])
-    assert differ([expected_path, output_path, '-m', 'bin'])
+    txt_filename = f"nonstdfmtx_{fmt}.txt"
+    expected_path = get_expected_path(txt_filename)
+    output_dir = get_temp_dir_path()
+    bin_output = os.path.join(output_dir, f"nonstdfmtx.{fmt}")
+    output_path = os.path.join(output_dir, txt_filename)
+    runner(CMD + ['-a', '-o', fmt, '*S', '*b', '-f', input_path, bin_output])
+    runner(CMD + ['-a', '-o', 'dump', '-f', bin_output, output_path])
+    skip = "## Filename "
+    assert differ([expected_path, output_path, '-s', skip])
