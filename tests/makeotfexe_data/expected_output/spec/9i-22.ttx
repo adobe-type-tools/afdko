@@ -18,7 +18,7 @@
         <AxisIndex value="0"/>
         <Flags value="0"/>
         <ValueNameID value="258"/>  <!-- Regular -->
-        <NominalValue value="0.0061"/>
+        <NominalValue value="400.0"/>
         <RangeMinValue value="-32768.0"/>
         <RangeMaxValue value="32767.99998"/>
       </AxisValue>

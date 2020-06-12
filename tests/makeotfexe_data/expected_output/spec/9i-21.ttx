@@ -66,7 +66,7 @@
         <AxisIndex value="0"/>
         <Flags value="1"/>
         <ValueNameID value="257"/>  <!-- Regular -->
-        <Value value="0.0061"/>
+        <Value value="400.0"/>
       </AxisValue>
     </AxisValueArray>
     <ElidedFallbackNameID value="300"/>  <!-- Regular -->
