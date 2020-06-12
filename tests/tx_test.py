@@ -1056,3 +1056,15 @@ def test_overlap_removal():
     args = [TOOL, '-t1', '+V', '-o', output_path, input_path]
     subprocess.call(args)
     assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
+
+
+@pytest.mark.parametrize("flag, outfile", [
+    ("cff", "nonstdfmtx.cff"),
+    ("cff2", "nonstdfmtx.cff2"),
+])
+def test_nonstd_fontmatrix(flag, outfile):
+    input_path = get_input_path("nonstdfmtx.otf")
+    expected_path = get_expected_path(outfile)
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', flag, '*S', '*b', '-f', input_path, output_path])
+    assert differ([expected_path, output_path, '-m', 'bin'])
