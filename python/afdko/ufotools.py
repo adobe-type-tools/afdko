@@ -1106,13 +1106,3 @@ def thresholdAttrGlyph(aGlyph, threshold=0.5):
         setattr(aGlyph, k, v)
 
     return aGlyph
-
-
-class PointIterator(object):
-    def __init__(self, aGlyph):
-        self.glyph = aGlyph
-
-    def __iter__(self):
-        for ci, c in enumerate(self.glyph._contours):
-            for p in c._points:
-                yield (ci, p)
