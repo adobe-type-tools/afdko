@@ -29,7 +29,7 @@ from afdko.fdkutils import (
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.4.4'
+__version__ = '2.4.5'
 
 logger = logging.getLogger(__name__)
 
@@ -450,6 +450,11 @@ def get_options(args):
              'Example: -i 1,4 (generates 2nd & 5th instances)'
     )
     parser.add_argument(
+        '--traceback',
+        action='store_true',
+        help="show traceback for exceptions.",
+    )
+    parser.add_argument(
         '--ufo-version',
         metavar='NUMBER',
         choices=(2, 3),
@@ -477,6 +482,8 @@ def main(args=None):
     try:
         run(opts)
     except Exception as exc:
+        if opts.traceback:
+            raise
         logger.error(exc)
         return 1
 
