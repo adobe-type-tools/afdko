@@ -94,8 +94,9 @@ def updateInstance(fontInstancePath, options):
             co_args.insert(0, '-d')
         try:
             checkoutlinesUFO(co_args)
-        except (Exception, SystemExit):
-            raise
+        except (Exception, SystemExit) as exc:
+            msg = f"During overlap removal on {fontInstancePath}"
+            raise type(exc)(msg) from exc
 
     if options.doAutoHint:
         logger.info("Running psautohint on %s ..." % fontInstancePath)
@@ -104,8 +105,9 @@ def updateInstance(fontInstancePath, options):
             ah_args.insert(0, '-d')
         try:
             psautohint(ah_args)
-        except (Exception, SystemExit):
-            raise
+        except (Exception, SystemExit) as exc:
+            msg = f"During psautohint run on {fontInstancePath}"
+            raise type(exc)(msg) from exc
 
 
 def clearCustomLibs(dFont):
