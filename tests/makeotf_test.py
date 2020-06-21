@@ -670,3 +670,19 @@ def test_cli_numerics():
         'fi', f'_{get_input_path(fontinfo_filename)}'])
     assert differ([expected_msg_path, stderr_path,
                    '-r', r'^Built (development|release) mode font'])
+
+
+@pytest.mark.parametrize('explicit_fmndb', [False, True])
+def test_check_psname_in_fmndb_bug1171(explicit_fmndb):
+    input_path = get_input_path('bug1171/font.ufo')
+    fmndb_path = get_input_path('bug1171/FontMenuNameDB')
+    expected_ttx = get_expected_path('bug1171.ttx')
+    actual_path = get_temp_file_path()
+    opts = ['-o', 'f', f'_{input_path}', 'o', f'_{actual_path}']
+    if explicit_fmndb is True:
+        opts.extend(['mf', f'_{fmndb_path}'])
+    runner(CMD + opts)
+    actual_ttx = generate_ttx_dump(actual_path, ['name'])
+    assert differ([expected_ttx, actual_ttx,
+                   '-s', '<ttFont sfntVersion',
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
