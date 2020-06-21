@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>public.kern1.LAT_C_LC_LEFT</key>
+		<dict>
+			<key>public.kern2.LAT_A_LC_RIGHT</key>
+			<integer>-10</integer>
+			<key>public.kern2.LAT_O_LC_RIGHT</key>
+			<integer>-16</integer>
+		</dict>
+		<key>public.kern1.LAT_O_LC_LEFT</key>
+		<dict>
+			<key>public.kern2.LAT_A_LC_RIGHT</key>
+			<integer>-16</integer>
+		</dict>
+	</dict>
+</plist>

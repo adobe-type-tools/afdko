@@ -2,6 +2,7 @@
 
 from decimal import Decimal
 import functools
+import io
 import os
 import re
 import sys
@@ -25,7 +26,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.11 May 20 2020
+makeotf.py v2.8.0 June 21 2020
 """
 
 __methods__ = """
@@ -1776,6 +1777,22 @@ def checkIfVertInFeature(featurePath):
     return foundVert
 
 
+def psname_in_fmndb(ps_name, fmndb_path):
+    """
+    Check the FontMenuNameDB file for the presence of a specific PostScript
+    name. Returns a boolean.
+    """
+    found_psname = False
+    with io.open(fmndb_path, encoding='utf-8') as fp:
+        fmndb_lst = fp.readlines()
+    for ln in fmndb_lst:
+        ln = ln.strip()
+        if not ln.startswith('#') and (f'[{ps_name}]' in ln):
+            found_psname = True
+            break
+    return found_psname
+
+
 def setMissingParams(makeOTFParams):
     error = False
     # The path to the original src font file
@@ -1828,18 +1845,26 @@ def setMissingParams(makeOTFParams):
 
     # FontMenuNameDB path.
     fmndb_path = getattr(makeOTFParams, kFileOptPrefix + kFMB)
+    ps_name = makeOTFParams.psName
     if fmndb_path == "None":
         setattr(makeOTFParams, kFileOptPrefix + kFMB, None)
-    # it was not specified
-    elif not fmndb_path:
+    # FontMenuNameDB file was NOT specified
+    elif fmndb_path is None:
         newpath = os.path.join(makeOTFParams.fontDirPath, kDefaultFMNDBPath)
         found_fmndb = False
-        for path in [newpath, lookUpDirTree(newpath)]:
-            if path and os.path.exists(path):
+        for new_fmndb_path in [newpath, lookUpDirTree(newpath)]:
+            if new_fmndb_path and os.path.exists(new_fmndb_path):
                 found_fmndb = True
                 break
         if found_fmndb:
-            setattr(makeOTFParams, kFileOptPrefix + kFMB, path)
+            if not psname_in_fmndb(ps_name, new_fmndb_path):
+                print(f"makeotf [Warning] Could not find '[{ps_name}]' in "
+                      "FontMenuNameDB file at "
+                      f"'{os.path.abspath(new_fmndb_path)}'. Font will be "
+                      "built with menu names derived from PostScript name.")
+                setattr(makeOTFParams, kFileOptPrefix + kFMB, None)
+            else:
+                setattr(makeOTFParams, kFileOptPrefix + kFMB, new_fmndb_path)
         else:
             if makeOTFParams.srcIsUFO:
                 ufo_fmndb_path = ufotools.makeUFOFMNDB(srcFontPath)
@@ -1857,6 +1882,14 @@ def setMissingParams(makeOTFParams):
                       "Font will be built with menu names derived from "
                       "PostScript name.")
                 setattr(makeOTFParams, kFileOptPrefix + kFMB, None)
+    # FontMenuNameDB file was specified
+    else:
+        if not psname_in_fmndb(ps_name, fmndb_path):
+            print(f"makeotf [Warning] Could not find '[{ps_name}]' in "
+                  f"FontMenuNameDB file at '{os.path.abspath(fmndb_path)}'. "
+                  "Font will be built with menu names derived from PostScript "
+                  "name.")
+            setattr(makeOTFParams, kFileOptPrefix + kFMB, None)
 
     # GOADB path.
     # Figure out if GOABD is required. It is required when (release mode
