@@ -1988,9 +1988,9 @@ designAxis
 
 axisValueFlag[uint16_t *flags]
 	:
-		K_ElidableAxisValueName     << *flags |= 0x0001; >>
+		K_OlderSiblingFontAttribute     << *flags |= 0x0001; >>
 		|
-		K_OlderSiblingFontAttribute << *flags |= 0x0002; >>
+		K_ElidableAxisValueName << *flags |= 0x0002; >>
 	;
 
 axisValueFlags>[uint16_t flags]
