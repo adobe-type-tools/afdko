@@ -4723,14 +4723,14 @@ axisValueFlag(uint16_t *flags)
     zzBLOCK(zztasp1);
     zzMake0;
     {
-        if ((LA(1) == K_ElidableAxisValueName)) {
-            zzmatch(K_ElidableAxisValueName);
+        if ((LA(1) == K_OlderSiblingFontAttribute)) {
+            zzmatch(K_OlderSiblingFontAttribute);
             *flags |= 0x0001;
             zzCONSUME;
 
         } else {
-            if ((LA(1) == K_OlderSiblingFontAttribute)) {
-                zzmatch(K_OlderSiblingFontAttribute);
+            if ((LA(1) == K_ElidableAxisValueName)) {
+                zzmatch(K_ElidableAxisValueName);
                 *flags |= 0x0002;
                 zzCONSUME;
 
