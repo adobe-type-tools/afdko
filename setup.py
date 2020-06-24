@@ -146,7 +146,6 @@ def _get_scripts():
 
 def _get_console_scripts():
     script_entries = [
-        ('autohint', 'autohint:main'),
         ('buildcff2vf', 'buildcff2vf:main'),
         ('buildmasterotfs', 'buildmasterotfs:main'),
         ('comparefamily', 'comparefamily:main'),
@@ -156,7 +155,6 @@ def _get_console_scripts():
         ('otc2otf', 'otc2otf:main'),
         ('otf2otc', 'otf2otc:main'),
         ('otf2ttf', 'otf2ttf:main'),
-        ('stemhist', 'stemhist:main'),
         ('ttfcomponentizer', 'ttfcomponentizer:main'),
         ('ttfdecomponentizer', 'ttfdecomponentizer:main'),
         ('ttxn', 'ttxn:main'),
