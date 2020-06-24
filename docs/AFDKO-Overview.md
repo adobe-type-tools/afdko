@@ -17,9 +17,11 @@ The tools fall into several different functional groups.
 
 ## 2.1 Making/editing fonts
 
-### `autohint`/`psautohint`
+### `psautohint`
 
-This program is the Adobe auto-hinter. It can be applied to both OpenType/CFF and Type 1 fonts. Works with Type 1 and OpenType/CFF fonts only. It uses Just van Rossum's [`fontTools`](https://github.com/fonttools/fonttools) Python package for accessing and changing the font data.
+This program is the Adobe auto-hinter and lives in [its own project repo](https://github.com/adobe-type-tools/psautohint). It is used by several ADFDKO tools and is installed automatically via AFDKO's project requirements.
+
+It can be applied to both OpenType/CFF and Type 1 fonts. Works with Type 1 and OpenType/CFF fonts only.
 
 ### `makeotf`
 
@@ -61,9 +63,14 @@ This tool will rotate and translate glyphs in a font, including the hints. Howev
 
 This allows you to cut and paste the entire binary block of a font table from one font to another. You do this by first using it on a source font with the `-x` option to copy a table from the source font to a separate file, and then using it with the `-a` option to add that table to a target font. It can also be used to simply delete a table, and to fix the font table checksums.
 
-### `stemhist`/`psstemhist`
+### `psstemhist`
 
-This program provides reports which help in selecting the global hint data and alignment zones for Type 1 hinting. You should look at the reports from this tool in order to select the most common stem widths, and then use a program such as FontLab or RoboFont to set the values in the font. This should be done before hinting the font. Works with Type 1 and OpenType/CFF fonts only.
+This program is actually the same tool as `psautohint` but with a different
+face. It provides reports which help in selecting the global hint data and
+alignment zones for Type 1 hinting. You should look at the reports from this
+tool in order to select the most common stem widths, and then use a program such
+as FontLab or RoboFont to set the values in the font. This should be done before
+hinting the font. Works with Type 1 and OpenType/CFF fonts only.
 
 ### `ttfcomponentizer`
 
