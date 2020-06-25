@@ -4,9 +4,10 @@
 convertfonttocid.py. v 1.13.1 Jul 12 2019
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
-"fontinfo" file. See psautohint help, with the "-hfd" option, or the makeotf
-user guide for details on this format. The output file produced by
-convertFontToCID() is a CID Type 1 font, no matter what the input is.
+"fontinfo" file. See psautohint help, with the "--doc-fddict" option,
+or the makeotf user guide for details on this format. The output file
+produced by convertFontToCID() is a CID Type 1 font, no matter what
+the input is.
 
 PROCEDURE:
 1. convertFontToCID()
