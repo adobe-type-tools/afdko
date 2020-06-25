@@ -19,7 +19,7 @@ The tools fall into several different functional groups.
 
 ### `psautohint`
 
-This program is the Adobe auto-hinter and lives in [its own project repo](https://github.com/adobe-type-tools/psautohint). It is used by several ADFDKO tools and is installed automatically via AFDKO's project requirements.
+This program is the Adobe auto-hinter and lives in [its own project repo](https://github.com/adobe-type-tools/psautohint). It is used by several AFDKO tools and is installed automatically via AFDKO's project requirements.
 
 It can be applied to both OpenType/CFF and Type 1 fonts. Works with Type 1 and OpenType/CFF fonts only.
 
