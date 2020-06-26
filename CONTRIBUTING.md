@@ -11,6 +11,11 @@ Following are some guidelines and information about contributing, mostly so you 
 
 ## How to contribute
 
+### Code of Conduct
+Please review our [Code of Conduct](./CODE_OF_CONDUCT.md)
+statement which explains standards and responsibilities for all contributors and
+project maintainers.
+
 ### Suggested areas
 If you'd like to contribute but are not sure where or how, here are some suggestions to get started:
  - Fix [active LGTM alerts](https://lgtm.com/projects/g/adobe-type-tools/afdko/alerts/?mode=list). Many of these are simple fixes and working through them is a great way to get familiar with the codebase.
@@ -24,7 +29,19 @@ First, **please check to see if [someone has already raised a similar question o
 You can also ask questions on the [AFDKO room in Gitter](https://gitter.im/adobe-type-tools/afdko) which is monitored by the AFDKO maintainers.
 
 ### Code Style
-Please see the [Code Style wiki page](https://github.com/adobe-type-tools/afdko/wiki/Code-Style) for guidelines. Note that automated processes will run `cpplint` on C/C++ code and `flake8` on Python code.
+Please see the [Code Style wiki
+page](https://github.com/adobe-type-tools/afdko/wiki/Code-Style) for guidelines.
+Note that automated processes will run `cpplint` on C/C++ code and `flake8` on
+Python code.
+
+### Testing, test code, and test data
+Contributions that add new functionality or substantially change existing
+functionality _must_ include test code and data that demonstrates that the
+contributed code functions as intended. But fonts and their interactions with
+systems and applications can be complicated, so simple tests aren't always
+sufficient. We encourage you to test your code on real fonts with tools,
+utilities, and applications outside of the AFDKO to ensure that your
+contribution produces font files that function correctly in real-world scenarios.
 
 ### Branches and Pull Requests
 All contributions are handled through the GitHub Pull Request process. You may do this directly via a branch of AFDKO's `develop` branch or via a fork of AFDKO.
@@ -33,8 +50,8 @@ In either case, submitting a Pull Request triggers a number of automated actions
 
 If you are contributing code, you should run the test suite locally and ensure that all tests pass. If you are contributing _a lot of code_ or introducing major changes, it is *essential* that you also add test cases to the test suite to ensure that your code is getting tested (review the contents of the [`tests`](./tests/) folder to get an idea of how to write tests). 100% coverage is not required, but you should add tests that demonstrate that new features/major changes are actually working as intended (and don't break existing tests). If you are contributing Python code, please pass it through [`flake8`](http://flake8.pycqa.org/en/latest/). If you are contributing C/C++ code, check with [`cpplint`](https://github.com/cpplint/cpplint).
 
-### Automated testing
-There are two main triggers for running automated tests:
+### Automation
+There are two main triggers for running automated tests for AFDKO:
  1. When any commit to _any_ branch is pushed to the main AFDKO repository
  2. When a Pull Request is submitted
  
