@@ -1,6 +1,10 @@
 Changelog
 =========
 
+3.5.0 (coming soon...)
+----------------------
+- description to come
+
 3.4.0 (released 2020-05-26)
 ---------------------------
 - [makeotf] STAT table support (thanks @khaledhosny!)
