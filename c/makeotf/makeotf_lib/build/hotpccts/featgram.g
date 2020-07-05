@@ -46,6 +46,9 @@ void featureFile(void);
 
 featCtx h;			/* Not reentrant; see featNew() comments */
 hotCtx g;
+int sawSTAT = FALSE;
+int sawFeatNames = FALSE;
+int sawCVParams = FALSE;
 >>
 
 /* ----------------------------- Tokens ------------------------------------ */
@@ -363,16 +366,16 @@ glyphClass[int named, char *gcname]>[GNode *gnode]
 					gid = featMapGName2GID(g, firstPart, FALSE );
 					endgid  = featMapGName2GID(g, secondPart, FALSE );
 					if (gid != 0 && endgid != 0) {
-					  gcAddRange(gid, endgid, firstPart, secondPart);
+						gcAddRange(gid, endgid, firstPart, secondPart);
 					}
 					else {
-					  hotMsg(g, hotFATAL, "aborting because of errors");
+						hotMsg(g, hotFATAL, "incomplete glyph range detected");
 					}
 				  
 				}
 				else {
-				  featMapGName2GID(g, firstPart, FALSE);
-				  hotMsg(g, hotFATAL, "aborting because of errors");
+					featMapGName2GID(g, firstPart, FALSE);
+					hotMsg(g, hotFATAL, "incomplete glyph range or glyph not in font");
 				}
 				zzEXIT(zztasp4);
 			}
@@ -1170,13 +1173,17 @@ featureNameEntry
 	:
 		<< long plat, spec, lang; >>
 		nameEntry>[plat, spec, lang]
-		<< addFeatureNameString(plat, spec, lang);>>
+		<<
+		sawFeatNames = TRUE;
+		addFeatureNameString(plat, spec, lang);
+		>>
 	;
 
 featureNames
 	:
 	<<
-	h->featNameID = 0;
+	sawFeatNames = TRUE;
+	h->featNameID = nameReserveUserID(h->g);
 	>>
 	K_feat_names
 	"\{"
@@ -1193,13 +1200,14 @@ featureNames
 cvParameterBlock
 	:
 	<<
+	sawCVParams = TRUE;
 	h->cvParameters.FeatUILabelNameID = 0;
 	h->cvParameters.FeatUITooltipTextNameID = 0;
 	h->cvParameters.SampleTextNameID = 0;
 	h->cvParameters.NumNamedParameters = 0;
 	h->cvParameters.FirstParamUILabelNameID = 0;
 	h->cvParameters.charValues.cnt = 0;
-	h->featNameID = 0;
+	h->featNameID = nameReserveUserID(h->g);
 	>>
 	K_cv_params
 	"\{"
@@ -2081,6 +2089,9 @@ elidedFallbackNameID
 
 table_STAT
 	: t:K_STAT			<<checkTag($t.ulval, tableTag, 1);>>
+		<<
+		sawSTAT = TRUE;
+		>>
 		"\{"
 		(
 			(
@@ -2219,8 +2230,17 @@ table_name
 						>>
 
 				numUInt16Ext>[id]
-					
-					
+				<<
+				if (sawSTAT && id > 255)
+					hotMsg(g, hotFATAL, "name table should be defined before "
+							"STAT table with nameids above 255");
+				if (sawCVParams && id > 255)
+					hotMsg(g, hotFATAL, "name table should be defined before "
+							"GSUB cvParameters with nameids above 255");
+				if (sawFeatNames && id > 255)
+					hotMsg(g, hotFATAL, "name table should be defined before "
+							"GSUB featureNames with nameids above 255");
+				>>
 				{
 				numUInt16Ext>[plat]
 					<<
