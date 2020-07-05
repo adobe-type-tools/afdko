@@ -61,6 +61,9 @@ void featureFile(void);
 
 featCtx h; /* Not reentrant; see featNew() comments */
 hotCtx g;
+int sawSTAT = FALSE;
+int sawFeatNames = FALSE;
+int sawCVParams = FALSE;
 
 GID
 #ifdef __USE_PROTOS
@@ -177,12 +180,12 @@ char *gcname;
                                                 if (gid != 0 && endgid != 0) {
                                                     gcAddRange(gid, endgid, firstPart, secondPart);
                                                 } else {
-                                                    hotMsg(g, hotFATAL, "aborting because of errors");
+                                                    hotMsg(g, hotFATAL, "incomplete glyph range detected");
                                                 }
 
                                             } else {
                                                 featMapGName2GID(g, firstPart, FALSE);
-                                                hotMsg(g, hotFATAL, "aborting because of errors");
+                                                hotMsg(g, hotFATAL, "incomplete glyph range or glyph not in font");
                                             }
                                             zzEXIT(zztasp4);
                                         } else {
@@ -2344,6 +2347,8 @@ featureNameEntry()
             spec = _trv.spec;
             lang = _trv.lang;
         }
+
+        sawFeatNames = TRUE;
         addFeatureNameString(plat, spec, lang);
         zzEXIT(zztasp1);
         return;
@@ -2365,7 +2370,8 @@ featureNames()
     zzBLOCK(zztasp1);
     zzMake0;
     {
-        h->featNameID = 0;
+        sawFeatNames = TRUE;
+        h->featNameID = nameReserveUserID(h->g);
         zzmatch(K_feat_names);
         zzCONSUME;
         zzmatch(157);
@@ -2414,13 +2420,14 @@ cvParameterBlock()
     zzBLOCK(zztasp1);
     zzMake0;
     {
+        sawCVParams = TRUE;
         h->cvParameters.FeatUILabelNameID = 0;
         h->cvParameters.FeatUITooltipTextNameID = 0;
         h->cvParameters.SampleTextNameID = 0;
         h->cvParameters.NumNamedParameters = 0;
         h->cvParameters.FirstParamUILabelNameID = 0;
         h->cvParameters.charValues.cnt = 0;
-        h->featNameID = 0;
+        h->featNameID = nameReserveUserID(h->g);
         zzmatch(K_cv_params);
         zzCONSUME;
         zzmatch(157);
@@ -5056,6 +5063,7 @@ table_STAT()
         checkTag(t.ulval, tableTag, 1);
         zzCONSUME;
 
+        sawSTAT = TRUE;
         zzmatch(157);
         zzCONSUME;
         {
@@ -5542,6 +5550,18 @@ table_name()
 
                                 id = numUInt16Ext();
 
+                                if (sawSTAT && id > 255)
+                                    hotMsg(g, hotFATAL,
+                                           "name table should be defined before "
+                                           "STAT table with nameids above 255");
+                                if (sawCVParams && id > 255)
+                                    hotMsg(g, hotFATAL,
+                                           "name table should be defined before "
+                                           "GSUB cvParameters with nameids above 255");
+                                if (sawFeatNames && id > 255)
+                                    hotMsg(g, hotFATAL,
+                                           "name table should be defined before "
+                                           "GSUB featureNames with nameids above 255");
                                 {
                                     zzBLOCK(zztasp4);
                                     zzMake0;

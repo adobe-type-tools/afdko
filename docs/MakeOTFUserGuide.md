@@ -236,7 +236,22 @@ Versions of MakeOTF prior to FDK 2.5 used a similar syntax in the FontMenuNameDB
 If the key `c=` is used, then MakeOTF will build the older style name table. If the keys `l=` or `m=` are present, it will build the newer style name table . If none of these are present, then there is no difference in how the name table is built.
 
 ## **GlyphOrderAndAliasDB** (GOADB)
-The GOADB file is used to rename and to establish an order for the glyphs in a font. It is a simple text file with one line per glyph name. Each line contains at least two fields, and optionally three fields. The first field is the final glyph name to be used in the output font. The second field is the ‘friendly’ name used in the source font data. The third field is a Unicode value, specified in the form `uniXXXX` or `uXXXX`, where `XXXX` is a Unicode value (hexadecimal). One may specify more than one Unicode value for a glyph by giving a comma separated list of values, for example: `uni0020,uni00A0`. The `XXXX` hexadecimal values *must* be either numerals (0-9) or uppercase letters. Values containing lowercase letters will be ignored. The source font is not required to have any glyphs that are named in the `GlyphOrderAndAliasDB` file.
+The GOADB file is used to rename and to establish an order for the glyphs in a font. 
+It is a simple text file with one line per glyph name. Each line contains at least two fields, 
+and optionally three fields. The first field is the final glyph name to be used in the output font. 
+The second field is the ‘friendly’ name used in the source font data. 
+The third field is a Unicode value, specified in the form `uniXXXX` or `uXXXX[XX]` (see [note](#unicode_note)). 
+One may specify more than one Unicode value for a glyph by giving a comma separated list of values, for example: `uni0020,uni00A0`. 
+The `XXXX` hexadecimal values *must* be either numerals (0-9) or uppercase letters. Values containing lowercase letters will be ignored. 
+The source font is not required to have any glyphs that are named in the `GlyphOrderAndAliasDB` file.
+
+<a name="unicode_note"></a>
+Note: Unicode values can be used in the form `uniXXXX` or `uXXXX[XX]` where `XXXX[XX]` is a hexadecimal Unicode value.
+The number of `X` is determined by the codepoint. For example, `U+0903` can be written as either 
+`uni0903` or `u0903`. If the codepoint requires 5 or 6 digits, for example `U+F0002` or `U+F00041`, 
+then the format must contain the same number of digits: `uF0002` or `uF00041`. This only applies when 
+assigning Unicode values using column 3.
+
 
 It should be noted that the ordering, renaming, and Unicode override operations are applied only if the `–r` option or the `-ga` option is specified. These operations work as follows:
 
@@ -246,11 +261,11 @@ It should be noted that the ordering, renaming, and Unicode override operations 
 
   3) Override the default Unicode encoding by MakeOTF. MakeOTF will assign Unicode values to glyphs in a non-CID font when possible. (For a CID font, the Unicode values are provided by the Adobe CMap files.) The rules used are as follows:
 
-      a) If the third field of the GOADB record for a glyph contains a Unicode value in the form uniXXXX or uXXXX (where XXXX stands for a Unicode value), assign that Unicode value to the glyph. Else b);
+      a) If the third field of the GOADB record for a glyph contains a Unicode value in the form uniXXXX or uXXXX\[XX\] (see [note](#unicode_note)), assign that Unicode value to the glyph. Else b);
       
       b) If a glyph name is in the [Adobe Glyph List For New Fonts](https://github.com/adobe-type-tools/agl-aglfn/blob/master/aglfn.txt), use the assigned Unicode value. Else c);
       
-      c) If the glyph name is in the form uniXXXX or uXXXX (where XXXX stands for a Unicode value), assign the Unicode value. Else d);
+      c) If the glyph name is in the form uniXXXX or uXXXX\[XX\] (see [note](#unicode_note)), assign the Unicode value. Else d);
 
       d) Do not assign any Unicode value.
 

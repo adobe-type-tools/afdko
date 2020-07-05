@@ -553,6 +553,24 @@ def test_parameter_offset_overflow_bug1017():
     assert differ([expected_txt, actual_txt])
 
 
+def test_bug1178():
+    input_filename = 'fealib/font.pfa'
+    feat_filename = 'fealib/bug1178.fea'
+    ttx_filename = 'fealib/bug1178.ttx'
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'ff', f'_{get_input_path(feat_filename)}',
+                        'o', f'_{actual_path}'])
+    actual_ttx = generate_ttx_dump(actual_path, ['name', 'STAT'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx,
+                   '-s',
+                   '<ttFont sfntVersion' + SPLIT_MARKER +
+                   '    <checkSumAdjustment value=' + SPLIT_MARKER +
+                   '    <created value=' + SPLIT_MARKER +
+                   '    <modified value='])
+
+
 TEST_FEATURE_FILES = [
     "Attach", "enum", "markClass", "language_required", "GlyphClassDef",
     "LigatureCaretByIndex", "LigatureCaretByPos", "lookup", "lookupflag",
@@ -570,7 +588,8 @@ TEST_FEATURE_FILES = [
     "ZeroValue_SinglePos_horizontal", "ZeroValue_SinglePos_vertical",
     "ZeroValue_PairPos_horizontal", "ZeroValue_PairPos_vertical",
     "ZeroValue_ChainSinglePos_horizontal", "ZeroValue_ChainSinglePos_vertical",
-    "PairPosSubtable", "MultipleLookupsPerGlyph", "MultipleLookupsPerGlyph2"
+    "PairPosSubtable", "MultipleLookupsPerGlyph", "MultipleLookupsPerGlyph2",
+    "name_after_STAT.bad", "incomplete_glyph_range.bad",
 ]
 
 TEST_FEATURE_FILES_XFAIL = [
@@ -580,6 +599,8 @@ TEST_FEATURE_FILES_XFAIL = [
     "language_required",  # required
     "PairPosSubtable",   # https://github.com/adobe-type-tools/afdko/issues/971
     "bug1307",           # https://github.com/adobe-type-tools/afdko/issues/966
+    "name_after_STAT.bad",
+    "incomplete_glyph_range.bad",
 ]
 
 TEST_FEATURE_FILES_TABLES = {

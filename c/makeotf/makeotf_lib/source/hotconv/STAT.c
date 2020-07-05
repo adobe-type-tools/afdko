@@ -129,11 +129,11 @@ int STATFill(hotCtx g) {
     }
 
     if (!nameVerifyIDExists(g, h->elidedFallbackNameID))
-        hotMsg(g, hotFATAL, "ElidedFallbackNameID points to a nameID that "
+        hotMsg(g, hotFATAL, "[STAT] ElidedFallbackNameID points to a nameID that "
                             "does not exist in \"name\" table.");
 
     h->tbl.majorVersion = 1;
-    h->tbl.minorVersion = 2;
+    h->tbl.minorVersion = 1;
     h->tbl.designAxisSize = AXIS_RECORD_SIZE;
     h->tbl.designAxisCount = h->designAxes.cnt;
     h->tbl.designAxesOffset = NULL_OFFSET;
@@ -160,18 +160,19 @@ int STATFill(hotCtx g) {
                     if (!axisIndexOfTag(h, av->format1.axisTag,
                         &av->format1.axisIndex)) {
                         hotMsg(g, hotFATAL,
-                               "No STAT DesignAxis defined for \"%c%c%c%c\".",
+                               "[STAT] No DesignAxis defined for \"%c%c%c%c\".",
                                TAG_ARG(av->format1.axisTag));
                     }
                     break;
 
                 case 4:
+                    h->tbl.minorVersion = 2;
                     for (j = 0; j < av->format4.axisCount; j++) {
                         if (!axisIndexOfTag(h,
                                 av->format4.axisValues[j].axisTag,
                                 &av->format4.axisValues[j].axisIndex)) {
                             hotMsg(g, hotFATAL,
-                                   "No STAT DesignAxis defined for \"%c%c%c%c\".",
+                                   "[STAT] No DesignAxis defined for \"%c%c%c%c\".",
                                    TAG_ARG(av->format4.axisValues[j].axisTag));
                         }
                     }
@@ -294,12 +295,45 @@ void STATFree(hotCtx g) {
 void STATAddDesignAxis(hotCtx g, Tag tag, uint16_t nameID, uint16_t ordering) {
     STATCtx h = g->ctx.STAT;
     AxisRecord *ar;
-    long i;
+    long index;
+    int i;
+    long j;
 
-    for (i = 0; i < h->designAxes.cnt; i++) {
-        AxisRecord *ar = &h->designAxes.array[i];
+    // Currently registered tags are 'wght', 'wdth', 'opsz', 'ital', 'slnt'
+    char tagString[4] = {TAG_ARG(tag)};
+    const uint32_t *regTags[5] = {
+                                  TAG('i','t','a','l'), TAG('o','p','s','z'),
+                                  TAG('s','l','n','t'), TAG('w','d','t','h'),
+                                  TAG('w','g','h','t'),
+                                  };
+
+    // Unregistered tags should be all uppercase
+    int regTag = false;
+    int size = sizeof(regTags) / sizeof(regTags[0]);
+    for (i = 0; i < size; i++) {
+        if (tag == regTags[i]) {
+            regTag = true;
+            break;
+            }
+    }
+    if (!regTag) {
+        int hasLC = false;
+        for (j = 0; j <= 4; j++) {
+            if (tagString[j] >= 'a' && tagString[j] <= 'z') {
+                hasLC = true;
+                break;
+            }
+        }
+        if (hasLC) {
+            hotMsg(g, hotWARNING, "[STAT] Unregistered axis tag \"%c%c%c%c\" "
+            "should be uppercase.\n", TAG_ARG(tag));
+        }
+    }
+
+    for (index = 0; index < h->designAxes.cnt; index++) {
+        AxisRecord *ar = &h->designAxes.array[index];
         if (ar->axisTag == tag)
-            hotMsg(g, hotFATAL, "STAT DesignAxis with \"%c%c%c%c\" tag "
+            hotMsg(g, hotFATAL, "[STAT] DesignAxis tag \"%c%c%c%c\" "
                    "is already defined.", TAG_ARG(tag));
     }
 
@@ -314,6 +348,7 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
                            uint16_t nameID, Fixed minValue, Fixed maxValue) {
     STATCtx h = g->ctx.STAT;
     long i;
+    long j;
 
     AxisValueTable *av = dnaNEXT(h->axisValues);
 
@@ -324,6 +359,14 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
 
     switch (format) {
         case 1:
+            for (i = 0; i < h->axisValues.cnt; i++) {
+                AxisValueTable *refav = &h->axisValues.array[i];
+                if (refav->format1.axisTag == axisTags[0]
+                    && refav->format1.value == values[0])
+                    hotMsg(g, hotFATAL, "[STAT] AxisValueTable already defined "
+                    "for axis \"%c%c%c%c\" with value %.2f\n",
+                    TAG_ARG(axisTags[0]), FIX2DBL(values[0]));
+            }
             av->size = AXIS_VALUE_TABLE1_SIZE;
             av->format1.axisTag = axisTags[0];
             av->format1.flags = flags;
@@ -332,6 +375,25 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
             break;
 
         case 2:
+            if ((values[0] < minValue) || (values[0] > maxValue)) {
+                    hotMsg(g, hotWARNING, "[STAT] \"%c%c%c%c\" AxisValue "
+                        "default value %.2f is not in range %.2f-%.2f",
+                        TAG_ARG(axisTags[0]), FIX2DBL(values[0]),
+                        FIX2DBL(minValue), FIX2DBL(maxValue));
+            }
+
+            for (i = 0; i < h->axisValues.cnt; i++) {
+                AxisValueTable *refav = &h->axisValues.array[i];
+                if (refav->format2.axisTag == axisTags[0]
+                    && refav->format2.nominalValue == values[0]
+                    && refav->format2.rangeMinValue == minValue
+                    && refav->format2.rangeMaxValue == maxValue)
+                    hotMsg(g, hotFATAL, "[STAT] AxisValueTable already defined "
+                    "for axis \"%c%c%c%c\" with values %.2f %.2f %.2f\n",
+                    TAG_ARG(axisTags[0]), FIX2DBL(values[0]),
+                        FIX2DBL(minValue), FIX2DBL(maxValue));
+            }
+
             av->size = AXIS_VALUE_TABLE2_SIZE;
             av->format2.axisTag = axisTags[0];
             av->format2.flags = flags;
@@ -342,6 +404,16 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
             break;
 
         case 3:
+            for (i = 0; i < h->axisValues.cnt; i++) {
+                AxisValueTable *refav = &h->axisValues.array[i];
+                if (refav->format3.axisTag == axisTags[0]
+                    && refav->format3.value == values[0]
+                    && refav->format3.linkedValue == minValue)
+                    hotMsg(g, hotFATAL, "[STAT] AxisValueTable already defined "
+                    "for axis \"%c%c%c%c\" with values %.2f %.2f\n",
+                    TAG_ARG(axisTags[0]), FIX2DBL(values[0]),
+                    FIX2DBL(minValue));
+            }
             av->size = AXIS_VALUE_TABLE3_SIZE;
             av->format3.axisTag = axisTags[0];
             av->format3.flags = flags;
@@ -351,6 +423,41 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
             break;
 
         case 4:
+            for (i = 0; i < h->axisValues.cnt; i++) {
+                AxisValueTable *refav = &h->axisValues.array[i];
+				bool dupeAVT[count];
+				bool isDupe = true;
+                if (refav->format4.axisCount == count) {
+					for (j = 0; j < count; j++) {
+		                if (refav->format4.axisValues[j].axisTag == axisTags[j]
+        		        	&& refav->format4.axisValues[j].value == values[j]) {
+        		        	dupeAVT[j] = true;
+						}
+						else {
+        		        	dupeAVT[j] = false;
+						}
+					}
+						for (j = 0; j < count; j++) {
+							if (!dupeAVT[j]) {
+								isDupe = false;
+//								break;
+							}
+						}
+						if (isDupe) {
+							// message + number of axes * 14 (wght ddddd.dd)
+							char dupeMsg[54 + count * 14];
+							dupeMsg[0] = '\0';
+							sprintf(dupeMsg, "[STAT] AxisValueTable already defined with locations: ");
+							for (j = 0; j < count; j++) {
+								char axisMsg[20];
+								axisMsg[0] = '\0';
+								sprintf(axisMsg, "%c%c%c%c %.2f ", TAG_ARG(axisTags[j]), FIX2DBL(values[j]));
+								strcat(dupeMsg, axisMsg);
+							}
+							hotMsg(g, hotFATAL, dupeMsg);
+						}
+					}
+            }
             av->size = AXIS_VALUE_TABLE4_SIZE(count);
             av->format4.axisCount = count;
             av->format4.flags = flags;
