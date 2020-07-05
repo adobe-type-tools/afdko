@@ -425,38 +425,37 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
         case 4:
             for (i = 0; i < h->axisValues.cnt; i++) {
                 AxisValueTable *refav = &h->axisValues.array[i];
-				bool dupeAVT[99];
-				bool isDupe = true;
-				if (refav->format4.axisCount == count) {
-					for (j = 0; j < count; j++) {
-						if (refav->format4.axisValues[j].axisTag == axisTags[j]
-							&& refav->format4.axisValues[j].value == values[j]) {
-							dupeAVT[j] = true;
-						}
-						else {
-							dupeAVT[j] = false;
-						}
-					}
-					for (j = 0; j < count; j++) {
-						if (!dupeAVT[j]) {
-							isDupe = false;
-							break;
-						}
-					}
-					if (isDupe) {
-						// message + number of axes * 14 (wght ddddd.dd)
-						char dupeMsg[2048];
-						dupeMsg[0] = '\0';
-						sprintf(dupeMsg, "[STAT] AxisValueTable already defined with locations: ");
-						for (j = 0; j < count; j++) {
-							char axisMsg[20];
-							axisMsg[0] = '\0';
-							sprintf(axisMsg, "%c%c%c%c %.2f ", TAG_ARG(axisTags[j]), FIX2DBL(values[j]));
-							strcat(dupeMsg, axisMsg);
-						}
-						hotMsg(g, hotFATAL, dupeMsg);
-					}
-				}
+                bool dupeAVT[99];
+                bool isDupe = true;
+                if (refav->format4.axisCount == count) {
+                    for (j = 0; j < count; j++) {
+                        if (refav->format4.axisValues[j].axisTag == axisTags[j]
+                            && refav->format4.axisValues[j].value == values[j]) {
+                            dupeAVT[j] = true;
+                        } else {
+                            dupeAVT[j] = false;
+                        }
+                    }
+                    for (j = 0; j < count; j++) {
+                        if (!dupeAVT[j]) {
+                            isDupe = false;
+                            break;
+                        }
+                    }
+                    if (isDupe) {
+                        // message + number of axes * 14 (wght ddddd.dd)
+                        char dupeMsg[2048];
+                        dupeMsg[0] = '\0';
+                        sprintf(dupeMsg, "[STAT] AxisValueTable already defined with locations: ");
+                        for (j = 0; j < count; j++) {
+                            char axisMsg[20];
+                            axisMsg[0] = '\0';
+                            sprintf(axisMsg, "%c%c%c%c %.2f ", TAG_ARG(axisTags[j]), FIX2DBL(values[j]));
+                            strcat(dupeMsg, axisMsg);
+                        }
+                        hotMsg(g, hotFATAL, dupeMsg);
+                    }
+                }
             }
             av->size = AXIS_VALUE_TABLE4_SIZE(count);
             av->format4.axisCount = count;
