@@ -883,7 +883,7 @@ static int parseSVG(svrCtx h) {
         } else if (tokenEqualStr(tk, "unicode=")) {
             char *endPtr;
             tk = getAttribute(h);
-            if ((tk == NULL) || (tk->length > kMaxName)) {
+            if ((tk == NULL) || (tk->length >= kMaxName)) {
                 fatal(h, svrErrParse, "Error parsing Unicode value. Glyph index: %ld.", h->chars.index.cnt);
                 return svrErrParse; /* should not reach this line, but it makes Xcode happy */
             }
@@ -905,10 +905,7 @@ static int parseSVG(svrCtx h) {
                     unicode = '>';
                     sprintf(tempName, "greater");
                 } else {
-                    size_t len = tk->length;
-                    if (len > kMaxName)
-                        len = kMaxName - 1;
-                    strncpy(tempVal, tk->val, len);
+                    strncpy(tempVal, tk->val, tk->length);
                     message(h, "Encountered bad Unicode value: '%s'.", tempVal);
                     continue;
                 }
@@ -923,7 +920,7 @@ static int parseSVG(svrCtx h) {
         } else if (tokenEqualStr(tk, "horiz-adv-x=")) {
             long width;
             tk = getToken(h);
-            if ((tk == NULL) || (tk->length > kMaxName)) {
+            if ((tk == NULL) || (tk->length >= kMaxName)) {
                 fatal(h, svrErrParse, "Error parsing horiz-adv-x value. Glyph index: %ld.", h->chars.index.cnt);
                 return svrErrParse; /* should not reach this line, but it makes Xcode happy */
             }
@@ -1145,7 +1142,7 @@ static STI addString(svrCtx h, size_t length, const char *value) {
         /* A null name (/) is legal in PostScript but could lead to unexpected
            behavior elsewhere in the coretype libraries so it is substituted
            for a name that is very likely to be unique in the font */
-        const char subs_name[] = "_null_name_substitute_";
+        static const char subs_name[] = "_null_name_substitute_";
         value = subs_name;
         length = sizeof(subs_name) - 1;
         message(h, "null charstring name");

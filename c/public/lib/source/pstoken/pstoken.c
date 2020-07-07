@@ -576,7 +576,7 @@ static int skipDictionary(pstCtx h, int call_depth) {
                     return 1;
                 break;
             case '<':
-                if (skipAngle(h, call_depth + 1))
+                if (skipAngle(h, call_depth + 1) == -1)
                     return 1;
                 break;
             case -1:

@@ -319,7 +319,7 @@ static STI addString(t1rCtx h, size_t length, const char *value) {
         /* A null name (/) is legal in PostScript but could lead to unexpected
            behavior elsewhere in the coretype libraries so it is substituted
            for a name that is very likely to be unique in the font */
-        const char subs_name[] = "_null_name_substitute_";
+        static const char subs_name[] = "_null_name_substitute_";
         value = subs_name;
         length = sizeof(subs_name) - 1;
         message(h, "null charstring name");
@@ -1543,13 +1543,18 @@ static void prepMMData(t1rCtx h) {
     char buf[64];
     char coords[64];
     char *p;
-    char *FontName = getString(h, (STI)h->fd->fdict->FontName.impl);
+    char *pFontName = getString(h, (STI)h->fd->fdict->FontName.impl);
+    char FontName[128];
     unsigned int nAxes;
     char *Weight = "SnapShotMM";
 
-    if (FontName == NULL)
+    if (pFontName == NULL)
         fatal(h, t1rErrMMParse, "missing FontName");
 
+    /* copy FontName because call to addString() below may make pointer stale */
+    strncpy(FontName, pFontName, 128);
+    FontName[127] = 0;
+    
     if (h->fd->aux.nMasters == 0)
         fatal(h, t1rErrMMParse, "invalid number of masters");
 
