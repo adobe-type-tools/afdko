@@ -1554,7 +1554,7 @@ static void prepMMData(t1rCtx h) {
     /* copy FontName because call to addString() below may make pointer stale */
     strncpy(FontName, pFontName, 128);
     FontName[127] = 0;
-    
+
     if (h->fd->aux.nMasters == 0)
         fatal(h, t1rErrMMParse, "invalid number of masters");
 
