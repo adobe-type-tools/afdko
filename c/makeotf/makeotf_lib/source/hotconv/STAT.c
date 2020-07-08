@@ -320,7 +320,7 @@ void STATAddDesignAxis(hotCtx g, Tag tag, uint16_t nameID, uint16_t ordering) {
     }
     if (!regTag) {
         int hasLC = false;
-        for (j = 0; j <= 4; j++) {
+        for (j = 0; j < 4; j++) {
             if (tagString[j] >= 'a' && tagString[j] <= 'z') {
                 hasLC = true;
                 break;
