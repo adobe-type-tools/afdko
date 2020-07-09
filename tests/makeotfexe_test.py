@@ -568,7 +568,8 @@ def test_bug1178():
                    '<ttFont sfntVersion' + SPLIT_MARKER +
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
-                   '    <modified value='])
+                   '    <modified value=',
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
 
 
 TEST_FEATURE_FILES = [
