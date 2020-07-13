@@ -12,6 +12,7 @@
 #include <string.h>
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
+#define MAX_NUM_TTC_TABLES 512  /* Arbitrary limit to avoid large memory allocations */
 
 /* Library context */
 struct sfrCtx_ /* Context */
@@ -177,14 +178,27 @@ static void readSfntDirectory(sfrCtx h, long origin) {
 static void readTTCDirectory(sfrCtx h, long origin) {
     long i;
     size_t size;
+    long dir_count = 0;
 
     /* Skip version since we are only interested in version 1.0 fields*/
     (void)read4(h);
 
     /* Read directory */
-    h->TTC.DirectoryCount = read4(h);
-    size = (size_t)h->TTC.DirectoryCount * sizeof(long);
-    if (h->TTC.DirectoryCount <= 0 || size / sizeof(long) != h->TTC.DirectoryCount) /* overflow check */
+    dir_count = h->TTC.DirectoryCount = read4(h);
+    if (dir_count > MAX_NUM_TTC_TABLES)
+    {
+        /* NOTE: this limit is not actually part of the spec; it was arbitrarily
+           chosen to avoid massive memory allocations when dir_count is ridiculously
+           large. Ideally we'd check the stream's size, but that's not possible for
+           the stdin input case. */
+        fprintf(stderr, "tx: TTC directory count %ld > limit %i\n", dir_count, MAX_NUM_TTC_TABLES);
+        fprintf(stderr, "tx: fatal error\n");
+        fatal(h, sfrErrTables);
+    }
+
+    size = (size_t)dir_count * sizeof(long);
+    
+    if (dir_count <= 0 || size / sizeof(long) != dir_count) /* overflow check */
     {
         h->TTC.DirectoryCount = 0;
         return;
@@ -192,7 +206,7 @@ static void readTTCDirectory(sfrCtx h, long origin) {
     h->TTC.TableDirectory = (long *)memResize(h, h->TTC.TableDirectory, size);
     h->flags |= TTC_STM; /* readSfntDirectory( reads in to h->TTC.TableDirectory[i].directory if TTC_STM is set.*/
 
-    for (i = 0; i < h->TTC.DirectoryCount; i++) {
+    for (i = 0; i < dir_count; i++) {
         h->TTC.TableDirectory[i] = read4(h) + origin;
     }
     h->TTC.origin = origin;
