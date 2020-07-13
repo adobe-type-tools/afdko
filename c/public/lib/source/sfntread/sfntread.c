@@ -197,7 +197,7 @@ static void readTTCDirectory(sfrCtx h, long origin) {
     }
 
     size = (size_t)dir_count * sizeof(long);
-    
+
     if (dir_count <= 0 || size / sizeof(long) != dir_count) /* overflow check */
     {
         h->TTC.DirectoryCount = 0;
