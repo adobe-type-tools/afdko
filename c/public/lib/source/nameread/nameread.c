@@ -462,7 +462,7 @@ long nam_generateArbitraryInstancePSName(nam_name nameTbl,
         }
     }
     buffer[nameLen++] = 0;
-    if (nameLen <= (long)instanceNameLen) {
+    if (nameLen < (long)instanceNameLen) {
         STRNCPY_S(instanceName, instanceNameLen, buffer, nameLen);
         instanceName[nameLen] = 0;
     } else

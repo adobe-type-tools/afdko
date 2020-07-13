@@ -50,6 +50,7 @@ static char *applestd[258] =
 #define SHORT_PS_NAME_LIMIT   63 /* according to the OpenType name table spec */
 #define LONG_PS_NAME_LIMIT   127 /* according to Adobe tech notes #5902 */
 #define STRING_BUFFER_LIMIT 1024 /* used to load family name/full name/copyright/trademark strings */
+#define SUBR_INDEX_CNT_LIMIT 134217728 /* limit subrINDEX cnt to avoid large memory allocations */
 
 #define ARRAY_LEN(t) (sizeof(t) / sizeof((t)[0]))
 
@@ -1534,7 +1535,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
 /* Read subroutine index. */
 static void readSubrINDEX(cfrCtx h, ctlRegion *region, SubrOffsets *offsets) {
     long i;
-    long cnt;
+    uint32_t cnt;
     Offset dataoff;
     OffSize offSize;
     OffSize cntSize;
@@ -1544,6 +1545,11 @@ static void readSubrINDEX(cfrCtx h, ctlRegion *region, SubrOffsets *offsets) {
     if (h->flags & CFR_IS_CFF2) {
         cntSize = 4;
         cnt = readN(h, cntSize);
+        if (cnt > SUBR_INDEX_CNT_LIMIT)
+        {
+            message(h, "subroutine count [%d] exceeds limit [%d]", cnt, SUBR_INDEX_CNT_LIMIT);
+            fatal(h, cfrErrINDEXHeader);
+        }
     } else {
         cntSize = 2;
         cnt = read2(h);
