@@ -324,6 +324,7 @@ void GPOSNew(hotCtx g) {
     GPOSCtx h = MEM_NEW(g, sizeof(struct GPOSCtx_));
 
     h->new.script = h->new.language = h->new.feature = TAG_UNDEF;
+    h->new.fileName = NULL;
 
     dnaINIT(g->dnaCtx, h->new.rules, 50, 200);
     dnaINIT(g->dnaCtx, h->new.single, 500, 1000);
@@ -2945,6 +2946,8 @@ static void createAnonLookups(hotCtx g, GPOSCtx h) {
         SubtableInfo *newsi = &h->new;
         si->script = si->language = si->feature = TAG_UNDEF; /* so that these will sort to the end of the subtable array       */
                                                              /* and will not be considered for adding to the FeatureList table */
+        si->fileName = NULL;
+
         *newsi = *si;
 
         sprintf(g->error_id_text, "feature '%c%c%c%c'", TAG_ARG(si->parentFeatTag));
