@@ -1240,7 +1240,7 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
             value[i++] = 0;
         }
         lineno++;
-        len = sscanf(buf, "%127s %128[^\n]", key, value);
+        len = sscanf(buf, "%127s %127[^\n]", key, value);
         if (len != 2) {
             if (len == -1)
                 continue;
