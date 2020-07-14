@@ -1934,7 +1934,7 @@ table_OS_2
 			  (
 				<<for (arrayIndex = 0; arrayIndex < kLenUnicodeList; arrayIndex++) unicodeRangeList[arrayIndex] = kCodePageUnSet; arrayIndex = 0; >>
 				(
-				numUInt16>[valUInt16] <<if ((arrayIndex) < kLenUnicodeList) unicodeRangeList[arrayIndex] = valUInt16; arrayIndex++;>>
+				numUInt16>[valUInt16] <<if (arrayIndex < kLenUnicodeList) unicodeRangeList[arrayIndex] = valUInt16; arrayIndex++;>>
 				)+
 				<<featSetUnicodeRange(g, unicodeRangeList);>>
 			  )
@@ -1943,7 +1943,7 @@ table_OS_2
 			  (
 				<<for (arrayIndex = 0; arrayIndex < kLenCodePageList; arrayIndex++) codePageList[arrayIndex] = kCodePageUnSet; arrayIndex = 0;>>
 				(
-				numUInt16>[valUInt16] <<codePageList[arrayIndex] = valUInt16; arrayIndex++;>>
+				numUInt16>[valUInt16] <<if (arrayIndex < kLenCodePageList) codePageList[arrayIndex] = valUInt16; arrayIndex++;>>
 				)+
 				<<featSetCodePageRange(g, codePageList);>>
 			  )
