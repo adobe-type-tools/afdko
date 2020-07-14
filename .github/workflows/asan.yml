@@ -2,7 +2,7 @@ name: Test with ASAN
 
 on:
   repository_dispatch:
-    types: manual-trigger
+    types: asan-manual-trigger
 
 jobs:
   run_asan:
