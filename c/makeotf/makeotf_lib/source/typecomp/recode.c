@@ -4622,10 +4622,10 @@ void InitStaticFontData(tcCtx g, int font__serif_selector, double *StdVW, double
         /* are the same for all masters, in all the fill-in fonts.                   */
         gi = cffGetGlyphInfo(ctx, h->newGlyph.fill_in_cff[font_index].scaling_gid, h->metricsPathcb);
 
-        cffFree(ctx);
-
         scaling_gid_bottom = gi->bbox.bottom;
         scaling_gid_top = gi->bbox.top;
+
+        cffFree(ctx);
 
         /* Now get the font transform matrix and the UDV to be used with   */
         /* this master face of the target font, for the new glyph from the */
