@@ -50,7 +50,7 @@ static char *applestd[258] =
 #define SHORT_PS_NAME_LIMIT   63 /* according to the OpenType name table spec */
 #define LONG_PS_NAME_LIMIT   127 /* according to Adobe tech notes #5902 */
 #define STRING_BUFFER_LIMIT 1024 /* used to load family name/full name/copyright/trademark strings */
-#define SUBR_INDEX_CNT_LIMIT 134217728 /* limit subrINDEX cnt to avoid large memory allocations */
+#define SUBR_INDEX_CNT_LIMIT 67108864 /* limit subrINDEX cnt to avoid large memory allocations */
 
 #define ARRAY_LEN(t) (sizeof(t) / sizeof((t)[0]))
 
