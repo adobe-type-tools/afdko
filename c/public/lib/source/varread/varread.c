@@ -1084,7 +1084,7 @@ var_hmtx var_loadhmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
 
     /* estimate the number of glyphs from the table size instead of reading the head table */
     numGlyphs = (table->length / 2) - hmtx->header.numberOfHMetrics;
-    if (numGlyphs < hmtx->header.numberOfHMetrics) {
+    if ((numGlyphs < hmtx->header.numberOfHMetrics) || (numGlyphs > 65535)) {
         sscb->message(sscb, "invalid hmtx table size");
         goto cleanup;
     }
