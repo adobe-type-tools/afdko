@@ -1,9 +1,66 @@
 Changelog
 =========
 
-3.5.0 (coming soon...)
+3.5.0 (released 2020-07-16)
 ----------------------
-- description to come
+- [docs] fix broken links, add new links, fix typos, add templates
+  ([#1140](https://github.com/adobe-type-tools/afdko/pull/1140),
+   [#1151](https://github.com/adobe-type-tools/afdko/pull/1151),
+   [#1176](https://github.com/adobe-type-tools/afdko/pull/1176))
+- [tx] many fixes related to uninitialized variables, buffer/stack overflows,
+  etc. Thanks to @antlarr-suse and internal contributors for chasing these down and fixing!
+  ([#1141](https://github.com/adobe-type-tools/afdko/pull/1141),
+   [#1180](https://github.com/adobe-type-tools/afdko/pull/1180),
+   [#1182](https://github.com/adobe-type-tools/afdko/pull/1182),
+   [#1187](https://github.com/adobe-type-tools/afdko/pull/1187),
+   [#1188](https://github.com/adobe-type-tools/afdko/pull/1188))
+- [makeotf] Drop Multiple Master in OpenType support (thanks @khaledhosny!)
+  ([#995](https://github.com/adobe-type-tools/afdko/issues/995),
+   [#1144](https://github.com/adobe-type-tools/afdko/pull/1144))
+- [checkoutlinesufo] Improve overlap removal
+  ([#790](https://github.com/adobe-type-tools/afdko/issues/790),
+   [#1146](https://github.com/adobe-type-tools/afdko/pull/1146),
+   [#1170](https://github.com/adobe-type-tools/afdko/pull/1170))
+- [fontsetplot, ttfdecomponentizer] Fix proofing issues
+  ([#1125](https://github.com/adobe-type-tools/afdko/issues/1125),
+   [#1148](https://github.com/adobe-type-tools/afdko/pull/1148))
+- [requirements] remove dependency on standalone cu2qu (integrated into
+  fontTools 4.7.0)
+  ([#1150](https://github.com/adobe-type-tools/afdko/pull/1150))
+- [makeinstancesufo] fix `use-varlib` flag, check for extrapolation/warn when
+  using varLib
+  ([#1152](https://github.com/adobe-type-tools/afdko/issues/1152),
+   [#1155](https://github.com/adobe-type-tools/afdko/pull/1155))
+- [makeotf] update a misleading comment regarding how CodePageRange bits are set
+  ([#1156](https://github.com/adobe-type-tools/afdko/issues/1156),
+   [#1157](https://github.com/adobe-type-tools/afdko/pull/1157))
+- [sfntedit, sfntdiff] fix failures with long file/pathnames
+  ([#1139](https://github.com/adobe-type-tools/afdko/issues/1139),
+   [#1159](https://github.com/adobe-type-tools/afdko/pull/1159))
+- [tx] don't write FontMatrix in CFF2 FontDict
+  ([cffsubr #13](https://github.com/adobe-type-tools/cffsubr/issues/13),
+   [#1165](https://github.com/adobe-type-tools/afdko/pull/1165))
+- [makeotf, makeotfexe] STAT table updates and improvements
+  ([#1164](https://github.com/adobe-type-tools/afdko/issues/1164),
+   [#1166](https://github.com/adobe-type-tools/afdko/pull/1166),
+   [#1174](https://github.com/adobe-type-tools/afdko/pull/1174),
+   [#1177](https://github.com/adobe-type-tools/afdko/issues/1177),
+   [#1178](https://github.com/adobe-type-tools/afdko/issues/1178),
+   [#1179](https://github.com/adobe-type-tools/afdko/pull/1179))
+- [makeotf] Check for PostScript name in FontMenuNameDB
+  ([#1171](https://github.com/adobe-type-tools/afdko/issues/1171),
+   [#1172](https://github.com/adobe-type-tools/afdko/pull/1172))
+- [autohint, stemhist] **REMOVED FROM AFDKO** (use psautohint/psstemhist)
+  ([#826](https://github.com/adobe-type-tools/afdko/issues/826),
+   [#827](https://github.com/adobe-type-tools/afdko/issues/827),
+   [#1175](https://github.com/adobe-type-tools/afdko/pull/1175))
+- [makeotfexe] fix stack buffer overflow and use-after-free issues
+  ([#1183](https://github.com/adobe-type-tools/afdko/pull/1183),
+   [#1184](https://github.com/adobe-type-tools/afdko/pull/1184))
+- [mergefonts] fix stack buffer overflow issue
+  ([#1185](https://github.com/adobe-type-tools/afdko/pull/1185))
+- [spot] fix heap buffer overflow issue
+  ([#1186](https://github.com/adobe-type-tools/afdko/pull/1186))
 
 3.4.0 (released 2020-05-26)
 ---------------------------
