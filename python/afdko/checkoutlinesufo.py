@@ -4,7 +4,7 @@
 Tool that performs outline quality checks and can remove path overlaps.
 """
 
-__version__ = '2.4.2'
+__version__ = '2.4.3'
 
 import argparse
 from functools import cmp_to_key
@@ -13,6 +13,7 @@ import re
 from shutil import copy2
 import sys
 import textwrap
+import warnings
 
 import booleanOperations.booleanGlyph
 import defcon
@@ -21,6 +22,7 @@ from fontTools.ufoLib import UFOWriter, UFOLibError, UFOFormatVersion
 
 from afdko import ufotools
 from afdko.ufotools import (
+    thresholdAttrGlyph,
     kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER,
     kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME,
 )
@@ -65,9 +67,9 @@ class FontFile(object):
             self.font_type = UFO_FONT_TYPE
             ufotools.validateLayers(font_path)
             self.defcon_font = defcon.Font(font_path)
-            self.ufo_format = self.defcon_font.ufoFormatVersion
-            if self.ufo_format < 2:
-                self.ufo_format = 2
+            self.ufo_format = self.defcon_font.ufoFormatVersionTuple
+            if self.ufo_format < UFOFormatVersion.FORMAT_2_0:
+                self.ufo_format = UFOFormatVersion.FORMAT_2_0
             self.use_hash_map = use_hash_map
             self.ufo_font_hash_data = ufotools.UFOFontData(
                 font_path, self.use_hash_map,
@@ -118,29 +120,35 @@ class FontFile(object):
             To achieve this, the code below hacks ufoLib to surgically save
             only the processed layer.
             This hack is only performed if the original UFO is format 2.
+
+            NOTE: this is deprecated and will be removed from AFDKO.
             """
-            fmt_ver = {
-                1: UFOFormatVersion.FORMAT_1_0,
-                2: UFOFormatVersion.FORMAT_2_0,
-                3: UFOFormatVersion.FORMAT_3_0}.get(self.ufo_format)
             writer = UFOWriter(
-                self.defcon_font.path, formatVersion=fmt_ver)
+                self.defcon_font.path, formatVersion=self.ufo_format)
             writer.layerContents[
                 PROCD_GLYPHS_LAYER_NAME] = PROCD_GLYPHS_LAYER
             layers = self.defcon_font.layers
             layer = layers[PROCD_GLYPHS_LAYER_NAME]
 
-            if self.ufo_format == 2:
+            if self.ufo_format == UFOFormatVersion.FORMAT_2_0:
                 # Override the UFO's formatVersion. This disguises a UFO2 to
                 # be seen as UFO3 by ufoLib, thus enabling it to write the
                 # layer without raising an error.
+                warn_txt = ("Using a ‘hybrid’ UFO2-as-UFO3 is deprecated and "
+                            "will be removed from AFDKO by the end of 2020. "
+                            "This behavior (hack) was primarily to support "
+                            "older versions of RoboFont which did not support "
+                            "UFO3/layers. RoboFont 3 now supports UFO3 so the "
+                            "hack is no longer required. Please update your "
+                            "toolchain as needed.")
+                warnings.warn(warn_txt, category=FutureWarning)
                 writer._formatVersion = UFOFormatVersion.FORMAT_3_0
 
             glyph_set = writer.getGlyphSet(
                 layerName=PROCD_GLYPHS_LAYER_NAME, defaultLayer=False)
             writer.writeLayerContents(layers.layerOrder)
 
-            if self.ufo_format == 2:
+            if self.ufo_format == UFOFormatVersion.FORMAT_2_0:
                 # Restore the UFO's formatVersion to the original value.
                 # This makes the glif files be set to format 1 instead of 2.
                 glyph_set.ufoFormatVersionTuple = UFOFormatVersion.FORMAT_2_0
@@ -910,6 +918,8 @@ def restore_contour_order(fixed_glyph, original_contours):
     num_contours = len(new_list)
     # Check each extreme for a match.
     if num_contours > 0:
+        # ctr_starts tracks start points per contour
+        ctr_starts = {n: [] for n in range(len(fixed_glyph))}
         for i in range(num_contours):
             ci, contour = new_list[i]
             max_p = contour.maxP
@@ -933,7 +943,19 @@ def restore_contour_order(fixed_glyph, original_contours):
                                 if (point.x == old_start_point.x) \
                                         and (point.y == old_start_point.y) \
                                         and point.segmentType is not None:
+                                    try:
+                                        msg = ("Failed assertion: duplicated "
+                                               f"start point on contour {ci} "
+                                               f"at {point.x}, {point.y} of "
+                                               f"glyph {fixed_glyph.name}.")
+                                        assert not ctr_starts[ci], msg
+                                    except KeyError:
+                                        msg = (f"Contour index {ci} out "
+                                               "of range on updated glyph "
+                                               f"{fixed_glyph.name}")
+                                        raise KeyError(msg)
                                     contour.setStartPoint(pi)
+                                    ctr_starts[ci].append(pi)
 
                         break
                 if matched:
@@ -1075,7 +1097,14 @@ def run(args=None):
                     for point in contour:
                         point.x = int(round(point.x))
                         point.y = int(round(point.y))
+
+            # JH May 2020: remove overlap can leave some coincident points
+            # we use thresholdAttrGlyph (modified thresholdPen) to remove them
+            # prior to restore_contour_order.
+            thresholdAttrGlyph(fixed_glyph, 1)
+
             restore_contour_order(fixed_glyph, original_contours)
+
         # The following is needed when the script is called from another
         # script with Popen():
         sys.stdout.flush()

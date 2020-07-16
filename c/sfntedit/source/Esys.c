@@ -15,6 +15,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#define FILESTR_BUF_SIZE 1024
+
 static void error(char *filename) {
     fatal(SFED_MSG_sysFERRORSTR, strerror(errno), filename);
 }
@@ -79,15 +81,15 @@ FILE *sysOpenSearchpath(char *filename) {
         "c:/psfonts/%s",
         "c:/temp/%s",
         NULL};
+    static char file[FILESTR_BUF_SIZE];
 
     for (p = path; *p != NULL; p++) {
         struct stat st;
-        char file[256];
         short fd;
         FILE *f;
 
         file[0] = '\0';
-        sprintf(file, *p, filename);
+        snprintf(file, FILESTR_BUF_SIZE, *p, filename);
         f = fopen(file, "rb");
         if (f == NULL)
             continue;

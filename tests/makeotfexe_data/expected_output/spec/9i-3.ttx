@@ -23,29 +23,29 @@
         <AxisIndex value="0"/>
         <Flags value="0"/>
         <ValueNameID value="259"/>  <!-- Regular -->
-        <Value value="0.0061"/>
+        <Value value="400.0"/>
       </AxisValue>
       <AxisValue index="1" Format="2">
         <AxisIndex value="0"/>
         <Flags value="0"/>
         <ValueNameID value="260"/>  <!-- Regular -->
-        <NominalValue value="0.0061"/>
-        <RangeMinValue value="0.00458"/>
-        <RangeMaxValue value="0.00763"/>
+        <NominalValue value="400.0"/>
+        <RangeMinValue value="300.0"/>
+        <RangeMaxValue value="500.0"/>
       </AxisValue>
       <AxisValue index="2" Format="3">
         <AxisIndex value="0"/>
         <Flags value="0"/>
         <ValueNameID value="261"/>  <!-- Regular -->
-        <Value value="0.0061"/>
-        <LinkedValue value="0.01068"/>
+        <Value value="400.0"/>
+        <LinkedValue value="700.0"/>
       </AxisValue>
       <AxisValue index="3" Format="3">
         <AxisIndex value="1"/>
         <Flags value="0"/>
         <ValueNameID value="262"/>  <!-- Regular -->
         <Value value="0.0"/>
-        <LinkedValue value="0.00002"/>
+        <LinkedValue value="1.0"/>
       </AxisValue>
       <AxisValue index="4" Format="4">
         <!-- AxisCount=2 -->
@@ -53,11 +53,11 @@
         <ValueNameID value="263"/>  <!-- Mediumitalic -->
         <AxisValueRecord index="0">
           <AxisIndex value="0"/>
-          <Value value="0.00763"/>
+          <Value value="500.0"/>
         </AxisValueRecord>
         <AxisValueRecord index="1">
           <AxisIndex value="1"/>
-          <Value value="0.00002"/>
+          <Value value="1.0"/>
         </AxisValueRecord>
       </AxisValue>
     </AxisValueArray>

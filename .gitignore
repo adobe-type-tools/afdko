@@ -44,3 +44,6 @@ xcuserdata/
 **/visualstudio/Debug/*
 **/visualstudio/Release/*
 **/visualstudio/x64/*
+
+# temp output dirs created during tests
+**/temp_output

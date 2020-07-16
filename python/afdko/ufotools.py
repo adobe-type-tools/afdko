@@ -6,18 +6,20 @@ import os
 import re
 from collections import OrderedDict
 
+from fontPens.thresholdPen import ThresholdPen
 from fontTools.misc import etree as ET
 from fontTools.misc import plistlib
+from fontTools.pens.recordingPen import RecordingPen
 from fontTools.ufoLib import UFOReader
 
 from psautohint.ufoFont import norm_float
 
 from afdko import fdkutils
 
-__version__ = '1.35.0'
+__version__ = '1.35.1'
 
 __doc__ = """
-ufotools.py v1.35.0 Mar 03 2020
+ufotools.py v1.35.1 Jun 11 2020
 
 Originally developed to work with 'bez' files and UFO fonts in support of
 the autohint tool, ufotools.py is now only used in checkoutlinesufo (since
@@ -1081,3 +1083,26 @@ def makeUFOFMNDB(srcFontPath):
     with open(fmndbPath, "w") as fp:
         fp.write(data)
     return fmndbPath
+
+
+def thresholdAttrGlyph(aGlyph, threshold=0.5):
+    """
+    Like fontPens.thresholdPen.thresholdGlyph, but preserves some glyph- and
+    point-level attributes that are not preserved by that method.
+    """
+    # preserve glyph-level attributes
+    attrnames = ['anchors']
+    attrs = {k: getattr(aGlyph, k, None) for k in attrnames if hasattr(aGlyph, k)}  # noqa: E501
+
+    # filter with ThresholdPen into recording pen
+    recorder = RecordingPen()
+    filterpen = ThresholdPen(recorder, threshold)
+    aGlyph.draw(filterpen)
+    aGlyph.clear()
+    recorder.replay(aGlyph.getPen())
+
+    # restore glyph-level attributes
+    for k, v in attrs.items():
+        setattr(aGlyph, k, v)
+
+    return aGlyph

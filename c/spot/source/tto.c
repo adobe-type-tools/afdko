@@ -333,9 +333,11 @@ static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX leve
     if (lastFeatureParam->param != NULL) {
         /* Skip printing the param block if we have already printed it. */
         char *cp = (char *)&record->FeatureTag;
+        char *pp = (char *)&lastFeatureParam->featTag;
 
         if (record->FeatureTag == TAG('s', 'i', 'z', 'e')) {
-            if ((0 == memcmp(lastFeatureParam->param, (char *)FeatureParam, 10)) && (record->FeatureTag == lastFeatureParam->featTag)) {
+            if ((record->FeatureTag == lastFeatureParam->featTag) &&
+                (0 == memcmp(lastFeatureParam->param, (char *)FeatureParam, 10))) {
                 if ((level == 7) || (level < 5)) {
                     if ((currentLang == 0) && (currentScript == 0)) {
                         fprintf(OUTPUTBUFF, "\n# Skipping optical size parameter block in feature '%c%c%c%c' offset %04hx. It was previously reported for feature '%c%c%c%c' offset %04hx.\n",
@@ -351,8 +353,9 @@ static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX leve
             }
         } else if ((cp[3] == 's') &&
                    (cp[2] == 's')) {
-            if ((0 == memcmp(lastFeatureParam->param, (char *)FeatureParam, 4)) && (cp[3] == 's') && (cp[2] == 's'))
-
+            if ((pp[3] == 's') &&
+                (pp[2] == 's') &&
+                (0 == memcmp(lastFeatureParam->param, (char *)FeatureParam, 4)))
             {
                 if ((level == 7) || (level < 5)) {
                     if ((currentLang == 0) && (currentScript == 0)) {
@@ -369,8 +372,9 @@ static void dumpFeatureParams(FeatureRecord *record, Feature *feature, IntX leve
             }
         } else if ((cp[3] == 'c') &&
                    (cp[2] == 'v')) {
-            if ((0 == memcmp(lastFeatureParam->param, (char *)FeatureParam, 14)) && (cp[3] == 'c') && (cp[2] == 'v'))
-
+            if ((pp[3] == 'c') &&
+                (pp[2] == 'v') &&
+                (0 == memcmp(lastFeatureParam->param, (char *)FeatureParam, 14)))
             {
                 if ((level == 7) || (level < 5)) {
                     if ((currentLang == 0) && (currentScript == 0)) {

@@ -20,7 +20,7 @@ The following is a list of inappropriate error messages issued by the MS Font Va
 #### 2.a. The following message is caused by the presence of the GPOS ‘size’ feature, which correctly uses a non-NULL FeatureParams pointer. This feature is registered.
 	E5400 The FeatureParams field is not null FeatureList, FeatureRecord[30](size), FeatureTable
 
-#### 2.b. The following message is causes by the presence of stylisitic set features. These feature tags are registered.
+#### 2.b. The following message is causes by the presence of stylistic set features. These feature tags are registered.
 	W5300 The FeatureRecord tag is valid, but unregistered FeatureList, FeatureRecord[<nnn>], tag = 'ss01'
 
 ### 3. Messages caused by OS/2 table version 4

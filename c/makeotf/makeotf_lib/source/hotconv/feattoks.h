@@ -124,10 +124,11 @@
 #define T_FONTREV 142
 #define T_NUMEXT 143
 #define T_NUM 144
-#define T_GCLASS 145
-#define T_CID 146
-#define T_GNAME 147
-#define T_STRING 148
+#define T_FLOAT 145
+#define T_GCLASS 146
+#define T_CID 147
+#define T_GNAME 148
+#define T_STRING 149
 
 #ifdef __USE_PROTOS
 extern GID glyph(char* tok, int allowNotdef);
@@ -172,15 +173,15 @@ extern unsigned numUInt16Ext();
 #endif
 
 #ifdef __USE_PROTOS
-extern int32_t numInt32Ext(void);
-#else
-extern int32_t numInt32Ext();
-#endif
-
-#ifdef __USE_PROTOS
 extern unsigned numUInt32Ext(void);
 #else
 extern unsigned numUInt32Ext();
+#endif
+
+#ifdef __USE_PROTOS
+extern Fixed numFixed(void);
+#else
+extern Fixed numFixed();
 #endif
 
 #ifdef __USE_PROTOS

@@ -7,9 +7,9 @@ from functools import partial, singledispatch
 from itertools import chain
 from multiprocessing import Pool
 
-from cu2qu.pens import Cu2QuPen
 from fontTools import configLogger
 from fontTools.misc.cliTools import makeOutputFileName
+from fontTools.pens.cu2quPen import Cu2QuPen
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.ttLib import TTCollection, TTFont, TTLibError, newTable
 

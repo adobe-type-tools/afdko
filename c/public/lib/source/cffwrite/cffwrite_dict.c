@@ -656,9 +656,6 @@ void cfwDictFillTop(cfwCtx g, DICT *dst,
 void cfwDictFillFont(cfwCtx g, DICT *dst, abfFontDict *src) {
     dst->cnt = 0;
 
-    /* FontMatrix */
-    saveFontMatrix(dst, &src->FontMatrix);
-
     if (g->flags & CFW_WRITE_CFF2) {
         return;
     }

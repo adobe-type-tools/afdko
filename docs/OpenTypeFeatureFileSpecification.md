@@ -10,8 +10,8 @@ Copyright 2015-2020 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
-Document version 1.25.0
-Last updated 22 May 2020
+Document version 1.25.1
+Last updated 5 July 2020
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
 
@@ -457,7 +457,7 @@ These named value coordinates can then be used in value records. For example:
 pos T V <SECOND_KERN>;
 ```
 
-Note than when the value record name is used, it must be enclosed by angle
+Note that when the value record name is used, it must be enclosed by angle
 brackets, whether it is a single value or four value record. The
 `valueRecordDef` is a top level statement, and must be defined outside of
 feature blocks. It also must be defined before it is used.
@@ -1696,7 +1696,7 @@ because there is more than one rule in each referenced lookup, and different
 rules within the referenced lookups will match in the different contexts. In the
 first contextual substitution rule, the lookup `CNTXT_LIGS`will be applied at
 the input sequence glyph “f”, and the glyphs “f” and “i” will be replaced by
-“f_i”. The lookup `CNTXT_SUB`will be applied at the input sequence glyph “n”,
+“f_i”. The lookup `CNTXT_SUB` will be applied at the input sequence glyph “n”,
 and the glyph “n” will be replaced by “n.end”. This will happen only when the
 sequence “f i n” is preceded by any one of the glyphs “a e i o u”. Likewise, in
 the second contextual substitution rule the glyphs “c” and “t” will be replaced
@@ -1754,7 +1754,7 @@ components.
 ###### Example 5:
 In this example two Multiple Sub lookups are applied to the same input. The rule below means: 
 in lookup `REORDER_CHAIN` the sequence “ka ka.pas_cakra.ns” is first substituted 
-by “ka” and then a second lookup subsitutes the remaining “ka” by the sequence “ka.pas_cakra ka”. 
+by “ka” and then a second lookup substitutes the remaining “ka” by the sequence “ka.pas_cakra ka”. 
 
 ```fea
 lookup REMOVE_CAKRA {
@@ -3193,7 +3193,7 @@ specification, any glyph not included in one of the class definitions will be
 assigned glyph class index 0, and will not be included in any of the `GlyphClassDef`
 classes.
 
-The **MarkAttach** classes of the GDEF table may not be specified explicitly in
+The **MarkAttachment** classes of the GDEF table may not be specified explicitly in
 feature file syntax. They are instead created by the implementation from use of
 the `lookupflag MarkAttachmentType <class name>` statements. The class names may
 be from either regular classes definitions or mark class definitions.
@@ -3562,10 +3562,12 @@ ElidedFallbackNameID <name ID>;
 ```
 
 #### Design axes
-There can be one or more design axes specified in the `STAT` table.
+All of the design axes defined in the `fvar` table must be present in the `STAT`
+table as well, but the order is not required to be the same. The `STAT` table 
+may also contain additional design axes not defined in the `fvar`.
 
 ```fea
-DesignAxis <axisTag> <axisOrdering num> {
+DesignAxis <axisTag> <axisOrdering> {
     name <name spec>;+
 };+
 ```
@@ -3596,7 +3598,7 @@ flag ElidableAxisValueName OlderSiblingFontAttribute;
 
 The `location` statement takes several formats:
 
-##### location format A
+##### location format A (used in Axis value table [Format 1](https://docs.microsoft.com/en-us/typography/opentype/spec/stat#axis-value-table-format-1) and [Format 4](https://docs.microsoft.com/en-us/typography/opentype/spec/stat#axis-value-table-format-4))
 ```fea
 location <axisTag> <value>;+
 ```
@@ -3605,28 +3607,54 @@ location <axisTag> <value>;+
 axes in the table. `value` is a signed number and can be specified using
 decimal, hex and octal formats as well (see §[9.e](#9.e)).
 
-There can be more than one `location` statement when this format is used (in
-this case the axis value will be `STAT` format 4 `AxisValue`, and format 1
-otherwise).
+With a single `location` statement the `AxisValue` will be format 1.
+If there are more than one `location` statements the `AxisValue` will be 
+format 4.
 
-##### location format B
+##### location format B (used in Axis value table [Format 2](https://docs.microsoft.com/en-us/typography/opentype/spec/stat#axis-value-table-format-2))
 ```fea
 location <axisTag> <nominalValue> <rangeMinValue> - <rangeMaxValue>;
 ```
 
-Format for `axisTag` and the other values as above, and there must be space
-before the `-` to distinguish it from possible minus sign for
-`<rangeMaxValue>`.
+Format for `axisTag` and the other values as above, and there must be a space
+before the `-` to distinguish it from a possible minus sign for
+`<rangeMaxValue>`. To specify an open ended range use `-32767` to mean 
+negative infinity and `32767.99998` to mean positive infinity. 
+For example, the following AxisValue definitions mean that "Regular" on the 
+`wght` axis is defined with a nominal value of 400 and a range covering all 
+possible values below 400 up to and including 649. "Bold" is defined with a 
+nominal value of 700 and a range covering all values from 650 and above. 
+```fea
+   AxisValue {
+      location wght 400 -32768 - 650;
+      name "Regular";
+   AxisValue {
+      location wght 700 650 - 32767.99998;
+      name "Bold";
+   };
+```
 
 There can be only one `location` statement when this format is used (the axis
 value will be `STAT` format 2 `AxisValue`).
 
-##### location format C
+##### location format C (used in Axis value table [Format 3](https://docs.microsoft.com/en-us/typography/opentype/spec/stat#axis-value-table-format-3))
 ```fea
 location <axisTag> <value> <linkedValue>;
 ```
 
 Format for `axisTag` and the other values as above.
+
+In the following example the `linkedValue` is used to style-link "Regular" and "Bold". 
+
+```fea
+   AxisValue {
+      location wght 400 700;
+      name "Regular";
+   AxisValue {
+      location wght 700;
+      name "Bold";
+   };
+```
 
 There can be only one `location` statement when this format is used (the axis
 value will be `STAT` format 3 `AxisValue`).
@@ -3637,109 +3665,204 @@ single STAT table. See Example 2 for a fully defined STAT table.
 
 ```fea
 table STAT {
-   ElidedFallbackName { name "Regular"; };
+    ElidedFallbackName { name "Regular"; };
 
-   DesignAxis wght 0 { name "Weight"; };
-   DesignAxis ital 1 { name "Italic"; };
+    DesignAxis wght 0 { name "Weight"; };
+    DesignAxis ital 1 { name "Italic"; };
 
-   # format 1
-   AxisValue {
-      location wght 400;
-      name "Regular";
-      name 3 1 0x411 "\5B9A\671F\7684";
-      flag ElidableAxisValueName;
-   };
+    # format 1
+    AxisValue {
+        location wght 400;
+        name "Regular";
+        name 3 1 0x411 "\5B9A\671F\7684";
+        flag ElidableAxisValueName;
+    };
 
-   # format 2
-   AxisValue {
-      location wght 400 300 - 500;
-      name "Regular";
-      flag ElidableAxisValueName;
-   };
+    # format 2
+    AxisValue {
+        location wght 400 300 - 500;
+        name "Regular";
+        flag ElidableAxisValueName;
+    };
 
-   # format 3
-   AxisValue {
-      location wght 400 700;
-      name "Regular";
-      flag ElidableAxisValueName;
-   };
+    # format 3
+    AxisValue {
+        location wght 400 700;
+        name "Regular";
+        flag ElidableAxisValueName;
+    };
 
-   # format 3
-   AxisValue {
-      location ital 0 1;
-      name "Regular";
-      flag ElidableAxisValueName;
-   };
+    # format 3
+    AxisValue {
+        location ital 0 1;
+        name "Regular";
+        flag ElidableAxisValueName;
+    };
 
-   # format 4
-   AxisValue {
-      location wght 500;
-      location ital 1;
-      name "MediumItalic";
-      flag ElidableAxisValueName;
-   };
+    # format 4
+    AxisValue {
+        location wght 500;
+        location ital 1;
+        name "MediumItalic";
+        flag ElidableAxisValueName;
+    };
 } STAT;
 ```
 #### Example 2:
-This example shows a fully defined STAT table with two axes in format 2. 
+This example shows two fully defined STAT tables with three axes in format 2.
+These link an Upright variable font and an Italic variable font with the `ital`
+axis. 
 
+For Upright:
 ```fea
 table STAT {
 
    ElidedFallbackName { name "Regular"; };
 
-   DesignAxis wght 0 { name "Weight"; };
-   DesignAxis opsz 1 { name "Optical"; };
+   DesignAxis opsz 0 { name "Optical Size"; };
+   DesignAxis wght 1 { name "Weight"; };
+   DesignAxis ital 2 { name "Italic"; };
 
-   AxisValue {
-      location wght 200 200 - 250;
-      name "ExtraLight";
-   };
+    AxisValue {
+        location wght 200 200 - 250;
+        name "ExtraLight";
+    };
 
-   AxisValue {
-      location wght 300 250 - 350;
-      name "Light";
-   };
+    AxisValue {
+        location wght 300 250 - 350;
+        name "Light";
+    };
 
-   AxisValue {
-      location wght 400 350 - 450;
-      name "Regular";
-      flag ElidableAxisValueName;
-   };
+    AxisValue {
+        location wght 400 350 - 450;
+        name "Regular";
+        flag ElidableAxisValueName;
+    };
 
-   AxisValue {
-      location wght 600 550 - 650;
-      name "Semibold";
-   };
+    AxisValue {
+        location wght 500 450 - 550;
+        name "Medium";
+        flag ElidableAxisValueName;
+    };
 
-   AxisValue {
-      location wght 700 650 - 750;
-      name "Bold";
-   };
+    AxisValue {
+        location wght 600 550 - 650;
+        name "Semibold";
+    };
 
-   AxisValue {
-      location wght 900 800 - 900;
-      name "Black";
-   };
+    AxisValue {
+        location wght 700 650 - 750;
+        name "Bold";
+    };
 
-   AxisValue {
-      location
-      opsz 6 0 - 8;
-      name "Caption";
-   };
+    AxisValue {
+        location wght 800 750 - 850;
+        name "ExtraBold";
+    };
+    
+    AxisValue {
+        location wght 900 850 - 900;
+        name "Black";
+    };
 
-   AxisValue {
-      location
-      opsz 10 8 - 24;
-      name "Text";
-      flag ElidableAxisValueName;
-   };
+    AxisValue {
+        location opsz 6 5 - 8;
+        name "Caption";
+    };
+    
+    AxisValue {
+        location opsz 10 8 - 24;
+        name "Text";
+        flag ElidableAxisValueName;
+    };
+    
+    AxisValue {
+        location opsz 60 24 - 100;
+        name "Display";
+    };
+    
+    AxisValue {
+        location ital 0 1;
+        name "Roman";
+        flag ElidableAxisValueName;
+    };
 
-   AxisValue {
-      location
-      opsz 60 24 - 100;
-      name "Display";
-   };
+} STAT;
+```
+
+For Italic:
+```fea
+table STAT {
+
+   ElidedFallbackName { name "Italic"; };
+
+   DesignAxis opsz 0 { name "Optical Size"; };
+   DesignAxis wght 1 { name "Weight"; };
+   DesignAxis ital 2 { name "Italic"; };
+
+    AxisValue {
+        location wght 200 200 - 250;
+        name "ExtraLight";
+    };
+
+    AxisValue {
+        location wght 300 250 - 350;
+        name "Light";
+    };
+
+    AxisValue {
+        location wght 400 350 - 450;
+        name "Regular";
+        flag ElidableAxisValueName;
+    };
+
+    AxisValue {
+        location wght 500 450 - 550;
+        name "Medium";
+        flag ElidableAxisValueName;
+    };
+
+    AxisValue {
+        location wght 600 550 - 650;
+        name "Semibold";
+    };
+
+    AxisValue {
+        location wght 700 650 - 750;
+        name "Bold";
+    };
+
+    AxisValue {
+        location wght 800 750 - 850;
+        name "ExtraBold";
+    };
+    
+    AxisValue {
+        location wght 900 850 - 900;
+        name "Black";
+    };
+
+    AxisValue {
+        location opsz 6 5 - 8;
+        name "Caption";
+    };
+    
+    AxisValue {
+        location opsz 10 8 - 24;
+        name "Text";
+        flag ElidableAxisValueName;
+    };
+    
+    AxisValue {
+        location opsz 60 24 - 100;
+        name "Display";
+    };
+    
+    AxisValue {
+        location ital 1 0;
+        name "Italic";
+        flag ElidableAxisValueName;
+    };
 
 } STAT;
 ```
@@ -3799,6 +3922,9 @@ along with the tag `sbit`.
 
 <a name="11"></a>
 ## 11. Document revisions
+
+**v1.25.1 [5 July 2020]:**
+*   Added information and examples to [STAT table](#9.e)
 
 **v1.25.0 [22 May 2020]:**
 

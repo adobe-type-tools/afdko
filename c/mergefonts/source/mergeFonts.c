@@ -8,7 +8,7 @@
 
 #include "tx_shared.h"
 
-#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1, 2, 2) /* derived from tx */
+#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1, 2, 3) /* derived from tx */
 
 #ifdef __cplusplus
 extern "C" {
@@ -1240,7 +1240,7 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
             value[i++] = 0;
         }
         lineno++;
-        len = sscanf(buf, "%127s %128[^\n]", key, value);
+        len = sscanf(buf, "%127s %127[^\n]", key, value);
         if (len != 2) {
             if (len == -1)
                 continue;

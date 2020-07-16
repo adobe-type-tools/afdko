@@ -1,5 +1,9 @@
 # TABLES: name,STAT
 
+table name {
+   nameid 300 "Regular";
+} name;
+
 table STAT {
    ElidedFallbackNameID 300;
 
@@ -11,7 +15,3 @@ table STAT {
       flag ElidableAxisValueName;
    };
 } STAT;
-
-table name {
-   nameid 300 "Regular";
-} name;

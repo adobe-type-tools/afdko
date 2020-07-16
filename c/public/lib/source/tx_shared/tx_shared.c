@@ -5480,8 +5480,12 @@ void buildFontList(txCtx h) {
                 addFont(h, src_Type1, 0, 0);
                 break;
             case sig_CFF:
+                if (read1(h) == 0x04) /* header size */
+                    addFont(h, src_CFF, 0, 0);
+                break;
             case sig_CFF2:
-                addFont(h, src_CFF, 0, 0);
+                if (read1(h) == 0x05) /* header size */
+                    addFont(h, src_CFF, 0, 0);
                 break;
             default:
                 /* Make 4-byte signature */

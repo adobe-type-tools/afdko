@@ -13,14 +13,11 @@
 #include "GDEF.h"
 #include "GPOS.h"
 #include "GSUB.h"
-#include "MMFX.h"
-#include "MMSD.h"
 #include "OS_2.h"
 #include "STAT.h"
 #include "VORG.h"
 #include "anon.h"
 #include "cmap.h"
-#include "fvar.h"
 #include "head.h"
 #include "hhea.h"
 #include "hmtx.h"
@@ -57,19 +54,16 @@ static Funcs g_funcs[] = {
     {name_, nameNew, nameFill, nameWrite, nameReuse, nameFree, 3, 5, 0},
     {cmap_, cmapNew, cmapFill, cmapWrite, cmapReuse, cmapFree, 1, 6, 0},
     {post_, postNew, postFill, postWrite, postReuse, postFree, 1, 7, 0},
-    {fvar_, fvarNew, fvarFill, fvarWrite, fvarReuse, fvarFree, 1, 8, 0},
-    {MMSD_, MMSDNew, MMSDFill, MMSDWrite, MMSDReuse, MMSDFree, 1, 9, 0},
-    {MMFX_, MMFXNew, MMFXFill, MMFXWrite, MMFXReuse, MMFXFree, 1, 10, 0},
-    {CFF__, CFF_New, CFF_Fill, CFF_Write, CFF_Reuse, CFF_Free, 1, 11, 0},
-    {hmtx_, hmtxNew, hmtxFill, hmtxWrite, hmtxReuse, hmtxFree, 1, 12, 0},
-    {vhea_, vheaNew, vheaFill, vheaWrite, vheaReuse, vheaFree, 2, 13, 0},
-    {vmtx_, vmtxNew, vmtxFill, vmtxWrite, vmtxReuse, vmtxFree, 1, 14, 0},
-    {GDEF_, GDEFNew, GDEFFill, GDEFWrite, GDEFReuse, GDEFFree, 1, 15, 0},
-    {GSUB_, GSUBNew, GSUBFill, GSUBWrite, GSUBReuse, GSUBFree, 1, 16, 0},
-    {GPOS_, GPOSNew, GPOSFill, GPOSWrite, GPOSReuse, GPOSFree, 1, 17, 0},
-    {BASE_, BASENew, BASEFill, BASEWrite, BASEReuse, BASEFree, 1, 18, 0},
-    {VORG_, VORGNew, VORGFill, VORGWrite, VORGReuse, VORGFree, 1, 19, 0},
-    {STAT_, STATNew, STATFill, STATWrite, STATReuse, STATFree, 1, 20, 0},
+    {CFF__, CFF_New, CFF_Fill, CFF_Write, CFF_Reuse, CFF_Free, 1, 8, 0},
+    {hmtx_, hmtxNew, hmtxFill, hmtxWrite, hmtxReuse, hmtxFree, 1, 9, 0},
+    {vhea_, vheaNew, vheaFill, vheaWrite, vheaReuse, vheaFree, 2, 10, 0},
+    {vmtx_, vmtxNew, vmtxFill, vmtxWrite, vmtxReuse, vmtxFree, 1, 11, 0},
+    {GDEF_, GDEFNew, GDEFFill, GDEFWrite, GDEFReuse, GDEFFree, 1, 12, 0},
+    {GSUB_, GSUBNew, GSUBFill, GSUBWrite, GSUBReuse, GSUBFree, 1, 13, 0},
+    {GPOS_, GPOSNew, GPOSFill, GPOSWrite, GPOSReuse, GPOSFree, 1, 14, 0},
+    {BASE_, BASENew, BASEFill, BASEWrite, BASEReuse, BASEFree, 1, 15, 0},
+    {VORG_, VORGNew, VORGFill, VORGWrite, VORGReuse, VORGFree, 1, 16, 0},
+    {STAT_, STATNew, STATFill, STATWrite, STATReuse, STATFree, 1, 17, 0},
 };
 #define SFNT_TABLE_CNT ARRAY_LEN(g_funcs)
 

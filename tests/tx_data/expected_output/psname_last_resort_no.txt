@@ -8,6 +8,6 @@ FSType              4
 sup.srcFontType     CFF (name-keyed)
 sup.nGlyphs         2
 ## FontDict[0]
-FontName            "ExtremelyLongVariationsPostScriptNamePrefixBlahBlahBlahBlahBlahB_9999wght_9999wdth_9999slnt_9999opsz_9999AXI5_9AXI6_0AXI7_0AXI8"
+FontName            "ExtremelyLongVariationsPostScriptNamePrefixBlahBlahBlahBlahBlahB_9999wght_9999wdth_9999slnt_9999opsz_999AXI5_9AXI6_0AXI7_0AXI8"
 ## Private
 BlueValues          {0,0}

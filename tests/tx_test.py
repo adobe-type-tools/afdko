@@ -540,8 +540,8 @@ def test_cff2_with_spare_masters_pr835():
 
 
 @pytest.mark.parametrize('vector, exp_filename', [
-    ('9999,9999,9999,9999,9999,9', 'psname_last_resort_no.txt'),
-    ('9999,9999,9999,9999,9999,99', 'psname_last_resort_yes.txt'),
+    ('9999,9999,9999,9999,999,9', 'psname_last_resort_no.txt'),
+    ('9999,9999,9999,9999,999,99', 'psname_last_resort_yes.txt'),
 ])
 def test_last_resort_instance_psname(vector, exp_filename):
     font_path = get_input_path('cff2_vf_many_axes.otf')
@@ -1056,3 +1056,20 @@ def test_overlap_removal():
     args = [TOOL, '-t1', '+V', '-o', output_path, input_path]
     subprocess.call(args)
     assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
+
+
+@pytest.mark.parametrize("fmt", [
+    "cff",
+    "cff2",
+])
+def test_nonstd_fontmatrix(fmt):
+    input_path = get_input_path("nonstdfmtx.otf")
+    txt_filename = f"nonstdfmtx_{fmt}.txt"
+    expected_path = get_expected_path(txt_filename)
+    output_dir = get_temp_dir_path()
+    bin_output = os.path.join(output_dir, f"nonstdfmtx.{fmt}")
+    output_path = os.path.join(output_dir, txt_filename)
+    runner(CMD + ['-a', '-o', fmt, '*S', '*b', '-f', input_path, bin_output])
+    runner(CMD + ['-a', '-o', 'dump', '-f', bin_output, output_path])
+    skip = "## Filename "
+    assert differ([expected_path, output_path, '-s', skip])
