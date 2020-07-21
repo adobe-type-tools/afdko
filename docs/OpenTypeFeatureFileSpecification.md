@@ -3413,6 +3413,7 @@ table OS/2 {
     Vendor <string>;
     LowerOpSize <number>;
     UpperOpSize <number>;
+    FamilyClass <number>;
 } OS/2;
 ```
 
@@ -3431,6 +3432,16 @@ OpenType specification for the [**ulCodePageRange1-2** in the OS/2 table](https:
 **usUpperOpticalPointSize** fields. If these are set, then the OS/2 version must be
 set to at least 5 by the implementation. Note that the values for these fields
 are set in units of TWIPS, or 20 × point size.
+
+`FamilyClass` is a single numeric value (decimal, hexadecimal, or octal) to
+set the
+[**sFamilyClass**](https://docs.microsoft.com/en-us/typography/opentype/spec/os2#sfamilyclass)
+field. FamilyClass is conceptually 2 fields (class and subclass), so it's often
+easier to think about and express as hexadecimal since that format nicely divides the class from subclass,
+i.e. 0x0805 means Class=8 (Sans Serif), Subclass=5 (Neo-grotesque Gothic). See the [OpenType
+Specification](https://docs.microsoft.com/en-us/typography/opentype/spec/ibmfc)
+for valid values for class/subclass. _NOTE: `makeotfexe` does not make any
+attempt to validate the supplied value beyond ensuring that the supplied value fits into two bytes._
 
 ###### Example:
 
@@ -3460,6 +3471,7 @@ table OS/2 {
     WeightClass 800;
     WidthClass 3;
     Vendor "ADBE";
+    FamilyClass 0x0805;  # Class 8 (Sans-serif), Subclass 5 (Neo-grotesque Gothic)
 } OS/2;
 ```
 
