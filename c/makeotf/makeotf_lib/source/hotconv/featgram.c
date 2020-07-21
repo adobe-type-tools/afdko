@@ -143,7 +143,7 @@ char *gcname;
             zzCONSUME;
 
         } else {
-            if ((LA(1) == 150)) {
+            if ((LA(1) == 151)) {
                 {
                     zzBLOCK(zztasp2);
                     zzMake0;
@@ -152,7 +152,7 @@ char *gcname;
                         GNode *namedHead;
                         if (!named)
                             h->gcInsert = &anonHead; /* Anon glyph class (inline) definition */
-                        zzmatch(150);
+                        zzmatch(151);
                         zzCONSUME;
                         {
                             zzBLOCK(zztasp3);
@@ -192,8 +192,8 @@ char *gcname;
                                             zzBLOCK(zztasp4);
                                             zzMake0;
                                             {
-                                                if ((LA(1) == 151)) {
-                                                    zzmatch(151);
+                                                if ((LA(1) == 152)) {
+                                                    zzmatch(152);
                                                     zzCONSUME;
                                                     endgid = glyph(q, FALSE);
 
@@ -232,7 +232,7 @@ char *gcname;
                                 zzEXIT(zztasp3);
                             }
                         }
-                        zzmatch(152);
+                        zzmatch(153);
 
                         namedHead = gcEnd(named);
                         _retv = (named) ? namedHead : anonHead;
@@ -678,8 +678,8 @@ device()
             zzBLOCK(zztasp2);
             zzMake0;
             {
-                if ((LA(1) == 153)) {
-                    zzmatch(153);
+                if ((LA(1) == 154)) {
+                    zzmatch(154);
                     _retv = 0;
                     zzCONSUME;
 
@@ -691,8 +691,8 @@ device()
                             zzBLOCK(zztasp3);
                             zzMake0;
                             {
-                                while ((LA(1) == 154)) {
-                                    zzmatch(154);
+                                while ((LA(1) == 155)) {
+                                    zzmatch(155);
                                     zzCONSUME;
                                     deviceEntry();
                                     zzLOOP(zztasp3);
@@ -1206,8 +1206,8 @@ pattern(int markedOK)
                         zzBLOCK(zztasp3);
                         zzMake0;
                         {
-                            if ((LA(1) == 155)) {
-                                zzmatch(155);
+                            if ((LA(1) == 156)) {
+                                zzmatch(156);
 
                                 if (markedOK) {
                                     /* Mark this node: */
@@ -1339,8 +1339,8 @@ pattern2(GNode **headP)
                         zzBLOCK(zztasp3);
                         zzMake0;
                         {
-                            if ((LA(1) == 155)) {
-                                zzmatch(155);
+                            if ((LA(1) == 156)) {
+                                zzmatch(156);
 
                                 /* Mark this node: */
                                 (*insert)->flags |= FEAT_MARKED;
@@ -1443,8 +1443,8 @@ pattern3(GNode **headP)
                     zzBLOCK(zztasp3);
                     zzMake0;
                     {
-                        if ((LA(1) == 155)) {
-                            zzmatch(155);
+                        if ((LA(1) == 156)) {
+                            zzmatch(156);
 
                             /* Mark this node: */
                             (*insert)->flags |= FEAT_MARKED;
@@ -1536,8 +1536,8 @@ ignoresub_or_pos()
             zzBLOCK(zztasp2);
             zzMake0;
             {
-                while ((LA(1) == 154)) {
-                    zzmatch(154);
+                while ((LA(1) == 155)) {
+                    zzmatch(155);
                     zzCONSUME;
                     targ = pattern(1);
 
@@ -1593,8 +1593,8 @@ substitute()
                         zzBLOCK(zztasp3);
                         zzMake0;
                         {
-                            while ((LA(1) == 154)) {
-                                zzmatch(154);
+                            while ((LA(1) == 155)) {
+                                zzmatch(155);
                                 zzCONSUME;
                                 targ = pattern(1);
 
@@ -1661,7 +1661,7 @@ substitute()
                                             }
                                         }
                                     } else {
-                                        if ((LA(1) == 156)) {
+                                        if ((LA(1) == 157)) {
                                         } else {
                                             zzFAIL(1, zzerr25, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                             goto fail;
@@ -1730,7 +1730,7 @@ substitute()
                                                 }
                                             }
                                         } else {
-                                            if ((LA(1) == 156)) {
+                                            if ((LA(1) == 157)) {
                                             } else {
                                                 zzFAIL(1, zzerr28, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                 goto fail;
@@ -2066,7 +2066,7 @@ position()
                                                 lastNodeP = pattern2(&lastNodeP);
 
                                             } else {
-                                                if ((LA(1) == 156)) {
+                                                if ((LA(1) == 157)) {
                                                 } else {
                                                     zzFAIL(1, zzerr35, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                     goto fail;
@@ -2097,7 +2097,7 @@ position()
                                                     lastNodeP = pattern2(&lastNodeP);
 
                                                 } else {
-                                                    if ((LA(1) == 156)) {
+                                                    if ((LA(1) == 157)) {
                                                     } else {
                                                         zzFAIL(1, zzerr36, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                         goto fail;
@@ -2128,7 +2128,7 @@ position()
                                                         lastNodeP = pattern2(&lastNodeP);
 
                                                     } else {
-                                                        if ((LA(1) == 156)) {
+                                                        if ((LA(1) == 157)) {
                                                         } else {
                                                             zzFAIL(1, zzerr37, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                             goto fail;
@@ -2159,7 +2159,7 @@ position()
                                                             lastNodeP = pattern2(&lastNodeP);
 
                                                         } else {
-                                                            if ((LA(1) == 156)) {
+                                                            if ((LA(1) == 157)) {
                                                             } else {
                                                                 zzFAIL(1, zzerr38, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                                 goto fail;
@@ -2312,7 +2312,7 @@ nameEntry()
                 }
                 zzmatch(T_STRING);
                 zzCONSUME;
-                zzmatch(156);
+                zzmatch(157);
                 zzCONSUME;
                 zzEXIT(zztasp2);
             }
@@ -2374,7 +2374,7 @@ featureNames()
         h->featNameID = nameReserveUserID(h->g);
         zzmatch(K_feat_names);
         zzCONSUME;
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -2395,7 +2395,7 @@ featureNames()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
 
         addFeatureNameParam(h->g, h->featNameID);
         zzCONSUME;
@@ -2430,7 +2430,7 @@ cvParameterBlock()
         h->featNameID = nameReserveUserID(h->g);
         zzmatch(K_cv_params);
         zzCONSUME;
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -2439,7 +2439,7 @@ cvParameterBlock()
                 if ((LA(1) == K_cvUILabel)) {
                     zzmatch(K_cvUILabel);
                     zzCONSUME;
-                    zzmatch(157);
+                    zzmatch(158);
                     zzCONSUME;
                     {
                         zzBLOCK(zztasp3);
@@ -2462,9 +2462,9 @@ cvParameterBlock()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(158);
+                    zzmatch(159);
                     zzCONSUME;
-                    zzmatch(156);
+                    zzmatch(157);
                     zzCONSUME;
                 } else {
                     if ((setwd8[LA(1)] & 0x40)) {
@@ -2483,7 +2483,7 @@ cvParameterBlock()
                 if ((LA(1) == K_cvToolTip)) {
                     zzmatch(K_cvToolTip);
                     zzCONSUME;
-                    zzmatch(157);
+                    zzmatch(158);
                     zzCONSUME;
                     {
                         zzBLOCK(zztasp3);
@@ -2506,9 +2506,9 @@ cvParameterBlock()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(158);
+                    zzmatch(159);
                     zzCONSUME;
-                    zzmatch(156);
+                    zzmatch(157);
                     zzCONSUME;
                 } else {
                     if ((setwd8[LA(1)] & 0x80)) {
@@ -2527,7 +2527,7 @@ cvParameterBlock()
                 if ((LA(1) == K_cvSampletext)) {
                     zzmatch(K_cvSampletext);
                     zzCONSUME;
-                    zzmatch(157);
+                    zzmatch(158);
                     zzCONSUME;
                     {
                         zzBLOCK(zztasp3);
@@ -2550,9 +2550,9 @@ cvParameterBlock()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(158);
+                    zzmatch(159);
                     zzCONSUME;
-                    zzmatch(156);
+                    zzmatch(157);
                     zzCONSUME;
                 } else {
                     if ((setwd9[LA(1)] & 0x1)) {
@@ -2577,7 +2577,7 @@ cvParameterBlock()
                             do {
                                 zzmatch(K_cvParameterLabel);
                                 zzCONSUME;
-                                zzmatch(157);
+                                zzmatch(158);
                                 zzCONSUME;
                                 {
                                     zzBLOCK(zztasp4);
@@ -2600,9 +2600,9 @@ cvParameterBlock()
                                         zzEXIT(zztasp4);
                                     }
                                 }
-                                zzmatch(158);
+                                zzmatch(159);
                                 zzCONSUME;
-                                zzmatch(156);
+                                zzmatch(157);
                                 zzCONSUME;
                                 zzLOOP(zztasp3);
                             } while ((LA(1) == K_cvParameterLabel));
@@ -2643,7 +2643,7 @@ cvParameterBlock()
                                         zzEXIT(zztasp4);
                                     }
                                 }
-                                zzmatch(156);
+                                zzmatch(157);
                                 zzCONSUME;
                                 zzLOOP(zztasp3);
                             } while ((LA(1) == K_cvCharacter));
@@ -2651,7 +2651,7 @@ cvParameterBlock()
                         }
                     }
                 } else {
-                    if ((LA(1) == 158)) {
+                    if ((LA(1) == 159)) {
                     } else {
                         zzFAIL(1, zzerr46, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                         goto fail;
@@ -2660,7 +2660,7 @@ cvParameterBlock()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
 
         addCVParam(h->g);
         zzCONSUME;
@@ -2740,8 +2740,8 @@ cursive(GNode **headP)
                     zzBLOCK(zztasp3);
                     zzMake0;
                     {
-                        if ((LA(1) == 155)) {
-                            zzmatch(155);
+                        if ((LA(1) == 156)) {
+                            zzmatch(156);
 
                             /* Mark this node: */
                             (*insert)->flags |= FEAT_MARKED;
@@ -2850,8 +2850,8 @@ baseToMark(GNode **headP)
                     zzBLOCK(zztasp3);
                     zzMake0;
                     {
-                        if ((LA(1) == 155)) {
-                            zzmatch(155);
+                        if ((LA(1) == 156)) {
+                            zzmatch(156);
 
                             /* Mark this node: */
                             (*insert)->flags |= FEAT_MARKED;
@@ -2931,8 +2931,8 @@ baseToMark(GNode **headP)
                                     zzBLOCK(zztasp4);
                                     zzMake0;
                                     {
-                                        if ((LA(1) == 155)) {
-                                            zzmatch(155);
+                                        if ((LA(1) == 156)) {
+                                            zzmatch(156);
 
                                             /* Mark this node: */
                                             (*insert)->flags |= FEAT_MARKED;
@@ -2993,8 +2993,8 @@ baseToMark(GNode **headP)
                                 zzBLOCK(zztasp4);
                                 zzMake0;
                                 {
-                                    if ((LA(1) == 155)) {
-                                        zzmatch(155);
+                                    if ((LA(1) == 156)) {
+                                        zzmatch(156);
 
                                         if (markInsert == NULL) {
                                             markInsert = featGlyphClassCopy(g, insert, gcLookup(a.text));
@@ -3107,8 +3107,8 @@ ligatureMark(GNode **headP)
                     zzBLOCK(zztasp3);
                     zzMake0;
                     {
-                        if ((LA(1) == 155)) {
-                            zzmatch(155);
+                        if ((LA(1) == 156)) {
+                            zzmatch(156);
 
                             /* Mark this node: */
                             (*insert)->flags |= FEAT_MARKED;
@@ -3188,8 +3188,8 @@ ligatureMark(GNode **headP)
                                     zzBLOCK(zztasp4);
                                     zzMake0;
                                     {
-                                        if ((LA(1) == 155)) {
-                                            zzmatch(155);
+                                        if ((LA(1) == 156)) {
+                                            zzmatch(156);
 
                                             /* Mark this node: */
                                             (*insert)->flags |= FEAT_MARKED;
@@ -3297,8 +3297,8 @@ ligatureMark(GNode **headP)
                                 zzBLOCK(zztasp4);
                                 zzMake0;
                                 {
-                                    if ((LA(1) == 155)) {
-                                        zzmatch(155);
+                                    if ((LA(1) == 156)) {
+                                        zzmatch(156);
 
                                         /* For contextual rules, we need the union of all the mark glyphs as a glyph node in the context */
                                         if (markInsert == NULL) {
@@ -3359,7 +3359,7 @@ glyphClassAssign()
         zzmatch(T_GCLASS);
         a = zzaCur;
         zzCONSUME;
-        zzmatch(159);
+        zzmatch(160);
         zzCONSUME;
         tmp1 = glyphClass(1, a.text);
 
@@ -3454,7 +3454,7 @@ languageAssign()
                                 zzCONSUME;
 
                             } else {
-                                if ((LA(1) == 156)) {
+                                if ((LA(1) == 157)) {
                                 } else {
                                     zzFAIL(1, zzerr63, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                     goto fail;
@@ -3830,7 +3830,7 @@ statement()
                                                                 if ((LA(1) == K_subtable)) {
                                                                     subtable();
                                                                 } else {
-                                                                    if ((LA(1) == 156)) {
+                                                                    if ((LA(1) == 157)) {
                                                                     } else {
                                                                         zzFAIL(1, zzerr69, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                                         goto fail;
@@ -3851,7 +3851,7 @@ statement()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -3899,7 +3899,7 @@ lookupBlockOrUse()
                                 zzCONSUME;
 
                             } else {
-                                if ((LA(1) == 157)) {
+                                if ((LA(1) == 158)) {
                                 } else {
                                     zzFAIL(1, zzerr70, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                     goto fail;
@@ -3908,7 +3908,7 @@ lookupBlockOrUse()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(157);
+                    zzmatch(158);
 
                     checkLkpName(t.text, labelLine, 1, 0);
                     if (useExtension)
@@ -3927,7 +3927,7 @@ lookupBlockOrUse()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(158);
+                    zzmatch(159);
                     zzmode(LABEL_MODE);
                     zzCONSUME;
 
@@ -3938,7 +3938,7 @@ lookupBlockOrUse()
                     zzCONSUME;
 
                 } else {
-                    if ((LA(1) == 156)) {
+                    if ((LA(1) == 157)) {
                         useLkp(t.text);
                     } else {
                         zzFAIL(1, zzerr71, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
@@ -3948,7 +3948,7 @@ lookupBlockOrUse()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -3995,7 +3995,7 @@ lookupBlockStandAlone()
                             zzCONSUME;
 
                         } else {
-                            if ((LA(1) == 157)) {
+                            if ((LA(1) == 158)) {
                             } else {
                                 zzFAIL(1, zzerr72, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                 goto fail;
@@ -4004,7 +4004,7 @@ lookupBlockStandAlone()
                         zzEXIT(zztasp3);
                     }
                 }
-                zzmatch(157);
+                zzmatch(158);
 
                 checkLkpName(t.text, labelLine, 1, 1);
                 if (useExtension)
@@ -4023,7 +4023,7 @@ lookupBlockStandAlone()
                         zzEXIT(zztasp3);
                     }
                 }
-                zzmatch(158);
+                zzmatch(159);
                 zzmode(LABEL_MODE);
                 zzCONSUME;
 
@@ -4036,7 +4036,7 @@ lookupBlockStandAlone()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -4077,7 +4077,7 @@ featureBlock()
                     zzCONSUME;
 
                 } else {
-                    if ((LA(1) == 157)) {
+                    if ((LA(1) == 158)) {
                     } else {
                         zzFAIL(1, zzerr73, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                         goto fail;
@@ -4086,7 +4086,7 @@ featureBlock()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -4118,7 +4118,7 @@ featureBlock()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
         zzmode(TAG_MODE);
         zzCONSUME;
 
@@ -4128,7 +4128,7 @@ featureBlock()
         checkTag(u.ulval, featureTag, 0);
         zzCONSUME;
 
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -4278,8 +4278,8 @@ axisSpecs()
             zzBLOCK(zztasp2);
             zzMake0;
             {
-                while ((LA(1) == 154)) {
-                    zzmatch(154);
+                while ((LA(1) == 155)) {
+                    zzmatch(155);
                     zzmode(TAG_MODE);
                     zzCONSUME;
 
@@ -4289,7 +4289,7 @@ axisSpecs()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(156);
+        zzmatch(157);
         dnaFREE(tagList);
         zzCONSUME;
 
@@ -4320,7 +4320,7 @@ table_BASE()
         checkTag(t.ulval, tableTag, 1);
         zzCONSUME;
 
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         axisSpecs();
         {
@@ -4330,7 +4330,7 @@ table_BASE()
                 if ((setwd15[LA(1)] & 0x8)) {
                     axisSpecs();
                 } else {
-                    if ((LA(1) == 158)) {
+                    if ((LA(1) == 159)) {
                     } else {
                         zzFAIL(1, zzerr77, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                         goto fail;
@@ -4339,7 +4339,7 @@ table_BASE()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
         zzmode(TAG_MODE);
         zzCONSUME;
 
@@ -4349,7 +4349,7 @@ table_BASE()
         checkTag(u.ulval, tableTag, 0);
         zzCONSUME;
 
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -4378,7 +4378,7 @@ table_OS_2()
         checkTag(t.ulval, tableTag, 1);
         zzCONSUME;
 
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -4571,24 +4571,32 @@ table_OS_2()
 
                                                                                             OS_2UpperOpticalPointSize(g, valUInt16);
                                                                                         } else {
-                                                                                            if ((LA(1) == K_Vendor)) {
-                                                                                                {
-                                                                                                    zzBLOCK(zztasp4);
-                                                                                                    zzMake0;
-                                                                                                    {
-                                                                                                        zzmatch(K_Vendor);
-                                                                                                        zzCONSUME;
-                                                                                                        zzmatch(T_STRING);
-                                                                                                        zzCONSUME;
-                                                                                                        zzEXIT(zztasp4);
-                                                                                                    }
-                                                                                                }
-                                                                                                addVendorString(g);
+                                                                                            if ((LA(1) == K_FamilyClass)) {
+                                                                                                zzmatch(K_FamilyClass);
+                                                                                                zzCONSUME;
+                                                                                                valUInt16 = numUInt16Ext();
+
+                                                                                                OS_2FamilyClass(g, valUInt16);
                                                                                             } else {
-                                                                                                if ((LA(1) == 156)) {
+                                                                                                if ((LA(1) == K_Vendor)) {
+                                                                                                    {
+                                                                                                        zzBLOCK(zztasp4);
+                                                                                                        zzMake0;
+                                                                                                        {
+                                                                                                            zzmatch(K_Vendor);
+                                                                                                            zzCONSUME;
+                                                                                                            zzmatch(T_STRING);
+                                                                                                            zzCONSUME;
+                                                                                                            zzEXIT(zztasp4);
+                                                                                                        }
+                                                                                                    }
+                                                                                                    addVendorString(g);
                                                                                                 } else {
-                                                                                                    zzFAIL(1, zzerr78, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
-                                                                                                    goto fail;
+                                                                                                    if ((LA(1) == 157)) {
+                                                                                                    } else {
+                                                                                                        zzFAIL(1, zzerr78, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
+                                                                                                        goto fail;
+                                                                                                    }
                                                                                                 }
                                                                                             }
                                                                                         }
@@ -4610,14 +4618,14 @@ table_OS_2()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(156);
+                    zzmatch(157);
                     zzCONSUME;
                     zzLOOP(zztasp2);
                 } while ((setwd15[LA(1)] & 0x20));
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
         zzmode(TAG_MODE);
         zzCONSUME;
 
@@ -4627,7 +4635,7 @@ table_OS_2()
         checkTag(u.ulval, tableTag, 0);
         zzCONSUME;
 
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -4689,7 +4697,7 @@ designAxis()
         zzCONSUME;
         ordering = numUInt16();
 
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -4703,7 +4711,7 @@ designAxis()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
 
         STATAddDesignAxis(g, t.ulval, h->featNameID, ordering);
         h->featNameID = 0;
@@ -4783,7 +4791,7 @@ axisValueFlags()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return _retv;
@@ -4823,8 +4831,8 @@ axisValueLocation()
             zzBLOCK(zztasp2);
             zzMake0;
             {
-                if ((LA(1) == 156)) {
-                    zzmatch(156);
+                if ((LA(1) == 157)) {
+                    zzmatch(157);
                     _retv.format = 1;
                     zzCONSUME;
 
@@ -4837,14 +4845,14 @@ axisValueLocation()
                             zzBLOCK(zztasp3);
                             zzMake0;
                             {
-                                if ((LA(1) == 151)) {
-                                    zzmatch(151);
+                                if ((LA(1) == 152)) {
+                                    zzmatch(152);
                                     zzCONSUME;
                                     _retv.max = numFixed();
 
                                     _retv.format = 2;
                                 } else {
-                                    if ((LA(1) == 156)) {
+                                    if ((LA(1) == 157)) {
                                     } else {
                                         zzFAIL(1, zzerr80, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                         goto fail;
@@ -4853,7 +4861,7 @@ axisValueLocation()
                                 zzEXIT(zztasp3);
                             }
                         }
-                        zzmatch(156);
+                        zzmatch(157);
                         zzCONSUME;
                     } else {
                         zzFAIL(1, zzerr81, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
@@ -4895,7 +4903,7 @@ axisValue()
         dnaINIT(g->dnaCtx, values, 1, 5);
         zzmatch(K_AxisValue);
         zzCONSUME;
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -4943,7 +4951,7 @@ axisValue()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
 
         if (!format)
             zzerr("AxisValue missing location statement");
@@ -4980,7 +4988,7 @@ elidedFallbackName()
         h->featNameID = 0;
         zzmatch(K_ElidedFallbackName);
         zzCONSUME;
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -5002,7 +5010,7 @@ elidedFallbackName()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
 
         if (!STATSetElidedFallbackNameID(g, h->featNameID))
             zzerr("ElidedFallbackName already defined.");
@@ -5064,7 +5072,7 @@ table_STAT()
         zzCONSUME;
 
         sawSTAT = TRUE;
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -5088,7 +5096,7 @@ table_STAT()
                                         if ((LA(1) == K_ElidedFallbackNameID)) {
                                             elidedFallbackNameID();
                                         } else {
-                                            if ((LA(1) == 156)) {
+                                            if ((LA(1) == 157)) {
                                             } else {
                                                 zzFAIL(1, zzerr83, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                 goto fail;
@@ -5100,14 +5108,14 @@ table_STAT()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(156);
+                    zzmatch(157);
                     zzCONSUME;
                     zzLOOP(zztasp2);
                 } while ((setwd17[LA(1)] & 0x2));
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
         zzmode(TAG_MODE);
         zzCONSUME;
 
@@ -5117,7 +5125,7 @@ table_STAT()
         checkTag(u.ulval, tableTag, 0);
         zzCONSUME;
 
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -5181,7 +5189,7 @@ table_GDEF()
         checkTag(t.ulval, tableTag, 1);
         zzCONSUME;
 
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -5199,15 +5207,15 @@ table_GDEF()
                                 zzCONSUME;
                                 gc[0] = glyphClassOptional();
 
-                                zzmatch(154);
+                                zzmatch(155);
                                 zzCONSUME;
                                 gc[1] = glyphClassOptional();
 
-                                zzmatch(154);
+                                zzmatch(155);
                                 zzCONSUME;
                                 gc[2] = glyphClassOptional();
 
-                                zzmatch(154);
+                                zzmatch(155);
                                 zzCONSUME;
                                 gc[3] = glyphClassOptional();
 
@@ -5298,7 +5306,7 @@ table_GDEF()
                                                 }
                                             }
                                         } else {
-                                            if ((LA(1) == 156)) {
+                                            if ((LA(1) == 157)) {
                                             } else {
                                                 zzFAIL(1, zzerr85, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                 goto fail;
@@ -5310,14 +5318,14 @@ table_GDEF()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(156);
+                    zzmatch(157);
                     zzCONSUME;
                     zzLOOP(zztasp2);
                 }
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
         zzmode(TAG_MODE);
         zzCONSUME;
 
@@ -5327,7 +5335,7 @@ table_GDEF()
         checkTag(u.ulval, tableTag, 0);
         zzCONSUME;
 
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -5356,7 +5364,7 @@ table_head()
         checkTag(t.ulval, tableTag, 1);
         zzCONSUME;
 
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -5372,7 +5380,7 @@ table_head()
                     zzCONSUME;
 
                 } else {
-                    if ((LA(1) == 156)) {
+                    if ((LA(1) == 157)) {
                     } else {
                         zzFAIL(1, zzerr86, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                         goto fail;
@@ -5381,9 +5389,9 @@ table_head()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
-        zzmatch(158);
+        zzmatch(159);
         zzmode(TAG_MODE);
         zzCONSUME;
 
@@ -5393,7 +5401,7 @@ table_head()
         checkTag(u.ulval, tableTag, 0);
         zzCONSUME;
 
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -5422,7 +5430,7 @@ table_hhea()
         checkTag(t.ulval, tableTag, 1);
         zzCONSUME;
 
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -5463,7 +5471,7 @@ table_hhea()
 
                                             g->font.hheaLineGap = value;
                                         } else {
-                                            if ((LA(1) == 156)) {
+                                            if ((LA(1) == 157)) {
                                             } else {
                                                 zzFAIL(1, zzerr87, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                                 goto fail;
@@ -5475,14 +5483,14 @@ table_hhea()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(156);
+                    zzmatch(157);
                     zzCONSUME;
                     zzLOOP(zztasp2);
                 } while ((setwd18[LA(1)] & 0x2));
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
         zzmode(TAG_MODE);
         zzCONSUME;
 
@@ -5492,7 +5500,7 @@ table_hhea()
         checkTag(u.ulval, tableTag, 0);
         zzCONSUME;
 
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -5521,7 +5529,7 @@ table_name()
         checkTag(t.ulval, tableTag, 1);
         zzCONSUME;
 
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -5607,7 +5615,7 @@ table_name()
                                 zzmatch(T_STRING);
                                 zzCONSUME;
                             } else {
-                                if ((LA(1) == 156)) {
+                                if ((LA(1) == 157)) {
                                 } else {
                                     zzFAIL(1, zzerr90, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                     goto fail;
@@ -5616,7 +5624,7 @@ table_name()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(156);
+                    zzmatch(157);
                     if (!ignoreRec) addNameString(plat, spec, lang, id);
                     zzCONSUME;
 
@@ -5625,7 +5633,7 @@ table_name()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
         zzmode(TAG_MODE);
         zzCONSUME;
 
@@ -5635,7 +5643,7 @@ table_name()
         checkTag(u.ulval, tableTag, 0);
         zzCONSUME;
 
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -5664,7 +5672,7 @@ table_vhea()
         checkTag(t.ulval, tableTag, 1);
         zzCONSUME;
 
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -5698,7 +5706,7 @@ table_vhea()
 
                                         g->font.VertTypoLineGap = value;
                                     } else {
-                                        if ((LA(1) == 156)) {
+                                        if ((LA(1) == 157)) {
                                         } else {
                                             zzFAIL(1, zzerr91, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                             goto fail;
@@ -5709,14 +5717,14 @@ table_vhea()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(156);
+                    zzmatch(157);
                     zzCONSUME;
                     zzLOOP(zztasp2);
                 } while ((setwd18[LA(1)] & 0x80));
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
         zzmode(TAG_MODE);
         zzCONSUME;
 
@@ -5726,7 +5734,7 @@ table_vhea()
         checkTag(u.ulval, tableTag, 0);
         zzCONSUME;
 
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -5755,7 +5763,7 @@ table_vmtx()
         checkTag(t.ulval, tableTag, 1);
         zzCONSUME;
 
-        zzmatch(157);
+        zzmatch(158);
         zzCONSUME;
         {
             zzBLOCK(zztasp2);
@@ -5787,7 +5795,7 @@ table_vmtx()
 
                                     hotAddVertAdvanceY(g, gid, value, INCL.file, zzline);
                                 } else {
-                                    if ((LA(1) == 156)) {
+                                    if ((LA(1) == 157)) {
                                     } else {
                                         zzFAIL(1, zzerr92, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                         goto fail;
@@ -5797,14 +5805,14 @@ table_vmtx()
                             zzEXIT(zztasp3);
                         }
                     }
-                    zzmatch(156);
+                    zzmatch(157);
                     zzCONSUME;
                     zzLOOP(zztasp2);
                 } while ((setwd19[LA(1)] & 0x2));
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(158);
+        zzmatch(159);
         zzmode(TAG_MODE);
         zzCONSUME;
 
@@ -5814,7 +5822,7 @@ table_vmtx()
         checkTag(u.ulval, tableTag, 0);
         zzCONSUME;
 
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;
@@ -5957,7 +5965,7 @@ topLevelStatement()
                                 if ((LA(1) == K_valueRecordDef)) {
                                     valueRecordDef();
                                 } else {
-                                    if ((LA(1) == 156)) {
+                                    if ((LA(1) == 157)) {
                                     } else {
                                         zzFAIL(1, zzerr94, &zzMissSet, &zzMissText, &zzBadTok, &zzBadText, &zzErrk);
                                         goto fail;
@@ -5970,7 +5978,7 @@ topLevelStatement()
                 zzEXIT(zztasp2);
             }
         }
-        zzmatch(156);
+        zzmatch(157);
         zzCONSUME;
         zzEXIT(zztasp1);
         return;

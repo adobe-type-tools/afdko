@@ -267,6 +267,7 @@ int sawCVParams = FALSE;
 #token K_WeightClass	"WeightClass"
 #token K_WidthClass		"WidthClass"
 #token K_Vendor			"Vendor"
+#token K_FamilyClass	"FamilyClass"
 
 #token K_STAT						"STAT"		/* Added tag to list in zzcr_attr() */
 #token K_ElidedFallbackName			"ElidedFallbackName"
@@ -1959,6 +1960,9 @@ table_OS_2
 			|              					                               
 			K_UpperOpticalPointSize numUInt16>[valUInt16]
 									<<OS_2UpperOpticalPointSize(g, valUInt16);>>
+			|              					                               
+			K_FamilyClass numUInt16Ext>[valUInt16]
+									<<OS_2FamilyClass(g, valUInt16);>>
 			|              					                               
 			(K_Vendor T_STRING)
 									<<addVendorString(g);>>

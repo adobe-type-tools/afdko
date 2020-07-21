@@ -20,27 +20,27 @@
 #define VEND_ID_SIZE 4
 
 typedef struct {
-    unsigned short version;
-    short xAvgCharWidth;
-    unsigned short usWeightClass;
+    uint16_t version;
+    int16_t xAvgCharWidth;
+    uint16_t usWeightClass;
 #define FWEIGHT_NORMAL 400
-    unsigned short usWidthClass;
+    uint16_t usWidthClass;
 #define FWIDTH_NORMAL 5
-    unsigned short fsType; /* Embedding permissions */
+    uint16_t fsType; /* Embedding permissions */
 #define EMBED_NONE (1 << 1)
 #define EMBED_PRINT_AND_VIEW (1 << 2)
 #define EMBED_EDITABLE (1 << 3)
-    short ySubscriptXSize;
-    short ySubscriptYSize;
-    short ySubscriptXOffset;
-    short ySubscriptYOffset;
-    short ySuperscriptXSize;
-    short ySuperscriptYSize;
-    short ySuperscriptXOffset;
-    short ySuperscriptYOffset;
-    short yStrikeoutSize;
-    short yStrikeoutPosition;
-    short sFamilyClass;
+    int16_t ySubscriptXSize;
+    int16_t ySubscriptYSize;
+    int16_t ySubscriptXOffset;
+    int16_t ySubscriptYOffset;
+    int16_t ySuperscriptXSize;
+    int16_t ySuperscriptYSize;
+    int16_t ySuperscriptXOffset;
+    int16_t ySuperscriptYOffset;
+    int16_t yStrikeoutSize;
+    int16_t yStrikeoutPosition;
+    uint16_t sFamilyClass;  /* spec defines this as signed */
 #define CLASS_NONE 0
     char panose[PANOSE_SIZE];
 #define PANOSE_ANY 0    /* [any] */
@@ -61,28 +61,28 @@ typedef struct {
     uint32_t ulUnicodeRange3;
     uint32_t ulUnicodeRange4;
     char achVendId[VEND_ID_SIZE];
-    unsigned short fsSelection;
+    uint16_t fsSelection;
 #define SEL_ITALIC (1 << 0)
 #define SEL_BOLD (1 << 5)
 #define SEL_REGULAR (1 << 6)
 #define SEL_RESPECT_STYPO (1 << 7)
 
-    unsigned short usFirstCharIndex;
-    unsigned short usLastCharIndex;
-    short sTypoAscender;
-    short sTypoDescender;
-    short sTypoLineGap;
-    unsigned short usWinAscent;
-    unsigned short usWinDescent;
+    uint16_t usFirstCharIndex;
+    uint16_t usLastCharIndex;
+    int16_t sTypoAscender;
+    int16_t sTypoDescender;
+    int16_t sTypoLineGap;
+    uint16_t usWinAscent;
+    uint16_t usWinDescent;
     uint32_t ulCodePageRange1;              /* Version 1 */
     uint32_t ulCodePageRange2;              /* Version 1 */
-    short sXHeight;                         /* Version 2 */
-    short sCapHeight;                       /* Version 2 */
-    unsigned short usDefaultChar;           /* Version 2 */
-    unsigned short usBreakChar;             /* Version 2 */
-    unsigned short usMaxContext;            /* Version 2 */
-    unsigned short usLowerOpticalPointSize; /* Version 5 */
-    unsigned short usUpperOpticalPointSize; /* Version 5 */
+    int16_t sXHeight;                         /* Version 2 */
+    int16_t sCapHeight;                       /* Version 2 */
+    uint16_t usDefaultChar;           /* Version 2 */
+    uint16_t usBreakChar;             /* Version 2 */
+    uint16_t usMaxContext;            /* Version 2 */
+    uint16_t usLowerOpticalPointSize; /* Version 5 */
+    uint16_t usUpperOpticalPointSize; /* Version 5 */
 } OS_2Tbl;
 
 /* --------------------------- Context Definition -------------------------- */
@@ -122,6 +122,7 @@ void OS_2New(hotCtx g) {
     h->tbl.usMaxContext = 0;
     h->tbl.usLowerOpticalPointSize = 0;
     h->tbl.usUpperOpticalPointSize = 0;
+    h->tbl.sFamilyClass = CLASS_NONE;
 
     /* Link contexts */
     h->g = g;
@@ -132,7 +133,7 @@ void OS_2New(hotCtx g) {
 static void setClasses(hotCtx g, OS_2Ctx h) {
     typedef struct {
         char *string;
-        unsigned short value;
+        uint16_t value;
     } Match;
     static Match weight[] = {
         {"thin", 250},
@@ -345,7 +346,7 @@ int OS_2Fill(hotCtx g) {
     h->tbl.yStrikeoutSize = font->win.StrikeOutSize;
     h->tbl.yStrikeoutPosition = font->win.StrikeOutPosition;
 
-    h->tbl.sFamilyClass = CLASS_NONE; /* No classification */
+    // h->tbl.sFamilyClass = CLASS_NONE; /* No classification */
     if (!h->seen[kPanose]) {
         setPanose(g, h);
     }
@@ -482,8 +483,8 @@ void OS_2SetCodePageRanges(hotCtx g,
 }
 
 void OS_2SetCharIndexRange(hotCtx g,
-                           unsigned short usFirstCharIndex,
-                           unsigned short usLastCharIndex) {
+                           uint16_t usFirstCharIndex,
+                           uint16_t usLastCharIndex) {
     OS_2Ctx h = g->ctx.OS_2;
     h->tbl.usFirstCharIndex = usFirstCharIndex;
     h->tbl.usLastCharIndex = usLastCharIndex;
@@ -499,14 +500,19 @@ void OS_2SetMaxContext(hotCtx g, unsigned maxContext) {
     }
 }
 
-void OS_2LowerOpticalPointSize(hotCtx g, unsigned short opSize) {
+void OS_2LowerOpticalPointSize(hotCtx g, uint16_t opSize) {
     OS_2Ctx h = g->ctx.OS_2;
     h->tbl.usLowerOpticalPointSize = opSize;
 }
 
-void OS_2UpperOpticalPointSize(hotCtx g, unsigned short opSize) {
+void OS_2UpperOpticalPointSize(hotCtx g, uint16_t opSize) {
     OS_2Ctx h = g->ctx.OS_2;
     h->tbl.usUpperOpticalPointSize = opSize;
+}
+
+void OS_2FamilyClass(hotCtx g, uint16_t familyClass) {
+    OS_2Ctx h = g->ctx.OS_2;
+    h->tbl.sFamilyClass = familyClass;
 }
 
 void OS_2SetPanose(hotCtx g, char *panose) {
@@ -515,19 +521,19 @@ void OS_2SetPanose(hotCtx g, char *panose) {
     h->seen[kPanose] = 1;
 }
 
-void OS_2SetFSType(hotCtx g, unsigned short fsType) {
+void OS_2SetFSType(hotCtx g, uint16_t fsType) {
     OS_2Ctx h = g->ctx.OS_2;
     h->tbl.fsType = fsType;
     h->seen[kFSType] = 1;
 }
 
-void OS_2SetWeightClass(hotCtx g, unsigned short weightClass) {
+void OS_2SetWeightClass(hotCtx g, uint16_t weightClass) {
     OS_2Ctx h = g->ctx.OS_2;
     h->tbl.usWeightClass = weightClass;
     h->seen[kWeightClass] = 1;
 }
 
-void OS_2SetWidthClass(hotCtx g, unsigned short widthClass) {
+void OS_2SetWidthClass(hotCtx g, uint16_t widthClass) {
     OS_2Ctx h = g->ctx.OS_2;
     h->tbl.usWidthClass = widthClass;
     h->seen[kWidthClass] = 1;

@@ -571,6 +571,11 @@ Vendor
 		NLA = K_Vendor;
 	>>
 
+FamilyClass
+	<<
+		NLA = K_FamilyClass;
+	>>
+
 STAT
 	<<
 		NLA = K_STAT;
@@ -696,52 +701,52 @@ VertAdvanceY
 
 \[
 	<<
-		NLA = 150;
+		NLA = 151;
 	>>
 
 \-
 	<<
-		NLA = 151;
+		NLA = 152;
 	>>
 
 \]
 	<<
-		NLA = 152;
+		NLA = 153;
 	>>
 
 0
 	<<
-		NLA = 153;
+		NLA = 154;
 	>>
 
 ,
 	<<
-		NLA = 154;
+		NLA = 155;
 	>>
 
 '
 	<<
-		NLA = 155;
+		NLA = 156;
 	>>
 
 ;
 	<<
-		NLA = 156;
+		NLA = 157;
 	>>
 
 \{
 	<<
-		NLA = 157;
+		NLA = 158;
 	>>
 
 \}
 	<<
-		NLA = 158;
+		NLA = 159;
 	>>
 
 =
 	<<
-		NLA = 159;
+		NLA = 160;
 	>>
 
 

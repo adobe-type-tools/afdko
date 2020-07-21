@@ -26,14 +26,15 @@ void OS_2SetCodePageRanges(hotCtx g,
                            uint32_t lCodePageRange1,
                            uint32_t ulCodePageRange2);
 void OS_2SetCharIndexRange(hotCtx g,
-                           unsigned short usFirstCharIndex,
-                           unsigned short usLastCharIndex);
+                           uint16_t usFirstCharIndex,
+                           uint16_t usLastCharIndex);
 void OS_2SetMaxContext(hotCtx g, unsigned maxContext);
 void OS_2SetPanose(hotCtx g, char *panose);
-void OS_2SetFSType(hotCtx g, unsigned short fsType);
-void OS_2SetWeightClass(hotCtx g, unsigned short weightClass);
-void OS_2SetWidthClass(hotCtx g, unsigned short widthClass);
-void OS_2LowerOpticalPointSize(hotCtx g, unsigned short opSize);
-void OS_2UpperOpticalPointSize(hotCtx g, unsigned short opSize);
+void OS_2SetFSType(hotCtx g, uint16_t fsType);
+void OS_2SetWeightClass(hotCtx g, uint16_t weightClass);
+void OS_2SetWidthClass(hotCtx g, uint16_t widthClass);
+void OS_2LowerOpticalPointSize(hotCtx g, uint16_t opSize);
+void OS_2UpperOpticalPointSize(hotCtx g, uint16_t opSize);
+void OS_2FamilyClass(hotCtx g, uint16_t familyClass);
 
 #endif /* HOTCONV_OS_2_H */
