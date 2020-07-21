@@ -1,0 +1,4 @@
+# Test bad FamilyClass
+table OS/2 {
+    FamilyClass 0x10FFFF;  # out of range for uint16_t
+} OS/2;
