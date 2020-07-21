@@ -16,4 +16,5 @@ table OS/2 {
    WeightClass 800;
    WidthClass 3;
    Vendor "ADBE";
+   FamilyClass 0x0805;
 } OS/2;
