@@ -590,7 +590,7 @@ TEST_FEATURE_FILES = [
     "ZeroValue_PairPos_horizontal", "ZeroValue_PairPos_vertical",
     "ZeroValue_ChainSinglePos_horizontal", "ZeroValue_ChainSinglePos_vertical",
     "PairPosSubtable", "MultipleLookupsPerGlyph", "MultipleLookupsPerGlyph2",
-    "name_after_STAT.bad", "incomplete_glyph_range.bad", "OS_2_bad_familycls",
+    "name_after_STAT.bad", "incomplete_glyph_range.bad",
 ]
 
 TEST_FEATURE_FILES_XFAIL = [
@@ -602,7 +602,6 @@ TEST_FEATURE_FILES_XFAIL = [
     "bug1307",           # https://github.com/adobe-type-tools/afdko/issues/966
     "name_after_STAT.bad",
     "incomplete_glyph_range.bad",
-    "OS_2_bad_familycls",
 ]
 
 TEST_FEATURE_FILES_TABLES = {
