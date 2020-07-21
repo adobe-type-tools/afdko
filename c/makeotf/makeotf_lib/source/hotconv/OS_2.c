@@ -346,7 +346,6 @@ int OS_2Fill(hotCtx g) {
     h->tbl.yStrikeoutSize = font->win.StrikeOutSize;
     h->tbl.yStrikeoutPosition = font->win.StrikeOutPosition;
 
-    // h->tbl.sFamilyClass = CLASS_NONE; /* No classification */
     if (!h->seen[kPanose]) {
         setPanose(g, h);
     }
