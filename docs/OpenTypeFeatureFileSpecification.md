@@ -3616,8 +3616,8 @@ location <axisTag> <value>;+
 ```
 
 `axisTag` is a 4-letter tag and must correspond to one of the defined design
-axes in the table. `value` is a signed number and can be specified using
-decimal, hex and octal formats as well (see §[9.e](#9.e)).
+axes in the table. `value` is a signed number specified as decimal (with
+optional fractional part) in the range -32767.0 to +32767.99998.
 
 With a single `location` statement the `AxisValue` will be format 1.
 If there are more than one `location` statements the `AxisValue` will be 
