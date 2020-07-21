@@ -26,6 +26,8 @@ cov.xml
 # ignore the compiled programs
 c/build_all/*
 !c/build_all/this_folder_intentionally_left_empty
+# ANTLR binaries
+**/hotpccts/pccts/bin/**
 
 # ignore the temp build directories and files
 *.o
