@@ -1,0 +1,4 @@
+# Test bad FamilyClass
+table OS/2 {
+    FamilyClass 87654;
+} OS/2;
