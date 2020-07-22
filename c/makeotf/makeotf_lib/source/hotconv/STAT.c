@@ -351,6 +351,7 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
     STATCtx h = g->ctx.STAT;
     long i;
     long j;
+    long k;
 
     AxisValueTable *av = dnaNEXT(h->axisValues);
 
@@ -377,8 +378,14 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
             break;
 
         case 2:
+            if (minValue > maxValue) {
+                    hotMsg(g, hotFATAL, "[STAT] \"%c%c%c%c\" AxisValue "
+                        "min %.2f cannot be greater than max %.2f",
+                        TAG_ARG(axisTags[0]), FIX2DBL(minValue),
+                        FIX2DBL(maxValue));
+            }
             if ((values[0] < minValue) || (values[0] > maxValue)) {
-                    hotMsg(g, hotWARNING, "[STAT] \"%c%c%c%c\" AxisValue "
+                    hotMsg(g, hotFATAL, "[STAT] \"%c%c%c%c\" AxisValue "
                         "default value %.2f is not in range %.2f-%.2f",
                         TAG_ARG(axisTags[0]), FIX2DBL(values[0]),
                         FIX2DBL(minValue), FIX2DBL(maxValue));
@@ -427,16 +434,16 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
         case 4:
             for (i = 0; i < h->axisValues.cnt; i++) {
                 AxisValueTable *refav = &h->axisValues.array[i];
-                bool dupeAVT[99];
+                bool dupeAVT[99] = {false};
                 bool isDupe = true;
                 if (refav->format4.axisCount == count) {
                     for (j = 0; j < count; j++) {
-                        if (refav->format4.axisValues[j].axisTag == axisTags[j]
-                            && refav->format4.axisValues[j].value == values[j]) {
-                            dupeAVT[j] = true;
-                        } else {
-                            dupeAVT[j] = false;
-                        }
+                    	for (k = 0; k < count; k++) {
+							if (refav->format4.axisValues[j].axisTag == axisTags[k]
+								&& refav->format4.axisValues[j].value == values[k]) {
+									dupeAVT[j] = true;
+							}
+                    	}
                     }
                     for (j = 0; j < count; j++) {
                         if (!dupeAVT[j]) {
