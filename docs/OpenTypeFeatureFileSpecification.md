@@ -3610,6 +3610,7 @@ flag ElidableAxisValueName OlderSiblingFontAttribute;
 
 The `location` statement takes several formats:
 
+<a name="stat_loc_format_a"></a>
 ##### location format A (used in Axis value table [Format 1](https://docs.microsoft.com/en-us/typography/opentype/spec/stat#axis-value-table-format-1) and [Format 4](https://docs.microsoft.com/en-us/typography/opentype/spec/stat#axis-value-table-format-4))
 ```fea
 location <axisTag> <value>;+
@@ -3617,21 +3618,25 @@ location <axisTag> <value>;+
 
 `axisTag` is a 4-letter tag and must correspond to one of the defined design
 axes in the table. `value` is a signed number specified as decimal (with
-optional fractional part) in the range -32767.0 to +32767.99998.
+optional fractional part) in the range -32768.0 to +32767.99998.
 
 With a single `location` statement the `AxisValue` will be format 1.
 If there are more than one `location` statements the `AxisValue` will be 
 format 4.
 
+<a name="stat_loc_format_b"></a>
 ##### location format B (used in Axis value table [Format 2](https://docs.microsoft.com/en-us/typography/opentype/spec/stat#axis-value-table-format-2))
 ```fea
 location <axisTag> <nominalValue> <rangeMinValue> - <rangeMaxValue>;
 ```
 
-Format for `axisTag` and the other values as above, and there must be a space
-before the `-` to distinguish it from a possible minus sign for
-`<rangeMaxValue>`. To specify an open ended range use `-32767` to mean 
-negative infinity and `32767.99998` to mean positive infinity. 
+Format for `axisTag` and `value`s is the same as for [location format
+A](#stat_loc_format_a) above. Note that the hyphen (`-`) defining the range must have spaces before
+and after so it does not get treated as a minus sign for `<rangeMaxValue>`.
+
+To specify an open ended range use `-32768` to mean negative infinity and 
+`32767.99998` to mean positive infinity.
+
 For example, the following AxisValue definitions mean that "Regular" on the 
 `wght` axis is defined with a nominal value of 400 and a range covering all 
 possible values below 400 up to and including 649. "Bold" is defined with a 
@@ -3649,12 +3654,13 @@ nominal value of 700 and a range covering all values from 650 and above.
 There can be only one `location` statement when this format is used (the axis
 value will be `STAT` format 2 `AxisValue`).
 
+<a name="stat_loc_format_c"></a>
 ##### location format C (used in Axis value table [Format 3](https://docs.microsoft.com/en-us/typography/opentype/spec/stat#axis-value-table-format-3))
 ```fea
 location <axisTag> <value> <linkedValue>;
 ```
 
-Format for `axisTag` and the other values as above.
+Format for `axisTag` and the other `value`s [as described above](#stat_loc_format_a).
 
 In the following example the `linkedValue` is used to style-link "Regular" and "Bold". 
 
