@@ -434,16 +434,20 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
         case 4:
             for (i = 0; i < h->axisValues.cnt; i++) {
                 AxisValueTable *refav = &h->axisValues.array[i];
-                bool dupeAVT[99] = {false};
+                bool *dupeAVT;
+                dupeAVT = MEM_NEW(g, sizeof(bool) * count);
+                for (j = 0; j < count; j++) {
+                    dupeAVT[j] = false;
+                }
                 bool isDupe = true;
                 if (refav->format4.axisCount == count) {
                     for (j = 0; j < count; j++) {
-                    	for (k = 0; k < count; k++) {
-							if (refav->format4.axisValues[j].axisTag == axisTags[k]
-								&& refav->format4.axisValues[j].value == values[k]) {
-									dupeAVT[j] = true;
-							}
-                    	}
+                        for (k = 0; k < count; k++) {
+                            if (refav->format4.axisValues[j].axisTag == axisTags[k]
+                                && refav->format4.axisValues[j].value == values[k]) {
+                                    dupeAVT[j] = true;
+                            }
+                        }
                     }
                     for (j = 0; j < count; j++) {
                         if (!dupeAVT[j]) {
@@ -465,6 +469,7 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
                         hotMsg(g, hotFATAL, dupeMsg);
                     }
                 }
+                MEM_FREE(g, dupeAVT);
             }
             av->size = AXIS_VALUE_TABLE4_SIZE(count);
             av->format4.axisCount = count;
