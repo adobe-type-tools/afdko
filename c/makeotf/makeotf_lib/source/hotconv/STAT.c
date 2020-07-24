@@ -456,17 +456,24 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
                         }
                     }
                     if (isDupe) {
-                        // message + number of axes * 14 (wght ddddd.dd)
-                        char dupeMsg[2048];
-                        dupeMsg[0] = '\0';
-                        sprintf(dupeMsg, "[STAT] AxisValueTable already defined with locations: ");
-                        for (j = 0; j < count; j++) {
-                            char axisMsg[20];
-                            axisMsg[0] = '\0';
-                            sprintf(axisMsg, "%c%c%c%c %.2f ", TAG_ARG(axisTags[j]), FIX2DBL(values[j]));
-                            strcat(dupeMsg, axisMsg);
+                        char *dupeMsg;
+                        if (count <= 8) {
+                            dupeMsg = MEM_NEW(g, sizeof(char) * count * 14 + (sizeof(char) * 54));
+                            dupeMsg[0] = '\0';
+                            sprintf(dupeMsg, "[STAT] AxisValueTable already defined with locations: ");
+                            for (j = 0; j < count; j++) {
+                                char axisMsg[20];
+                                sprintf(axisMsg, "%c%c%c%c %.2f ", TAG_ARG(axisTags[j]), FIX2DBL(values[j]));
+                                strcat(dupeMsg, axisMsg);
+                            }
+                        } else {
+                            char baseMsg[] = "[STAT] AxisValueTable already defined with these %d locations.";
+                            dupeMsg = MEM_NEW(g, sizeof(char) * (strlen(baseMsg) + count));
+                            sprintf(dupeMsg, baseMsg, count);
                         }
                         hotMsg(g, hotFATAL, dupeMsg);
+                        /* Shouldn't reach this MEM_FREE due to above hotFATAL, but just in case it gets changed to warning*/
+                        MEM_FREE(g, dupeMsg);
                     }
                 }
                 MEM_FREE(g, dupeAVT);
