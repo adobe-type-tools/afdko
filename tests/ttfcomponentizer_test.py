@@ -33,6 +33,16 @@ EMPTY_LIB = b"""<?xml version="1.0" encoding="UTF-8"?>
     <dict/>
 </plist>
 """
+EMPTY_PSKEY = b"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+    <key>public.postscriptNames</key>
+    <dict/>
+    </dict>
+</plist>
+"""
 
 
 def _get_test_ttf_path():
@@ -206,6 +216,21 @@ def test_get_glyph_names_mapping_names_from_goadb():
     _write_file(lib_path, lib_data)
     assert sorted(result[1].keys()) == DESIGN_NAMES_LIST
     assert sorted(result[1].values()) == PRODCT_NAMES_LIST
+
+
+def test_warn_empty_psnames_key(capsys):
+    # the test UFO has a 'public.postscriptNames' in its lib;
+    # set the key to empty to ensure we get a warning
+    ufo_path = _get_test_ufo_path()
+    lib_path = os.path.join(ufo_path, 'lib.plist')
+    lib_data = _read_file(lib_path)
+    _write_file(lib_path, EMPTY_PSKEY)
+    result = ttfcomp.get_glyph_names_mapping(ufo_path)
+    _write_file(lib_path, lib_data)
+    assert len(result[1]) == 0
+    captured = capsys.readouterr()
+    # check (partial) warning message in stdout:
+    assert "WARNING: The contents of public.postscriptNames is empty." in captured.out  # noqa: E501
 
 
 def test_componentize():
