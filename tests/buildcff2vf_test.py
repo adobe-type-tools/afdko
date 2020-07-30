@@ -177,3 +177,21 @@ def test_stat_axisvaluerecords():
         runner(CMD + ['-o', 'd', f'_{ds_path}'])
     except subprocess.CalledProcessError:
         pytest.xfail()
+
+
+def test_stat_infinite_range():
+    """
+    Check that range tests work when infinite ranges are defined
+    """
+    input_dir = get_input_path('STAT_tests')
+    temp_dir = get_temp_dir_path('STAT_tests')
+    copytree(input_dir, temp_dir)
+    ds_path = os.path.join(temp_dir,
+                           'STAT_infinite_range/'
+                           'STAT_infinite_range.designspace')
+    runner(CMD + ['-o', 'd', f'_{ds_path}'])
+    actual_path = os.path.join(temp_dir,
+                               'STAT_infinite_range/STAT_infinite_range.otf')
+    actual_ttx = generate_ttx_dump(actual_path, ['STAT'])
+    expected_ttx = get_expected_path('STAT_infinite_range.ttx')
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
