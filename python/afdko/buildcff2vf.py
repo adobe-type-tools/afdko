@@ -385,7 +385,8 @@ def validate_stat_axes(tt_font):
     fvar = tt_font['fvar']
     stat = tt_font['STAT']
     fvar_axis_tags = [axis.axisTag for axis in fvar.axes]
-    stat_axis_tags = [axis.AxisTag for axis in stat.table.DesignAxisRecord.Axis]
+    stat_axis_tags = [axis.AxisTag for axis in
+                      stat.table.DesignAxisRecord.Axis]
     diff = set(fvar_axis_tags) - set(stat_axis_tags)
     if diff:
         raise CFF2VFError(
@@ -433,13 +434,15 @@ def validate_stat_values(ttFont):
             continue
         out_of_range = []
         for val in stat_ref:
-            if val > axis.maxValue or val < axis.minValue:
+            if (val > axis.maxValue and int(val) != 32767) or \
+                    (val < axis.minValue and int(val) != -32767):
                 out_of_range.append(val)
         if out_of_range:
             expected_range = '%s - %s' % (axis.minValue, axis.maxValue)
             errors.append(
                 '%s values %s are outside of range %s specified in fvar'
-                % (axis.axisTag, str(sorted(set(out_of_range))), expected_range)
+                % (axis.axisTag, str(sorted(set(out_of_range))),
+                   expected_range)
             )
     if errors:
         raise CFF2VFError('Invalid STAT table. %s' % '\n'.join(errors))
