@@ -26,7 +26,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.8.2 July 20 2020
+makeotf.py v2.8.3 July 30 2020
 """
 
 __methods__ = """
@@ -606,7 +606,7 @@ def readOptionFile(filePath, makeOTFParams, optionIndex):
     try:
         with open(filePath, "r", encoding='utf-8') as fp:
             data = fp.read()
-    except (IOError, OSError):
+    except (OSError):
         print("makeotf [Error] Could not read the options file %s. "
               "Please check the file protection settings." % filePath)
         error = True
@@ -697,7 +697,7 @@ def writeOptionsFile(makeOTFParams, filePath):
         try:
             with open(filePath, "w", encoding='utf-8') as fp:
                 fp.write(data)
-        except (IOError, OSError):
+        except (OSError):
             print("makeotf [Warning] Could not write the options file %s. "
                   "Please check the file protection settings for the file "
                   "and for the directory." % filePath)
@@ -734,7 +734,7 @@ def setOptionsFromFontInfo(makeOTFParams):
             with open(fontinfo_path, "r", encoding='utf-8') as fi:
                 data = fi.read()
             makeOTFParams.fontinfoPath = fontinfo_path
-        except (OSError, IOError):
+        except (OSError):
             print("makeotf [Error] Failed to find and open fontinfo file: "
                   "FSType, OS/2 V4 bits, and Bold and Italic settings may "
                   "not be correct.")
@@ -2002,7 +2002,7 @@ def convertFontIfNeeded(makeOTFParams):
                 if b"/Private" in data:
                     isTextPS = True
                     needsConversion = True
-        except (IOError, OSError):
+        except (OSError):
             print("makeotf [Error] Could not read font file at '%s'." %
                   filePath)
             raise MakeOTFShellError
@@ -2107,7 +2107,7 @@ def updateFontRevision(featuresPath, fontRevision):
         featuresPath = os.path.abspath(featuresPath)
         with open(featuresPath, "r", encoding='utf-8') as fp:
             data = fp.read()
-    except (IOError, OSError):
+    except (OSError):
         print("makeotf [Error] When trying to update the head table "
               "fontRevision field, failed to open '%s'." % featuresPath)
         return
@@ -2159,7 +2159,7 @@ def updateFontRevision(featuresPath, fontRevision):
     try:
         with open(featuresPath, "w", encoding='utf-8') as fp:
             fp.write(newData)
-    except (IOError, OSError):
+    except (OSError):
         print("makeotf [Error] When trying to update the head table "
               "fontRevision field, failed to write the new data to '%s'." %
               featuresPath)

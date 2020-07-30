@@ -4,7 +4,7 @@
 Tool that performs outline quality checks and can remove path overlaps.
 """
 
-__version__ = '2.4.3'
+__version__ = '2.4.4'
 
 import argparse
 from functools import cmp_to_key
@@ -967,13 +967,13 @@ def restore_contour_order(fixed_glyph, original_contours):
     # just add them on the end.
     if num_contours != 0:
         ci2 = len(new_contours)
-        for ci, contour in new_list:
+        for ci, _contour in new_list:
             order_list.append([ci2, ci])
 
     # Now re-order the new list
     order_list.sort()
     new_contour_list = []
-    for ci2, ci in order_list:
+    for _ci2, ci in order_list:
         new_contour_list.append(new_contours[ci])
 
     fixed_glyph.clearContours()
