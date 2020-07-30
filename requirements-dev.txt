@@ -2,6 +2,7 @@ codecov>=2.0.15
 cpplint>=1.4.3
 cython>=0.29.5
 flake8>=3.7.6
+flake8-bugbear>=20.1.4
 pip>=19.0.2
 pytest-cov>=2.6.1
 setuptools>=40.8.0

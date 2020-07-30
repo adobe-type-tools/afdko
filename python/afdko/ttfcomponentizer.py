@@ -17,7 +17,7 @@ from defcon import Font
 from afdko.fdkutils import get_font_format
 
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 
 PUBLIC_PSNAMES = "public.postscriptNames"
@@ -120,7 +120,7 @@ class TTComponentizer(object):
 
             glyph = glyf_table[gname]
             glyph.__dict__.clear()
-            setattr(glyph, "components", components)
+            glyph.components = components
             glyph.numberOfContours = -1
             self.comp_count += 1
 

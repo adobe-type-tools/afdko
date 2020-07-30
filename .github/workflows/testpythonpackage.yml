@@ -1,4 +1,4 @@
-name: Test Python Package
+name: AFDKO Test Suite
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - README.md
 
 jobs:
-  build:
+  run_tests:
     if: contains(toJson(github.event.commits), '[skip ci]') == false && contains(toJson(github.event.commits), '[skip github]') == false
 
     runs-on: ${{ matrix.os }}
@@ -48,13 +48,9 @@ jobs:
         pip install -r requirements.txt -r requirements-dev.txt .
         pip freeze --all
     
-    - name: Lint with flake8
+    - name: Lint with flake8 using .flake8 config file
       run: |
-        pip install flake8
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude **/comparefamily.py,**/beztools.py
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-line-length=127 --statistics
+        flake8 . --count --show-source --statistics --config=.flake8
 
     - name: Test with pytest
       run: |

@@ -16,10 +16,10 @@ from psautohint.ufoFont import norm_float
 
 from afdko import fdkutils
 
-__version__ = '1.35.1'
+__version__ = '1.35.2'
 
 __doc__ = """
-ufotools.py v1.35.1 Jun 11 2020
+ufotools.py v1.35.2 Jul 30 2020
 
 Originally developed to work with 'bez' files and UFO fonts in support of
 the autohint tool, ufotools.py is now only used in checkoutlinesufo (since
@@ -561,8 +561,8 @@ class UFOFontData(object):
             else:
                 width = 0
         except UFOParseError as e:
-            print("Error. skipping glyph '%s' because of parse error: %s" %
-                  (glyphFileName, e.message))
+            print(f"Error. skipping glyph '{glyphFileName}' because "
+                  f"of parse error: {str(e)}")
             return None, None, None
         return width, glifXML, outlineXML
 
