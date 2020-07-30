@@ -1,5 +1,7 @@
 import os
 from shutil import copytree
+import pytest
+import subprocess
 
 from afdko.fdkutils import get_temp_dir_path
 from test_utils import (
@@ -113,3 +115,65 @@ def test_bug1003_compat():
     actual_ttx = generate_ttx_dump(actual_path, ['CFF2'])
     expected_ttx = get_expected_path('bug1003.ttx')
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_stat_axis_not_in_fvar():
+    """
+    Fail if fvar axes are missing from STAT
+    """
+    input_dir = get_input_path('STAT_tests')
+    temp_dir = get_temp_dir_path('STAT_tests')
+    copytree(input_dir, temp_dir)
+    ds_path = os.path.join(temp_dir,
+                           'STAT_axis_missing/STAT_axis_missing.designspace')
+    try:
+        runner(CMD + ['-o', 'd', f'_{ds_path}'])
+    except subprocess.CalledProcessError:
+        pytest.xfail()
+
+
+def test_stat_axis_values_range():
+    """
+    Fail if STAT axis values are outside range defined in fvar
+    """
+    input_dir = get_input_path('STAT_tests')
+    temp_dir = get_temp_dir_path('STAT_tests')
+    copytree(input_dir, temp_dir)
+    ds_path = os.path.join(temp_dir,
+                           'STAT_axis_ranges/STAT_axis_ranges.designspace')
+    try:
+        runner(CMD + ['-o', 'd', f'_{ds_path}'])
+    except subprocess.CalledProcessError:
+        pytest.xfail()
+
+
+def test_stat_axis_in_fvar():
+    """
+    Basic check that fvar axes are defined in STAT
+    """
+    input_dir = get_input_path('STAT_tests')
+    temp_dir = get_temp_dir_path('STAT_tests')
+    copytree(input_dir, temp_dir)
+    ds_path = os.path.join(temp_dir,
+                           'STAT_axis_in_fvar/STAT_axis_in_fvar.designspace')
+    runner(CMD + ['-o', 'd', f'_{ds_path}'])
+    actual_path = os.path.join(temp_dir,
+                               'STAT_axis_in_fvar/STAT_axis_in_fvar.otf')
+    actual_ttx = generate_ttx_dump(actual_path, ['STAT'])
+    expected_ttx = get_expected_path('STAT_in_fvar.ttx')
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_stat_axisvaluerecords():
+    """
+    Fail if no STAT AxisValueRecords are defined
+    """
+    input_dir = get_input_path('STAT_tests')
+    temp_dir = get_temp_dir_path('STAT_tests')
+    copytree(input_dir, temp_dir)
+    ds_path = os.path.join(temp_dir,
+                           'STAT_no_AxisValues/STAT_no_AxisValues.designspace')
+    try:
+        runner(CMD + ['-o', 'd', f'_{ds_path}'])
+    except subprocess.CalledProcessError:
+        pytest.xfail()
