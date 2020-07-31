@@ -116,12 +116,11 @@ class CompatibilityPen(CFF2CharStringMergePen):
                 success, new_pt_coords = self.check_and_fix_flat_curve(
                     cmd, point_type, pt_coords)
                 if success:
-                    logger.progress("Converted between line and curve in "
-                                    "source font index '%s' glyph '%s', "
-                                    "point index '%s'at '%s'. "
-                                    "Please check correction." % (
-                                        self.m_index, self.glyphName,
-                                        self.pt_index, pt_coords))
+                    logger.progress(f"Converted between line and curve in "
+                                    f"source font index '{self.m_index}' "
+                                    f"glyph '{self.glyphName}', point index "
+                                    f"'{self.pt_index}'at '{pt_coords}'. "
+                                    f"Please check correction.")
                     pt_coords = new_pt_coords
                 else:
                     success = self.check_and_fix_closepath(
@@ -390,8 +389,8 @@ def validate_stat_axes(tt_font):
     diff = set(fvar_axis_tags) - set(stat_axis_tags)
     if diff:
         raise CFF2VFError(
-            'All fvar axes must also be defined in the STAT table. '
-            'Axes for %s are missing' % str(list(diff))
+            f'All fvar axes must also be defined in the STAT table. '
+            f'Axes for {str(list(diff))} are missing.'
         )
 
 
@@ -417,9 +416,9 @@ def validate_stat_values(ttFont):
         if hasattr(av, 'NominalValue'):
             stat_range_vals[axis_tag].append(av.NominalValue)
             if not av.RangeMinValue <= av.NominalValue <= av.RangeMaxValue:
-                logger.error(
-                    'Invalid default value %d for range %d - %d'
-                    % (av.NominalValue, av.RangeMinValue, av.RangeMaxValue)
+                errors.append(
+                    f'Invalid default value {av.NominalValue} for range '
+                    f'{av.RangeMinValue} - {av.RangeMaxValue}'
                 )
         if hasattr(av, 'RangeMaxValue'):
             stat_range_vals[axis_tag].append(av.RangeMaxValue)
@@ -438,20 +437,20 @@ def validate_stat_values(ttFont):
                     (val < axis.minValue and int(val) != -32767):
                 out_of_range.append(val)
         if out_of_range:
-            expected_range = '%s - %s' % (axis.minValue, axis.maxValue)
+            expected_range = f'{axis.minValue} - {axis.maxValue}'
             errors.append(
-                '%s values %s are outside of range %s specified in fvar'
-                % (axis.axisTag, str(sorted(set(out_of_range))),
-                   expected_range)
+                f'{axis.axisTag} values {str(sorted(set(out_of_range)))} are '
+                f'outside of range {expected_range} specified in fvar'
             )
     if errors:
-        raise CFF2VFError('Invalid STAT table. %s' % '\n'.join(errors))
+        msg = '\n'.join(errors)
+        raise CFF2VFError(f'Invalid STAT table. {msg}')
 
 
 def import_stat_override(tt_font, stat_file_path):
     if 'STAT' in tt_font:
         logger.warning(
-            'Overwriting existing STAT table with %s.' % stat_file_path
+            f'Overwriting existing STAT table with {stat_file_path}.'
         )
     tt_font.importXML(stat_file_path)
 
@@ -594,7 +593,7 @@ def main(args=None):
     update_stat_name_ids(varFont)
 
     varFont.save(options.var_font_path)
-    logger.progress("Built variable font '%s'" % options.var_font_path)
+    logger.progress(f"Built variable font '{options.var_font_path}'")
 
 
 if __name__ == '__main__':

@@ -126,10 +126,8 @@ def test_stat_axis_not_in_fvar():
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir,
                            'STAT_axis_missing/STAT_axis_missing.designspace')
-    try:
+    with pytest.raises(subprocess.CalledProcessError):
         runner(CMD + ['-o', 'd', f'_{ds_path}'])
-    except subprocess.CalledProcessError:
-        pytest.xfail()
 
 
 def test_stat_axis_values_range():
@@ -141,10 +139,8 @@ def test_stat_axis_values_range():
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir,
                            'STAT_axis_ranges/STAT_axis_ranges.designspace')
-    try:
+    with pytest.raises(subprocess.CalledProcessError):
         runner(CMD + ['-o', 'd', f'_{ds_path}'])
-    except subprocess.CalledProcessError:
-        pytest.xfail()
 
 
 def test_stat_axis_in_fvar():
@@ -173,10 +169,8 @@ def test_stat_axisvaluerecords():
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir,
                            'STAT_no_AxisValues/STAT_no_AxisValues.designspace')
-    try:
+    with pytest.raises(subprocess.CalledProcessError):
         runner(CMD + ['-o', 'd', f'_{ds_path}'])
-    except subprocess.CalledProcessError:
-        pytest.xfail()
 
 
 def test_stat_infinite_range():
