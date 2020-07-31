@@ -8,8 +8,11 @@ import argparse
 import os
 import subprocess
 import tempfile
+import zipfile
 
 __version__ = '1.3.7'
+
+LEN_CID_TOK = 31  # length of string '%!PS-Adobe-3.0 Resource-CIDFont'
 
 
 def validate_path(path_str):
@@ -48,30 +51,33 @@ def _font_is_ufo(path):
 
 
 def get_font_format(font_file_path):
-    if _font_is_ufo(font_file_path):
-        return 'UFO'
+    if os.path.isdir(font_file_path):
+        if _font_is_ufo(font_file_path):
+            return 'UFO'
     elif os.path.isfile(font_file_path):
         with open(font_file_path, 'rb') as f:
-            head = f.read(4)
+            fullhead = f.read(LEN_CID_TOK)
+            head = fullhead[0, 4]
+            shorthead = fullhead[0, 2]
             if head == b'OTTO':
                 return 'OTF'
             elif head in (b'\x00\x01\x00\x00', b'true'):
                 return 'TTF'
             elif head == b'ttcf':
                 return 'TTC'
-            elif head[0:2] == b'\x01\x00':
+            elif shorthead == b'\x01\x00':
                 return 'CFF'
-            elif head[0:2] == b'\x80\x01':
+            elif shorthead == b'\x80\x01':
                 return 'PFB'
             elif head in (b'%!PS', b'%!Fo'):
-                for fullhead in (b'%!PS-AdobeFont', b'%!FontType1',
-                                 b'%!PS-Adobe-3.0 Resource-CIDFont'):
-                    f.seek(0)
-                    if f.read(len(fullhead)) == fullhead:
-                        if b"CID" not in fullhead:
-                            return 'PFA'
-                        else:
-                            return 'PFC'
+                if b'CID' not in fullhead:
+                    return 'PFA'
+                else:
+                    return 'PFC'
+            elif (shorthead == b'PK' and
+                  zipfile.is_zipfile(font_file_path) and
+                  _font_is_ufo(font_file_path)):
+                return 'UFO'
     return None
 
 
