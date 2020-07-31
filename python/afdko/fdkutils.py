@@ -57,8 +57,8 @@ def get_font_format(font_file_path):
     elif os.path.isfile(font_file_path):
         with open(font_file_path, 'rb') as f:
             fullhead = f.read(LEN_CID_TOK)
-            head = fullhead[0, 4]
-            shorthead = fullhead[0, 2]
+            head = fullhead[0: 4]
+            shorthead = fullhead[0: 2]
             if head == b'OTTO':
                 return 'OTF'
             elif head in (b'\x00\x01\x00\x00', b'true'):
