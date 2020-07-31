@@ -22,4 +22,5 @@ exclude =
     **/pdflib/pdfgen.py,
     **/pdflib/pdfgeom.py,
     **/pdflib/pdfutils.py,
-    **/pdflib/ttfpdf.py
+    **/pdflib/ttfpdf.py,
+    ./venv*
