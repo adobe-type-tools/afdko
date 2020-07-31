@@ -4,26 +4,10 @@ set -e
 
 # activate virtual environment
 source venv/bin/activate
-# check source files
-flake8 setup.py
-flake8 tests/*.py
-pushd python/afdko
-flake8 buildcff2vf.py
-flake8 buildmasterotfs.py
-flake8 checkoutlinesufo.py
-flake8 convertfonttocid.py
-flake8 fdkutils.py
-flake8 makeinstancesufo.py
-flake8 makeotf.py
-flake8 otc2otf.py
-flake8 otf2ttf.py
-flake8 pdflib/otfpdf.py
-flake8 pdflib/pdfmetrics.py
-flake8 ttfdecomponentizer.py
-flake8 ttfcomponentizer.py
-flake8 ttxn.py
-flake8 ufotools.py
-popd
+# check Python source files with flake8
+flake8 --count --show-source --statistics --config=.flake8
+
+# check C files with cpplint
 cpplint --recursive --quiet c/detype1
 cpplint --recursive --quiet c/makeotf/makeotf_lib/source
 cpplint --recursive --quiet c/makeotf/makeotf_lib/api
