@@ -21,7 +21,7 @@ htmlcov
 .pytest_cache
 *.gcno
 *.gcda
-cov.xml
+cov*.xml
 
 # ignore the compiled programs
 c/build_all/*

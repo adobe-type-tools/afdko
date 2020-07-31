@@ -3,36 +3,32 @@ Input font: RgBd.ttc
 Font 0: SourceSansPro-Regular.otf
     tag     checksum    length    offset
     ----  ----------  --------  --------
-    BASE  0x651E5DBD        70       492
-    CFF   0xF715B0B5    120605       564
-    DSIG  0x00000001         8    246668
-    GDEF  0xF721FB92       908    246676
-    GPOS  0x43FA27F5     89210    247584
-    GSUB  0x85444310     21032    425500
-    OS/2  0x5DDFD5A3        96    446532
-    cmap  0x9FCE01F4     14018    446724
-    head  0x157F8BB0        54    460744
-    hhea  0x0A840D78        36    460856
-    hmtx  0xD07616EC      7896    460928
-    maxp  0x07B65000         6    476720
-    name  0x4E7E178C      2068    476728
-    post  0xFFD10032        32    480888
+    CFF   0xAFA0A6FF     10709       428
+    GDEF  0x004A006F        28     22452
+    GPOS  0x6B25663B      5390     22480
+    GSUB  0x3C2D5481       788     33264
+    OS/2  0x5AE57622        96     34052
+    cmap  0x2777098B       606     34244
+    head  0x18EA7283        54     34852
+    hhea  0x0A840644        36     34964
+    hmtx  0xE1341825       520     35036
+    maxp  0x00825000         6     36076
+    name  0x4D11643E       550     36084
+    post  0xFFD10032        32     37208
 
 Font 1: SourceSansPro-Bold.otf
     tag     checksum    length    offset
     ----  ----------  --------  --------
-    BASE  - shared -
-    CFF   0x1B1D42D9    125495    121172
-    DSIG  - shared -
+    CFF   0x64D23345     11312     11140
     GDEF  - shared -
-    GPOS  0x0147FBFD     88702    336796
+    GPOS  0x67C261E2      5390     27872
     GSUB  - shared -
-    OS/2  0x5F11D7AE        96    446628
+    OS/2  0x5C17782D        96     34148
     cmap  - shared -
-    head  0x157B8B8A        54    460800
-    hhea  0x0A7F0D75        36    460892
-    hmtx  0xC338D3DB      7896    468824
+    head  0x18E67279        54     34908
+    hhea  0x0A7F0641        36     35000
+    hmtx  0xF04B14BE       520     35556
     maxp  - shared -
-    name  0x13EB56F8      2090    478796
+    name  0x4F2F65DB       572     36636
     post  - shared -
 
