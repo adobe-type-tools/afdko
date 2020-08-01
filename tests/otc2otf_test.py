@@ -99,7 +99,7 @@ def test_convert(ttc_filename, input_filenames, diff_index):
     actual_ttx = generate_ttx_dump(actual_path)
     in_ext = os.path.splitext(input_filename)[1]
     expected_ttx = get_expected_path(input_filename.replace(in_ext, '.ttx'))
-    return differ([expected_ttx, actual_ttx,
+    assert differ([expected_ttx, actual_ttx,
                    '-s',
                    '<ttFont sfntVersion' + SPLIT_MARKER +
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
