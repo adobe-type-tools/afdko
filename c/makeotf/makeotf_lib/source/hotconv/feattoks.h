@@ -138,7 +138,7 @@ extern GID glyph();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode* glyphClass(int named, char* gcname);
+extern GNode* glyphClass(bool named, bool dontcopy, char* gcname);
 #else
 extern GNode* glyphClass();
 #endif
@@ -656,8 +656,8 @@ extern SetWordType zzerr70[];
 extern SetWordType zzerr71[];
 extern SetWordType zzerr72[];
 extern SetWordType zzerr73[];
-extern SetWordType zzerr74[];
 extern SetWordType setwd14[];
+extern SetWordType zzerr74[];
 extern SetWordType zzerr75[];
 extern SetWordType zzerr76[];
 extern SetWordType zzerr77[];
@@ -670,15 +670,15 @@ extern SetWordType zzerr82[];
 extern SetWordType setwd16[];
 extern SetWordType zzerr83[];
 extern SetWordType zzerr84[];
-extern SetWordType zzerr85[];
 extern SetWordType setwd17[];
+extern SetWordType zzerr85[];
 extern SetWordType zzerr86[];
 extern SetWordType zzerr87[];
 extern SetWordType zzerr88[];
 extern SetWordType zzerr89[];
 extern SetWordType zzerr90[];
-extern SetWordType zzerr91[];
 extern SetWordType setwd18[];
+extern SetWordType zzerr91[];
 extern SetWordType zzerr92[];
 extern SetWordType zzerr93[];
 extern SetWordType zzerr94[];

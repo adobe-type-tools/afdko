@@ -318,11 +318,12 @@ glyph[char *tok, int allowNotdef]>[GID gid]
 	|	cid:T_CID					<<$gid = cid2gid(g, (CID)($cid).lval);>>
 	;
 
-/* Returns head of list; any named glyph classes references are copied.
+/* Returns head of list; any named glyph classes references are copied, unless
+   dontcopy is true.
    Note that FEAT_GCLASS is set only for a @CLASSNAME or [...] construct even
    if it contains only a single glyph - this is essential for classifying
    pair pos rules as specific or class pairs */
-glyphClass[int named, char *gcname]>[GNode *gnode]
+glyphClass[bool named, bool dontcopy, char *gcname]>[GNode *gnode]
 	:	<<
 		$gnode = NULL;	/* Suppress compiler warning */
 		if ($named)
@@ -337,6 +338,8 @@ glyphClass[int named, char *gcname]>[GNode *gnode]
 			$gnode   = gcAddGlyphClass($a.text, 1);
 			gcEnd(named);
 			}
+		else if ($dontcopy)
+			$gnode = gcLookup($a.text);
 		else
 			featGlyphClassCopy(g, &($gnode), gcLookup($a.text));
 		>>
@@ -733,7 +736,7 @@ pattern[int markedOK]>[GNode *pat]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -798,7 +801,7 @@ pattern2[GNode** headP]>[GNode *lastNode]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -847,7 +850,7 @@ pattern3[GNode** headP]>[GNode *lastNode]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -972,7 +975,7 @@ mark_statement
 			(
 			<<GNode *gc;>>
 	
-			glyphClass[0, NULL]>[gc]
+			glyphClass[false, false, NULL]>[gc]
 				<<
 				targ = gc;
 				>>
@@ -1313,7 +1316,7 @@ cursive[GNode** headP]>[GNode *lastNode]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -1370,7 +1373,7 @@ baseToMark[GNode** headP]>[GNode *lastNode]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -1410,7 +1413,7 @@ baseToMark[GNode** headP]>[GNode *lastNode]
 					(
 					<<GNode *gc;>>
 		
-					glyphClass[0, NULL]>[gc]
+					glyphClass[false, false, NULL]>[gc]
 						<<
 						*insert = gc;
 						>>
@@ -1496,7 +1499,7 @@ ligatureMark[GNode** headP]>[GNode *lastNode]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -1536,7 +1539,7 @@ ligatureMark[GNode** headP]>[GNode *lastNode]
 					(
 					<<GNode *gc;>>
 		
-					glyphClass[0, NULL]>[gc]
+					glyphClass[false, false, NULL]>[gc]
 						<<
 						*insert = gc;
 						>>
@@ -1614,7 +1617,7 @@ ligatureMark[GNode** headP]>[GNode *lastNode]
 	
 glyphClassAssign
 	:	<<GNode *tmp1;>>
-		a:T_GCLASS "=" glyphClass[1, $a.text]>[tmp1]
+		a:T_GCLASS "=" glyphClass[true, false, $a.text]>[tmp1]
 	;
 
 scriptAssign
@@ -1658,9 +1661,10 @@ namedLookupFlagValue[unsigned short *val]
 		|
 		K_UseMarkFilteringSet
 		(
-		umfClass:T_GCLASS
+		<<GNode *gc;>>
+		glyphClass[false, true, NULL]>[gc]
 		<<
-			getMarkSetIndex($umfClass.text, &umfIndex);
+			getMarkSetIndex(gc, &umfIndex);
 			setLkpFlagAttribute(val,otlUseMarkFilteringSet, umfIndex);
 		>>
 		)
@@ -1671,9 +1675,10 @@ namedLookupFlagValue[unsigned short *val]
 			numUInt8>[gdef_markclass_index]
 			|
 			(
-				matClass:T_GCLASS
+				<<GNode *gc;>>
+				glyphClass[false, true, NULL]>[gc]
 				<<
-				 getGDEFMarkClassIndex($matClass.text, &gdef_markclass_index);
+				 getGDEFMarkClassIndex(gc, &gdef_markclass_index);
 				>>
 			)
 		
@@ -2118,7 +2123,7 @@ table_STAT
 glyphClassOptional>[GNode *gnode]
 	:	<<$gnode = NULL;>> /* Suppress optimizer warning */
 
-		glyphClass[0, NULL]>[$gnode]
+		glyphClass[false, false, NULL]>[$gnode]
 		|				<<$gnode = NULL;>>
 	;
 

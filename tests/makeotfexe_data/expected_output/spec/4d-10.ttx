@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont>
+
+  <GDEF>
+    <Version value="0x00010002"/>
+    <GlyphClassDef Format="2">
+      <ClassDef glyph="f" class="4"/>
+      <ClassDef glyph="f_i" class="2"/>
+      <ClassDef glyph="i" class="4"/>
+    </GlyphClassDef>
+    <MarkGlyphSetsDef>
+      <MarkSetTableFormat value="1"/>
+      <!-- MarkSetCount=1 -->
+      <Coverage index="0" Format="1">
+        <Glyph value="grave"/>
+        <Glyph value="acute"/>
+        <Glyph value="macron"/>
+      </Coverage>
+    </MarkGlyphSetsDef>
+  </GDEF>
+
+  <GSUB>
+    <Version value="0x00010000"/>
+    <ScriptList>
+      <!-- ScriptCount=0 -->
+    </ScriptList>
+    <FeatureList>
+      <!-- FeatureCount=0 -->
+    </FeatureList>
+    <LookupList>
+      <!-- LookupCount=1 -->
+      <Lookup index="0">
+        <LookupType value="4"/>
+        <LookupFlag value="16"/><!-- useMarkFilteringSet -->
+        <!-- SubTableCount=1 -->
+        <LigatureSubst index="0" Format="1">
+          <LigatureSet glyph="f">
+            <Ligature components="i" glyph="f_i"/>
+          </LigatureSet>
+        </LigatureSubst>
+        <MarkFilteringSet value="0"/>
+      </Lookup>
+    </LookupList>
+  </GSUB>
+
+</ttFont>

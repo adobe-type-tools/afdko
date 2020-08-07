@@ -1,0 +1,6 @@
+# Direct glyph class in UseMarkFilteringSet.
+
+lookup test {
+  lookupflag UseMarkFilteringSet [acute grave macron];
+  sub f i by f_i;
+} test;
