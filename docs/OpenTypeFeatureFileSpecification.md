@@ -1107,8 +1107,8 @@ RightToLeft
 IgnoreBaseGlyphs
 IgnoreLigatures
 IgnoreMarks
-MarkAttachmentType <glyph class name>
-UseMarkFilteringSet <glyph class name>
+MarkAttachmentType <glyphclass|glyphclass name>
+UseMarkFilteringSet <glyphclass|glyphclass name>
 ```
 
 At most one of each of the above 6 kinds of `<named lookupflag>` values may be
@@ -1136,6 +1136,13 @@ different classes.
 The flag `UseMarkFilteringSet` was added in OpenType spec 1.6. This works the
 same as the `MarkAttachmentType`, but allows you to use up to 16K different mark
 classes, and allows the glyph sets of the referenced classes to overlap.
+
+`MarkAttachmentType` and `UseMarkFilteringSet` can also use glyph classes
+directly, with the same restrictions as above.
+
+```fea
+lookupflag UseMarkFilteringSet [acute grave];
+```
 
 ##### lookupflag format B:
 
