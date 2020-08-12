@@ -41,7 +41,7 @@ jobs:
         CIBW_TEST_REQUIRES: "pytest"
         CIBW_TEST_COMMAND_MACOS: "cd {project}; pytest"
         CIBW_TEST_COMMAND_LINUX: "cd {project}; pytest"
-        CIBW_TEST_COMMAND_WINDOWS: "cd {project} && pytest"
+        CIBW_TEST_COMMAND_WINDOWS: "cd '{project}' && pytest"
 
     - uses: actions/upload-artifact@v1
       with:
