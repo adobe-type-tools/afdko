@@ -39,9 +39,7 @@ jobs:
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
         CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x"
         CIBW_TEST_REQUIRES: "pytest"
-        CIBW_BEFORE_TEST: "cd {project}"
-        CIWB_BEFORE_TEST: "pwd"
-        CIBW_TEST_COMMAND: "pytest"
+        CIBW_TEST_COMMAND: "cd {project}; pytest"
 
     - uses: actions/upload-artifact@v1
       with:
