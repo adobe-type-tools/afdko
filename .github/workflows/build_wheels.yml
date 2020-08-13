@@ -3,6 +3,10 @@ name: Build Python Wheels
 on:
   repository_dispatch:
     types: wheel-manual-trigger
+  # push:
+  #   branches: [develop, master]
+  #   tags:
+  #     - 'v*'  # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   build_wheels:
@@ -37,7 +41,7 @@ jobs:
       env:
         CIBW_BUILD: "cp36-*"
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-        CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x"
+        CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x cp*win32"
         CIBW_TEST_REQUIRES: "pytest"
         CIBW_TEST_COMMAND: "pytest {project}/tests"
 
@@ -51,11 +55,11 @@ jobs:
         python setup.py sdist
       if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
 
-    # - name: Publish package to PyPI
-    #   run: |
-    #     pip install twine
-    #     twine upload dist/*
-    #   env:
-    #     TWINE_USERNAME: __token__
-    #     TWINE_PASSWORD: ${{ secrets.pypi_password }}
-    #   if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    - name: Publish package to PyPI TEST
+      run: |
+        pip install twine
+        twine upload --repository testpypi dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.test_pypi_password }}
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
