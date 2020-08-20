@@ -3625,23 +3625,21 @@ format 4.
 
 ##### location format B (used in Axis value table [Format 2](https://docs.microsoft.com/en-us/typography/opentype/spec/stat#axis-value-table-format-2))
 ```fea
-location <axisTag> <nominalValue> <rangeMinValue> - <rangeMaxValue>;
+location <axisTag> <nominalValue> <rangeMinValue> <rangeMaxValue>;
 ```
 
-Format for `axisTag` and the other values as above, and there must be a space
-before the `-` to distinguish it from a possible minus sign for
-`<rangeMaxValue>`. To specify an open ended range use `-32767` to mean 
-negative infinity and `32767.99998` to mean positive infinity. 
+Format for `axisTag` and the other values as above. To specify an open ended 
+range use `-32767` to mean negative infinity and `32767.99998` to mean positive infinity. 
 For example, the following AxisValue definitions mean that "Regular" on the 
 `wght` axis is defined with a nominal value of 400 and a range covering all 
 possible values below 400 up to and including 649. "Bold" is defined with a 
 nominal value of 700 and a range covering all values from 650 and above. 
 ```fea
    AxisValue {
-      location wght 400 -32768 - 650;
+      location wght 400 -32768 650;
       name "Regular";
    AxisValue {
-      location wght 700 650 - 32767.99998;
+      location wght 700 650 32767.99998;
       name "Bold";
    };
 ```
@@ -3692,7 +3690,7 @@ table STAT {
 
     # format 2
     AxisValue {
-        location wght 400 300 - 500;
+        location wght 400 300 500;
         name "Regular";
         flag ElidableAxisValueName;
     };
@@ -3736,60 +3734,60 @@ table STAT {
    DesignAxis ital 2 { name "Italic"; };
 
     AxisValue {
-        location wght 200 200 - 250;
+        location wght 200 200 250;
         name "ExtraLight";
     };
 
     AxisValue {
-        location wght 300 250 - 350;
+        location wght 300 250 350;
         name "Light";
     };
 
     AxisValue {
-        location wght 400 350 - 450;
+        location wght 400 350 450;
         name "Regular";
         flag ElidableAxisValueName;
     };
 
     AxisValue {
-        location wght 500 450 - 550;
+        location wght 500 450 550;
         name "Medium";
         flag ElidableAxisValueName;
     };
 
     AxisValue {
-        location wght 600 550 - 650;
+        location wght 600 550 650;
         name "Semibold";
     };
 
     AxisValue {
-        location wght 700 650 - 750;
+        location wght 700 650 750;
         name "Bold";
     };
 
     AxisValue {
-        location wght 800 750 - 850;
+        location wght 800 750 850;
         name "ExtraBold";
     };
     
     AxisValue {
-        location wght 900 850 - 900;
+        location wght 900 850 900;
         name "Black";
     };
 
     AxisValue {
-        location opsz 6 5 - 8;
+        location opsz 6 5 8;
         name "Caption";
     };
     
     AxisValue {
-        location opsz 10 8 - 24;
+        location opsz 10 8 24;
         name "Text";
         flag ElidableAxisValueName;
     };
     
     AxisValue {
-        location opsz 60 24 - 100;
+        location opsz 60 24 100;
         name "Display";
     };
     
@@ -3813,60 +3811,60 @@ table STAT {
    DesignAxis ital 2 { name "Italic"; };
 
     AxisValue {
-        location wght 200 200 - 250;
+        location wght 200 200 250;
         name "ExtraLight";
     };
 
     AxisValue {
-        location wght 300 250 - 350;
+        location wght 300 250 350;
         name "Light";
     };
 
     AxisValue {
-        location wght 400 350 - 450;
+        location wght 400 350 450;
         name "Regular";
         flag ElidableAxisValueName;
     };
 
     AxisValue {
-        location wght 500 450 - 550;
+        location wght 500 450 550;
         name "Medium";
         flag ElidableAxisValueName;
     };
 
     AxisValue {
-        location wght 600 550 - 650;
+        location wght 600 550 650;
         name "Semibold";
     };
 
     AxisValue {
-        location wght 700 650 - 750;
+        location wght 700 650 750;
         name "Bold";
     };
 
     AxisValue {
-        location wght 800 750 - 850;
+        location wght 800 750 850;
         name "ExtraBold";
     };
     
     AxisValue {
-        location wght 900 850 - 900;
+        location wght 900 850 900;
         name "Black";
     };
 
     AxisValue {
-        location opsz 6 5 - 8;
+        location opsz 6 5 8;
         name "Caption";
     };
     
     AxisValue {
-        location opsz 10 8 - 24;
+        location opsz 10 8 24;
         name "Text";
         flag ElidableAxisValueName;
     };
     
     AxisValue {
-        location opsz 60 24 - 100;
+        location opsz 60 24 100;
         name "Display";
     };
     

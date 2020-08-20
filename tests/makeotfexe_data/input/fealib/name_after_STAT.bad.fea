@@ -7,7 +7,7 @@ table STAT {
    DesignAxis ital 1 { name "Italic"; };
 
    AxisValue {
-      location wght 400.0 -300.54 - 450.6;
+      location wght 400.0 -300.54 450.6;
       name "Regular";
       flag ElidableAxisValueName;
    };

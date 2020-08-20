@@ -12,7 +12,7 @@ table STAT {
    };
 
    AxisValue {
-      location wght 400 300 - 500;
+      location wght 400 300 500;
       name "Regular";
    };
 

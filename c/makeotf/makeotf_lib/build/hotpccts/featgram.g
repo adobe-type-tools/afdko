@@ -2017,7 +2017,7 @@ axisValueLocation>[uint16_t format, Tag tag, Fixed value, Fixed min, Fixed max]
 		K_location t:T_TAG << $tag = $t.ulval; >> numFixed>[$value]
 		( ";" << $format = 1; >>
 		| numFixed>[$min] << $format = 3; >>
-		  {"\-" numFixed>[$max] << $format = 2; >> } ";"
+		  {numFixed>[$max] << $format = 2; >> } ";"
 		)
 	;
 

@@ -119,7 +119,7 @@ class CompatibilityPen(CFF2CharStringMergePen):
                     logger.progress(f"Converted between line and curve in "
                                     f"source font index '{self.m_index}' "
                                     f"glyph '{self.glyphName}', point index "
-                                    f"'{self.pt_index}'at '{pt_coords}'. "
+                                    f"'{self.pt_index}' at '{pt_coords}'. "
                                     f"Please check correction.")
                     pt_coords = new_pt_coords
                 else:
@@ -406,26 +406,24 @@ def validate_stat_values(ttFont):
     errors = []
     stat_range_vals = {}
 
-    if not stat.table.AxisValueArray.AxisValue:
-        raise CFF2VFError('Invalid STAT table. No Axis Value Records found.')
-
-    for av in stat.table.AxisValueArray.AxisValue:
-        axis_tag = stat.table.DesignAxisRecord.Axis[av.AxisIndex].AxisTag
-        if axis_tag not in stat_range_vals:
-            stat_range_vals[axis_tag] = []
-        if hasattr(av, 'NominalValue'):
-            stat_range_vals[axis_tag].append(av.NominalValue)
-            if not av.RangeMinValue <= av.NominalValue <= av.RangeMaxValue:
-                errors.append(
-                    f'Invalid default value {av.NominalValue} for range '
-                    f'{av.RangeMinValue} - {av.RangeMaxValue}'
-                )
-        if hasattr(av, 'RangeMaxValue'):
-            stat_range_vals[axis_tag].append(av.RangeMaxValue)
-        if hasattr(av, 'RangeMinValue'):
-            stat_range_vals[axis_tag].append(av.RangeMinValue)
-        if hasattr(av, 'Value'):
-            stat_range_vals[axis_tag].append(av.Value)
+    if hasattr(stat.table.AxisValueArray, "AxisValue"):
+        for av in stat.table.AxisValueArray.AxisValue:
+            axis_tag = stat.table.DesignAxisRecord.Axis[av.AxisIndex].AxisTag
+            if axis_tag not in stat_range_vals:
+                stat_range_vals[axis_tag] = []
+            if hasattr(av, 'NominalValue'):
+                stat_range_vals[axis_tag].append(av.NominalValue)
+                if not av.RangeMinValue <= av.NominalValue <= av.RangeMaxValue:
+                    errors.append(
+                        f'Invalid default value {av.NominalValue} for range '
+                        f'{av.RangeMinValue} - {av.RangeMaxValue}'
+                    )
+            if hasattr(av, 'RangeMaxValue'):
+                stat_range_vals[axis_tag].append(av.RangeMaxValue)
+            if hasattr(av, 'RangeMinValue'):
+                stat_range_vals[axis_tag].append(av.RangeMinValue)
+            if hasattr(av, 'Value'):
+                stat_range_vals[axis_tag].append(av.Value)
 
     for axis in fvar.axes:
         stat_ref = stat_range_vals.get(axis.axisTag)
