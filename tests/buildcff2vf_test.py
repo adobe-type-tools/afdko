@@ -160,19 +160,6 @@ def test_stat_axis_in_fvar():
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
-def test_stat_axisvaluerecords():
-    """
-    Fail if no STAT AxisValueRecords are defined
-    """
-    input_dir = get_input_path('STAT_tests')
-    temp_dir = get_temp_dir_path('STAT_tests')
-    copytree(input_dir, temp_dir)
-    ds_path = os.path.join(temp_dir,
-                           'STAT_no_AxisValues/STAT_no_AxisValues.designspace')
-    with pytest.raises(subprocess.CalledProcessError):
-        runner(CMD + ['-o', 'd', f'_{ds_path}'])
-
-
 def test_stat_infinite_range():
     """
     Check that range tests work when infinite ranges are defined

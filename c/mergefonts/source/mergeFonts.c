@@ -265,7 +265,7 @@ static GAFileInfo *checkIFParentCIDCompatible(txCtx h, abfTopDict *local_top, bo
         if (parentIsCID) {
             int ifd;
             if ((gaf->gaType == gafBothName) || (gaf->gaType == gafSrcCID))
-                fatal(h, "Parent font  not a CID font, but its matching glyph alias file maps the glyphs to names rather than CID values");
+                fatal(h, "Parent font is not a CID font, but its matching glyph alias file maps the glyphs to names rather than CID values");
 
             for (ifd = 0; ifd < local_top->FDArray.cnt; ifd++) {
                 if (gaf->FontName[0] != 0) /* if the GA file supplies an alternate FontName, use it .*/
@@ -276,7 +276,7 @@ static GAFileInfo *checkIFParentCIDCompatible(txCtx h, abfTopDict *local_top, bo
             }
         } else {
             if ((gaf->gaType == gafBothCID) || (gaf->gaType == gafDstCID))
-                fatal(h, "Parent font  is not a CID font, but its matching glyph alias file maps the glyph names to CID values.");
+                fatal(h, "Parent font is not a CID font, but its matching glyph alias file maps the glyph names to CID values.");
         }
     } else {
         if (parentIsCID != localFontIsCID) {
@@ -1297,7 +1297,7 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
             } else if (0 == strcmp(key, "version")) {
                 mergeInfo->cidinfo.fontVersion = (float)atof(value);
                 if (mergeInfo->cidinfo.fontVersion == 0.0)
-                    fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The fontVersion value could not be parsed as a fractional  number.", filePath, lineno - 1);
+                    fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The fontVersion value could not be parsed as a fractional number.", filePath, lineno - 1);
             } else if (0 == strcmp(key, "XUID")) {
                 char *p = value;
                 long cnt = 0;
@@ -1312,7 +1312,7 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
                                 fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. There are more than 16 values in the array.", filePath, lineno - 1);
                             mergeInfo->XUID.array[cnt] = atoi(startp);
                             if ((0 != strcmp("0", startp)) && (mergeInfo->XUID.array[cnt] == 0))
-                                fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The %ld'th XIUD value (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
+                                fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. XUID value no. %ld (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
                             startp = NULL;
                             cnt++;
                         }
@@ -1328,7 +1328,7 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
                         fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. There are more than 16 values in the array.", filePath, lineno - 1);
                     mergeInfo->XUID.array[cnt] = atoi(startp);
                     if ((0 != strcmp("0", startp)) && (mergeInfo->XUID.array[cnt] == 0))
-                        fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. The %ld'th XIUD value (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
+                        fatal(h, "Parse error in the CID fontinfo file \"%s\" at line no %d. XUID value no. %ld (%s) could not be parsed as an integer number.", filePath, lineno - 1, cnt + 1, p);
                     cnt++;
                 }
                 mergeInfo->XUID.cnt = cnt;
@@ -1338,7 +1338,7 @@ static void readCIDFontInfo(txCtx h, char *filePath) {
 
     fclose(fp);
     if (lineno < 9)
-        fatal(h, "Parse error in the CID fontinfo file \"%s\", there are not enough key/value pairs. Nake sure line-endings are correct.", filePath);
+        fatal(h, "Parse error in the CID fontinfo file \"%s\", there are not enough key/value pairs. Make sure line-endings are correct.", filePath);
 
     {
         int missingKey = 0;
@@ -1438,14 +1438,14 @@ static int mergeGlyphBegin(abfGlyphCallbacks *cb, abfGlyphInfo *srcInfo) {
             if (cnt == 1) {
                 info->flags |= ABF_GLYPH_CID; /* set CID flag in  glyph info */
             } else {
-                fatal(h, "Bad glyph name '%s'. When converting a name-keyed font to CID, all glyph must be either .notdef, or have a name in the form 'cidXXXXX'.", info->gname.ptr);
+                fatal(h, "Bad glyph name '%s'. When converting a name-keyed font to CID, all glyphs must be either .notdef, or have a name in the form 'cidXXXXX'.", info->gname.ptr);
             }
         } else if (strcmp(info->gname.ptr, ".notdef") == 0) {
             info->flags |= ABF_GLYPH_CID; /* set CID flag in  glyph info */
             info->cid = 0;
         } else {
             /* Skip the glyph, and emit a warning. */
-            fprintf(stderr, "%s: Warning: Skipping glyph '%s'. When converting to CID,  only glyphs with a name in the form 'cidXXXXX' will be copied.\n", h->progname, info->gname.ptr);
+            fprintf(stderr, "%s: Warning: Skipping glyph '%s'. When converting to CID, only glyphs with a name in the form 'cidXXXXX' will be copied.\n", h->progname, info->gname.ptr);
             return ABF_SKIP_RET; /* If we are copying only the font dict hint info, then we take no glyphs from the source.*/
         }
 
@@ -1813,7 +1813,7 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                     if (h->mode != mode_cff)
                         goto wrongmode;
                     if (argsleft < 1)
-                        fatal(h, "too few file args: need  at least <dest file> <parent src> ");
+                        fatal(h, "too few file args: need at least <dest file> <parent src> ");
                     dstPath = argv[i];
                     dstFileSetName(h, argv[i]);
                     i++; /* Consume arg */
