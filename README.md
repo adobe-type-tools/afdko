@@ -40,6 +40,10 @@ Releases are available on the [Python Package
 Index](https://pypi.python.org/pypi/afdko) (PyPI) and can be installed
 with [pip](https://pip.pypa.io).
 
+Note for macOS users: we recommend that you do **not** use the system Python. Among other reasons, macOS ships with Python 2 and the latest version of the AFDKO is only available for Python 3. You can find instructions for using Brew to install Python 3 on macOS here: [Installing Python 3 on Mac OS X](https://docs.python-guide.org/starting/install3/osx/)
+
+Note for all users: if you are in a Python 3 only environment, then the command `pip` is sufficient.  If you are in a mixed Python 2 and Python 3 environment, or you are unsure of your environment, then the command `pip3` ensures that you are using the Python 3 version of `pip`. It is for this reason that we have used `pip3` in the instructions below.
+
 ### Installing
 
 **Option 1 (Recommended)**
@@ -60,7 +64,7 @@ with [pip](https://pip.pypa.io).
 
 - Install [afdko](https://pypi.python.org/pypi/afdko):
 
-        pip install afdko
+        pip3 install afdko
 
 Installing the **afdko** inside a virtual environment prevents conflicts
 between its dependencies and other modules installed globally.
@@ -69,24 +73,24 @@ between its dependencies and other modules installed globally.
 
 Install [afdko](https://pypi.python.org/pypi/afdko) globally:
 
-    pip install --user afdko
+    pip3 install --user afdko
 
 ### Updating
 
 Use the `-U` (or `--upgrade`) option to update the afdko (and its
 dependencies) to the newest stable release:
 
-    pip install -U afdko
+    pip3 install -U afdko
 
 To get pre-release and in-development versions, use the `--pre` flag:
 
-    pip install -U afdko --pre
+    pip3 install -U afdko --pre
 
 ### Uninstalling
 
 To remove the afdko package use the command:
 
-    pip uninstall afdko
+    pip3 uninstall afdko
 
 Build from source
 -----------------
@@ -107,15 +111,15 @@ On Windows, you need Visual Studio 2017.
 
 To build the **afdko** from source, clone the [afdko GitHub
 repository](https://github.com/adobe-type-tools/afdko), ensure the `wheel`
-module is installed (`pip install wheel`), then `cd` to the top-level
+module is installed (`pip3 install wheel`), then `cd` to the top-level
 directory of the afdko, and run:
 
-    pip install .
+    pip3 install .
 
 **Note**
 
 It's not possible to install the afdko in editable/develop mode using
-`pip install -e .` ; this is because the toolkit includes binary C executables
+`pip3 install -e .` ; this is because the toolkit includes binary C executables
 which setup.py tries to install in the bin/ (or Scripts/) folder, however
 this process was only meant to be used with text-based scripts (either
 written in Python or a shell scripting language). To work around this problem
