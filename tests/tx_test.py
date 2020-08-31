@@ -1073,3 +1073,15 @@ def test_nonstd_fontmatrix(fmt):
     runner(CMD + ['-a', '-o', 'dump', '-f', bin_output, output_path])
     skip = "## Filename "
     assert differ([expected_path, output_path, '-s', skip])
+
+
+def test_pdf_single_glyph():
+    input_path = get_input_path("bug1218.otf")
+    pdf_filename = "bug1218.pdf"
+    expected_path = get_expected_path(pdf_filename)
+    output_dir = get_temp_dir_path()
+    output_path = os.path.join(output_dir, pdf_filename)
+
+    runner(CMD + ['-a', '-o', 'pdf', '1', '-f', input_path, output_path])
+
+    assert differ([expected_path, output_path, '-s', *PDF_SKIP])

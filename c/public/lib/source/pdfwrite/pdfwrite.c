@@ -810,7 +810,7 @@ static void drawCircle(pdwCtx h, int iStm, float x, float y, float r) {
     double top = RND(1, y + r);
     double l = r * 0.552285; /* Control arm length */
     double xp = RND(1, x + l);
-    double xm = RND(1, x - 1);
+    double xm = RND(1, x - l);
     double yp = RND(1, y + l);
     double ym = RND(1, y - l);
     stmPrint(h, iStm,
