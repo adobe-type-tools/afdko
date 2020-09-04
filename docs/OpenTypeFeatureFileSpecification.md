@@ -686,6 +686,18 @@ in an alternate substitution lookup type rule.
 <a name="2.g.i"></a>
 #### 2.g.i. Ranges
 
+A glyph range is a notational mechanism in the feature file grammar that makes it
+possible to define a class of several glyphs is a concise way. The mechanism makes
+use of glyph names that use a contiguous alphabetic sequence A–Z or a–z (or
+sub-sequences thereof), or that use contiguous numeric sequences, such as 0–9. A
+range is specified by referencing starting and ending glyph names, and all of the
+glyph names in the implied sequence are included in the class. The glyphs referenced
+by these names do not have to be in a contiguous sequence in a font file or sources;
+only their names need to be in a contiguous sequence.
+
+If a glyph name within the implied sequence does not correspond to a glyph in the font
+file or font sources, it is ignored.
+
 A range of glyphs is denoted by a hyphen:
 
 ```fea
@@ -703,7 +715,8 @@ feature file glyph names. For example:
 For CID fonts, the ordering is the CID ordering.
 
 For non-CID fonts, the ordering is independent of the ordering of glyphs in the
-font. `<firstGlyph>` and `<lastGlyph>` must be the same length and can differ:
+font. `<firstGlyph>` and `<lastGlyph>` must be the same length and can differ only
+in one of the following ways:
 
 1.  By a single letter from A-Z, either uppercase or lowercase. For example:
 
