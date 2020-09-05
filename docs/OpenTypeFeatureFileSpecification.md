@@ -688,8 +688,8 @@ in an alternate substitution lookup type rule.
 
 A glyph range is a notational mechanism in the feature file grammar that makes it
 possible to define a class of several glyphs is a concise way. The mechanism makes
-use of glyph names that use a contiguous alphabetic sequence A–Z or a–z (or
-sub-sequences thereof), or that use contiguous numeric sequences, such as 0–9. A
+use of glyph names that use a contiguous alphabetic sequence A to Z or a to z (or
+sub-sequences thereof), or that use contiguous numeric sequences, such as 0 to 9. A
 range is specified by referencing starting and ending glyph names, and all of the
 glyph names in the implied sequence are included in the class. The glyphs referenced
 by these names do not have to be in a contiguous sequence in a font file or sources;
