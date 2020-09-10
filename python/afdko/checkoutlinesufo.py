@@ -1052,7 +1052,8 @@ def run(args=None):
             defcon_glyph = defcon_font[glyph_name]
             if defcon_glyph.components:
                 defcon_glyph.decomposeAllComponents()
-            new_glyph = booleanOperations.booleanGlyph.BooleanGlyph(defcon_glyph)
+            new_glyph = booleanOperations.booleanGlyph.BooleanGlyph(
+                defcon_glyph)
             if len(new_glyph) == 0:
                 # Complain about empty glyph only if it is not a space glyph.
                 if not RE_SPACE_PATTERN.search(glyph_name):
@@ -1095,8 +1096,8 @@ def run(args=None):
                             point.y = int(round(point.y))
 
                 # JH May 2020: remove overlap can leave some coincident points
-                # we use thresholdAttrGlyph (modified thresholdPen) to remove them
-                # prior to restore_contour_order.
+                # we use thresholdAttrGlyph (modified thresholdPen) to remove
+                # them prior to restore_contour_order.
                 thresholdAttrGlyph(fixed_glyph, 1)
 
                 restore_contour_order(fixed_glyph, original_contours)
@@ -1136,3 +1137,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
