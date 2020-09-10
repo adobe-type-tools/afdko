@@ -102,3 +102,15 @@ def test_bug790():
     runner(CMD + ['-f', actual_path, '-o', 'e'])
     expected_path = get_expected_path(ufoname)
     assert differ([expected_path, actual_path])
+
+
+@pytest.mark.parametrize('filename, diffmode', [
+    ('cidfont.subset', ['-m', 'bin'])
+])
+def test_cidkeyed_remove_overlap(filename, diffmode):
+    actual_path = get_temp_file_path()
+    copy2(get_input_path(filename), actual_path)
+    runner(CMD + ['-f', actual_path, '-o', 'e', 'q', '=no-overlap-checks'])
+    expected_path = get_expected_path('cidfont.subset.checked')
+    assert differ([expected_path, actual_path] + diffmode)
+

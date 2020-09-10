@@ -8,11 +8,11 @@ __version__ = '2.4.4'
 
 import argparse
 from functools import cmp_to_key
-import os
 import re
 from shutil import copy2
 import sys
 import textwrap
+from tqdm import tqdm, trange
 import warnings
 
 import booleanOperations.booleanGlyph
@@ -313,7 +313,7 @@ def get_options(args):
         '-g',
         '--glyph-list',
         help='specify a list of glyphs to check\n'
-             'Check only the specified list of glyphs. The list must be'
+             'Check only the specified list of glyphs. The list must be '
              'comma-delimited. The glyph IDs may be glyph indexes '
              'or glyph names. There must be no white-space in the '
              'glyph list.\n'
@@ -1026,88 +1026,84 @@ def run(args=None):
         font_file.save_to_default_layer = True
 
     font_changed = False
-    last_had_msg = False
     seen_glyph_count = 0
     processed_glyph_count = 0
 
-    for glyph_name in sorted(glyph_list):
-        changed = False
-        seen_glyph_count += 1
-        msg = []
+    with trange(len(glyph_list)) as t:
+        for i in t:
+            glyph_name = sorted(glyph_list)[i]
+            t.set_description('Checking %s' % glyph_name)
+            changed = False
+            seen_glyph_count += 1
+            msg = []
 
-        if glyph_name not in defcon_font:
-            continue
+            if glyph_name not in defcon_font:
+                continue
 
-        # font_file.check_skip_glyph updates the hash map for the glyph,
-        # so we call it even when the  '-all' option is used.
-        skip = font_file.check_skip_glyph(glyph_name, options.check_all)
-        # Note: this will delete glyphs from the processed layer,
-        #       if the glyph hash has changed.
-        if skip:
-            continue
-        processed_glyph_count += 1
+            # font_file.check_skip_glyph updates the hash map for the glyph,
+            # so we call it even when the  '-all' option is used.
+            skip = font_file.check_skip_glyph(glyph_name, options.check_all)
+            # Note: this will delete glyphs from the processed layer,
+            #       if the glyph hash has changed.
+            if skip:
+                continue
+            processed_glyph_count += 1
 
-        defcon_glyph = defcon_font[glyph_name]
-        if defcon_glyph.components:
-            defcon_glyph.decomposeAllComponents()
-        new_glyph = booleanOperations.booleanGlyph.BooleanGlyph(defcon_glyph)
-        if len(new_glyph) == 0:
-            # Complain about empty glyph only if it is not a space glyph.
-            if not RE_SPACE_PATTERN.search(glyph_name):
-                msg = ["has no contours"]
+            defcon_glyph = defcon_font[glyph_name]
+            if defcon_glyph.components:
+                defcon_glyph.decomposeAllComponents()
+            new_glyph = booleanOperations.booleanGlyph.BooleanGlyph(defcon_glyph)
+            if len(new_glyph) == 0:
+                # Complain about empty glyph only if it is not a space glyph.
+                if not RE_SPACE_PATTERN.search(glyph_name):
+                    msg = ["has no contours"]
+                else:
+                    msg = []
             else:
-                msg = []
-        else:
-            for test in options.test_list:
-                if test is not None:
-                    new_glyph, changed, msg = \
-                        test(new_glyph, changed, msg, options)
+                for test in options.test_list:
+                    if test is not None:
+                        new_glyph, changed, msg = \
+                            test(new_glyph, changed, msg, options)
 
-        if not options.quiet_mode:
-            if len(msg) == 0:
-                if last_had_msg:
-                    print()
-                print('.', end='')
-                last_had_msg = False
-            else:
-                print(os.linesep + glyph_name, ' '.join(msg), end='')
-                last_had_msg = True
-        if changed and options.allow_changes:
-            font_changed = True
-            original_contours = list(defcon_glyph)
-            if font_file.save_to_default_layer:
-                fixed_glyph = defcon_glyph
-                fixed_glyph.clearContours()
-            else:
-                # this will replace any pre-existing glyph:
-                processed_layer.newGlyph(glyph_name)
-                fixed_glyph = processed_layer[glyph_name]
-                fixed_glyph.width = defcon_glyph.width
-                fixed_glyph.height = defcon_glyph.height
-                fixed_glyph.unicodes = defcon_glyph.unicodes
-            point_pen = fixed_glyph.getPointPen()
-            new_glyph.drawPoints(point_pen)
-            if options.allow_decimal_coords:
-                for contour in fixed_glyph:
-                    for point in contour:
-                        point.x = round(point.x, 3)
-                        point.y = round(point.y, 3)
-            else:
-                for contour in fixed_glyph:
-                    for point in contour:
-                        point.x = int(round(point.x))
-                        point.y = int(round(point.y))
+            if not options.quiet_mode:
+                if msg:
+                    tqdm.write('%s %s' % (glyph_name, ' '.join(msg)))
+            if changed and options.allow_changes:
+                font_changed = True
+                original_contours = list(defcon_glyph)
+                if font_file.save_to_default_layer:
+                    fixed_glyph = defcon_glyph
+                    fixed_glyph.clearContours()
+                else:
+                    # this will replace any pre-existing glyph:
+                    processed_layer.newGlyph(glyph_name)
+                    fixed_glyph = processed_layer[glyph_name]
+                    fixed_glyph.width = defcon_glyph.width
+                    fixed_glyph.height = defcon_glyph.height
+                    fixed_glyph.unicodes = defcon_glyph.unicodes
+                point_pen = fixed_glyph.getPointPen()
+                new_glyph.drawPoints(point_pen)
+                if options.allow_decimal_coords:
+                    for contour in fixed_glyph:
+                        for point in contour:
+                            point.x = round(point.x, 3)
+                            point.y = round(point.y, 3)
+                else:
+                    for contour in fixed_glyph:
+                        for point in contour:
+                            point.x = int(round(point.x))
+                            point.y = int(round(point.y))
 
-            # JH May 2020: remove overlap can leave some coincident points
-            # we use thresholdAttrGlyph (modified thresholdPen) to remove them
-            # prior to restore_contour_order.
-            thresholdAttrGlyph(fixed_glyph, 1)
+                # JH May 2020: remove overlap can leave some coincident points
+                # we use thresholdAttrGlyph (modified thresholdPen) to remove them
+                # prior to restore_contour_order.
+                thresholdAttrGlyph(fixed_glyph, 1)
 
-            restore_contour_order(fixed_glyph, original_contours)
+                restore_contour_order(fixed_glyph, original_contours)
 
-        # The following is needed when the script is called from another
-        # script with Popen():
-        sys.stdout.flush()
+            # The following is needed when the script is called from another
+            # script with Popen():
+            sys.stdout.flush()
     # update layer plist: the hash check call may have deleted processed layer
     # glyphs because the default layer glyph is newer.
 

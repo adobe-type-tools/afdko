@@ -53,6 +53,7 @@ enum {
 const char* t1HintKey = "com.adobe.type.autohint";
 const char* t1HintKeyV1 = "com.adobe.type.autohint";
 const char* t1HintKeyV2 = "com.adobe.type.autohint.v2";
+int cidCount = 0;
 
 typedef struct
 {
@@ -1180,6 +1181,10 @@ static void updateGLIFRec(ufoCtx h, int state) {
 #define START_PUBLIC_ORDER 1256
 #define IN_PUBLIC_ORDER 1257
 #define IN_COMMENT 1258
+#define REGISTRY 1259
+#define ORDERING 1260
+#define SUPPLEMENT 1261
+#define CIDNAME 1255
 
 static int parseGlyphOrder(ufoCtx h) {
     int state = 0; /* 0 == start, 1= seen start of glyph, 2 = seen glyph name, 3 = in path, 4 in comment.  */
@@ -1193,6 +1198,7 @@ static int parseGlyphOrder(ufoCtx h) {
         fprintf(stderr, "Failed to read lib.plist\n");
         return ufoErrSrcStream;
     }
+    abfTopDict* top = &h->top;
 
     dnaSET_CNT(h->valueArray, 0);
     fillbuf(h, 0);
@@ -1231,7 +1237,19 @@ static int parseGlyphOrder(ufoCtx h) {
                 if (tokenEqualStr(tk, "</key>")) {
                     message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
                 } else {
-                    if (tokenEqualStr(tk, "public.glyphOrder")) {
+                    if (tokenEqualStr(tk, "com.adobe.type.cid.CIDFontName")) {
+                        prevState = state;
+                        state = CIDNAME;
+                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Registry")) {
+                        prevState = state;
+                        state = REGISTRY;
+                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Ordering")) {//
+                        prevState = state;
+                        state = ORDERING;
+                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Supplement")) {
+                        prevState = state;
+                        state = SUPPLEMENT;
+                    } else if (tokenEqualStr(tk, "public.glyphOrder")) {
                         prevState = state;
                         state = START_PUBLIC_ORDER;
                     }
@@ -1249,7 +1267,52 @@ static int parseGlyphOrder(ufoCtx h) {
                 state = prevState;
             }
         } else if ((tokenEqualStr(tk, "</array>")) && (state == IN_PUBLIC_ORDER)) {
-            break;
+            state = prevState;
+        } else if ((tokenEqualStrN(tk, "<string", 7)) && ((state == REGISTRY) || (state == ORDERING) || (state == CIDNAME) )) {
+            if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
+                message(h, "Warning: Encountered empty <string/>. Text: '%s'.", getBufferContextPtr(h));
+            } else {
+                tk = getElementValue(h, state);
+                if (tokenEqualStr(tk, "</string>")) {
+                    message(h, "Warning: Encountered empty <string></string>. Text: '%s'.", getBufferContextPtr(h));
+                } else {
+                    if (state == CIDNAME) {
+                        top->cid.CIDFontName.ptr = copyStr(h, tk->val);;
+                        state = prevState;
+                    } else if (state == REGISTRY) {
+                        top->cid.Registry.ptr = copyStr(h, tk->val);;
+                        state = prevState;
+                    }
+                    else if (state == ORDERING) {
+                        top->cid.Ordering.ptr = copyStr(h, tk->val);;
+                        state = prevState;
+                    }
+                    tk = getToken(h, state);
+                    if (!tokenEqualStr(tk, "</string>")) {
+                        tk->val[tk->length - 1] = 0;
+                        fatal(h, ufoErrParse, "Encountered element other than </string> when reading <string> name: %s. Text: '%s'.", tk->val, getBufferContextPtr(h));
+                    }
+                }
+            }
+        } else if ((tokenEqualStrN(tk, "<integer", 8)) && (state == SUPPLEMENT) ) {
+                if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
+                    message(h, "Warning: Encountered empty <integer/>. Text: '%s'.", getBufferContextPtr(h));
+                } else {
+                    tk = getElementValue(h, state);
+                    if (tokenEqualStr(tk, "</integer>")) {
+                        message(h, "Warning: Encountered empty <integer></integer>. Text: '%s'.", getBufferContextPtr(h));
+                    } else {
+                        if (state == SUPPLEMENT) {
+                            top->cid.Supplement = atol(copyStr(h, tk->val));
+                            state = prevState;
+                        }
+                        tk = getToken(h, state);
+                        if (!tokenEqualStr(tk, "</integer>")) {
+                            tk->val[tk->length - 1] = 0;
+                            fatal(h, ufoErrParse, "Encountered element other than </integer> when reading <string> name: %s. Text: '%s'.", tk->val, getBufferContextPtr(h));
+                        }
+                    }
+                }
         } else if ((tokenEqualStrN(tk, "<string", 7)) && (state == IN_PUBLIC_ORDER)) {
             if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
                 message(h, "Warning: Encountered empty <string/> in public.glyphOrder. Text: '%s'.", getBufferContextPtr(h));
@@ -1258,15 +1321,15 @@ static int parseGlyphOrder(ufoCtx h) {
                 if (tokenEqualStr(tk, "</string>")) {
                     message(h, "Warning: Encountered empty <string></string>. Text: '%s'.", getBufferContextPtr(h));
                 } else {
-                    GlIFOrderRec* newGLIFOrderRec;
-                    newGLIFOrderRec = dnaNEXT(h->data.glifOrder);
-                    newGLIFOrderRec->glyphName = copyStr(h, tk->val);  // get a copy in memory
-                    newGLIFOrderRec->order = h->data.glifOrder.cnt - 1;
-                    tk = getToken(h, state);
-                    if (!tokenEqualStr(tk, "</string>")) {
-                        tk->val[tk->length - 1] = 0;
-                        fatal(h, ufoErrParse, "Encountered element other than </string> when reading <string> name: %s. Text: '%s'.", tk->val, getBufferContextPtr(h));
-                    }
+                        GlIFOrderRec* newGLIFOrderRec;
+                        newGLIFOrderRec = dnaNEXT(h->data.glifOrder);
+                        newGLIFOrderRec->glyphName = copyStr(h, tk->val);  // get a copy in memory
+                        newGLIFOrderRec->order = h->data.glifOrder.cnt - 1;
+                        tk = getToken(h, state);
+                        if (!tokenEqualStr(tk, "</string>")) {
+                            tk->val[tk->length - 1] = 0;
+                            fatal(h, ufoErrParse, "Encountered element other than </string> when reading <string> name: %s. Text: '%s'.", tk->val, getBufferContextPtr(h));
+                        }
                 }
             }
         }
@@ -1797,7 +1860,7 @@ static int parseFontInfo(ufoCtx h) {
 
 static int parseUFO(ufoCtx h) {
     /* This does a first pass through the font, loading the glyph name/ID and the path to each glyph file.
-     Open the UFO fontinfo.plist, and extract the PS infop
+     Open the UFO fontinfo.plist, and extract the PS info
      Open the glyphs/contents.plist file, and extract any glyphs that are not in the glyphs.ac/contents.plist file
      */
     h->hasAltLayer = true; /* assume we have one until we find we don't */
@@ -3390,6 +3453,18 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks* glyph_cb) 
 
     /* note that gname.ptr is not stable: it is a pointer into the h->string->buf array, which moves when it gets resized. */
     gi->gname.ptr = getString(h, (STI)gi->tag);
+    if (strlen(gi->gname.ptr) > 4) {
+        char cidstring[3] = "cid";
+        if (strncmp(gi->gname.ptr, cidstring, 3) == 0)
+        {
+            char * digits = gi->gname.ptr + 3;
+            unsigned short cid = atoi(digits);
+            gi->cid = cid;
+            gi->gname.ptr = NULL;
+            gi->flags |= ABF_GLYPH_CID;
+            cidCount += 1;
+        }
+    }
     result = glyph_cb->beg(glyph_cb, gi);
     gi->flags |= ABF_GLYPH_SEEN;
 
@@ -3615,6 +3690,7 @@ int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks* glyph_cb) {
 
     /* Set error handler */
     DURING_EX(h->err.env)
+    cidCount = 0;
 
     for (i = 0; i < h->chars.index.cnt; i++) {
         int res;
@@ -3622,7 +3698,10 @@ int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks* glyph_cb) {
         if (res != ufoSuccess)
             return res;
     }
-
+    if (cidCount == h->chars.index.cnt){
+        if (!(h->top.sup.flags & ABF_CID_FONT))
+            h->top.sup.flags |= ABF_CID_FONT;
+    }
     HANDLER
     return Exception.Code;
     END_HANDLER
