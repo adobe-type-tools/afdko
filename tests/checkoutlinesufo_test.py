@@ -113,4 +113,3 @@ def test_cidkeyed_remove_overlap(filename, diffmode):
     runner(CMD + ['-f', actual_path, '-o', 'e', 'q', '=no-overlap-checks'])
     expected_path = get_expected_path('cidfont.subset.checked')
     assert differ([expected_path, actual_path] + diffmode)
-
