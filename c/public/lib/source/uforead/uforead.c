@@ -1243,7 +1243,7 @@ static int parseGlyphOrder(ufoCtx h) {
                     } else if (tokenEqualStr(tk, "com.adobe.type.cid.Registry")) {
                         prevState = state;
                         state = REGISTRY;
-                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Ordering")) {//
+                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Ordering")) {
                         prevState = state;
                         state = ORDERING;
                     } else if (tokenEqualStr(tk, "com.adobe.type.cid.Supplement")) {
@@ -1277,14 +1277,13 @@ static int parseGlyphOrder(ufoCtx h) {
                     message(h, "Warning: Encountered empty <string></string>. Text: '%s'.", getBufferContextPtr(h));
                 } else {
                     if (state == CIDNAME) {
-                        top->cid.CIDFontName.ptr = copyStr(h, tk->val);;
+                        top->cid.CIDFontName.ptr = copyStr(h, tk->val);
                         state = prevState;
                     } else if (state == REGISTRY) {
-                        top->cid.Registry.ptr = copyStr(h, tk->val);;
+                        top->cid.Registry.ptr = copyStr(h, tk->val);
                         state = prevState;
-                    }
-                    else if (state == ORDERING) {
-                        top->cid.Ordering.ptr = copyStr(h, tk->val);;
+                    } else if (state == ORDERING) {
+                        top->cid.Ordering.ptr = copyStr(h, tk->val);
                         state = prevState;
                     }
                     tk = getToken(h, state);
@@ -1294,7 +1293,7 @@ static int parseGlyphOrder(ufoCtx h) {
                     }
                 }
             }
-        } else if ((tokenEqualStrN(tk, "<integer", 8)) && (state == SUPPLEMENT) ) {
+        } else if ((tokenEqualStrN(tk, "<integer", 8)) && (state == SUPPLEMENT)) {
                 if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
                     message(h, "Warning: Encountered empty <integer/>. Text: '%s'.", getBufferContextPtr(h));
                 } else {
