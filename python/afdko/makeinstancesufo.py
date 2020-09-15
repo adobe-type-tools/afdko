@@ -241,7 +241,7 @@ def validateDesignspaceDoc(dsDoc, dsoptions, **kwArgs):
     for i, inst in enumerate(dsDoc.instances):
         if dsoptions.indexList and i not in dsoptions.indexList:
             continue
-        for attr_name in ('familyName', 'postScriptFontName', 'styleName'):
+        for attr_name in ('familyname', 'postscriptfontname', 'stylename'):
             if getattr(inst, attr_name, None) is None:
                 logger.warning(
                     f"Instance at index {i} has no '{attr_name}' attribute.")

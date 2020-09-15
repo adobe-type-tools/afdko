@@ -44,7 +44,7 @@ class glyph:
 		for e in ee:
 			k, x = e # get key and its data
 			if k == 'uni':
-				self.uni = re.compile(r'[0-9A-F]{4}').search(x).group() # Unicode value
+				self.uni = re.compile(r'[0-9A-F]{4,5}').search(x).group() # Unicode value
 			elif k == 'fin': self.fin = re_name.search(x).group() # final name
 			elif k == 'ali':
 				for a in re_name.findall(x): self.ali.append(a) # name aliases
@@ -60,7 +60,7 @@ class glyph:
 	# Check a glyph for internal conflicts, problems, etc.
 	def check(self):
 		m = [] # holds reports of what was fixed
-		u = re.compile(r'uni([0-9A-F]{4})$') # Unicode value regexp
+		u = re.compile(r'u(?:ni)?([0-9A-F]{4,5})$') # Unicode value regexp
 		n = {}
 		# process aliases: remove duplicates, uninames, final names:
 		for a in self.ali:

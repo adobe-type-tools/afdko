@@ -12,7 +12,7 @@ import subprocess
 import sys
 import tempfile
 
-__version__ = '0.6.2'
+__version__ = '0.6.3'
 
 logger = logging.getLogger('runner')
 
@@ -106,7 +106,7 @@ def _check_save_path(path_str):
         open(check_path, 'a').close()
         if del_test_file:
             os.remove(check_path)
-    except (IOError, OSError):
+    except (OSError):
         raise argparse.ArgumentTypeError(
             f"{check_path} is not a valid path to write to.")
     return check_path

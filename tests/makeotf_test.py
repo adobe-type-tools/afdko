@@ -28,6 +28,14 @@ from test_utils import (
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
 
+# The following ensures that the current working directory is consistently set.
+# This is necessary to avoid a problem that was discovered when running tests
+# with cibuildwheel, which initiates the pytest command from root, which causes
+# some minor discrepancies in relative vs absolute paths.
+test_dir = os.path.dirname(os.path.realpath(__file__))
+afdko_dir = os.path.join(test_dir, "..")
+os.chdir(afdko_dir)
+
 TOOL = 'makeotf'
 CMD = ['-t', TOOL]
 

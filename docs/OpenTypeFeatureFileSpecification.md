@@ -686,6 +686,18 @@ in an alternate substitution lookup type rule.
 <a name="2.g.i"></a>
 #### 2.g.i. Ranges
 
+A glyph range is a notational mechanism in the feature file grammar that makes it
+possible to define a class of several glyphs is a concise way. The mechanism makes
+use of glyph names that use a contiguous alphabetic sequence A to Z or a to z (or
+sub-sequences thereof), or that use contiguous numeric sequences, such as 0 to 9. A
+range is specified by referencing starting and ending glyph names, and all of the
+glyph names in the implied sequence are included in the class. The glyphs referenced
+by these names do not have to be in a contiguous sequence in a font file or sources;
+only their names need to be in a contiguous sequence.
+
+If a glyph name within the implied sequence does not correspond to a glyph in the font
+file or font sources, it is ignored.
+
 A range of glyphs is denoted by a hyphen:
 
 ```fea
@@ -703,7 +715,8 @@ feature file glyph names. For example:
 For CID fonts, the ordering is the CID ordering.
 
 For non-CID fonts, the ordering is independent of the ordering of glyphs in the
-font. `<firstGlyph>` and `<lastGlyph>` must be the same length and can differ:
+font. `<firstGlyph>` and `<lastGlyph>` must be the same length and can differ only
+in one of the following ways:
 
 1.  By a single letter from A-Z, either uppercase or lowercase. For example:
 
@@ -1107,8 +1120,8 @@ RightToLeft
 IgnoreBaseGlyphs
 IgnoreLigatures
 IgnoreMarks
-MarkAttachmentType <glyph class name>
-UseMarkFilteringSet <glyph class name>
+MarkAttachmentType <glyphclass|glyphclass name>
+UseMarkFilteringSet <glyphclass|glyphclass name>
 ```
 
 At most one of each of the above 6 kinds of `<named lookupflag>` values may be
@@ -1136,6 +1149,13 @@ different classes.
 The flag `UseMarkFilteringSet` was added in OpenType spec 1.6. This works the
 same as the `MarkAttachmentType`, but allows you to use up to 16K different mark
 classes, and allows the glyph sets of the referenced classes to overlap.
+
+`MarkAttachmentType` and `UseMarkFilteringSet` can also use glyph classes
+directly, with the same restrictions as above.
+
+```fea
+lookupflag UseMarkFilteringSet [acute grave];
+```
 
 ##### lookupflag format B:
 
@@ -3413,6 +3433,7 @@ table OS/2 {
     Vendor <string>;
     LowerOpSize <number>;
     UpperOpSize <number>;
+    FamilyClass <number>;
 } OS/2;
 ```
 
@@ -3431,6 +3452,16 @@ OpenType specification for the [**ulCodePageRange1-2** in the OS/2 table](https:
 **usUpperOpticalPointSize** fields. If these are set, then the OS/2 version must be
 set to at least 5 by the implementation. Note that the values for these fields
 are set in units of TWIPS, or 20 × point size.
+
+`FamilyClass` is a single numeric value (decimal, hexadecimal, or octal) to
+set the
+[**sFamilyClass**](https://docs.microsoft.com/en-us/typography/opentype/spec/os2#sfamilyclass)
+field. FamilyClass is conceptually 2 fields (class and subclass), so it's often
+easier to think about and express as hexadecimal since that format nicely divides the class from subclass,
+i.e. 0x0805 means Class=8 (Sans Serif), Subclass=5 (Neo-grotesque Gothic). See the [OpenType
+Specification](https://docs.microsoft.com/en-us/typography/opentype/spec/ibmfc)
+for valid values for class/subclass. _NOTE: `makeotfexe` does not make any
+attempt to validate the supplied value beyond ensuring that the supplied value fits into two bytes._
 
 ###### Example:
 
@@ -3460,6 +3491,7 @@ table OS/2 {
     WeightClass 800;
     WidthClass 3;
     Vendor "ADBE";
+    FamilyClass 0x0805;  # Class 8 (Sans-serif), Subclass 5 (Neo-grotesque Gothic)
 } OS/2;
 ```
 
@@ -3604,8 +3636,8 @@ location <axisTag> <value>;+
 ```
 
 `axisTag` is a 4-letter tag and must correspond to one of the defined design
-axes in the table. `value` is a signed number and can be specified using
-decimal, hex and octal formats as well (see §[9.e](#9.e)).
+axes in the table. `value` is a signed number specified as decimal (with
+optional fractional part) in the range -32767.0 to +32767.99998.
 
 With a single `location` statement the `AxisValue` will be format 1.
 If there are more than one `location` statements the `AxisValue` will be 
@@ -3613,23 +3645,21 @@ format 4.
 
 ##### location format B (used in Axis value table [Format 2](https://docs.microsoft.com/en-us/typography/opentype/spec/stat#axis-value-table-format-2))
 ```fea
-location <axisTag> <nominalValue> <rangeMinValue> - <rangeMaxValue>;
+location <axisTag> <nominalValue> <rangeMinValue> <rangeMaxValue>;
 ```
 
-Format for `axisTag` and the other values as above, and there must be a space
-before the `-` to distinguish it from a possible minus sign for
-`<rangeMaxValue>`. To specify an open ended range use `-32767` to mean 
-negative infinity and `32767.99998` to mean positive infinity. 
+Format for `axisTag` and the other values as above. To specify an open ended 
+range use `-32767` to mean negative infinity and `32767.99998` to mean positive infinity. 
 For example, the following AxisValue definitions mean that "Regular" on the 
 `wght` axis is defined with a nominal value of 400 and a range covering all 
 possible values below 400 up to and including 649. "Bold" is defined with a 
 nominal value of 700 and a range covering all values from 650 and above. 
 ```fea
    AxisValue {
-      location wght 400 -32768 - 650;
+      location wght 400 -32768 650;
       name "Regular";
    AxisValue {
-      location wght 700 650 - 32767.99998;
+      location wght 700 650 32767.99998;
       name "Bold";
    };
 ```
@@ -3680,7 +3710,7 @@ table STAT {
 
     # format 2
     AxisValue {
-        location wght 400 300 - 500;
+        location wght 400 300 500;
         name "Regular";
         flag ElidableAxisValueName;
     };
@@ -3724,60 +3754,60 @@ table STAT {
    DesignAxis ital 2 { name "Italic"; };
 
     AxisValue {
-        location wght 200 200 - 250;
+        location wght 200 200 250;
         name "ExtraLight";
     };
 
     AxisValue {
-        location wght 300 250 - 350;
+        location wght 300 250 350;
         name "Light";
     };
 
     AxisValue {
-        location wght 400 350 - 450;
+        location wght 400 350 450;
         name "Regular";
         flag ElidableAxisValueName;
     };
 
     AxisValue {
-        location wght 500 450 - 550;
+        location wght 500 450 550;
         name "Medium";
         flag ElidableAxisValueName;
     };
 
     AxisValue {
-        location wght 600 550 - 650;
+        location wght 600 550 650;
         name "Semibold";
     };
 
     AxisValue {
-        location wght 700 650 - 750;
+        location wght 700 650 750;
         name "Bold";
     };
 
     AxisValue {
-        location wght 800 750 - 850;
+        location wght 800 750 850;
         name "ExtraBold";
     };
     
     AxisValue {
-        location wght 900 850 - 900;
+        location wght 900 850 900;
         name "Black";
     };
 
     AxisValue {
-        location opsz 6 5 - 8;
+        location opsz 6 5 8;
         name "Caption";
     };
     
     AxisValue {
-        location opsz 10 8 - 24;
+        location opsz 10 8 24;
         name "Text";
         flag ElidableAxisValueName;
     };
     
     AxisValue {
-        location opsz 60 24 - 100;
+        location opsz 60 24 100;
         name "Display";
     };
     
@@ -3801,60 +3831,60 @@ table STAT {
    DesignAxis ital 2 { name "Italic"; };
 
     AxisValue {
-        location wght 200 200 - 250;
+        location wght 200 200 250;
         name "ExtraLight";
     };
 
     AxisValue {
-        location wght 300 250 - 350;
+        location wght 300 250 350;
         name "Light";
     };
 
     AxisValue {
-        location wght 400 350 - 450;
+        location wght 400 350 450;
         name "Regular";
         flag ElidableAxisValueName;
     };
 
     AxisValue {
-        location wght 500 450 - 550;
+        location wght 500 450 550;
         name "Medium";
         flag ElidableAxisValueName;
     };
 
     AxisValue {
-        location wght 600 550 - 650;
+        location wght 600 550 650;
         name "Semibold";
     };
 
     AxisValue {
-        location wght 700 650 - 750;
+        location wght 700 650 750;
         name "Bold";
     };
 
     AxisValue {
-        location wght 800 750 - 850;
+        location wght 800 750 850;
         name "ExtraBold";
     };
     
     AxisValue {
-        location wght 900 850 - 900;
+        location wght 900 850 900;
         name "Black";
     };
 
     AxisValue {
-        location opsz 6 5 - 8;
+        location opsz 6 5 8;
         name "Caption";
     };
     
     AxisValue {
-        location opsz 10 8 - 24;
+        location opsz 10 8 24;
         name "Text";
         flag ElidableAxisValueName;
     };
     
     AxisValue {
-        location opsz 60 24 - 100;
+        location opsz 60 24 100;
         name "Display";
     };
     

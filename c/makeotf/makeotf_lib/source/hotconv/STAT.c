@@ -351,6 +351,7 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
     STATCtx h = g->ctx.STAT;
     long i;
     long j;
+    long k;
 
     AxisValueTable *av = dnaNEXT(h->axisValues);
 
@@ -377,8 +378,14 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
             break;
 
         case 2:
+            if (minValue > maxValue) {
+                    hotMsg(g, hotFATAL, "[STAT] \"%c%c%c%c\" AxisValue "
+                        "min %.2f cannot be greater than max %.2f",
+                        TAG_ARG(axisTags[0]), FIX2DBL(minValue),
+                        FIX2DBL(maxValue));
+            }
             if ((values[0] < minValue) || (values[0] > maxValue)) {
-                    hotMsg(g, hotWARNING, "[STAT] \"%c%c%c%c\" AxisValue "
+                    hotMsg(g, hotFATAL, "[STAT] \"%c%c%c%c\" AxisValue "
                         "default value %.2f is not in range %.2f-%.2f",
                         TAG_ARG(axisTags[0]), FIX2DBL(values[0]),
                         FIX2DBL(minValue), FIX2DBL(maxValue));
@@ -427,15 +434,19 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
         case 4:
             for (i = 0; i < h->axisValues.cnt; i++) {
                 AxisValueTable *refav = &h->axisValues.array[i];
-                bool dupeAVT[99];
+                bool *dupeAVT;
+                dupeAVT = MEM_NEW(g, sizeof(bool) * count);
+                for (j = 0; j < count; j++) {
+                    dupeAVT[j] = false;
+                }
                 bool isDupe = true;
                 if (refav->format4.axisCount == count) {
                     for (j = 0; j < count; j++) {
-                        if (refav->format4.axisValues[j].axisTag == axisTags[j]
-                            && refav->format4.axisValues[j].value == values[j]) {
-                            dupeAVT[j] = true;
-                        } else {
-                            dupeAVT[j] = false;
+                        for (k = 0; k < count; k++) {
+                            if (refav->format4.axisValues[j].axisTag == axisTags[k]
+                                && refav->format4.axisValues[j].value == values[k]) {
+                                    dupeAVT[j] = true;
+                            }
                         }
                     }
                     for (j = 0; j < count; j++) {
@@ -445,19 +456,27 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
                         }
                     }
                     if (isDupe) {
-                        // message + number of axes * 14 (wght ddddd.dd)
-                        char dupeMsg[2048];
-                        dupeMsg[0] = '\0';
-                        sprintf(dupeMsg, "[STAT] AxisValueTable already defined with locations: ");
-                        for (j = 0; j < count; j++) {
-                            char axisMsg[20];
-                            axisMsg[0] = '\0';
-                            sprintf(axisMsg, "%c%c%c%c %.2f ", TAG_ARG(axisTags[j]), FIX2DBL(values[j]));
-                            strcat(dupeMsg, axisMsg);
+                        char *dupeMsg;
+                        if (count <= 8) {
+                            dupeMsg = MEM_NEW(g, sizeof(char) * count * 14 + (sizeof(char) * 54));
+                            dupeMsg[0] = '\0';
+                            sprintf(dupeMsg, "[STAT] AxisValueTable already defined with locations: ");
+                            for (j = 0; j < count; j++) {
+                                char axisMsg[20];
+                                sprintf(axisMsg, "%c%c%c%c %.2f ", TAG_ARG(axisTags[j]), FIX2DBL(values[j]));
+                                strcat(dupeMsg, axisMsg);
+                            }
+                        } else {
+                            char baseMsg[] = "[STAT] AxisValueTable already defined with these %d locations.";
+                            dupeMsg = MEM_NEW(g, sizeof(char) * (strlen(baseMsg) + count));
+                            sprintf(dupeMsg, baseMsg, count);
                         }
                         hotMsg(g, hotFATAL, dupeMsg);
+                        /* Shouldn't reach this MEM_FREE due to above hotFATAL, but just in case it gets changed to warning*/
+                        MEM_FREE(g, dupeMsg);
                     }
                 }
+                MEM_FREE(g, dupeAVT);
             }
             av->size = AXIS_VALUE_TABLE4_SIZE(count);
             av->format4.axisCount = count;

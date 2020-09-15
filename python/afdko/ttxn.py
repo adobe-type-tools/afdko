@@ -90,7 +90,7 @@ import logging
 
 from afdko.fdkutils import get_temp_file_path
 
-__version__ = "1.21.2"
+__version__ = "1.21.3"
 
 log = logging.getLogger('fontTools.ttx')
 
@@ -1741,7 +1741,7 @@ class OTLConverter(object):
         for defList in sorted(self.markClassesByDefList.keys()):
             classRecList = self.markClassesByDefList[defList]
             defNameList = []
-            for nameList, anchor in defList:
+            for nameList, _anchor in defList:
                 defNameList.extend(list(nameList))
             lenList = len(defNameList)
             if lenList == 0:
@@ -2241,7 +2241,7 @@ def ttnDump(input_file, output, options, showExtensionFlag, supressHints=False,
                     if mapping[1] == "NULL":
                         delList.append(mapping)
             if delList:
-                for charCode, glyphName in delList:
+                for charCode, _glyphName in delList:
                     try:
                         del cmapSubtable.cmap[charCode]
                     except KeyError:

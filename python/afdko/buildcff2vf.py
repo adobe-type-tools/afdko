@@ -28,6 +28,10 @@ __version__ = '2.0.2'
 STAT_FILENAME = 'override.STAT.ttx'
 
 
+class CFF2VFError(Exception):
+    """Base exception for buildcff2vf"""
+
+
 # set up for printing progress notes
 def progress(self, message, *args, **kws):
     # Note: message must contain the format specifiers for any strings in args.
@@ -112,12 +116,11 @@ class CompatibilityPen(CFF2CharStringMergePen):
                 success, new_pt_coords = self.check_and_fix_flat_curve(
                     cmd, point_type, pt_coords)
                 if success:
-                    logger.progress("Converted between line and curve in "
-                                    "source font index '%s' glyph '%s', "
-                                    "point index '%s'at '%s'. "
-                                    "Please check correction." % (
-                                        self.m_index, self.glyphName,
-                                        self.pt_index, pt_coords))
+                    logger.progress(f"Converted between line and curve in "
+                                    f"source font index '{self.m_index}' "
+                                    f"glyph '{self.glyphName}', point index "
+                                    f"'{self.pt_index}' at '{pt_coords}'. "
+                                    f"Please check correction.")
                     pt_coords = new_pt_coords
                 else:
                     success = self.check_and_fix_closepath(
@@ -353,6 +356,103 @@ def remove_mac_names(tt_font):
     name_tb.names = [nr for nr in name_tb.names if nr.platformID != 1]
 
 
+def update_stat_name_ids(tt_font):
+    """
+    The STAT spec says that axes must point to the same name ID used
+    in the fvar so check here and update if they are different.
+    """
+    fvar = tt_font['fvar']
+    stat = tt_font['STAT']
+    fvar_axis_names = {}
+
+    for axis in fvar.axes:
+        fvar_axis_names[axis.axisTag] = axis.axisNameID
+
+    for axis in stat.table.DesignAxisRecord.Axis:
+        fvar_id = fvar_axis_names.get(axis.AxisTag)
+        if fvar_id is None:
+            # Not required for all STAT axes to be in fvar
+            continue
+        if axis.AxisNameID != fvar_id:
+            axis.AxisNameID = fvar_id
+
+
+def validate_stat_axes(tt_font):
+    """
+    Ensure all axes defined in fvar also exist in the STAT table
+    """
+    fvar = tt_font['fvar']
+    stat = tt_font['STAT']
+    fvar_axis_tags = [axis.axisTag for axis in fvar.axes]
+    stat_axis_tags = [axis.AxisTag for axis in
+                      stat.table.DesignAxisRecord.Axis]
+    diff = set(fvar_axis_tags) - set(stat_axis_tags)
+    if diff:
+        raise CFF2VFError(
+            f'All fvar axes must also be defined in the STAT table. '
+            f'Axes for {str(list(diff))} are missing.'
+        )
+
+
+def validate_stat_values(ttFont):
+    """
+    Check axis values in the STAT table to ensure they are within the ranges
+    defined in the fvar
+    """
+    fvar = ttFont['fvar']
+    stat = ttFont['STAT']
+
+    logger.progress('Validating STAT axis values...')
+    errors = []
+    stat_range_vals = {}
+
+    if hasattr(stat.table.AxisValueArray, "AxisValue"):
+        for av in stat.table.AxisValueArray.AxisValue:
+            axis_tag = stat.table.DesignAxisRecord.Axis[av.AxisIndex].AxisTag
+            if axis_tag not in stat_range_vals:
+                stat_range_vals[axis_tag] = []
+            if hasattr(av, 'NominalValue'):
+                stat_range_vals[axis_tag].append(av.NominalValue)
+                if not av.RangeMinValue <= av.NominalValue <= av.RangeMaxValue:
+                    errors.append(
+                        f'Invalid default value {av.NominalValue} for range '
+                        f'{av.RangeMinValue} - {av.RangeMaxValue}'
+                    )
+            if hasattr(av, 'RangeMaxValue'):
+                stat_range_vals[axis_tag].append(av.RangeMaxValue)
+            if hasattr(av, 'RangeMinValue'):
+                stat_range_vals[axis_tag].append(av.RangeMinValue)
+            if hasattr(av, 'Value'):
+                stat_range_vals[axis_tag].append(av.Value)
+
+    for axis in fvar.axes:
+        stat_ref = stat_range_vals.get(axis.axisTag)
+        if stat_ref is None:
+            continue
+        out_of_range = []
+        for val in stat_ref:
+            if (val > axis.maxValue and int(val) != 32767) or \
+                    (val < axis.minValue and int(val) != -32767):
+                out_of_range.append(val)
+        if out_of_range:
+            expected_range = f'{axis.minValue} - {axis.maxValue}'
+            errors.append(
+                f'{axis.axisTag} values {str(sorted(set(out_of_range)))} are '
+                f'outside of range {expected_range} specified in fvar'
+            )
+    if errors:
+        msg = '\n'.join(errors)
+        raise CFF2VFError(f'Invalid STAT table. {msg}')
+
+
+def import_stat_override(tt_font, stat_file_path):
+    if 'STAT' in tt_font:
+        logger.warning(
+            f'Overwriting existing STAT table with {stat_file_path}.'
+        )
+    tt_font.importXML(stat_file_path)
+
+
 def get_options(args):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
@@ -463,7 +563,7 @@ def main(args=None):
         # the font, which we don't want to do to the default font.
         do_compatibility(vf, font_list, ds_data.base_idx)
 
-    logger.progress("Building VF font...")
+    logger.progress("Building variable OTF (CFF2) font...")
     # Note that we now pass in the design space object, rather than a path to
     # the design space file, in order to pass in the modified source fonts
     # fonts without having to recompile and save them.
@@ -484,10 +584,14 @@ def main(args=None):
         os.path.dirname(options.var_font_path), STAT_FILENAME)
     if os.path.exists(stat_file_path):
         logger.progress("Importing STAT table override...")
-        varFont.importXML(stat_file_path)
+        import_stat_override(varFont, stat_file_path)
+
+    validate_stat_axes(varFont)
+    validate_stat_values(varFont)
+    update_stat_name_ids(varFont)
 
     varFont.save(options.var_font_path)
-    logger.progress("Built variable font '%s'" % (options.var_font_path))
+    logger.progress(f"Built variable font '{options.var_font_path}'")
 
 
 if __name__ == '__main__':

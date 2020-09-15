@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont>
+
+  <GDEF>
+    <Version value="0x00010000"/>
+    <GlyphClassDef Format="2">
+      <ClassDef glyph="f" class="4"/>
+      <ClassDef glyph="f_i" class="2"/>
+      <ClassDef glyph="i" class="4"/>
+    </GlyphClassDef>
+    <MarkAttachClassDef Format="1">
+      <ClassDef glyph="acute" class="1"/>
+      <ClassDef glyph="grave" class="1"/>
+      <ClassDef glyph="macron" class="1"/>
+    </MarkAttachClassDef>
+  </GDEF>
+
+  <GSUB>
+    <Version value="0x00010000"/>
+    <ScriptList>
+      <!-- ScriptCount=0 -->
+    </ScriptList>
+    <FeatureList>
+      <!-- FeatureCount=0 -->
+    </FeatureList>
+    <LookupList>
+      <!-- LookupCount=1 -->
+      <Lookup index="0">
+        <LookupType value="4"/>
+        <LookupFlag value="256"/><!-- markAttachmentType[1] -->
+        <!-- SubTableCount=1 -->
+        <LigatureSubst index="0" Format="1">
+          <LigatureSet glyph="f">
+            <Ligature components="i" glyph="f_i"/>
+          </LigatureSet>
+        </LigatureSubst>
+      </Lookup>
+    </LookupList>
+  </GSUB>
+
+</ttFont>

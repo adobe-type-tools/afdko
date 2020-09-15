@@ -3,54 +3,48 @@ Input font: RgItBd.ttc
 Font 0: SourceSansPro-Regular.otf
     tag     checksum    length    offset
     ----  ----------  --------  --------
-    BASE  0x651E5DBD        70       732
-    CFF   0xF715B0B5    120605       804
-    DSIG  0x00000001         8    314424
-    GDEF  0xF721FB92       908    314432
-    GPOS  0x43FA27F5     89210    315708
-    GSUB  0x85444310     21032    508164
-    OS/2  0x5DDFD5A3        96    540296
-    cmap  0x9FCE01F4     14018    540584
-    head  0x157F8BB0        54    565360
-    hhea  0x0A840D78        36    565528
-    hmtx  0xD07616EC      7896    565636
-    maxp  0x07B65000         6    585816
-    name  0x4E7E178C      2068    585832
-    post  0xFFD10032        32    592084
+    CFF   0xAFA0A6FF     10709       636
+    GDEF  0x004A006F        28     33472
+    GPOS  0x6B25663B      5390     33536
+    GSUB  0x3C2D5481       788     48216
+    OS/2  0x5AE57622        96     49580
+    cmap  0x2777098B       606     49868
+    head  0x18EA78D6        54     51084
+    hhea  0x0A840644        36     51252
+    hmtx  0xE1341825       520     51360
+    maxp  0x00825000         6     52920
+    name  0x4D11643E       550     52928
+    post  0xFFD10032        32     54624
 
 Font 1: SourceSansPro-It.otf
     tag     checksum    length    offset
     ----  ----------  --------  --------
-    BASE  - shared -
-    CFF   0xAF5B8371     67515    121412
-    DSIG  - shared -
-    GDEF  0x606A6174       368    315340
-    GPOS  0x0EA45E04     14538    404920
-    GSUB  0x705F0282     11100    529196
-    OS/2  0x5B549578        96    540392
-    cmap  0xE9DC64DE     10754    554604
-    head  0x15B198C8        54    565416
-    hhea  0x0B780CED        36    565564
-    hmtx  0x3E77750F      4388    573532
-    maxp  0x04495000         6    585824
-    name  0x14065713      2090    587900
-    post  0xFFC60032        32    592116
+    CFF   0x5DB1F487     10811     11348
+    GDEF  0x008400A9        34     33500
+    GPOS  0x981DA212      3896     38928
+    GSUB  0x78158170       576     49004
+    OS/2  0x5ADA75F7        96     49676
+    cmap  0x27970999       606     50476
+    head  0x191C85CA        54     51140
+    hhea  0x0B780926        36     51288
+    hmtx  0xDA301052       520     51880
+    maxp  - shared -
+    name  0x4F4A65F6       572     53480
+    post  0xFFC60032        32     54656
 
 Font 2: SourceSansPro-Bold.otf
     tag     checksum    length    offset
     ----  ----------  --------  --------
-    BASE  - shared -
-    CFF   0x1B1D42D9    125495    188928
-    DSIG  - shared -
+    CFF   0x64D23345     11312     22160
     GDEF  - shared -
-    GPOS  0x0147FBFD     88702    419460
+    GPOS  0x67C261E2      5390     42824
     GSUB  - shared -
-    OS/2  0x5F11D7AE        96    540488
+    OS/2  0x5C17782D        96     49772
     cmap  - shared -
-    head  0x157B8B8A        54    565472
-    hhea  0x0A7F0D75        36    565600
-    hmtx  0xC338D3DB      7896    577920
+    head  0x18E678CC        54     51196
+    hhea  0x0A7F0641        36     51324
+    hmtx  0xF04B14BE       520     52400
     maxp  - shared -
-    name  0x13EB56F8      2090    589992
+    name  0x4F2F65DB       572     54052
     post  - shared -
 
