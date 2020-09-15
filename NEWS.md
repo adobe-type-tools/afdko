@@ -1,6 +1,46 @@
 Changelog
 =========
 
+3.5.1 (released 2020-09-15)
+----------------------
+- [tx] improve robustness
+  ([#1187](https://github.com/adobe-type-tools/afdko/pull/1187),
+   [#1188](https://github.com/adobe-type-tools/afdko/pull/1188))
+- [makeotfexe] support `OS/2.sFamilyClass` in feature files
+  ([#1191](**https://github.com/adobe-type-tools/afdko/issues/1191),
+   [#1192](https://github.com/adobe-type-tools/afdko/pull/1192))
+- [docs] correct description of STAT location values
+  ([#1190](https://github.com/adobe-type-tools/afdko/issues/1190),
+   [#1193](https://github.com/adobe-type-tools/afdko/pull/1193))
+- [makeotfexe] fix check of duplicates in STAT Format 4 Axis Values
+  ([#1195](https://github.com/adobe-type-tools/afdko/pull/1195))
+- [ttfcomponentizer] add warning for empty psnames
+  ([#1198](https://github.com/adobe-type-tools/afdko/issues/1198),
+   [#1199](https://github.com/adobe-type-tools/afdko/pull/1199))
+- [buildcff2vf] add STAT validation
+  ([#1200](https://github.com/adobe-type-tools/afdko/pull/1200))
+- [makeotf] allow anonymous glyphclass in LookupFlags
+  ([#1206](https://github.com/adobe-type-tools/afdko/pull/1206))
+- [agd] support 5-digit codepoints in AGD file
+  ([#1207](https://github.com/adobe-type-tools/afdko/issues/1207),
+   [#1208](https://github.com/adobe-type-tools/afdko/pull/1208))
+- [makeinstancesufo] make designspace attributes lowercase
+  ([#1211](https://github.com/adobe-type-tools/afdko/issues/1211),
+   [#1212](https://github.com/adobe-type-tools/afdko/pull/1212))
+- [makeotf] remove hyphen for STAT range definitions
+  ([#1197](https://github.com/adobe-type-tools/afdko/issues/1197),
+   [#1213](https://github.com/adobe-type-tools/afdko/pull/1213))
+- [docs] clarify use of `python3` and `pip3` in README
+  ([#1215](https://github.com/adobe-type-tools/afdko/pull/1215))
+- [pdflib] fix circle-drawing bug (thanks @bcirc!)
+  ([#1218](https://github.com/adobe-type-tools/afdko/issues/1218),
+   [#1219](https://github.com/adobe-type-tools/afdko/pull/1219)])
+- [docs] clarify description of glyph name ranges (thanks @PeterCon!)
+  ([#1222](https://github.com/adobe-type-tools/afdko/issues/1222),
+   [#1211](https://github.com/adobe-type-tools/afdko/pull/1221))
+- [checkoutlinesufo] add support for CID-keyed fonts
+  ([#1224](https://github.com/adobe-type-tools/afdko/pull/1224))
+
 3.5.0 (released 2020-07-16)
 ----------------------
 - [docs] fix broken links, add new links, fix typos, add templates
