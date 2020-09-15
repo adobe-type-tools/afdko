@@ -19,7 +19,11 @@ PostScript and TrueType font data.
 
 This repository contains the data files, Python scripts, and sources for
 the command line programs that comprise the AFDKO. The project uses the
-[Apache 2.0 OpenSource license](LICENSE.md).
+[Apache 2.0 OpenSource license](LICENSE.md). Please note that the AFDKO
+makes use of several dependencies, listed in the requirements.txt file,
+which will automatically be installed if you install AFDKO with `pip`.
+Most of these dependencies are BSD or MIT license, with the exception of
+`tqdm`, which is [MPL 2.0](https://www.mozilla.org/en-US/MPL/2.0/).
 
 Please refer to the
 [AFDKO Overview](https://adobe-type-tools.github.io/afdko/AFDKO-Overview.html)
