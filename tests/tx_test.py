@@ -1084,4 +1084,11 @@ def test_pdf_single_glyph():
 
     runner(CMD + ['-a', '-o', 'pdf', '1', '-f', input_path, output_path])
 
-    assert differ([expected_path, output_path, '-s', *PDF_SKIP])
+    skip = PDF_SKIP[:]
+    skip.insert(0, '-s')
+    regex_skip = PDF_SKIP_REGEX[:]
+    for regex in regex_skip:
+        skip.append('-r')
+        skip.append(regex)
+
+    assert differ([expected_path, output_path] + skip)
