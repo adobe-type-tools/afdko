@@ -927,10 +927,10 @@ def restore_contour_order(fixed_glyph, original_contours):
             for j in old_index_list:
                 ci2, old_contour = old_list[j]
                 matched = False
-                for point in old_contour:
-                    if point.segmentType is None:
+                for old_point in old_contour:
+                    if old_point.segmentType is None:
                         continue
-                    if (max_p.x == point.x) and (max_p.y == point.y):
+                    if (max_p.x == old_point.x) and (max_p.y == old_point.y):
                         new_list[i] = None
                         order_list.append([ci2, ci])
                         matched = True
