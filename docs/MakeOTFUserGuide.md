@@ -236,9 +236,14 @@ Versions of MakeOTF prior to FDK 2.5 used a similar syntax in the FontMenuNameDB
 If the key `c=` is used, then MakeOTF will build the older style name table. If the keys `l=` or `m=` are present, it will build the newer style name table . If none of these are present, then there is no difference in how the name table is built.
 
 ## **GlyphOrderAndAliasDB** (GOADB)
-The GOADB file is used to rename and to establish an order for the glyphs in a font. 
-It is a simple text file with one line per glyph name. Each line contains at least two fields, 
-and optionally three fields. The first field is the final glyph name to be used in the output font. 
+The GOADB file is used to rename and to establish an order for the glyphs in a font.
+It is a simple text file with one line per glyph name. Each line contains at least two fields,
+and optionally a third field.
+Fields within a line are tab separated
+(technically any amount of a whitespace works but a single ASCII TAB is preferred).
+Blank lines are ignored.
+Lines beginning with `#` are comments and are also ignored.
+The first field is the final glyph name to be used in the output font.
 The second field is the ‘friendly’ name used in the source font data. 
 The third field is a Unicode value, specified in the form `uniXXXX` or `uXXXX[XX]` (see [note](#unicode_note)). 
 One may specify more than one Unicode value for a glyph by giving a comma separated list of values, for example: `uni0020,uni00A0`. 
