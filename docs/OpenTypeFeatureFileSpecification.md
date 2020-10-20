@@ -1682,9 +1682,9 @@ feature test {
 Note that both the contextual substitution rules use the same lookups. This is
 because there is more than one rule in each referenced lookup, and different
 rules within the referenced lookups will match in the different contexts. In the
-first contextual substitution rule, the lookup `CNTXT_LIGS`will be applied at
+first contextual substitution rule, the lookup `CNTXT_LIGS` will be applied at
 the input sequence glyph “f”, and the glyphs “f” and “i” will be replaced by
-“f_i”. The lookup `CNTXT_SUB`will be applied at the input sequence glyph “n”,
+“f_i”. The lookup `CNTXT_SUB` will be applied at the input sequence glyph “n”,
 and the glyph “n” will be replaced by “n.end”. This will happen only when the
 sequence “f i n” is preceded by any one of the glyphs “a e i o u”. Likewise, in
 the second contextual substitution rule the glyphs “c” and “t” will be replaced
