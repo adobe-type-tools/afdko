@@ -1029,10 +1029,13 @@ def run(args=None):
     seen_glyph_count = 0
     processed_glyph_count = 0
 
+    max_length = max([len(g) for g in glyph_list])
+    fmt = '{:<%d}' % max_length
     with trange(len(glyph_list)) as t:
         for i in t:
             glyph_name = sorted(glyph_list)[i]
-            t.set_description('Checking %s' % glyph_name)
+            t.set_description('Checking outlines for %s' %
+                              fmt.format(glyph_name))
             changed = False
             seen_glyph_count += 1
             msg = []
@@ -1105,6 +1108,9 @@ def run(args=None):
             # The following is needed when the script is called from another
             # script with Popen():
             sys.stdout.flush()
+            if i == len(glyph_list) - 1:
+                t.set_description("Finished checkoutlinesufo")
+
     # update layer plist: the hash check call may have deleted processed layer
     # glyphs because the default layer glyph is newer.
 
