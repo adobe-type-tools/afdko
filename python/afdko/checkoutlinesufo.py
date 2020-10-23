@@ -10,6 +10,7 @@ import argparse
 from functools import cmp_to_key
 import re
 from shutil import copy2
+import shutil
 import sys
 import textwrap
 from tqdm import tqdm, trange
@@ -347,6 +348,15 @@ def get_options(args):
              'the modified version of the glyphs is added. The new layer is '
              f"named: '{PROCD_GLYPHS_LAYER}'"
     )
+    parser.add_argument(
+        '-o',
+        '--output-file',
+        metavar='FILE_PATH',
+        nargs='?',
+        help='Specify an output file to save to. RECOMMENDED for non-UFO '
+             'inputs since the default behavior will overwrite the input.'
+    )
+
     ufo_opts = parser.add_argument_group('UFO-only options')
     ufo_opts.add_argument(
         '-w',
@@ -386,6 +396,16 @@ def get_options(args):
     font_format = get_font_format(parsed_args.font_path)
     if font_format not in ('UFO', 'OTF', 'CFF', 'PFA', 'PFB', 'PFC'):
         parser.error('Font format is not supported.')
+
+    if parsed_args.output_file:
+        src = parsed_args.font_path
+        dst = parsed_args.output_file
+        if font_format == 'UFO':
+            shutil.rmtree(dst, ignore_errors=True)
+            shutil.copytree(src, dst)
+        else:
+            shutil.copy(src, dst)
+        parsed_args.font_path = dst
 
     options = COOptions()
 
