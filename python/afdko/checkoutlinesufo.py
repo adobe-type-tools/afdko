@@ -9,7 +9,6 @@ __version__ = '2.4.4'
 import argparse
 from functools import cmp_to_key
 import re
-from shutil import copy2
 import shutil
 import sys
 import textwrap
@@ -177,7 +176,7 @@ class FontFile(object):
                 raise FocusFontError('Failed to convert UFO font to CFF.')
 
             if self.font_type == CFF_FONT_TYPE:
-                copy2(temp_cff_path, self.font_path)
+                shutil.copy2(temp_cff_path, self.font_path)
 
             else:  # OTF_FONT_TYPE
                 if not run_shell_command([
