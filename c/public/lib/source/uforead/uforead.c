@@ -3712,7 +3712,7 @@ int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks* glyph_cb) {
     for (i = 0; i < h->chars.index.cnt; i++) {
         hasCIDNames(h, i, glyph_cb);
     }
-    
+
     for (i = 0; i < h->chars.index.cnt; i++) {
         int res;
         res = readGlyph(h, i, glyph_cb);
