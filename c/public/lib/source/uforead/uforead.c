@@ -3439,6 +3439,19 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
     return result;
 }
 
+void hasCIDNames(ufoCtx h, unsigned short tag, abfGlyphCallbacks* glyph_cb) {
+    abfGlyphInfo* gi;
+    gi = &h->chars.index.array[tag];
+    gi->gname.ptr = getString(h, (STI)gi->tag);
+    if (strlen(gi->gname.ptr) > 4) {
+        char cidstring[3] = "cid";
+        if (strncmp(gi->gname.ptr, cidstring, 3) == 0)
+        {
+            cidCount += 1;
+        }
+    }
+}
+
 static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks* glyph_cb) {
     int result;
     token op_tk;
@@ -3452,16 +3465,20 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks* glyph_cb) 
 
     /* note that gname.ptr is not stable: it is a pointer into the h->string->buf array, which moves when it gets resized. */
     gi->gname.ptr = getString(h, (STI)gi->tag);
-    if (strlen(gi->gname.ptr) > 4) {
-        char cidstring[3] = "cid";
-        if (strncmp(gi->gname.ptr, cidstring, 3) == 0)
-        {
-            char * digits = gi->gname.ptr + 3;
-            unsigned short cid = atoi(digits);
-            gi->cid = cid;
-            gi->gname.ptr = NULL;
-            gi->flags |= ABF_GLYPH_CID;
-            cidCount += 1;
+    // Only set CID flags if all glyphs conform to cidXXXXX naming
+    if (cidCount == h->chars.index.cnt) {
+        if (!(h->top.sup.flags & ABF_CID_FONT))
+            h->top.sup.flags |= ABF_CID_FONT;
+        if (strlen(gi->gname.ptr) > 4) {
+            char cidstring[3] = "cid";
+            if (strncmp(gi->gname.ptr, cidstring, 3) == 0)
+            {
+                char * digits = gi->gname.ptr + 3;
+                unsigned short cid = atoi(digits);
+                gi->cid = cid;
+                gi->gname.ptr = NULL;
+                gi->flags |= ABF_GLYPH_CID;
+            }
         }
     }
     result = glyph_cb->beg(glyph_cb, gi);
@@ -3691,15 +3708,16 @@ int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks* glyph_cb) {
     DURING_EX(h->err.env)
     cidCount = 0;
 
+    // Check if all glyphs in the UFO are named cidXXXXX
+    for (i = 0; i < h->chars.index.cnt; i++) {
+        hasCIDNames(h, i, glyph_cb);
+    }
+    
     for (i = 0; i < h->chars.index.cnt; i++) {
         int res;
         res = readGlyph(h, i, glyph_cb);
         if (res != ufoSuccess)
             return res;
-    }
-    if (cidCount == h->chars.index.cnt){
-        if (!(h->top.sup.flags & ABF_CID_FONT))
-            h->top.sup.flags |= ABF_CID_FONT;
     }
     HANDLER
     return Exception.Code;
