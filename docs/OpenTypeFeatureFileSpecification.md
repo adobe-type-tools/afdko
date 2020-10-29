@@ -269,6 +269,11 @@ DFLT  # can be used only with the script keyword and as the script value with th
 dflt  # can be used only with the language keyword and as the language value with the languagesystem keyword.
 ```
 
+**Implementation note:** at least one top-level element (e.g. a `languagesystem`
+definition, `feature` block, `table` definition, etc.) must be defined. Feature
+files that are completely empty (or effectively so, such as comment-only or
+whitespace-only) are not supported.
+
 <a name="2.d"></a>
 ### 2.d. Special characters
 
@@ -891,8 +896,8 @@ and other features can be referred to with a `feature` statement within its
 feature block. The `size` feature is also treated specially; see §[8.b](#8.b).
 
 A feature file “rule” is a statement that specifies glyph substitution or
-glyph positioning. A feature block may contain glyph substitution rules
-[§[5](#5)], glyph positioning rules [§[6](#6)], or both.
+glyph positioning. A feature block must contain one or more glyph substitution
+[§[5](#5)] or glyph positioning [§[6](#6)] rules, or a combination of both.
 
 A lookup is a group of rules of the same type. See §[4.e](#4.e).
 
