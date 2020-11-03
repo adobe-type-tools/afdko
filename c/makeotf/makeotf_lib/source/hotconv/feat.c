@@ -3301,7 +3301,7 @@ static int validateGSUBMultiple(hotCtx g, GNode *targ, GNode *repl,
         valid = 0;
     }
 
-    if (!((isSubrule || IS_GLYPH(targ)) && isUnmarkedGlyphSeq(repl))) {
+    if (!((isSubrule || IS_GLYPH(targ)) && isUnmarkedGlyphSeq(repl)) && repl != NULL) {
         featMsg(hotERROR, "Invalid multiple substitution rule");
         valid = 0;
     }
@@ -3597,7 +3597,7 @@ static void addSub(GNode *targ, GNode *repl, int lkpType, int targLine) {
         }
     }
 
-    if ((repl == NULL) || lkpType == GSUBChain || (targ->flags & FEAT_IGNORE_CLAUSE)) {
+    if (lkpType == GSUBChain || (targ->flags & FEAT_IGNORE_CLAUSE)) {
         /* Chain sub exceptions (further analyzed below).                */
         /* "sub f i by fi;" will be here if there was an "except" clause */
 
