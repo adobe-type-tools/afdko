@@ -3301,7 +3301,7 @@ static int validateGSUBMultiple(hotCtx g, GNode *targ, GNode *repl,
         valid = 0;
     }
 
-    if (!((isSubrule || IS_GLYPH(targ)) && isUnmarkedGlyphSeq(repl)) && repl != NULL) {
+    if (!((isSubrule || IS_GLYPH(targ)) && isUnmarkedGlyphSeq(repl)) && (repl != NULL || targ->flags & FEAT_LOOKUP_NODE)) {
         featMsg(hotERROR, "Invalid multiple substitution rule");
         valid = 0;
     }
