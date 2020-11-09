@@ -1,8 +1,11 @@
 name: Build Python Wheels
 
 on:
-  repository_dispatch:
-    types: wheel-manual-trigger
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for running workflow'
+        required: true
   push:
     branches: [develop, master]
     tags:
@@ -18,6 +21,11 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
+    - name: Log reason (manual run only)
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "Reason for triggering: ${{ github.event.inputs.reason }}"
+
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0  # unshallow fetch for setuptools-scm

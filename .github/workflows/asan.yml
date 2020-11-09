@@ -1,14 +1,22 @@
 name: Test with ASAN
 
 on:
-  repository_dispatch:
-    types: asan-manual-trigger
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for running workflow'
+        required: true
 
 jobs:
   run_asan:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Log reason
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "Reason for triggering: ${{ github.event.inputs.reason }}"
+
     - uses: actions/checkout@v1
       with:
         submodules: true
