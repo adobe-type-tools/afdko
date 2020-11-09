@@ -4,8 +4,11 @@ on:
   push:
     branches:
       - '*'
-  repository_dispatch:
-    types: manual-trigger
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for running workflow'
+        required: true
 
 jobs:
   build:
@@ -14,6 +17,11 @@ jobs:
     runs-on: 'ubuntu-latest'
 
     steps:
+    - name: Log reason (manual run only)
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "Reason for triggering: ${{ github.event.inputs.reason }}"
+
     - uses: actions/checkout@v1
       with:
         submodules: true
