@@ -65,11 +65,11 @@ jobs:
         python setup.py sdist
       if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
 
-    - name: Publish package to PyPI TEST
+    - name: Publish package to PyPI
       run: |
         pip install twine
-        twine upload --repository testpypi dist/*
+        twine upload dist/*
       env:
         TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.test_pypi_password }}
+        TWINE_PASSWORD: ${{ secrets.pypi_password }}
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
