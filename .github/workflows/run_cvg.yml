@@ -1,4 +1,4 @@
-name: Coverage
+name: C and Python coverage
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
         required: true
 
 jobs:
-  build:
+  coverage:
     if: contains(toJson(github.event.commits), '[skip ci]') == false && contains(toJson(github.event.commits), '[skip github]') == false
 
     runs-on: 'ubuntu-latest'
