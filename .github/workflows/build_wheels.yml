@@ -1,19 +1,28 @@
 name: Build Python Wheels
 
 on:
-  workflow_dispatch:
-    inputs:
-      reason:
-        description: 'Reason for running workflow'
-        required: true
   push:
-    branches: [develop, master]
     tags:
       - '[0-9].*'
 
 jobs:
+  create_release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: true
+
   build_wheels:
-    name: Build wheels on ${{ matrix.os }}
+    needs: create_release
+    name: Build Py3 Wheel on ${{ matrix.os }}
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     runs-on: ${{ matrix.os }}
     strategy:
@@ -21,30 +30,23 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-    - name: Log reason (manual run only)
-      if: github.event_name == 'workflow_dispatch'
-      run: |
-        echo "Reason for triggering: ${{ github.event.inputs.reason }}"
-
-    - uses: actions/checkout@v2
+    - name: Check out
+      uses: actions/checkout@v2
       with:
         fetch-depth: 0  # unshallow fetch for setuptools-scm
 
-    - name: Use MSBuild (Windows)
+    - name: Use MSBuild (Windows only)
       uses: microsoft/setup-msbuild@v1.0.2
       if: matrix.os == 'windows-latest'
 
-    - uses: actions/setup-python@v1
-      name: Install Python
+    - name: Install Python 3.7
+      uses: actions/setup-python@v1
       with:
         python-version: '3.7'
 
     - name: Install deps
-      run: python -m pip install wheel setuptools_scm
+      run: python -m pip install wheel setuptools_scm cibuildwheel
 
-    - name: Install cibuildwheel
-      run: |
-        python -m pip install cibuildwheel==1.4.1
     - name: Build wheel
       run: |
         python -m cibuildwheel --output-dir dist
@@ -52,20 +54,13 @@ jobs:
         CIBW_BUILD: "cp36-*"
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
         CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x cp*win32"
-        CIBW_TEST_REQUIRES: "pytest"
-        CIBW_TEST_COMMAND: "pytest {project}/tests"
 
-    - uses: actions/upload-artifact@v1
-      with:
-        name: afdko-dist
-        path: ./dist
-
-    - name: Build sdist
+    - name: Build sdist (Ubuntu only)
+      if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       run: |
         python setup.py sdist
-      if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
 
-    - name: Publish package to PyPI
+    - name: Publish dist(s) to PyPI
       run: |
         pip install twine
         twine upload dist/*
@@ -73,3 +68,17 @@ jobs:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.pypi_password }}
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+
+    - name: Attach assets to GitHub release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell:
+        bash
+      run: |
+        set -x
+        assets=()
+        for asset in ./dist/*.*; do
+          assets+=("-a" "$asset")
+        done
+        tag_name="${GITHUB_REF##*/}"
+        hub release edit "${assets[@]}" -m "" "$tag_name"
