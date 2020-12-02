@@ -169,7 +169,7 @@ static void printUsage(void) {
         "    name> + '.otf'\n"
         "-b : Specify that font has bold style.\n"
         "-i : Specify that font has italic style.\n"
-        "-ff <path> : Specify path other than default 'features' for feature file\n"
+        "-ff <path> : Specify path for feature file\n"
         "-fs : If there are no GSUB rules, make a stub GSUB table.\n"
         "-mf <path> : Specify path for the FontMenuNameDB file. Required if the\n"
         "    '-r' option is used.\n"
