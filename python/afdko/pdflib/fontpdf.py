@@ -469,7 +469,7 @@ class FontPDFFont:
 		return self.emSquare
 
 	def getBaseLine(self):
-		if self.baseLine == None:
+		if self.baseLine is None:
 			self.baseLine = self.clientGetBaseline()
 		return self.baseLine
 
@@ -484,9 +484,9 @@ class FontPDFFont:
 		return self.blueZones
 
 	def AscentDescent(self):
-		if  self.ascent == None:
+		if  self.ascent is None:
 			self.ascent, self.descent = self.clientGetAscentDescent()
-		if self.ascent == None:
+		if self.ascent is None:
 			emsquare = self.getEmSquare()
 			bbox = self.getBBox()
 			self.ascent = bbox[3]
@@ -651,7 +651,7 @@ class FontPDFGlyph:
 		glyphX = 0
 		rt_yMin = params.rt_yMin
 		rt_metaDataYOffset = params.rt_metaDataYOffset
-		if self.extraY == None:
+		if self.extraY is None:
 			extraY = params.rt_metaDataYOffset
 			#if params.metaDataAboveGlyph:
 			#	extraY -= params.rt_yMin # The total excursion of the glyph tile below the origin = (abs(font min) + yMetaHeight
@@ -1348,7 +1348,7 @@ def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 		rt_canvas.drawString(params.pageLeftMargin, cur_y, title)
 		rt_canvas.drawRightString(rightMarginPos, cur_y, time.asctime())
 	cur_y -= pageTitleSize*1.2
-	if numPages == None:
+	if numPages is None:
 		numPages = numGlyphs // params.glyphsPerPage
 		if (numGlyphs % params.glyphsPerPage) > 0:
 			numPages +=1
@@ -1364,7 +1364,7 @@ def doTitle(rt_canvas, pdfFont, params, numGlyphs, numPages = None):
 	return  cur_y - pageTitleSize # Add some space below the title line.
 
 def  getMetaDataHeight(params, fontYMin) :
-	if params.rt_metaDataYOffset == None:
+	if params.rt_metaDataYOffset is None:
 		yMeta = 0
 		metaEntryList =  filter(lambda fieldName: fieldName[:len(kShowMetaTag)] == kShowMetaTag, dir(params))
 		for fieldName in metaEntryList:
@@ -1689,7 +1689,7 @@ class  FontInfo:
 				StemV = pdfFont.clientFont['CFF '].cff.topDictIndex[0].Private.StdVW
 			except AttributeError:
 				pass
-			if StemV == None:
+			if StemV is None:
 				try:
 					StemV = pdfFont.clientFont['CFF '].cff.topDictIndex[0].Private.StemSnapV
 					StemV = StemV[0]
@@ -1703,7 +1703,7 @@ class  FontInfo:
 				StemH = pdfFont.clientFont['CFF '].cff.topDictIndex[0].Private.StdHW
 			except AttributeError:
 				pass
-			if StemH == None:
+			if StemH is None:
 				try:
 					StemH = pdfFont.clientFont['CFF '].cff.topDictIndex[0].Private.StemSnapH
 					StemH = StemH[0]
@@ -1747,7 +1747,7 @@ class  FontInfo:
 			self.Leading = os2.sTypoLineGap
 			self.avgWidth = os2.xAvgCharWidth
 		else:
-			if txreport == None:
+			if txreport is None:
 				command = "tx -mtx \"%s\"" % (self.pdfFont.path)
 				txreport = fdkutils.runShellCmd(command)
 			# try for "H"
@@ -2217,7 +2217,7 @@ def makeProofPDF(pdfFont, params, doProgressBar=True):
 	rt_canvas  = params.rt_canvas
 	numGlyphs = len(params.rt_glyphList)
 	yTop = getTitleHeight(params)
-	if params.descenderSpace == None:
+	if params.descenderSpace is None:
 		params.rt_yMin = fontYMin = pdfFont.descent
 	else:
 		params.rt_yMin = fontYMin =  params.descenderSpace
