@@ -215,7 +215,7 @@ class PDFDocument:
         #self.objects.append(page.stream)
 
     def hasFont(self, psfontname, encoding=kDefaultEncoding):
-        if encoding == None:
+        if encoding is None:
             encoding = kDefaultEncoding
         try:
            entry = self.fontMapping[psfontname+repr(encoding)]
@@ -281,7 +281,7 @@ class PDFDocument:
         self.fontdict = MakeFontDictionary(self.fontMapping)
 
     def getInternalFontName(self, psfontname, encoding=kDefaultEncoding):
-        if encoding == None:
+        if encoding is None:
             encoding = kDefaultEncoding
         try:
             entry = self.fontMapping[psfontname+repr(encoding)]
@@ -543,7 +543,7 @@ class PDFStream(PDFObject):
 
     def save(self, file):
         #avoid crashes if they wrote nothing in the page
-        if self.data == None:
+        if self.data is None:
              self.data = TestStream
 
         if self.compression == 1:
@@ -598,7 +598,7 @@ class PDFEmbddedFont(PDFStream):
 
     def save(self, file):
         #avoid crashes if they wrote nothing in the page
-        if self.data == None:
+        if self.data is None:
              self.data = TestStream
 
         if self.compression == 1:
@@ -613,7 +613,7 @@ class PDFEmbddedFont(PDFStream):
         #lines = len(string.split(self.data,'\n'))
         #length = len(self.data) + lines   # one extra LF each
         length = len(data_to_write) + len(LINEEND)    #AR 19980202
-        if self.fontType == None:
+        if self.fontType is None:
             fontStreamEntry = ""
         else:
             fontStreamEntry = "/Subtype %s" % (self.fontType)
@@ -630,7 +630,7 @@ class PDFType1Font(PDFObject):
     def __init__(self, key, psName, encoding=kDefaultEncoding, fontDescriptObjectNumber = None, type = kDefaultFontType, firstChar = None, lastChar = None, widths = None):
         self.fontname = psName
         self.keyname = key
-        if encoding == None:
+        if encoding is None:
            encoding = '/MacRomanEncoding'
         textList = [
                     '<<',
