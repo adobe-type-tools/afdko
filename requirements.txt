@@ -10,5 +10,5 @@ fontTools[unicode,lxml,ufo,woff]==4.17.1
 mutatorMath==3.0.1
 psautohint==2.1.2
 tqdm==4.54.0
-ufonormalizer==0.4.2
+ufonormalizer==0.5.0
 ufoProcessor==1.9.0
