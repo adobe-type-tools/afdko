@@ -4,7 +4,7 @@
 Tool that performs outline quality checks and can remove path overlaps.
 """
 
-__version__ = '2.4.5'
+__version__ = '2.5.0'
 
 import argparse
 from functools import cmp_to_key
@@ -68,8 +68,6 @@ class FontFile(object):
             ufotools.validateLayers(font_path)
             self.defcon_font = defcon.Font(font_path)
             self.ufo_format = self.defcon_font.ufoFormatVersionTuple
-            if self.ufo_format < UFOFormatVersion.FORMAT_2_0:
-                self.ufo_format = UFOFormatVersion.FORMAT_2_0
             self.use_hash_map = use_hash_map
             self.ufo_font_hash_data = ufotools.UFOFontData(
                 font_path, self.use_hash_map,
@@ -111,48 +109,25 @@ class FontFile(object):
         if self.save_to_default_layer:
             self.defcon_font.save()
         else:
-            """
-            XXX A real hack here XXX
-            RoboFont did not support layers (UFO3 feature) until version 3.
-            So in order to allow editing (in RF 1.x) UFOs that contain
-            a processed glyphs layer, checkoutlinesufo generates UFOs that
-            are structured like UFO3, but advertise themselves as UFO2.
-            To achieve this, the code below hacks ufoLib to surgically save
-            only the processed layer.
-            This hack is only performed if the original UFO is format 2.
+            if self.ufo_format <= UFOFormatVersion.FORMAT_2_0:
+                # Up-convert the UFO to format 3
+                warnings.warn("The UFO was up-converted to format 3.")
+                self.ufo_format = UFOFormatVersion.FORMAT_3_0
 
-            NOTE: this is deprecated and will be removed from AFDKO.
-            """
+                with UFOWriter(self.defcon_font.path,
+                               formatVersion=self.ufo_format) as writer:
+                    writer.getGlyphSet()
+                    writer.writeLayerContents()
+
             writer = UFOWriter(
                 self.defcon_font.path, formatVersion=self.ufo_format)
             writer.layerContents[
                 PROCD_GLYPHS_LAYER_NAME] = PROCD_GLYPHS_LAYER
             layers = self.defcon_font.layers
             layer = layers[PROCD_GLYPHS_LAYER_NAME]
-
-            if self.ufo_format == UFOFormatVersion.FORMAT_2_0:
-                # Override the UFO's formatVersion. This disguises a UFO2 to
-                # be seen as UFO3 by ufoLib, thus enabling it to write the
-                # layer without raising an error.
-                warn_txt = ("Using a ‘hybrid’ UFO2-as-UFO3 is deprecated and "
-                            "will be removed from AFDKO by the end of 2020. "
-                            "This behavior (hack) was primarily to support "
-                            "older versions of RoboFont which did not support "
-                            "UFO3/layers. RoboFont 3 now supports UFO3 so the "
-                            "hack is no longer required. Please update your "
-                            "toolchain as needed.")
-                warnings.warn(warn_txt, category=FutureWarning)
-                writer._formatVersion = UFOFormatVersion.FORMAT_3_0
-
             glyph_set = writer.getGlyphSet(
                 layerName=PROCD_GLYPHS_LAYER_NAME, defaultLayer=False)
             writer.writeLayerContents(layers.layerOrder)
-
-            if self.ufo_format == UFOFormatVersion.FORMAT_2_0:
-                # Restore the UFO's formatVersion to the original value.
-                # This makes the glif files be set to format 1 instead of 2.
-                glyph_set.ufoFormatVersionTuple = UFOFormatVersion.FORMAT_2_0
-
             layer.save(glyph_set)
 
         if self.font_type == UFO_FONT_TYPE:
