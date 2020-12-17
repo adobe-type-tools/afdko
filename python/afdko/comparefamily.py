@@ -2626,7 +2626,7 @@ def doSingleTest26():
 	matchPats = [ re.compile(r"^uni([0-9A-F][0-9A-F][0-9A-F][0-9A-F])+$"), re.compile(r"^u[0-9A-F][0-9A-F][0-9A-F][0-9A-F]([0-9A-F]*[0-9A-F]*)$")]
 
 	for font in fontlist:
-		if font.usDefaultChar == None:
+		if font.usDefaultChar is None:
 			break
 		if font.usDefaultChar!= 0:
 			print("	Warning: the OS/2 default char is set to char code '%s'; it is most usefully set to 0, aka .notdef. %s" % (font.usDefaultChar, font.PostScriptName1))

@@ -8,6 +8,13 @@ on:
       - LICENSE.md
       - NEWS.md
       - README.md
+  schedule:
+    - cron: '0 11 1 * *'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for running workflow'
+        required: true
 
 jobs:
   run_tests:
@@ -17,24 +24,34 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
         exclude:
           - os: macos-latest
             python-version: 3.6
           - os: macos-latest
             python-version: 3.7
+          - os: macos-latest
+            python-version: 3.8
           - os: windows-latest
             python-version: 3.6
           - os: windows-latest
             python-version: 3.7
+          - os: windows-latest
+            python-version: 3.8
 
     steps:
+
+    - name: Log reason (manual run only)
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "Reason for triggering: ${{ github.event.inputs.reason }}"
+
     - uses: actions/checkout@v1
       with:
         submodules: true
 
     - name: Use MSBuild (Windows)
-      uses: microsoft/setup-msbuild@v1.0.0
+      uses: microsoft/setup-msbuild@v1.0.2
       if: matrix.os == 'windows-latest'
 
     - name: Set up Python ${{ matrix.python-version }}

@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
+#include <math.h>
 
 #include "common.h"
 #include "feat.h"

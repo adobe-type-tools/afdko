@@ -1,6 +1,35 @@
 Changelog
 =========
 
+3.6.0 (released 2020-12-17)
+---------------------------
+- [checkoutlinesufo] Add CID support
+  ([#1224](https://github.com/adobe-type-tools/afdko/pull/1224))
+- [checkoutlinesufo] Fix nested loop variable
+  ([#1231](https://github.com/adobe-type-tools/afdko/pull/1231))
+- [tests] Update date regex to skip date & time metrics
+  ([#1232](https://github.com/adobe-type-tools/afdko/pull/1232))
+- [docs] Fix typo (Thanks, @djr11!)
+  ([#1236](https://github.com/adobe-type-tools/afdko/pull/1236))
+- [docs] Describe tab-separated format of GOADB (Thanks, @djr11!)
+  ([#1238](https://github.com/adobe-type-tools/afdko/pull/1238))
+- [docs] Fix typo (Thanks, @ln-north!)
+  ([#1241](https://github.com/adobe-type-tools/afdko/pull/1241))
+- [checkoutlinesufo] Update progress bar
+  ([#1243](https://github.com/adobe-type-tools/afdko/pull/1243))
+- [checkoutlinesufo] Implement `-o` (output file) option
+  ([#1244](https://github.com/adobe-type-tools/afdko/pull/1244))
+- [ci, tests] Use GitHub Actions for everything
+  ([#1254](https://github.com/adobe-type-tools/afdko/pull/1254),
+   [#1265](https://github.com/adobe-type-tools/afdko/pull/1265))
+- [makeotfexe] Update help/usage documentation
+  ([#1262](https://github.com/adobe-type-tools/afdko/pull/1262))
+- [comparefamily, pdflib] Fix `== None` comparisons
+  ([#1264](https://github.com/adobe-type-tools/afdko/pull/1264))
+- [checkoutlinesufo] Remove UFO2-as-UFO3 hack (now up-converts to UFO3)
+  ([#1135](https://github.com/adobe-type-tools/afdko/issues/1135),
+   [#1270](https://github.com/adobe-type-tools/afdko/pull/1270))
+
 3.5.1 (released 2020-09-15)
 ----------------------
 - [tx] improve robustness

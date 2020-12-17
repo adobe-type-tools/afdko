@@ -30,7 +30,7 @@
 
 jmp_buf mark;
 
-#define MAKEOTF_VERSION "2.5.65601"
+#define MAKEOTF_VERSION "2.5.65602"
 /* Warning: this string is now part of heuristic used by CoolType to identify the
    first round of CoolType fonts which had the backtrack sequence of a chaining
    contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
@@ -169,7 +169,7 @@ static void printUsage(void) {
         "    name> + '.otf'\n"
         "-b : Specify that font has bold style.\n"
         "-i : Specify that font has italic style.\n"
-        "-ff <path> : Specify path other than default 'features' for feature file\n"
+        "-ff <path> : Specify path for feature file\n"
         "-fs : If there are no GSUB rules, make a stub GSUB table.\n"
         "-mf <path> : Specify path for the FontMenuNameDB file. Required if the\n"
         "    '-r' option is used.\n"
@@ -194,15 +194,12 @@ static void printUsage(void) {
         "-S/-nS : Turn subroutinization on/off. If '-ns' is used after -r, it\n"
         "    overrides the default -r setting. Default is no subroutinization, except\n"
         "    in release mode.\n"
-        "-cm <path> : Path to Mac encoding CMAP file. Used only for CID fonts.\n"
         "-cs <integer> : Integer value for Mac cmap script ID. -1 means undefined.\n"
-        "    Used only for CID fonts.\n"
         "-cl <integer> : Integer value for Mac cmap language ID. -1 means undefined.\n"
-        "    Used only for CID fonts.\n"
+        "-cm <path> : Path to Mac encoding CMAP file. Used only for CID fonts.\n"
         "-ch <path> : Path to Unicode horizontal CMAP file. Used only for CID fonts.\n"
         "-cv <path> : Path to Unicode vertical CMAP file. Used only for CID fonts.\n"
-        "-ci <path> : Path to Unicode Variation Sequences specification file. Used\n"
-        "    only for CID fonts.\n"
+        "-ci <path> : Path to Unicode Variation Sequences specification file.\n"
         "-addn : Override any .notdef in the font with a synthesized marking notdef.\n"
         "-adds [integer] : If the source font is missing any glyphs from the AL2 set,\n"
         "    add them, using an MM font to match weight and width. If an integer value\n"

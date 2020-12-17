@@ -4,12 +4,12 @@
 Tool that performs outline quality checks and can remove path overlaps.
 """
 
-__version__ = '2.4.4'
+__version__ = '2.5.0'
 
 import argparse
 from functools import cmp_to_key
 import re
-from shutil import copy2
+import shutil
 import sys
 import textwrap
 from tqdm import tqdm, trange
@@ -68,8 +68,6 @@ class FontFile(object):
             ufotools.validateLayers(font_path)
             self.defcon_font = defcon.Font(font_path)
             self.ufo_format = self.defcon_font.ufoFormatVersionTuple
-            if self.ufo_format < UFOFormatVersion.FORMAT_2_0:
-                self.ufo_format = UFOFormatVersion.FORMAT_2_0
             self.use_hash_map = use_hash_map
             self.ufo_font_hash_data = ufotools.UFOFontData(
                 font_path, self.use_hash_map,
@@ -111,48 +109,25 @@ class FontFile(object):
         if self.save_to_default_layer:
             self.defcon_font.save()
         else:
-            """
-            XXX A real hack here XXX
-            RoboFont did not support layers (UFO3 feature) until version 3.
-            So in order to allow editing (in RF 1.x) UFOs that contain
-            a processed glyphs layer, checkoutlinesufo generates UFOs that
-            are structured like UFO3, but advertise themselves as UFO2.
-            To achieve this, the code below hacks ufoLib to surgically save
-            only the processed layer.
-            This hack is only performed if the original UFO is format 2.
+            if self.ufo_format <= UFOFormatVersion.FORMAT_2_0:
+                # Up-convert the UFO to format 3
+                warnings.warn("The UFO was up-converted to format 3.")
+                self.ufo_format = UFOFormatVersion.FORMAT_3_0
 
-            NOTE: this is deprecated and will be removed from AFDKO.
-            """
+                with UFOWriter(self.defcon_font.path,
+                               formatVersion=self.ufo_format) as writer:
+                    writer.getGlyphSet()
+                    writer.writeLayerContents()
+
             writer = UFOWriter(
                 self.defcon_font.path, formatVersion=self.ufo_format)
             writer.layerContents[
                 PROCD_GLYPHS_LAYER_NAME] = PROCD_GLYPHS_LAYER
             layers = self.defcon_font.layers
             layer = layers[PROCD_GLYPHS_LAYER_NAME]
-
-            if self.ufo_format == UFOFormatVersion.FORMAT_2_0:
-                # Override the UFO's formatVersion. This disguises a UFO2 to
-                # be seen as UFO3 by ufoLib, thus enabling it to write the
-                # layer without raising an error.
-                warn_txt = ("Using a ‘hybrid’ UFO2-as-UFO3 is deprecated and "
-                            "will be removed from AFDKO by the end of 2020. "
-                            "This behavior (hack) was primarily to support "
-                            "older versions of RoboFont which did not support "
-                            "UFO3/layers. RoboFont 3 now supports UFO3 so the "
-                            "hack is no longer required. Please update your "
-                            "toolchain as needed.")
-                warnings.warn(warn_txt, category=FutureWarning)
-                writer._formatVersion = UFOFormatVersion.FORMAT_3_0
-
             glyph_set = writer.getGlyphSet(
                 layerName=PROCD_GLYPHS_LAYER_NAME, defaultLayer=False)
             writer.writeLayerContents(layers.layerOrder)
-
-            if self.ufo_format == UFOFormatVersion.FORMAT_2_0:
-                # Restore the UFO's formatVersion to the original value.
-                # This makes the glif files be set to format 1 instead of 2.
-                glyph_set.ufoFormatVersionTuple = UFOFormatVersion.FORMAT_2_0
-
             layer.save(glyph_set)
 
         if self.font_type == UFO_FONT_TYPE:
@@ -176,7 +151,7 @@ class FontFile(object):
                 raise FocusFontError('Failed to convert UFO font to CFF.')
 
             if self.font_type == CFF_FONT_TYPE:
-                copy2(temp_cff_path, self.font_path)
+                shutil.copy2(temp_cff_path, self.font_path)
 
             else:  # OTF_FONT_TYPE
                 if not run_shell_command([
@@ -347,6 +322,15 @@ def get_options(args):
              'the modified version of the glyphs is added. The new layer is '
              f"named: '{PROCD_GLYPHS_LAYER}'"
     )
+    parser.add_argument(
+        '-o',
+        '--output-file',
+        metavar='FILE_PATH',
+        nargs='?',
+        help='Specify an output file to save to. RECOMMENDED for non-UFO '
+             'inputs since the default behavior will overwrite the input.'
+    )
+
     ufo_opts = parser.add_argument_group('UFO-only options')
     ufo_opts.add_argument(
         '-w',
@@ -386,6 +370,16 @@ def get_options(args):
     font_format = get_font_format(parsed_args.font_path)
     if font_format not in ('UFO', 'OTF', 'CFF', 'PFA', 'PFB', 'PFC'):
         parser.error('Font format is not supported.')
+
+    if parsed_args.output_file:
+        src = parsed_args.font_path
+        dst = parsed_args.output_file
+        if font_format == 'UFO':
+            shutil.rmtree(dst, ignore_errors=True)
+            shutil.copytree(src, dst)
+        else:
+            shutil.copy(src, dst)
+        parsed_args.font_path = dst
 
     options = COOptions()
 
@@ -927,10 +921,10 @@ def restore_contour_order(fixed_glyph, original_contours):
             for j in old_index_list:
                 ci2, old_contour = old_list[j]
                 matched = False
-                for point in old_contour:
-                    if point.segmentType is None:
+                for old_point in old_contour:
+                    if old_point.segmentType is None:
                         continue
-                    if (max_p.x == point.x) and (max_p.y == point.y):
+                    if (max_p.x == old_point.x) and (max_p.y == old_point.y):
                         new_list[i] = None
                         order_list.append([ci2, ci])
                         matched = True
@@ -1029,10 +1023,13 @@ def run(args=None):
     seen_glyph_count = 0
     processed_glyph_count = 0
 
+    max_length = max([len(g) for g in glyph_list])
+    fmt = '{:<%d}' % max_length
     with trange(len(glyph_list)) as t:
         for i in t:
             glyph_name = sorted(glyph_list)[i]
-            t.set_description('Checking %s' % glyph_name)
+            t.set_description('Checking outlines for %s' %
+                              fmt.format(glyph_name))
             changed = False
             seen_glyph_count += 1
             msg = []
@@ -1105,6 +1102,9 @@ def run(args=None):
             # The following is needed when the script is called from another
             # script with Popen():
             sys.stdout.flush()
+            if i == len(glyph_list) - 1:
+                t.set_description("Finished checkoutlinesufo")
+
     # update layer plist: the hash check call may have deleted processed layer
     # glyphs because the default layer glyph is newer.
 
