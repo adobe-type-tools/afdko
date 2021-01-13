@@ -43,7 +43,7 @@
     <sTypoAscender value="0"/>
     <sTypoDescender value="-1000"/>
     <sTypoLineGap value="200"/>
-    <usWinAscent value="1000"/>
+    <usWinAscent value="0"/>
     <usWinDescent value="0"/>
     <ulCodePageRange1 value="00000000 00111111 00000001 11111111"/>
     <ulCodePageRange2 value="11111111 11111111 00000000 00000000"/>
