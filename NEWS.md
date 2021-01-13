@@ -1,6 +1,12 @@
 Changelog
 =========
 
+3.6.1 (released 2021-01-13)
+---------------------------
+- [packaging] Fix Windows wheel
+  ([#1278](https://github.com/adobe-type-tools/afdko/pull/1278),
+   [#1277](https://github.com/adobe-type-tools/afdko/issues/1277))
+
 3.6.0 (released 2020-12-17)
 ---------------------------
 - [checkoutlinesufo] Add CID support
