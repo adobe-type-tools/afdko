@@ -2,3 +2,4 @@ makeotfexe [WARNING] unhinted <.notdef>
 makeotfexe [WARNING] unhinted <a>
 makeotfexe [WARNING] unhinted <b>
 makeotfexe [WARNING] FontMenuNameDB file was not specified or not found. [SourceSerifPro-Regular]
+makeotfexe [WARNING] <SourceSerifPro-Regular> Negative internal leading: win.ascent + win.descent < unitsPerEm
