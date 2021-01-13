@@ -213,7 +213,7 @@ def main():
           keywords='font development tools',
           platforms=[platform_name],
           package_dir={'': 'python'},
-          packages=['afdko'],
+          packages=['afdko', 'afdko.pdflib'],
           include_package_data=True,
           package_data={
               'afdko': [
