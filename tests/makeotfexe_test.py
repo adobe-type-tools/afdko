@@ -688,17 +688,21 @@ def test_spec(path):
                    '    <modified value=',
                    '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
 
+
 def test_negative_internal_loading_bug1227():
     input_filename = "font.pfa"
     feat_filename = "bug1227/bug1227.fea"
     actual_path = get_temp_file_path()
     ttx_filename = "bug1227.ttx"
-    stderr_path = runner(CMD + ['-s', '-e', '-o', 'f', f'_{get_input_path(input_filename)}',
-                        'ff', f'_{get_input_path(feat_filename)}',
-                        'o', f'_{actual_path}'])
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o',
+               'f', f'_{get_input_path(input_filename)}',
+               'ff', f'_{get_input_path(feat_filename)}',
+               'o', f'_{actual_path}'])
     actual_ttx = generate_ttx_dump(actual_path, ['OS/2'])
     expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-s', '<usWinAscent 600'])
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert (b'[WARNING] <SourceSerifPro-Regular> Negative internal leading: win.ascent + win.descent < unitsPerEm') in output
+    assert (b'[WARNING] <SourceSerifPro-Regular> Negative internal leading: '
+            b'win.ascent + win.descent < unitsPerEm') in output
