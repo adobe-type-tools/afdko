@@ -715,9 +715,8 @@ static void prepWinData(hotCtx g) {
     }
     intLeading = font->win.ascent + font->win.descent - font->unitsPerEm;
     if (intLeading < 0) {
-        /* Avoid negative internal leading */
-        font->win.ascent -= intLeading;
-        intLeading = 0;
+        /* Warn about negative internal leading */
+        hotMsg(g, hotWARNING, "Negative internal leading: win.ascent + win.descent < unitsPerEm");
     }
 
     /* Set typo ascender/descender/linegap */
