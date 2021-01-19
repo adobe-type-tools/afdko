@@ -406,7 +406,7 @@ def validate_stat_values(ttFont):
     errors = []
     stat_range_vals = {}
 
-    if hasattr(stat.table.AxisValueArray, "AxisValue"):
+    if hasattr(stat.table, "AxisValueArray.AxisValue"):
         for av in stat.table.AxisValueArray.AxisValue:
             axis_tag = stat.table.DesignAxisRecord.Axis[av.AxisIndex].AxisTag
             if axis_tag not in stat_range_vals:
