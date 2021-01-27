@@ -689,7 +689,7 @@ def test_spec(path):
                    '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
 
 
-def test_negative_internal_loading_bug1227():
+def test_negative_internal_leading_bug1227():
     input_filename = "font.pfa"
     feat_filename = "bug1227/bug1227.fea"
     actual_path = get_temp_file_path()
@@ -701,7 +701,7 @@ def test_negative_internal_loading_bug1227():
                'o', f'_{actual_path}'])
     actual_ttx = generate_ttx_dump(actual_path, ['OS/2'])
     expected_ttx = get_expected_path(ttx_filename)
-    assert differ([expected_ttx, actual_ttx, '-s', '<usWinAscent 600'])
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion='])
     with open(stderr_path, 'rb') as f:
         output = f.read()
     assert (b'[WARNING] <SourceSerifPro-Regular> Negative internal leading: '
