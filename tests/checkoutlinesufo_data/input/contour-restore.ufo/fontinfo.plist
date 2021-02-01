@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ascender</key>
+	<integer>800</integer>
+	<key>capHeight</key>
+	<integer>0</integer>
+	<key>descender</key>
+	<integer>-200</integer>
+	<key>familyName</key>
+	<string>outline-test</string>
+	<key>openTypeHeadCreated</key>
+	<string>2021/02/01 17:50:27</string>
+	<key>openTypeNamePreferredSubfamilyName</key>
+	<string>ExtraLight</string>
+	<key>openTypeOS2WeightClass</key>
+	<integer>200</integer>
+	<key>openTypeOS2WidthClass</key>
+	<integer>5</integer>
+	<key>postscriptBlueFuzz</key>
+	<integer>1</integer>
+	<key>postscriptBlueScale</key>
+	<real>0.04</real>
+	<key>postscriptBlueShift</key>
+	<integer>7</integer>
+	<key>postscriptBlueValues</key>
+	<array>
+		<integer>7</integer>
+		<integer>7</integer>
+	</array>
+	<key>postscriptFontName</key>
+	<string>outlineTestExtraLight</string>
+	<key>postscriptOtherBlues</key>
+	<array/>
+	<key>styleMapFamilyName</key>
+	<string>outline-test ExtraLight</string>
+	<key>styleMapStyleName</key>
+	<string>regular</string>
+	<key>styleName</key>
+	<string>ExtraLight</string>
+	<key>unitsPerEm</key>
+	<integer>1000</integer>
+	<key>versionMajor</key>
+	<integer>1</integer>
+	<key>versionMinor</key>
+	<integer>0</integer>
+	<key>xHeight</key>
+	<integer>0</integer>
+</dict>
+</plist>

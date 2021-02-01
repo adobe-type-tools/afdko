@@ -250,6 +250,11 @@ def get_options(args):
         help='run in quiet mode'
     )
     parser.add_argument(
+        '--ignore-contour-order',
+        action='store_true',
+        help='do not attempt to restore contour order'
+    )
+    parser.add_argument(
         '--no-overlap-checks',
         action='store_true',
         help='turn off path overlap checks'
@@ -408,6 +413,7 @@ def get_options(args):
     options.check_all = parsed_args.all
     options.clear_hash_map = parsed_args.clear_hash_map
     options.write_to_default_layer = parsed_args.write_to_default_layer
+    options.ignore_contour_order = parsed_args.ignore_contour_order
 
     return options
 
@@ -871,9 +877,9 @@ def sort_contours(c1, c2):
 def restore_contour_order(fixed_glyph, original_contours):
     """ The pyClipper library first sorts all the outlines by x position,
     then y position. I try to undo that, so that un-touched contours will end
-    up in the same order as the in the original, and any conbined contours
+    up in the same order as the in the original, and any combined contours
     will end up in a similar order. The reason I try to match new contours
-    to the old is to reduce arbitraryness in the new contour order between
+    to the old is to reduce arbitrariness in the new contour order between
     similar fonts. I can't completely avoid this, but I can reduce how often
     it happens.
     """
@@ -894,7 +900,7 @@ def restore_contour_order(fixed_glyph, original_contours):
     # Match contours that have not changed.
     # This will fix the order of the contours that have not been touched.
     num_contours = len(new_list)
-    if num_contours > 0:  # If the new contours aren't already all matched..
+    if num_contours > 0:  # If the new contours aren't already all matched.
         for i in range(num_contours):
             ci, contour = new_list[i]
             for j in old_index_list:
@@ -1097,7 +1103,8 @@ def run(args=None):
                 # them prior to restore_contour_order.
                 thresholdAttrGlyph(fixed_glyph, 1)
 
-                restore_contour_order(fixed_glyph, original_contours)
+                if not options.ignore_contour_order:
+                    restore_contour_order(fixed_glyph, original_contours)
 
             # The following is needed when the script is called from another
             # script with Popen():
