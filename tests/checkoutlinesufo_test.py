@@ -132,3 +132,19 @@ def test_output_file_option(input_font, expected_font):
 
     assert get_font_format(out_path) == get_font_format(in_path)
     assert differ([expected_path, out_path])
+
+
+@pytest.mark.parametrize('input_font, expected_font', [
+    ('contour-restore.ufo', 'contour-restore-ignored.ufo'),
+])
+def test_ignore_contour_order(input_font, expected_font):
+    """
+    Test the '--ignore-contour-order' option.
+    """
+    in_path = get_input_path(input_font)
+    out_path = os.path.join(get_temp_dir_path(), input_font)
+    expected_path = get_expected_path(expected_font)
+    runner(CMD + ['-f', in_path, '-o', '=ignore-contour-order', '=all', 'e',
+                  'q', 'o', '_' + out_path])
+    assert get_font_format(out_path) == get_font_format(in_path)
+    assert differ([expected_path, out_path, '-r', r'^\s*<point'])
