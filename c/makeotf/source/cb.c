@@ -1677,8 +1677,6 @@ static void ProcessFontInfo(hotCtx g, char *version, char *FontName, int psinfo,
     common.nKernPairs = 0;
     common.clientVers = version;
     common.licenseID = licenseID;
-    common.nStyles = 0;
-    common.nInstances = 0;
     common.encoding = NULL;
 
     common.fsSelectionMask_on = fsSelectionMask_on;

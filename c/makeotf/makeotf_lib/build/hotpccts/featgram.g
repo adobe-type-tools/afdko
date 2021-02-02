@@ -15,10 +15,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
+#include <math.h>
 
 #include "common.h"
 #include "feat.h"
-#include "MMFX.h"
 #include "OS_2.h"
 #include "hhea.h"
 #include "vmtx.h"
@@ -47,6 +47,9 @@ void featureFile(void);
 
 featCtx h;			/* Not reentrant; see featNew() comments */
 hotCtx g;
+int sawSTAT = FALSE;
+int sawFeatNames = FALSE;
+int sawCVParams = FALSE;
 >>
 
 /* ----------------------------- Tokens ------------------------------------ */
@@ -139,7 +142,7 @@ hotCtx g;
 #token	"\r\n"		<<zzskip(); zzline++;>>
 #token	"[\r\n]"	<<zzskip(); zzline++;>>
 
-#token "[\0x20-\0x7E]"  <<featAddNameStringChar(zzlextext[0]); zzskip();>>
+#token "[\0x20-\0x7E\0x80-\0xF7]"  <<featAddNameStringChar(zzlextext[0]); zzskip();>>
 
 #lexclass START // ------------------------------------------------------------
 
@@ -265,6 +268,7 @@ hotCtx g;
 #token K_WeightClass	"WeightClass"
 #token K_WidthClass		"WidthClass"
 #token K_Vendor			"Vendor"
+#token K_FamilyClass	"FamilyClass"
 
 #token K_STAT						"STAT"		/* Added tag to list in zzcr_attr() */
 #token K_ElidedFallbackName			"ElidedFallbackName"
@@ -286,8 +290,9 @@ hotCtx g;
 #token K_VertAdvanceY		"VertAdvanceY"
 
 #token T_FONTREV	"[0-9]+.[0-9]+"
-#token T_NUMEXT		"({\-}0x[0-9a-fA-F]+)|0[0-7]+"
-#token T_NUM		"({\-}[1-9][0-9]*)|0"
+#token T_NUMEXT		"0x[0-9a-fA-F]+|0[0-7]+"
+#token T_NUM		"({\-}[1-9][0-9]*)|{\-}0"
+#token T_FLOAT		"\-[0-9]+.[0-9]+"
 
 #token T_GCLASS  	"\@[A-Za-z_0-9.\-]+"
 #token T_CID		"\\[0-9]+"
@@ -314,11 +319,12 @@ glyph[char *tok, int allowNotdef]>[GID gid]
 	|	cid:T_CID					<<$gid = cid2gid(g, (CID)($cid).lval);>>
 	;
 
-/* Returns head of list; any named glyph classes references are copied.
+/* Returns head of list; any named glyph classes references are copied, unless
+   dontcopy is true.
    Note that FEAT_GCLASS is set only for a @CLASSNAME or [...] construct even
    if it contains only a single glyph - this is essential for classifying
    pair pos rules as specific or class pairs */
-glyphClass[int named, char *gcname]>[GNode *gnode]
+glyphClass[bool named, bool dontcopy, char *gcname]>[GNode *gnode]
 	:	<<
 		$gnode = NULL;	/* Suppress compiler warning */
 		if ($named)
@@ -333,6 +339,8 @@ glyphClass[int named, char *gcname]>[GNode *gnode]
 			$gnode   = gcAddGlyphClass($a.text, 1);
 			gcEnd(named);
 			}
+		else if ($dontcopy)
+			$gnode = gcLookup($a.text);
 		else
 			featGlyphClassCopy(g, &($gnode), gcLookup($a.text));
 		>>
@@ -363,16 +371,16 @@ glyphClass[int named, char *gcname]>[GNode *gnode]
 					gid = featMapGName2GID(g, firstPart, FALSE );
 					endgid  = featMapGName2GID(g, secondPart, FALSE );
 					if (gid != 0 && endgid != 0) {
-					  gcAddRange(gid, endgid, firstPart, secondPart);
+						gcAddRange(gid, endgid, firstPart, secondPart);
 					}
 					else {
-					  hotMsg(g, hotFATAL, "aborting because of errors");
+						hotMsg(g, hotFATAL, "incomplete glyph range detected");
 					}
 				  
 				}
 				else {
-				  featMapGName2GID(g, firstPart, FALSE);
-				  hotMsg(g, hotFATAL, "aborting because of errors");
+					featMapGName2GID(g, firstPart, FALSE);
+					hotMsg(g, hotFATAL, "incomplete glyph range or glyph not in font");
 				}
 				zzEXIT(zztasp4);
 			}
@@ -463,23 +471,6 @@ numUInt16Ext>[unsigned value]
 	;
 
 /* Extended format: hex, oct also allowed */
-numInt32Ext>[int32_t value]
-	:	<<$value = 0; /* Suppress optimizer warning */
-		  h->linenum = zzline;>>
-		m:T_NUMEXT	<<
-					if ($m.lval < INT_MIN || $m.lval > INT_MAX)
-						zzerr("not in range -(1<<31) .. ((1<<31) -1)");
-					$value = (int32_t)($m).lval;
-					>>
-		|
-		n:T_NUM		<<
-					if ($n.lval < INT_MIN || $n.lval > INT_MAX)
-						zzerr("not in range -(1<<31) .. ((1<<31) -1)");
-					$value = (int32_t)($n).lval;
-					>>
-	;
-
-/* Extended format: hex, oct also allowed */
 numUInt32Ext>[unsigned value]
 	:	<<$value = 0; /* Suppress optimizer warning */
 		  h->linenum = zzline;>>
@@ -494,6 +485,27 @@ numUInt32Ext>[unsigned value]
 						zzerr("not in range 0 .. ((1<<32) -1)");
 					$value = (unsigned)($n).ulval;
 					>>
+	;
+
+/* 32-bit signed fixed-point number (16.16) */
+numFixed>[Fixed value]
+	:	<<
+		int64_t retval = 0;
+		$value = 0; /* Suppress optimizer warning */
+		h->linenum = zzline;
+		>>
+		(
+		f:T_FLOAT	<<retval = floor(0.5 + strtod($f.text, NULL) * 65536);>>
+		|
+		d:T_FONTREV	<<retval = floor(0.5 + strtod($d.text, NULL) * 65536);>>
+		|
+		n:T_NUM		<<retval = $n.lval * 65536;>>
+		)
+		<<
+		if (retval < INT_MIN || retval > INT_MAX)
+			zzerr("not in range -32768.0 .. 32767.99998");
+		$value = (Fixed)retval;
+		>>
 	;
 
 metric>[short value]
@@ -725,7 +737,7 @@ pattern[int markedOK]>[GNode *pat]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -790,7 +802,7 @@ pattern2[GNode** headP]>[GNode *lastNode]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -839,7 +851,7 @@ pattern3[GNode** headP]>[GNode *lastNode]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -964,7 +976,7 @@ mark_statement
 			(
 			<<GNode *gc;>>
 	
-			glyphClass[0, NULL]>[gc]
+			glyphClass[false, false, NULL]>[gc]
 				<<
 				targ = gc;
 				>>
@@ -1166,13 +1178,17 @@ featureNameEntry
 	:
 		<< long plat, spec, lang; >>
 		nameEntry>[plat, spec, lang]
-		<< addFeatureNameString(plat, spec, lang);>>
+		<<
+		sawFeatNames = TRUE;
+		addFeatureNameString(plat, spec, lang);
+		>>
 	;
 
 featureNames
 	:
 	<<
-	h->featNameID = 0;
+	sawFeatNames = TRUE;
+	h->featNameID = nameReserveUserID(h->g);
 	>>
 	K_feat_names
 	"\{"
@@ -1189,13 +1205,14 @@ featureNames
 cvParameterBlock
 	:
 	<<
+	sawCVParams = TRUE;
 	h->cvParameters.FeatUILabelNameID = 0;
 	h->cvParameters.FeatUITooltipTextNameID = 0;
 	h->cvParameters.SampleTextNameID = 0;
 	h->cvParameters.NumNamedParameters = 0;
 	h->cvParameters.FirstParamUILabelNameID = 0;
 	h->cvParameters.charValues.cnt = 0;
-	h->featNameID = 0;
+	h->featNameID = nameReserveUserID(h->g);
 	>>
 	K_cv_params
 	"\{"
@@ -1300,7 +1317,7 @@ cursive[GNode** headP]>[GNode *lastNode]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -1357,7 +1374,7 @@ baseToMark[GNode** headP]>[GNode *lastNode]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -1397,7 +1414,7 @@ baseToMark[GNode** headP]>[GNode *lastNode]
 					(
 					<<GNode *gc;>>
 		
-					glyphClass[0, NULL]>[gc]
+					glyphClass[false, false, NULL]>[gc]
 						<<
 						*insert = gc;
 						>>
@@ -1483,7 +1500,7 @@ ligatureMark[GNode** headP]>[GNode *lastNode]
 				(
 				<<GNode *gc;>>
 	
-				glyphClass[0, NULL]>[gc]
+				glyphClass[false, false, NULL]>[gc]
 					<<
 					*insert = gc;
 					>>
@@ -1523,7 +1540,7 @@ ligatureMark[GNode** headP]>[GNode *lastNode]
 					(
 					<<GNode *gc;>>
 		
-					glyphClass[0, NULL]>[gc]
+					glyphClass[false, false, NULL]>[gc]
 						<<
 						*insert = gc;
 						>>
@@ -1601,7 +1618,7 @@ ligatureMark[GNode** headP]>[GNode *lastNode]
 	
 glyphClassAssign
 	:	<<GNode *tmp1;>>
-		a:T_GCLASS "=" glyphClass[1, $a.text]>[tmp1]
+		a:T_GCLASS "=" glyphClass[true, false, $a.text]>[tmp1]
 	;
 
 scriptAssign
@@ -1645,9 +1662,10 @@ namedLookupFlagValue[unsigned short *val]
 		|
 		K_UseMarkFilteringSet
 		(
-		umfClass:T_GCLASS
+		<<GNode *gc;>>
+		glyphClass[false, true, NULL]>[gc]
 		<<
-			getMarkSetIndex($umfClass.text, &umfIndex);
+			getMarkSetIndex(gc, &umfIndex);
 			setLkpFlagAttribute(val,otlUseMarkFilteringSet, umfIndex);
 		>>
 		)
@@ -1658,9 +1676,10 @@ namedLookupFlagValue[unsigned short *val]
 			numUInt8>[gdef_markclass_index]
 			|
 			(
-				matClass:T_GCLASS
+				<<GNode *gc;>>
+				glyphClass[false, true, NULL]>[gc]
 				<<
-				 getGDEFMarkClassIndex($matClass.text, &gdef_markclass_index);
+				 getGDEFMarkClassIndex(gc, &gdef_markclass_index);
 				>>
 			)
 		
@@ -1922,7 +1941,7 @@ table_OS_2
 			  (
 				<<for (arrayIndex = 0; arrayIndex < kLenUnicodeList; arrayIndex++) unicodeRangeList[arrayIndex] = kCodePageUnSet; arrayIndex = 0; >>
 				(
-				numUInt16>[valUInt16] <<if ((arrayIndex) < kLenUnicodeList) unicodeRangeList[arrayIndex] = valUInt16; arrayIndex++;>>
+				numUInt16>[valUInt16] <<if (arrayIndex < kLenUnicodeList) unicodeRangeList[arrayIndex] = valUInt16; arrayIndex++;>>
 				)+
 				<<featSetUnicodeRange(g, unicodeRangeList);>>
 			  )
@@ -1931,7 +1950,7 @@ table_OS_2
 			  (
 				<<for (arrayIndex = 0; arrayIndex < kLenCodePageList; arrayIndex++) codePageList[arrayIndex] = kCodePageUnSet; arrayIndex = 0;>>
 				(
-				numUInt16>[valUInt16] <<codePageList[arrayIndex] = valUInt16; arrayIndex++;>>
+				numUInt16>[valUInt16] <<if (arrayIndex < kLenCodePageList) codePageList[arrayIndex] = valUInt16; arrayIndex++;>>
 				)+
 				<<featSetCodePageRange(g, codePageList);>>
 			  )
@@ -1947,6 +1966,9 @@ table_OS_2
 			|              					                               
 			K_UpperOpticalPointSize numUInt16>[valUInt16]
 									<<OS_2UpperOpticalPointSize(g, valUInt16);>>
+			|              					                               
+			K_FamilyClass numUInt16Ext>[valUInt16]
+									<<OS_2FamilyClass(g, valUInt16);>>
 			|              					                               
 			(K_Vendor T_STRING)
 									<<addVendorString(g);>>
@@ -1984,9 +2006,9 @@ designAxis
 
 axisValueFlag[uint16_t *flags]
 	:
-		K_ElidableAxisValueName     << *flags |= 0x0001; >>
+		K_OlderSiblingFontAttribute     << *flags |= 0x0001; >>
 		|
-		K_OlderSiblingFontAttribute << *flags |= 0x0002; >>
+		K_ElidableAxisValueName << *flags |= 0x0002; >>
 	;
 
 axisValueFlags>[uint16_t flags]
@@ -1998,10 +2020,10 @@ axisValueFlags>[uint16_t flags]
 
 axisValueLocation>[uint16_t format, Tag tag, Fixed value, Fixed min, Fixed max]
 	:
-		K_location t:T_TAG << $tag = $t.ulval; >> numInt32Ext>[$value]
+		K_location t:T_TAG << $tag = $t.ulval; >> numFixed>[$value]
 		( ";" << $format = 1; >>
-		| numInt32Ext>[$min] << $format = 3; >>
-		  {"\-" numInt32Ext>[$max] << $format = 2; >> } ";"
+		| numFixed>[$min] << $format = 3; >>
+		  {numFixed>[$max] << $format = 2; >> } ";"
 		)
 	;
 
@@ -2077,6 +2099,9 @@ elidedFallbackNameID
 
 table_STAT
 	: t:K_STAT			<<checkTag($t.ulval, tableTag, 1);>>
+		<<
+		sawSTAT = TRUE;
+		>>
 		"\{"
 		(
 			(
@@ -2099,7 +2124,7 @@ table_STAT
 glyphClassOptional>[GNode *gnode]
 	:	<<$gnode = NULL;>> /* Suppress optimizer warning */
 
-		glyphClass[0, NULL]>[$gnode]
+		glyphClass[false, false, NULL]>[$gnode]
 		|				<<$gnode = NULL;>>
 	;
 
@@ -2215,8 +2240,17 @@ table_name
 						>>
 
 				numUInt16Ext>[id]
-					
-					
+				<<
+				if (sawSTAT && id > 255)
+					hotMsg(g, hotFATAL, "name table should be defined before "
+							"STAT table with nameids above 255");
+				if (sawCVParams && id > 255)
+					hotMsg(g, hotFATAL, "name table should be defined before "
+							"GSUB cvParameters with nameids above 255");
+				if (sawFeatNames && id > 255)
+					hotMsg(g, hotFATAL, "name table should be defined before "
+							"GSUB featureNames with nameids above 255");
+				>>
 				{
 				numUInt16Ext>[plat]
 					<<

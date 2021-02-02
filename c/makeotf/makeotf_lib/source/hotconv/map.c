@@ -13,7 +13,6 @@
 #include "GPOS.h"
 #include "GSUB.h"
 #include "otl.h"
-#include "MMFX.h"
 #include "feat.h"
 
 #include <stdlib.h>
@@ -1846,7 +1845,7 @@ static void setOS_2Fields(hotCtx g) {
         }
     }
 
-    /* if no code page range bits are set, then set the Symbol code page. */
+    /* if no code page range bits are set, then set the Latin (Windows 1252) code page. */
     {
         int somePage = 0;
         for (i = 0; i < ARRAY_LEN(codePage); i++) {
@@ -2401,7 +2400,7 @@ static void SIDWrite(hotCtx g, SID sid) {
 
 /* Write AFM data */
 void mapPrintAFM(hotCtx g) {
-    printf(IS_MM(g) ? "StartMasterFontMetrics 4.1\n" : "StartFontMetrics 2.0\n");
+    printf("StartFontMetrics 2.0\n");
 
     printf("FontName %s\n", g->font.FontName.array);
     SID_WRITE_FIELD(g, "FullName", g->font.FullName);
@@ -2428,7 +2427,7 @@ void mapPrintAFM(hotCtx g) {
 
     AFMPrintKernData(g);
 
-    printf(IS_MM(g) ? "EndMasterFontMetrics\n" : "EndFontMetrics\n");
+    printf("EndFontMetrics\n");
 }
 
 #if HOT_DEBUG

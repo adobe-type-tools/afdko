@@ -1,5 +1,5 @@
 """
-otfpdf v1.4.2 Jul 15 2019
+ttfpdf v1.4.3 May 30 2020
 provides support for the proofpdf script,  for working with OpenType/TTF
 fonts. Provides an implementation of the fontpdf font object. Cannot be
 run alone.
@@ -10,7 +10,7 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 from fontTools.pens.boundsPen import BoundsPen
 from afdko.pdflib.fontpdf import FontPDFGlyph, FontPDFFont, FontPDFPen
 
-__version__ = "1.4.2"
+__version__ = "1.4.3"
 
 
 class txPDFFont(FontPDFFont):
@@ -106,10 +106,10 @@ class  txPDFGlyph(FontPDFGlyph):
 		self.isTT = 1
 		self.isCID = 0
 		txFont = self.parentFont.clientFont
-		glyphSet = txFont.getGlyphSet(preferCFF=1)
+		glyphSet = txFont.getGlyphSet(preferCFF=False)
 		clientGlyph = glyphSet[self.name]
 		# Get the list of points
-		pen = FontPDFPen(None)
+		pen = FontPDFPen(glyphSet)
 		clientGlyph.draw(pen)
 
 		if not hasattr(txFont, 'vmetrics'):
@@ -143,7 +143,7 @@ class  txPDFGlyph(FontPDFGlyph):
 
 		assert len(self.pathList) == self.numPaths, " Path lengths don't match %s %s" % (len(self.pathList) , self.numPaths)
 		# get the bbox and width.
-		pen = BoundsPen(None)
+		pen = BoundsPen(glyphSet)
 		clientGlyph.draw(pen)
 		self.xAdvance = clientGlyph.width
 		glyph_bounds = pen.bounds

@@ -345,7 +345,7 @@ static void writeContents(ufwCtx h) {
 
     h->state = 1; /* Indicates writing to dst stream */
 
-    /* Open fontinfo.plist file as dst stream */
+    /* Open contents.plist file as dst stream */
 
     sprintf(buffer, "%s/%s", h->arg.glyphLayer, "contents.plist");
     h->cb.stm.clientFileName = buffer;
@@ -414,6 +414,24 @@ static void writeGlyphOrder(ufwCtx h) {
     }
 
     writeLine(h, "\t</array>");
+
+    if (h->top->sup.flags & ABF_CID_FONT) {
+        if (h->top->cid.CIDFontName.ptr != NULL) {
+            writeLine(h, "\t<key>com.adobe.type.cid.CIDFontName</key>");
+            sprintf(buffer, "\t<string>%s</string>", h->top->cid.CIDFontName.ptr);
+            writeLine(h, buffer);
+            writeLine(h, "\t<key>com.adobe.type.cid.Registry</key>");
+            sprintf(buffer, "\t<string>%s</string>", h->top->cid.Registry.ptr);
+            writeLine(h, buffer);
+            writeLine(h, "\t<key>com.adobe.type.cid.Ordering</key>");
+            sprintf(buffer, "\t<string>%s</string>", h->top->cid.Ordering.ptr);
+            writeLine(h, buffer);
+            writeLine(h, "\t<key>com.adobe.type.cid.Supplement</key>");
+            sprintf(buffer, "\t<integer>%ld</integer>", h->top->cid.Supplement);
+            writeLine(h, buffer);
+        }
+    }
+
     writeLine(h, "</dict>");
     writeLine(h, "</plist>");
 
@@ -435,7 +453,7 @@ static void writeMetaInfo(ufwCtx h) {
 
     h->state = 1; /* Indicates writing to dst stream */
 
-    /* Open lib.plist file as dst stream */
+    /* Open metainfo.plist file as dst stream */
 
     sprintf(buffer, "%s", "metainfo.plist");
     h->cb.stm.clientFileName = buffer;
@@ -1094,7 +1112,7 @@ static void writeContour(ufwCtx h) {
         return; /* Don't write paths with only a single move-to. UFO fonts can make these. */
     }
 
-    /* Fix up the start op. UFo fonts require a completely closed path, and no initial move-to.
+    /* Fix up the start op. UFO fonts require a completely closed path, and no initial move-to.
     If the last op coords are not the same as the move-to:
       - change the initial move-to to a line-to.
     else if the last op is a line-to:

@@ -530,7 +530,7 @@ def getOptions(params):
 			exec("params." + kShowMetaTag + "Hints = 0")
 			params.DrawFilledOutline = 1
 			params.rt_doFontSet = 1
-			if params.userPtSize == None: # set default point size.
+			if params.userPtSize is None: # set default point size.
 				params.userPtSize = 12
 		elif arg == "-alpha":
 			params.rt_alphaSort = 1
@@ -653,7 +653,7 @@ def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
 	glyphNameList = []
 	rangeList = glyphTag.split("-")
 	prevGID = getGlyphID(rangeList[0], fontGlyphList)
-	if prevGID == None:
+	if prevGID is None:
 		if len(rangeList) > 1:
 			logMsg( "\tWarning: glyph ID <%s> in range %s from glyph selection list option is not in font. <%s>." % (rangeList[0], glyphTag, fontFileName))
 		else:
@@ -665,7 +665,7 @@ def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
 		#import pdb
 		#pdb.set_trace()
 		gid = getGlyphID(glyphTag2, fontGlyphList)
-		if gid == None:
+		if gid is None:
 			logMsg( "\tWarning: glyph ID <%s> in range %s from glyph selection list option is not in font. <%s>." % (glyphTag2, glyphTag, fontFileName))
 			return None
 		for i in range(prevGID+1, gid+1):

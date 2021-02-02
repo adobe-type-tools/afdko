@@ -18,11 +18,11 @@ from fontTools.pens.ttGlyphPen import TTGlyphPen
 
 from afdko.fdkutils import get_font_format
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 def _validate_dir_path(path):
-    return os.path.isdir(path)
+    return False if path is None else os.path.isdir(path)
 
 
 def _validate_font_path(path_str):
@@ -36,18 +36,18 @@ def get_options(args):
     )
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument(
+        "-d",
+        "--directory",
+        action="store_true",
+        help="indicates that the input is a directory, rather than a file.\n"
+             "The program will process any valid TrueType files in the "
+             "specified directory."
+    )
+    parser.add_argument(
         "-o",
         metavar="OUTPUT_PATH",
         dest="output_path",
         help="path to output TTF file OR directory if -d specified.",
-    )
-    parser.add_argument(
-        "-d",
-        "--directory",
-        action="store_true",
-        help="Indicates that the input is a directory, rather than a file. "
-             "The program will process any valid TrueType files in the "
-             "specified directory."
     )
     parser.add_argument(
         "input_path",
@@ -63,15 +63,21 @@ def get_options(args):
     options = parser.parse_args(args)
 
     # validate the provided options
+    input_path_is_dir = _validate_dir_path(options.input_path)
+    output_path_is_dir = _validate_dir_path(options.output_path)
+
     if options.directory:
-        if not _validate_dir_path(options.input_path):
+        if not input_path_is_dir:
             parser.error(f'{options.input_path} is not a directory.')
-        if options.output_path:
-            if not _validate_dir_path(options.output_path):
-                parser.error(f'{options.output_path} is not a directory')
+        if options.output_path and not output_path_is_dir:
+            parser.error(f'{options.output_path} is not a directory')
+        if options.output_path is None:
+            options.output_path = options.input_path
     else:
         if not _validate_font_path(options.input_path):
             parser.error(f'{options.input_path} is not a TTF font file.')
+        if options.output_path and output_path_is_dir:
+            parser.error('input directory was not provided.')
 
     return options
 

@@ -7,7 +7,7 @@
 
 #include "ctlshare.h"
 
-#define SVR_VERSION CTL_MAKE_VERSION(1, 0, 7)
+#define SVR_VERSION CTL_MAKE_VERSION(1, 0, 8)
 
 #include "absfont.h"
 

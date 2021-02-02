@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="3.13">
+
+  <STAT>
+    <Version value="0x00010001"/>
+    <DesignAxisRecordSize value="8"/>
+    <!-- DesignAxisCount=3 -->
+    <DesignAxisRecord>
+      <Axis index="0">
+        <AxisTag value="wght"/>
+        <AxisNameID value="259"/>  <!-- Weight -->
+        <AxisOrdering value="1"/>
+      </Axis>
+      <Axis index="1">
+        <AxisTag value="wdth"/>
+        <AxisNameID value="260"/>  <!-- Width -->
+        <AxisOrdering value="0"/>
+      </Axis>
+      <Axis index="2">
+        <AxisTag value="opsz"/>
+        <AxisNameID value="261"/>  <!-- Optical Size -->
+        <AxisOrdering value="2"/>
+      </Axis>
+    </DesignAxisRecord>
+    <!-- AxisValueCount=18 -->
+    <AxisValueArray>
+      <AxisValue index="0" Format="2">
+        <AxisIndex value="0"/>
+        <Flags value="0"/>
+        <ValueNameID value="316"/>  <!-- Thin -->
+        <NominalValue value="200.0"/>
+        <RangeMinValue value="200.0"/>
+        <RangeMaxValue value="250.0"/>
+      </AxisValue>
+      <AxisValue index="1" Format="2">
+        <AxisIndex value="0"/>
+        <Flags value="0"/>
+        <ValueNameID value="318"/>  <!-- ExtraLight -->
+        <NominalValue value="220.0"/>
+        <RangeMinValue value="200.0"/>
+        <RangeMaxValue value="250.0"/>
+      </AxisValue>
+      <AxisValue index="2" Format="2">
+        <AxisIndex value="0"/>
+        <Flags value="0"/>
+        <ValueNameID value="320"/>  <!-- Light -->
+        <NominalValue value="300.0"/>
+        <RangeMinValue value="250.0"/>
+        <RangeMaxValue value="350.0"/>
+      </AxisValue>
+      <AxisValue index="3" Format="2">
+        <AxisIndex value="0"/>
+        <Flags value="2"/>
+        <ValueNameID value="322"/>  <!-- Regular -->
+        <NominalValue value="400.0"/>
+        <RangeMinValue value="350.0"/>
+        <RangeMaxValue value="450.0"/>
+      </AxisValue>
+      <AxisValue index="9" Format="2">
+        <AxisIndex value="1"/>
+        <Flags value="0"/>
+        <ValueNameID value="268"/>  <!-- ExtraCondensed -->
+        <NominalValue value="50.0"/>
+        <RangeMinValue value="50.0"/>
+        <RangeMaxValue value="58.75"/>
+      </AxisValue>
+      <AxisValue index="10" Format="2">
+        <AxisIndex value="1"/>
+        <Flags value="0"/>
+        <ValueNameID value="286"/>  <!-- Condensed -->
+        <NominalValue value="67.5"/>
+        <RangeMinValue value="58.75"/>
+        <RangeMaxValue value="78.75"/>
+      </AxisValue>
+      <AxisValue index="11" Format="2">
+        <AxisIndex value="1"/>
+        <Flags value="0"/>
+        <ValueNameID value="304"/>  <!-- SemiCondensed -->
+        <NominalValue value="90.0"/>
+        <RangeMinValue value="78.75"/>
+        <RangeMaxValue value="95.0"/>
+      </AxisValue>
+      <AxisValue index="12" Format="2">
+        <AxisIndex value="1"/>
+        <Flags value="2"/>
+        <ValueNameID value="257"/>  <!-- Normal -->
+        <NominalValue value="100.0"/>
+        <RangeMinValue value="95.0"/>
+        <RangeMaxValue value="105.0"/>
+      </AxisValue>
+      <AxisValue index="13" Format="2">
+        <AxisIndex value="1"/>
+        <Flags value="0"/>
+        <ValueNameID value="340"/>  <!-- Wide -->
+        <NominalValue value="115.0"/>
+        <RangeMinValue value="105.0"/>
+        <RangeMaxValue value="115.0"/>
+      </AxisValue>
+      <AxisValue index="14" Format="2">
+        <AxisIndex value="2"/>
+        <Flags value="2"/>
+        <ValueNameID value="258"/>  <!-- Roman -->
+        <NominalValue value="7"/>
+        <RangeMinValue value="6"/>
+        <RangeMaxValue value="44"/>
+      </AxisValue>
+      <AxisValue index="15" Format="2">
+        <AxisIndex value="2"/>
+        <Flags value="0"/>
+        <ValueNameID value="412"/>  <!-- Italic -->
+        <NominalValue value="12.0"/>
+        <RangeMinValue value="8.0"/>
+        <RangeMaxValue value="20.0"/>
+      </AxisValue>
+      <AxisValue index="16" Format="3">
+        <AxisIndex value="0"/>
+        <Flags value="2"/>
+        <ValueNameID value="322"/>  <!-- Regular -->
+        <Value value="400.0"/>
+        <LinkedValue value="700.0"/>
+      </AxisValue>
+      <AxisValue index="17" Format="3">
+        <AxisIndex value="2"/>
+        <Flags value="2"/>
+        <ValueNameID value="258"/>  <!-- Roman -->
+        <Value value="8.0"/>
+        <LinkedValue value="12.0"/>
+      </AxisValue>
+    </AxisValueArray>
+    <ElidedFallbackNameID value="2"/>  <!-- Regular -->
+  </STAT>
+
+</ttFont>

@@ -1,0 +1,42 @@
+name: Test with ASAN
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for running workflow'
+        required: true
+
+jobs:
+  run_asan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Log reason
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "Reason for triggering: ${{ github.event.inputs.reason }}"
+
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Install multilib packages
+      run: sudo apt-get install gcc-multilib g++-multilib
+
+    - name: Set ASAN-related environment variables
+      run: echo '::set-env name=XFLAGS::-Og -g -fsanitize=address -fno-omit-frame-pointer'
+
+    - name: Install AFDKO and dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt -r requirements-dev.txt .
+        pip freeze --all
+
+    - name: Run tests
+      run: pytest tests

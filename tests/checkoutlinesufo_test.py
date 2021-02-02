@@ -1,5 +1,6 @@
 import pytest
 from shutil import copy2, copytree
+import os
 
 from booleanOperations.booleanGlyph import BooleanGlyph
 from defcon import Glyph
@@ -9,6 +10,7 @@ from afdko.checkoutlinesufo import remove_tiny_sub_paths
 from afdko.fdkutils import (
     get_temp_file_path,
     get_temp_dir_path,
+    get_font_format,
 )
 from test_utils import (
     get_input_path,
@@ -88,3 +90,61 @@ def test_remove_overlap_otf():
     actual_ttx = generate_ttx_dump(actual_path, ['CFF '])
     expected_ttx = get_expected_path('font.ttx')
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_bug790():
+    """
+    Test case where the result of overlap removal resulted in coincident points
+    at contour start. Previously caused a crash when attempting to set start
+    point on the second point.
+    """
+    ufoname = 'bug790.ufo'
+    actual_path = get_temp_dir_path(ufoname)
+    copytree(get_input_path(ufoname), actual_path)
+    runner(CMD + ['-f', actual_path, '-o', 'e'])
+    expected_path = get_expected_path(ufoname)
+    assert differ([expected_path, actual_path])
+
+
+@pytest.mark.parametrize('filename, diffmode', [
+    ('cidfont.subset', ['-m', 'bin'])
+])
+def test_cidkeyed_remove_overlap(filename, diffmode):
+    actual_path = get_temp_file_path()
+    copy2(get_input_path(filename), actual_path)
+    runner(CMD + ['-f', actual_path, '-o', 'e', 'q', '=no-overlap-checks'])
+    expected_path = get_expected_path('cidfont.subset.checked')
+    assert differ([expected_path, actual_path] + diffmode)
+
+
+@pytest.mark.parametrize('input_font, expected_font', [
+    ('ufo3.ufo', 'ufo3-proc-layer.ufo'),
+    ('font.pfa', 'font.pfa'),
+])
+def test_output_file_option(input_font, expected_font):
+    """
+    Test the '-o' (output file) option.
+    """
+    in_path = get_input_path(input_font)
+    out_path = os.path.join(get_temp_dir_path(), input_font)
+    expected_path = get_expected_path(expected_font)
+    runner(CMD + ['-f', in_path, '-o', 'e', 'o', '_' + out_path])
+
+    assert get_font_format(out_path) == get_font_format(in_path)
+    assert differ([expected_path, out_path])
+
+
+@pytest.mark.parametrize('input_font, expected_font', [
+    ('contour-restore.ufo', 'contour-restore-ignored.ufo'),
+])
+def test_ignore_contour_order(input_font, expected_font):
+    """
+    Test the '--ignore-contour-order' option.
+    """
+    in_path = get_input_path(input_font)
+    out_path = os.path.join(get_temp_dir_path(), input_font)
+    expected_path = get_expected_path(expected_font)
+    runner(CMD + ['-f', in_path, '-o', '=ignore-contour-order', '=all', 'e',
+                  'q', 'o', '_' + out_path])
+    assert get_font_format(out_path) == get_font_format(in_path)
+    assert differ([expected_path, out_path, '-r', r'^\s*<point'])

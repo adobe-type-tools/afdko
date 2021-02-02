@@ -17,7 +17,7 @@ from defcon import Font
 from afdko.fdkutils import get_font_format
 
 
-__version__ = '0.3.0'
+__version__ = '0.3.2'
 
 
 PUBLIC_PSNAMES = "public.postscriptNames"
@@ -120,7 +120,7 @@ class TTComponentizer(object):
 
             glyph = glyf_table[gname]
             glyph.__dict__.clear()
-            setattr(glyph, "components", components)
+            glyph.components = components
             glyph.numberOfContours = -1
             self.comp_count += 1
 
@@ -273,7 +273,13 @@ def get_glyph_names_mapping(ufo_path):
         return None, None
 
     if PUBLIC_PSNAMES in ufo.lib:
-        return ufo, ufo.lib[PUBLIC_PSNAMES]
+        ufo_names = ufo.lib[PUBLIC_PSNAMES]
+        if len(ufo_names) == 0:
+            # empty dict; warn
+            print(f"WARNING: The contents of {PUBLIC_PSNAMES} is empty. This "
+                  "may result in uncomponentized glyphs if final glyph names "
+                  "vary from production names.")
+        return ufo, ufo_names
 
     return ufo, get_goadb_names_mapping(ufo_path)
 

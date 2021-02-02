@@ -12,7 +12,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-Byte8 *version = "3.0.0"; /* Program version */
+Byte8 *version = "3.0.1"; /* Program version */
 
 static char *sourcepath = "";
 #include "setjmp.h"

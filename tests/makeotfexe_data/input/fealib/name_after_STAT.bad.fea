@@ -1,0 +1,26 @@
+# name table should be defined before STAT to avoid possibly overwriting names
+
+table STAT {
+   ElidedFallbackName { name "Regular"; };
+
+   DesignAxis wght 0 { name "Weight"; };
+   DesignAxis ital 1 { name "Italic"; };
+
+   AxisValue {
+      location wght 400.0 -300.54 450.6;
+      name "Regular";
+      flag ElidableAxisValueName;
+   };
+
+   AxisValue {
+      location ital 1;
+      name "Italic";
+      flag ElidableAxisValueName;
+   };
+} STAT;
+
+
+table name {
+    nameid 256 "Roman";
+    nameid 257 "Italic";
+} name;

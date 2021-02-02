@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="o" format="2">
+	<unicode hex="006F"/>
+	<advance width="574"/>
+	<outline>
+		<contour>
+			<point name="hintSet0000" x="287" y="-12" type="curve"/>
+			<point x="422" y="-12"/>
+			<point x="553" y="86"/>
+			<point x="553" y="256" type="curve"/>
+			<point x="553" y="425"/>
+			<point x="422" y="523"/>
+			<point x="287" y="523" type="curve"/>
+			<point x="152" y="523"/>
+			<point x="21" y="425"/>
+			<point x="21" y="256" type="curve"/>
+			<point x="21" y="86"/>
+			<point x="152" y="-12"/>
+		</contour>
+		<contour>
+			<point x="287" y="181" type="curve"/>
+			<point x="260" y="181"/>
+			<point x="269" y="208"/>
+			<point x="269" y="256" type="curve"/>
+			<point x="269" y="304"/>
+			<point x="260" y="330"/>
+			<point x="287" y="330" type="curve"/>
+			<point x="314" y="330"/>
+			<point x="305" y="304"/>
+			<point x="305" y="256" type="curve"/>
+			<point x="305" y="208"/>
+			<point x="314" y="181"/>
+		</contour>
+	</outline>
+	<anchor name="aboveLC" x="287" y="532"/>
+	<anchor name="belowLC" x="287" y="-22"/>
+	<anchor name="hornLC" x="382" y="511"/>
+	<anchor name="ogonekLC" x="345" y="0"/>
+	<lib>
+		<dict>
+			<key>com.adobe.type.autohint.v2</key>
+			<dict>
+				<key>hintSetList</key>
+				<array>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0000</string>
+						<key>stems</key>
+						<array>
+							<string>hstem -12 193</string>
+							<string>hstem 330 193</string>
+							<string>vstem 21 248</string>
+							<string>vstem 305 248</string>
+						</array>
+					</dict>
+				</array>
+				<key>id</key>
+				<string>7f3b1bb4056282330f2d0bac4e78f5feeda562071edc0577ee2f6ef105dd57863da558ffef8e7dadaf8c0bb324a3eb31405c6c075975f24feff235ea87cc9b62</string>
+			</dict>
+		</dict>
+	</lib>
+</glyph>

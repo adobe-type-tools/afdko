@@ -1,0 +1,84 @@
+name: Build Python Wheels
+
+on:
+  push:
+    tags:
+      - '[0-9].*'
+
+jobs:
+  create_release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: true
+
+  build_wheels:
+    needs: create_release
+    name: Build Py3 Wheel on ${{ matrix.os }}
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - name: Check out
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # unshallow fetch for setuptools-scm
+
+    - name: Use MSBuild (Windows only)
+      uses: microsoft/setup-msbuild@v1.0.2
+      if: matrix.os == 'windows-latest'
+
+    - name: Install Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.7'
+
+    - name: Install deps
+      run: python -m pip install wheel setuptools_scm cibuildwheel
+
+    - name: Build wheel
+      run: |
+        python -m cibuildwheel --output-dir dist
+      env:
+        CIBW_BUILD: "cp36-*"
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+        CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x cp*win32"
+
+    - name: Build sdist (Ubuntu only)
+      if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      run: |
+        python setup.py sdist
+
+    - name: Publish dist(s) to PyPI
+      run: |
+        pip install twine
+        twine upload dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.pypi_password }}
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+
+    - name: Attach assets to GitHub release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell:
+        bash
+      run: |
+        set -x
+        assets=()
+        for asset in ./dist/*.*; do
+          assets+=("-a" "$asset")
+        done
+        tag_name="${GITHUB_REF##*/}"
+        hub release edit "${assets[@]}" -m "" "$tag_name"

@@ -2,6 +2,7 @@
 
 from decimal import Decimal
 import functools
+import io
 import os
 import re
 import sys
@@ -25,7 +26,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.7.10 Dec 3 2019
+makeotf.py v2.8.4 November 9 2020
 """
 
 __methods__ = """
@@ -605,7 +606,7 @@ def readOptionFile(filePath, makeOTFParams, optionIndex):
     try:
         with open(filePath, "r", encoding='utf-8') as fp:
             data = fp.read()
-    except (IOError, OSError):
+    except (OSError):
         print("makeotf [Error] Could not read the options file %s. "
               "Please check the file protection settings." % filePath)
         error = True
@@ -696,7 +697,7 @@ def writeOptionsFile(makeOTFParams, filePath):
         try:
             with open(filePath, "w", encoding='utf-8') as fp:
                 fp.write(data)
-        except (IOError, OSError):
+        except (OSError):
             print("makeotf [Warning] Could not write the options file %s. "
                   "Please check the file protection settings for the file "
                   "and for the directory." % filePath)
@@ -733,7 +734,7 @@ def setOptionsFromFontInfo(makeOTFParams):
             with open(fontinfo_path, "r", encoding='utf-8') as fi:
                 data = fi.read()
             makeOTFParams.fontinfoPath = fontinfo_path
-        except (OSError, IOError):
+        except (OSError):
             print("makeotf [Error] Failed to find and open fontinfo file: "
                   "FSType, OS/2 V4 bits, and Bold and Italic settings may "
                   "not be correct.")
@@ -1776,6 +1777,22 @@ def checkIfVertInFeature(featurePath):
     return foundVert
 
 
+def psname_in_fmndb(ps_name, fmndb_path):
+    """
+    Check the FontMenuNameDB file for the presence of a specific PostScript
+    name. Returns a boolean.
+    """
+    found_psname = False
+    with io.open(fmndb_path, encoding='utf-8') as fp:
+        fmndb_lst = fp.readlines()
+    for ln in fmndb_lst:
+        ln = ln.strip()
+        if not ln.startswith('#') and (f'[{ps_name}]' in ln):
+            found_psname = True
+            break
+    return found_psname
+
+
 def setMissingParams(makeOTFParams):
     error = False
     # The path to the original src font file
@@ -1828,18 +1845,26 @@ def setMissingParams(makeOTFParams):
 
     # FontMenuNameDB path.
     fmndb_path = getattr(makeOTFParams, kFileOptPrefix + kFMB)
+    ps_name = makeOTFParams.psName
     if fmndb_path == "None":
         setattr(makeOTFParams, kFileOptPrefix + kFMB, None)
-    # it was not specified
-    elif not fmndb_path:
+    # FontMenuNameDB file was NOT specified
+    elif fmndb_path is None:
         newpath = os.path.join(makeOTFParams.fontDirPath, kDefaultFMNDBPath)
         found_fmndb = False
-        for path in [newpath, lookUpDirTree(newpath)]:
-            if path and os.path.exists(path):
+        for new_fmndb_path in [newpath, lookUpDirTree(newpath)]:
+            if new_fmndb_path and os.path.exists(new_fmndb_path):
                 found_fmndb = True
                 break
         if found_fmndb:
-            setattr(makeOTFParams, kFileOptPrefix + kFMB, path)
+            if not psname_in_fmndb(ps_name, new_fmndb_path):
+                print(f"makeotf [Warning] Could not find '[{ps_name}]' in "
+                      "FontMenuNameDB file at "
+                      f"'{os.path.abspath(new_fmndb_path)}'. Font will be "
+                      "built with menu names derived from PostScript name.")
+                setattr(makeOTFParams, kFileOptPrefix + kFMB, None)
+            else:
+                setattr(makeOTFParams, kFileOptPrefix + kFMB, new_fmndb_path)
         else:
             if makeOTFParams.srcIsUFO:
                 ufo_fmndb_path = ufotools.makeUFOFMNDB(srcFontPath)
@@ -1857,6 +1882,14 @@ def setMissingParams(makeOTFParams):
                       "Font will be built with menu names derived from "
                       "PostScript name.")
                 setattr(makeOTFParams, kFileOptPrefix + kFMB, None)
+    # FontMenuNameDB file was specified
+    else:
+        if not psname_in_fmndb(ps_name, fmndb_path):
+            print(f"makeotf [Warning] Could not find '[{ps_name}]' in "
+                  f"FontMenuNameDB file at '{os.path.abspath(fmndb_path)}'. "
+                  "Font will be built with menu names derived from PostScript "
+                  "name.")
+            setattr(makeOTFParams, kFileOptPrefix + kFMB, None)
 
     # GOADB path.
     # Figure out if GOABD is required. It is required when (release mode
@@ -1969,7 +2002,7 @@ def convertFontIfNeeded(makeOTFParams):
                 if b"/Private" in data:
                     isTextPS = True
                     needsConversion = True
-        except (IOError, OSError):
+        except (OSError):
             print("makeotf [Error] Could not read font file at '%s'." %
                   filePath)
             raise MakeOTFShellError
@@ -2074,7 +2107,7 @@ def updateFontRevision(featuresPath, fontRevision):
         featuresPath = os.path.abspath(featuresPath)
         with open(featuresPath, "r", encoding='utf-8') as fp:
             data = fp.read()
-    except (IOError, OSError):
+    except (OSError):
         print("makeotf [Error] When trying to update the head table "
               "fontRevision field, failed to open '%s'." % featuresPath)
         return
@@ -2126,7 +2159,7 @@ def updateFontRevision(featuresPath, fontRevision):
     try:
         with open(featuresPath, "w", encoding='utf-8') as fp:
             fp.write(newData)
-    except (IOError, OSError):
+    except (OSError):
         print("makeotf [Error] When trying to update the head table "
               "fontRevision field, failed to write the new data to '%s'." %
               featuresPath)
@@ -2343,19 +2376,6 @@ def copy_tables(temp_font, font, tags):
         print('    copied "%s"' % tag)
 
 
-def makeRelativePath(curDir, targetPath):
-    if targetPath is None:
-        return
-
-    abs_targetPath = os.path.abspath(targetPath)
-    abs_curDir = os.path.abspath(curDir)
-    try:
-        return os.path.relpath(abs_targetPath, abs_curDir)
-    except ValueError:
-        # the paths are on different drives/mounts
-        return targetPath
-
-
 def adjustPaths(makeOTFParams):
     """
     Change file paths to be relative to fontDir,
@@ -2366,17 +2386,16 @@ def adjustPaths(makeOTFParams):
     inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
     fontDir = os.path.dirname(os.path.abspath(inputFilePath))
 
-    inputFilePath = makeRelativePath(fontDir, inputFilePath)
     setattr(makeOTFParams, kFileOptPrefix + kInputFont, inputFilePath)
 
-    outputFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kOutputFont))
+    outputFilePath = getattr(makeOTFParams, kFileOptPrefix + kOutputFont)
     if outputFilePath:
+        outputFilePath = os.path.abspath(outputFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kOutputFont, outputFilePath)
 
-    featuresFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kFeature))
+    featuresFilePath = getattr(makeOTFParams, kFileOptPrefix + kFeature)
     if featuresFilePath:
+        featuresFilePath = os.path.abspath(featuresFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kFeature, featuresFilePath)
 
     fmndbFilePath = getattr(makeOTFParams, kFileOptPrefix + kFMB)
@@ -2384,24 +2403,24 @@ def adjustPaths(makeOTFParams):
         fmndbFilePath = os.path.abspath(fmndbFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kFMB, fmndbFilePath)
 
-    goadbFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kGOADB))
+    goadbFilePath = getattr(makeOTFParams, kFileOptPrefix + kGOADB)
     if goadbFilePath:
+        goadbFilePath = os.path.abspath(goadbFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kGOADB, goadbFilePath)
 
-    maccmapFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath))
+    maccmapFilePath = getattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath)
     if maccmapFilePath:
+        maccmapFilePath = os.path.abspath(maccmapFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath, maccmapFilePath)
 
-    uniHFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath))
+    uniHFilePath = getattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath)
     if uniHFilePath:
+        uniHFilePath = os.path.abspath(uniHFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath, uniHFilePath)
 
-    uvsFilePath = makeRelativePath(
-        fontDir, getattr(makeOTFParams, kFileOptPrefix + kUVSPath))
+    uvsFilePath = getattr(makeOTFParams, kFileOptPrefix + kUVSPath)
     if uvsFilePath:
+        uvsFilePath = os.path.abspath(uvsFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kUVSPath, uvsFilePath)
 
     if makeOTFParams.tempFontPath:

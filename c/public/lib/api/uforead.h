@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-/*SVG Font Parser Library
+/*UFO Font Parser Library
    =======================================
    This library parses parses UFO fonts. 
 
@@ -59,7 +59,7 @@ int ufoBegFont(ufoCtx h,
 
 /* ufoBegFont() is called to initiate a new font parse. The source data stream
    (UFO_SRC_STREAM_ID) is opened, positioned at the offset specified by the
-   "origin" parameter, the SVG source is parsed, and selected
+   "origin" parameter, the UFO source is parsed, and selected
    dictionary values are stored in the data structure pointed to by the "top"
    parameter (which will remain stable until ufoEndFont() is called).
    Charstring and subroutine data is then stored in the temporary stream for subsequent parsing.

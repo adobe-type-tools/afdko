@@ -1,6 +1,6 @@
 #ifndef feattoks_h
 #define feattoks_h
-/* feattoks.h -- List of labeled tokens and stuff
+/* feattoks.h -- List of labelled tokens and stuff
  *
  * Generated from: featgram.g
  *
@@ -105,29 +105,31 @@
 #define K_WeightClass 123
 #define K_WidthClass 124
 #define K_Vendor 125
-#define K_STAT 126
-#define K_ElidedFallbackName 127
-#define K_ElidedFallbackNameID 128
-#define K_DesignAxis 129
-#define K_AxisValue 130
-#define K_flag 131
-#define K_location 132
-#define K_ElidableAxisValueName 133
-#define K_OlderSiblingFontAttribute 134
-#define K_vhea 135
-#define K_VertTypoAscender 136
-#define K_VertTypoDescender 137
-#define K_VertTypoLineGap 138
-#define K_vmtx 139
-#define K_VertOriginY 140
-#define K_VertAdvanceY 141
-#define T_FONTREV 142
-#define T_NUMEXT 143
-#define T_NUM 144
-#define T_GCLASS 145
-#define T_CID 146
-#define T_GNAME 147
-#define T_STRING 148
+#define K_FamilyClass 126
+#define K_STAT 127
+#define K_ElidedFallbackName 128
+#define K_ElidedFallbackNameID 129
+#define K_DesignAxis 130
+#define K_AxisValue 131
+#define K_flag 132
+#define K_location 133
+#define K_ElidableAxisValueName 134
+#define K_OlderSiblingFontAttribute 135
+#define K_vhea 136
+#define K_VertTypoAscender 137
+#define K_VertTypoDescender 138
+#define K_VertTypoLineGap 139
+#define K_vmtx 140
+#define K_VertOriginY 141
+#define K_VertAdvanceY 142
+#define T_FONTREV 143
+#define T_NUMEXT 144
+#define T_NUM 145
+#define T_FLOAT 146
+#define T_GCLASS 147
+#define T_CID 148
+#define T_GNAME 149
+#define T_STRING 150
 
 #ifdef __USE_PROTOS
 extern GID glyph(char* tok, int allowNotdef);
@@ -136,7 +138,7 @@ extern GID glyph();
 #endif
 
 #ifdef __USE_PROTOS
-extern GNode* glyphClass(int named, char* gcname);
+extern GNode* glyphClass(bool named, bool dontcopy, char* gcname);
 #else
 extern GNode* glyphClass();
 #endif
@@ -172,15 +174,15 @@ extern unsigned numUInt16Ext();
 #endif
 
 #ifdef __USE_PROTOS
-extern int32_t numInt32Ext(void);
-#else
-extern int32_t numInt32Ext();
-#endif
-
-#ifdef __USE_PROTOS
 extern unsigned numUInt32Ext(void);
 #else
 extern unsigned numUInt32Ext();
+#endif
+
+#ifdef __USE_PROTOS
+extern Fixed numFixed(void);
+#else
+extern Fixed numFixed();
 #endif
 
 #ifdef __USE_PROTOS
@@ -654,8 +656,8 @@ extern SetWordType zzerr70[];
 extern SetWordType zzerr71[];
 extern SetWordType zzerr72[];
 extern SetWordType zzerr73[];
-extern SetWordType zzerr74[];
 extern SetWordType setwd14[];
+extern SetWordType zzerr74[];
 extern SetWordType zzerr75[];
 extern SetWordType zzerr76[];
 extern SetWordType zzerr77[];
@@ -668,15 +670,15 @@ extern SetWordType zzerr82[];
 extern SetWordType setwd16[];
 extern SetWordType zzerr83[];
 extern SetWordType zzerr84[];
+extern SetWordType setwd17[];
 extern SetWordType zzerr85[];
 extern SetWordType zzerr86[];
-extern SetWordType setwd17[];
 extern SetWordType zzerr87[];
 extern SetWordType zzerr88[];
 extern SetWordType zzerr89[];
 extern SetWordType zzerr90[];
-extern SetWordType zzerr91[];
 extern SetWordType setwd18[];
+extern SetWordType zzerr91[];
 extern SetWordType zzerr92[];
 extern SetWordType zzerr93[];
 extern SetWordType zzerr94[];

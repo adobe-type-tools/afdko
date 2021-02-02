@@ -1,12 +1,13 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 """
-convertfonttocid.py. v 1.13.1 Jul 12 2019
+convertfonttocid.py. v 1.13.2 Jul 30 2020
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
-"fontinfo" file. See autohint help, with the "-hfd" option, or the makeotf
-user guide for details on this format. The output file produced by
-convertFontToCID() is a CID Type 1 font, no matter what the input is.
+"fontinfo" file. See psautohint help, with the "--doc-fddict" option,
+or the makeotf user guide for details on this format. The output file
+produced by convertFontToCID() is a CID Type 1 font, no matter what
+the input is.
 
 PROCEDURE:
 1. convertFontToCID()
@@ -208,7 +209,7 @@ class FDDict(object):
         return "\n".join(fiList)
 
     def buildBlueLists(self):
-        baseline_overshoot = getattr(self, 'BaselineOvershoot')
+        baseline_overshoot = getattr(self, 'BaselineOvershoot', None)
         if baseline_overshoot is None:
             print("Error: FDDict definition %s is missing the "
                   "BaselineYCoord/BaselineOvershoot values. These are "
@@ -507,11 +508,11 @@ def parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY,
         # e.g outside of the Font BBox. We do this because if there are
         # glyphs which are not assigned to a user specified font dict,
         # it is because it doesn't make sense to provide alignment zones
-        # for the glyph. Since autohint does require at least one bottom zone
+        # for the glyph. Since psautohint does require at least one bottom zone
         # and one top zone, we add one bottom and one top zone that are
         # outside the font BBox, so that hinting won't be affected by them.
         # NOTE: The FDDict receives a special name "No Alignment Zones" which
-        # autohint recognizes.
+        # psautohint recognizes.
         defaultFDDict = fontDictList[0]
 
         for key in kBlueValueKeys + kOtherBlueValueKeys:
@@ -817,7 +818,7 @@ def fixFontDict(tempPath, fdDict):
         if not m:
             raise FontParseError("Failed to find FontMatrix in input font! "
                                  "%s" % tempPath)
-        emUnits = getattr(fdDict, 'OrigEmSqUnits')
+        emUnits = fdDict.OrigEmSqUnits
         a = 1.0 / emUnits
         target = "/FontMatrix [%s 0 0 %s 0 0] def" % (a, a)
         data = data[:m.start()] + target + data[m.end():]
@@ -960,7 +961,7 @@ def makeCIDFontInfo(fontPath, cidfontinfoPath):
                     value = "(" + value[1:-1] + ")"
                 string = "%s\t%s\n" % (key, value)
                 fp.write(string)
-    except (IOError, OSError):
+    except (OSError):
         raise FontInfoParseError(
             "Error. Could not open and write file '%s'" % cidfontinfoPath)
 

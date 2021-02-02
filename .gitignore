@@ -21,11 +21,13 @@ htmlcov
 .pytest_cache
 *.gcno
 *.gcda
-cov.xml
+cov*.xml
 
 # ignore the compiled programs
 c/build_all/*
 !c/build_all/this_folder_intentionally_left_empty
+# ANTLR binaries
+**/hotpccts/pccts/bin/**
 
 # ignore the temp build directories and files
 *.o
@@ -44,3 +46,6 @@ xcuserdata/
 **/visualstudio/Debug/*
 **/visualstudio/Release/*
 **/visualstudio/x64/*
+
+# temp output dirs created during tests
+**/temp_output

@@ -1,0 +1,4 @@
+# TABLES: name
+table name {
+   nameid 9 "Joachim Müller-Lancé";    # Windows (Unicode)
+} name;

@@ -13,7 +13,6 @@ from afdko.makeotf import (
     writeOptionsFile,
     kMOTFOptions,
     kOptionNotSeen,
-    makeRelativePath,
 )
 from afdko.fdkutils import (
     get_temp_file_path,
@@ -28,6 +27,14 @@ from test_utils import (
 )
 from runner import main as runner
 from differ import main as differ, SPLIT_MARKER
+
+# The following ensures that the current working directory is consistently set.
+# This is necessary to avoid a problem that was discovered when running tests
+# with cibuildwheel, which initiates the pytest command from root, which causes
+# some minor discrepancies in relative vs absolute paths.
+test_dir = os.path.dirname(os.path.realpath(__file__))
+afdko_dir = os.path.join(test_dir, "..")
+os.chdir(afdko_dir)
 
 TOOL = 'makeotf'
 CMD = ['-t', TOOL]
@@ -383,28 +390,6 @@ def test_readOptionFile_filenotfound():
     assert readOptionFile(proj_path, params, 0) == (True, 0)
 
 
-@pytest.mark.parametrize('cur_dir, target_path, result', [
-    ('/folder/folder2', '/folder/folder2/font.pfa', 'font.pfa'),
-    ('/folder/folder2', '/folder/font.pfa', '../font.pfa'),
-    ('/folder', '/folder/font.pfa', 'font.pfa'),
-    ('/folder', '/font.pfa', '../font.pfa'),
-    ('/folder', None, None),
-])
-def test_makeRelativePath(cur_dir, target_path, result):
-    if result:
-        result = os.path.normpath(result)
-    assert makeRelativePath(cur_dir, target_path) == result
-
-
-@pytest.mark.skipif(sys.platform != 'win32', reason="windows-only")
-@pytest.mark.parametrize('cur_dir, target_path, result', [
-    ('C:\\folder', 'C:\\folder\\font.pfa', 'font.pfa'),
-    ('F:\\folder', 'C:\\folder\\font.pfa', 'C:\\folder\\font.pfa'),
-])
-def test_makeRelativePath_win_only(cur_dir, target_path, result):
-    assert makeRelativePath(cur_dir, target_path) == result
-
-
 @pytest.mark.parametrize('args, input_filename, ttx_filename', [
     (['r'], T1PFA_NAME, 't1pfa-cmap.ttx'),
     (['r', 'cs', '_1'], T1PFA_NAME, 't1pfa-cmap_cs1.ttx'),
@@ -693,3 +678,19 @@ def test_cli_numerics():
         'fi', f'_{get_input_path(fontinfo_filename)}'])
     assert differ([expected_msg_path, stderr_path,
                    '-r', r'^Built (development|release) mode font'])
+
+
+@pytest.mark.parametrize('explicit_fmndb', [False, True])
+def test_check_psname_in_fmndb_bug1171(explicit_fmndb):
+    input_path = get_input_path('bug1171/font.ufo')
+    fmndb_path = get_input_path('bug1171/FontMenuNameDB')
+    expected_ttx = get_expected_path('bug1171.ttx')
+    actual_path = get_temp_file_path()
+    opts = ['-o', 'f', f'_{input_path}', 'o', f'_{actual_path}']
+    if explicit_fmndb is True:
+        opts.extend(['mf', f'_{fmndb_path}'])
+    runner(CMD + opts)
+    actual_ttx = generate_ttx_dump(actual_path, ['name'])
+    assert differ([expected_ttx, actual_ttx,
+                   '-s', '<ttFont sfntVersion',
+                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])

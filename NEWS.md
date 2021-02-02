@@ -1,6 +1,163 @@
 Changelog
 =========
 
+3.6.1 (released 2021-01-13)
+---------------------------
+- [packaging] Fix Windows wheel
+  ([#1278](https://github.com/adobe-type-tools/afdko/pull/1278),
+   [#1277](https://github.com/adobe-type-tools/afdko/issues/1277))
+
+3.6.0 (released 2020-12-17)
+---------------------------
+- [checkoutlinesufo] Add CID support
+  ([#1224](https://github.com/adobe-type-tools/afdko/pull/1224))
+- [checkoutlinesufo] Fix nested loop variable
+  ([#1231](https://github.com/adobe-type-tools/afdko/pull/1231))
+- [tests] Update date regex to skip date & time metrics
+  ([#1232](https://github.com/adobe-type-tools/afdko/pull/1232))
+- [docs] Fix typo (Thanks, @djr11!)
+  ([#1236](https://github.com/adobe-type-tools/afdko/pull/1236))
+- [docs] Describe tab-separated format of GOADB (Thanks, @djr11!)
+  ([#1238](https://github.com/adobe-type-tools/afdko/pull/1238))
+- [docs] Fix typo (Thanks, @ln-north!)
+  ([#1241](https://github.com/adobe-type-tools/afdko/pull/1241))
+- [checkoutlinesufo] Update progress bar
+  ([#1243](https://github.com/adobe-type-tools/afdko/pull/1243))
+- [checkoutlinesufo] Implement `-o` (output file) option
+  ([#1244](https://github.com/adobe-type-tools/afdko/pull/1244))
+- [ci, tests] Use GitHub Actions for everything
+  ([#1254](https://github.com/adobe-type-tools/afdko/pull/1254),
+   [#1265](https://github.com/adobe-type-tools/afdko/pull/1265))
+- [makeotfexe] Update help/usage documentation
+  ([#1262](https://github.com/adobe-type-tools/afdko/pull/1262))
+- [comparefamily, pdflib] Fix `== None` comparisons
+  ([#1264](https://github.com/adobe-type-tools/afdko/pull/1264))
+- [checkoutlinesufo] Remove UFO2-as-UFO3 hack (now up-converts to UFO3)
+  ([#1135](https://github.com/adobe-type-tools/afdko/issues/1135),
+   [#1270](https://github.com/adobe-type-tools/afdko/pull/1270))
+
+3.5.1 (released 2020-09-15)
+----------------------
+- [tx] improve robustness
+  ([#1187](https://github.com/adobe-type-tools/afdko/pull/1187),
+   [#1188](https://github.com/adobe-type-tools/afdko/pull/1188))
+- [makeotfexe] support `OS/2.sFamilyClass` in feature files
+  ([#1191](**https://github.com/adobe-type-tools/afdko/issues/1191),
+   [#1192](https://github.com/adobe-type-tools/afdko/pull/1192))
+- [docs] correct description of STAT location values
+  ([#1190](https://github.com/adobe-type-tools/afdko/issues/1190),
+   [#1193](https://github.com/adobe-type-tools/afdko/pull/1193))
+- [makeotfexe] fix check of duplicates in STAT Format 4 Axis Values
+  ([#1195](https://github.com/adobe-type-tools/afdko/pull/1195))
+- [ttfcomponentizer] add warning for empty psnames
+  ([#1198](https://github.com/adobe-type-tools/afdko/issues/1198),
+   [#1199](https://github.com/adobe-type-tools/afdko/pull/1199))
+- [buildcff2vf] add STAT validation
+  ([#1200](https://github.com/adobe-type-tools/afdko/pull/1200))
+- [makeotf] allow anonymous glyphclass in LookupFlags
+  ([#1206](https://github.com/adobe-type-tools/afdko/pull/1206))
+- [agd] support 5-digit codepoints in AGD file
+  ([#1207](https://github.com/adobe-type-tools/afdko/issues/1207),
+   [#1208](https://github.com/adobe-type-tools/afdko/pull/1208))
+- [makeinstancesufo] make designspace attributes lowercase
+  ([#1211](https://github.com/adobe-type-tools/afdko/issues/1211),
+   [#1212](https://github.com/adobe-type-tools/afdko/pull/1212))
+- [makeotf] remove hyphen for STAT range definitions
+  ([#1197](https://github.com/adobe-type-tools/afdko/issues/1197),
+   [#1213](https://github.com/adobe-type-tools/afdko/pull/1213))
+- [docs] clarify use of `python3` and `pip3` in README
+  ([#1215](https://github.com/adobe-type-tools/afdko/pull/1215))
+- [pdflib] fix circle-drawing bug (thanks @bcirc!)
+  ([#1218](https://github.com/adobe-type-tools/afdko/issues/1218),
+   [#1219](https://github.com/adobe-type-tools/afdko/pull/1219)])
+- [docs] clarify description of glyph name ranges (thanks @PeterCon!)
+  ([#1222](https://github.com/adobe-type-tools/afdko/issues/1222),
+   [#1211](https://github.com/adobe-type-tools/afdko/pull/1221))
+- [checkoutlinesufo] add support for CID-keyed fonts
+  ([#1224](https://github.com/adobe-type-tools/afdko/pull/1224))
+
+3.5.0 (released 2020-07-16)
+----------------------
+- [docs] fix broken links, add new links, fix typos, add templates
+  ([#1140](https://github.com/adobe-type-tools/afdko/pull/1140),
+   [#1151](https://github.com/adobe-type-tools/afdko/pull/1151),
+   [#1176](https://github.com/adobe-type-tools/afdko/pull/1176))
+- [tx] many fixes related to uninitialized variables, buffer/stack overflows,
+  etc. Thanks to @antlarr-suse and internal contributors for chasing these down and fixing!
+  ([#1141](https://github.com/adobe-type-tools/afdko/pull/1141),
+   [#1180](https://github.com/adobe-type-tools/afdko/pull/1180),
+   [#1182](https://github.com/adobe-type-tools/afdko/pull/1182),
+   [#1187](https://github.com/adobe-type-tools/afdko/pull/1187),
+   [#1188](https://github.com/adobe-type-tools/afdko/pull/1188))
+- [makeotf] Drop Multiple Master in OpenType support (thanks @khaledhosny!)
+  ([#995](https://github.com/adobe-type-tools/afdko/issues/995),
+   [#1144](https://github.com/adobe-type-tools/afdko/pull/1144))
+- [checkoutlinesufo] Improve overlap removal
+  ([#790](https://github.com/adobe-type-tools/afdko/issues/790),
+   [#1146](https://github.com/adobe-type-tools/afdko/pull/1146),
+   [#1170](https://github.com/adobe-type-tools/afdko/pull/1170))
+- [fontsetplot, ttfdecomponentizer] Fix proofing issues
+  ([#1125](https://github.com/adobe-type-tools/afdko/issues/1125),
+   [#1148](https://github.com/adobe-type-tools/afdko/pull/1148))
+- [requirements] remove dependency on standalone cu2qu (integrated into
+  fontTools 4.7.0)
+  ([#1150](https://github.com/adobe-type-tools/afdko/pull/1150))
+- [makeinstancesufo] fix `use-varlib` flag, check for extrapolation/warn when
+  using varLib
+  ([#1152](https://github.com/adobe-type-tools/afdko/issues/1152),
+   [#1155](https://github.com/adobe-type-tools/afdko/pull/1155))
+- [makeotf] update a misleading comment regarding how CodePageRange bits are set
+  ([#1156](https://github.com/adobe-type-tools/afdko/issues/1156),
+   [#1157](https://github.com/adobe-type-tools/afdko/pull/1157))
+- [sfntedit, sfntdiff] fix failures with long file/pathnames
+  ([#1139](https://github.com/adobe-type-tools/afdko/issues/1139),
+   [#1159](https://github.com/adobe-type-tools/afdko/pull/1159))
+- [tx] don't write FontMatrix in CFF2 FontDict
+  ([cffsubr #13](https://github.com/adobe-type-tools/cffsubr/issues/13),
+   [#1165](https://github.com/adobe-type-tools/afdko/pull/1165))
+- [makeotf, makeotfexe] STAT table updates and improvements
+  ([#1164](https://github.com/adobe-type-tools/afdko/issues/1164),
+   [#1166](https://github.com/adobe-type-tools/afdko/pull/1166),
+   [#1174](https://github.com/adobe-type-tools/afdko/pull/1174),
+   [#1177](https://github.com/adobe-type-tools/afdko/issues/1177),
+   [#1178](https://github.com/adobe-type-tools/afdko/issues/1178),
+   [#1179](https://github.com/adobe-type-tools/afdko/pull/1179))
+- [makeotf] Check for PostScript name in FontMenuNameDB
+  ([#1171](https://github.com/adobe-type-tools/afdko/issues/1171),
+   [#1172](https://github.com/adobe-type-tools/afdko/pull/1172))
+- [autohint, stemhist] **REMOVED FROM AFDKO** (use psautohint/psstemhist)
+  ([#826](https://github.com/adobe-type-tools/afdko/issues/826),
+   [#827](https://github.com/adobe-type-tools/afdko/issues/827),
+   [#1175](https://github.com/adobe-type-tools/afdko/pull/1175))
+- [makeotfexe] fix stack buffer overflow and use-after-free issues
+  ([#1183](https://github.com/adobe-type-tools/afdko/pull/1183),
+   [#1184](https://github.com/adobe-type-tools/afdko/pull/1184))
+- [mergefonts] fix stack buffer overflow issue
+  ([#1185](https://github.com/adobe-type-tools/afdko/pull/1185))
+- [spot] fix heap buffer overflow issue
+  ([#1186](https://github.com/adobe-type-tools/afdko/pull/1186))
+
+3.4.0 (released 2020-05-26)
+---------------------------
+- [makeotf] STAT table support (thanks @khaledhosny!)
+  ([#176](https://github.com/adobe-type-tools/afdko/issues/176),
+   [#1127](https://github.com/adobe-type-tools/afdko/pull/1127))
+- [makeotf] Support multiple chained lookups per position (thanks @simoncozens!)
+  ([#1119](https://github.com/adobe-type-tools/afdko/issues/1119),
+   [#1132](https://github.com/adobe-type-tools/afdko/pull/1132))
+- [makeotf] Allow UTF-8 input for name strings (thanks @khaledhosny!)
+  ([#165](https://github.com/adobe-type-tools/afdko/issues/165),
+   [#1133](https://github.com/adobe-type-tools/afdko/pull/1133))
+- [spot] prevent string overflow
+  ([#1136](https://github.com/adobe-type-tools/afdko/pull/1136))
+- [spec] Update STAT examples, multiple lookup documentation, fix broken links
+  ([#1137](https://github.com/adobe-type-tools/afdko/pull/1137),
+   [#1140](https://github.com/adobe-type-tools/afdko/pull/1140))
+- [sfntedit] Use portable `rename`
+  ([#1138](https://github.com/adobe-type-tools/afdko/pull/1138))
+- [absfont, ttread] Initialize variables before use (thanks @antlarr-suse!)
+  ([#1141](https://github.com/adobe-type-tools/afdko/pull/1141))
+
 3.3.0 (released 2020-05-01)
 ---------------------------
 - [otf2ttf] update LSB in hmtx to match glyph xMin

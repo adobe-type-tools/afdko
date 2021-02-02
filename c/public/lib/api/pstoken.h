@@ -7,7 +7,7 @@
 
 #include "ctlshare.h"
 
-#define PST_VERSION CTL_MAKE_VERSION(2, 0, 10)
+#define PST_VERSION CTL_MAKE_VERSION(2, 0, 11)
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="i" format="2">
+	<unicode hex="0069"/>
+	<advance width="209"/>
+	<outline>
+		<contour>
+			<point name="hintSet0000" x="104" y="0" type="line"/>
+			<point x="105" y="0" type="line"/>
+			<point x="105" y="474" type="line"/>
+			<point x="104" y="474" type="line"/>
+		</contour>
+		<contour>
+			<point x="106" y="608" type="curve"/>
+			<point x="116" y="608"/>
+			<point x="127" y="617"/>
+			<point x="127" y="631" type="curve"/>
+			<point x="127" y="648"/>
+			<point x="116" y="655"/>
+			<point x="106" y="655" type="curve"/>
+			<point x="95" y="655"/>
+			<point x="84" y="648"/>
+			<point x="84" y="631" type="curve"/>
+			<point x="84" y="617"/>
+			<point x="95" y="608"/>
+		</contour>
+	</outline>
+	<anchor name="aboveLC" x="103" y="660"/>
+	<anchor name="belowLC" x="103" y="-22"/>
+	<anchor name="ogonekLC" x="118" y="0"/>
+	<lib>
+		<dict>
+			<key>com.adobe.type.autohint.v2</key>
+			<dict>
+				<key>hintSetList</key>
+				<array>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0000</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 21 -21</string>
+							<string>hstem 474 -20</string>
+							<string>hstem 608 47</string>
+							<string>vstem 84 43</string>
+						</array>
+					</dict>
+				</array>
+				<key>id</key>
+				<string>w209l1040l1050l105474l104474c106608116608127617c127631127648116655c1066559565584648c846318461795608</string>
+			</dict>
+		</dict>
+	</lib>
+</glyph>

@@ -19,7 +19,7 @@ extern "C" {
    This library parses tables common tables used by variable OpenType fonts.
 */
 
-#define VARREAD_VERSION CTL_MAKE_VERSION(1, 0, 7)
+#define VARREAD_VERSION CTL_MAKE_VERSION(1, 0, 8)
 #define F2DOT14_TO_FIXED(v) (((Fixed)(v)) << 2)
 #define FIXED_TO_F2DOT14(v) ((var_F2dot14)(((Fixed)(v) + 0x00000002) >> 2))
 

@@ -1607,16 +1607,14 @@ static void addMarkClass(char *markClassName) {
     anchorMarkInfo->markClass = headNode;
 }
 
-static void getMarkSetIndex(char *markClassName, unsigned short *markSetIndex) {
-    GNode *markClass = gcLookup(markClassName);
+static void getMarkSetIndex(GNode *markClass, unsigned short *markSetIndex) {
     *markSetIndex = addMarkSetClassGDEF(g, markClass);
 }
 
-static void getGDEFMarkClassIndex(char *markClassName, unsigned short *markAttachClassIndex) {
-    GNode *markClass = gcLookup(markClassName);
+static void getGDEFMarkClassIndex(GNode *markClass, unsigned short *markAttachClassIndex) {
     *markAttachClassIndex = addGlyphMarkClassGDEF(g, markClass);
     if (*markAttachClassIndex > kMaxMarkAttachClasses) {
-        featMsg(hotERROR, "No more than 15 different class names can be used with the \"lookupflag MarkAttachmentType <class name.\" statement \"%s\" would be a 16th.", markClassName);
+        featMsg(hotERROR, "No more than 15 different class names can be used with the \"lookupflag MarkAttachmentType\". This would be a 16th.");
     }
 }
 

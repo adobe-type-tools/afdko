@@ -1,0 +1,31 @@
+# https://github.com/adobe-type-tools/afdko/issues/1178
+
+table name {
+    nameid 0 "\00a9 2014 - 2020 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name \2018Source\2019.";
+    nameid 7 "Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.";
+    nameid 8 "Adobe Systems Incorporated";
+    nameid 9 "A Designer";
+    nameid 11 "http://www.adobe.com/type";
+    nameid 256 "Roman";
+    nameid 257 "Italic";
+} name;
+
+
+table STAT {
+
+   ElidedFallbackName { name "Regular"; };
+
+   DesignAxis wght 0 { name "Weight"; };
+
+   AxisValue {
+      location wght 300 250 350;
+      name "Light";
+   };
+
+   AxisValue {
+      location wght 400 350 450;
+      name "Regular";
+      flag ElidableAxisValueName;
+   };
+
+} STAT;

@@ -4,23 +4,25 @@
 Tool that performs outline quality checks and can remove path overlaps.
 """
 
-__version__ = '2.4.2'
+__version__ = '2.5.0'
 
 import argparse
 from functools import cmp_to_key
-import os
 import re
-from shutil import copy2
+import shutil
 import sys
 import textwrap
+from tqdm import tqdm, trange
+import warnings
 
 import booleanOperations.booleanGlyph
 import defcon
 from fontPens.digestPointPen import DigestPointPen
-from fontTools.ufoLib import UFOWriter, UFOLibError
+from fontTools.ufoLib import UFOWriter, UFOLibError, UFOFormatVersion
 
 from afdko import ufotools
 from afdko.ufotools import (
+    thresholdAttrGlyph,
     kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER,
     kProcessedGlyphsLayerName as PROCD_GLYPHS_LAYER_NAME,
 )
@@ -65,9 +67,7 @@ class FontFile(object):
             self.font_type = UFO_FONT_TYPE
             ufotools.validateLayers(font_path)
             self.defcon_font = defcon.Font(font_path)
-            self.ufo_format = self.defcon_font.ufoFormatVersion
-            if self.ufo_format < 2:
-                self.ufo_format = 2
+            self.ufo_format = self.defcon_font.ufoFormatVersionTuple
             self.use_hash_map = use_hash_map
             self.ufo_font_hash_data = ufotools.UFOFontData(
                 font_path, self.use_hash_map,
@@ -109,38 +109,25 @@ class FontFile(object):
         if self.save_to_default_layer:
             self.defcon_font.save()
         else:
-            """
-            XXX A real hack here XXX
-            RoboFont did not support layers (UFO3 feature) until version 3.
-            So in order to allow editing (in RF 1.x) UFOs that contain
-            a processed glyphs layer, checkoutlinesufo generates UFOs that
-            are structured like UFO3, but advertise themselves as UFO2.
-            To achieve this, the code below hacks ufoLib to surgically save
-            only the processed layer.
-            This hack is only performed if the original UFO is format 2.
-            """
+            if self.ufo_format <= UFOFormatVersion.FORMAT_2_0:
+                # Up-convert the UFO to format 3
+                warnings.warn("The UFO was up-converted to format 3.")
+                self.ufo_format = UFOFormatVersion.FORMAT_3_0
+
+                with UFOWriter(self.defcon_font.path,
+                               formatVersion=self.ufo_format) as writer:
+                    writer.getGlyphSet()
+                    writer.writeLayerContents()
+
             writer = UFOWriter(
                 self.defcon_font.path, formatVersion=self.ufo_format)
             writer.layerContents[
                 PROCD_GLYPHS_LAYER_NAME] = PROCD_GLYPHS_LAYER
             layers = self.defcon_font.layers
             layer = layers[PROCD_GLYPHS_LAYER_NAME]
-
-            if self.ufo_format == 2:
-                # Override the UFO's formatVersion. This disguises a UFO2 to
-                # be seen as UFO3 by ufoLib, thus enabling it to write the
-                # layer without raising an error.
-                writer._formatVersion = 3
-
             glyph_set = writer.getGlyphSet(
                 layerName=PROCD_GLYPHS_LAYER_NAME, defaultLayer=False)
             writer.writeLayerContents(layers.layerOrder)
-
-            if self.ufo_format == 2:
-                # Restore the UFO's formatVersion to the original value.
-                # This makes the glif files be set to format 1 instead of 2.
-                glyph_set.ufoFormatVersion = self.ufo_format
-
             layer.save(glyph_set)
 
         if self.font_type == UFO_FONT_TYPE:
@@ -164,7 +151,7 @@ class FontFile(object):
                 raise FocusFontError('Failed to convert UFO font to CFF.')
 
             if self.font_type == CFF_FONT_TYPE:
-                copy2(temp_cff_path, self.font_path)
+                shutil.copy2(temp_cff_path, self.font_path)
 
             else:  # OTF_FONT_TYPE
                 if not run_shell_command([
@@ -263,6 +250,11 @@ def get_options(args):
         help='run in quiet mode'
     )
     parser.add_argument(
+        '--ignore-contour-order',
+        action='store_true',
+        help='do not attempt to restore contour order'
+    )
+    parser.add_argument(
         '--no-overlap-checks',
         action='store_true',
         help='turn off path overlap checks'
@@ -301,7 +293,7 @@ def get_options(args):
         '-g',
         '--glyph-list',
         help='specify a list of glyphs to check\n'
-             'Check only the specified list of glyphs. The list must be'
+             'Check only the specified list of glyphs. The list must be '
              'comma-delimited. The glyph IDs may be glyph indexes '
              'or glyph names. There must be no white-space in the '
              'glyph list.\n'
@@ -335,6 +327,15 @@ def get_options(args):
              'the modified version of the glyphs is added. The new layer is '
              f"named: '{PROCD_GLYPHS_LAYER}'"
     )
+    parser.add_argument(
+        '-o',
+        '--output-file',
+        metavar='FILE_PATH',
+        nargs='?',
+        help='Specify an output file to save to. RECOMMENDED for non-UFO '
+             'inputs since the default behavior will overwrite the input.'
+    )
+
     ufo_opts = parser.add_argument_group('UFO-only options')
     ufo_opts.add_argument(
         '-w',
@@ -375,6 +376,16 @@ def get_options(args):
     if font_format not in ('UFO', 'OTF', 'CFF', 'PFA', 'PFB', 'PFC'):
         parser.error('Font format is not supported.')
 
+    if parsed_args.output_file:
+        src = parsed_args.font_path
+        dst = parsed_args.output_file
+        if font_format == 'UFO':
+            shutil.rmtree(dst, ignore_errors=True)
+            shutil.copytree(src, dst)
+        else:
+            shutil.copy(src, dst)
+        parsed_args.font_path = dst
+
     options = COOptions()
 
     if parsed_args.glyph_list:
@@ -402,6 +413,7 @@ def get_options(args):
     options.check_all = parsed_args.all
     options.clear_hash_map = parsed_args.clear_hash_map
     options.write_to_default_layer = parsed_args.write_to_default_layer
+    options.ignore_contour_order = parsed_args.ignore_contour_order
 
     return options
 
@@ -865,9 +877,9 @@ def sort_contours(c1, c2):
 def restore_contour_order(fixed_glyph, original_contours):
     """ The pyClipper library first sorts all the outlines by x position,
     then y position. I try to undo that, so that un-touched contours will end
-    up in the same order as the in the original, and any conbined contours
+    up in the same order as the in the original, and any combined contours
     will end up in a similar order. The reason I try to match new contours
-    to the old is to reduce arbitraryness in the new contour order between
+    to the old is to reduce arbitrariness in the new contour order between
     similar fonts. I can't completely avoid this, but I can reduce how often
     it happens.
     """
@@ -888,7 +900,7 @@ def restore_contour_order(fixed_glyph, original_contours):
     # Match contours that have not changed.
     # This will fix the order of the contours that have not been touched.
     num_contours = len(new_list)
-    if num_contours > 0:  # If the new contours aren't already all matched..
+    if num_contours > 0:  # If the new contours aren't already all matched.
         for i in range(num_contours):
             ci, contour = new_list[i]
             for j in old_index_list:
@@ -906,6 +918,8 @@ def restore_contour_order(fixed_glyph, original_contours):
     num_contours = len(new_list)
     # Check each extreme for a match.
     if num_contours > 0:
+        # ctr_starts tracks start points per contour
+        ctr_starts = {n: [] for n in range(len(fixed_glyph))}
         for i in range(num_contours):
             ci, contour = new_list[i]
             max_p = contour.maxP
@@ -913,10 +927,10 @@ def restore_contour_order(fixed_glyph, original_contours):
             for j in old_index_list:
                 ci2, old_contour = old_list[j]
                 matched = False
-                for point in old_contour:
-                    if point.segmentType is None:
+                for old_point in old_contour:
+                    if old_point.segmentType is None:
                         continue
-                    if (max_p.x == point.x) and (max_p.y == point.y):
+                    if (max_p.x == old_point.x) and (max_p.y == old_point.y):
                         new_list[i] = None
                         order_list.append([ci2, ci])
                         matched = True
@@ -929,7 +943,19 @@ def restore_contour_order(fixed_glyph, original_contours):
                                 if (point.x == old_start_point.x) \
                                         and (point.y == old_start_point.y) \
                                         and point.segmentType is not None:
+                                    try:
+                                        msg = ("Failed assertion: duplicated "
+                                               f"start point on contour {ci} "
+                                               f"at {point.x}, {point.y} of "
+                                               f"glyph {fixed_glyph.name}.")
+                                        assert not ctr_starts[ci], msg
+                                    except KeyError:
+                                        msg = (f"Contour index {ci} out "
+                                               "of range on updated glyph "
+                                               f"{fixed_glyph.name}")
+                                        raise KeyError(msg)
                                     contour.setStartPoint(pi)
+                                    ctr_starts[ci].append(pi)
 
                         break
                 if matched:
@@ -941,13 +967,13 @@ def restore_contour_order(fixed_glyph, original_contours):
     # just add them on the end.
     if num_contours != 0:
         ci2 = len(new_contours)
-        for ci, contour in new_list:
+        for ci, _contour in new_list:
             order_list.append([ci2, ci])
 
     # Now re-order the new list
     order_list.sort()
     new_contour_list = []
-    for ci2, ci in order_list:
+    for _ci2, ci in order_list:
         new_contour_list.append(new_contours[ci])
 
     fixed_glyph.clearContours()
@@ -1000,81 +1026,92 @@ def run(args=None):
         font_file.save_to_default_layer = True
 
     font_changed = False
-    last_had_msg = False
     seen_glyph_count = 0
     processed_glyph_count = 0
 
-    for glyph_name in sorted(glyph_list):
-        changed = False
-        seen_glyph_count += 1
-        msg = []
+    max_length = max([len(g) for g in glyph_list])
+    fmt = '{:<%d}' % max_length
+    with trange(len(glyph_list)) as t:
+        for i in t:
+            glyph_name = sorted(glyph_list)[i]
+            t.set_description('Checking outlines for %s' %
+                              fmt.format(glyph_name))
+            changed = False
+            seen_glyph_count += 1
+            msg = []
 
-        if glyph_name not in defcon_font:
-            continue
+            if glyph_name not in defcon_font:
+                continue
 
-        # font_file.check_skip_glyph updates the hash map for the glyph,
-        # so we call it even when the  '-all' option is used.
-        skip = font_file.check_skip_glyph(glyph_name, options.check_all)
-        # Note: this will delete glyphs from the processed layer,
-        #       if the glyph hash has changed.
-        if skip:
-            continue
-        processed_glyph_count += 1
+            # font_file.check_skip_glyph updates the hash map for the glyph,
+            # so we call it even when the  '-all' option is used.
+            skip = font_file.check_skip_glyph(glyph_name, options.check_all)
+            # Note: this will delete glyphs from the processed layer,
+            #       if the glyph hash has changed.
+            if skip:
+                continue
+            processed_glyph_count += 1
 
-        defcon_glyph = defcon_font[glyph_name]
-        if defcon_glyph.components:
-            defcon_glyph.decomposeAllComponents()
-        new_glyph = booleanOperations.booleanGlyph.BooleanGlyph(defcon_glyph)
-        if len(new_glyph) == 0:
-            # Complain about empty glyph only if it is not a space glyph.
-            if not RE_SPACE_PATTERN.search(glyph_name):
-                msg = ["has no contours"]
+            defcon_glyph = defcon_font[glyph_name]
+            if defcon_glyph.components:
+                defcon_glyph.decomposeAllComponents()
+            new_glyph = booleanOperations.booleanGlyph.BooleanGlyph(
+                defcon_glyph)
+            if len(new_glyph) == 0:
+                # Complain about empty glyph only if it is not a space glyph.
+                if not RE_SPACE_PATTERN.search(glyph_name):
+                    msg = ["has no contours"]
+                else:
+                    msg = []
             else:
-                msg = []
-        else:
-            for test in options.test_list:
-                if test is not None:
-                    new_glyph, changed, msg = \
-                        test(new_glyph, changed, msg, options)
+                for test in options.test_list:
+                    if test is not None:
+                        new_glyph, changed, msg = \
+                            test(new_glyph, changed, msg, options)
 
-        if not options.quiet_mode:
-            if len(msg) == 0:
-                if last_had_msg:
-                    print()
-                print('.', end='')
-                last_had_msg = False
-            else:
-                print(os.linesep + glyph_name, ' '.join(msg), end='')
-                last_had_msg = True
-        if changed and options.allow_changes:
-            font_changed = True
-            original_contours = list(defcon_glyph)
-            if font_file.save_to_default_layer:
-                fixed_glyph = defcon_glyph
-                fixed_glyph.clearContours()
-            else:
-                # this will replace any pre-existing glyph:
-                processed_layer.newGlyph(glyph_name)
-                fixed_glyph = processed_layer[glyph_name]
-                fixed_glyph.width = defcon_glyph.width
-                fixed_glyph.height = defcon_glyph.height
-                fixed_glyph.unicodes = defcon_glyph.unicodes
-            point_pen = fixed_glyph.getPointPen()
-            new_glyph.drawPoints(point_pen)
-            if options.allow_decimal_coords:
-                for contour in fixed_glyph:
-                    for point in contour:
-                        point.x = round(point.x, 3)
-                        point.y = round(point.y, 3)
-            else:
-                for contour in fixed_glyph:
-                    for point in contour:
-                        point.x = int(round(point.x))
-                        point.y = int(round(point.y))
-            restore_contour_order(fixed_glyph, original_contours)
-        # The following is needed when the script is called from another
-        # script with Popen():
-        sys.stdout.flush()
+            if not options.quiet_mode:
+                if msg:
+                    tqdm.write('%s %s' % (glyph_name, ' '.join(msg)))
+            if changed and options.allow_changes:
+                font_changed = True
+                original_contours = list(defcon_glyph)
+                if font_file.save_to_default_layer:
+                    fixed_glyph = defcon_glyph
+                    fixed_glyph.clearContours()
+                else:
+                    # this will replace any pre-existing glyph:
+                    processed_layer.newGlyph(glyph_name)
+                    fixed_glyph = processed_layer[glyph_name]
+                    fixed_glyph.width = defcon_glyph.width
+                    fixed_glyph.height = defcon_glyph.height
+                    fixed_glyph.unicodes = defcon_glyph.unicodes
+                point_pen = fixed_glyph.getPointPen()
+                new_glyph.drawPoints(point_pen)
+                if options.allow_decimal_coords:
+                    for contour in fixed_glyph:
+                        for point in contour:
+                            point.x = round(point.x, 3)
+                            point.y = round(point.y, 3)
+                else:
+                    for contour in fixed_glyph:
+                        for point in contour:
+                            point.x = int(round(point.x))
+                            point.y = int(round(point.y))
+
+                # JH May 2020: remove overlap can leave some coincident points
+                # we use thresholdAttrGlyph (modified thresholdPen) to remove
+                # them prior to restore_contour_order.
+                thresholdAttrGlyph(fixed_glyph, 1)
+
+                if not options.ignore_contour_order:
+                    restore_contour_order(fixed_glyph, original_contours)
+
+            # The following is needed when the script is called from another
+            # script with Popen():
+            sys.stdout.flush()
+            if i == len(glyph_list) - 1:
+                t.set_description("Finished checkoutlinesufo")
+
     # update layer plist: the hash check call may have deleted processed layer
     # glyphs because the default layer glyph is newer.
 
