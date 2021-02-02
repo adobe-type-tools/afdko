@@ -282,12 +282,15 @@ def collect_features_content(instances, inst_idx_lst):
             fea_dict[fea_pth] = fea_cntnts
     return fea_dict
 
+
 def starmap_kwargs(pool, fun, args, kwargs):
     starmap_args = zip(repeat(fun), args, kwargs)
     return pool.starmap(fun_args_and_kwargs, starmap_args)
 
+
 def fun_args_and_kwargs(fun, args, kwargs):
     return fun(*args, **kwargs)
+
 
 def run(options):
 
@@ -335,20 +338,26 @@ def run(options):
 
     logger.info("Built %s instances." % newInstancesCount)
     # Remove glyph.lib and font.lib (except for "public.glyphOrder")
-    pool = multiprocessing.Pool(os.cpu_count()-1)
-    pool.starmap(postProcessInstance, [(instancePath, options) for instancePath in newInstancesList])
+    pool = multiprocessing.Pool(os.cpu_count() - 1)
+    pool.starmap(postProcessInstance, [(instancePath, options)
+                                       for instancePath in newInstancesList])
 
     if options.doNormalize:
         logger.info("Applying UFO normalization...")
         args = zip(newInstancesList)
-        kwargs = repeat({'outputPath': None, 'onlyModified': True, 'writeModTimes': False}, newInstancesCount)
+        kwargs = repeat(
+            {'outputPath': None,
+             'onlyModified': True,
+             'writeModTimes': False},
+            newInstancesCount)
         starmap_kwargs(pool, normalizeUFO, args, kwargs)
 
     if options.doAutoHint or options.doOverlapRemoval:
         logger.info("Applying post-processing...")
         # Apply autohint and checkoutlines, if requested.
         # make new instance font.
-        pool.starmap(updateInstance, [(instancePath, options) for instancePath in newInstancesList])
+        pool.starmap(updateInstance, [(instancePath, options)
+                                      for instancePath in newInstancesList])
 
     # checkoutlinesufo does ufotools.validateLayers()
     if not options.doOverlapRemoval:
@@ -360,7 +369,11 @@ def run(options):
     if options.doOverlapRemoval or options.doAutoHint:
         if options.doNormalize:
             args = zip(newInstancesList)
-            kwargs = repeat({'outputPath': None, 'onlyModified': False, 'writeModTimes': False}, newInstancesCount)
+            kwargs = repeat(
+                {'outputPath': None,
+                 'onlyModified': False,
+                 'writeModTimes': False},
+                newInstancesCount)
             starmap_kwargs(pool, normalizeUFO, args, kwargs)
     pool.close()
     pool.join()
