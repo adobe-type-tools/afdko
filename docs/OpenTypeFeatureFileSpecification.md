@@ -195,7 +195,7 @@ contexts.
 [`MarkAttachmentType`](#4.d)<br>
 [`markClass`](#4.f)<br>
 [`nameid`](#9.e)<br>
-`NULL` (used in [device](#2.e.iii), [value record](#2.e.iv), [anchor](#2.e.vii))<br>
+`NULL` (used in [substitute](#5.a), [device](#2.e.iii), [value record](#2.e.iv), [anchor](#2.e.vii))<br>
 [`parameters`](#4.c)<br>
 [`pos`](#6)<br>
 [`position`](#6)<br>
@@ -1556,6 +1556,13 @@ substitute b by B.sc;
 substitute c by C.sc;
 # ...
 substitute z by Z.sc;
+```
+
+If the replacement glyph is the reserved word `NULL`, then the substitution
+has no replacement, removing the input glyph from the glyph sequence:
+
+```fea
+substitute a by NULL;
 ```
 
 <a name="5.b"></a>
