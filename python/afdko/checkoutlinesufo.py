@@ -943,20 +943,19 @@ def restore_contour_order(fixed_glyph, original_contours):
                                 if (point.x == old_start_point.x) \
                                         and (point.y == old_start_point.y) \
                                         and point.segmentType is not None:
-                                    try:
-                                        msg = ("Failed assertion: duplicated "
-                                               f"start point on contour {ci} "
-                                               f"at {point.x}, {point.y} of "
-                                               f"glyph {fixed_glyph.name}.")
-                                        assert not ctr_starts[ci], msg
-                                    except KeyError:
+                                    if ci not in ctr_starts:
                                         msg = (f"Contour index {ci} out "
                                                "of range on updated glyph "
                                                f"{fixed_glyph.name}")
                                         raise KeyError(msg)
+                                    elif not ctr_starts[ci]:
+                                        msg = ("Warning: duplicated "
+                                               f"start point on contour {ci} "
+                                               f"at {point.x}, {point.y} of "
+                                               f"glyph {fixed_glyph.name}.")
+                                        print(msg)
                                     contour.setStartPoint(pi)
                                     ctr_starts[ci].append(pi)
-
                         break
                 if matched:
                     break
