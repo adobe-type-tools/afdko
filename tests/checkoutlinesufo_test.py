@@ -148,3 +148,24 @@ def test_ignore_contour_order(input_font, expected_font):
                   'q', 'o', '_' + out_path])
     assert get_font_format(out_path) == get_font_format(in_path)
     assert differ([expected_path, out_path, '-r', r'^\s*<point'])
+
+
+@pytest.mark.parametrize('input_font, expected_font', [
+    ('contour-restore.ufo', 'restore_contour_order_warned.ufo'),
+])
+def test_restore_contour_order_warning(input_font, expected_font):
+    """
+    Test the warning message outputted with
+    unsuccessful restore_contour_order.
+    """
+    in_path = get_input_path(input_font)
+    out_path = os.path.join(get_temp_dir_path(), input_font)
+    expected_path = get_expected_path(expected_font)
+    stderr_path = runner(CMD + ['-s', '-f', in_path, '-o', "e", '=all',
+                                'o', '_' + out_path])
+    assert get_font_format(out_path) == get_font_format(in_path)
+    assert differ([expected_path, out_path, '-r', r'^\s*<point'])
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (b'Warning: duplicated start point on contour 3 at 616, 597 of '
+            b'glyph cid51107.') in output
