@@ -8,6 +8,8 @@ on:
       - LICENSE.md
       - NEWS.md
       - README.md
+  pull_request:
+    branches: [master, develop]
   schedule:
     - cron: '0 11 1 * *'
   workflow_dispatch:
