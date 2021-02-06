@@ -2332,6 +2332,7 @@ def fixPost(glyphList, font):
             extraNamesList.append(gname)
 
     post_table = font['post']
+    post_table.mapping = {}
     post_table.formatType = 2
     post_table.glyphOrder = glyphOrderList
     post_table.extraNames = extraNamesList
