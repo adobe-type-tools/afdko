@@ -48,6 +48,7 @@ extern jmp_buf mark;
 #define WINDOWS_DECORATIVE (5 << 4)
 #define MAX_CHAR_NAME_LEN 63       /* Max charname len (inc '\0') */
 #define MAX_FINAL_CHAR_NAME_LEN 63 /* Max charname len (inc '\0') */
+#define MAX_UV_CHAR_NAME_LEN 2047 /* length of entire alias string (column) */
 
 #ifdef _MSC_VER /* defined by Microsoft Compiler */
 #include <io.h>
@@ -900,6 +901,11 @@ enum {
 static char *gnameScan(cbCtx h, char *p, unsigned char *action, unsigned char *next, int nameType) {
     char *start = p;
     int state = 0;
+    int nameLimit = MAX_CHAR_NAME_LEN;
+
+    if (nameType == uvName) {
+        nameLimit = MAX_UV_CHAR_NAME_LEN;
+    }
 
     for (;;) {
         int actn;
@@ -934,7 +940,7 @@ static char *gnameScan(cbCtx h, char *p, unsigned char *action, unsigned char *n
             return NULL;
         }
         if (actn & Q_) {
-            if (p - start > MAX_CHAR_NAME_LEN) {
+            if (p - start > nameLimit) {
                 return NULL; /* Maximum glyph name length exceeded */
             }
             return p;
