@@ -706,3 +706,31 @@ def test_negative_internal_leading_bug1227():
         output = f.read()
     assert (b'[WARNING] <SourceSerifPro-Regular> Negative internal leading: '
             b'win.ascent + win.descent < unitsPerEm') in output
+
+
+@pytest.mark.parametrize(
+    'goadb_filename, expected',
+    [('bug1310/longUVGOADB.txt', False),
+     ('bug1310/longGnameGOADB.txt', True)])
+def test_glyph_alias_name_limits(goadb_filename, expected):
+    """
+    - 'longUVGOADB' has a 3rd column (UV names) with length > 63. This should
+      is expected to be allowed (up to MAX_UV_CHAR_NAME_LEN in cb.c)
+    - 'longGnameGOADB' has 2nd column (glyph name) with a length > 63. This
+      is expected to raise a warning.
+    """
+    input_filename = "font.pfa"
+    actual_path = get_temp_file_path()
+
+    cmd = CMD + ['-s', '-e', '-o',
+                 'r',
+                 'f', f'_{get_input_path(input_filename)}',
+                 'o', f'_{actual_path}',
+                 'gf', f'_{get_input_path(goadb_filename)}']
+
+    stderr_path = runner(cmd)
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+
+    assert ((b'(record skipped)(gnameError)') in output) is expected
