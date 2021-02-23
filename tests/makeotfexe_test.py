@@ -733,4 +733,4 @@ def test_glyph_alias_name_limits(goadb_filename, expected):
     with open(stderr_path, 'rb') as f:
         output = f.read()
 
-    assert ((b'(record skipped)(gnameError)') in output) is expected
+    assert (b'(record skipped)(gnameError)' in output) is expected
