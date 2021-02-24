@@ -32,6 +32,9 @@ class CFF2VFError(Exception):
     """Base exception for buildcff2vf"""
 
 
+class CFF2VFCompatibilizationError(VarLibCFFPointTypeMergeError):
+    """To distinguish when raised during compatibilization"""
+
 # set up for printing progress notes
 def progress(self, message, *args, **kws):
     # Note: message must contain the format specifiers for any strings in args.
@@ -569,9 +572,12 @@ def main(args=None):
     # fonts without having to recompile and save them.
     try:
         varFont, _, _ = varLib.build(designspace, otfFinder)
-    except VarLibCFFPointTypeMergeError:
-        logger.error("The input set requires compatibilization. Please try "
-                     "again with the -c (--check-compat) option.")
+    except VarLibCFFPointTypeMergeError as exc:
+        msg = str(exc)
+        if not isinstance(exc, CFF2VFCompatibilizationError):
+            # if not in --check-compat mode, add suggestion to try
+            msg += ". Please try again with the -c (--check-compat) option."
+        logger.error(msg)
         return 0
 
     if not options.keep_glyph_names:
