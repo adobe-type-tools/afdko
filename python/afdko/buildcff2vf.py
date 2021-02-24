@@ -35,6 +35,7 @@ class CFF2VFError(Exception):
 class CFF2VFCompatibilizationError(VarLibCFFPointTypeMergeError):
     """To distinguish when raised during compatibilization"""
 
+
 # set up for printing progress notes
 def progress(self, message, *args, **kws):
     # Note: message must contain the format specifiers for any strings in args.
