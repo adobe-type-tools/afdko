@@ -48,8 +48,8 @@ glyph[4] {dollar,0x24,
 glyph[5] {percent,0x25,
  669 width 26 95 vstem 372 441 vstem 574 643 vstem -12 36 hstem 352 401 hstem
  666 714 hstem newhints 26 95 vstem 229 297 vstem 372 441 vstem 574 643 vstem
- -12 36 hstem 352 401 hstem 666 714 hstem 297 533 move 297 649 246 715 162 715
- curve 77 715 26 649 26 533 curve 26 419 78 352 162 352 curve 245 352 297 418
+ -12 36 hstem 352 401 hstem 666 714 hstem 297 533 move 297 649 246 714 162 714
+ curve 77 714 26 649 26 533 curve 26 419 78 352 162 352 curve 245 352 297 418
  297 532 curve newhints 26 95 vstem 372 441 vstem 574 643 vstem -12 36 hstem
  352 401 hstem 666 714 hstem 548 711 move 477 711 line 119 -8 line 191 -8 line
  newhints 26 95 vstem 229 297 vstem 372 441 vstem 574 643 vstem -12 36 hstem
@@ -483,11 +483,11 @@ glyph[72] {h,0x68,
  326 430 328 393 328 350 curve 328 0 line endchar}
 glyph[73] {i,0x69,
  195 width 54 141 vstem 0 bottomedge 532 topedge 643 731 hstem 141 643 move
- 141 731 line 54 731 line 54 643 line 141 532 move 54 532 line 54 0 line 141 0
+ 141 731 line 54 731 line 54 642 line 141 532 move 54 532 line 54 0 line 141 0
  line endchar}
 glyph[74] {j,0x6A,
  195 width 53 141 vstem -241 -181 hstem 532 topedge 643 731 hstem 141 643 move
- 141 731 line 53 731 line 53 643 line -123 -212 move -105 -221 -87 -228 -69
+ 141 731 line 53 731 line 53 642 line -123 -212 move -105 -221 -87 -228 -69
  -233 curve -51 -238 -32 -241 -10 -241 curve 41 -241 80 -225 105 -191 curve
  130 -156 141 -104 141 -21 curve 141 532 line 54 532 line 54 -36 line 54 -93
  49 -129 36 -153 curve 22 -172 -1 -181 -22 -181 curve -42 -181 -54 -177 -63
@@ -829,7 +829,7 @@ glyph[120] {ellipsis,0xBC,
 glyph[121] {perthousand,0xBD,
  981 width 26 95 vstem 372 441 vstem 684 753 vstem 886 955 vstem -12 36 hstem
  301 350 hstem 666 714 hstem newhints 26 95 vstem 229 297 vstem 352 401 hstem
- 666 714 hstem 297 533 move 297 649 246 715 162 715 curve 77 715 26 649 26 533
+ 666 714 hstem 297 533 move 297 649 246 714 162 714 curve 77 714 26 649 26 533
  curve 26 419 78 352 162 352 curve 245 352 297 418 297 532 curve newhints 26
  95 vstem -12 36 hstem 666 714 hstem 548 711 move 477 711 line 119 -8 line 191
  -8 line newhints 26 95 vstem 229 297 vstem 352 401 hstem 666 714 hstem 162

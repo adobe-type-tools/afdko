@@ -48,8 +48,8 @@ struct t1cCtx {
         int cnt;
         float array[T1_MAX_OP_STACK];
     } stack;
-    float x; /* Path x-coord */
-    float y; /* Path y-coord */
+    double x; /* Path x-coord */
+    double y; /* Path y-coord */
     long maxOpStack;
     int subrDepth;
     float transformMatrix[6];
@@ -117,7 +117,7 @@ struct t1cCtx {
 #define PUSH(v) (h->stack.array[h->stack.cnt++] = (float)(v))
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
-#define RND(v) ((float)floor((v) + 0.50001))
+#define RND(v) ((double)floor((v) + 0.5))
 /* The 0.000005 is added to allow for differences in OS's and other mathlibs
 when blending LE's or MM's. The problem is that the differences can lead to 
 a final value being just a hair above .5 on one platform and a hair below on
@@ -214,8 +214,8 @@ static int callbackWidth(t1cCtx h, float width) {
 
 /* Callback path move. */
 static void callbackMove(t1cCtx h, float dx, float dy) {
-    float x;
-    float y;
+    double x;
+    double y;
 
     h->flags &= ~PEND_MOVETO;
     h->flags |= SEEN_MOVETO;
@@ -223,8 +223,8 @@ static void callbackMove(t1cCtx h, float dx, float dy) {
     x = h->x + dx;
     y = h->y + dy;
 
-    x = (float)RND_ON_READ(x);
-    y = (float)RND_ON_READ(y);
+    x = (double)RND_ON_READ(x);
+    y = (double)RND_ON_READ(y);
 
     if (h->seac.phase == seacAccentPreMove) {
         x += h->seac.xshift;
@@ -261,8 +261,8 @@ static void callbackMove(t1cCtx h, float dx, float dy) {
 
 /* Callback path line. */
 static void callbackLine(t1cCtx h, float dx, float dy) {
-    float x;
-    float y;
+    double x;
+    double y;
 
     if (h->flags & PEND_MOVETO)
         callbackMove(h, 0, 0); /* Insert missing move */
@@ -270,8 +270,8 @@ static void callbackLine(t1cCtx h, float dx, float dy) {
     x = h->x + dx;
     y = h->y + dy;
 
-    x = (float)RND_ON_READ(x);
-    y = (float)RND_ON_READ(y);
+    x = (double)RND_ON_READ(x);
+    y = (double)RND_ON_READ(y);
 
     h->x = x;
     h->y = y;
@@ -289,12 +289,12 @@ static void callbackCurve(t1cCtx h,
                           float dx1, float dy1,
                           float dx2, float dy2,
                           float dx3, float dy3) {
-    float x1;
-    float y1;
-    float x2;
-    float y2;
-    float x3;
-    float y3;
+    double x1;
+    double y1;
+    double x2;
+    double y2;
+    double x3;
+    double y3;
 
     if (h->flags & PEND_MOVETO)
         callbackMove(h, 0, 0); /* Insert missing move */
@@ -305,8 +305,8 @@ static void callbackCurve(t1cCtx h,
     y2 = y1 + dy2;
     x3 = x2 + dx3;
     y3 = y2 + dy3;
-    x3 = (float)RND_ON_READ(x3);
-    y3 = (float)RND_ON_READ(y3);
+    x3 = (double)RND_ON_READ(x3);
+    y3 = (double)RND_ON_READ(y3);
     h->x = x3;
     h->y = y3;
 
@@ -408,20 +408,20 @@ static void callbackFlex(t1cCtx h) {
                       dx6, dy6);
     } else {
         /* Callback as flex hint; convert to absolute coordinates */
-        float x1 = h->x + dx1;
-        float y1 = h->y + dy1;
-        float x2 = x1 + dx2;
-        float y2 = y1 + dy2;
-        float x3 = x2 + dx3;
-        float y3 = y2 + dy3;
-        float x4 = x3 + dx4;
-        float y4 = y3 + dy4;
-        float x5 = x4 + dx5;
-        float y5 = y4 + dy5;
-        float x6 = x5 + dx6;
-        float y6 = y5 + dy6;
-        x6 = (float)RND_ON_READ(x6);
-        y6 = (float)RND_ON_READ(y6);
+        double x1 = h->x + dx1;
+        double y1 = h->y + dy1;
+        double x2 = x1 + dx2;
+        double y2 = y1 + dy2;
+        double x3 = x2 + dx3;
+        double y3 = y2 + dy3;
+        double x4 = x3 + dx4;
+        double y4 = y3 + dy4;
+        double x5 = x4 + dx5;
+        double y5 = y4 + dy5;
+        double x6 = x5 + dx6;
+        double y6 = y5 + dy6;
+        x6 = (double)RND_ON_READ(x6);
+        y6 = (double)RND_ON_READ(y6);
         h->x = x6;
         h->y = y6;
 
@@ -476,8 +476,8 @@ static void callbackFlex(t1cCtx h) {
        a closepoint-terminated subpath to a new subpath in MM fonts. */
 
     if (h->seac.phase <= seacBase) {
-        h->x = (float)RND_ON_READ(args[15]);
-        h->y = (float)RND_ON_READ(args[16]);
+        h->x = (double)RND_ON_READ(args[15]);
+        h->y = (double)RND_ON_READ(args[16]);
     }
 }
 

@@ -220,7 +220,7 @@ glyph[23] {seven,0x37,
  endchar}
 glyph[24] {eight,0x38,
  723 width 46 202 vstem 511 680 vstem -14 38 hstem 653 705 hstem 354 -14 move
- 471 -14 553 10 604 48 curve 657 86 680 140 680 196 curve 680 250 650 294 610
+ 471 -14 553 10 604 48 curve 656 86 680 140 680 196 curve 680 250 650 294 610
  327 curve 580 353 539 376 492 394 curve 492 397 line newhints 76 231 vstem
  496 650 vstem -14 38 hstem 653 705 hstem 544 413 578 431 602 451 curve 634
  478 650 508 650 546 curve 650 597 616 637 570 662 curve 513 692 438 705 364
@@ -1054,8 +1054,8 @@ glyph[114] {paragraph,0xB6,
  155 332 202 320 260 320 curve 260 -33 line 260 -93 255 -97 179 -97 curve 179
  -143 line 319 -143 line 319 662 line endchar}
 glyph[115] {bullet,0xB7,
- 524 width 104 421 vstem 182 500 hstem 262 500 move 175 500 104 429 104 341
- curve 104 254 175 182 262 182 curve 350 182 421 253 421 341 curve 421 428 350
+ 524 width 104 421 vstem 182 500 hstem 262 500 move 175 500 104 428 104 341
+ curve 104 253 175 182 262 182 curve 350 182 421 253 421 341 curve 421 428 350
  500 263 500 curve endchar}
 glyph[116] {quotesinglbase,0xB8,
  262 width 146 206 vstem -10 bottomedge 92 -137 move newhints 146 206 vstem
