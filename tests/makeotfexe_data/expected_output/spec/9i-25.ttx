@@ -21,7 +21,7 @@
     <AxisValueArray>
       <AxisValue index="0" Format="2">
         <AxisIndex value="0"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="259"/>  <!-- Regular -->
         <NominalValue value="400.0"/>
         <RangeMinValue value="-300.54"/>
@@ -29,7 +29,7 @@
       </AxisValue>
       <AxisValue index="1" Format="1">
         <AxisIndex value="1"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="260"/>  <!-- Italic -->
         <Value value="1.0"/>
       </AxisValue>

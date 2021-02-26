@@ -42,7 +42,7 @@
       </AxisValue>
       <AxisValue index="2" Format="2">
         <AxisIndex value="0"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="322"/>  <!-- missing from name table -->
         <NominalValue value="400.0"/>
         <RangeMinValue value="350.0"/>
@@ -114,7 +114,7 @@
       </AxisValue>
       <AxisValue index="11" Format="2">
         <AxisIndex value="1"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="257"/>  <!-- Optical Size -->
         <NominalValue value="100.0"/>
         <RangeMinValue value="95.0"/>
@@ -130,7 +130,7 @@
       </AxisValue>
       <AxisValue index="13" Format="2">
         <AxisIndex value="2"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="258"/>  <!-- Weight -->
         <NominalValue value="9.0"/>
         <RangeMinValue value="6.0"/>
@@ -146,14 +146,14 @@
       </AxisValue>
       <AxisValue index="15" Format="3">
         <AxisIndex value="0"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="322"/>  <!-- missing from name table -->
         <Value value="400.0"/>
         <LinkedValue value="700.0"/>
       </AxisValue>
       <AxisValue index="16" Format="3">
         <AxisIndex value="2"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="258"/>  <!-- Weight -->
         <Value value="8.0"/>
         <LinkedValue value="12.0"/>

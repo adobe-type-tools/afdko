@@ -16,13 +16,13 @@
     <AxisValueArray>
       <AxisValue index="0" Format="1">
         <AxisIndex value="0"/>
-        <Flags value="1"/>
+        <Flags value="1"/>  <!-- OlderSiblingFontAttribute -->
         <ValueNameID value="258"/>  <!-- Regular -->
         <Value value="400.0"/>
       </AxisValue>
       <AxisValue index="1" Format="2">
         <AxisIndex value="0"/>
-        <Flags value="3"/>
+        <Flags value="3"/>  <!-- OlderSiblingFontAttribute ElidableAxisValueName -->
         <ValueNameID value="259"/>  <!-- Regular -->
         <NominalValue value="400.0"/>
         <RangeMinValue value="300.0"/>

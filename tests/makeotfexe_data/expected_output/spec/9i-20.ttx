@@ -64,7 +64,7 @@
     <AxisValueArray>
       <AxisValue index="0" Format="1">
         <AxisIndex value="0"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="257"/>  <!-- Regular -->
         <Value value="400.0"/>
       </AxisValue>
