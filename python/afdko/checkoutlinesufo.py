@@ -948,7 +948,7 @@ def restore_contour_order(fixed_glyph, original_contours):
                                                "of range on updated glyph "
                                                f"{fixed_glyph.name}")
                                         raise KeyError(msg)
-                                    elif not ctr_starts[ci]:
+                                    elif ctr_starts[ci]:
                                         msg = ("Warning: duplicated "
                                                f"start point on contour {ci} "
                                                f"at {point.x}, {point.y} of "
