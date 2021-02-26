@@ -1428,7 +1428,7 @@ static void writeAddnNameKeyedFont(t1wCtx h) {
 /* Write name-keyed font. */
 static void writeNameKeyedFont(t1wCtx h) {
     if (h->flags & SEEN_CID_KEYED_GLYPH)
-        fatal(h, t1wErrGlyphType);
+        fatal(h, t1wErrGlyphTypeCIDt1);
 
     /* Validate name-keyed data */
     if (h->top->FDArray.cnt != 1 ||
@@ -1893,7 +1893,7 @@ static void writeAddnCIDKeyedFont(t1wCtx h) {
 /* Write cid-keyed font. */
 static void writeCIDKeyedFont(t1wCtx h) {
     if (h->flags & SEEN_NAME_KEYED_GLYPH)
-        fatal(h, t1wErrGlyphType);
+        fatal(h, t1wErrGlyphTypet1CID);
 
     /* Validate CID data */
     if (h->top->cid.Registry.ptr == ABF_UNSET_PTR ||

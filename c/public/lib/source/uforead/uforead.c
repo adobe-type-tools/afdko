@@ -3452,17 +3452,10 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks* glyph_cb) 
 
     /* note that gname.ptr is not stable: it is a pointer into the h->string->buf array, which moves when it gets resized. */
     gi->gname.ptr = getString(h, (STI)gi->tag);
-    if (strlen(gi->gname.ptr) > 4) {
-        char cidstring[3] = "cid";
-        if (strncmp(gi->gname.ptr, cidstring, 3) == 0)
-        {
-            char * digits = gi->gname.ptr + 3;
-            unsigned short cid = atoi(digits);
-            gi->cid = cid;
-            gi->gname.ptr = NULL;
-            gi->flags |= ABF_GLYPH_CID;
-            cidCount += 1;
-        }
+    if (h->top.sup.flags & ABF_CID_FONT) {
+        gi->cid = tag;
+        gi->gname.ptr = NULL;
+        gi->flags |= ABF_GLYPH_CID;
     }
     result = glyph_cb->beg(glyph_cb, gi);
     gi->flags |= ABF_GLYPH_SEEN;
@@ -3689,17 +3682,19 @@ int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks* glyph_cb) {
 
     /* Set error handler */
     DURING_EX(h->err.env)
-    cidCount = 0;
+    if ((h->top.cid.CIDFontName.ptr != NULL) &&
+        (h->top.cid.Registry.ptr != NULL) &&
+        (h->top.cid.Ordering.ptr != NULL) &&
+        (h->top.cid.Supplement >= 0)) {
+        if (!(h->top.sup.flags & ABF_CID_FONT))
+            h->top.sup.flags |= ABF_CID_FONT;
+    }
 
     for (i = 0; i < h->chars.index.cnt; i++) {
         int res;
         res = readGlyph(h, i, glyph_cb);
         if (res != ufoSuccess)
             return res;
-    }
-    if (cidCount == h->chars.index.cnt){
-        if (!(h->top.sup.flags & ABF_CID_FONT))
-            h->top.sup.flags |= ABF_CID_FONT;
     }
     HANDLER
     return Exception.Code;
