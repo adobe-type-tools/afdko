@@ -3,7 +3,7 @@
 version             "001.003"
 Notice              "Copyright (c) 1992, 1993, 1994, 1999 Adobe Systems Incorporated.  All Rights Reserved."
 Weight              "SnapShotMM"
-FontBBox            {-157,-257,1195,911}
+FontBBox            {-157,-258,1195,911}
 XUID                {1,44277,17709,6867,29516,11444,300,600}
 sup.srcFontType     Type 1 (name-keyed)
 sup.nGlyphs         230
@@ -1214,7 +1214,7 @@ glyph[137] {AE,0xE1,
  580 vstem 774 818 vstem 0 35 hstem 233 277 hstem 347 391 hstem 665 709 hstem
  197 35 line 138 35 126 48 156 103 curve 226 233 line 478 233 line 478 114
  line 478 43 471 35 402 35 curve newhints 478 580 vstem 774 818 vstem 0 44
- hstem 233 277 hstem 347 391 hstem 665 709 hstem 402 0 line 916 0 line 950 160
+ hstem 233 277 hstem 347 391 hstem 665 709 hstem 402 0 line 915 0 line 950 160
  line 906 160 line 879 50 868 44 811 44 curve 608 44 line 588 44 580 48 580 86
  curve 580 347 line 723 347 line 767 347 774 340 774 247 curve 818 247 line
  newhints 478 580 vstem 774 818 vstem 0 44 hstem 233 277 hstem 347 488 hstem
@@ -1412,7 +1412,7 @@ glyph[154] {eth,-,
  curve 525 709 line newhints 45 145 vstem 484 585 vstem -12 24 hstem 456 492
  hstem 713 737 hstem 510 737 line newhints 45 145 vstem 484 585 vstem -12 24
  hstem 456 492 hstem 713 739 hstem 382 675 line 322 708 250 731 168 739 curve
- 132 713 line 201 700 264 681 317 649 curve 172 579 line 187 551 line 348 626
+ 132 713 line 201 700 264 681 317 649 curve 172 579 line 187 550 line 348 626
  line 381 601 411 571 433 534 curve 454 499 470 459 483 409 curve 479 408 line
  newhints 45 145 vstem 484 585 vstem -12 24 hstem 456 492 hstem 713 739 hstem
  451 455 401 492 311 492 curve 315 456 move 367 456 408 439 436 407 curve 469
@@ -1489,8 +1489,8 @@ glyph[162] {Acircumflex,-,
  line 660 35 646 46 624 102 curve 370 723 line 314 723 line 84 89 line 68 45
  53 35 19 35 curve 19 0 line 189 0 line 189 35 line 129 35 125 47 145 107
  curve 183 222 line 453 266 move 199 266 line 317 602 line 321 602 line 343
- 819 move 506 764 line 523 796 line 343 891 line 340 891 line 160 796 line 177
- 764 line 341 819 line endchar}
+ 819 move 506 763 line 523 796 line 343 891 line 340 891 line 160 796 line 177
+ 763 line 341 819 line endchar}
 glyph[163] {Zcaron,-,
  648 width 28 616 vstem 0 44 hstem 665 709 hstem 470 665 move 28 26 line 44 0
  line 585 0 line 616 163 line 571 163 line 544 53 531 44 458 44 curve 163 44
@@ -1718,8 +1718,8 @@ glyph[184] {Ucircumflex,-,
  247 line 110 150 129 82 186 38 curve 233 1 303 -14 390 -14 curve 473 -14 536
  7 579 48 curve 623 90 646 150 646 239 curve 646 597 line 646 667 652 674 719
  674 curve 719 709 line 521 709 line 521 674 line 589 674 596 668 596 597
- curve 394 819 move 557 764 line 574 796 line 394 891 line 391 891 line 211
- 796 line 228 764 line 392 819 line endchar}
+ curve 394 819 move 557 763 line 574 796 line 394 891 line 391 891 line 211
+ 796 line 228 763 line 392 819 line endchar}
 glyph[185] {Ydieresis,-,
  703 width 18 202 vstem 210 311 vstem 307 409 vstem 436 537 vstem 567 688
  vstem 0 35 hstem 674 709 hstem 773 874 hstem 307 310 move 307 112 line 307 42
@@ -1935,8 +1935,8 @@ glyph[200] {Icircumflex,-,
  350 width 124 226 vstem 0 35 hstem 674 709 hstem 124 112 move 124 42 119 35
  33 35 curve 33 0 line 317 0 line 317 35 line 231 35 226 42 226 112 curve 226
  597 line 226 667 231 674 316 674 curve 316 709 line 33 709 line 33 674 line
- 119 674 124 667 124 597 curve 176 819 move 339 764 line 357 796 line 176 891
- line 174 891 line -7 796 line 10 764 line 174 819 line endchar}
+ 119 674 124 667 124 597 curve 176 819 move 339 763 line 357 796 line 176 891
+ line 174 891 line -7 796 line 10 763 line 174 819 line endchar}
 glyph[201] {Iacute,-,
  350 width 124 226 vstem 0 35 hstem 674 709 hstem 124 112 move 124 42 119 35
  33 35 curve 33 0 line 317 0 line 317 35 line 231 35 226 42 226 112 curve 226

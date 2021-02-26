@@ -1653,8 +1653,8 @@ static STI parseName(t1rCtx h, int kKey) {
 }
 
 /* Parse blend array and blend elements. */
-static float parseBlend(t1rCtx h, int kKey, char **str) {
-    float value;
+static double parseBlend(t1rCtx h, int kKey, char **str) {
+    double value;
     int i;
     char *p = *str;
     char delim = (*p++ == '[') ? ']' : '}';
@@ -1672,7 +1672,7 @@ static float parseBlend(t1rCtx h, int kKey, char **str) {
         char *q;
 
         /* Parse and blend number */
-        value += h->fd->aux.WV[i] * (float)ctuStrtod(p, &q);
+        value += h->fd->aux.WV[i] * (double)ctuStrtod(p, &q);
         if (p == q)
             badKeyValue(h, kKey); /* Invalid number */
         p = q;
@@ -1725,7 +1725,7 @@ static float parseNum(t1rCtx h, int kKey, int round) {
         case pstArray:
         case pstProcedure: {
             char *p = copyArrayToken(h, token);
-            float value = parseBlend(h, kKey, &p);
+            double value = parseBlend(h, kKey, &p);
             return round ? RND(value) : value;
         }
         default:
@@ -1764,10 +1764,10 @@ static int parseNumArray(t1rCtx h, int kKey,
             case '{':
                 if (blend) {
                     if (i < max) {
-                        float value = parseBlend(h, kKey, &p);
+                        double value = parseBlend(h, kKey, &p);
                         if (kKey == kFontBBox) {
                             array[i] =
-                                (float)((i < 2) ? floor(value) : ceil(value));
+                                (double)((i < 2) ? floor(value) : ceil(value));
                             i++;
                         } else
                             array[i++] = value;
