@@ -87,13 +87,13 @@
     <AxisValueArray>
       <AxisValue index="0" Format="1">
         <AxisIndex value="0"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="259"/>  <!-- Regular -->
         <Value value="400.0"/>
       </AxisValue>
       <AxisValue index="1" Format="2">
         <AxisIndex value="0"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="260"/>  <!-- Regular -->
         <NominalValue value="400.0"/>
         <RangeMinValue value="300.0"/>
@@ -101,21 +101,21 @@
       </AxisValue>
       <AxisValue index="2" Format="3">
         <AxisIndex value="0"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="261"/>  <!-- Regular -->
         <Value value="400.0"/>
         <LinkedValue value="700.0"/>
       </AxisValue>
       <AxisValue index="3" Format="3">
         <AxisIndex value="1"/>
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="262"/>  <!-- Regular -->
         <Value value="0.0"/>
         <LinkedValue value="1.0"/>
       </AxisValue>
       <AxisValue index="4" Format="4">
         <!-- AxisCount=2 -->
-        <Flags value="2"/>
+        <Flags value="2"/>  <!-- ElidableAxisValueName -->
         <ValueNameID value="263"/>  <!-- Mediumitalic -->
         <AxisValueRecord index="0">
           <AxisIndex value="0"/>
