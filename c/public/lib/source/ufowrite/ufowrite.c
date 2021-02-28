@@ -988,7 +988,7 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
     if (h->stm.dst == NULL)
         fatal(h, ufwErrDstStream);
-    // write start of GL:IF file and open glyph element.
+    // write start of GLIF file and open glyph element.
     writeLine(h, XML_HEADER);
     writeStr(h, "<glyph");
 
@@ -1009,7 +1009,20 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
         writeStr(h, buf);
         writeLine(h, "\"/>");
     }
-
+    if (info->flags & ABF_GLYPH_CID) {
+        writeLine(h, "\t<lib>");
+        writeLine(h, "\t\t<dict>");
+        writeLine(h, "\t\t\t<key>com.adobe.type.cid.CID</key>");
+        writeStr(h, "\t\t\t<integer>");
+        writeInt(h, (long)info->cid);
+        writeLine(h, "</integer>");
+        writeLine(h, "\t\t\t<key>com.adobe.type.cid.iFD</key>");
+        writeStr(h, "\t\t\t<integer>");
+        writeInt(h, (long)info->iFD);
+        writeLine(h, "</integer>");
+        writeLine(h, "\t\t</dict>");
+        writeLine(h, "\t</lib>");
+    }
     glyphRec = dnaNEXT(h->glyphs);
     strcpy(glyphRec->glyphName, glyphName);
     strcpy(glyphRec->glifFileName, glifName);

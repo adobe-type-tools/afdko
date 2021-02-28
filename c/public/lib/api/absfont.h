@@ -65,7 +65,8 @@ enum /* srcFontType values */
     abfSrcFontTypeCFFCID,
     abfSrcFontTypeSVGName,
     abfSrcFontTypeUFOName,
-    abfSrcFontTypeTrueType
+    abfSrcFontTypeTrueType,
+    abfSrcFontTypeUFOCID,
 };
 
 typedef struct

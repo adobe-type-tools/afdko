@@ -220,6 +220,9 @@ static void dumpTopDict(abfDumpCtx h, abfTopDict *top) {
         case abfSrcFontTypeUFOName:
             srcFontType = "UFO (name-keyed)";
             break;
+        case abfSrcFontTypeUFOCID:
+            srcFontType = "UFO (cid-keyed)";
+            break;
         case abfSrcFontTypeTrueType:
             srcFontType = "TrueType";
             break;
