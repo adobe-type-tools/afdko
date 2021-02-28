@@ -53,7 +53,9 @@ enum {
 const char* t1HintKey = "com.adobe.type.autohint";
 const char* t1HintKeyV1 = "com.adobe.type.autohint";
 const char* t1HintKeyV2 = "com.adobe.type.autohint.v2";
-int cidCount = 0;
+int currentCID = -1;
+long CIDCount = 0;
+int currentiFD = 0;
 
 typedef struct
 {
@@ -157,7 +159,10 @@ enum {
     otherInTag,
     otherInAnchor,
     otherInNote,
-    otherInGuideline
+    otherInGuideline,
+    inCustomLib,
+    inCIDNumber,
+    inFDNumber,
 } outlineState;
 
 typedef struct {
@@ -1494,9 +1499,16 @@ static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin,
     } else {
         chr->flags = 0;
         chr->tag = tag;
+        chr->iFD = 0;
+        if (currentCID >= 0) {
+            chr->cid = currentCID;
+            chr->iFD = currentiFD;
+            if (currentCID > CIDCount) {
+                CIDCount = (long)currentCID + 1;
+            }
+        }
         chr->gname.ptr = glyphName;
         chr->gname.impl = tag;
-        chr->iFD = 0;
         if (unicode != ABF_GLYPH_UNENC) {
             chr->flags |= ABF_GLYPH_UNICODE;
             chr->encoding.code = unicode;
@@ -1583,6 +1595,23 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
             state = prevState;
         } else if (state == 4) {
             continue;
+        } else if (tokenEqualStr(tk, "<lib>")) {
+            prevState = state;
+            state = inCustomLib;
+        } else if (tokenEqualStr(tk, "</lib>")) {
+            state = prevState;
+        } else if (tokenEqualStr(tk, "com.adobe.type.cid.CID") && state == inCustomLib) {
+            state = inCIDNumber;
+        } else if (tokenEqualStr(tk, "<integer>") && state == inCIDNumber) {
+            tk = getToken(h, state);
+            currentCID = atoi(tk->val);
+            state = inCustomLib;
+        } else if (tokenEqualStr(tk, "com.adobe.type.cid.iFD") && state == inCustomLib) {
+            state = inFDNumber;
+        } else if (tokenEqualStr(tk, "<integer>") && state == inFDNumber) {
+            tk = getToken(h, state);
+            currentiFD = atoi(tk->val);
+            state = inCustomLib;
         } else if (tokenEqualStr(tk, "<glyph")) {
             if (state != 0) {
                 fatal(h, ufoErrParse, "Encountered start glyph token while processing another glyph.%s.", getBufferContextPtr(h));
@@ -3453,7 +3482,6 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks* glyph_cb) 
     /* note that gname.ptr is not stable: it is a pointer into the h->string->buf array, which moves when it gets resized. */
     gi->gname.ptr = getString(h, (STI)gi->tag);
     if (h->top.sup.flags & ABF_CID_FONT) {
-        gi->cid = tag;
         gi->gname.ptr = NULL;
         gi->flags |= ABF_GLYPH_CID;
     }
@@ -3664,6 +3692,16 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
     prepClientData(h);
     *top = &h->top;
 
+    if ((h->top.cid.CIDFontName.ptr != NULL) &&
+        (h->top.cid.Registry.ptr != NULL) &&
+        (h->top.cid.Ordering.ptr != NULL) &&
+        (h->top.cid.Supplement >= 0)) {
+        if (!(h->top.sup.flags & ABF_CID_FONT)) {
+            h->top.sup.flags |= ABF_CID_FONT;
+            h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
+        }
+    }
+
     HANDLER
     result = Exception.Code;
     END_HANDLER
@@ -3682,19 +3720,15 @@ int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks* glyph_cb) {
 
     /* Set error handler */
     DURING_EX(h->err.env)
-    if ((h->top.cid.CIDFontName.ptr != NULL) &&
-        (h->top.cid.Registry.ptr != NULL) &&
-        (h->top.cid.Ordering.ptr != NULL) &&
-        (h->top.cid.Supplement >= 0)) {
-        if (!(h->top.sup.flags & ABF_CID_FONT))
-            h->top.sup.flags |= ABF_CID_FONT;
-    }
 
     for (i = 0; i < h->chars.index.cnt; i++) {
         int res;
         res = readGlyph(h, i, glyph_cb);
         if (res != ufoSuccess)
             return res;
+    }
+    if (h->top.sup.flags & ABF_CID_FONT) {
+        h->top.cid.CIDCount = CIDCount;
     }
     HANDLER
     return Exception.Code;
