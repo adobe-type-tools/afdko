@@ -118,18 +118,6 @@ struct t1cCtx {
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
 #define RND(v) ((double)floor((v) + 0.5))
-/* The 0.000005 is added to allow for differences in OS's and other mathlibs
-when blending LE's or MM's. The problem is that the differences can lead to 
-a final value being just a hair above .5 on one platform and a hair below on
-another,leading, to off by one differences depending on which system is being
- used to build the output font.
-The logic 'floor(x + 0.5)' implements std Java rounding, where x.5 rounds
- to (x+1), -x.5) rounds to (-x), and everything else rounds to the nearest
- whole integer. The addition of 0.00001 captures everything 'close enough'
- to +/- x.5 to be treated as it if were on the boundary. This number is derived
- empirically, as being the smallest number that is still larger than precision
- differences between Flex/Flash in TWB2, and the 64 bit C math lib.
- */
 
 /* Transform coordinates by matrix. */
 #define TX(x, y) \
