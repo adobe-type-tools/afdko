@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.github.googlei18n.ufo2ft.keepGlyphNames</key>
+	<false/>
+	<key>com.schriftgestaltung.DisplayStrings</key>
+	<array/>
+	<key>com.schriftgestaltung.disablesAutomaticAlignment</key>
+	<true/>
+	<key>com.schriftgestaltung.font.customParameters</key>
+	<array>
+		<dict>
+			<key>name</key>
+			<string>AnchorColors</string>
+			<key>value</key>
+			<dict>
+				<key>START10</key>
+				<array>
+					<real>0.377</real>
+					<real>0.381</real>
+					<real>0.118</real>
+				</array>
+				<key>START15</key>
+				<array>
+					<real>0.224</real>
+					<real>0.218</real>
+					<real>0.194</real>
+				</array>
+				<key>START18</key>
+				<array>
+					<real>0.215</real>
+					<real>0.173</real>
+					<real>0.413</real>
+				</array>
+				<key>START5</key>
+				<array>
+					<real>0.24</real>
+					<real>0.276</real>
+					<real>0.41</real>
+				</array>
+				<key>new anchor</key>
+				<array>
+					<real>0.065</real>
+					<real>0.145</real>
+					<real>0.221</real>
+				</array>
+			</dict>
+		</dict>
+	</array>
+	<key>com.schriftgestaltung.fontMasterID</key>
+	<string>master01</string>
+	<key>com.schriftgestaltung.glyphOrder</key>
+	<false/>
+	<key>com.schriftgestaltung.useNiceNames</key>
+	<false/>
+	<key>public.glyphOrder</key>
+	<array>
+		<string>cid22139</string>
+		<string>cid22144</string>
+		<string>cid22280</string>
+		<string>cid01538</string>
+		<string>cid01541</string>
+		<string>cid01560</string>
+	</array>
+</dict>
+</plist>

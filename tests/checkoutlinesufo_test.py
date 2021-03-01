@@ -169,3 +169,17 @@ def test_restore_contour_order_warning(input_font, expected_font):
         output = f.read()
     assert (b'Warning: duplicated start point on contour 3 at 616, 597 of '
             b'glyph cid51107.') in output
+
+
+def test_regression_bug1315():
+    """
+    Test for uneccessary duplicated start point error messages.
+    """
+    in_path = get_input_path('bug1315.ufo')
+    out_path = os.path.join(get_temp_dir_path(), 'bug1315.ufo')
+    stderr_path = runner(CMD + ['-s', '-f', in_path, '-o', "e", '=all',
+                                'o', '_' + out_path])
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    print(output)
+    assert (b'Warning: duplicated start point on contour ') not in output
