@@ -1,6 +1,48 @@
 Changelog
 =========
 
+3.6.2 (released 2021-03-02)
+---------------------------
+- [spec] Allow deleting glyphs via Multiple substitution (thanks @simoncozens!)
+  ([#1251](https://github.com/adobe-type-tools/afdko/pull/1251),
+   [#1234](https://github.com/adobe-type-tools/afdko/issues/1234),
+   [#1294](https://github.com/adobe-type-tools/afdko/pull/1294))
+- [makeotfexe] Allow negative internal leading
+  ([#1279](https://github.com/adobe-type-tools/afdko/pull/1279),
+   [#1227](https://github.com/adobe-type-tools/afdko/issues/1227))
+- [docs] Clean up README.md (thanks @vladdoster!)
+  ([#1280](https://github.com/adobe-type-tools/afdko/pull/1280))
+- [cff2vf] Do not assume presence of `STAT.AxisValueArray`
+  ([#1283](https://github.com/adobe-type-tools/afdko/pull/1283),
+   [#1281](https://github.com/adobe-type-tools/afdko/issues/1281))
+- [repo] Re-sync `master` --> `develop`
+  ([#1285](https://github.com/adobe-type-tools/afdko/pull/1285))
+- [tests] Skip version number in diff of makeotfexe test
+  ([#1286](https://github.com/adobe-type-tools/afdko/pull/1286))
+- [spot] re-format documentation
+  ([#1287](https://github.com/adobe-type-tools/afdko/pull/1287))
+- [checkoutlinesufo] Add `ignore-contour-order` flag
+  ([#1289](https://github.com/adobe-type-tools/afdko/pull/1289))
+- [makeinstancesufo] Implement multiprocessing
+  ([#1293](https://github.com/adobe-type-tools/afdko/pull/1293),
+   [#1161](https://github.com/adobe-type-tools/afdko/issues/1161))
+- [checkoutlinesufo] Fix `restore_contour_order`
+  ([#1296](https://github.com/adobe-type-tools/afdko/pull/1296),
+   [#1291](https://github.com/adobe-type-tools/afdko/issues/1291))
+- [makeotf] don't fail when converting `'post'` table format 3 --> 2
+  ([#1303](https://github.com/adobe-type-tools/afdko/pull/1303),
+   [#1301](https://github.com/adobe-type-tools/afdko/issues/1301))
+- [makeotfexe] increase GOADB UV/Alias name string length limit
+  ([#1311](https://github.com/adobe-type-tools/afdko/pull/1311),
+   [#1310](https://github.com/adobe-type-tools/afdko/issues/1310))
+- [checkoutlinesufo] Fix logic for reporting duplicated start point
+  ([#1318](https://github.com/adobe-type-tools/afdko/pull/1318),
+   [#1315](https://github.com/adobe-type-tools/afdko/issues/1315))
+- [tests, tx] increase precision (`float` --> `double`) to fix i586 failing tests
+  ([#1321](https://github.com/adobe-type-tools/afdko/issues/1321),
+   [#1216](https://github.com/adobe-type-tools/afdko/issues/1216),
+   [#1163](https://github.com/adobe-type-tools/afdko/issues/1163))
+
 3.6.1 (released 2021-01-13)
 ---------------------------
 - [packaging] Fix Windows wheel
