@@ -29,7 +29,7 @@ Changelog
 - [checkoutlinesufo] Fix `restore_contour_order`
   ([#1296](https://github.com/adobe-type-tools/afdko/pull/1296),
    [#1291](https://github.com/adobe-type-tools/afdko/issues/1291))
-- [makeotf] don't fail when converting `'post'` table format 3 --> 2
+- [makeotf] don't fail when converting `'post'` table format 3 -> 2
   ([#1303](https://github.com/adobe-type-tools/afdko/pull/1303),
    [#1301](https://github.com/adobe-type-tools/afdko/issues/1301))
 - [makeotfexe] increase GOADB UV/Alias name string length limit
