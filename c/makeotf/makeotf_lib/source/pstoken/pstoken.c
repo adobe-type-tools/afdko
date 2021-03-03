@@ -695,7 +695,7 @@ double psGetReal(psCtx h) {
 
 /* Convert string token to string value. Already validated */
 char *psConvString(psCtx h, psToken *token, unsigned *length) {
-    *length = token->length - 2;
+    *length = (unsigned int) token->length - 2;
     return &h->cb.buf->array[token->index + 1];
 }
 
@@ -712,7 +712,7 @@ char *psGetString(psCtx h, unsigned *length) {
 
 /* Convert literal token to string value. Already validated */
 char *psConvLiteral(psCtx h, psToken *token, unsigned *length) {
-    *length = token->length - 1;
+    *length = (unsigned int) token->length - 1;
     return &h->cb.buf->array[token->index + 1];
 }
 
