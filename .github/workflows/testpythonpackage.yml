@@ -20,8 +20,6 @@ on:
 
 jobs:
   run_tests:
-    if: contains(toJson(github.event.commits), '[skip ci]') == false && contains(toJson(github.event.commits), '[skip github]') == false
-
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

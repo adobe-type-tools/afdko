@@ -14,8 +14,6 @@ on:
 
 jobs:
   coverage:
-    if: contains(toJson(github.event.commits), '[skip ci]') == false && contains(toJson(github.event.commits), '[skip github]') == false
-
     runs-on: 'ubuntu-latest'
 
     steps:
