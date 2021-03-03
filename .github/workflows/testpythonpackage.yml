@@ -65,9 +65,14 @@ jobs:
         pip install -r requirements.txt -r requirements-dev.txt .
         pip freeze --all
     
-    - name: Lint with flake8 using .flake8 config file
+    - name: Lint Python code with flake8 using .flake8 config file
       run: |
         flake8 . --count --show-source --statistics --config=.flake8
+
+    - name: Lint C code with cpplint using script (Linux only)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        ./.run_cpplint.sh
 
     - name: Test with pytest
       run: |
