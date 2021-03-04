@@ -663,11 +663,11 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                                 cbFatal(cbctx, "can't have multiple scripts");
                             }
                             makeArgs(argv[++i]);
-                            parseArgs(script.args.cnt, script.args.array, 1);
+                            parseArgs((int)script.args.cnt, script.args.array, 1);
                         }
                         break;
 #if 0
-                    /* This is left over from when Morisawa was demanding font protection mechanims. */
+                    /* This is left over from when Morisawa was demanding font protection mechanisms. */
                     case 'A':
                         convert.flags |= HOT_ADD_AUTH_AREA;
                         break;
