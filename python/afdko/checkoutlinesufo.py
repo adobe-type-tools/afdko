@@ -1034,7 +1034,8 @@ def run(args=None):
         for i in t:
             glyph_name = sorted(glyph_list)[i]
             t.set_description('Checking outlines for %s' %
-                              fmt.format(glyph_name))
+                              fmt.format(glyph_name),
+                              refresh=not(options.quiet_mode))
             changed = False
             seen_glyph_count += 1
             msg = []
