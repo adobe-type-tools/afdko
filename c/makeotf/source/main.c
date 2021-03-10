@@ -663,7 +663,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                                 cbFatal(cbctx, "can't have multiple scripts");
                             }
                             makeArgs(argv[++i]);
-                            parseArgs((int)script.args.cnt, script.args.array, 1);
+                            parseArgs(script.args.cnt, script.args.array, 1);
                         }
                         break;
 #if 0
