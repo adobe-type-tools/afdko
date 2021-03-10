@@ -94,7 +94,7 @@ struct psCtx_ {
 };
 
 /* Replenish input buffer using refill function and handle end of input */
-static char fillbuf(psCtx h, int check) {
+static int fillbuf(psCtx h, int check) {
     h->next = h->cb.psRefill(h->cb.ctx, &h->left);
     if (h->left-- == 0) {
         if (check) {
@@ -108,7 +108,7 @@ static char fillbuf(psCtx h, int check) {
 
 /* Get character from PostScript input */
 #define GETRAW(check) \
-    ((unsigned char)((h->left-- == 0) ? fillbuf(h, check) : *h->next++))
+    ((int)((h->left-- == 0) ? fillbuf(h, check) : *h->next++))
 
 /* Get decrypted character from hexadecimal eexec encrypted font file */
 static int hexdecrypt(psCtx h, int check) {
@@ -179,7 +179,10 @@ void psSetDecrypt(psCtx h) {
 
 /* Get unencrypted character from font file */
 static int getplain(psCtx h, int check) {
-    return *dnaNEXT(*h->cb.buf) = GETRAW(check);
+    int c;
+    c = GETRAW(check);
+    *dnaNEXT(*h->cb.buf) = c;
+    return c;
 }
 
 #define SKIPTODELIM         \
@@ -612,7 +615,7 @@ finish:
 
 /* Match token */
 int psMatchToken(psCtx h, psToken *token, int type, char *value) {
-    double length = strlen(value);
+    size_t length = strlen(value);
     return token->type == type && token->length == (long)length &&
            memcmp(&h->cb.buf->array[token->index], value, length) == 0;
 }
@@ -631,7 +634,7 @@ psToken *psFindToken(psCtx h, int type, char *value) {
 
 /* Match token's value */
 int psMatchValue(psCtx h, psToken *token, char *value) {
-    double length = strlen(value);
+    size_t length = strlen(value);
     return token->length == (long)length &&
            memcmp(&h->cb.buf->array[token->index], value, length) == 0;
 }
