@@ -71,7 +71,7 @@ typedef struct dnaCtx_ *dnaCtx;
         dnaCtx ctx;                                    \
         type *array;                                   \
         long cnt;                                      \
-        int32_t size;                                  \
+        long size;                                     \
         long incr;                                     \
         void (*func)(void *ctx, long cnt, type *base); \
     } da
