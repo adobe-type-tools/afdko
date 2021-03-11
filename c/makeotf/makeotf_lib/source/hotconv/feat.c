@@ -266,7 +266,7 @@ struct featCtx_ {
     dnaDCL(unsigned short, ligCaretValues);   /* List of list of caret values for current GDEF ligature glyph record.*/
 
     /* --- Temp and misc stuff --- */
-    dnaDCL(char, nameString);               /* Tmp for a nameid string */
+    dnaDCL(signed char, nameString);               /* Tmp for a nameid string */
     dnaDCL(MetricsInfo, metricsInfo);       /* Tmp for a pos rule's metrics */
     dnaDCL(AnchorMarkInfo, anchorMarkInfo); /* Tmp for a pos rule's anchor and mark info */
     short mmMetric[TX_MAX_MASTERS];         /* Tmp for a mm metric */

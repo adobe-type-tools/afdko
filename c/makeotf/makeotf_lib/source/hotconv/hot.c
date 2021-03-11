@@ -1080,7 +1080,7 @@ void hotAddMiscData(hotCtx g,
 
 /* Prepare Windows name by converting \-format numbers to UTF-8. Return 1 on
    syntax error else 0. */
-static int prepWinName(hotCtx g, char *src) {
+static int prepWinName(hotCtx g, signed char *src) {
     /* Next state table */
     static unsigned char next[5][6] = {
         /*  \       0-9     a-f     A-F     *       \0       index */
@@ -1213,7 +1213,7 @@ static int prepWinName(hotCtx g, char *src) {
 
 /* Prepare Macintosh name by converting \-format numbers to bytes. Return 1 on
    syntax error else 0. */
-static int prepMacName(hotCtx g, char *src) {
+static int prepMacName(hotCtx g, signed char *src) {
     /* Next state table */
     static unsigned char next[3][6] = {
         /*  \       0-9     a-f     A-F     *       \0       index */
@@ -1339,7 +1339,7 @@ static int prepMacName(hotCtx g, char *src) {
 int hotAddName(hotCtx g,
                unsigned short platformId, unsigned short platspecId,
                unsigned short languageId, unsigned short nameId,
-               char *str) {
+               signed char *str) {
     if ((platformId == HOT_NAME_MS_PLATFORM) ? prepWinName(g, str) : prepMacName(g, str)) {
         return 1;
     }
