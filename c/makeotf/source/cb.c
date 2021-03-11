@@ -808,7 +808,7 @@ static void fcdbError(void *ctx, unsigned fileid, long line, int errid) {
 static int fcdbAddName(void *ctx,
                        unsigned short platformId, unsigned short platspecId,
                        unsigned short languageId, unsigned short nameId,
-                       char *str) {
+                       signed char *str) {
     cbCtx h = ctx;
     return hotAddName(h->hot.ctx,
                       platformId, platspecId, languageId, nameId, str);

@@ -651,7 +651,7 @@ Blank lines, and characters following the comment char "#" on a line, are ignore
 int hotAddName(hotCtx g,
                unsigned short platformId, unsigned short platspecId,
                unsigned short languageId, unsigned short nameId,
-               char *str);
+               signed char *str);
 
 /* hotAddName() is called to add menu names. This name will be directly stored
    in the name table using the various id arguments specified. The actual name
