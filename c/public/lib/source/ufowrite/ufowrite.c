@@ -548,7 +548,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
         fontDict0 = &(top->FDArray.array[h->lastiFD]);
     else
         fontDict0 = &(top->FDArray.array[0]);
-    privateDict = &(fontDict0->Private);
+//    privateDict = &(fontDict0->Private);
 
     /* Set error handler */
     DURING_EX(h->err.env)
@@ -679,151 +679,173 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
         writeLine(h, "\t<key>postscriptIsFixedPitch</key>");
         writeLine(h, "\t<true/>");
     }
-
-    /* All the Blue values */
-    if (privateDict->BlueValues.cnt != ABF_EMPTY_ARRAY) {
-        writeLine(h, "\t<key>postscriptBlueValues</key>");
+    
+    if (top->FDArray.cnt != ABF_EMPTY_ARRAY) {
+        writeLine(h, "\t<key>postscriptFDArray</key>");
         writeLine(h, "\t<array>");
-        for (i = 0; i < privateDict->BlueValues.cnt; i++) {
-            float stem = privateDict->BlueValues.array[i];
-            if (stem == ((int)stem))
-                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-            else
-                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+        for (int j = 0; j < top->FDArray.cnt; j++) {
+            writeLine(h, "\t<dict>");
+            abfFontDict *fd = &h->top->FDArray.array[j];
+            writeLine(h, "\t<string>FontName</string>");
+            sprintf(buffer, "\t<string>%s</string>", fd->FontName.ptr);
             writeLine(h, buffer);
-        }
-        writeLine(h, "\t</array>");
-    }
-
-    if (privateDict->OtherBlues.cnt != ABF_EMPTY_ARRAY) {
-        writeLine(h, "\t<key>postscriptOtherBlues</key>");
-        writeLine(h, "\t<array>");
-        for (i = 0; i < privateDict->OtherBlues.cnt; i++) {
-            float stem = privateDict->OtherBlues.array[i];
-            if (stem == ((int)stem))
-                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-            else
-                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+            writeLine(h, "\t<string>PaintType</string>");
+            sprintf(buffer, "\t<integer>%ld</integer>", top->FDArray.array->PaintType);
             writeLine(h, buffer);
-        }
-        writeLine(h, "\t</array>");
-    }
-
-    if (privateDict->FamilyBlues.cnt != ABF_EMPTY_ARRAY) {
-        writeLine(h, "\t<key>postscriptFamilyBlues</key>");
-        writeLine(h, "\t<array>");
-        for (i = 0; i < privateDict->FamilyBlues.cnt; i++) {
-            float stem = privateDict->FamilyBlues.array[i];
-            if (stem == ((int)stem))
-                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-            else
-                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+            writeLine(h, "\t<string>FontMatrix</string>");
+            sprintf(buffer, "\t<integer>%ld</integer>", top->FDArray.array->PaintType);
             writeLine(h, buffer);
-        }
-        writeLine(h, "\t</array>");
-    }
-
-    if (privateDict->FamilyOtherBlues.cnt != ABF_EMPTY_ARRAY) {
-        writeLine(h, "\t<key>postscriptFamilyOtherBlues</key>");
-        writeLine(h, "\t<array>");
-        for (i = 0; i < privateDict->FamilyOtherBlues.cnt; i++) {
-            float stem = privateDict->FamilyOtherBlues.array[i];
-            if (stem == ((int)stem))
-                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-            else
-                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
-            writeLine(h, buffer);
-        }
-        writeLine(h, "\t</array>");
-    }
-
-    if (privateDict->StemSnapH.cnt != ABF_EMPTY_ARRAY) {
-        writeLine(h, "\t<key>postscriptStemSnapH</key>");
-        writeLine(h, "\t<array>");
-        for (i = 0; i < privateDict->StemSnapH.cnt; i++) {
-            float stem = privateDict->StemSnapH.array[i];
-            if (stem == ((int)stem))
-                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-            else
-                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
-            writeLine(h, buffer);
-        }
-        writeLine(h, "\t</array>");
-    } else if (privateDict->StdHW != ABF_UNSET_REAL) {
-        float stem = privateDict->StdHW;
-        writeLine(h, "\t<key>postscriptStemSnapH</key>");
-        writeLine(h, "\t<array>");
-        if (stem == ((int)stem))
-            sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-        else
-            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
-        writeLine(h, buffer);
-        writeLine(h, "\t</array>");
-    }
-
-    if (privateDict->StemSnapV.cnt != ABF_EMPTY_ARRAY) {
-        writeLine(h, "\t<key>postscriptStemSnapV</key>");
-        writeLine(h, "\t<array>");
-        for (i = 0; i < privateDict->StemSnapV.cnt; i++) {
-            float stem = privateDict->StemSnapV.array[i];
-            if (stem == ((int)stem))
-                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-            else
-                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
-            writeLine(h, buffer);
-        }
-        writeLine(h, "\t</array>");
-    } else if (privateDict->StdVW != ABF_UNSET_REAL) {
-        float stem = privateDict->StdVW;
-        writeLine(h, "\t<key>postscriptStemSnapV</key>");
-        writeLine(h, "\t<array>");
-        if (stem == ((int)stem))
-            sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-        else
-            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
-        writeLine(h, buffer);
-        writeLine(h, "\t</array>");
-    }
-
-    if (privateDict->BlueScale != ABF_UNSET_REAL) {
-        char *p;
-        char valueBuffer[50];
-        /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
-        sprintf(valueBuffer, "%.8f", privateDict->BlueScale);
-        p = strchr(valueBuffer, '.');
-        if (p != NULL) {
-            /* Have decimal point. Remove trailing zeros.*/
-            size_t l = strlen(p);
-            p += l - 1;
-            while (*p == '0') {
-                *p = '\0';
-                p--;
+            privateDict = &(fd->Private);
+            writeLine(h, "\t<dict>");
+            /* All the Blue values */
+            if (privateDict->BlueValues.cnt != ABF_EMPTY_ARRAY) {
+                writeLine(h, "\t<key>postscriptBlueValues</key>");
+                writeLine(h, "\t<array>");
+                for (i = 0; i < privateDict->BlueValues.cnt; i++) {
+                    float stem = privateDict->BlueValues.array[i];
+                    if (stem == ((int)stem))
+                        sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+                    else
+                        sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+                    writeLine(h, buffer);
+                }
+                writeLine(h, "\t</array>");
             }
-            if (*p == '.') {
-                *p = '\0';
+
+            if (privateDict->OtherBlues.cnt != ABF_EMPTY_ARRAY) {
+                writeLine(h, "\t<key>postscriptOtherBlues</key>");
+                writeLine(h, "\t<array>");
+                for (i = 0; i < privateDict->OtherBlues.cnt; i++) {
+                    float stem = privateDict->OtherBlues.array[i];
+                    if (stem == ((int)stem))
+                        sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+                    else
+                        sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+                    writeLine(h, buffer);
+                }
+                writeLine(h, "\t</array>");
             }
+
+            if (privateDict->FamilyBlues.cnt != ABF_EMPTY_ARRAY) {
+                writeLine(h, "\t<key>postscriptFamilyBlues</key>");
+                writeLine(h, "\t<array>");
+                for (i = 0; i < privateDict->FamilyBlues.cnt; i++) {
+                    float stem = privateDict->FamilyBlues.array[i];
+                    if (stem == ((int)stem))
+                        sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+                    else
+                        sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+                    writeLine(h, buffer);
+                }
+                writeLine(h, "\t</array>");
+            }
+
+            if (privateDict->FamilyOtherBlues.cnt != ABF_EMPTY_ARRAY) {
+                writeLine(h, "\t<key>postscriptFamilyOtherBlues</key>");
+                writeLine(h, "\t<array>");
+                for (i = 0; i < privateDict->FamilyOtherBlues.cnt; i++) {
+                    float stem = privateDict->FamilyOtherBlues.array[i];
+                    if (stem == ((int)stem))
+                        sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+                    else
+                        sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+                    writeLine(h, buffer);
+                }
+                writeLine(h, "\t</array>");
+            }
+
+            if (privateDict->StemSnapH.cnt != ABF_EMPTY_ARRAY) {
+                writeLine(h, "\t<key>postscriptStemSnapH</key>");
+                writeLine(h, "\t<array>");
+                for (i = 0; i < privateDict->StemSnapH.cnt; i++) {
+                    float stem = privateDict->StemSnapH.array[i];
+                    if (stem == ((int)stem))
+                        sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+                    else
+                        sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+                    writeLine(h, buffer);
+                }
+                writeLine(h, "\t</array>");
+            } else if (privateDict->StdHW != ABF_UNSET_REAL) {
+                float stem = privateDict->StdHW;
+                writeLine(h, "\t<key>postscriptStemSnapH</key>");
+                writeLine(h, "\t<array>");
+                if (stem == ((int)stem))
+                    sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+                else
+                    sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+                writeLine(h, buffer);
+                writeLine(h, "\t</array>");
+            }
+
+            if (privateDict->StemSnapV.cnt != ABF_EMPTY_ARRAY) {
+                writeLine(h, "\t<key>postscriptStemSnapV</key>");
+                writeLine(h, "\t<array>");
+                for (i = 0; i < privateDict->StemSnapV.cnt; i++) {
+                    float stem = privateDict->StemSnapV.array[i];
+                    if (stem == ((int)stem))
+                        sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+                    else
+                        sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+                    writeLine(h, buffer);
+                }
+                writeLine(h, "\t</array>");
+            } else if (privateDict->StdVW != ABF_UNSET_REAL) {
+                float stem = privateDict->StdVW;
+                writeLine(h, "\t<key>postscriptStemSnapV</key>");
+                writeLine(h, "\t<array>");
+                if (stem == ((int)stem))
+                    sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+                else
+                    sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+                writeLine(h, buffer);
+                writeLine(h, "\t</array>");
+            }
+
+            if (privateDict->BlueScale != ABF_UNSET_REAL) {
+                char *p;
+                char valueBuffer[50];
+                /* 8 places is as good as it gets when converting ASCII real numbers->float-> ASCII real numbers, as happens to all the  PrivateDict values.*/
+                sprintf(valueBuffer, "%.8f", privateDict->BlueScale);
+                p = strchr(valueBuffer, '.');
+                if (p != NULL) {
+                    /* Have decimal point. Remove trailing zeros.*/
+                    size_t l = strlen(p);
+                    p += l - 1;
+                    while (*p == '0') {
+                        *p = '\0';
+                        p--;
+                    }
+                    if (*p == '.') {
+                        *p = '\0';
+                    }
+                }
+
+                writeLine(h, "\t<key>postscriptBlueScale</key>");
+                sprintf(buffer, "\t<real>%s</real>", valueBuffer);
+                writeLine(h, buffer);
+            }
+
+            if (privateDict->BlueShift != ABF_UNSET_REAL) {
+                writeLine(h, "\t<key>postscriptBlueShift</key>");
+                sprintf(buffer, "\t<integer>%d</integer>", (int)(0.5 + privateDict->BlueShift));
+                writeLine(h, buffer);
+            }
+
+            if (privateDict->BlueFuzz != ABF_UNSET_REAL) {
+                writeLine(h, "\t<key>postscriptBlueFuzz</key>");
+                sprintf(buffer, "\t<integer>%d</integer>", (int)(0.5 + privateDict->BlueFuzz));
+                writeLine(h, buffer);
+            }
+
+            if ((privateDict->ForceBold != ABF_UNSET_INT) && (privateDict->ForceBold > 0)) {
+                writeLine(h, "\t<key>postscriptForceBold</key>");
+                writeLine(h, "\t<true/>");
+            }
+            writeLine(h, "\t</dict>");
+            writeLine(h, "\t</dict>");
         }
-
-        writeLine(h, "\t<key>postscriptBlueScale</key>");
-        sprintf(buffer, "\t<real>%s</real>", valueBuffer);
-        writeLine(h, buffer);
-    }
-
-    if (privateDict->BlueShift != ABF_UNSET_REAL) {
-        writeLine(h, "\t<key>postscriptBlueShift</key>");
-        sprintf(buffer, "\t<integer>%d</integer>", (int)(0.5 + privateDict->BlueShift));
-        writeLine(h, buffer);
-    }
-
-    if (privateDict->BlueFuzz != ABF_UNSET_REAL) {
-        writeLine(h, "\t<key>postscriptBlueFuzz</key>");
-        sprintf(buffer, "\t<integer>%d</integer>", (int)(0.5 + privateDict->BlueFuzz));
-        writeLine(h, buffer);
-    }
-
-    if ((privateDict->ForceBold != ABF_UNSET_INT) && (privateDict->ForceBold > 0)) {
-        writeLine(h, "\t<key>postscriptForceBold</key>");
-        writeLine(h, "\t<true/>");
+        writeLine(h, "\t</array>");
     }
 
     /* Finish the file */
