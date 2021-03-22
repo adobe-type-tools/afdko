@@ -2519,7 +2519,7 @@ context, you need to put the mark and kern rules in different lookups.
 ###### Example 4:
 
 ```fea
-mark sukun <anchor 0 0> @TOP_CLASS;
+markClass sukun <anchor 0 0> @TOP_CLASS;
 
 lookup MARK_POS {
     position base lam_meem_jeem' <anchor 625 1800> mark @TOP_CLASS alef;
