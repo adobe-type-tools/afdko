@@ -945,7 +945,7 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
 static void setFontDictKey(ufoCtx h, char* keyValue) {
     char* keyName = h->parseKeyName;
     abfTopDict* top = &h->top;
-    abfFontDict* fd = h->top.FDArray.array + h->top.FDArray.cnt - 1;
+    abfFontDict* fd = h->top.FDArray.array + currentiFD - 1 ;
     abfPrivateDict* pd = &fd->Private;
     BluesArray* bluesArray;
     abfFontMatrix* fontMatrix;
@@ -1025,6 +1025,7 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
         memFree(h, keyValue);
     } else if (!strcmp(keyName, "postscriptFDArrayLength")) {
         h->top.FDArray.array = memNew(h, atoi(keyValue) * sizeof(abfFontDict));
+        h->top.FDArray.cnt = atoi(keyValue);
     } else if (!strcmp(keyName, "FontName")) {
         fd->FontName.ptr = keyValue;
     } else if (!strcmp(keyName, "PaintType")) {
@@ -1808,7 +1809,6 @@ static int parseFontInfo(ufoCtx h) {
         fixUnsetDictValues(h);
         return ufoSuccess;
     }
-    abfFontDict *fdptr = h->top.FDArray.array;
 
     dnaSET_CNT(h->valueArray, 0);
     fillbuf(h, 0);
@@ -1832,11 +1832,8 @@ static int parseFontInfo(ufoCtx h) {
         } else if (tokenEqualStr(tk, "<dict>")) {
             if (state == 3 || state == 5){ // dict within FDArray
                 currentiFD = currentiFD + 1;
-                h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
                 if (state == 3)
                     state = 5;
-                else if (state == 5)
-                    fdptr = h->top.FDArray.array + h->top.FDArray.cnt - 1;
             } else {
                 state = 1;
             }
@@ -1879,7 +1876,6 @@ static int parseFontInfo(ufoCtx h) {
             dnaSET_CNT(h->valueArray, 0);
         } else if (tokenEqualStr(tk, "</array>")) {
             if (state == 5) {
-                fdptr = fdptr - (h->top.FDArray.cnt - 1);
                 state = 1;
             } else if (state != 3) {
                 fatal(h, ufoErrParse, "Encountered </array> when not after <array> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
@@ -3710,11 +3706,11 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
     abfInitTopDict(&h->top);
     abfInitFontDict(&h->fdict);
     
-    h->top.FDArray.cnt = 0;
+    h->top.FDArray.cnt = 1;
+    h->top.FDArray.array = &h->fdict;
 
     /* init glyph data structures used */
     h->valueArray.cnt = 0;
-    h->top.FDArray.cnt = 0;
     h->chars.index.cnt = 0;
     h->data.glifRecs.cnt = 0;
     h->data.opList.cnt = 0;
