@@ -385,6 +385,7 @@ void ufoFree(ufoCtx h) {
         return;
 
     dnaFREE(h->valueArray);
+    free(h->top.FDArray.array);
     {
         int i = 0;
         while (i < h->hints.hintMasks.size) {
@@ -445,6 +446,7 @@ ufoCtx ufoNew(ctlMemoryCallbacks* mem_cb, ctlStreamCallbacks* stm_cb,
     dna_init(h);
 
     dnaINIT(h->dna, h->valueArray, 256, 50);
+    dnaINIT(h->dna, h->top.FDArray.array, 256, 50);
     dnaINIT(h->dna, h->tmp, 100, 250);
     dnaINIT(h->dna, h->chars.index, 256, 1000);
     dnaINIT(h->dna, h->chars.byName, 256, 1000);
@@ -931,12 +933,23 @@ static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements
     }
 }
 
+static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) {
+    int i = 0;
+    fontMatrix->cnt = h->valueArray.cnt;
+    while ((i < h->valueArray.cnt) && (i < numElements)) {
+        fontMatrix->array[i] = (float)atof(h->valueArray.array[i]);
+        memFree(h, h->valueArray.array[i]);
+        i++;
+    }
+}
+
 static void setFontDictKey(ufoCtx h, char* keyValue) {
     char* keyName = h->parseKeyName;
     abfTopDict* top = &h->top;
-    abfFontDict* fd0 = &h->top.FDArray.array[0];
-    abfPrivateDict* pd = &fd0->Private;
+    abfFontDict* fd = h->top.FDArray.array + h->top.FDArray.cnt - 1;
+    abfPrivateDict* pd = &fd->Private;
     BluesArray* bluesArray;
+    abfFontMatrix* fontMatrix;
 
     /* If we do not use a keyValue, we need to dispose of it
      */
@@ -980,7 +993,7 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
             memFree(h, keyValue);
         }
     } else if (!strcmp(keyName, "postscriptFontName")) {
-        fd0->FontName.ptr = keyValue;
+        fd->FontName.ptr = keyValue;
     } else if (!strcmp(keyName, "openTypeNamePreferredFamilyName")) {
         top->FamilyName.ptr = keyValue;
     } else if (!strcmp(keyName, "familyName")) {
@@ -1003,14 +1016,21 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
     } else if (!strcmp(keyName, "unitsPerEm")) {
         double ppem = strtod(keyValue, NULL);
         top->sup.UnitsPerEm = (int)ppem;
-        fd0->FontMatrix.cnt = 6;
-        fd0->FontMatrix.array[0] = (float)(1.0 / ppem);
-        fd0->FontMatrix.array[1] = 0;
-        fd0->FontMatrix.array[2] = 0;
-        fd0->FontMatrix.array[3] = (float)(1.0 / ppem);
-        fd0->FontMatrix.array[4] = 0;
-        fd0->FontMatrix.array[5] = 0;
+        fd->FontMatrix.cnt = 6;
+        fd->FontMatrix.array[0] = (float)(1.0 / ppem);
+        fd->FontMatrix.array[1] = 0;
+        fd->FontMatrix.array[2] = 0;
+        fd->FontMatrix.array[3] = (float)(1.0 / ppem);
+        fd->FontMatrix.array[4] = 0;
+        fd->FontMatrix.array[5] = 0;
         memFree(h, keyValue);
+    } else if (!strcmp(keyName, "FontName")) {
+        fd->FontName.ptr = keyValue;
+    } else if (!strcmp(keyName, "PaintType")) {
+        fd->PaintType = atoi(keyValue);
+    } else if (!strcmp(keyName, "FontMatrix")) {
+        fontMatrix = &fd->FontMatrix;
+        setFontMatrix(h, fontMatrix, 6);
     } else if (!strcmp(keyName, "postscriptBlueFuzz")) {
         pd->BlueFuzz = (float)strtod(keyValue, NULL);
         memFree(h, keyValue);
@@ -1071,6 +1091,11 @@ static int doFontDictValue(ufoCtx h, char* keyName, char* endKeyName, int state)
     {
         if (valueString != NULL)
             *dnaNEXT(h->valueArray) = valueString;
+    } else if (state == 5)  // we are within a <dict> within an <array> (an fDict in an FDArray), which is a key value
+    {
+        if (valueString != NULL) {
+            setFontDictKey(h, valueString);
+        }
     } else {
         memFree(h, h->parseKeyName);
         fatal(h, ufoErrParse, "Encountered key value when not after <key> or <array> element. Text: '%s'.", getBufferContextPtr(h));
@@ -1782,6 +1807,7 @@ static int parseFontInfo(ufoCtx h) {
         fixUnsetDictValues(h);
         return ufoSuccess;
     }
+    abfFontDict *fdptr = h->top.FDArray.array;
 
     dnaSET_CNT(h->valueArray, 0);
     fillbuf(h, 0);
@@ -1803,16 +1829,27 @@ static int parseFontInfo(ufoCtx h) {
         } else if (state == 4) {
             continue;
         } else if (tokenEqualStr(tk, "<dict>")) {
-            if (state > 0) {
-                skipToDictEnd(h);
-            } else
+            if (state == 3){ // dict within FDArray
+                state = 5;
+                h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
+                currentiFD = currentiFD + 1;
+            } else if (state == 5){
+                currentiFD = currentiFD + 1;
+                h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
+                h->top.FDArray.array = realloc(h->top.FDArray.array, h->top.FDArray.cnt * sizeof(abfFontDict));
+                fdptr = h->top.FDArray.array + h->top.FDArray.cnt - 1;
+            }else if (state != 5){
                 state = 1;
+            }
         } else if (tokenEqualStr(tk, "</dict>")) {
-            break;
-        } else if (state > 4) {
-            continue;
+//            break;
+//        } else if (state > 4) {
+//            continue
+            if (state != 5){
+                break;
+            }
         } else if (tokenEqualStr(tk, "<key>")) {
-            if (state != 1) {
+            if (state != 1 && state != 5) {
                 fatal(h, ufoErrParse, "Encountered '<key>' while not in top level of first <dict>, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             }
             // get key name
@@ -1828,19 +1865,32 @@ static int parseFontInfo(ufoCtx h) {
                     fatal(h, ufoErrParse, "Encountered element other than </key> when reading <key> name: %s, in fontinfo.plist file. Context: '%s'.\n", tk->val, getBufferContextPtr(h));
                 }
             }
-            state = 2;
+            if (state != 5){
+                state = 2;
+            }
         } else if (tokenEqualStr(tk, "<array>")) {
-            if (state != 2) {
+            if (state != 2 && state!=5) {
                 fatal(h, ufoErrParse, "Encountered <array> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
-            } else
+            } else {
+                if (state == 5){
+                    prevState = state;
+                }
                 state = 3;
+            }
             dnaSET_CNT(h->valueArray, 0);
         } else if (tokenEqualStr(tk, "</array>")) {
-            if (state != 3) {
+            if (state == 5) {
+                fdptr = fdptr - (h->top.FDArray.cnt - 1);
+                state = 1;
+            } else if (state != 3) {
                 fatal(h, ufoErrParse, "Encountered </array> when not after <array> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             } else {
                 setFontDictKey(h, NULL);
-                state = 1;
+                if (prevState == 5){
+                    state = 5;
+                }else{
+                    state = 1;
+                }
             }
         } else if (tokenEqualStr(tk, "<array/>")) {
             if (state != 2) {
@@ -3660,9 +3710,12 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
     /* Initialize */
     abfInitTopDict(&h->top);
     abfInitFontDict(&h->fdict);
-
-    h->top.FDArray.cnt = 1;
-    h->top.FDArray.array = &h->fdict;
+    
+    h->top.FDArray.cnt = 0;
+//    abfInitFontDict(h->top.FDArray.array);
+    
+    h->top.FDArray.array = malloc(1 * sizeof(abfFontDict));
+//    dnaGROW(h->top.FDArray, 14);
 
     /* init glyph data structures used */
     h->valueArray.cnt = 0;
