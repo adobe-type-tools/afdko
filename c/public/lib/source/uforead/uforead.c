@@ -385,7 +385,7 @@ void ufoFree(ufoCtx h) {
         return;
 
     dnaFREE(h->valueArray);
-    free(h->top.FDArray.array);
+    memFree(h, h->top.FDArray.array);
     {
         int i = 0;
         while (i < h->hints.hintMasks.size) {
@@ -446,7 +446,6 @@ ufoCtx ufoNew(ctlMemoryCallbacks* mem_cb, ctlStreamCallbacks* stm_cb,
     dna_init(h);
 
     dnaINIT(h->dna, h->valueArray, 256, 50);
-    dnaINIT(h->dna, h->top.FDArray.array, 256, 50);
     dnaINIT(h->dna, h->tmp, 100, 250);
     dnaINIT(h->dna, h->chars.index, 256, 1000);
     dnaINIT(h->dna, h->chars.byName, 256, 1000);
@@ -1024,6 +1023,8 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
         fd->FontMatrix.array[4] = 0;
         fd->FontMatrix.array[5] = 0;
         memFree(h, keyValue);
+    } else if (!strcmp(keyName, "postscriptFDArrayLength")) {
+        h->top.FDArray.array = memNew(h, atoi(keyValue) * sizeof(abfFontDict));
     } else if (!strcmp(keyName, "FontName")) {
         fd->FontName.ptr = keyValue;
     } else if (!strcmp(keyName, "PaintType")) {
@@ -1829,16 +1830,14 @@ static int parseFontInfo(ufoCtx h) {
         } else if (state == 4) {
             continue;
         } else if (tokenEqualStr(tk, "<dict>")) {
-            if (state == 3){ // dict within FDArray
-                state = 5;
-                h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
-                currentiFD = currentiFD + 1;
-            } else if (state == 5){
+            if (state == 3 || state == 5){ // dict within FDArray
                 currentiFD = currentiFD + 1;
                 h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
-                h->top.FDArray.array = realloc(h->top.FDArray.array, h->top.FDArray.cnt * sizeof(abfFontDict));
-                fdptr = h->top.FDArray.array + h->top.FDArray.cnt - 1;
-            }else if (state != 5){
+                if (state == 3)
+                    state = 5;
+                else if (state == 5)
+                    fdptr = h->top.FDArray.array + h->top.FDArray.cnt - 1;
+            } else {
                 state = 1;
             }
         } else if (tokenEqualStr(tk, "</dict>")) {
@@ -3712,13 +3711,10 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
     abfInitFontDict(&h->fdict);
     
     h->top.FDArray.cnt = 0;
-//    abfInitFontDict(h->top.FDArray.array);
-    
-    h->top.FDArray.array = malloc(1 * sizeof(abfFontDict));
-//    dnaGROW(h->top.FDArray, 14);
 
     /* init glyph data structures used */
     h->valueArray.cnt = 0;
+    h->top.FDArray.cnt = 0;
     h->chars.index.cnt = 0;
     h->data.glifRecs.cnt = 0;
     h->data.opList.cnt = 0;
