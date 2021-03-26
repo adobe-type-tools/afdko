@@ -385,7 +385,6 @@ void ufoFree(ufoCtx h) {
         return;
 
     dnaFREE(h->valueArray);
-    memFree(h, h->top.FDArray.array);
     {
         int i = 0;
         while (i < h->hints.hintMasks.size) {
@@ -945,7 +944,7 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
 static void setFontDictKey(ufoCtx h, char* keyValue) {
     char* keyName = h->parseKeyName;
     abfTopDict* top = &h->top;
-    abfFontDict* fd = h->top.FDArray.array + currentiFD - 1 ;
+    abfFontDict* fd = h->top.FDArray.array + currentiFD;
     abfPrivateDict* pd = &fd->Private;
     BluesArray* bluesArray;
     abfFontMatrix* fontMatrix;
@@ -1830,13 +1829,12 @@ static int parseFontInfo(ufoCtx h) {
         } else if (state == 4) {
             continue;
         } else if (tokenEqualStr(tk, "<dict>")) {
-            if (state == 3 || state == 5){ // dict within FDArray
+            if (state == 3)
+                state = 5; //first fdict in FDArray
+            else if (state == 5)
                 currentiFD = currentiFD + 1;
-                if (state == 3)
-                    state = 5;
-            } else {
+            else
                 state = 1;
-            }
         } else if (tokenEqualStr(tk, "</dict>")) {
 //            break;
 //        } else if (state > 4) {
@@ -1876,6 +1874,7 @@ static int parseFontInfo(ufoCtx h) {
             dnaSET_CNT(h->valueArray, 0);
         } else if (tokenEqualStr(tk, "</array>")) {
             if (state == 5) {
+                memFree(h, h->top.FDArray.array);
                 state = 1;
             } else if (state != 3) {
                 fatal(h, ufoErrParse, "Encountered </array> when not after <array> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
