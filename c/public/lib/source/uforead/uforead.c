@@ -1056,17 +1056,30 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
         bluesArray = (BluesArray*)&pd->FamilyOtherBlues;
         setBluesArrayValue(h, bluesArray, 10);
     } else if (!strcmp(keyName, "postscriptStdHW")) {
-        pd->StdHW = (float)strtod(keyValue, NULL);
-        memFree(h, keyValue);
+        if (keyValue != NULL){
+            pd->StdHW = (float)strtod(keyValue, NULL);
+            memFree(h, keyValue);
+        } else {
+            pd->StdHW = (float)strtod(h->valueArray.array[0], NULL);
+            memFree(h, h->valueArray.array[0]);
+        }
     } else if (!strcmp(keyName, "postscriptStdVW")) {
-        pd->StdVW = (float)strtod(keyValue, NULL);
-        memFree(h, keyValue);
+        if (keyValue != NULL){
+            pd->StdVW = (float)strtod(keyValue, NULL);
+            memFree(h, keyValue);
+        } else {
+            pd->StdVW = (float)strtod(h->valueArray.array[0], NULL);
+            memFree(h, h->valueArray.array[0]);
+        }
     } else if (!strcmp(keyName, "postscriptStemSnapH")) {
         bluesArray = (BluesArray*)&pd->StemSnapH;
         setBluesArrayValue(h, bluesArray, 12);
     } else if (!strcmp(keyName, "postscriptStemSnapV")) {
         bluesArray = (BluesArray*)&pd->StemSnapV;
         setBluesArrayValue(h, bluesArray, 12);
+    } else if (!strcmp(keyName, "LanguageGroup")) {
+        pd->LanguageGroup = (float)strtod(keyValue, NULL);
+        memFree(h, keyValue);
     } else {
         // if it isn't used, free the string.
         memFree(h, keyValue);
