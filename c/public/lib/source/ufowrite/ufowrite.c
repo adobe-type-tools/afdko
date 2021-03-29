@@ -559,13 +559,13 @@ static void writeBlueValues(ufwCtx h, abfPrivateDict *privateDict){
         if (privateDict->StdHW != ABF_UNSET_REAL) {
             float stem = privateDict->StdHW;
             writeLine(h, "\t<key>postscriptStdHW</key>");
-//            writeLine(h, "\t<array>");
+            writeLine(h, "\t<array>");
             if (stem == ((int)stem))
                 sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
             else
                 sprintf(buffer, "\t\t<real>%.2f</real>", stem);
             writeLine(h, buffer);
-//            writeLine(h, "\t</array>");
+            writeLine(h, "\t</array>");
         }
     }
 
@@ -585,13 +585,13 @@ static void writeBlueValues(ufwCtx h, abfPrivateDict *privateDict){
         if (privateDict->StdVW != ABF_UNSET_REAL) {
             float stem = privateDict->StdVW;
             writeLine(h, "\t<key>postscriptStdVW</key>");
-//            writeLine(h, "\t<array>");
+            writeLine(h, "\t<array>");
             if (stem == ((int)stem))
                 sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
             else
                 sprintf(buffer, "\t\t<real>%.2f</real>", stem);
             writeLine(h, buffer);
-//            writeLine(h, "\t</array>");
+            writeLine(h, "\t</array>");
         }
     }
 
@@ -636,10 +636,10 @@ static void writeBlueValues(ufwCtx h, abfPrivateDict *privateDict){
         writeLine(h, "\t<true/>");
     }
 
-    if (privateDict->LanguageGroup != ABF_DESC_LanguageGroup) {
-          writeLine(h, "\t<string>LanguageGroup</string>");
-          sprintf(buffer, "\t<integer>%d</integer>", (int)privateDict->LanguageGroup);
-          writeLine(h, buffer);
+    if (privateDict->LanguageGroup != cff_DFLT_LanguageGroup) {
+        writeLine(h, "\t<key>LanguageGroup</key>");
+        sprintf(buffer, "\t<integer>%d</integer>", (int)privateDict->LanguageGroup);
+        writeLine(h, buffer);
     }
 }
 
@@ -858,10 +858,10 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
             writeLine(h, buffer);
             if (fd->FontMatrix.cnt == ABF_EMPTY_ARRAY) {
                 fd->FontMatrix.cnt = 6;
-                fd->FontMatrix.array[0] = (float)1.0;
+                fd->FontMatrix.array[0] = 1.0;
                 fd->FontMatrix.array[1] = 0;
                 fd->FontMatrix.array[2] = 0;
-                fd->FontMatrix.array[3] = (float)1.0;
+                fd->FontMatrix.array[3] = 1.0;
                 fd->FontMatrix.array[4] = 0;
                 fd->FontMatrix.array[5] = 0;
             }
