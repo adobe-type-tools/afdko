@@ -64,10 +64,18 @@
 		<integer>67</integer>
 		<integer>78</integer>
 	</array>
+	<key>postscriptStdHW</key>
+	<array>
+		<integer>67</integer>
+	</array>
 	<key>postscriptStemSnapV</key>
 	<array>
 		<integer>84</integer>
 		<integer>95</integer>
+	</array>
+	<key>postscriptStdVW</key>
+	<array>
+		<integer>84</integer>
 	</array>
 	<key>postscriptBlueScale</key>
 	<real>0.0625</real>
