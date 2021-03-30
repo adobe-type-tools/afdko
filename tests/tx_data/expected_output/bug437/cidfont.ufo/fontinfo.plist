@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>postscriptFDArrayLength</key>
+	<integer>3</integer>
 	<key>familyName</key>
 	<string>Source Han Sans AJ16</string>
 	<key>versionMajor</key>
@@ -18,6 +20,72 @@
 	<string>Regular</string>
 	<key>postscriptUnderlinePosition</key>
 	<integer>-150</integer>
+	<key>postscriptFDArray</key>
+	<array>
+	<dict>
+	<key>FontName</key>
+	<string>(null)</string>
+	<key>PaintType</key>
+	<integer>0</integer>
+	<key>FontMatrix</key>
+	<array>
+		<integer>1</integer>
+		<integer>0</integer>
+		<integer>0</integer>
+		<integer>1</integer>
+		<integer>0</integer>
+		<integer>0</integer>
+	</array>
+	<key>PrivateDict</key>
+	<key>postscriptBlueValues</key>
+	<array>
+		<integer>-250</integer>
+		<integer>-250</integer>
+		<integer>1100</integer>
+		<integer>1100</integer>
+	</array>
+	<key>postscriptStemSnapH</key>
+	<array>
+		<integer>40</integer>
+		<integer>120</integer>
+	</array>
+	<key>postscriptStdHW</key>
+	<array>
+		<integer>40</integer>
+	</array>
+	<key>postscriptStemSnapV</key>
+	<array>
+		<integer>40</integer>
+		<integer>120</integer>
+	</array>
+	<key>postscriptStdVW</key>
+	<array>
+		<integer>40</integer>
+	</array>
+	<key>postscriptBlueScale</key>
+	<real>0.039625</real>
+	<key>postscriptBlueShift</key>
+	<integer>7</integer>
+	<key>postscriptBlueFuzz</key>
+	<integer>1</integer>
+	<key>LanguageGroup</key>
+	<integer>1</integer>
+	</dict>
+	<dict>
+	<key>FontName</key>
+	<string>(null)</string>
+	<key>PaintType</key>
+	<integer>0</integer>
+	<key>FontMatrix</key>
+	<array>
+		<integer>1</integer>
+		<integer>0</integer>
+		<integer>0</integer>
+		<integer>1</integer>
+		<integer>0</integer>
+		<integer>0</integer>
+	</array>
+	<key>PrivateDict</key>
 	<key>postscriptBlueValues</key>
 	<array>
 		<integer>-250</integer>
@@ -31,11 +99,19 @@
 		<integer>65</integer>
 		<integer>84</integer>
 	</array>
+	<key>postscriptStdHW</key>
+	<array>
+		<integer>58</integer>
+	</array>
 	<key>postscriptStemSnapV</key>
 	<array>
 		<integer>63</integer>
 		<integer>73</integer>
 		<integer>89</integer>
+	</array>
+	<key>postscriptStdVW</key>
+	<array>
+		<integer>63</integer>
 	</array>
 	<key>postscriptBlueScale</key>
 	<real>0.039625</real>
@@ -43,5 +119,65 @@
 	<integer>7</integer>
 	<key>postscriptBlueFuzz</key>
 	<integer>1</integer>
+	<key>LanguageGroup</key>
+	<integer>1</integer>
+	</dict>
+	<dict>
+	<key>FontName</key>
+	<string>(null)</string>
+	<key>PaintType</key>
+	<integer>0</integer>
+	<key>FontMatrix</key>
+	<array>
+		<integer>1</integer>
+		<integer>0</integer>
+		<integer>0</integer>
+		<integer>1</integer>
+		<integer>0</integer>
+		<integer>0</integer>
+	</array>
+	<key>PrivateDict</key>
+	<key>postscriptBlueValues</key>
+	<array>
+		<integer>-13</integer>
+		<integer>0</integer>
+		<integer>543</integer>
+		<integer>557</integer>
+		<integer>733</integer>
+		<integer>747</integer>
+	</array>
+	<key>postscriptOtherBlues</key>
+	<array>
+		<integer>-250</integer>
+		<integer>-229</integer>
+	</array>
+	<key>postscriptStemSnapH</key>
+	<array>
+		<integer>69</integer>
+		<integer>79</integer>
+		<integer>88</integer>
+	</array>
+	<key>postscriptStdHW</key>
+	<array>
+		<integer>69</integer>
+	</array>
+	<key>postscriptStemSnapV</key>
+	<array>
+		<integer>85</integer>
+		<integer>95</integer>
+		<integer>111</integer>
+	</array>
+	<key>postscriptStdVW</key>
+	<array>
+		<integer>85</integer>
+	</array>
+	<key>postscriptBlueScale</key>
+	<real>0.039625</real>
+	<key>postscriptBlueShift</key>
+	<integer>7</integer>
+	<key>postscriptBlueFuzz</key>
+	<integer>1</integer>
+	</dict>
+	</array>
 </dict>
 </plist>
