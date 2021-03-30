@@ -1887,7 +1887,9 @@ static int parseFontInfo(ufoCtx h) {
             dnaSET_CNT(h->valueArray, 0);
         } else if (tokenEqualStr(tk, "</array>")) {
             if (state == 5) {
-                memFree(h, h->top.FDArray.array);
+                if (h->top.FDArray.array != &h->fdict){ //if more memory was allocated for FDArray
+                    memFree(h, h->top.FDArray.array);
+                }
                 state = 1;
             } else if (state != 3) {
                 fatal(h, ufoErrParse, "Encountered </array> when not after <array> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
