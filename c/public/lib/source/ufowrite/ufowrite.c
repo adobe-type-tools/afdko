@@ -879,7 +879,9 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
     
             privateDict = &(fd->Private);
             writeLine(h, "\t<key>PrivateDict</key>");
+            writeLine(h, "\t<dict>");
             writeBlueValues(h, privateDict);
+            writeLine(h, "\t</dict>");
             writeLine(h, "\t</dict>");
         }
         writeLine(h, "\t</array>");
