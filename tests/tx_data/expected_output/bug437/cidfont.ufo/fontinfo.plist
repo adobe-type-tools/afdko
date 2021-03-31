@@ -37,6 +37,7 @@
 		<integer>0</integer>
 	</array>
 	<key>PrivateDict</key>
+	<dict>
 	<key>postscriptBlueValues</key>
 	<array>
 		<integer>-250</integer>
@@ -71,6 +72,7 @@
 	<key>LanguageGroup</key>
 	<integer>1</integer>
 	</dict>
+	</dict>
 	<dict>
 	<key>FontName</key>
 	<string>(null)</string>
@@ -86,6 +88,7 @@
 		<integer>0</integer>
 	</array>
 	<key>PrivateDict</key>
+	<dict>
 	<key>postscriptBlueValues</key>
 	<array>
 		<integer>-250</integer>
@@ -122,6 +125,7 @@
 	<key>LanguageGroup</key>
 	<integer>1</integer>
 	</dict>
+	</dict>
 	<dict>
 	<key>FontName</key>
 	<string>(null)</string>
@@ -137,6 +141,7 @@
 		<integer>0</integer>
 	</array>
 	<key>PrivateDict</key>
+	<dict>
 	<key>postscriptBlueValues</key>
 	<array>
 		<integer>-13</integer>
@@ -177,6 +182,7 @@
 	<integer>7</integer>
 	<key>postscriptBlueFuzz</key>
 	<integer>1</integer>
+	</dict>
 	</dict>
 	</array>
 </dict>
