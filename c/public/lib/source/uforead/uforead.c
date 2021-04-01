@@ -1022,9 +1022,6 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
         fd->FontMatrix.array[4] = 0;
         fd->FontMatrix.array[5] = 0;
         memFree(h, keyValue);
-    } else if (!strcmp(keyName, "postscriptFDArrayLength")) {
-        h->top.FDArray.array = memNew(h, atoi(keyValue) * sizeof(abfFontDict));
-        h->top.FDArray.cnt = atoi(keyValue);
     } else if (!strcmp(keyName, "FontName")) {
         fd->FontName.ptr = keyValue;
     } else if (!strcmp(keyName, "PaintType")) {
@@ -1079,6 +1076,7 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
         setBluesArrayValue(h, bluesArray, 12);
     } else if (!strcmp(keyName, "LanguageGroup")) {
         pd->LanguageGroup = (float)strtod(keyValue, NULL);
+        h->parseKeyName = NULL;
         memFree(h, keyValue);
     } else {
         // if it isn't used, free the string.
@@ -1105,7 +1103,7 @@ static int doFontDictValue(ufoCtx h, char* keyName, char* endKeyName, int state)
     {
         if (valueString != NULL)
             *dnaNEXT(h->valueArray) = valueString;
-    } else if (state == 5)  // we are within a <dict> within an <array> (an fDict in an FDArray), which is a key value
+    } else if (state >= 5)  // we are within a <dict> within an <array> (an fDict in an FDArray), which is a key value
     {
         if (valueString != NULL) {
             setFontDictKey(h, valueString);
@@ -1842,21 +1840,30 @@ static int parseFontInfo(ufoCtx h) {
         } else if (state == 4) {
             continue;
         } else if (tokenEqualStr(tk, "<dict>")) {
-            if (state == 3)
-                state = 5; //first fdict in FDArray
-            else if (state == 5)
-                currentiFD = currentiFD + 1;
-            else
+            if (state == 3){
+                state = 5;
+                if (prevState == 5){ //NOT first fdict in FDArray
+                    currentiFD = currentiFD + 1;
+                    h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
+                    h->top.FDArray.array = memNew(h, h->top.FDArray.cnt *sizeof(abfFontDict));
+                    h->top.FDArray.array[0] = h->fdict; //delete after fixing memNew to keep contents
+                }
+            }else if (state == 5){
+                state = 6;
+            }else{
                 state = 1;
+            }
         } else if (tokenEqualStr(tk, "</dict>")) {
-//            break;
-//        } else if (state > 4) {
-//            continue
-            if (state != 5){
+            if (state == 6){
+                state = 5;
+            } else if (state == 5){
+                prevState = state;
+                state = 3;
+            } else{
                 break;
             }
         } else if (tokenEqualStr(tk, "<key>")) {
-            if (state != 1 && state != 5) {
+            if (state != 1 && state < 5) {
                 fatal(h, ufoErrParse, "Encountered '<key>' while not in top level of first <dict>, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             }
             // get key name
@@ -1872,14 +1879,14 @@ static int parseFontInfo(ufoCtx h) {
                     fatal(h, ufoErrParse, "Encountered element other than </key> when reading <key> name: %s, in fontinfo.plist file. Context: '%s'.\n", tk->val, getBufferContextPtr(h));
                 }
             }
-            if (state != 5){
+            if (state != 5 && state != 6){
                 state = 2;
             }
         } else if (tokenEqualStr(tk, "<array>")) {
-            if (state != 2 && state!=5) {
+            if (state != 2 && state<5) {
                 fatal(h, ufoErrParse, "Encountered <array> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             } else {
-                if (state == 5){
+                if (state >= 5){
                     prevState = state;
                 }
                 state = 3;
@@ -1894,15 +1901,17 @@ static int parseFontInfo(ufoCtx h) {
             } else if (state != 3) {
                 fatal(h, ufoErrParse, "Encountered </array> when not after <array> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             } else {
+                if (h->parseKeyName == NULL)
+                    break;
                 setFontDictKey(h, NULL);
-                if (prevState == 5){
-                    state = 5;
+                if (prevState >= 5){
+                    state = prevState;
                 }else{
                     state = 1;
                 }
             }
         } else if (tokenEqualStr(tk, "<array/>")) {
-            if (state != 2) {
+            if (state != 2 && state != 5) {
                 fatal(h, ufoErrParse, "Encountered <array/> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             } else {
                 dnaSET_CNT(h->valueArray, 0);
