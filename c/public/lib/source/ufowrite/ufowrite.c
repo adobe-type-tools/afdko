@@ -732,9 +732,6 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
     /* This is what I care about the most. Add the rest in the order of the
      UFO 3 spec. */
     if (top->sup.flags & ABF_CID_FONT) {
-        writeLine(h, "\t<key>postscriptFDArrayLength</key>");
-        sprintf(buffer, "\t<integer>%ld</integer>", top->FDArray.cnt);
-        writeLine(h, buffer);
         if (top->cid.CIDFontName.ptr != NULL) {
             writeLine(h, "\t<key>postscriptFontName</key>");
             sprintf(buffer, "\t<string>%s</string>", top->cid.CIDFontName.ptr);
