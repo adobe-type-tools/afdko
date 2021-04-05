@@ -27,10 +27,10 @@
 	<integer>0</integer>
 	<key>FontMatrix</key>
 	<array>
-		<integer>1</integer>
+		<real>0.001</real>
 		<integer>0</integer>
 		<integer>0</integer>
-		<integer>1</integer>
+		<real>0.001</real>
 		<integer>0</integer>
 		<integer>0</integer>
 	</array>
@@ -78,10 +78,10 @@
 	<integer>0</integer>
 	<key>FontMatrix</key>
 	<array>
-		<integer>1</integer>
+		<real>0.001</real>
 		<integer>0</integer>
 		<integer>0</integer>
-		<integer>1</integer>
+		<real>0.001</real>
 		<integer>0</integer>
 		<integer>0</integer>
 	</array>
@@ -131,10 +131,10 @@
 	<integer>0</integer>
 	<key>FontMatrix</key>
 	<array>
-		<integer>1</integer>
+		<real>0.001</real>
 		<integer>0</integer>
 		<integer>0</integer>
-		<integer>1</integer>
+		<real>0.001</real>
 		<integer>0</integer>
 		<integer>0</integer>
 	</array>

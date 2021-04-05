@@ -855,12 +855,12 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
             writeLine(h, buffer);
             if (fd->FontMatrix.cnt == ABF_EMPTY_ARRAY) {
                 fd->FontMatrix.cnt = 6;
-                fd->FontMatrix.array[0] = 1.0;
-                fd->FontMatrix.array[1] = 0;
-                fd->FontMatrix.array[2] = 0;
-                fd->FontMatrix.array[3] = 1.0;
-                fd->FontMatrix.array[4] = 0;
-                fd->FontMatrix.array[5] = 0;
+                fd->FontMatrix.array[0] = 0.001;
+                fd->FontMatrix.array[1] = 0.0;
+                fd->FontMatrix.array[2] = 0.0;
+                fd->FontMatrix.array[3] = 0.001;
+                fd->FontMatrix.array[4] = 0.0;
+                fd->FontMatrix.array[5] = 0.0;
             }
             writeLine(h, "\t<key>FontMatrix</key>");
             writeLine(h, "\t<array>");
@@ -869,7 +869,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
                 if (stem == ((int)stem))
                     sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
                 else
-                    sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+                    sprintf(buffer, "\t\t<real>%.3f</real>", stem);
                 writeLine(h, buffer);
             }
             writeLine(h, "\t</array>");
