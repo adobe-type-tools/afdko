@@ -555,18 +555,18 @@ static void writeBlueValues(ufwCtx h, abfPrivateDict *privateDict){
             writeLine(h, buffer);
         }
         writeLine(h, "\t</array>");
+    }
 
-        if (privateDict->StdHW != ABF_UNSET_REAL) {
-            float stem = privateDict->StdHW;
-            writeLine(h, "\t<key>postscriptStdHW</key>");
-            writeLine(h, "\t<array>");
-            if (stem == ((int)stem))
-                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-            else
-                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
-            writeLine(h, buffer);
-            writeLine(h, "\t</array>");
-        }
+    if (privateDict->StdHW != ABF_UNSET_REAL) {
+        float stem = privateDict->StdHW;
+        writeLine(h, "\t<key>postscriptStdHW</key>");
+        writeLine(h, "\t<array>");
+        if (stem == ((int)stem))
+            sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+        else
+            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+        writeLine(h, buffer);
+        writeLine(h, "\t</array>");
     }
 
     if (privateDict->StemSnapV.cnt != ABF_EMPTY_ARRAY) {
@@ -581,18 +581,18 @@ static void writeBlueValues(ufwCtx h, abfPrivateDict *privateDict){
             writeLine(h, buffer);
         }
         writeLine(h, "\t</array>");
+    }
 
-        if (privateDict->StdVW != ABF_UNSET_REAL) {
-            float stem = privateDict->StdVW;
-            writeLine(h, "\t<key>postscriptStdVW</key>");
-            writeLine(h, "\t<array>");
-            if (stem == ((int)stem))
-                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-            else
-                sprintf(buffer, "\t\t<real>%.2f</real>", stem);
-            writeLine(h, buffer);
-            writeLine(h, "\t</array>");
-        }
+    if (privateDict->StdVW != ABF_UNSET_REAL) {
+        float stem = privateDict->StdVW;
+        writeLine(h, "\t<key>postscriptStdVW</key>");
+        writeLine(h, "\t<array>");
+        if (stem == ((int)stem))
+            sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+        else
+            sprintf(buffer, "\t\t<real>%.2f</real>", stem);
+        writeLine(h, buffer);
+        writeLine(h, "\t</array>");
     }
 
     if (privateDict->BlueScale != ABF_UNSET_REAL) {
@@ -639,6 +639,12 @@ static void writeBlueValues(ufwCtx h, abfPrivateDict *privateDict){
     if (privateDict->LanguageGroup != cff_DFLT_LanguageGroup) {
         writeLine(h, "\t<key>LanguageGroup</key>");
         sprintf(buffer, "\t<integer>%d</integer>", (int)privateDict->LanguageGroup);
+        writeLine(h, buffer);
+    }
+    
+    if (privateDict->ExpansionFactor != cff_DFLT_ExpansionFactor){
+        writeLine(h, "\t<key>ExpansionFactor</key>");
+        sprintf(buffer, "\t<real>%.2f</real>", privateDict->ExpansionFactor);
         writeLine(h, buffer);
     }
 }
@@ -842,6 +848,9 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
     }
     
     if (top->sup.flags & ABF_CID_FONT) {
+        writeLine(h, "\t<key>FSType</key>");
+        sprintf(buffer, "\t<integer>%d</integer>", (int)h->top->FSType);
+        writeLine(h, buffer);
         writeLine(h, "\t<key>postscriptFDArray</key>");
         writeLine(h, "\t<array>");
         for (int j = 0; j < top->FDArray.cnt; j++) {
@@ -851,7 +860,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
             sprintf(buffer, "\t<string>%s</string>", fd->FontName.ptr);
             writeLine(h, buffer);
             writeLine(h, "\t<key>PaintType</key>");
-            sprintf(buffer, "\t<integer>%ld</integer>", top->FDArray.array->PaintType);
+            sprintf(buffer, "\t<integer>%ld</integer>", fd->PaintType);
             writeLine(h, buffer);
             if (fd->FontMatrix.cnt == ABF_EMPTY_ARRAY) {
                 fd->FontMatrix.cnt = 6;
@@ -864,8 +873,8 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
             }
             writeLine(h, "\t<key>FontMatrix</key>");
             writeLine(h, "\t<array>");
-            for (i = 0; i < top->FDArray.array->FontMatrix.cnt; i++) {
-                float stem = top->FDArray.array->FontMatrix.array[i];
+            for (i = 0; i < fd->FontMatrix.cnt; i++) {
+                float stem = fd->FontMatrix.array[i];
                 if (stem == ((int)stem))
                     sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
                 else
