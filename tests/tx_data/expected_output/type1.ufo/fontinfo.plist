@@ -66,5 +66,7 @@
 	<integer>7</integer>
 	<key>postscriptBlueFuzz</key>
 	<integer>0</integer>
+	<key>ExpansionFactor</key>
+	<real>0.06</real>
 </dict>
 </plist>
