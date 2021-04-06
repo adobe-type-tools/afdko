@@ -1101,3 +1101,51 @@ def test_cffread_bug1343():
     actual_path = runner(CMD + ['-s', '-f', 'font.otf', '-o', '3'])
     expected_path = get_expected_path('font.otf.dump3.txt')
     assert differ([expected_path, actual_path, '-s', '## Filename'])
+
+
+def test_roundtrip_cid_ufo():
+    folder = "cid_roundtrip/"
+    cid_input_path = get_input_path(folder + "cidfont.subset")
+    ufo_expected_path = get_expected_path(folder + 'testCID.ufo')
+    output_dir = get_temp_dir_path()
+    ufo_output_path = os.path.join(output_dir, "cidfont_subset.ufo")
+    runner(CMD + ['-a', '-o', 'ufo', '-f', cid_input_path, ufo_output_path])
+    assert differ([ufo_expected_path, ufo_output_path])
+
+
+def test_roundtrip_ufo_cid():
+    folder = "cid_roundtrip/"
+    ufo_input_path = get_input_path(folder + 'testCID.ufo')
+    cid_expected_path = get_expected_path(folder + 'cidfont.subset')
+    cid_actual_path = runner(CMD + ['-s', '-o', 't1', '-f', ufo_input_path])
+    cid_new_expected_path = generate_ps_dump(cid_expected_path)
+    output_path = generate_ps_dump(cid_actual_path)
+    assert differ([cid_new_expected_path, output_path])
+
+
+def test_roundtrip_cid_ufo_cid():
+    folder = "cid_roundtrip/"
+    cid_input_path = get_input_path(folder + "cidfont.subset")
+    cid_expected_path = get_expected_path(folder + 'cidfont.subset')
+    output_dir = get_temp_dir_path()
+    ufo_output_path = os.path.join(output_dir, "cidfont_subset.ufo")
+    # cid -> ufo
+    runner(CMD + ['-a', '-o', 'ufo', '-f', cid_input_path, ufo_output_path])
+    # ufo -> cid
+    cid_actual_path = runner(CMD + ['-s', '-o', 't1', '-f', ufo_output_path])
+    cid_new_expected_path = generate_ps_dump(cid_expected_path)
+    cid_output_path = generate_ps_dump(cid_actual_path)
+    assert differ([cid_new_expected_path, cid_output_path])
+
+
+def test_roundtrip_ufo_cid_ufo():
+    folder = "cid_roundtrip/"
+    ufo_input_path = get_input_path(folder + 'testCID.ufo')
+    ufo_expected_path = get_expected_path(folder + 'testCID.ufo')
+    # ufo -> cid
+    cid_actual_path = runner(CMD + ['-s', '-o', 't1', '-f', ufo_input_path])
+    output_dir = get_temp_dir_path()
+    ufo_output_path = os.path.join(output_dir, "cidfont_subset.ufo")
+    # cid -> ufo
+    runner(CMD + ['-a', '-o', 'ufo', '-f', cid_actual_path, ufo_output_path])
+    assert differ([ufo_expected_path, ufo_output_path])
