@@ -56,6 +56,7 @@ const char* t1HintKeyV2 = "com.adobe.type.autohint.v2";
 int currentCID = -1;
 long CIDCount = 0;
 int currentiFD = 0;
+int FDArrayInitSize = 50;
 
 typedef struct
 {
@@ -1005,6 +1006,8 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
         top->Weight.ptr = keyValue;
     } else if (!strcmp(keyName, "postscriptIsFixedPitch")) {
         top->isFixedPitch = atol(keyValue);
+    } else if (!strcmp(keyName, "FSType")) {
+        top->FSType = atoi(keyValue);
     } else if (!strcmp(keyName, "italicAngle")) {
         top->ItalicAngle = (float)strtod(keyValue, NULL);
     } else if (!strcmp(keyName, "postscriptUnderlinePosition")) {
@@ -1076,6 +1079,10 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
         setBluesArrayValue(h, bluesArray, 12);
     } else if (!strcmp(keyName, "LanguageGroup")) {
         pd->LanguageGroup = (float)strtod(keyValue, NULL);
+        h->parseKeyName = NULL;
+        memFree(h, keyValue);
+    } else if (!strcmp(keyName, "ExpansionFactor")) {
+        pd->ExpansionFactor = (float)strtod(keyValue, NULL);
         h->parseKeyName = NULL;
         memFree(h, keyValue);
     } else {
@@ -1808,6 +1815,15 @@ static void skipToDictEnd(ufoCtx h) {
     } /* end while more tokens */
 }
 
+static void reallocFDArray(ufoCtx h){
+    float newFDArraySize = FDArrayInitSize * 1.5;
+    abfFontDict *oldFDArray = memNew(h, h->top.FDArray.cnt *sizeof(abfFontDict));
+    memcpy(oldFDArray, h->top.FDArray.array, (h->top.FDArray.cnt - 1) *sizeof(abfFontDict));
+    h->top.FDArray.array = memNew(h, newFDArraySize *sizeof(abfFontDict)); //reallocate memory
+    memcpy(h->top.FDArray.array, oldFDArray, (h->top.FDArray.cnt - 1) *sizeof(abfFontDict));
+    memFree(h, oldFDArray);
+}
+
 static int parseFontInfo(ufoCtx h) {
     int state = 0;     /* 0 == start, 1=in first dict, 2 in key, 3= in value, 4=in array 4 in comment, 5 in child dict.*/
     int prevState = 0; /* used to save prev state while in comment. */
@@ -1842,11 +1858,15 @@ static int parseFontInfo(ufoCtx h) {
         } else if (tokenEqualStr(tk, "<dict>")) {
             if (state == 3){
                 state = 5;
-                if (prevState == 5){ //NOT first fdict in FDArray
+                if (prevState == 5) { //NOT first fdict in FDArray
                     currentiFD = currentiFD + 1;
                     h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
-                    h->top.FDArray.array = memNew(h, h->top.FDArray.cnt *sizeof(abfFontDict));
-                    h->top.FDArray.array[0] = h->fdict; //delete after fixing memNew to keep contents
+                    if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
+                        reallocFDArray(h);
+                    }
+                } else {
+                    h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
+                    h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
                 }
             }else if (state == 5){
                 state = 6;
