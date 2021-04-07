@@ -1816,12 +1816,11 @@ static void skipToDictEnd(ufoCtx h) {
 }
 
 static void reallocFDArray(ufoCtx h){
-    float newFDArraySize = FDArrayInitSize * 1.5;
-    abfFontDict *oldFDArray = memNew(h, h->top.FDArray.cnt *sizeof(abfFontDict));
-    memcpy(oldFDArray, h->top.FDArray.array, (h->top.FDArray.cnt - 1) *sizeof(abfFontDict));
-    h->top.FDArray.array = memNew(h, newFDArraySize *sizeof(abfFontDict)); //reallocate memory
-    memcpy(h->top.FDArray.array, oldFDArray, (h->top.FDArray.cnt - 1) *sizeof(abfFontDict));
-    memFree(h, oldFDArray);
+    float newFDArraySize = h->top.FDArray.cnt * 1.5;  /* x1.5 for efficiency */
+    abfFontDict* newFDArray = memNew(h, newFDArraySize * sizeof(abfFontDict));
+    memcpy(newFDArray, h->top.FDArray.array, (h->top.FDArray.cnt - 1) * sizeof(abfFontDict));
+    memFree(h, h->top.FDArray.array);
+    h->top.FDArray.array = newFDArray;
 }
 
 static int parseFontInfo(ufoCtx h) {
