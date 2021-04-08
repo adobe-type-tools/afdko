@@ -77,6 +77,9 @@ class FontFile(object):
         else:
             print("Converting to temp UFO font...")
             self.temp_ufo_path = temp_path = get_temp_dir_path('font.ufo')
+            if self.font_format == 'PFC':
+                self.font_format = 'UFO'
+                self.ufo_format = UFOFormatVersion.FORMAT_3_0
 
             if not run_shell_command([
                     'tx', '-ufo', font_path, temp_path]):
@@ -991,6 +994,8 @@ def run(args=None):
     font_file = FontFile(font_path, font_format)
     use_hash_map = True if font_format == 'UFO' else False
     defcon_font = font_file.open(use_hash_map)
+    if font_format == 'PFC':
+        font_format = font_file.font_format
 
     # We allow use of a hash map to skip glyphs only if fixing glyphs
     if options.clear_hash_map:
