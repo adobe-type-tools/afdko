@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="4.0">
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <CFF2>
     <major value="2"/>
@@ -13,6 +13,8 @@
             <BlueScale value="0.039625"/>
             <BlueShift value="7"/>
             <BlueFuzz value="1"/>
+            <LanguageGroup value="0"/>
+            <ExpansionFactor value="0.06"/>
           </Private>
         </FontDict>
       </FDArray>
