@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GSUB>
     <Version value="0x00010000"/>
@@ -34,11 +34,11 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <ReverseChainSingleSubst index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="d"/>
           </Coverage>
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0" Format="1">
+          <BacktrackCoverage index="0">
             <Glyph value="a"/>
             <Glyph value="e"/>
             <Glyph value="n"/>

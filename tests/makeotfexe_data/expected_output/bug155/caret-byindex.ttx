@@ -3,12 +3,12 @@
 
   <GDEF>
     <Version value="0x00010000"/>
-    <GlyphClassDef Format="2">
+    <GlyphClassDef>
       <ClassDef glyph="f_f_i" class="2"/>
       <ClassDef glyph="f_i" class="2"/>
     </GlyphClassDef>
     <LigCaretList>
-      <Coverage Format="1">
+      <Coverage>
         <Glyph value="f_i"/>
         <Glyph value="f_f_i"/>
       </Coverage>

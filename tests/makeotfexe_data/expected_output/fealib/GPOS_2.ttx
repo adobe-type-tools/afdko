@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GPOS>
     <Version value="0x00010000"/>
@@ -43,7 +43,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=2 -->
         <PairPos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="v"/>
           </Coverage>
           <ValueFormat1 value="4"/>
@@ -58,16 +58,16 @@
           </PairSet>
         </PairPos>
         <PairPos index="1" Format="2">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="D"/>
             <Glyph value="O"/>
             <Glyph value="Q"/>
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
-          <ClassDef1 Format="2">
+          <ClassDef1>
           </ClassDef1>
-          <ClassDef2 Format="1">
+          <ClassDef2>
             <ClassDef glyph="T" class="1"/>
             <ClassDef glyph="V" class="1"/>
             <ClassDef glyph="W" class="1"/>
@@ -89,7 +89,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=2 -->
         <PairPos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="T"/>
             <Glyph value="X"/>
             <Glyph value="Y"/>
@@ -144,7 +144,7 @@
           </PairSet>
         </PairPos>
         <PairPos index="1" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="Y"/>
           </Coverage>
           <ValueFormat1 value="15"/>
@@ -164,7 +164,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <PairPos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="T"/>
           </Coverage>
           <ValueFormat1 value="8"/>

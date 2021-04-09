@@ -34,11 +34,11 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <MarkBasePos index="0" Format="1">
-          <MarkCoverage Format="1">
+          <MarkCoverage>
             <Glyph value=".notdef"/>
             <Glyph value="a"/>
           </MarkCoverage>
-          <BaseCoverage Format="1">
+          <BaseCoverage>
             <Glyph value=".notdef"/>
             <Glyph value="a"/>
           </BaseCoverage>

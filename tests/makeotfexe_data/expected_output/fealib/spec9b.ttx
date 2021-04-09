@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GDEF>
     <Version value="0x00010000"/>
-    <GlyphClassDef Format="2">
+    <GlyphClassDef>
       <ClassDef glyph="acute" class="3"/>
       <ClassDef glyph="c_s" class="2"/>
       <ClassDef glyph="c_t" class="2"/>
@@ -17,7 +17,7 @@
       <ClassDef glyph="s_t" class="2"/>
     </GlyphClassDef>
     <AttachList>
-      <Coverage Format="1">
+      <Coverage>
         <Glyph value="noon.final"/>
         <Glyph value="noon.initial"/>
       </Coverage>
@@ -32,7 +32,7 @@
       </AttachPoint>
     </AttachList>
     <LigCaretList>
-      <Coverage Format="1">
+      <Coverage>
         <Glyph value="c_t"/>
         <Glyph value="f_f_i"/>
         <Glyph value="f_i"/>

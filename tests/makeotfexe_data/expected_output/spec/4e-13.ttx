@@ -17,7 +17,7 @@
         <!-- SubTableCount=1 -->
         <ExtensionSubst index="0" Format="1">
           <ExtensionLookupType value="4"/>
-          <LigatureSubst Format="1">
+          <LigatureSubst>
             <LigatureSet glyph="f">
               <Ligature components="i" glyph="f_i"/>
             </LigatureSet>

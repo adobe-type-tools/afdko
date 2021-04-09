@@ -3,7 +3,7 @@
 
   <GDEF>
     <Version value="0x00010000"/>
-    <GlyphClassDef Format="1">
+    <GlyphClassDef>
       <ClassDef glyph=".notdef" class="1"/>
     </GlyphClassDef>
   </GDEF>

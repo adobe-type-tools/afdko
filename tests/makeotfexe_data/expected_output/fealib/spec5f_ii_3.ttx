@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GSUB>
     <Version value="0x00010000"/>
@@ -35,7 +35,7 @@
         <!-- SubTableCount=3 -->
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0" Format="2">
+          <BacktrackCoverage index="0">
             <Glyph value="a"/>
             <Glyph value="b"/>
             <Glyph value="c"/>
@@ -64,13 +64,13 @@
             <Glyph value="z"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=3 -->
-          <InputCoverage index="0" Format="1">
+          <InputCoverage index="0">
             <Glyph value="a"/>
           </InputCoverage>
-          <InputCoverage index="1" Format="1">
+          <InputCoverage index="1">
             <Glyph value="n"/>
           </InputCoverage>
-          <InputCoverage index="2" Format="1">
+          <InputCoverage index="2">
             <Glyph value="d"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -79,17 +79,17 @@
         <ChainContextSubst index="1" Format="3">
           <!-- BacktrackGlyphCount=0 -->
           <!-- InputGlyphCount=3 -->
-          <InputCoverage index="0" Format="1">
+          <InputCoverage index="0">
             <Glyph value="a"/>
           </InputCoverage>
-          <InputCoverage index="1" Format="1">
+          <InputCoverage index="1">
             <Glyph value="n"/>
           </InputCoverage>
-          <InputCoverage index="2" Format="1">
+          <InputCoverage index="2">
             <Glyph value="d"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=1 -->
-          <LookAheadCoverage index="0" Format="2">
+          <LookAheadCoverage index="0">
             <Glyph value="a"/>
             <Glyph value="b"/>
             <Glyph value="c"/>
@@ -122,13 +122,13 @@
         <ChainContextSubst index="2" Format="3">
           <!-- BacktrackGlyphCount=0 -->
           <!-- InputGlyphCount=3 -->
-          <InputCoverage index="0" Format="1">
+          <InputCoverage index="0">
             <Glyph value="a"/>
           </InputCoverage>
-          <InputCoverage index="1" Format="1">
+          <InputCoverage index="1">
             <Glyph value="n"/>
           </InputCoverage>
-          <InputCoverage index="2" Format="1">
+          <InputCoverage index="2">
             <Glyph value="d"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -143,7 +143,7 @@
         <LookupType value="4"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <LigatureSubst index="0" Format="1">
+        <LigatureSubst index="0">
           <LigatureSet glyph="a">
             <Ligature components="n,d" glyph="a_n_d"/>
           </LigatureSet>
