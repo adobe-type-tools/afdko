@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="\x00\x01\x00\x00" ttLibVersion="4.13">
+<ttFont sfntVersion="\x00\x01\x00\x00" ttLibVersion="4.22">
 
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
@@ -185,12 +185,12 @@
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="1.0"/>
     <fontRevision value="1.01"/>
-    <checkSumAdjustment value="0x7d5a2d90"/>
+    <checkSumAdjustment value="0x7ac22c72"/>
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00000001"/>
     <unitsPerEm value="1000"/>
     <created value="Fri Jan 11 01:46:51 2019"/>
-    <modified value="Sat Aug  1 00:44:43 2020"/>
+    <modified value="Fri Apr  9 20:39:38 2021"/>
     <xMin value="-181"/>
     <yMin value="-325"/>
     <xMax value="1187"/>
@@ -6915,7 +6915,7 @@
 
   <GDEF>
     <Version value="0x00010000"/>
-    <GlyphClassDef Format="2">
+    <GlyphClassDef>
       <ClassDef glyph="A" class="1"/>
       <ClassDef glyph="B" class="1"/>
       <ClassDef glyph="C" class="1"/>
@@ -7038,7 +7038,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=4 -->
         <PairPos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="B"/>
             <Glyph value="F"/>
             <Glyph value="P"/>
@@ -7321,7 +7321,7 @@
           </PairSet>
         </PairPos>
         <PairPos index="1" Format="2">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="B"/>
             <Glyph value="F"/>
             <Glyph value="P"/>
@@ -7340,7 +7340,7 @@
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
-          <ClassDef1 Format="2">
+          <ClassDef1>
             <ClassDef glyph="F" class="1"/>
             <ClassDef glyph="P" class="2"/>
             <ClassDef glyph="V" class="3"/>
@@ -7356,7 +7356,7 @@
             <ClassDef glyph="underscore" class="13"/>
             <ClassDef glyph="x" class="14"/>
           </ClassDef1>
-          <ClassDef2 Format="2">
+          <ClassDef2>
             <ClassDef glyph="A" class="1"/>
             <ClassDef glyph="B" class="2"/>
             <ClassDef glyph="C" class="5"/>
@@ -9050,7 +9050,7 @@
           </Class1Record>
         </PairPos>
         <PairPos index="2" Format="2">
-          <Coverage Format="2">
+          <Coverage>
             <Glyph value="A"/>
             <Glyph value="C"/>
             <Glyph value="D"/>
@@ -9116,7 +9116,7 @@
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
-          <ClassDef1 Format="1">
+          <ClassDef1>
             <ClassDef glyph="C" class="1"/>
             <ClassDef glyph="D" class="2"/>
             <ClassDef glyph="E" class="3"/>
@@ -9179,7 +9179,7 @@
             <ClassDef glyph="y" class="34"/>
             <ClassDef glyph="z" class="35"/>
           </ClassDef1>
-          <ClassDef2 Format="1">
+          <ClassDef2>
             <ClassDef glyph="A" class="1"/>
             <ClassDef glyph="B" class="2"/>
             <ClassDef glyph="C" class="3"/>
@@ -14208,7 +14208,7 @@
           </Class1Record>
         </PairPos>
         <PairPos index="3" Format="2">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="period"/>
             <Glyph value="comma"/>
             <Glyph value="colon"/>
@@ -14230,7 +14230,7 @@
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
-          <ClassDef1 Format="2">
+          <ClassDef1>
             <ClassDef glyph="asciitilde" class="6"/>
             <ClassDef glyph="asterisk" class="8"/>
             <ClassDef glyph="braceleft" class="4"/>
@@ -14248,7 +14248,7 @@
             <ClassDef glyph="quotedbl" class="7"/>
             <ClassDef glyph="quotesingle" class="7"/>
           </ClassDef1>
-          <ClassDef2 Format="1">
+          <ClassDef2>
             <ClassDef glyph="A" class="36"/>
             <ClassDef glyph="B" class="32"/>
             <ClassDef glyph="C" class="20"/>
@@ -15888,7 +15888,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="1">
+        <SingleSubst index="0">
           <Substitution in="i" out="glyph00054"/>
         </SingleSubst>
       </Lookup>
@@ -15896,7 +15896,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="2">
+        <SingleSubst index="0">
           <Substitution in="bracketleft" out="glyph00158"/>
           <Substitution in="bracketright" out="glyph00159"/>
           <Substitution in="comma" out="glyph00161"/>
@@ -15919,7 +15919,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="2">
+        <SingleSubst index="0">
           <Substitution in="bracketleft" out="glyph00142"/>
           <Substitution in="bracketright" out="glyph00143"/>
           <Substitution in="comma" out="glyph00145"/>
@@ -15942,7 +15942,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="1">
+        <SingleSubst index="0">
           <Substitution in="slash" out="glyph00164"/>
         </SingleSubst>
       </Lookup>
@@ -15952,7 +15952,7 @@
         <!-- SubTableCount=3 -->
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0" Format="2">
+          <BacktrackCoverage index="0">
             <Glyph value="glyph00146"/>
             <Glyph value="glyph00147"/>
             <Glyph value="glyph00148"/>
@@ -15965,7 +15965,7 @@
             <Glyph value="glyph00155"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0" Format="1">
+          <InputCoverage index="0">
             <Glyph value="space"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -15977,7 +15977,7 @@
         </ChainContextSubst>
         <ChainContextSubst index="1" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0" Format="2">
+          <BacktrackCoverage index="0">
             <Glyph value="glyph00130"/>
             <Glyph value="glyph00131"/>
             <Glyph value="glyph00132"/>
@@ -15997,7 +15997,7 @@
             <Glyph value="glyph00164"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0" Format="2">
+          <InputCoverage index="0">
             <Glyph value="glyph00146"/>
             <Glyph value="glyph00147"/>
             <Glyph value="glyph00148"/>
@@ -16024,10 +16024,10 @@
         </ChainContextSubst>
         <ChainContextSubst index="2" Format="3">
           <!-- BacktrackGlyphCount=2 -->
-          <BacktrackCoverage index="0" Format="1">
+          <BacktrackCoverage index="0">
             <Glyph value="glyph00165"/>
           </BacktrackCoverage>
-          <BacktrackCoverage index="1" Format="2">
+          <BacktrackCoverage index="1">
             <Glyph value="glyph00130"/>
             <Glyph value="glyph00131"/>
             <Glyph value="glyph00132"/>
@@ -16040,7 +16040,7 @@
             <Glyph value="glyph00139"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0" Format="2">
+          <InputCoverage index="0">
             <Glyph value="glyph00146"/>
             <Glyph value="glyph00147"/>
             <Glyph value="glyph00148"/>
@@ -16070,7 +16070,7 @@
         <LookupType value="4"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <LigatureSubst index="0" Format="1">
+        <LigatureSubst index="0">
           <LigatureSet glyph="f">
             <Ligature components="f,b" glyph="glyph00063"/>
             <Ligature components="f,f" glyph="glyph00064"/>
@@ -16095,7 +16095,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="2">
+        <SingleSubst index="0">
           <Substitution in="glyph00146" out="glyph00130"/>
           <Substitution in="glyph00147" out="glyph00131"/>
           <Substitution in="glyph00148" out="glyph00132"/>

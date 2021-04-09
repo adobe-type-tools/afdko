@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="4.13">
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
@@ -139,12 +139,12 @@
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="1.0"/>
     <fontRevision value="1.09"/>
-    <checkSumAdjustment value="0x928b2eb1"/>
+    <checkSumAdjustment value="0x8ff32dcb"/>
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00000011"/>
     <unitsPerEm value="1000"/>
     <created value="Sun Oct  7 02:25:32 2018"/>
-    <modified value="Sat Aug  1 00:45:10 2020"/>
+    <modified value="Fri Apr  9 20:39:37 2021"/>
     <xMin value="-323"/>
     <yMin value="-291"/>
     <xMax value="2077"/>
@@ -3967,7 +3967,7 @@
 
   <GDEF>
     <Version value="0x00010000"/>
-    <GlyphClassDef Format="2">
+    <GlyphClassDef>
       <ClassDef glyph="A" class="1"/>
       <ClassDef glyph="B" class="1"/>
       <ClassDef glyph="C" class="1"/>
@@ -4080,7 +4080,7 @@
         <ExtensionPos index="0" Format="1">
           <ExtensionLookupType value="2"/>
           <PairPos Format="1">
-            <Coverage Format="1">
+            <Coverage>
               <Glyph value="period"/>
               <Glyph value="semicolon"/>
             </Coverage>
@@ -4106,16 +4106,16 @@
         <ExtensionPos index="1" Format="1">
           <ExtensionLookupType value="2"/>
           <PairPos Format="2">
-            <Coverage Format="1">
+            <Coverage>
               <Glyph value="slash"/>
               <Glyph value="backslash"/>
             </Coverage>
             <ValueFormat1 value="4"/>
             <ValueFormat2 value="0"/>
-            <ClassDef1 Format="1">
+            <ClassDef1>
               <ClassDef glyph="slash" class="1"/>
             </ClassDef1>
-            <ClassDef2 Format="1">
+            <ClassDef2>
               <ClassDef glyph="A" class="10"/>
               <ClassDef glyph="C" class="18"/>
               <ClassDef glyph="G" class="18"/>
@@ -4293,7 +4293,7 @@
         <ExtensionPos index="2" Format="1">
           <ExtensionLookupType value="2"/>
           <PairPos Format="2">
-            <Coverage Format="2">
+            <Coverage>
               <Glyph value="A"/>
               <Glyph value="B"/>
               <Glyph value="C"/>
@@ -4356,7 +4356,7 @@
             </Coverage>
             <ValueFormat1 value="4"/>
             <ValueFormat2 value="0"/>
-            <ClassDef1 Format="1">
+            <ClassDef1>
               <ClassDef glyph="A" class="2"/>
               <ClassDef glyph="B" class="3"/>
               <ClassDef glyph="C" class="5"/>
@@ -4416,7 +4416,7 @@
               <ClassDef glyph="y" class="33"/>
               <ClassDef glyph="z" class="35"/>
             </ClassDef1>
-            <ClassDef2 Format="1">
+            <ClassDef2>
               <ClassDef glyph="A" class="31"/>
               <ClassDef glyph="C" class="7"/>
               <ClassDef glyph="G" class="7"/>
@@ -9320,7 +9320,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="1">
+        <SingleSubst index="0">
           <Substitution in="a" out="a.a"/>
         </SingleSubst>
       </Lookup>
@@ -9328,7 +9328,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="2">
+        <SingleSubst index="0">
           <Substitution in="comma" out="comma.numr"/>
           <Substitution in="eight" out="eight.numr"/>
           <Substitution in="five" out="five.numr"/>
@@ -9349,7 +9349,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="2">
+        <SingleSubst index="0">
           <Substitution in="comma" out="comma.dnom"/>
           <Substitution in="eight" out="eight.dnom"/>
           <Substitution in="five" out="five.dnom"/>
@@ -9370,7 +9370,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="1">
+        <SingleSubst index="0">
           <Substitution in="slash" out="slash.frac"/>
         </SingleSubst>
       </Lookup>
@@ -9380,7 +9380,7 @@
         <!-- SubTableCount=3 -->
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0" Format="2">
+          <BacktrackCoverage index="0">
             <Glyph value="zero.numr"/>
             <Glyph value="one.numr"/>
             <Glyph value="two.numr"/>
@@ -9393,7 +9393,7 @@
             <Glyph value="nine.numr"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0" Format="1">
+          <InputCoverage index="0">
             <Glyph value="space"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -9405,7 +9405,7 @@
         </ChainContextSubst>
         <ChainContextSubst index="1" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0" Format="2">
+          <BacktrackCoverage index="0">
             <Glyph value="zero.dnom"/>
             <Glyph value="one.dnom"/>
             <Glyph value="two.dnom"/>
@@ -9423,7 +9423,7 @@
             <Glyph value="slash.frac"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0" Format="2">
+          <InputCoverage index="0">
             <Glyph value="zero.numr"/>
             <Glyph value="one.numr"/>
             <Glyph value="two.numr"/>
@@ -9448,10 +9448,10 @@
         </ChainContextSubst>
         <ChainContextSubst index="2" Format="3">
           <!-- BacktrackGlyphCount=2 -->
-          <BacktrackCoverage index="0" Format="1">
+          <BacktrackCoverage index="0">
             <Glyph value="space.frac"/>
           </BacktrackCoverage>
-          <BacktrackCoverage index="1" Format="2">
+          <BacktrackCoverage index="1">
             <Glyph value="zero.dnom"/>
             <Glyph value="one.dnom"/>
             <Glyph value="two.dnom"/>
@@ -9464,7 +9464,7 @@
             <Glyph value="nine.dnom"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0" Format="2">
+          <InputCoverage index="0">
             <Glyph value="zero.numr"/>
             <Glyph value="one.numr"/>
             <Glyph value="two.numr"/>
@@ -9492,7 +9492,7 @@
         <LookupType value="4"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <LigatureSubst index="0" Format="1">
+        <LigatureSubst index="0">
           <LigatureSet glyph="f">
             <Ligature components="f,t" glyph="f_f_t"/>
             <Ligature components="f" glyph="f_f"/>
@@ -9504,7 +9504,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="2">
+        <SingleSubst index="0">
           <Substitution in="comma.numr" out="comma.dnom"/>
           <Substitution in="eight.numr" out="eight.dnom"/>
           <Substitution in="five.numr" out="five.dnom"/>
