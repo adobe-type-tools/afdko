@@ -3,12 +3,12 @@
 
   <GDEF>
     <Version value="0x00010000"/>
-    <GlyphClassDef Format="2">
+    <GlyphClassDef>
       <ClassDef glyph="f" class="4"/>
       <ClassDef glyph="f_i" class="2"/>
       <ClassDef glyph="i" class="4"/>
     </GlyphClassDef>
-    <MarkAttachClassDef Format="1">
+    <MarkAttachClassDef>
       <ClassDef glyph="acute" class="1"/>
       <ClassDef glyph="grave" class="1"/>
       <ClassDef glyph="macron" class="1"/>
@@ -29,7 +29,7 @@
         <LookupType value="4"/>
         <LookupFlag value="256"/><!-- markAttachmentType[1] -->
         <!-- SubTableCount=1 -->
-        <LigatureSubst index="0" Format="1">
+        <LigatureSubst index="0">
           <LigatureSet glyph="f">
             <Ligature components="i" glyph="f_i"/>
           </LigatureSet>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
- 
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
+
   <GPOS>
     <Version value="0x00010000"/>
     <ScriptList>
@@ -34,13 +34,13 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=2 -->
         <SinglePos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="zero"/>
           </Coverage>
           <ValueFormat value="0"/>
         </SinglePos>
         <SinglePos index="1" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="four"/>
           </Coverage>
           <ValueFormat value="4"/>

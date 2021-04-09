@@ -34,16 +34,16 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <PairPos index="0" Format="2">
-          <Coverage Format="2">
+          <Coverage>
             <Glyph value="cid00118"/>
             <Glyph value="cid00119"/>
             <Glyph value="cid00120"/>
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
-          <ClassDef1 Format="2">
+          <ClassDef1>
           </ClassDef1>
-          <ClassDef2 Format="2">
+          <ClassDef2>
             <ClassDef glyph="cid00121" class="1"/>
             <ClassDef glyph="cid00122" class="1"/>
             <ClassDef glyph="cid00123" class="1"/>

@@ -3,7 +3,7 @@
 
   <GDEF>
     <Version value="0x00010002"/>
-    <GlyphClassDef Format="2">
+    <GlyphClassDef>
       <ClassDef glyph="f" class="4"/>
       <ClassDef glyph="f_i" class="2"/>
       <ClassDef glyph="i" class="4"/>
@@ -11,7 +11,7 @@
     <MarkGlyphSetsDef>
       <MarkSetTableFormat value="1"/>
       <!-- MarkSetCount=1 -->
-      <Coverage index="0" Format="1">
+      <Coverage index="0">
         <Glyph value="grave"/>
         <Glyph value="acute"/>
         <Glyph value="macron"/>
@@ -33,7 +33,7 @@
         <LookupType value="4"/>
         <LookupFlag value="16"/><!-- useMarkFilteringSet -->
         <!-- SubTableCount=1 -->
-        <LigatureSubst index="0" Format="1">
+        <LigatureSubst index="0">
           <LigatureSet glyph="f">
             <Ligature components="i" glyph="f_i"/>
           </LigatureSet>

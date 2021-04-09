@@ -52,7 +52,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="T"/>
           </Coverage>
           <ValueFormat value="4"/>
@@ -64,7 +64,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="T"/>
           </Coverage>
           <ValueFormat value="4"/>

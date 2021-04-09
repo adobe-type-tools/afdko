@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GDEF>
     <Version value="0x00010000"/>
-    <GlyphClassDef Format="2">
+    <GlyphClassDef>
       <ClassDef glyph="damma" class="3"/>
       <ClassDef glyph="hamza" class="3"/>
     </GlyphClassDef>
@@ -42,10 +42,10 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <MarkMarkPos index="0" Format="1">
-          <Mark1Coverage Format="1">
+          <Mark1Coverage>
             <Glyph value="damma"/>
           </Mark1Coverage>
-          <Mark2Coverage Format="1">
+          <Mark2Coverage>
             <Glyph value="hamza"/>
           </Mark2Coverage>
           <!-- ClassCount=1 -->
