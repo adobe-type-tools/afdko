@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttCollection ttLibVersion="4.0">
+<ttCollection ttLibVersion="4.22">
 
   <ttFont sfntVersion="\x00\x01\x00\x00">
 
@@ -17,12 +17,12 @@
       <!-- Most of this table will be recalculated by the compiler -->
       <tableVersion value="1.0"/>
       <fontRevision value="3.00099"/>
-      <checkSumAdjustment value="0x9d41c3fe"/>
+      <checkSumAdjustment value="0x97babd76"/>
       <magicNumber value="0x5f0f3cf5"/>
       <flags value="00000000 00000011"/>
       <unitsPerEm value="1000"/>
       <created value="Fri Oct 11 13:57:31 2019"/>
-      <modified value="Mon Oct 21 05:17:50 2019"/>
+      <modified value="Fri Apr  9 20:41:30 2021"/>
       <xMin value="11"/>
       <yMin value="-16"/>
       <xMax value="615"/>
@@ -483,7 +483,7 @@
 
     <GDEF>
       <Version value="0x00010000"/>
-      <GlyphClassDef Format="2">
+      <GlyphClassDef>
         <ClassDef glyph="A.sc" class="1"/>
         <ClassDef glyph="B.sc" class="1"/>
         <ClassDef glyph="a" class="1"/>
@@ -578,15 +578,15 @@
           <LookupFlag value="8"/><!-- ignoreMarks -->
           <!-- SubTableCount=4 -->
           <PairPos index="0" Format="2">
-            <Coverage Format="1">
+            <Coverage>
               <Glyph value="B.sc"/>
             </Coverage>
             <ValueFormat1 value="4"/>
             <ValueFormat2 value="0"/>
-            <ClassDef1 Format="1">
+            <ClassDef1>
               <ClassDef glyph="B.sc" class="1"/>
             </ClassDef1>
-            <ClassDef2 Format="1">
+            <ClassDef2>
               <ClassDef glyph="A.sc" class="2"/>
               <ClassDef glyph="B.sc" class="4"/>
               <ClassDef glyph="a" class="3"/>
@@ -630,15 +630,15 @@
             </Class1Record>
           </PairPos>
           <PairPos index="1" Format="2">
-            <Coverage Format="1">
+            <Coverage>
               <Glyph value="space"/>
             </Coverage>
             <ValueFormat1 value="4"/>
             <ValueFormat2 value="0"/>
-            <ClassDef1 Format="1">
+            <ClassDef1>
               <ClassDef glyph="space" class="1"/>
             </ClassDef1>
-            <ClassDef2 Format="1">
+            <ClassDef2>
               <ClassDef glyph="a" class="1"/>
               <ClassDef glyph="b" class="2"/>
             </ClassDef2>
@@ -668,14 +668,14 @@
             </Class1Record>
           </PairPos>
           <PairPos index="2" Format="2">
-            <Coverage Format="1">
+            <Coverage>
               <Glyph value="A.sc"/>
             </Coverage>
             <ValueFormat1 value="4"/>
             <ValueFormat2 value="0"/>
-            <ClassDef1 Format="2">
+            <ClassDef1>
             </ClassDef1>
-            <ClassDef2 Format="1">
+            <ClassDef2>
               <ClassDef glyph="A.sc" class="3"/>
               <ClassDef glyph="B.sc" class="4"/>
               <ClassDef glyph="a" class="1"/>
@@ -702,17 +702,17 @@
             </Class1Record>
           </PairPos>
           <PairPos index="3" Format="2">
-            <Coverage Format="1">
+            <Coverage>
               <Glyph value="a"/>
               <Glyph value="b"/>
             </Coverage>
             <ValueFormat1 value="4"/>
             <ValueFormat2 value="0"/>
-            <ClassDef1 Format="1">
+            <ClassDef1>
               <ClassDef glyph="a" class="1"/>
               <ClassDef glyph="b" class="2"/>
             </ClassDef1>
-            <ClassDef2 Format="1">
+            <ClassDef2>
               <ClassDef glyph="A.sc" class="2"/>
               <ClassDef glyph="B.sc" class="3"/>
               <ClassDef glyph="a" class="1"/>
@@ -872,7 +872,7 @@
           <LookupType value="1"/>
           <LookupFlag value="0"/>
           <!-- SubTableCount=1 -->
-          <SingleSubst index="0" Format="1">
+          <SingleSubst index="0">
             <Substitution in="a" out="A.sc"/>
             <Substitution in="b" out="B.sc"/>
           </SingleSubst>
@@ -898,12 +898,12 @@
       <!-- Most of this table will be recalculated by the compiler -->
       <tableVersion value="1.0"/>
       <fontRevision value="3.00099"/>
-      <checkSumAdjustment value="0xd7fb4354"/>
+      <checkSumAdjustment value="0xd273b880"/>
       <magicNumber value="0x5f0f3cf5"/>
       <flags value="00000000 00000011"/>
       <unitsPerEm value="1000"/>
       <created value="Fri Oct 11 13:56:47 2019"/>
-      <modified value="Mon Oct 21 05:17:50 2019"/>
+      <modified value="Fri Apr  9 20:41:30 2021"/>
       <xMin value="14"/>
       <yMin value="-13"/>
       <xMax value="571"/>
@@ -1364,7 +1364,7 @@
 
     <GDEF>
       <Version value="0x00010000"/>
-      <GlyphClassDef Format="2">
+      <GlyphClassDef>
         <ClassDef glyph="A.sc" class="1"/>
         <ClassDef glyph="B.sc" class="1"/>
         <ClassDef glyph="a" class="1"/>
@@ -1459,15 +1459,15 @@
           <LookupFlag value="8"/><!-- ignoreMarks -->
           <!-- SubTableCount=4 -->
           <PairPos index="0" Format="2">
-            <Coverage Format="1">
+            <Coverage>
               <Glyph value="B.sc"/>
             </Coverage>
             <ValueFormat1 value="4"/>
             <ValueFormat2 value="0"/>
-            <ClassDef1 Format="1">
+            <ClassDef1>
               <ClassDef glyph="B.sc" class="1"/>
             </ClassDef1>
-            <ClassDef2 Format="1">
+            <ClassDef2>
               <ClassDef glyph="A.sc" class="2"/>
               <ClassDef glyph="B.sc" class="3"/>
               <ClassDef glyph="a" class="4"/>
@@ -1511,14 +1511,14 @@
             </Class1Record>
           </PairPos>
           <PairPos index="1" Format="2">
-            <Coverage Format="1">
+            <Coverage>
               <Glyph value="space"/>
             </Coverage>
             <ValueFormat1 value="4"/>
             <ValueFormat2 value="0"/>
-            <ClassDef1 Format="2">
+            <ClassDef1>
             </ClassDef1>
-            <ClassDef2 Format="1">
+            <ClassDef2>
               <ClassDef glyph="a" class="2"/>
               <ClassDef glyph="b" class="1"/>
             </ClassDef2>
@@ -1537,15 +1537,15 @@
             </Class1Record>
           </PairPos>
           <PairPos index="2" Format="2">
-            <Coverage Format="1">
+            <Coverage>
               <Glyph value="A.sc"/>
             </Coverage>
             <ValueFormat1 value="4"/>
             <ValueFormat2 value="0"/>
-            <ClassDef1 Format="1">
+            <ClassDef1>
               <ClassDef glyph="A.sc" class="1"/>
             </ClassDef1>
-            <ClassDef2 Format="1">
+            <ClassDef2>
               <ClassDef glyph="A.sc" class="2"/>
               <ClassDef glyph="space" class="1"/>
             </ClassDef2>
@@ -1575,17 +1575,17 @@
             </Class1Record>
           </PairPos>
           <PairPos index="3" Format="2">
-            <Coverage Format="1">
+            <Coverage>
               <Glyph value="a"/>
               <Glyph value="b"/>
             </Coverage>
             <ValueFormat1 value="4"/>
             <ValueFormat2 value="0"/>
-            <ClassDef1 Format="1">
+            <ClassDef1>
               <ClassDef glyph="a" class="1"/>
               <ClassDef glyph="b" class="2"/>
             </ClassDef1>
-            <ClassDef2 Format="1">
+            <ClassDef2>
               <ClassDef glyph="A.sc" class="3"/>
               <ClassDef glyph="B.sc" class="4"/>
               <ClassDef glyph="a" class="1"/>
@@ -1745,7 +1745,7 @@
           <LookupType value="1"/>
           <LookupFlag value="0"/>
           <!-- SubTableCount=1 -->
-          <SingleSubst index="0" Format="1">
+          <SingleSubst index="0">
             <Substitution in="a" out="A.sc"/>
             <Substitution in="b" out="B.sc"/>
           </SingleSubst>
