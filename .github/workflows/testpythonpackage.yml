@@ -2,16 +2,19 @@ name: AFDKO Test Suite
 
 on:
   push:
-    paths-ignore: 
-      - docs/*
-      - CONTRIBUTING.md
-      - LICENSE.md
-      - NEWS.md
-      - README.md
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+
   pull_request:
     branches: [master, develop]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+
   schedule:
     - cron: '0 11 1 * *'
+
   workflow_dispatch:
     inputs:
       reason:
@@ -64,7 +67,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt .
         pip freeze --all
-    
+
     - name: Lint Python code with flake8 using .flake8 config file
       run: |
         flake8 . --count --show-source --statistics --config=.flake8
