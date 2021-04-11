@@ -6,22 +6,7 @@ on:
       - '[0-9]+.[0-9]+.[0-9a-z]+'
 
 jobs:
-  create_release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: true
-
   build_wheels:
-    needs: create_release
     name: Build Py3 Wheel on ${{ matrix.os }}
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     runs-on: ${{ matrix.os }}
@@ -66,16 +51,10 @@ jobs:
         user: __token__
         password: ${{ secrets.pypi_password }}
 
-    - name: Attach assets to GitHub release
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      shell:
-        bash
-      run: |
-        set -x
-        assets=()
-        for asset in ./dist/*.*; do
-          assets+=("-a" "$asset")
-        done
-        tag_name="${GITHUB_REF##*/}"
-        hub release edit "${assets[@]}" -m "" "$tag_name"
+      with:
+        prerelease: true
+        files: ./dist/*
