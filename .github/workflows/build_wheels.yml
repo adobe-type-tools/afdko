@@ -61,13 +61,10 @@ jobs:
         python setup.py sdist
 
     - name: Publish dist(s) to PyPI
-      run: |
-        pip install twine
-        twine upload dist/*
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.pypi_password }}
-      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}
 
     - name: Attach assets to GitHub release
       env:
