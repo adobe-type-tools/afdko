@@ -44,6 +44,25 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: python setup.py sdist
 
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: wheelstorage
+        path: ./dist/*
+        if-no-files-found: error
+        retention-days: 30
+
+  publish_release:
+    name: Publish Release
+    needs: build_wheels
+    runs-on: ubuntu-latest
+
+    - name: Download release assets
+      uses: actions/download-artifact@v2
+      with:
+        name: wheelstorage
+        path: dist
+
     - name: Publish dist(s) to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
