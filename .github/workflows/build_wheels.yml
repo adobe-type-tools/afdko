@@ -57,6 +57,18 @@ jobs:
     needs: build_wheels
     runs-on: ubuntu-latest
 
+    steps:
+    - name: Get date & flat tag
+      id: date_tag
+      run: |
+        export DATE=$(TZ=US/Pacific date +'%Y-%m-%d')
+        echo $DATE
+        export FLAT_TAG=$(echo ${GITHUB_REF##*/} | sed 's/\.//g')
+        echo $FLAT_TAG
+        echo ::set-output name=TODAY::$DATE
+        echo ::set-output name=VERSION::$FLAT_TAG
+      shell: bash
+
     - name: Download release assets
       uses: actions/download-artifact@v2
       with:
@@ -74,5 +86,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        body: '[Release Notes](https://github.com/adobe-type-tools/afdko/blob/develop/NEWS.md#${{ steps.date_tag.outputs.VERSION }}-released-${{ steps.date_tag.outputs.TODAY }})'
         prerelease: true
         files: ./dist/*
