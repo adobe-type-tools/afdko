@@ -5,7 +5,7 @@ Notice              "Source is a trademark of Adobe Systems Incorporated in the 
 Copyright           "Copyright 2010, 2012, 2014 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'."
 FamilyName          "Source Sans Pro"
 UnderlinePosition   -75
-FontBBox            {52,65524,565,660}
+FontBBox            {52,-12,565,660}
 FSType              4
 sup.srcFontType     CFF (name-keyed)
 sup.nGlyphs         5
