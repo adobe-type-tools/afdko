@@ -1455,7 +1455,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                 CHKOFLOW(1);
                 CHECK_DICT_BYTES_LEFT(2);
                 {
-                    uint16_t value = read1(h);
+                    int16_t value = read1(h);
                     value = value << 8 | read1(h);
                     PUSH_INT(value);
                 }
