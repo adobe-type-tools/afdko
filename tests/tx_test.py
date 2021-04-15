@@ -1099,5 +1099,5 @@ def test_cffread_bug1343():
     Check FontBBox values
     """
     actual_path = runner(CMD + ['-s', '-f', 'font.otf', '-o', '3'])
-    expected_path = get_expected_path(f'font.otf.dump3.txt')
+    expected_path = get_expected_path('font.otf.dump3.txt')
     assert differ([expected_path, actual_path, '-s', '## Filename'])
