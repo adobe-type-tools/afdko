@@ -340,9 +340,9 @@ static STI addString(t1rCtx h, size_t length, const char *value) {
 /* Get string from STI. */
 static char *getString(t1rCtx h, STI sti) {
     if ((sti != STI_UNDEF) && (sti >= STI_LIMIT))
-        fatal(h, t1rErrSTILimit, "String INDEX limit exceeded: [%ld]", sti);
+        fatal(h, t1rErrSTILimit, "String INDEX limit exceeded: [%hu]", sti);
     else if ((sti == STI_UNDEF) || (sti >= h->strings.index.cnt))
-        fatal(h, t1rErrSTIUndef, "String undefined for index: [%ld]", sti);
+        fatal(h, t1rErrSTIUndef, "String undefined for index: [%hu]", sti);
     else
         return &h->strings.buf.array[h->strings.index.array[sti]];
 }
