@@ -55,6 +55,7 @@ static const char *keys[] =
 
 typedef unsigned short STI; /* String index */
 #define STI_UNDEF 0xffff    /* Undefined string index */
+#define STI_LIMIT 65000
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
 
 typedef struct /* Map glyph name to its standard encoding */
@@ -338,8 +339,10 @@ static STI addString(t1rCtx h, size_t length, const char *value) {
 
 /* Get string from STI. */
 static char *getString(t1rCtx h, STI sti) {
-    if ((sti == STI_UNDEF) || (sti >= h->strings.index.cnt))
-        return NULL;
+    if ((sti != STI_UNDEF) && (sti >= STI_LIMIT))
+        fatal(h, t1rErrSTILimit, "String INDEX limit exceeded: [%ld]", sti);
+    else if ((sti == STI_UNDEF) || (sti >= h->strings.index.cnt))
+        fatal(h, t1rErrSTIUndef, "String undefined for index: [%ld]", sti);
     else
         return &h->strings.buf.array[h->strings.index.array[sti]];
 }

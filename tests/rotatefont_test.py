@@ -105,3 +105,20 @@ def test_rtf_option(font_filename):
         actual_path = generate_ps_dump(actual_path)
         expected_path = generate_ps_dump(expected_path)
     assert differ([expected_path, actual_path] + skip)
+
+
+def test_segfault_bug1338():
+    """
+    Testing font with 65535 glyphs for
+    string INDEX limit exceeded error
+    instead of segfault error
+    """
+    rtf_path = get_input_path("bug1338/bug1338-map.txt")
+    font_path = get_input_path("bug1338/bug1338-font.pfa")
+    actual_path = get_temp_file_path()
+    cmd = CMD + ['-a', '-f', font_path, actual_path,
+                 '-o', 't1',
+                 'rtf', f'_{rtf_path}']
+    with pytest.raises(subprocess.CalledProcessError) as err:
+        runner(cmd)
+    assert err.value.returncode == 35
