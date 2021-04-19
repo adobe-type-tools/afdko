@@ -107,7 +107,7 @@ def test_rtf_option(font_filename):
     assert differ([expected_path, actual_path] + skip)
 
 
-def test_segfault_bug1338():
+def test_glyph_limit_error_bug1338():
     """
     Testing font with 65535 glyphs for
     string INDEX limit exceeded error
