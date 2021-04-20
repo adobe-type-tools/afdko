@@ -232,8 +232,14 @@ def classChainContext(subtable, otlConv):
 
 
 def classExt(subtable, otlConv):
+    format = 1
+    if hasattr(subtable.ExtSubTable, "Format"):
+        format = subtable.ExtSubTable.Format
+    elif subtable.ExtensionLookupType == 7:
+        if hasattr(subtable.ExtSubTable, "ClassDef"):
+            format = 2
     handler = otlConv.classHandlers.get(
-        (subtable.ExtensionLookupType, subtable.ExtSubTable.Format), None)
+        (subtable.ExtensionLookupType, format), None)
     if handler:
         handler(subtable.ExtSubTable, otlConv)
 
@@ -1712,7 +1718,7 @@ class OTLConverter(object):
             for subtableIndex, subtable in enumerate(lookup.SubTable):
                 self.curSubTableIndex = subtableIndex
                 handler = self.classHandlers.get(
-                    (lookup.LookupType, subtable.Format))
+                    (lookup.LookupType, getattr(subtable, "Format", 1)))
                 if handler:
                     handler(subtable, self)
 
