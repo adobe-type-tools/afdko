@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GSUB>
     <Version value="0x00010000"/>
@@ -41,7 +41,7 @@
         <LookupType value="3"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <AlternateSubst index="0" Format="1">
+        <AlternateSubst index="0">
           <AlternateSet glyph="A">
             <Alternate glyph="A.alt1"/>
             <Alternate glyph="A.alt2"/>
@@ -60,7 +60,7 @@
         <LookupType value="3"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <AlternateSubst index="0" Format="1">
+        <AlternateSubst index="0">
           <AlternateSet glyph="A">
             <Alternate glyph="A.alt1"/>
             <Alternate glyph="A.alt2"/>

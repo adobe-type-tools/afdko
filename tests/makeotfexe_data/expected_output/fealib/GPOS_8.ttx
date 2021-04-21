@@ -36,20 +36,20 @@
         <!-- SubTableCount=1 -->
         <ChainContextPos index="0" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0" Format="1">
+          <BacktrackCoverage index="0">
             <Glyph value="A"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=4 -->
-          <InputCoverage index="0" Format="1">
+          <InputCoverage index="0">
             <Glyph value="one"/>
           </InputCoverage>
-          <InputCoverage index="1" Format="1">
+          <InputCoverage index="1">
             <Glyph value="two"/>
           </InputCoverage>
-          <InputCoverage index="2" Format="1">
+          <InputCoverage index="2">
             <Glyph value="one"/>
           </InputCoverage>
-          <InputCoverage index="3" Format="1">
+          <InputCoverage index="3">
             <Glyph value="two"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=0 -->
@@ -77,7 +77,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="one"/>
           </Coverage>
           <ValueFormat value="4"/>
@@ -89,7 +89,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="two"/>
           </Coverage>
           <ValueFormat value="4"/>
@@ -102,30 +102,30 @@
         <!-- SubTableCount=1 -->
         <ChainContextPos index="0" Format="3">
           <!-- BacktrackGlyphCount=2 -->
-          <BacktrackCoverage index="0" Format="1">
+          <BacktrackCoverage index="0">
             <Glyph value="B"/>
             <Glyph value="b"/>
           </BacktrackCoverage>
-          <BacktrackCoverage index="1" Format="1">
+          <BacktrackCoverage index="1">
             <Glyph value="A"/>
             <Glyph value="a"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=3 -->
-          <InputCoverage index="0" Format="1">
+          <InputCoverage index="0">
             <Glyph value="I"/>
           </InputCoverage>
-          <InputCoverage index="1" Format="1">
+          <InputCoverage index="1">
             <Glyph value="N"/>
           </InputCoverage>
-          <InputCoverage index="2" Format="1">
+          <InputCoverage index="2">
             <Glyph value="P"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=2 -->
-          <LookAheadCoverage index="0" Format="1">
+          <LookAheadCoverage index="0">
             <Glyph value="Y"/>
             <Glyph value="y"/>
           </LookAheadCoverage>
-          <LookAheadCoverage index="1" Format="1">
+          <LookAheadCoverage index="1">
             <Glyph value="Z"/>
             <Glyph value="z"/>
           </LookAheadCoverage>
@@ -145,7 +145,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="2">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="one"/>
             <Glyph value="two"/>
           </Coverage>
@@ -160,7 +160,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="2">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="one"/>
             <Glyph value="two"/>
           </Coverage>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GPOS>
     <Version value="0x00010000"/>
@@ -34,7 +34,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=2 -->
         <PairPos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="f"/>
             <Glyph value="y"/>
             <Glyph value="yacute"/>
@@ -73,16 +73,16 @@
           </PairSet>
         </PairPos>
         <PairPos index="1" Format="2">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="y"/>
             <Glyph value="yacute"/>
             <Glyph value="ydieresis"/>
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
-          <ClassDef1 Format="2">
+          <ClassDef1>
           </ClassDef1>
-          <ClassDef2 Format="2">
+          <ClassDef2>
             <ClassDef glyph="comma" class="1"/>
             <ClassDef glyph="period" class="1"/>
             <ClassDef glyph="semicolon" class="1"/>

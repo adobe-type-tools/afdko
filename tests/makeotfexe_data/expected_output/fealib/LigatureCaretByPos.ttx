@@ -4,7 +4,7 @@
   <GDEF>
     <Version value="0x00010000"/>
     <LigCaretList>
-      <Coverage Format="1">
+      <Coverage>
         <Glyph value="c_h"/>
         <Glyph value="c_k"/>
         <Glyph value="o_f_f_i"/>

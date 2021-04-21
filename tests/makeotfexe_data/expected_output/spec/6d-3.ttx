@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="4.0">
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GDEF>
     <Version value="0x00010000"/>
-    <GlyphClassDef Format="2">
+    <GlyphClassDef>
       <ClassDef glyph="A" class="1"/>
       <ClassDef glyph="B" class="1"/>
       <ClassDef glyph="C" class="1"/>
@@ -28,20 +28,20 @@
         <!-- SubTableCount=2 -->
         <ChainContextPos index="0" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0" Format="2">
+          <BacktrackCoverage index="0">
             <Glyph value="A"/>
             <Glyph value="B"/>
             <Glyph value="C"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0" Format="1">
+          <InputCoverage index="0">
             <Glyph value="a"/>
             <Glyph value="e"/>
             <Glyph value="o"/>
             <Glyph value="u"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=1 -->
-          <LookAheadCoverage index="0" Format="2">
+          <LookAheadCoverage index="0">
             <Glyph value="X"/>
             <Glyph value="Y"/>
             <Glyph value="Z"/>
@@ -54,15 +54,15 @@
         </ChainContextPos>
         <ChainContextPos index="1" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0" Format="1">
+          <BacktrackCoverage index="0">
             <Glyph value="A"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0" Format="1">
+          <InputCoverage index="0">
             <Glyph value="a"/>
           </InputCoverage>
           <!-- LookAheadGlyphCount=1 -->
-          <LookAheadCoverage index="0" Format="1">
+          <LookAheadCoverage index="0">
             <Glyph value="X"/>
           </LookAheadCoverage>
           <!-- PosCount=1 -->
@@ -77,11 +77,11 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <MarkBasePos index="0" Format="1">
-          <MarkCoverage Format="1">
+          <MarkCoverage>
             <Glyph value="grave"/>
             <Glyph value="acute"/>
           </MarkCoverage>
-          <BaseCoverage Format="1">
+          <BaseCoverage>
             <Glyph value="a"/>
             <Glyph value="e"/>
             <Glyph value="o"/>

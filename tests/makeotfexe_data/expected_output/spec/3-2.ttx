@@ -33,7 +33,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="1">
+        <SingleSubst index="0">
           <Substitution in="A.alt1" out="B.alt1"/>
           <Substitution in="A.alt2" out="B.alt2"/>
           <Substitution in="A.alt3" out="B.alt3"/>

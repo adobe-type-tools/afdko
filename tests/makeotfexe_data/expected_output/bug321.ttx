@@ -56,7 +56,7 @@
           <ChainContextSubst Format="3">
             <!-- BacktrackGlyphCount=0 -->
             <!-- InputGlyphCount=1 -->
-            <InputCoverage index="0" Format="1">
+            <InputCoverage index="0">
               <Glyph value="a"/>
             </InputCoverage>
             <!-- LookAheadGlyphCount=0 -->
@@ -74,7 +74,7 @@
         <!-- SubTableCount=1 -->
         <ExtensionSubst index="0" Format="1">
           <ExtensionLookupType value="1"/>
-          <SingleSubst Format="1">
+          <SingleSubst>
             <Substitution in="a" out="b"/>
           </SingleSubst>
         </ExtensionSubst>
@@ -137,7 +137,7 @@
           <ChainContextPos Format="3">
             <!-- BacktrackGlyphCount=0 -->
             <!-- InputGlyphCount=1 -->
-            <InputCoverage index="0" Format="1">
+            <InputCoverage index="0">
               <Glyph value="a"/>
             </InputCoverage>
             <!-- LookAheadGlyphCount=0 -->
@@ -156,7 +156,7 @@
         <ExtensionPos index="0" Format="1">
           <ExtensionLookupType value="1"/>
           <SinglePos Format="1">
-            <Coverage Format="1">
+            <Coverage>
               <Glyph value="a"/>
             </Coverage>
             <ValueFormat value="4"/>

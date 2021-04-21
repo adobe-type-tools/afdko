@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GPOS>
     <Version value="0x00010000"/>
@@ -34,14 +34,14 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=3 -->
         <PairPos index="0" Format="2">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="A"/>
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
-          <ClassDef1 Format="2">
+          <ClassDef1>
           </ClassDef1>
-          <ClassDef2 Format="2">
+          <ClassDef2>
             <ClassDef glyph="comma" class="1"/>
             <ClassDef glyph="period" class="1"/>
             <ClassDef glyph="semicolon" class="1"/>
@@ -58,7 +58,7 @@
           </Class1Record>
         </PairPos>
         <PairPos index="1" Format="2">
-          <Coverage Format="2">
+          <Coverage>
             <Glyph value="B"/>
             <Glyph value="C"/>
             <Glyph value="D"/>
@@ -67,12 +67,12 @@
           </Coverage>
           <ValueFormat1 value="4"/>
           <ValueFormat2 value="0"/>
-          <ClassDef1 Format="2">
+          <ClassDef1>
             <ClassDef glyph="D" class="1"/>
             <ClassDef glyph="E" class="1"/>
             <ClassDef glyph="F" class="1"/>
           </ClassDef1>
-          <ClassDef2 Format="2">
+          <ClassDef2>
             <ClassDef glyph="comma" class="1"/>
             <ClassDef glyph="period" class="2"/>
             <ClassDef glyph="semicolon" class="2"/>
@@ -103,14 +103,14 @@
           </Class1Record>
         </PairPos>
         <PairPos index="2" Format="2">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="G"/>
           </Coverage>
           <ValueFormat1 value="15"/>
           <ValueFormat2 value="0"/>
-          <ClassDef1 Format="2">
+          <ClassDef1>
           </ClassDef1>
-          <ClassDef2 Format="2">
+          <ClassDef2>
             <ClassDef glyph="comma" class="1"/>
             <ClassDef glyph="period" class="1"/>
             <ClassDef glyph="semicolon" class="1"/>

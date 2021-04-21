@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GSUB>
     <Version value="0x00010000"/>
@@ -35,7 +35,7 @@
         <!-- SubTableCount=1 -->
         <ChainContextSubst index="0" Format="3">
           <!-- BacktrackGlyphCount=1 -->
-          <BacktrackCoverage index="0" Format="2">
+          <BacktrackCoverage index="0">
             <Glyph value="A"/>
             <Glyph value="B"/>
             <Glyph value="C"/>
@@ -64,7 +64,7 @@
             <Glyph value="Z"/>
           </BacktrackCoverage>
           <!-- InputGlyphCount=1 -->
-          <InputCoverage index="0" Format="2">
+          <InputCoverage index="0">
             <Glyph value="A.sc"/>
             <Glyph value="B.sc"/>
             <Glyph value="C.sc"/>
@@ -104,7 +104,7 @@
         <LookupType value="1"/>
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
-        <SingleSubst index="0" Format="1">
+        <SingleSubst index="0">
           <Substitution in="A.sc" out="a"/>
           <Substitution in="B.sc" out="b"/>
           <Substitution in="C.sc" out="c"/>

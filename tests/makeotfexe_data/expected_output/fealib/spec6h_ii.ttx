@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GDEF>
     <Version value="0x00010000"/>
-    <GlyphClassDef Format="2">
+    <GlyphClassDef>
       <ClassDef glyph="acute" class="3"/>
       <ClassDef glyph="c" class="1"/>
       <ClassDef glyph="grave" class="3"/>
@@ -44,7 +44,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <PairPos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="T"/>
           </Coverage>
           <ValueFormat1 value="4"/>
@@ -68,11 +68,11 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <MarkBasePos index="0" Format="1">
-          <MarkCoverage Format="1">
+          <MarkCoverage>
             <Glyph value="grave"/>
             <Glyph value="acute"/>
           </MarkCoverage>
-          <BaseCoverage Format="1">
+          <BaseCoverage>
             <Glyph value="c"/>
             <Glyph value="o"/>
           </BaseCoverage>
@@ -118,14 +118,14 @@
         <ChainContextPos index="0" Format="3">
           <!-- BacktrackGlyphCount=0 -->
           <!-- InputGlyphCount=3 -->
-          <InputCoverage index="0" Format="1">
+          <InputCoverage index="0">
             <Glyph value="T"/>
           </InputCoverage>
-          <InputCoverage index="1" Format="1">
+          <InputCoverage index="1">
             <Glyph value="c"/>
             <Glyph value="o"/>
           </InputCoverage>
-          <InputCoverage index="2" Format="1">
+          <InputCoverage index="2">
             <Glyph value="grave"/>
             <Glyph value="acute"/>
           </InputCoverage>

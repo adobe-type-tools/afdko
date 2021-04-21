@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.22">
 
   <GPOS>
     <Version value="0x00010000"/>
@@ -34,7 +34,7 @@
         <LookupFlag value="0"/>
         <!-- SubTableCount=1 -->
         <SinglePos index="0" Format="1">
-          <Coverage Format="1">
+          <Coverage>
             <Glyph value="T"/>
           </Coverage>
           <ValueFormat value="4"/>
