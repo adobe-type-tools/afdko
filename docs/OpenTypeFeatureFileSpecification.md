@@ -318,12 +318,13 @@ _[ Note: the following is unimplemented and is subject to change. ]_
 
 For **variable fonts only**, a `<metric>` value can make use of the following syntax to specify how values should vary based on axis locations:
 ```
-(<location_spec1>:<value1> <location_spec_2>:<value2>)
+(<location_spec1>:<value1> [...] <location_specN>:<valueN>)
 ```
 
 Notes:
  - A `<location_spec>` consists of one or more `<axis_tag>=<axis_location>` pairs, separated by commas 
  - `<location_spec>:<value>` pairs are separated by spaces within the variable `<metric>`
+ - multiple `<location_spec>:<value>` pairs may be specified within a variable `<metric>`
 
 Example showing a simple single-axis variable scalar value. The value is -100 when Weight is 200, and -150 when Weight is 900:
 ```
