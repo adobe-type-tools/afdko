@@ -257,6 +257,7 @@ struct featCtx_ {
     /* --- Stores stats on deprecated feature file syntax */
     struct {
         unsigned short numExcept;
+        unsigned short numAnon;
     } syntax;
 
     dnaDCL(GNode *, markClasses);  /* Container for head nodes or mark classes */
@@ -4328,8 +4329,9 @@ void featNew(hotCtx hot) {
 /* Emit report on any deprecated feature file syntax encountered */
 
 static void reportOldSyntax(void) {
+    int one;
     if (h->syntax.numExcept > 0) {
-        int one = h->syntax.numExcept == 1;
+        one = h->syntax.numExcept == 1;
 
         hotMsg(g, hotNOTE,
                "There %s %hd instance%s of the deprecated \"except\" syntax in the"
@@ -4341,6 +4343,17 @@ static void reportOldSyntax(void) {
                " Contextual and not a Single Substitution rule.)",
                one ? "is" : "are",
                h->syntax.numExcept,
+               one ? "" : "s");
+    }
+    if (h->syntax.numAnon > 0) {
+        one = h->syntax.numAnon == 1;
+
+        hotMsg(g, hotNOTE,
+               "There %s %hd instance%s of the deprecated \"anon\" block in the"
+               " feature file. makeotf currently parses these blocks without providing any"
+               " interface to retrieve them but they will be removed from a future standard.",
+               one ? "is" : "are",
+               h->syntax.numAnon,
                one ? "" : "s");
     }
 }

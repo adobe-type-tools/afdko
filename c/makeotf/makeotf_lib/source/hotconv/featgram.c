@@ -6007,6 +6007,7 @@ anonBlock()
         zzCONSUME;
 
         featAddAnonData();
+        h->syntax.numAnon++;
         featSetTagReturnMode(START);
         zzEXIT(zztasp1);
         return;
