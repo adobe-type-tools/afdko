@@ -168,6 +168,7 @@ static void addName(nameCtx h,
                     unsigned short nameId,
                     size_t length, char *str) {
     char *dst;
+    char newStr[length];
     NameRecord *rec;
     int index;
     int omitMacNames = (h->g->convertFlags & HOT_OMIT_MAC_NAMES); /* omit all Mac platform names. */
@@ -197,8 +198,9 @@ static void addName(nameCtx h,
 
     /* Save name's string */
     rec->offset = (unsigned short)h->addstrs.cnt;
+    strncpy(newStr, str, length);
     dst = dnaEXTEND(h->addstrs, (long)length + 1);
-    strncpy(dst, str, length);
+    strncpy(dst, newStr, length);
     dst[length] = '\0';
 }
 
