@@ -78,7 +78,7 @@ class FontFile(object):
             print("Converting to temp UFO font...")
             self.temp_ufo_path = temp_path = get_temp_dir_path('font.ufo')
             if self.font_format == 'PFC':
-                self.ufo_format = UFOFormatVersion.FORMAT_3_0
+                self.ufo_format = UFOFormatVersion.FORMAT_2_0
 
             if not run_shell_command([
                     'tx', '-ufo', font_path, temp_path]):
