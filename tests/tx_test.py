@@ -1103,61 +1103,40 @@ def test_cffread_bug1343():
     assert differ([expected_path, actual_path, '-s', '## Filename'])
 
 
-def test_roundtrip_cid_ufo():
+@pytest.mark.parametrize('arg, input, output, expected', [
+    ('ufo', 'cidfont.subset', 'cidfont_subset.ufo', 'testCID.ufo'),
+    ('t1', 'testCID.ufo', 'cidfont_subset.ufo', 'cidfont.subset'),
+    (('ufo', 't1'), 'cidfont.subset', 'cidfont_subset.ufo', 'cidfont.subset'),
+    (('t1', 'ufo'), 'testCID.ufo', 'cidfont_subset.ufo', 'testCID.ufo'),
+])
+def test_cidkeyed_read_write(arg, input, output, expected):
+    """
+    Tests reading & writing CID-Keyed fonts in tx (uforead & ufowrite)
+    CID -> UFO (one-way test)
+    UFO -> CID (one-way test)
+    CID -> UFO -> CID (round-trip test)
+    UFO -> CID -> UFO (round-trip test)
+    """
     folder = "cid_roundtrip/"
-    cid_input_path = get_input_path(folder + "cidfont.subset")
-    ufo_expected_path = get_expected_path(folder + 'testCID.ufo')
+    input_path = get_input_path(folder + input)
     output_dir = get_temp_dir_path()
-    ufo_output_path = os.path.join(output_dir, "cidfont_subset.ufo")
-    runner(CMD + ['-a', '-o', 'ufo', '-f',
-                  cid_input_path, ufo_output_path])
-    assert differ([ufo_expected_path, ufo_output_path])
+    output_path = os.path.join(output_dir, output)
+    expected_path = get_expected_path(folder + expected)
+    if isinstance(arg, tuple):  # round-trip tests
+        runner(CMD + ['-a', '-o', 't1', 'n', '-f',
+                      input_path, output_path])
+        final_output_dir = get_temp_dir_path()
+        final_output_path = os.path.join(final_output_dir, output)
+        runner(CMD + ['-a', '-o', arg[1], '-f',
+                      output_path, final_output_path])
+        output_path = final_output_path
+    else:  # one-way tests
+        runner(CMD + ['-a', '-o', arg, '-f', input_path, output_path])
+    if '.subset' in expected_path:
+        expected_path = generate_ps_dump(expected_path)
+        output_path = generate_ps_dump(output_path)
+    assert differ([expected_path, output_path])
 
-
-def test_roundtrip_ufo_cid():
-    folder = "cid_roundtrip/"
-    ufo_input_path = get_input_path(folder + 'testCID.ufo')
-    cid_expected_path = get_expected_path(folder + 'cidfont.subset')
-    cid_actual_path = get_temp_file_path()
-    runner(CMD + ['-a', '-o', 't1', 'n', '-f',
-                  ufo_input_path, cid_actual_path])
-    cid_new_expected_path = generate_ps_dump(cid_expected_path)
-    output_path = generate_ps_dump(cid_actual_path)
-    assert differ([cid_new_expected_path, output_path])
-
-
-def test_roundtrip_cid_ufo_cid():
-    folder = "cid_roundtrip/"
-    cid_input_path = get_input_path(folder + "cidfont.subset")
-    cid_expected_path = get_expected_path(folder + 'cidfont.subset')
-    output_dir = get_temp_dir_path()
-    ufo_output_path = os.path.join(output_dir, "cidfont_subset.ufo")
-    # cid -> ufo
-    runner(CMD + ['-a', '-o', 'ufo', '-f',
-                  cid_input_path, ufo_output_path])
-    # ufo -> cid
-    cid_actual_path = get_temp_file_path()
-    runner(CMD + ['-a', '-o', 't1', 'n', '-f',
-                  ufo_output_path, cid_actual_path])
-    cid_new_expected_path = generate_ps_dump(cid_expected_path)
-    cid_output_path = generate_ps_dump(cid_actual_path)
-    assert differ([cid_new_expected_path, cid_output_path])
-
-
-def test_roundtrip_ufo_cid_ufo():
-    folder = "cid_roundtrip/"
-    ufo_input_path = get_input_path(folder + 'testCID.ufo')
-    ufo_expected_path = get_expected_path(folder + 'testCID.ufo')
-    # ufo -> cid
-    cid_actual_path = get_temp_file_path()
-    runner(CMD + ['-a', '-o', 't1', 'n', '-f',
-                  ufo_input_path, cid_actual_path])
-    output_dir = get_temp_dir_path()
-    ufo_output_path = os.path.join(output_dir, "cidfont_subset.ufo")
-    # cid -> ufo
-    runner(CMD + ['-a', '-o', 'ufo', '-f',
-                  cid_actual_path, ufo_output_path])
-    assert differ([ufo_expected_path, ufo_output_path])
 
 @pytest.mark.parametrize("file", [
     "missing_CID.ufo",
@@ -1168,4 +1147,3 @@ def test_cidkeyed_lib_missing(file):
     ufo_input_path = get_input_path(folder + file)
     arg = [TOOL, '-t1', '-f', ufo_input_path]
     assert subprocess.call(arg) == 6
-
