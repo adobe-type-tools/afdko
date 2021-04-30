@@ -1546,10 +1546,15 @@ static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin,
         chr->iFD = 0;
         if (currentCID >= 0) {
             chr->cid = currentCID;
+            if (currentiFD < 0){
+                    fatal(h, ufoErrParse, "Warning: glyph '%s' missing FDArray index within <lib> dict", glyphName);
+            }
             chr->iFD = currentiFD;
             if (currentCID > CIDCount) {
                 CIDCount = (long)currentCID + 1;
             }
+        } else if (h->top.sup.flags & ABF_CID_FONT){
+            fatal(h, ufoErrParse, "Warning: glyph '%s' missing CID number within <lib> dict", glyphName);
         }
         chr->gname.ptr = glyphName;
         chr->gname.impl = tag;
@@ -1649,6 +1654,8 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
         } else if (tokenEqualStr(tk, "<integer>") && state == inCIDNumber) {
             tk = getToken(h, state);
             currentCID = atoi(tk->val);
+            h->top.sup.flags |= ABF_CID_FONT;
+            h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
             state = inCustomLib;
         } else if (tokenEqualStr(tk, "com.adobe.type.cid.iFD") && state == inCustomLib) {
             state = inFDNumber;
@@ -1675,8 +1682,9 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
             /* Set default width and name, to be used if these values are not supplied by the glyph attributes. */
             sprintf(tempName, "gid%05d", (unsigned short)h->chars.index.cnt);
         } else if (tokenEqualStr(tk, "</glyph>")) {
-            if (char_begin == 0)  // happens when there is no <outline> element, which can happen with spaces.
-                addCharFromGLIF(h, tag, glifRec->glyphName, char_begin, char_end, unicode);
+            addCharFromGLIF(h, tag, glifRec->glyphName, char_begin, char_end, unicode);
+            currentCID = -1;
+            currentiFD = -1;
             h->flags |= SEEN_END;
             break;
         } else if (tokenEqualStr(tk, "<unicode")) {
@@ -1733,8 +1741,6 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
                 continue;
             }
             char_end = tk->offset;
-            addCharFromGLIF(h, tag, glifRec->glyphName, char_begin, char_end, unicode);
-            break;
         } else if (tokenEqualStr(tk, "lib")) {
             /* since any lib element follows the outline element, if we get here there is no outline element.
              end we need to add the current glyph to the char list with no outline content. */
