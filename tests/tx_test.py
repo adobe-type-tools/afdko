@@ -1158,3 +1158,14 @@ def test_roundtrip_ufo_cid_ufo():
     runner(CMD + ['-a', '-o', 'ufo', '-f',
                   cid_actual_path, ufo_output_path])
     assert differ([ufo_expected_path, ufo_output_path])
+
+@pytest.mark.parametrize("file", [
+    "missing_CID.ufo",
+    "missing_iFD.ufo",
+])
+def test_cidkeyed_lib_missing(file):
+    folder = folder = "cidkeyed_missing_lib/"
+    ufo_input_path = get_input_path(folder + file)
+    arg = [TOOL, '-t1', '-f', ufo_input_path]
+    assert subprocess.call(arg) == 6
+
