@@ -1123,7 +1123,7 @@ def test_cidkeyed_read_write(arg, input, output, expected):
     output_path = os.path.join(output_dir, output)
     expected_path = get_expected_path(folder + expected)
     if isinstance(arg, tuple):  # round-trip tests
-        runner(CMD + ['-a', '-o', 't1', 'n', '-f',
+        runner(CMD + ['-a', '-o', arg[0], '-f',
                       input_path, output_path])
         final_output_dir = get_temp_dir_path()
         final_output_path = os.path.join(final_output_dir, output)
@@ -1131,7 +1131,8 @@ def test_cidkeyed_read_write(arg, input, output, expected):
                       output_path, final_output_path])
         output_path = final_output_path
     else:  # one-way tests
-        runner(CMD + ['-a', '-o', arg, '-f', input_path, output_path])
+        runner(CMD + ['-a', '-o', arg, '-f',
+                      input_path, output_path])
     if '.subset' in expected_path:
         expected_path = generate_ps_dump(expected_path)
         output_path = generate_ps_dump(output_path)
