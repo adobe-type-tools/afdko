@@ -715,7 +715,6 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
         fontDict0 = &(top->FDArray.array[h->lastiFD]);
     else
         fontDict0 = &(top->FDArray.array[0]);
-//    privateDict = &(fontDict0->Private);
 
     /* Set error handler */
     DURING_EX(h->err.env)
