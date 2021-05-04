@@ -734,3 +734,32 @@ def test_glyph_alias_name_limits(goadb_filename, expected):
         output = f.read()
 
     assert (b'(record skipped)(gnameError)' in output) is expected
+
+
+def test_heap_after_free_bug1349():
+    """
+    Heap used after free because of stale pointer
+    after realloc. This wiped out some values
+    in name table.
+    """
+    folder = "bug1349/"
+    input_filename = get_input_path(folder + "cidfont.subset")
+    output_filename = get_temp_file_path()
+    features_filename = get_input_path(folder + "features.VF.HW.J")
+    db_filename = get_input_path(folder + "FontMenuNameDB.VF.Mono")
+    cmap_filename = get_input_path(folder + "UniSourceHanSansHWJP-UTF32-H")
+    lic_name = "ADOBE"
+
+    cmd = CMD + ['-o',
+                 'f', f'_{input_filename}',
+                 'o', f'_{output_filename}',
+                 'shw', 'omitMacNames',
+                 'ff', f'_{features_filename}',
+                 'mf', f'_{db_filename}',
+                 'r', 'nS', 'cs', '1',
+                 'ch', f'_{cmap_filename}',
+                 'lic', f'_{lic_name}']
+    runner(cmd)
+    output_dump = generate_ttx_dump(output_filename, ['name'])
+    assert differ([output_dump, get_expected_path("bug1349.ttx"),
+                   '-s', '<ttFont sfntVersion='])
