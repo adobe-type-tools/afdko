@@ -749,7 +749,6 @@ def test_heap_after_free_bug1349():
     db_filename = get_input_path(folder + "FontMenuNameDB.VF.Mono")
     cmap_filename = get_input_path(folder + "UniSourceHanSansHWJP-UTF32-H")
     lic_name = "ADOBE"
-
     cmd = CMD + ['-o',
                  'f', f'_{input_filename}',
                  'o', f'_{output_filename}',
