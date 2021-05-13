@@ -52,7 +52,7 @@
             <ExitAnchor Format="2">
               <XCoordinate value="3"/>
               <YCoordinate value="4"/>
-              <AnchorPoint value="0"/>
+              <AnchorPoint value="2"/>
             </ExitAnchor>
           </EntryExitRecord>
           <EntryExitRecord index="2">

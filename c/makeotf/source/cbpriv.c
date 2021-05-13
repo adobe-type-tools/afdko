@@ -9,7 +9,6 @@ This license is available at: http://opensource.org/licenses/Apache-2.0. */
 #include "cb.h"
 
 extern void myfatal(void *ctx);
-extern void message(void *ctx, int type, char *text);
 
 extern int KeepGoing;
 

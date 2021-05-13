@@ -24,6 +24,9 @@ SEMIBOLD = 'SourceSerifPro-SemiboldIt.ttf'
 DATA_DIR = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 TEMP_DIR = os.path.join(DATA_DIR, 'temp_output')
 
+allow_skip_console = os.getenv('AFDKO_TEST_SKIP_CONSOLE',
+                               'False').lower() in ('true', '1', 't')
+
 
 def setup_module():
     """
@@ -46,23 +49,33 @@ def teardown_module():
 
 @pytest.mark.parametrize('arg', ['-h'])
 def test_exit_known_option(arg):
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     assert subprocess.call([TOOL, arg]) == 0
 
 
 @pytest.mark.parametrize('arg', ['-j', '--foobar'])
 def test_exit_unknown_option(arg):
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     assert subprocess.call([TOOL, arg]) == 2
 
 
 def test_exit_no_font_provided():
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     assert subprocess.call([TOOL]) == 2
 
 
 def test_exit_invalid_path():
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     assert subprocess.call([TOOL, 'foobar']) == 2
 
 
 def test_exit_not_ttc_font():
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     font_path = get_input_path('font.ttf')
     assert subprocess.call([TOOL, font_path]) == 2
 

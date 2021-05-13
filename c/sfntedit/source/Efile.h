@@ -9,15 +9,15 @@
 
 typedef struct /* File data */
 {
-    char *name;
+    const char *name;
     FILE *fp;
 } File;
 
-extern void fileOpenRead(char *filename, File *fyl);
-extern void fileOpenWrite(char *filename, File *fyl);
+extern void fileOpenRead(const char *filename, File *fyl);
+extern void fileOpenWrite(const char *filename, File *fyl);
 extern long fileLength(File *fyl);
 extern int fileIsOpened(File *fyl);
-extern int fileExists(char *filename);
+extern int fileExists(const char *filename);
 extern void fileClose(File *fyl);
 extern Card32 fileTell(File *fyl);
 extern void fileSeek(File *file, long offset, int wherefrom);

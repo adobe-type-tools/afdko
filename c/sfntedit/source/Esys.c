@@ -17,11 +17,11 @@
 
 #define FILESTR_BUF_SIZE 1024
 
-static void error(char *filename) {
+static void error(const char *filename) {
     fatal(SFED_MSG_sysFERRORSTR, strerror(errno), filename);
 }
 
-int sysFileExists(char *filename) {
+int sysFileExists(const char *filename) {
     FILE *f;
 
     if (filename == NULL)
@@ -58,14 +58,14 @@ long sysFileLen(FILE *f) {
         return at;
 }
 
-FILE *sysOpenRead(char *filename) {
+FILE *sysOpenRead(const char *filename) {
     FILE *f = fopen(filename, "rb");
     if (f == NULL)
         error(filename);
     return f;
 }
 
-FILE *sysOpenWrite(char *filename) {
+FILE *sysOpenWrite(const char *filename) {
     FILE *f = fopen(filename, "w+b");
 
     if (f == NULL)
@@ -73,7 +73,7 @@ FILE *sysOpenWrite(char *filename) {
     return f;
 }
 
-FILE *sysOpenSearchpath(char *filename) {
+FILE *sysOpenSearchpath(const char *filename) {
     char **p;
     static char *path[] = {
         "%s",

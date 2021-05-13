@@ -16,8 +16,31 @@ __version__ = '0.6.3'
 
 logger = logging.getLogger('runner')
 
+console_scripts = {
+    'buildcff2vf': 'buildcff2vf:main',
+    'buildmasterotfs': 'buildmasterotfs:main',
+    'comparefamily': 'comparefamily:main',
+    'checkoutlinesufo': 'checkoutlinesufo:main',
+    'makeotf': 'makeotf:main',
+    'makeinstancesufo': 'makeinstancesufo:main',
+    'otc2otf': 'otc2otf:main',
+    'otf2otc': 'otf2otc:main',
+    'otf2ttf': 'otf2ttf:main',
+    'ttfcomponentizer': 'ttfcomponentizer:main',
+    'ttfdecomponentizer': 'ttfdecomponentizer:main',
+    'ttxn': 'ttxn:main',
+    'charplot': 'proofpdf:charplot',
+    'digiplot': 'proofpdf:digiplot',
+    'fontplot': 'proofpdf:fontplot',
+    'fontplot2': 'proofpdf:fontplot2',
+    'fontsetplot': 'proofpdf:fontsetplot',
+    'hintplot': 'proofpdf:hintplot',
+    'waterfallplot': 'proofpdf:waterfallplot'
+}
 
 TIMEOUT = 240  # seconds
+allow_skip_console = os.getenv('AFDKO_TEST_SKIP_CONSOLE',
+                               'False').lower() in ('true', '1', 't')
 
 
 def _write_file(file_path, data):
@@ -65,6 +88,13 @@ def run_tool(opts):
     if opts.std_error:
         stderr = subprocess.STDOUT
 
+    if allow_skip_console and console_scripts.get(opts.tool):
+        mod, fcn = console_scripts[opts.tool].split(':')
+        args[0] = sys.executable
+        args.insert(1, '-c')
+        args.insert(2, f'import sys; import afdko.{mod}; ' +
+                       f'sys.exit(afdko.{mod}.{fcn}())')
+
     logger.debug(
         f"About to run the command below\n==>{' '.join(args)}<==")
     try:
@@ -90,8 +120,16 @@ def _check_tool(tool_name):
     or a tuple with the tool's name and the error if it's not.
     """
     try:
-        subprocess.check_output([tool_name, '-h'], timeout=TIMEOUT)
-        return tool_name
+        if allow_skip_console and console_scripts.get(tool_name):
+            mod, fcn = console_scripts[tool_name].split(':')
+            subprocess.check_output([sys.executable, '-c',
+                                     f'import sys; import afdko.{mod}; ' +
+                                     f'sys.exit(afdko.{mod}.{fcn}())', '-h'],
+                                    timeout=TIMEOUT)
+            return tool_name
+        else:
+            subprocess.check_output([tool_name, '-h'], timeout=TIMEOUT)
+            return tool_name
     except (subprocess.CalledProcessError, OSError) as err:
         logger.error(err)
         return tool_name, err

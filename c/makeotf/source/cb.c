@@ -104,10 +104,6 @@ struct cbCtx_ {
 
     struct {                 /* Feature file input */
         char *mainFile;      /* Main feature file name */
-        char *includeDir[4]; /* font dir*/
-        File file;
-        char buf[BUFSIZ];       /* Refill buffer for feature file */
-        dnaDCL(AnonInfo, anon); /* Storage for anon tables */
     } feat;
 
     struct { /* ucs file input/output */
@@ -169,25 +165,29 @@ void myfatal(void *ctx) {
 }
 
 /* [hot callback] Print error message */
-void message(void *ctx, int type, char *text) {
+void message(void *ctx, int type, const char *text) {
     cbCtx h = ctx;
 
     /* Print type */
     switch (type) {
+        case hotHEADING:
+            fprintf(stderr, "%s ", h->progname);
+            break;
+
         case hotNOTE:
-            fprintf(stderr, "%s [NOTE] ", h->progname);
+            fprintf(stderr, "   NOTE: ");
             break;
 
         case hotWARNING:
-            fprintf(stderr, "%s [WARNING] ", h->progname);
+            fprintf(stderr, "WARNING: ");
             break;
 
         case hotERROR:
-            fprintf(stderr, "%s [ERROR] ", h->progname);
+            fprintf(stderr, "  ERROR: ");
             break;
 
         case hotFATAL:
-            fprintf(stderr, "%s [FATAL] ", h->progname);
+            fprintf(stderr, "  FATAL: ");
             break;
     }
     fprintf(stderr, "%s\n", text);
@@ -195,21 +195,7 @@ void message(void *ctx, int type, char *text) {
 
 /* --------------------------- Memory Management --------------------------- */
 
-/* find last path directory separator */
-static char* findDirName(char *path)
-{
-    size_t i = strlen(path);
-    char* end = NULL;
-    while (i > 0)
-    {
-        end = strchr("/\\:", path[--i]);
-        if (end != NULL)
-            break;
-    }
-    if (end != NULL)
-        end = &path[i];
-    return end;
-}
+#if 0
 
 /* Make a copy of a string */
 static void copyStr(cbCtx h, char **dst, char *src) {
@@ -255,6 +241,7 @@ static void CBcbMemFree(void *h, void *ptr) {
         free(ptr);
     }
 }
+#endif
 
 /* ------------------------------- Font Input ------------------------------ */
 
@@ -441,144 +428,10 @@ static char *otfRefill(void *ctx, long *count) {
 
 /* -------------------------- Feature file input --------------------------- */
 
-/* Returns mem-allocated path */
-static char *findFeatInclFile(cbCtx h, char *filename) {
-    char path[FILENAME_MAX + 1];
-    char *fullpath;
-
-    path[0] = '\0';
-    if (!filename) {
-        return NULL;
-    }
-    /* Check if relative path */
-    if ((filename[0] != '/') && (filename[0] != '\\') && (filename[1] != ':')) {
-        /* h->feat.includeDir[0] contains the parent directory of the main feature file.             */
-        /* h->feat.includeDir[1] contains the parent directory of the including parent feature file. */
-        if ((h->feat.includeDir[0] != 0) &&
-            (h->feat.includeDir[0][0] != '\0')) {
-            /* Relative to UFO parent dir, if that is what it is */
-            sprintf(path, "%s%s%s", h->feat.includeDir[0], sep(), "fontinfo.plist");
-            if (fileExists(path)) {
-                sprintf(path, "%s%s..%s%s", h->feat.includeDir[0], sep(), sep(), filename);
-                if (fileExists(path)) {
-                    goto found;
-                }
-            }
-            /* Relative to the main feature file */
-            sprintf(path, "%s%s%s", h->feat.includeDir[0], sep(), filename);
-            if (fileExists(path)) {
-                goto found;
-            }
-        }
-        /* Relative to parent include file */
-        if ((h->feat.includeDir[1] != 0) &&
-            (h->feat.includeDir[1][0] != '\0')) {
-            sprintf(path, "%s%s%s", h->feat.includeDir[1], sep(), filename);
-            if (fileExists(path)) {
-                goto found;
-            }
-        }
-        return NULL; /* Can't find include file (error) */
-    } else {
-        if (fileExists(filename)) {
-            strcpy((char *)path, filename);
-        } else {
-            return NULL; /* Can't find include file (error) */
-        }
-    }
-found : { /* set the current include directory */
-    char *p;
-
-    p = findDirName(path);
-    if (p == NULL) {
-        /* if there are no directory separators, it is in the main feature file parent dir */
-        if (h->feat.includeDir[1] != 0)
-            cbMemFree(h, h->feat.includeDir[1]);
-    } else {
-        char featDir[FILENAME_MAX];
-        strncpy(featDir, path, p - path);
-        featDir[p - path] = '\0';
-        if (h->feat.includeDir[1] != 0)
-            cbMemFree(h, h->feat.includeDir[1]);
-        copyStr(h, &h->feat.includeDir[1], featDir);
-    }
-}
-    copyStr(h, &fullpath, (path[0] == '\0') ? filename : path);
-    return fullpath;
-}
-
-/* [hot callback] Open feature file. (name == NULL) indicates main feature
-   file. The full file name is returned. */
-static char *featOpen(void *ctx, char *name, long offset) {
+static char *featTopLevelFile(void *ctx) {
     cbCtx h = ctx;
-    char *fullpath;
 
-    if (name == NULL) {
-        /* Main feature file */
-        if (h->feat.mainFile != NULL) {
-            if (!fileExists(h->feat.mainFile)) {
-                cbFatal(h, "Specified feature file not found: %s \n", h->feat.mainFile);
-                return NULL; /* No feature file for this font */
-            }
-            copyStr(h, &fullpath, h->feat.mainFile);
-            if (h->feat.includeDir[1] != 0) {
-                cbMemFree(ctx, h->feat.includeDir[1]);
-                h->feat.includeDir[1] = 0;
-            }
-        } else {
-            return NULL; /* No feature file for this font */
-        }
-    } else if (offset == 0) {
-        /* First time called, we get the path used in the feature file */
-        fullpath = findFeatInclFile(h, name);
-        if (fullpath == NULL) {
-            return NULL; /* Include file not found (error) */
-        }
-    } else {
-        char *p;
-        /* RE-opening file: name is full path. */
-        copyStr(h, &fullpath, name);
-        /* Determine dir that feature file's in */
-        p = findDirName(fullpath);
-        if (p == NULL) {
-            cbMemFree(ctx, h->feat.includeDir[1]);
-            h->feat.includeDir[1] = 0;
-        } else {
-            char featDir[FILENAME_MAX];
-            strncpy(featDir, fullpath, p - fullpath);
-            featDir[p - fullpath] = '\0';
-            if (h->feat.includeDir[1] != 0) {
-                cbMemFree(ctx, h->feat.includeDir[1]);
-                h->feat.includeDir[1] = 0;
-            }
-            copyStr(h, &h->feat.includeDir[1], featDir);
-        }
-    }
-
-    if (h->feat.file.name != NULL) {
-        cbFatal(h, "previous feature file not closed\n");
-    }
-
-    fileOpen(&h->feat.file, h, fullpath, "rb");
-    if (offset != 0) {
-        fileSeek(&h->feat.file, offset, SEEK_SET);
-    }
-    return fullpath;
-}
-
-/* [hot callback] Refill data buffer from file */
-static char *featRefill(void *ctx, long *count) {
-    cbCtx h = ctx;
-    *count = fileReadN(&h->feat.file, BUFSIZ, h->feat.buf);
-    return (*count == 0) ? NULL : h->feat.buf;
-}
-
-/* [hot callback] Close feature file */
-static void featClose(void *ctx) {
-    cbCtx h = ctx;
-    fileClose(&h->feat.file);
-    cbMemFree(h, h->feat.file.name); /* Alloc in featOpen() */
-    h->feat.file.name = NULL;
+    return h->feat.mainFile;
 }
 
 #if 0
@@ -602,11 +455,10 @@ static char *anonRefill(void *ctx, long *count, unsigned long tag) {
     cbFatal(h, "unrecognized anon table tag: %c%c%c%c\n", TAG_ARG(tag));
     return 0; /* Supress compiler warning */
 }
-
 #endif
 
 /* [hot callback] Add anonymous data from feature file */
-static void featAddAnonData(void *ctx, char *data, long count,
+static void featAddAnonData(void *ctx, const char *data, long count,
                             unsigned long tag) {
 #if 0
     /* Sample code for adding anonymous tables */
@@ -808,7 +660,7 @@ static void fcdbError(void *ctx, unsigned fileid, long line, int errid) {
 static int fcdbAddName(void *ctx,
                        unsigned short platformId, unsigned short platspecId,
                        unsigned short languageId, unsigned short nameId,
-                       signed char *str) {
+                       const char *str) {
     cbCtx h = ctx;
     return hotAddName(h->hot.ctx,
                       platformId, platspecId, languageId, nameId, str);
@@ -1338,9 +1190,6 @@ cbCtx cbNew(char *progname, char *pfbdir, char *otfdir,
         NULL, /* Callback context; set after creation */
         myfatal,
         message,
-        CBcbMemNew,
-        CBcbMemResize,
-        CBcbMemFree,
         psId,
         psRefill,
         cffId,
@@ -1355,9 +1204,7 @@ cbCtx cbNew(char *progname, char *pfbdir, char *otfdir,
         otfTell,
         otfSeek,
         otfRefill,
-        featOpen,
-        featRefill,
-        featClose,
+        featTopLevelFile,
         featAddAnonData,
         tmpOpen,
         tmpWriteN,
@@ -1392,13 +1239,6 @@ cbCtx cbNew(char *progname, char *pfbdir, char *otfdir,
 
     dnaINIT(mainDnaCtx, h->cff.buf, 50000, 150000);
     h->cff.euroAdded = 0;
-    h->feat.includeDir[0] = 0;
-    h->feat.includeDir[1] = 0;
-    h->feat.includeDir[2] = 0;
-    h->feat.includeDir[3] = 0;
-    h->feat.file.name = NULL;
-    dnaINIT(mainDnaCtx, h->feat.anon, 1, 3); /* xxx */
-    h->feat.anon.func = anonInit;
     h->hot.ctx = hotNew(&h->hot.cb);
     dnaINIT(mainDnaCtx, h->tmpbuf, 32, 32);
     h->mac.encoding = NULL;
@@ -1793,19 +1633,6 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
 
     /* Determine dir that feature file's in */
     h->feat.mainFile = featurefile;
-    if (featurefile != NULL) {
-        char *p;
-        p = findDirName(featurefile);
-        if (p == NULL) {
-            h->feat.includeDir[0] = curdir();
-        } else {
-            char featDir[FILENAME_MAX];
-            strncpy(featDir, featurefile, p - featurefile);
-            featDir[p - featurefile] = '\0';
-            copyStr(h, &h->feat.includeDir[0], featDir);
-            freeFeatName = 1;
-        }
-    }
 
     if (type == hotCID) {
         /* Add CMaps */
@@ -1852,11 +1679,6 @@ void cbConvert(cbCtx h, int flags, char *clientVers,
     fileOpen(&h->otf.file, h, otfpath, "w+b");
     hotConvert(h->hot.ctx);
     fileClose(&h->otf.file);
-
-    if (freeFeatName) {
-        cbMemFree(h, h->feat.includeDir[0]);
-    }
-    h->feat.anon.cnt = 0;
 }
 
 // Read font conversion database
@@ -1873,10 +1695,6 @@ void cbFree(cbCtx h) {
     hotFree(h->hot.ctx);
     dnaFREE(h->cff.buf);
     dnaFREE(h->tmpbuf);
-    for (i = 0; i < h->feat.anon.size; i++) {
-        dnaFREE(h->feat.anon.array[i].data);
-    }
-    dnaFREE(h->feat.anon);
 
     // Free database resources
     fcdbFree(h->fcdb.ctx);

@@ -1,2 +1,0 @@
-tree parser input:  ( do i 1 10 ( = ( () a i ) 3 ) )
-tree parser output:  ( do i 1 10 ( = ( () a i ) ( * 3 i ) ) )

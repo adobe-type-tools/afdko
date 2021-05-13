@@ -21,6 +21,9 @@ FONT0 = 'font0.ttf'
 FONT1 = 'font1.ttf'
 FONT2 = 'font2.ttf'
 
+allow_skip_console = os.getenv('AFDKO_TEST_SKIP_CONSOLE',
+                               'False').lower() in ('true', '1', 't')
+
 MSG_1 = (
     "Shared tables: "
     f"['BASE', 'DSIG', 'GDEF', 'GSUB', 'cmap', 'maxp', 'post']{os.linesep}"
@@ -55,27 +58,39 @@ MSG_5 = (
 
 @pytest.mark.parametrize('arg', ['-h'])
 def test_exit_known_option(arg):
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     assert subprocess.call([TOOL, arg]) == 0
 
 
 @pytest.mark.parametrize('arg', ['-j', '--foobar'])
 def test_exit_unknown_option(arg):
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     assert subprocess.call([TOOL, arg]) == 0
 
 
 def test_exit_malformed_t_option():
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     assert subprocess.call([TOOL, '-t', 'abc-2']) == 0
 
 
 def test_exit_no_font_provided():
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     assert subprocess.call([TOOL]) == 0
 
 
 def test_exit_invalid_path():
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     assert subprocess.call([TOOL, 'foobar']) == 0
 
 
 def test_exit_not_a_font():
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     font_path = get_input_path('file.txt')
     assert subprocess.call([TOOL, font_path]) == 0
 

@@ -7,13 +7,17 @@ extraction:
     after_prepare:
     - "pip3 install --upgrade --user cython"
     - "pip3 install --upgrade --user wheel"
+    - "pip3 install --upgrade --user scikit-build"
+    - "pip3 install --upgrade --user cmake"
+    - "pip3 install --upgrade --user ninja"
+    - "git config --global url.https://github.com/.insteadOf git://github.com/"
     - "export PATH=\"$HOME/.local/bin:$PATH\""
     index:
       build_command: "python3 setup.py build"
 path_classifiers:
   generated:
     # Classify files generated from featgram.g as generated code so no alerts:
-    - c/makeotf/makeotf_lib/source/hotconv/featerr.c
-    - c/makeotf/makeotf_lib/source/hotconv/featgram.c
-    - c/makeotf/makeotf_lib/source/hotconv/featscan.c
-    - c/makeotf/makeotf_lib/source/hotconv/feattoks.h
+    - c/makeotf/lib/hotconv/FeatParser.cpp
+    - c/makeotf/lib/hotconv/FeatLexer.cpp
+    - c/makeotf/lib/hotconv/FeatParserVisitor.cpp
+    - c/makeotf/lib/hotconv/FeatParserBaseVisitor.cpp

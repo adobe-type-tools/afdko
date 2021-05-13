@@ -30,7 +30,7 @@ jobs:
       run: sudo apt-get install gcc-multilib g++-multilib
 
     - name: Set ASAN-related environment variables
-      run: echo '::set-env name=XFLAGS::-Og -g -fsanitize=address -fno-omit-frame-pointer'
+      run: echo "ADD_SANITIZER=address" >> $GITHUB_ENV
 
     - name: Install AFDKO and dependencies
       run: |

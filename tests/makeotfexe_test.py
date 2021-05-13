@@ -150,8 +150,7 @@ def test_glyph_not_in_font_bug492():
 
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert (b'[ERROR] <SourceSans-Test> Glyph "glyph_not_found" not in font. '
-            b'[') in output
+    assert (b'Glyph "glyph_not_found" not in font.') in output
     assert (b'syntax error at "a" [') not in output
 
 
@@ -174,159 +173,159 @@ def test_version_warning_bug610():
 
 @pytest.mark.parametrize('feat_name, error_msg', [
     ('test_named_lookup',
-        b"[FATAL] <SourceSans-Test> In feature 'last' positioning rules "
+        b"In feature 'last' positioning rules "
         b"cause an offset overflow (0x10020) to a lookup subtable"),
     ('test_singlepos_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'sps1' lookup 'lkup40' "
+        b"In feature 'sps1' lookup 'lkup40' "
         b"positioning rules cause an offset overflow (0x10188) to a "
         b"lookup subtable"),
     ('test_class_pair_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'last' positioning rules "
+        b"In feature 'last' positioning rules "
         b"cause an offset overflow (0x10020) to a lookup subtable"),
     ('test_class_pair_class_def_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'krn1' lookup 'l1' pair "
+        b"In feature 'krn1' lookup 'l1' pair "
         b"positioning rules cause an offset overflow (0x1001a) to a "
         b"class 2 definition table"),
     ('test_contextual_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'krn0' lookup 'lkup40' "
+        b"In feature 'krn0' lookup 'lkup40' "
         b"chain contextual positioning rules cause an offset overflow "
         b"(0x10002) to a lookup subtable"),
     ('test_cursive_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'curs' lookup 'lk20' "
+        b"In feature 'curs' lookup 'lk20' "
         b"cursive positioning rules cause an offset overflow "
         b"(0x1006e) to a cursive attach table"),
     ('test_mark_to_base_coverage_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'mrk1' mark to base "
+        b"In feature 'mrk1' mark to base "
         b"positioning rules cause an offset overflow (0x1002c) to a "
         b"base coverage table"),
     ('test_mark_to_base_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'mrk1' mark to base "
+        b"In feature 'mrk1' mark to base "
         b"positioning rules cause an offset overflow (0x10230) to a "
         b"lookup subtable"),
     ('test_mark_to_ligature_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'lig1' lookup 'lk0' mark "
+        b"In feature 'lig1' lookup 'lk0' mark "
         b"to ligature positioning rules cause an offset overflow (0x1053e) "
         b"to a lookup subtable"),
     ('test_singlesub1_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'tss2' lookup 'lkup258' "
+        b"In feature 'tss2' lookup 'lkup258' "
         b"substitution rules cause an offset overflow (0x10002) to a "
         b"lookup subtable"),
     ('test_singlesub2_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'tss1' lookup 'lkup237' "
+        b"In feature 'tss1' lookup 'lkup237' "
         b"substitution rules cause an offset overflow (0x10098) to a "
         b"lookup subtable"),
     ('test_multiplesub_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'mts1' lookup 'lkup238' "
+        b"In feature 'mts1' lookup 'lkup238' "
         b"substitution rules cause an offset overflow (0x10056) to a "
         b"lookup subtable"),
     ('test_alternatesub_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'ats1' lookup 'lkup238' "
+        b"In feature 'ats1' lookup 'lkup238' "
         b"substitution rules cause an offset overflow (0x1009c) to a "
         b"lookup subtable"),
     ('test_ligaturesub_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'lts1' lookup 'lkup238' "
+        b"In feature 'lts1' lookup 'lkup238' "
         b"substitution rules cause an offset overflow (0x10016) to a "
         b"lookup subtable"),
     ('test_chaincontextualsub_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'cts1' substitution rules "
+        b"In feature 'cts1' substitution rules "
         b"cause an offset overflow (0x100ac) to a lookup subtable"),
     ('test_reversechaincontextualsub_subtable_overflow',
-        b"[FATAL] <SourceSans-Test> In feature 'rts1' lookup 'lkup238' "
+        b"In feature 'rts1' lookup 'lkup238' "
         b"reverse chain contextual substitution rules cause an offset "
         b"overflow (0x100a0) to a lookup subtable"),
     ('test_duplicate_single_sub',
-        b"[NOTE] <SourceSans-Test> Removing duplicate single substitution "
+        b"Removing duplicate single substitution "
         b"in standalone lookup 'test2': glyph1, glyph1"),
     ('test_conflicting_single_sub',
-        b"[FATAL] <SourceSans-Test> Duplicate target glyph for single "
+        b"Duplicate target glyph for single "
         b"substitution in standalone lookup 'test2': glyph1"),
     ('test_duplicate_alternate_sub',
-        b"[FATAL] <SourceSans-Test> Duplicate target glyph for alternate "
+        b"Duplicate target glyph for alternate "
         b"substitution in standalone lookup 'test2': glyph1"),
     ('test_duplicate_multiple_sub',
-        b"[FATAL] <SourceSans-Test> Duplicate target glyph for multiple "
+        b"Duplicate target glyph for multiple "
         b"substitution in standalone lookup 'test2': glyph1"),
     ('test_duplicate_ligature_sub',
-        b"[NOTE] <SourceSans-Test> Removing duplicate ligature substitution "
+        b"Removing duplicate ligature substitution "
         b"in standalone lookup 'test2'"),
     ('test_conflicting_ligature_sub',
-        b"[FATAL] <SourceSans-Test> Duplicate target sequence but different "
+        b"Duplicate target sequence but different "
         b"replacement glyphs in ligature substitutions in standalone "
         b"lookup 'test2'"),
     ('test_duplicate_single_pos',
-        b"[NOTE] <SourceSans-Test> Removing duplicate single positioning "
+        b"Removing duplicate single positioning "
         b"in standalone lookup 'test2'"),
     ('test_conflicting_single_pos',
-        b"[FATAL] <SourceSans-Test> Duplicate single positioning glyph "
+        b"Duplicate single positioning glyph "
         b"with different values in standalone lookup 'test2'"),
     ('test_features_name_missing_win_dflt_sub',
-        b"[FATAL] <SourceSans-Test> Missing Windows default name for "
+        b"Missing Windows default name for "
         b"'featureNames' nameid 256 in feature 'ss01'"),
     ('test_cv_params_not_in_cvxx_sub',
-        b"[FATAL] <SourceSans-Test> A 'cvParameters' block is only allowed "
+        b"A 'cvParameters' block is only allowed "
         b"in Character Variant (cvXX) features; it is being used in "
         b"feature 'tst1'"),
     ('test_cv_params_missing_win_dflt_sub',
-        b"[FATAL] <SourceSans-Test> Missing Windows default name for "
+        b"Missing Windows default name for "
         b"'cvParameters' nameid 256 in feature 'cv01'"),
     ('test_size_withfamilyID_0_pos',
-        b"[FATAL] <SourceSans-Test> 'size' feature must have 4 parameters if "
+        b"'size' feature must have 4 parameters if "
         b"sub family ID code is non-zero!"),
     ('test_size_withfamilyID_3_pos',
-        b"[FATAL] <SourceSans-Test> 'size' feature must have 4 or 2 "
+        b"'size' feature must have 4 or 2 "
         b"parameters if sub family code is zero!"),
     ('test_sizemenuname_missing_win_dflt_pos',
-        b"[FATAL] <SourceSans-Test> Missing Windows default name for "
+        b"Missing Windows default name for "
         b"'sizemenuname' nameid 256 in 'size' feature"),
     ('test_kernpair_warnings_pos',
-        b"[WARNING] <SourceSans-Test> Single kern pair occurring after class "
+        b"Single kern pair occurring after class "
         b"kern pair in feature 'tst1'"),
     ('test_kernpair_warnings_pos',
-        b"[WARNING] <SourceSans-Test> Start of new pair positioning subtable "
+        b"Start of new pair positioning subtable "
         b"forced by overlapping glyph classes in feature 'tst1'; some pairs "
         b"may never be accessed"),
     ('test_kernpair_warnings_pos',
-        b"[NOTE] <SourceSans-Test> Removing duplicate pair positioning in "
+        b"Removing duplicate pair positioning in "
         b"feature 'tst1': glyph3 glyph3"),
     ('test_kernpair_warnings_pos',
-        b"[WARNING] <SourceSans-Test> Pair positioning has conflicting "
+        b"Pair positioning has conflicting "
         b"statements in feature 'tst1'"),
     ('test_base_glyph_conflict_pos',
-        b"[ERROR] <SourceSans-Test> MarkToBase or MarkToMark error in "
+        b"MarkToBase or MarkToMark error in "
         b"feature 'tst1'. Another statement has already defined the anchors "
         b"and marks on glyph 'glyph5'."),
     ('test_base_glyph_conflict_pos',
-        b"[WARNING] <SourceSans-Test> MarkToBase or MarkToMark error in "
+        b"MarkToBase or MarkToMark error in "
         b"feature 'tst1'. Glyph 'glyph5' does not have an anchor point "
         b"for a mark class that was used in a previous statement in the "
         b"same lookup table. Setting the anchor point offset to 0."),
     ('test_mark_ligature_conflict_pos',
-        b"[ERROR] <SourceSans-Test> MarkToLigature error in feature 'tst1'. "
+        b"MarkToLigature error in feature 'tst1'. "
         b"Two different statements referencing the ligature glyph 'glyph6' "
         b"have assigned the same mark class to the same ligature component."),
     ('test_mark_ligature_conflict_pos',
-        b"[ERROR] <SourceSans-Test> MarkToLigature statement error in feature "
+        b"MarkToLigature statement error in feature "
         b"'tst1'. Glyph 'glyph6' contains a duplicate mark class assignment "
         b"for one of the ligature components."),
     ('test_mark_class_glyph_conflict',
-        b"[ERROR] <SourceSans-Test> In feature 'tst1', glyph 'glyph2' "
+        b"In feature 'tst1', glyph 'glyph2' "
         b"is repeated in the current class definition. Mark class: "
         b"@TOP_MARKS."),
     ('test_mark_class_glyph_conflict',
-        b"[ERROR] <SourceSans-Test> In feature 'tst1', glyph 'glyph1' "
+        b"In feature 'tst1', glyph 'glyph1' "
         b"occurs in two different mark classes. Previous mark class: "
         b"@TOP_MARKS. Current mark class: @BOTTOM_MARKS."),
     ('test_base_anchor_errors_pos',
-        b"[ERROR] <SourceSans-Test> MarkToBase or MarkToMark error in "
+        b"MarkToBase or MarkToMark error in "
         b"feature 'tst1'. Another statement has already assigned the current "
         b"mark class to another anchor point on glyph 'glyph7'"),
     ('test_base_anchor_errors_pos',
-        b"[WARNING] <SourceSans-Test> MarkToBase or MarkToMark error in "
+        b"MarkToBase or MarkToMark error in "
         b"feature 'tst1'. Glyph 'glyph5' does not have an anchor point "
         b"for a mark class that was used in a previous statement in the "
         b"same lookup table"),
     ('test_cursive_duplicate_glyph_pos',
-        b"[ERROR] <SourceSans-Test> Cursive statement error in feature "
+        b"Cursive statement error in feature "
         b"'tst1'. A previous statement has already referenced glyph "
         b"'glyph1'."),
 ])
@@ -359,7 +358,7 @@ def test_feature_recursion_bug628():
 
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert(b"[FATAL] <SourceSans-Test> Can't include [feat.fea]; maximum "
+    assert(b"Can't include [feat.fea]; maximum "
            b"include levels <50> reached") in output
 
 
@@ -422,7 +421,7 @@ def test_overflow_bug731():
 
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert(b"[FATAL] <SourceSans-Test> subtable offset too large (1003c) in "
+    assert(b"subtable offset too large (1003c) in "
            b"lookup 0 type 3") in output
 
 
@@ -704,7 +703,7 @@ def test_negative_internal_leading_bug1227():
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion='])
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert (b'[WARNING] <SourceSerifPro-Regular> Negative internal leading: '
+    assert (b'Negative internal leading: '
             b'win.ascent + win.descent < unitsPerEm') in output
 
 
