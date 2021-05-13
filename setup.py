@@ -9,9 +9,9 @@ from distutils.dep_util import newer
 from distutils.util import convert_path
 from distutils.util import get_platform
 
-import setuptools.command.build_py
 import setuptools.command.install
-from setuptools import setup
+
+from skbuild import setup
 
 try:
     from wheel.bdist_wheel import bdist_wheel
@@ -51,39 +51,6 @@ class InstallPlatlib(setuptools.command.install.install):
     def finalize_options(self):
         setuptools.command.install.install.finalize_options(self)
         self.install_lib = self.install_platlib
-
-
-def compile_package(pkg_dir):
-    programs_dir = 'c'
-    platform_system = platform.system()
-    if platform_system == "Windows":
-        cmd = [os.path.abspath(os.path.join('c', 'buildall.cmd'))]
-        programs_dir = None
-    elif platform_system == "Linux":
-        cmd = ["sh", "buildalllinux.sh"]
-    elif platform_system == "Darwin":
-        cmd = ["sh", "buildall.sh"]
-    else:
-        # fallback to Linux
-        print(f'afdko: Unknown OS: {platform_system}')
-        cmd = ["sh", "buildalllinux.sh"]
-    cur_dir = os.getcwd()
-    try:
-        subprocess.run(cmd, cwd=programs_dir)
-    except subprocess.CalledProcessError:
-        print('afdko: Error executing build command.')
-        sys.exit(1)
-    os.chdir(cur_dir)
-
-
-class CustomBuild(setuptools.command.build_py.build_py):
-    """Custom build command."""
-
-    def run(self):
-        pkg_dir = 'afdko'
-        compile_package(pkg_dir)
-        setuptools.command.build_py.build_py.run(self)
-
 
 class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
 
@@ -139,7 +106,7 @@ def _get_scripts():
     else:
         extension = ''
 
-    scripts = [f'c/build_all/{script_name}{extension}'
+    scripts = [f'bin/{script_name}{extension}'
                for script_name in script_names]
     return scripts
 
@@ -229,6 +196,9 @@ def main():
           setup_requires=[
               'wheel',
               'setuptools_scm',
+              'scikit-build',
+              'cmake',
+              'ninja'
           ],
           tests_require=[
               'pytest',
@@ -239,7 +209,6 @@ def main():
               'console_scripts': _get_console_scripts(),
           },
           cmdclass={
-              'build_py': CustomBuild,
               'build_scripts': CustomBuildScripts,
               'bdist_wheel': CustomBDistWheel,
               'install': InstallPlatlib,

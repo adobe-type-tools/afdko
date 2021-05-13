@@ -1,6 +1,0 @@
-#include "common.xcconfig"
-GCC_GENERATE_DEBUGGING_SYMBOLS = NO
-GCC_OPTIMIZATION_LEVEL = s
-CONFIGURATION_BUILD_DIR = ../../../exe/osx/release/
-HEADER_SEARCH_PATHS =  $(SDKROOT)/usr/include ../../../../spot/sfnt_includes ../../../../public/lib/api
-
