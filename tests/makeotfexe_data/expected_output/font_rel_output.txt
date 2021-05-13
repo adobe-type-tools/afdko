@@ -1,6 +1,7 @@
-makeotfexe [WARNING] unhinted <.notdef>
-makeotfexe [WARNING] unhinted <a>
-makeotfexe [WARNING] unhinted <b>
-makeotfexe [WARNING] FontMenuNameDB file was not specified or not found. [SourceSerifPro-Regular]
-makeotfexe [WARNING] Glyph renaming was requested, but the GlyphOrderAndAliasDB file was not specified.
-makeotfexe [WARNING] <SourceSerifPro-Regular> Negative internal leading: win.ascent + win.descent < unitsPerEm
+WARNING: unhinted <.notdef>
+WARNING: unhinted <a>
+WARNING: unhinted <b>
+makeotfexe processing font <SourceSerifPro-Regular>
+WARNING: FontMenuNameDB file was not specified or not found. [SourceSerifPro-Regular]
+WARNING: Glyph renaming was requested, but the GlyphOrderAndAliasDB file was not specified.
+WARNING: Negative internal leading: win.ascent + win.descent < unitsPerEm

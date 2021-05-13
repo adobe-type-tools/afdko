@@ -1,4 +1,4 @@
-### [GSUB] (00000544)
+### [GSUB] (00000530)
 Version    =1.0 (00010000)
 ScriptList =000a
 FeatureList=0042

@@ -8,3 +8,4 @@
 ##### • [Practical issues in weight setting and style linking (Windows only)](./WinWeights.md)
 ---
 ##### • [FDK Build Notes](./FDK_Build_Notes.md)
+##### • [MakeOTFEXE Feature File Parser Notes](./Feature_Parser_Notes.md)

@@ -11,10 +11,10 @@
 
 #include "Eglobal.h"
 
-FILE *sysOpenRead(char *filename);
-FILE *sysOpenWrite(char *filename);
-FILE *sysOpenSearchpath(char *filename);
-int sysFileExists(char *filename);
+FILE *sysOpenRead(const char *filename);
+FILE *sysOpenWrite(const char *filename);
+FILE *sysOpenSearchpath(const char *filename);
+int sysFileExists(const char *filename);
 long sysFileLen(FILE *f);
 
 #endif /* ESYS_H */

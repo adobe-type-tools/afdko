@@ -1,2 +1,0 @@
-tree parser input:  ( Plus 3 ( Mult 4 5 ) )
-tree parser output:  ( Plus 3 ( Mult 5 4 ) )

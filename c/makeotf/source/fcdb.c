@@ -729,7 +729,7 @@ int fcdbGetRec(fcdbCtx h, char *FontName) {
 
 /* Create new context */
 fcdbCtx fcdbNew(fcdbCallbacks *cb, void *dna_ctx) {
-    fcdbCtx h = cbMemNew(cb->ctx, sizeof(struct fcdbCtx_));
+    fcdbCtx h = malloc(sizeof(struct fcdbCtx_));
     dnaCtx local_dna_ctx = (dnaCtx)dna_ctx;
 
     h->cb = *cb; /* Copy callbacks */
@@ -747,7 +747,7 @@ void fcdbFree(fcdbCtx h) {
     dnaFREE(h->refs);
     dnaFREE(h->FontNames);
     dnaFREE(h->record);
-    cbMemFree(cxt, h);
+    free(h);
 }
 
 #if DEBUG

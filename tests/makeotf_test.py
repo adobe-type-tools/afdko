@@ -49,6 +49,8 @@ OTF_NAME = 'SourceSans-Test.otf'
 DATA_DIR = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 TEMP_DIR = os.path.join(DATA_DIR, 'temp_output')
 
+allow_skip_console = os.getenv('AFDKO_TEST_SKIP_CONSOLE',
+                               'False').lower() in ('true', '1', 't')
 
 xfail_win = pytest.mark.xfail(
     sys.platform == 'win32',
@@ -83,6 +85,8 @@ def test_exit_no_option():
     # It's valid to run 'makeotf' without using any options,
     # but if a default-named font file is NOT found in the
     # current directory, the tool exits with an error
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     with pytest.raises(subprocess.CalledProcessError) as err:
         subprocess.check_call([TOOL])
     assert err.value.returncode == 2
@@ -90,11 +94,15 @@ def test_exit_no_option():
 
 @pytest.mark.parametrize('arg', ['-v', '-h', '-u'])
 def test_exit_known_option(arg):
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     assert subprocess.call([TOOL, arg]) == 0
 
 
 @pytest.mark.parametrize('arg', ['-j', '--bogus'])
 def test_exit_unknown_option(arg):
+    if allow_skip_console:
+        pytest.xfail("May not work if console_script wrapper is missing")
     assert subprocess.call([TOOL, arg]) == 2
 
 

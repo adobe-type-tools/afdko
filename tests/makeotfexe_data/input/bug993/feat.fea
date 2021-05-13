@@ -1,5 +1,5 @@
 markClass [acute grave] <anchor 150 -10> @TOP_MARKS;                            
                                                                                 
-lookup mark {                                                                   
+lookup mrk {                                                                   
   position base [a e o u]' <anchor 250 450> mark @TOP_MARKS;                    
-} mark;
+} mrk;

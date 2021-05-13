@@ -39,7 +39,7 @@ jmp_buf mark;
 
 #endif /* SUNOS */
 
-#define VERSION "1.4.2"
+#define VERSION "1.4.3"
 
 /* Data type sizes (bytes) */
 #define uint16_ 2
@@ -769,7 +769,7 @@ static void checkChecksums(void) {
 }
 
 /* Return tail component of path */
-static char *tail(char *path) {
+static const char *tail(const char *path) {
     char *p;
     p = strrchr(path, '/');
     if (p == NULL)
@@ -784,8 +784,8 @@ static char *makexFilename(Table *tbl) {
     else {
         static char filename[FILENAME_MAX];
         int i;
-        char *p;
-        char *q;
+        const char *p;
+        const char *q;
         char tag[5];
 
         tag[0] = (char)(tbl->tag >> 24);
@@ -925,7 +925,7 @@ static boolean sfntCopy(void) {
     Card32 totalsum;
     int headSeen = 0;
     char outputfilename[FILENAME_MAX];
-    char *dstfilename = dstfile.name;
+    const char *dstfilename = dstfile.name;
     FILE *f;
     boolean changed = (options & OPT_FIX) ? 1: 0; /* write file only if we change it */
 
@@ -1139,7 +1139,7 @@ int main(int argc, char *argv[]) {
             if (end == NULL)
                 sourcepath = "";
             else {
-                char *scurr = srcfile.name;
+                const char *scurr = srcfile.name;
                 char *dcurr;
 
                 sourcepath = (char *)malloc(strlen(srcfile.name) + 1);

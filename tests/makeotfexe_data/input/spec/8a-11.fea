@@ -1,0 +1,13 @@
+# When the replacement glyph of a single substitution is the same as
+# the target glyph of a multiple substitution, the former is encoded
+# as an alternate rather than a single substitution. That should happen
+# with A by A.sc and C by C.sc below.
+feature aalt {
+    sub B by B.sc;
+    sub A by A.sc;
+    sub C by C.sc;
+    sub D by D.sc;
+    sub a from [a.alt2 a.alt1];
+    sub C.sc from [C.alt1 C.alt2];
+    sub A.sc from [A.alt1 A.alt2];
+} aalt;
