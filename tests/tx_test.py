@@ -1154,9 +1154,7 @@ def test_cff2_windows_line_endings_bug1355():
     # Testing writing binary to stdout on Windows
     # to ensure line endings are not inserted.
     font_path = get_input_path('regular_CFF2.otf')
-    output_path = get_temp_file_path()
-    runner(CMD + ['-a', '-o',
-                  'cff2', '*S', '*b', 'std',
-                  '-f', font_path, output_path])
+    actual_path = runner(CMD + ['-s', '-a', '-o', 'cff2',
+                                '*S', '*b', '-f', font_path])
     expected_path = get_expected_path('bug1355.cff2')
-    assert differ([expected_path, output_path, '-m', 'bin'])
+    assert differ([expected_path, actual_path, '-m', 'bin'])
