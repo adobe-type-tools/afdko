@@ -7,6 +7,9 @@ extraction:
     after_prepare:
     - "pip3 install --upgrade --user cython"
     - "pip3 install --upgrade --user wheel"
+    - "pip3 install --upgrade --user scikit-build"
+    - "pip3 install --upgrade --user cmake"
+    - "pip3 install --upgrade --user ninja"
     - "export PATH=\"$HOME/.local/bin:$PATH\""
     index:
       build_command: "python3 setup.py build"
