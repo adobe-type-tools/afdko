@@ -30,6 +30,26 @@ ADD_AFDKOLIB(uforead)
 ADD_AFDKOLIB(ufowrite)
 ADD_AFDKOLIB(varread)
 
+target_compile_options(absfont PRIVATE $<$<CONFIG:Debug>:-DABF_DEBUG=1>)
+target_compile_options(cfembed PRIVATE $<$<CONFIG:Debug>:-DCEF_DEBUG=1>)
+target_compile_options(cffread PRIVATE $<$<CONFIG:Debug>:-DCFR_DEBUG=1>)
+target_compile_options(cffwrite PRIVATE $<$<CONFIG:Debug>:-DCFW_DEBUG=1>)
+target_compile_options(dynarr PRIVATE $<$<CONFIG:Debug>:-DDNA_DEBUG=1>)
+target_compile_options(pstoken PRIVATE $<$<CONFIG:Debug>:-DPST_DEBUG=1>)
+target_compile_options(pdfwrite PRIVATE $<$<CONFIG:Debug>:-DPDW_DEBUG=1>)
+target_compile_options(t1cstr PRIVATE $<$<CONFIG:Debug>:-DT1C_DEBUG=1>)
+target_compile_options(t2cstr PRIVATE $<$<CONFIG:Debug>:-DT1C_DEBUG=1>)
+target_compile_options(t1read PRIVATE $<$<CONFIG:Debug>:-DT1R_DEBUG=1>)
+target_compile_options(t1write PRIVATE $<$<CONFIG:Debug>:-DT1W_DEBUG=1>)
+target_compile_options(ttread PRIVATE $<$<CONFIG:Debug>:-DTTR_DEBUG=1>)
+target_compile_options(tx_shared PRIVATE $<$<CONFIG:Debug>:-DCFW_DEBUG=1>)
+
+if(MSVC)
+    target_compile_options(support PRIVATE -DCTL_CDECL=__cdecl -DCDECL=__cdecl
+        -DOS=os_windowsNT -DISP=isp_i80486 -D_CRT_SECURE_NO_DEPRECATE
+        $<$<CONFIG:Release>:-DNDEBUG>)
+endif()
+
 # These libraries are partially ordered
 
 target_link_libraries(tx_shared PUBLIC
