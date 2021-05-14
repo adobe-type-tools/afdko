@@ -33,7 +33,6 @@ ADD_AFDKOLIB(varread)
 # These libraries are partially ordered
 
 target_link_libraries(tx_shared PUBLIC
-    m
     cfembed
     cffread
     cffwrite
@@ -57,4 +56,5 @@ target_link_libraries(tx_shared PUBLIC
     absfont
     dynarr
     varread
+    m
 )
