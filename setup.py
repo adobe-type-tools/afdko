@@ -2,7 +2,6 @@ import distutils.command.build_scripts
 import io
 import os
 import platform
-import subprocess
 import sys
 from distutils import log
 from distutils.dep_util import newer
