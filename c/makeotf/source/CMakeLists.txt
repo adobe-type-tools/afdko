@@ -21,7 +21,7 @@ target_sources(makeotfexe PRIVATE
     systemspecific.h
 )
 
-target_link_libraries(makeotfexe PRIVATE m ctutil dynarr hotconv makeotf_pstoken typecomp makeotf_cffread)
+target_link_libraries(makeotfexe PRIVATE ctutil dynarr hotconv makeotf_pstoken typecomp makeotf_cffread m)
 target_compile_options(makeotfexe PRIVATE -DMAKEOTFLIB_EXPORTS=1)
 install(TARGETS makeotfexe DESTINATION bin)
 
