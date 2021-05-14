@@ -7,9 +7,9 @@ endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if(WIN32)
-    add_compile_options(-DCTL_CDECL=__cdecl -DCDECL=__cdecl
-        -DOS=os_windowsNT -DISP=isp_i80486 -D_CRT_SECURE_NO_DEPRECATE
-        $<$<CONFIG:Release>:-DNDEBUG>)
+    add_compile_definitions(CTL_CDECL=__cdecl CDECL=__cdecl
+        OS=os_windowsNT ISP=isp_i80486 _CRT_SECURE_NO_DEPRECATE
+        $<$<CONFIG:Release>:NDEBUG>)
 endif()
 
 

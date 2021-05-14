@@ -22,7 +22,7 @@ target_sources(makeotfexe PRIVATE
 )
 
 target_link_libraries(makeotfexe PRIVATE ctutil dynarr hotconv makeotf_pstoken typecomp makeotf_cffread m)
-target_compile_options(makeotfexe PRIVATE -DMAKEOTFLIB_EXPORTS=1)
+target_compile_definitions(makeotfexe PRIVATE MAKEOTFLIB_EXPORTS=1)
 install(TARGETS makeotfexe DESTINATION bin)
 
 

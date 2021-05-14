@@ -60,6 +60,7 @@ add_library(hotconv STATIC
     winansi.h
 )
 
-target_compile_options(hotconv PRIVATE -DHOT_FEAT_SUPPORT=1 -std=c99)
+set_property(TARGET hotconv PROPERTY C_STANDARD 99)
+target_compile_definitions(hotconv PRIVATE HOT_FEAT_SUPPORT=1)
 target_include_directories(hotconv PRIVATE AFTER ../../utils/hotpccts/pccts/h)
 

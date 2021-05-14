@@ -1,4 +1,4 @@
 add_library(makeotf_cffread STATIC cffread.c)
 
-target_compile_options(makeotf_cffread PRIVATE $<$<CONFIG:Debug>:-DCFF_DEBUG=1> -DCFF_T13_SUPPORT=0)
+target_compile_definitions(makeotf_cffread PRIVATE $<$<CONFIG:Debug>:CFF_DEBUG=1> CFF_T13_SUPPORT=0)
 

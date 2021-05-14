@@ -45,10 +45,10 @@ add_library(typecomp STATIC
     tc.c
 )
 
-target_compile_options(typecomp PRIVATE
-    -DTC_HINT_CHECK=1
-    -DTC_T13_SUPPORT=0
-    -DTC_EURO_SUPPORT=1
-    -DTC_SUBR_SUPPORT=1
-    -DTC_DEBUG=1
+target_compile_definitions(typecomp PRIVATE
+    TC_HINT_CHECK=1
+    TC_T13_SUPPORT=0
+    TC_EURO_SUPPORT=1
+    TC_SUBR_SUPPORT=1
+    TC_DEBUG=1
 )

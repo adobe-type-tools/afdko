@@ -1,3 +1,3 @@
 add_library(makeotf_pstoken STATIC pstoken.c)
 
-target_compile_options(makeotf_pstoken PRIVATE -DPSTOKEN_DEBUG=1 -DCFF_DEBUG=1 -DCFF_T13_SUPPORT=0)
+target_compile_definitions(makeotf_pstoken PRIVATE PSTOKEN_DEBUG=1 CFF_DEBUG=1 CFF_T13_SUPPORT=0)

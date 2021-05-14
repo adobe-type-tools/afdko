@@ -139,5 +139,5 @@ target_sources(spot PRIVATE
 
 target_include_directories(spot PRIVATE ../../spot/sfnt_includes ../../shared/include .)
 target_link_libraries(spot PRIVATE m)
-target_compile_options(spot PRIVATE -DEXECUTABLE=1)
+target_compile_definitions(spot PRIVATE EXECUTABLE=1)
 install(TARGETS spot DESTINATION bin)
