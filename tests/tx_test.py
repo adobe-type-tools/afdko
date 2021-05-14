@@ -1148,3 +1148,15 @@ def test_cidkeyed_lib_missing(file):
     ufo_input_path = get_input_path(folder + file)
     arg = [TOOL, '-t1', '-f', ufo_input_path]
     assert subprocess.call(arg) == 6
+
+
+def test_cff2_windows_line_endings_bug1355():
+    # Testing writing binary to stdout on Windows
+    # to ensure line endings are not inserted.
+    font_path = get_input_path('regular_CFF2.otf')
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o',
+                  'cff2', '*S', '*b', 'std',
+                  '-f', font_path, output_path])
+    expected_path = get_expected_path('bug1355.cff2')
+    assert differ([expected_path, output_path, '-m', 'bin'])

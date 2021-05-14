@@ -1552,6 +1552,10 @@ int CTL_CDECL main(int argc, char *argv[]) {
     (void)setvbuf(stderr, NULL, _IONBF, 0);
 #endif /* PLAT_WIN */
 
+#if _MSC_VER
+    _setmode(_fileno(stdout), _O_BINARY);
+#endif
+
     /* Get program name */
     progname = tail(argv[0]);
     --argc;
