@@ -44,12 +44,6 @@ target_compile_options(t1write PRIVATE $<$<CONFIG:Debug>:-DT1W_DEBUG=1>)
 target_compile_options(ttread PRIVATE $<$<CONFIG:Debug>:-DTTR_DEBUG=1>)
 target_compile_options(tx_shared PRIVATE $<$<CONFIG:Debug>:-DCFW_DEBUG=1>)
 
-if(WIN32)
-    target_compile_options(support PRIVATE -DCTL_CDECL=__cdecl -DCDECL=__cdecl
-        -DOS=os_windowsNT -DISP=isp_i80486 -D_CRT_SECURE_NO_DEPRECATE
-        $<$<CONFIG:Release>:-DNDEBUG>)
-endif()
-
 # These libraries are partially ordered
 
 target_link_libraries(tx_shared PUBLIC

@@ -6,6 +6,13 @@ endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+if(WIN32)
+    add_compile_options(-DCTL_CDECL=__cdecl -DCDECL=__cdecl
+        -DOS=os_windowsNT -DISP=isp_i80486 -D_CRT_SECURE_NO_DEPRECATE
+        $<$<CONFIG:Release>:-DNDEBUG>)
+endif()
+
+
 add_subdirectory(c/shared/source)
 add_subdirectory(c/detype1/source)
 add_subdirectory(c/mergefonts/source)
