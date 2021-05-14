@@ -36,7 +36,7 @@ jobs:
         XFLAGS: '--coverage'
       run: |
         python -m pip install --upgrade pip
-        pip install wheel
+        pip install wheel setuptools_scm cibuildwheel scikit-build cmake ninja
         python setup.py bdist_wheel
         echo 'Installing AFDKO wheel...'
         pip install dist/*.whl -q
