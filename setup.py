@@ -51,6 +51,7 @@ class InstallPlatlib(setuptools.command.install.install):
         setuptools.command.install.install.finalize_options(self)
         self.install_lib = self.install_platlib
 
+
 class CustomBuildScripts(distutils.command.build_scripts.build_scripts):
 
     def copy_scripts(self):
