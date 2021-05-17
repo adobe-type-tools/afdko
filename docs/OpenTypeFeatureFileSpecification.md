@@ -6,12 +6,12 @@ layout: default
 OpenType™ Feature File Specification
 ---
 
-Copyright 2015-2020 Adobe. All Rights Reserved. This software is licensed as
+Copyright 2015-2021 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
-Document version 1.25.1
-Last updated 5 July 2020
+Document version 1.25.2
+Last updated 17 May 2021
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
 
@@ -616,6 +616,9 @@ supported for development glyph names:
     U+007C | Vertical bar
     U+007E ~ Tilde
 
+However, none of these characters are allowed at the start of a glyph name and
+a hyphen may not be the last character in a name.
+
 For glyphs where the development glyph name differs from the final production
 glyph name, an implementation of the feature file syntax must be able to accept
 either name in source files, but must produce output data which contains either
@@ -704,8 +707,7 @@ A range of glyphs is denoted by a hyphen:
 [<firstGlyph> - <lastGlyph>]
 ```
 
-Spaces around the hyphen are not required since hyphens are not permitted in
-feature file glyph names. For example:
+Spaces around the hyphen are not required, so these are also valid ranges:
 
 ```fea
 [\0-\31]
@@ -3959,6 +3961,9 @@ along with the tag `sbit`.
 
 <a name="11"></a>
 ## 11. Document revisions
+
+**v1.25.2 [17 May 2021]:**
+*   Clarify the use of hyphens in [glyph names](#2.f.i)
 
 **v1.25.1 [5 July 2020]:**
 *   Added information and examples to [STAT table](#9.e)
