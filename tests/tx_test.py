@@ -1156,5 +1156,5 @@ def test_cff2_windows_line_endings_bug1355():
     font_path = get_input_path('regular_CFF2.otf')
     actual_path = runner(CMD + ['-s', '-a', '-o', 'cff2',
                                 '*S', '*b', '-f', font_path])
-    expected_path = get_expected_path('bug1355.CFF2')
+    expected_path = get_expected_path('bug1355.cff2')
     assert differ([expected_path, actual_path, '-m', 'bin'])
