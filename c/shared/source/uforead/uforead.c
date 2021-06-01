@@ -1741,17 +1741,6 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
                 continue;
             }
             char_end = tk->offset;
-        } else if (tokenEqualStr(tk, "lib")) {
-            /* since any lib element follows the outline element, if we get here there is no outline element.
-             end we need to add the current glyph to the char list with no outline content. */
-            char_begin = 0;
-            char_end = 0;
-
-            if (state != 1) {
-                continue;
-            }
-            addCharFromGLIF(h, tag, glifRec->glyphName, char_begin, char_end, unicode);
-            break;
         } else if (isUnknownAttribute(tk)) {
             getToken(h, state);
             /* discard its value.*/
