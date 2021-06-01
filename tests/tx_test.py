@@ -1158,3 +1158,14 @@ def test_cff2_windows_line_endings_bug1355():
                                 '*S', '*b', '-f', font_path])
     expected_path = get_expected_path('bug1355.cff2')
     assert differ([expected_path, actual_path, '-m', 'bin'])
+
+
+def test_lib_remove_outlines_bug1366():
+    input_path = get_input_path("bug1366.ufo")
+    expected_path = get_expected_path("bug1366.pfa")
+    output_path = get_temp_file_path()
+    runner(CMD + ['-a', '-o', 't1', '-f', input_path, output_path])
+    expected_path = generate_ps_dump(expected_path)
+    print("hello", expected_path)
+    output_path = generate_ps_dump(output_path)
+    assert differ([expected_path, output_path])
