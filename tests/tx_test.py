@@ -1160,7 +1160,7 @@ def test_cff2_windows_line_endings_bug1355():
     assert differ([expected_path, actual_path, '-m', 'bin'])
 
 
-def test_lib_remove_outlines_bug1366():
+def test_lib_removes_outlines_bug1366():
     input_path = get_input_path("bug1366.ufo")
     expected_path = get_expected_path("bug1366.pfa")
     output_path = get_temp_file_path()
