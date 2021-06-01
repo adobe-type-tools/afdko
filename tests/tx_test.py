@@ -1167,4 +1167,4 @@ def test_lib_removes_outlines_bug1366():
     runner(CMD + ['-a', '-o', 't1', '-f', input_path, output_path])
     expected_path = generate_ps_dump(expected_path)
     output_path = generate_ps_dump(output_path)
-    assert differ([expected_path, output_path])
+    assert differ([expected_path, output_path, '-m', 'bin'])
