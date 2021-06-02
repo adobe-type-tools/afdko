@@ -6,12 +6,12 @@ layout: default
 OpenType™ Feature File Specification
 ---
 
-Copyright 2015-2020 Adobe. All Rights Reserved. This software is licensed as
+Copyright 2015-2021 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
-Document version 1.25.1
-Last updated 5 July 2020
+Document version 1.26.0
+Last updated XX XXXXXX 2021  **TODO: adjust date**
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
 
@@ -48,6 +48,7 @@ Last updated 5 July 2020
   - [c. parameters](#4.c)
   - [d. lookupflag](#4.d)
   - [e. lookup](#4.e)
+    - [i. Specifying FeatureVariations (variable fonts)](#4.e.i)
   - [f. markClass](#4.f)
   - [g. subtable](#4.g)
   - [h. Examples](#4.h)
@@ -261,6 +262,9 @@ The following are keywords only in their corresponding table/feature blocks:
 | [`location`](#9.i) | STAT table | ✅ |
 | [`ElidableAxisValueName`](#9.i) | STAT table | ✅ |
 | [`OlderSiblingFontAttribute`](#9.i) | STAT table | ✅ |
+| [`conditionset`](#X.x) TODO: link up | Variable sub and pos lookups | ❌ |
+| [`variation`](#4.e.i) | Variable sub and pos lookups | ❌ |
+
 
 The following are keywords only where a tag is expected:
 
@@ -284,7 +288,7 @@ dflt  # can be used only with the language keyword and as the language value wit
     { }  braces           Enclose a feature, lookup, table, or anonymous block
     [ ]  square brackets  Enclose components of a glyph class
     < >  angle brackets   Enclose a device, value record, contour point, anchor, or caret
-    ( )  parentheses      Enclose the file name to be included
+    ( )  parentheses      Enclose the file name to be included. Within a `<metric>`, enclose variable scalar values.
 
 
 <a name="2.e"></a>
@@ -309,6 +313,28 @@ value records [§[2.e.iv](#2.e.iv)] for positioning rules, as well as to express
 the values of various table fields [§[9](#9)].
 
 _[ Note: Multiple master support has been withdrawn as of OpenType specification 1.3. ]_
+
+_[ Note: the following is unimplemented and is subject to change. ]_
+
+For **variable fonts only**, a `<metric>` value can make use of the following syntax to specify how values should vary based on axis locations:
+```
+(<location_spec1>:<value1> [...] <location_specN>:<valueN>)
+```
+
+Notes:
+ - A `<location_spec>` consists of one or more `<axis_tag>=<axis_location>` pairs, separated by commas 
+ - `<location_spec>:<value>` pairs are separated by spaces within the variable `<metric>`
+ - multiple `<location_spec>:<value>` pairs may be specified within a variable `<metric>`
+
+Example showing a simple single-axis variable scalar value. The value is -100 when Weight is 200, and -150 when Weight is 900:
+```
+<(wght=200:-100 wght=900:-150)>
+```
+
+A more complex example combining single and multiple `<axis_location>`s extends the above example to specify that the value should be -120 when Weight is 900 and Width is 150:
+```
+<(wght=200:-100 wght=900:-150 wght=900,wdth=150:-120)>
+```
 
 <a name="2.e.iii"></a>
 #### 2.e.iii. Device table _[ Currently not implemented. ]_
@@ -1266,6 +1292,44 @@ the same order that they are written in the feature file. For non-contextual
 rules, the implementation sorts the rules to avoid conflict; for example, the
 ligature substitution rule for f_f_i will be written before the ligature
 substitution rule for f_i, no matter what their order is in the feature file.
+
+<a name="4.e.i"></a>
+#### 4.e.i Feature Variations (variable font feature replacement)
+
+For variable fonts *only*, it is possible to specify [FeatureVariations](https://docs.microsoft.com/en-us/typography/opentype/spec/chapter2#featurevariations-table), which allow the use of different lookups for different parts of the variation space.
+
+<a name="4.e.i.1"></a>
+##### 4.e.i.1 `conditionset`
+
+A named `conditionset` defines [conditions](https://docs.microsoft.com/en-us/typography/opentype/spec/chapter2#conditionset-table) that can trigger a variable font lookup to swap in different lookups when the conditions are matched. A `conditionset` is simply a list of axis tags and min/max values. A conditionset is matched when all conditions are true. Syntax:
+```fea
+conditionset <name of set> {
+    <axis tag> <minValue> <maxValue>;
+    # additional tag min max entries
+} <name of set>;
+```
+For example, to define a "heavy" condition, for the 'wght' axis between 700-900:
+```fea
+conditionset heavy {
+    wght 700 900;
+} heavy;
+```
+
+<a name="4.e.i.2"></a>
+##### 4.e.i.2 `variation` (FeatureVariation)
+A `variation` is akin to a regular `feature` definition, with an added `conditionset` specifier to indicate that the feature should be active when the conditions of the conditionset are met. The syntax is:
+```fea
+variation <feature tag> <conditionset name or NULL> {
+    # feature specifications
+} <feature tag>;
+```
+For example, let's say we've defined a `lookup` called "heavy_symbols" that we want to swap in when the "wght" axis is between 700-900 (our "heavy" `conditionset` from above):
+```
+variation rvrn heavy {
+    lookup symbols_heavy;
+} rvrn;
+```
+
 
 <a name="4.f"></a>
 ### 4.f. markClass
