@@ -1,4 +1,4 @@
----
+--
 title: OpenType Feature File Specification
 layout: default
 ---
@@ -6,12 +6,12 @@ layout: default
 OpenType™ Feature File Specification
 ---
 
-Copyright 2015-2020 Adobe. All Rights Reserved. This software is licensed as
+Copyright 2015-2021 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
-Document version 1.25.1
-Last updated 5 July 2020
+Document version 1.25.2
+Last updated 26 April 2021
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
 
@@ -170,8 +170,8 @@ contexts.
 
 [`anchor`](#2.e.vii)<br>
 [`anchorDef`](#2.e.viii)<br>
-[`anon`](#10)<br>
-[`anonymous`](#10)<br>
+[`anon`](#10) (deprecated)<br>
+[`anonymous`](#10) (deprecated)<br>
 [`by`](#5.a)<br>
 [`contourpoint`](#2.e.vi)<br>
 [`cursive`](#6.c)<br>
@@ -3907,6 +3907,11 @@ table STAT {
 <a name="10"></a>
 ## 10. Specifying anonymous data blocks
 
+**Note:** Anonymous data blocks are deprecated and will cause a warning to
+appear. The Adobe implementation may never have provided an interface to
+anonyomous block content and definitely has not since 2014. They will
+be removed from a future version of the standard.
+
 The feature file can contain `anonymous` tagged blocks of data that must be
 passed back to the client of the implementation software. These blocks of data
 typically contain information needed to specify custom or unsupported tables.
@@ -3959,6 +3964,9 @@ along with the tag `sbit`.
 
 <a name="11"></a>
 ## 11. Document revisions
+
+**v1.25.2 [26 April 2021]:**
+*   Deprecated [anonymous data blocks](#10)
 
 **v1.25.1 [5 July 2020]:**
 *   Added information and examples to [STAT table](#9.e)

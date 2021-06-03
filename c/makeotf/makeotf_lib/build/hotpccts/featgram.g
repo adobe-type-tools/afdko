@@ -2358,7 +2358,7 @@ topLevelStatement
 
 anonBlock
 	:	K_anon t:T_TAG		<<h->anonData.tag = $t.ulval;>>
-			   				<<featAddAnonData(); featSetTagReturnMode(START);>>
+			   				<<featAddAnonData(); h->syntax.numAnon++; featSetTagReturnMode(START);>>
 	;
 
 featureFile

@@ -26,7 +26,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.8.6 March 11 2021
+makeotf.py v2.8.7 April 26 2021
 """
 
 __methods__ = """
