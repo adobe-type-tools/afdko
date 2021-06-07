@@ -3385,8 +3385,8 @@ static void recodeAddChar(tcCtx g, unsigned length, char *cstr, unsigned id,
 #if TC_DEBUG
     if (h->debug.output) {
         long icstr = h->chars.array[h->chars.cnt - 1].icstr;
-        unsigned length = h->cstrs.cnt - icstr;
-        printf("==== recode[%d]: ", length);
+        unsigned len = h->cstrs.cnt - icstr;
+        printf("==== recode[%d]: ", len);
         csDump(length, (unsigned char *)&h->cstrs.array[icstr], g->nMasters, 0);
     }
 #endif /* TC_DEBUG */
