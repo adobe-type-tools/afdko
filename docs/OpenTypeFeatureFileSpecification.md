@@ -11,7 +11,7 @@ OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
 Document version 1.26
-Last updated 1 June 2021
+Last updated 7 June 2021
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
 
@@ -191,7 +191,7 @@ contexts.
 [`languagesystem`](#4.b.i)<br>
 [`lookup`](#4.e)<br>
 [`lookupflag`](#4.d)<br>
-[`mark`](#6.d)<br>
+[`mark`](#6.d) (can also be used as a [tag](#2.h) or [lookup block label](#2.i))<br>
 [`MarkAttachmentType`](#4.d)<br>
 [`markClass`](#4.f)<br>
 [`nameid`](#9.e)<br>
@@ -849,14 +849,16 @@ A tag can only have characters from the following set:
 and must not start with a digit or hyphen. However, use of characters beyond
 those in production glyph names is not recommended.
 
-The special language tag `dflt` denotes the default language system of the
+The keyword `mark` is a valid tag but other (short) keywords are not.  The
+special language tag `dflt` denotes the default language system of the
 corresponding script.
 
 <a name="2.i"></a>
 ### 2.i. Lookup block labels
 
 The same length and name restrictions that apply to a production glyph name
-apply to a lookup block label.
+apply to a lookup block label.  For historical reasons the keyword `mark' also
+accepted as a label but other keywords are not.
 
 <a name="3"></a>
 ## 3. Including files
@@ -3996,7 +3998,7 @@ along with the tag `sbit`.
 <a name="11"></a>
 ## 11. Document revisions
 
-**v1.26 [1 June 2021]:**
+**v1.26 [7 June 2021]:**
 *   Clarified syntax of [keywords](#2.c), [glyph names](#2.f.i), 
     [named glyph classes](#2.g.iii), [tags](#2.h),
     [lookup block labels](#2.i), and [include directives](#3), 
