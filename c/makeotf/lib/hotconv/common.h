@@ -30,6 +30,12 @@
 extern "C" {
 #endif
 
+#if WIN32
+#define SAFE_LOCALTIME(x, y) localtime_s(y, x)
+#else
+#define SAFE_LOCALTIME(x, y) localtime_r(x, y)
+#endif
+
 /* --------------------------------- Macros -------------------------------- */
 
 /* Define to supply Microsoft-specific function calling info, e.g. __cdecl */
