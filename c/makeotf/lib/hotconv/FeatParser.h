@@ -1754,6 +1754,7 @@ public:
     LabelContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NAMELABEL();
+    antlr4::tree::TerminalNode *MARK();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

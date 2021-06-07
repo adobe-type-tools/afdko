@@ -499,7 +499,7 @@ glyphName:
 ;
 
 label:
-    NAMELABEL
+    NAMELABEL | MARK
 ;
 
 tag:
