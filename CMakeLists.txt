@@ -38,7 +38,10 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 add_definitions(-DANTLR4CPP_STATIC)
 set(ANTLR4_WITH_STATIC_CRT OFF)
-set(ANTLR4_TAG tags/4.9.2)
+# Use slightly more recent commit than 4.9.2 to deal with utfcpp test
+# compilation problems
+# set(ANTLR4_TAG tags/4.9.2)
+set(ANTLR4_TAG 916f03366edf15bf8b50010b11d479c189bf9f96)
 include(ExternalAntlr4Cpp)
 
 # sanitizer support
