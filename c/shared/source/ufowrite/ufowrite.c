@@ -710,6 +710,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
     abfFontDict *fontDict0;
     abfPrivateDict *privateDict;
     int i;
+    int j;
 
     if (h->lastiFD != ABF_UNSET_INT)
         fontDict0 = &(top->FDArray.array[h->lastiFD]);
@@ -852,7 +853,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
         writeLine(h, buffer);
         writeLine(h, "\t<key>postscriptFDArray</key>");
         writeLine(h, "\t<array>");
-        for (int j = 0; j < top->FDArray.cnt; j++) {
+        for (j = 0; j < top->FDArray.cnt; j++) {
             writeLine(h, "\t<dict>");
             abfFontDict *fd = &h->top->FDArray.array[j];
             writeLine(h, "\t<key>FontName</key>");
