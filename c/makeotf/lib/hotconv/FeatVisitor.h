@@ -49,7 +49,7 @@ class FeatVisitor : public FeatParserBaseVisitor {
     // Console message reporting utilities
     void newFileMsg(char **msg);
     void tokenPositionMsg(char **msg, bool full = false);
-    const char *currentTokStr();
+    void currentTokStr(std::string &ts);
 
     // Functions to mark the "current" token before calling into FeatCtx
     inline antlr4::Token *TOK(antlr4::Token *t) { current_msg_token = t; return t; }

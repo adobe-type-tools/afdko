@@ -339,7 +339,8 @@ void FeatCtx::featMsg(int msgType, FeatVisitor *v,
 
 const char *FeatCtx::tokstr() {
     assert(current_visitor != NULL);
-    return current_visitor->currentTokStr();
+    current_visitor->currentTokStr(tokenStringBuffer);
+    return tokenStringBuffer.c_str();
 }
 
 void FeatCtx::setIDText()
