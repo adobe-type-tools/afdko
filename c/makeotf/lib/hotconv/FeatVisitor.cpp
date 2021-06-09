@@ -146,11 +146,11 @@ void FeatVisitor::Translate() {
 
 // --------------------------- Message Reporting -----------------------------
 
-const char *FeatVisitor::currentTokStr() {
+void FeatVisitor::currentTokStr(std::string &ts) {
     if ( current_msg_token == nullptr )
-        return nullptr;
+        return;
 
-    return current_msg_token->getText().c_str();
+    ts = current_msg_token->getText();
 }
 
 void FeatVisitor::newFileMsg(char **msg) {
@@ -222,8 +222,7 @@ antlrcpp::Any FeatVisitor::visitFeatureBlock(FeatParser::FeatureBlockContext *ct
     EntryPoint tmp_ep = include_ep;
     include_ep = &FeatParser::featureFile;
     if ( stage == vExtract ) {
-        Tag t = checkTag(ctx->starttag, ctx->endtag);
-        TOK(ctx);
+        Tag t = checkTag(TOK(ctx->starttag), ctx->endtag);
         fc->startFeature(t);
         if ( ctx->USE_EXTENSION() != nullptr )
             fc->flagExtension(false);

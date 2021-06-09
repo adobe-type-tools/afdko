@@ -117,6 +117,7 @@ class FeatCtx {
     struct {
         unsigned short numExcept {0};
     } syntax;
+    std::string tokenStringBuffer;
 
     void CDECL featMsg(int msgType, const char *fmt, ...);
     void CDECL featMsg(int msgType, FeatVisitor *v,
