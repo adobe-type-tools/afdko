@@ -24,8 +24,8 @@ jobs:
       if: matrix.os == 'windows-latest'
 
     - name: Install libuuid.a and headers (Ubuntu only) 
-     run: sudo apt-get install uuid-dev 
-     if: matrix.os == 'ubuntu-latest'  
+      run: sudo apt-get install uuid-dev 
+      if: matrix.os == 'ubuntu-latest'  
 
     - name: Install Python 3.7
       uses: actions/setup-python@v2
@@ -38,11 +38,11 @@ jobs:
         pip install wheel setuptools_scm cibuildwheel scikit-build cmake ninja
 
       - name: Set Windows generator to Visual Studio
-      run: |
-        echo "CMAKE_GENERATOR=Visual Studio 16 2019" >> $GITHUB_ENV
-        echo "CMAKE_GENERATOR_PLATFORM=x64" >> $GITHUB_ENV
-      shell: bash
-      if: matrix.os == 'windows-latest'
+        run: |
+          echo "CMAKE_GENERATOR=Visual Studio 16 2019" >> $GITHUB_ENV
+          echo "CMAKE_GENERATOR_PLATFORM=x64" >> $GITHUB_ENV
+        shell: bash
+        if: matrix.os == 'windows-latest'
 
     - name: Build wheel
       run: |
