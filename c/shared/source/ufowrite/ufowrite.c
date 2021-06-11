@@ -651,10 +651,10 @@ static void writeGlyphOrder(ufwCtx h) {
             writeLine(h, buffer);
         }
     }
-
+    
+    writeFDArray(h, h->top, buffer);
     writeLine(h, "</dict>");
     writeLine(h, "</plist>");
-    writeFDArray(h, h->top, buffer);
 
     /* Close dst stream */
     flushBuf(h);
