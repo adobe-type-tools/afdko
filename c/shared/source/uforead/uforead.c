@@ -1988,35 +1988,16 @@ static int parseFontInfo(ufoCtx h) {
         } else if (state == 4) {
             continue;
         } else if (tokenEqualStr(tk, "<dict>")) {
-            if (state == 3){
-                state = 5;
-                if (prevState == 5) {  // NOT first fdict in FDArray
-                    currentiFD = currentiFD + 1;
-                    h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
-                    if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
-                        reallocFDArray(h);
-                    }
-                } else {
-                    h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
-                    if (h->top.version.ptr != NULL)
-                        h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
-                }
-            }else if (state == 5){
-                state = 6;
-            }else{
+            if (state > 0) {
+                skipToDictEnd(h);
+            } else
                 state = 1;
-            }
         } else if (tokenEqualStr(tk, "</dict>")) {
-            if (state == 6){
-                state = 5;
-            } else if (state == 5){
-                prevState = state;
-                state = 3;
-            } else{
-                break;
-            }
+            break;
+        } else if (state > 4) {
+            continue;
         } else if (tokenEqualStr(tk, "<key>")) {
-            if (state != 1 && state < 5) {
+            if (state != 1) {
                 fatal(h, ufoErrParse, "Encountered '<key>' while not in top level of first <dict>, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             }
             // get key name
@@ -2032,39 +2013,22 @@ static int parseFontInfo(ufoCtx h) {
                     fatal(h, ufoErrParse, "Encountered element other than </key> when reading <key> name: %s, in fontinfo.plist file. Context: '%s'.\n", tk->val, getBufferContextPtr(h));
                 }
             }
-            if (state != 5 && state != 6){
-                state = 2;
-            }
+            state = 2;
         } else if (tokenEqualStr(tk, "<array>")) {
-            if (state != 2 && state < 5) {
+            if (state != 2) {
                 fatal(h, ufoErrParse, "Encountered <array> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
-            } else {
-                if (state >= 5){
-                    prevState = state;
-                }
+            } else
                 state = 3;
-            }
             dnaSET_CNT(h->valueArray, 0);
         } else if (tokenEqualStr(tk, "</array>")) {
-            if (state == 5) {
-                if ( h->top.FDArray.array != &h->fdict ) {  // if more memory was allocated for FDArray
-                    memFree(h, h->top.FDArray.array);
-                }
-                state = 1;
-            } else if (state != 3) {
+            if (state != 3) {
                 fatal(h, ufoErrParse, "Encountered </array> when not after <array> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             } else {
-                if (h->parseKeyName == NULL)
-                    break;
                 setFontDictKey(h, NULL);
-                if (prevState >= 5){
-                    state = prevState;
-                }else{
-                    state = 1;
-                }
+                state = 1;
             }
         } else if (tokenEqualStr(tk, "<array/>")) {
-            if (state != 2 && state != 5) {
+            if (state != 2) {
                 fatal(h, ufoErrParse, "Encountered <array/> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             } else {
                 dnaSET_CNT(h->valueArray, 0);
