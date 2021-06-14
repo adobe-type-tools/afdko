@@ -5,6 +5,12 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9a-z]+'
 
+  workflow_dispatch:
+  inputs:
+    reason:
+      description: 'Reason for running workflow'
+      required: true
+
 jobs:
   build_wheels:
     name: Build Py3 Wheel on ${{ matrix.os }}
@@ -14,6 +20,12 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
+
+    - name: Log reason (manual run only)
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "Reason for triggering: ${{ github.event.inputs.reason }}"
+
     - name: Check out
       uses: actions/checkout@v2
       with:
@@ -41,7 +53,7 @@ jobs:
         CIBW_BUILD: "cp36-*"
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
         CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x cp*win32"
-        CIBW_BEFORE_BUILD_LINUX: "yum install -y uuid-devel"
+        CIBW_BEFORE_BUILD_LINUX: "yum install -y libuuid-devel"
 
     - name: Build sdist (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
