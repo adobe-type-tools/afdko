@@ -11,7 +11,7 @@
 	</array>
 	<key>FSType</key>
 	<integer>0</integer>
-	<key>postscriptFDArray</key>
+	<key>com.adobe.type.postscriptFDArray</key>
 	<array>
 	<dict>
 	<key>FontName</key>

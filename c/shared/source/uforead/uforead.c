@@ -1490,7 +1490,7 @@ static int parseGlyphOrder(ufoCtx h) {
                     } else if (tokenEqualStr(tk, "public.glyphOrder")) {
                         prevState = state;
                         state = START_PUBLIC_ORDER;
-                    }  else if (tokenEqualStr(tk, "postscriptFDArray")) {
+                    }  else if (tokenEqualStr(tk, "com.adobe.type.postscriptFDArray")) {
                         prevState = state;
                         state = FDARRAY;
                     }

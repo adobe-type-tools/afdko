@@ -148,9 +148,9 @@
 	<string>Identity</string>
 	<key>com.adobe.type.cid.Supplement</key>
 	<integer>0</integer>
-		<key>FSType</key>
+	<key>FSType</key>
 	<integer>0</integer>
-	<key>postscriptFDArray</key>
+	<key>com.adobe.type.postscriptFDArray</key>
 	<array>
 	<dict>
 	<key>FontName</key>
