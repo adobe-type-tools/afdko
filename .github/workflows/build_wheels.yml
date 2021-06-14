@@ -6,10 +6,10 @@ on:
       - '[0-9]+.[0-9]+.[0-9a-z]+'
 
   workflow_dispatch:
-  inputs:
-    reason:
-      description: 'Reason for running workflow'
-      required: true
+    inputs:
+      reason:
+        description: 'Reason for running workflow'
+        required: true
 
 jobs:
   build_wheels:
