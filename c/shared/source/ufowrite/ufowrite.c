@@ -558,7 +558,7 @@ static int writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
         writeLine(h, "\t<key>FSType</key>");
         sprintf(buffer, "\t<integer>%d</integer>", (int)h->top->FSType);
         writeLine(h, buffer);
-        writeLine(h, "\t<key>postscriptFDArray</key>");
+        writeLine(h, "\t<key>com.adobe.type.postscriptFDArray</key>");
         writeLine(h, "\t<array>");
         for (j = 0; j < top->FDArray.cnt; j++) {
             writeLine(h, "\t<dict>");
