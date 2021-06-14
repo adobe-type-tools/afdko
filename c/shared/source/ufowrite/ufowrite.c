@@ -553,13 +553,14 @@ static void writeBlueValues(ufwCtx h, abfPrivateDict *privateDict){
 static int writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
     abfPrivateDict *privateDict;
     int i;
+    int j;
     if (top->sup.flags & ABF_CID_FONT) {
         writeLine(h, "\t<key>FSType</key>");
         sprintf(buffer, "\t<integer>%d</integer>", (int)h->top->FSType);
         writeLine(h, buffer);
         writeLine(h, "\t<key>postscriptFDArray</key>");
         writeLine(h, "\t<array>");
-        for (int j = 0; j < top->FDArray.cnt; j++) {
+        for (j = 0; j < top->FDArray.cnt; j++) {
             writeLine(h, "\t<dict>");
             abfFontDict *fd = &h->top->FDArray.array[j];
             writeLine(h, "\t<key>FontName</key>");
