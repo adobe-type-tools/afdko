@@ -1475,16 +1475,16 @@ static int parseGlyphOrder(ufoCtx h) {
                 } else if (tokenEqualStr(tk, "</key>")) {
                     message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
                 } else {
-                    if (tokenEqualStr(tk, "com.adobe.type.cid.CIDFontName")) {
+                    if (tokenEqualStr(tk, "com.adobe.type.CIDFontName")) {
                         prevState = state;
                         state = CIDNAME;
-                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Registry")) {
+                    } else if (tokenEqualStr(tk, "com.adobe.type.Registry")) {
                         prevState = state;
                         state = REGISTRY;
-                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Ordering")) {
+                    } else if (tokenEqualStr(tk, "com.adobe.type.Ordering")) {
                         prevState = state;
                         state = ORDERING;
-                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Supplement")) {
+                    } else if (tokenEqualStr(tk, "com.adobe.type.Supplement")) {
                         prevState = state;
                         state = SUPPLEMENT;
                     } else if (tokenEqualStr(tk, "public.glyphOrder")) {
