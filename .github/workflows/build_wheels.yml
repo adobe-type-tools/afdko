@@ -51,9 +51,9 @@ jobs:
         python -m cibuildwheel --output-dir dist
       env:
         CIBW_BUILD: "cp36-*"
-        CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x cp*win32"
-        CIBW_BEFORE_BUILD_LINUX: "yum install -y libuuid-devel"
+        CIBW_BEFORE_ALL_LINUX: "yum install -y libuuid-devel"
 
     - name: Build sdist (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
