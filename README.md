@@ -45,6 +45,8 @@ Note for macOS users: we recommend that you do **not** use the system Python. Am
 
 Note for all users: if you are in a Python 3 only environment, then the command `pip` is sufficient.  If you are in a mixed Python 2 and Python 3 environment, or you are unsure of your environment, then the command `pip3` ensures that you are using the Python 3 version of `pip`. It is for this reason that we have used `pip3` in the instructions below.
 
+Note for Linux users (and users of other platforms that are not macOS or Windows): When there is not a pre-built "wheel" for your platform `pip` will attempt to build the C and C++ portions of the package from source. This process will only succeed if both the C and C++ development tools and libuuid are installed. See [build from source](#Build-from-source) below.
+
 ### Installing
 
 **Option 1 (Recommended)**
@@ -107,8 +109,15 @@ On Linux (Ubuntu 17.10 LTS or later), install these with:
     apt-get -y install python3.6
     apt-get -y install python-pip
     apt-get -y install python-dev
+    apt-get -y install uuid-dev
 
-On Windows, you need Visual Studio 2017.
+On other POSIX-like operating systems, `libuuid` and its header files
+may be in a package named `libuuid-devel` or `util-linux-libs`. The
+source code for `libuuid` is maintained in the
+[util-linux repository](https://github.com/karelzak/util-linux).
+
+On Windows, you need Visual Studio 2017 or later.
+
 
 To build the **afdko** from source, clone the [afdko GitHub
 repository](https://github.com/adobe-type-tools/afdko), ensure the `wheel`
@@ -116,6 +125,9 @@ module is installed (`pip3 install wheel`), then `cd` to the top-level
 directory of the afdko, and run:
 
     pip3 install .
+
+For further information on building from source see
+[docs/FDK\_Build\_Notes.md](docs/FDK_Build_Notes.md).
 
 **Note**
 
