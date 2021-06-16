@@ -90,7 +90,7 @@ def test_subset_vf():
 
 def test_bug1003(capfd):
     """
-    Check that "the input set requires compatibilization" message is in
+    Check that the underlying fontTools.varLib exception message is in
     stderr when run without '-c' option.
     """
     input_dir = get_input_path('bug1003')
@@ -99,7 +99,10 @@ def test_bug1003(capfd):
     ds_path = os.path.join(temp_dir, 'bug1003.designspace')
     runner(CMD + ['-o', 'd', f'_{ds_path}'])
     captured = capfd.readouterr()
-    assert "The input set requires compatibilization" in captured.err
+    expected = ("Glyph 'a': 'rlineto' at point index 2 in master index 1 "
+                "differs from the default font point type 'rrcurveto'. Please "
+                "try again with the -c (--check-compat) option.")
+    assert expected in captured.err
 
 
 def test_bug1003_compat():
