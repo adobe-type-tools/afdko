@@ -107,10 +107,10 @@ def run_shell_command_logging(args):
     try:
         proc = subprocess.Popen(args,
                                 stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT,
-                                universal_newlines=True)
-        out = proc.communicate()[0]
-        print(out, end='')
+                                stderr=subprocess.STDOUT)
+        out, _ = proc.communicate()
+        for line in out.decode('utf-8'):
+            print(line, end='')
         if proc.returncode != 0:
             msg = " ".join(args)
             print(f"Error executing command '{msg}'")
