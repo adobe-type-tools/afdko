@@ -1109,20 +1109,6 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
         writeStr(h, buf);
         writeLine(h, "\"/>");
     }
-    if (info->flags & ABF_GLYPH_CID) {
-        writeLine(h, "\t<lib>");
-        writeLine(h, "\t\t<dict>");
-        writeLine(h, "\t\t\t<key>com.adobe.type.cid.CID</key>");
-        writeStr(h, "\t\t\t<integer>");
-        writeInt(h, (long)info->cid);
-        writeLine(h, "</integer>");
-        writeLine(h, "\t\t\t<key>com.adobe.type.cid.iFD</key>");
-        writeStr(h, "\t\t\t<integer>");
-        writeInt(h, (long)info->iFD);
-        writeLine(h, "</integer>");
-        writeLine(h, "\t\t</dict>");
-        writeLine(h, "\t</lib>");
-    }
     glyphRec = dnaNEXT(h->glyphs);
     strcpy(glyphRec->glyphName, glyphName);
     strcpy(glyphRec->glifFileName, glifName);
