@@ -182,5 +182,36 @@
 	</dict>
 	</dict>
 	</array>
+	<key>com.adobe.type.CIDMap</key>
+	<dict>
+	<key>cid00000</key>
+	<array>
+	<key>com.adobe.type.cid</key>
+	<integer>0</integer>
+	<key>com.adobe.type.iFD</key>
+	<integer>0</integer>
+	</array>
+	<key>cid00001</key>
+	<array>
+	<key>com.adobe.type.cid</key>
+	<integer>1</integer>
+	<key>com.adobe.type.iFD</key>
+	<integer>2</integer>
+	</array>
+	<key>cid01125</key>
+	<array>
+	<key>com.adobe.type.cid</key>
+	<integer>1125</integer>
+	<key>com.adobe.type.iFD</key>
+	<integer>1</integer>
+	</array>
+	<key>cid01143</key>
+	<array>
+	<key>com.adobe.type.cid</key>
+	<integer>1143</integer>
+	<key>com.adobe.type.iFD</key>
+	<integer>1</integer>
+	</array>
+	</dict>
 </dict>
 </plist>
