@@ -556,51 +556,49 @@ static int writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
     abfPrivateDict *privateDict;
     int i;
     int j;
-    if (top->sup.flags & ABF_CID_FONT) {
-        writeLine(h, "\t<key>FSType</key>");
-        sprintf(buffer, "\t<integer>%d</integer>", (int)h->top->FSType);
+    writeLine(h, "\t<key>FSType</key>");
+    sprintf(buffer, "\t<integer>%d</integer>", (int)h->top->FSType);
+    writeLine(h, buffer);
+    writeLine(h, "\t<key>com.adobe.type.postscriptFDArray</key>");
+    writeLine(h, "\t<array>");
+    for (j = 0; j < top->FDArray.cnt; j++) {
+        writeLine(h, "\t<dict>");
+        abfFontDict *fd = &h->top->FDArray.array[j];
+        writeLine(h, "\t<key>FontName</key>");
+        sprintf(buffer, "\t<string>%s</string>", fd->FontName.ptr);
         writeLine(h, buffer);
-        writeLine(h, "\t<key>com.adobe.type.postscriptFDArray</key>");
+        writeLine(h, "\t<key>PaintType</key>");
+        sprintf(buffer, "\t<integer>%ld</integer>", fd->PaintType);
+        writeLine(h, buffer);
+        if (fd->FontMatrix.cnt == ABF_EMPTY_ARRAY) {
+            fd->FontMatrix.cnt = 6;
+            fd->FontMatrix.array[0] = 0.001;
+            fd->FontMatrix.array[1] = 0.0;
+            fd->FontMatrix.array[2] = 0.0;
+            fd->FontMatrix.array[3] = 0.001;
+            fd->FontMatrix.array[4] = 0.0;
+            fd->FontMatrix.array[5] = 0.0;
+        }
+        writeLine(h, "\t<key>FontMatrix</key>");
         writeLine(h, "\t<array>");
-        for (j = 0; j < top->FDArray.cnt; j++) {
-            writeLine(h, "\t<dict>");
-            abfFontDict *fd = &h->top->FDArray.array[j];
-            writeLine(h, "\t<key>FontName</key>");
-            sprintf(buffer, "\t<string>%s</string>", fd->FontName.ptr);
+        for (i = 0; i < fd->FontMatrix.cnt; i++) {
+            float stem = fd->FontMatrix.array[i];
+            if (stem == ((int)stem))
+                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+            else
+                sprintf(buffer, "\t\t<real>%.3f</real>", stem);
             writeLine(h, buffer);
-            writeLine(h, "\t<key>PaintType</key>");
-            sprintf(buffer, "\t<integer>%ld</integer>", fd->PaintType);
-            writeLine(h, buffer);
-            if (fd->FontMatrix.cnt == ABF_EMPTY_ARRAY) {
-                fd->FontMatrix.cnt = 6;
-                fd->FontMatrix.array[0] = 0.001;
-                fd->FontMatrix.array[1] = 0.0;
-                fd->FontMatrix.array[2] = 0.0;
-                fd->FontMatrix.array[3] = 0.001;
-                fd->FontMatrix.array[4] = 0.0;
-                fd->FontMatrix.array[5] = 0.0;
-            }
-            writeLine(h, "\t<key>FontMatrix</key>");
-            writeLine(h, "\t<array>");
-            for (i = 0; i < fd->FontMatrix.cnt; i++) {
-                float stem = fd->FontMatrix.array[i];
-                if (stem == ((int)stem))
-                    sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-                else
-                    sprintf(buffer, "\t\t<real>%.3f</real>", stem);
-                writeLine(h, buffer);
-            }
-            writeLine(h, "\t</array>");
-
-            privateDict = &(fd->Private);
-            writeLine(h, "\t<key>PrivateDict</key>");
-            writeLine(h, "\t<dict>");
-            writeBlueValues(h, privateDict);
-            writeLine(h, "\t</dict>");
-            writeLine(h, "\t</dict>");
         }
         writeLine(h, "\t</array>");
+
+        privateDict = &(fd->Private);
+        writeLine(h, "\t<key>PrivateDict</key>");
+        writeLine(h, "\t<dict>");
+        writeBlueValues(h, privateDict);
+        writeLine(h, "\t</dict>");
+        writeLine(h, "\t</dict>");
     }
+    writeLine(h, "\t</array>");
     return 0;
 }
 
@@ -670,10 +668,9 @@ static void writeGlyphOrder(ufwCtx h) {
             sprintf(buffer, "\t<integer>%ld</integer>", h->top->cid.Supplement);
             writeLine(h, buffer);
         }
+        writeFDArray(h, h->top, buffer);
+        writeCIDMap(h, h->top, buffer);
     }
-    
-    writeFDArray(h, h->top, buffer);
-    writeCIDMap(h, h->top, buffer);
     writeLine(h, "</dict>");
     writeLine(h, "</plist>");
 
