@@ -15,7 +15,7 @@
 	<string>Identity</string>
 	<key>com.adobe.type.Supplement</key>
 	<integer>0</integer>
-		<key>FSType</key>
+		<key>com.adobe.type.FSType</key>
 	<integer>0</integer>
 	<key>com.adobe.type.postscriptFDArray</key>
 	<array>
