@@ -1847,7 +1847,8 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
                 } else {
                     GLIF_Rec *glif = &h->data.glifRecs.array[glyphFound];
                     glif->glifFileName = fileName;
-                    glif->glyphOrder = getGlyphOrderIndex(h, h->parseKeyName);
+                    if (glif->glyphOrder == -1)
+                        glif->glyphOrder = getGlyphOrderIndex(h, h->parseKeyName);
                 }
             }
             state = 1;
