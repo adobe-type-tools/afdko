@@ -77,8 +77,6 @@ class FontFile(object):
         else:
             print("Converting to temp UFO font...")
             self.temp_ufo_path = temp_path = get_temp_dir_path('font.ufo')
-            if self.font_format == 'PFC':
-                self.ufo_format = UFOFormatVersion.FORMAT_2_0
 
             if not run_shell_command([
                     'tx', '-ufo', font_path, temp_path]):
@@ -129,12 +127,6 @@ class FontFile(object):
             layer = layers[PROCD_GLYPHS_LAYER_NAME]
             glyph_set = writer.getGlyphSet(
                 layerName=PROCD_GLYPHS_LAYER_NAME, defaultLayer=False)
-            if self.font_format == "PFC":
-                libs = {}
-                for f in layers.defaultLayer._glyphs.items():
-                    libs[f[0]] = f[1].lib
-                for g in layer._glyphs.items():
-                    g[1].lib = libs[g[0]]
             writer.writeLayerContents(layers.layerOrder)
             layer.save(glyph_set)
 
@@ -999,8 +991,6 @@ def run(args=None):
     font_file = FontFile(font_path, font_format)
     use_hash_map = True if font_format == 'UFO' else False
     defcon_font = font_file.open(use_hash_map)
-    if font_format == 'PFC':
-        font_format = 'UFO'
 
     # We allow use of a hash map to skip glyphs only if fixing glyphs
     if options.clear_hash_map:
