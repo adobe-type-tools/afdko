@@ -556,7 +556,7 @@ static int writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
     abfPrivateDict *privateDict;
     int i;
     int j;
-    writeLine(h, "\t<key>FSType</key>");
+    writeLine(h, "\t<key>com.adobe.type.FSType</key>");
     sprintf(buffer, "\t<integer>%d</integer>", (int)h->top->FSType);
     writeLine(h, buffer);
     writeLine(h, "\t<key>com.adobe.type.postscriptFDArray</key>");
@@ -604,19 +604,19 @@ static int writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
 
 static int writeCIDMap(ufwCtx h, abfTopDict *top, char *buffer) {
     int i;
-    writeLine(h, "\t<key>com.adobe.type.CIDMap</key>");
+    writeLine(h, "\t<key>com.adobe.type.postscriptCIDMap</key>");
     writeLine(h, "\t<dict>");
     for (i = 0; i < h->glyphs.cnt; i++) {
         sprintf(buffer, "\t<key>%s</key>", h->glyphs.array[i].glyphName);
         writeLine(h, buffer);
-        writeLine(h, "\t<array>");
+        writeLine(h, "\t<dict>");
         writeLine(h, "\t<key>com.adobe.type.cid</key>");
         sprintf(buffer, "\t<integer>%d</integer>", h->glyphs.array[i].cid);
         writeLine(h, buffer);
         writeLine(h, "\t<key>com.adobe.type.iFD</key>");
         sprintf(buffer, "\t<integer>%d</integer>", h->glyphs.array[i].iFD);
         writeLine(h, buffer);
-        writeLine(h, "\t</array>");
+        writeLine(h, "\t</dict>");
     }
     writeLine(h, "\t</dict>");
 }
