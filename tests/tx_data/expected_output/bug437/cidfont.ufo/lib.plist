@@ -9,7 +9,7 @@
 		<string>cid01125</string>
 		<string>cid01143</string>
 	</array>
-	<key>FSType</key>
+	<key>com.adobe.type.FSType</key>
 	<integer>0</integer>
 	<key>com.adobe.type.postscriptFDArray</key>
 	<array>
@@ -182,36 +182,36 @@
 	</dict>
 	</dict>
 	</array>
-	<key>com.adobe.type.CIDMap</key>
+	<key>com.adobe.type.postscriptCIDMap</key>
 	<dict>
 	<key>cid00000</key>
-	<array>
+	<dict>
 	<key>com.adobe.type.cid</key>
 	<integer>0</integer>
 	<key>com.adobe.type.iFD</key>
 	<integer>0</integer>
-	</array>
+	</dict>
 	<key>cid00001</key>
-	<array>
+	<dict>
 	<key>com.adobe.type.cid</key>
 	<integer>1</integer>
 	<key>com.adobe.type.iFD</key>
 	<integer>2</integer>
-	</array>
+	</dict>
 	<key>cid01125</key>
-	<array>
+	<dict>
 	<key>com.adobe.type.cid</key>
 	<integer>1125</integer>
 	<key>com.adobe.type.iFD</key>
 	<integer>1</integer>
-	</array>
+	</dict>
 	<key>cid01143</key>
-	<array>
+	<dict>
 	<key>com.adobe.type.cid</key>
 	<integer>1143</integer>
 	<key>com.adobe.type.iFD</key>
 	<integer>1</integer>
-	</array>
+	</dict>
 	</dict>
 </dict>
 </plist>
