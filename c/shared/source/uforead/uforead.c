@@ -1151,18 +1151,6 @@ static int CTL_CDECL cmpGlifRecs(const void* first, const void* second, void* ct
     return retVal;
 }
 
-int glifRecComparator(const void *v1, const void *v2)
-{
-    const GLIF_Rec *p1 = (GLIF_Rec *)v1;
-    const GLIF_Rec *p2 = (GLIF_Rec *)v2;
-    if (p1->cid < p2->cid)
-        return -1;
-    else if (p1->cid > p2->cid)
-        return +1;
-    else
-        return 0;
-}
-
 static int matchGLIFOrderRec(const void* key, const void* value, void* ctx) {
     GlIFOrderRec* orderRec = (GlIFOrderRec*)value;
     return strcmp((char*)key, orderRec->glyphName);
@@ -1202,35 +1190,34 @@ static void addGLIFRec(ufoCtx h, int state, char* fileName) {
     }
 }
 
-static int findGLIFRecByName(ufoCtx h, char *glyphName)
+int glifRecNameComparator (const void *a, const void *b) {
+    const GLIF_Rec *p1 = (GLIF_Rec *) a;
+    const GLIF_Rec *p2 = (GLIF_Rec *) b;
+    return strcmp((*p1).glyphName, (*p2).glyphName);
+}
+
+static GLIF_Rec* findGLIFRecByName(ufoCtx h, char *glyphName)
 {
-    int i = 0;
-    while (i < h->data.glifRecs.cnt) {
-        GLIF_Rec* glifRec;
-        glifRec = &h->data.glifRecs.array[i];
-        if (!strcmp(glifRec->glyphName, glyphName)) {
-            return i;
-        }
-        i++;
-    }
-    return -1;
+    GLIF_Rec *glifKey = memNew(h, sizeof(GLIF_Rec*));
+    glifKey->glyphName = glyphName;
+    
+    GLIF_Rec* glif = bsearch(glifKey, h->data.glifRecs.array, h->data.glifRecs.cnt, sizeof(GLIF_Rec), glifRecNameComparator);
+    memFree(h, glifKey);
+    return glif;
 }
 
 static void updateGLIFRec(ufoCtx h, int state) {
-    int index;
+    GLIF_Rec* glifRec;
     char *glyphName;
 
     glyphName = h->parseKeyName;
 
-    index = findGLIFRecByName(h, glyphName);
-    if (index == -1) {
+    glifRec = findGLIFRecByName(h, glyphName);
+    if (glifRec == NULL) {
         message(h, "Warning: glyph '%s' is in the processed layer but not in the default layer.", glyphName);
         getKeyValue(h, "</string>", state); /* consume the file name */
     } else {
         char* fileName;
-        GLIF_Rec* glifRec;
-
-        glifRec = &h->data.glifRecs.array[index];
 
         fileName = getKeyValue(h, "</string>", state);
         if (fileName == NULL) {
@@ -1784,6 +1771,8 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
             return ufoErrSrcStream;
         }
     }
+    
+    qsort(h->data.glifRecs.array, h->data.glifRecs.cnt, sizeof(GLIF_Rec), glifRecNameComparator);
 
     dnaSET_CNT(h->valueArray, 0);
     fillbuf(h, 0);
@@ -1840,15 +1829,14 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
                 char *subbuff = memNew(h, (sizeof(char*) * nameLength));
                 memcpy(subbuff, &fileName[0], nameLength );
                 subbuff[nameLength] = '\0';
-                int glyphFound = findGLIFRecByName(h, subbuff);
+                GLIF_Rec* foundGlyph = findGLIFRecByName(h, subbuff);
                 memFree(h, subbuff);
-                if (glyphFound == -1){
+                if (foundGlyph == NULL){
                     addGLIFRec(h, state, fileName);
                 } else {
-                    GLIF_Rec *glif = &h->data.glifRecs.array[glyphFound];
-                    glif->glifFileName = fileName;
-                    if (glif->glyphOrder == -1)
-                        glif->glyphOrder = getGlyphOrderIndex(h, h->parseKeyName);
+                    foundGlyph->glifFileName = fileName;
+                    if (foundGlyph->glyphOrder == -1)
+                        foundGlyph->glyphOrder = getGlyphOrderIndex(h, h->parseKeyName);
                 }
             }
             state = 1;
