@@ -56,7 +56,7 @@ const char* t1HintKeyV2 = "com.adobe.type.autohint.v2";
 int currentCID = -1;
 long CIDCount = 0;
 int currentiFD = 0;
-int FDArrayInitSize = 50;
+int FDArrayInitSize = 20;
 
 typedef struct
 {
@@ -117,6 +117,8 @@ typedef struct
     char* glifFilePath;
     char* altLayerGlifFileName;
     long int glyphOrder;  // used to sort the glifRecs by glyph order from lib.plist.
+    int cid;
+    int iFD;
 } GLIF_Rec;
 
 typedef struct
@@ -1006,7 +1008,7 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
         top->Weight.ptr = keyValue;
     } else if (!strcmp(keyName, "postscriptIsFixedPitch")) {
         top->isFixedPitch = atol(keyValue);
-    } else if (!strcmp(keyName, "FSType")) {
+    } else if (!strcmp(keyName, "com.adobe.type.FSType")) {
         top->FSType = atoi(keyValue);
     } else if (!strcmp(keyName, "italicAngle")) {
         top->ItalicAngle = (float)strtod(keyValue, NULL);
@@ -1168,8 +1170,7 @@ static long getGlyphOrderIndex(ufoCtx h, char* glyphName) {
     return orderIndex;
 }
 
-static void addGLIFRec(ufoCtx h, int state) {
-    char* fileName;
+static void addGLIFRec(ufoCtx h, int state, char* fileName) {
     GLIF_Rec* newGLIFRec;
     long int glyphOrder;
 
@@ -1177,44 +1178,46 @@ static void addGLIFRec(ufoCtx h, int state) {
     newGLIFRec = dnaNEXT(h->data.glifRecs);
     newGLIFRec->glyphName = h->parseKeyName;
     newGLIFRec->glyphOrder = glyphOrder;
-    fileName = getKeyValue(h, "</string>", state);
-    if (fileName == NULL) {
-        fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
+    if (state != 7){
+        if (fileName == NULL) {
+            fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
+        }
+        newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
+        sprintf(newGLIFRec->glifFileName, "%s", fileName);
+        newGLIFRec->altLayerGlifFileName = NULL;
+        newGLIFRec->cid = -1;
+        newGLIFRec->iFD = -1;
     }
-    newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
-    sprintf(newGLIFRec->glifFileName, "%s", fileName);
-    newGLIFRec->altLayerGlifFileName = NULL;
 }
 
-static int findGLIFRecByName(ufoCtx h, char *glyphName)
+int glifRecNameComparator (const void *a, const void *b) {
+    const GLIF_Rec *p1 = (GLIF_Rec *) a;
+    const GLIF_Rec *p2 = (GLIF_Rec *) b;
+    return strcmp((*p1).glyphName, (*p2).glyphName);
+}
+
+static GLIF_Rec* findGLIFRecByName(ufoCtx h, char *glyphName)
 {
-    int i = 0;
-    while (i < h->data.glifRecs.cnt) {
-        GLIF_Rec* glifRec;
-        glifRec = &h->data.glifRecs.array[i];
-        if (!strcmp(glifRec->glyphName, glyphName)) {
-            return i;
-        }
-        i++;
-    }
-    return -1;
+    GLIF_Rec *glifKey = memNew(h, sizeof(GLIF_Rec*));
+    glifKey->glyphName = glyphName;
+    
+    GLIF_Rec* glif = bsearch(glifKey, h->data.glifRecs.array, h->data.glifRecs.cnt, sizeof(GLIF_Rec), glifRecNameComparator);
+    memFree(h, glifKey);
+    return glif;
 }
 
 static void updateGLIFRec(ufoCtx h, int state) {
-    int index;
+    GLIF_Rec* glifRec;
     char *glyphName;
 
     glyphName = h->parseKeyName;
 
-    index = findGLIFRecByName(h, glyphName);
-    if (index == -1) {
+    glifRec = findGLIFRecByName(h, glyphName);
+    if (glifRec == NULL) {
         message(h, "Warning: glyph '%s' is in the processed layer but not in the default layer.", glyphName);
         getKeyValue(h, "</string>", state); /* consume the file name */
     } else {
         char* fileName;
-        GLIF_Rec* glifRec;
-
-        glifRec = &h->data.glifRecs.array[index];
 
         fileName = getKeyValue(h, "</string>", state);
         if (fileName == NULL) {
@@ -1226,6 +1229,319 @@ static void updateGLIFRec(ufoCtx h, int state) {
     }
 }
 
+static int cmpNumeric(const void* first, const void* second, void* ctx) {
+    int retVal;
+    if ((*(float*)first) == (*(float*)second))
+        retVal = 0;
+    else if ((*(float*)first) > (*(float*)second))
+        retVal = 1;
+    else
+        retVal = -1;
+    return retVal;
+}
+
+static void fixUnsetDictValues(ufoCtx h) {
+    abfTopDict* top = &h->top;
+    abfFontDict* fd0 = &h->top.FDArray.array[0];
+    abfPrivateDict* pd = &fd0->Private;
+
+    if (fd0->FontName.ptr == NULL) {
+        message(h, "Warning: No PS name specified in source UFO font.");
+    }
+
+    if (top->version.ptr == NULL) {
+        message(h, "Warning: No version specified in source UFO font.");
+    }
+
+    if (pd->StemSnapH.cnt > ABF_EMPTY_ARRAY) {
+        if (pd->StdHW == ABF_UNSET_REAL) {
+            pd->StdHW = pd->StemSnapH.array[0];
+        }
+        ctuQSort(pd->StemSnapH.array, pd->StemSnapH.cnt,
+                 sizeof(pd->StemSnapH.array[0]), cmpNumeric, h);
+    }
+    if (pd->StemSnapV.cnt > ABF_EMPTY_ARRAY) {
+        if (pd->StdVW == ABF_UNSET_REAL) {
+            pd->StdVW = pd->StemSnapV.array[0];
+        }
+        ctuQSort(pd->StemSnapV.array, pd->StemSnapV.cnt,
+                 sizeof(pd->StemSnapV.array[0]), cmpNumeric, h);
+    }
+    top->sup.srcFontType = abfSrcFontTypeUFOName;
+}
+
+static void reallocFDArray(ufoCtx h){
+    float newFDArraySize = h->top.FDArray.cnt * 1.5;  /* x1.5 for efficiency */
+    abfFontDict* newFDArray = memNew(h, newFDArraySize * sizeof(abfFontDict));
+    memcpy(newFDArray, h->top.FDArray.array, (h->top.FDArray.cnt - 1) * sizeof(abfFontDict));
+    memFree(h, h->top.FDArray.array);
+    h->top.FDArray.array = newFDArray;
+}
+
+#define IN_KEY 2
+#define IN_ARRAY 3
+#define IN_FDICT 5
+#define IN_PRIVATE_DICT 6
+
+static void parseFDArray(ufoCtx h){
+    /* 2 = in key, 3 = in array, 4 = in comment, 5 = in dict.*/
+    int state = IN_ARRAY;
+    int prevState = 0;
+
+    h->flags &= ~((unsigned long)SEEN_END);
+
+    while (!(h->flags & SEEN_END)) {
+        token* tk;
+        tk = getToken(h, state);
+
+        if (tokenEqualStr(tk, "<!--")) {
+            prevState = state;
+            state = 4;
+        } else if (tokenEqualStr(tk, "-->")) {
+            if (state != 4) {
+                fatal(h, ufoErrParse, "Encountered end comment token while not in comment, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
+            }
+            state = prevState;
+        } else if (state == 4) {
+            continue;
+        } else if (tokenEqualStr(tk, "<dict>")) {
+            if (state == IN_ARRAY){
+                state = IN_FDICT;
+                if (prevState == IN_FDICT) { /* Not first fdict in FDArray */
+                    currentiFD = currentiFD + 1;
+                    h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
+                    if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
+                        reallocFDArray(h);
+                    }
+                } else { //First fdict in FDArray
+                    h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
+                    if (h->top.version.ptr != NULL)
+                        h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
+                }
+            } else if (state == IN_FDICT){
+                state = IN_PRIVATE_DICT;
+            } else {
+                message(h, "Warning: Encountered <dict> outside of FDArray");
+            }
+        } else if (tokenEqualStr(tk, "</dict>")) {
+            if (state == IN_PRIVATE_DICT){
+                state = IN_FDICT;
+            } else if (state == IN_FDICT){
+                prevState = state;
+                state = 3;
+                h->parseKeyName = NULL;
+            } else{
+                break;
+            }
+        } else if (tokenEqualStr(tk, "<key>")) {
+            if (state != 1 && state < IN_FDICT) {
+                fatal(h, ufoErrParse, "Encountered '<key>' while not in top level of first <dict>, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
+            }
+            // get key name
+            tk = getElementValue(h, state);
+            if (tokenEqualStr(tk, "</key>")) {
+                message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
+            } else {
+                h->parseKeyName = copyStr(h, tk->val);  // get a copy in memory. This is freed when the value is assigned.
+                // get end-key.
+                tk = getToken(h, state);
+                if (!tokenEqualStr(tk, "</key>")) {
+                    tk->val[tk->length - 1] = 0;
+                    fatal(h, ufoErrParse, "Encountered element other than </key> when reading <key> name: %s, in fontinfo.plist file. Context: '%s'.\n", tk->val, getBufferContextPtr(h));
+                }
+            }
+            if (state != IN_FDICT && state != IN_PRIVATE_DICT){
+                state = IN_KEY;
+            }
+        } else if (tokenEqualStr(tk, "<array>")) {
+            if (state != IN_KEY && state < IN_FDICT) {
+                fatal(h, ufoErrParse, "Encountered <array> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
+            } else {
+                if (state >= IN_FDICT){
+                    prevState = state;
+                }
+                state = IN_ARRAY;
+            }
+            dnaSET_CNT(h->valueArray, 0);
+        } else if (tokenEqualStr(tk, "</array>")) {
+            if (state == IN_FDICT) {
+                if (h->top.FDArray.array != &h->fdict){ //if more memory was allocated for FDArray
+                    memFree(h, h->top.FDArray.array);
+                }
+                state = 1;
+            } else if (state != IN_ARRAY) {
+                fatal(h, ufoErrParse, "Encountered </array> when not after <array> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
+            } else {
+                if (h->parseKeyName == NULL)
+                    break;
+                setFontDictKey(h, NULL);
+                if (prevState >= IN_FDICT){
+                    state = prevState;
+                }else{
+                    state = 1;
+                }
+            }
+        } else if (tokenEqualStr(tk, "<array/>")) {
+            if (state != IN_KEY && state != IN_FDICT) {
+                fatal(h, ufoErrParse, "Encountered <array/> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
+            } else {
+                dnaSET_CNT(h->valueArray, 0);
+                setFontDictKey(h, NULL);
+                state = 1;
+            }
+        } else if (tokenEqualStr(tk, "<string>")) {
+            state = doFontDictValue(h, "<string>", "</string>", state);
+        } else if (tokenEqualStr(tk, "<real>")) {
+            state = doFontDictValue(h, "<real>", "</real>", state);
+        } else if (tokenEqualStr(tk, "<integer>")) {
+            state = doFontDictValue(h, "<integer>", "</integer>", state);
+        } else if (tokenEqualStr(tk, "<date>")) {
+            state = doFontDictValue(h, "<date>", "</date>", state);
+        } else if (tokenEqualStr(tk, "<data>")) {
+            message(h, "Warning: encountered <data> element: skipping.");
+        } else if (tokenEqualStr(tk, "<false/>")) {
+            setFontDictKey(h, "0");
+            state--;
+        } else if (tokenEqualStr(tk, "<true/>")) {
+            setFontDictKey(h, "1");
+            state--;
+        } else if (state != 0) {
+            tk->val[tk->length - 1] = 0;
+            message(h, "Warning: discarding token '%s', in fontinfo.plist file. Context: '%s'.", tk->val, getBufferContextPtr(h));
+            if (state == IN_KEY)
+                state = 1;
+            else if (state == 3)
+                state = IN_KEY;
+        }
+    }
+}
+
+static void parseCIDMap(ufoCtx h){
+    int state = 5; /*in cid dict*/
+    int prevState = 0;
+    h->flags &= ~((unsigned long)SEEN_END);
+
+    while (!(h->flags & SEEN_END)) {
+        token* tk;
+        tk = getToken(h, state);
+        
+        if (tokenEqualStr(tk, "<!--")) {
+            prevState = state;
+            state = 4;
+        } else if (tokenEqualStr(tk, "-->")) {
+            if (state != 4) {
+                fatal(h, ufoErrParse, "Encountered end comment token while not in comment, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
+            }
+            state = prevState;
+        } else if (state == 4) {
+            continue;
+        } else if (tokenEqualStr(tk, "<dict>")) {
+            state = 3;
+            dnaSET_CNT(h->valueArray, 0);
+        } else if (tokenEqualStr(tk, "</dict>")) {
+            if (state == 3){
+                if (h->parseKeyName == NULL)
+                    break;
+                setFontDictKey(h, NULL);
+                if (prevState >= IN_FDICT){
+                    state = prevState;
+                }else{
+                    state = 1;
+                }
+            } else {
+                break;
+            }
+        } else if (tokenEqualStr(tk, "<key>")) {
+            // get key name
+            prevState = state;
+            state = IN_KEY;
+            tk = getElementValue(h, state);
+            if (tokenEqualStr(tk, "</key>")) {
+                message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
+            } else {
+                if (prevState == 3 | prevState == 9 | prevState == 10) {
+                    /* parsing cid and iFD values*/
+                    if (tokenEqualStr(tk, "com.adobe.type.cid")) {
+                        state = 9;
+                    } else if(tokenEqualStr(tk, "com.adobe.type.iFD")) {
+                        state = 10;
+                    } else {
+                        message(h, "Warning: Encountered unknown token for CIDMap. Text: '%s'.", tk->val); /* test this later */
+                    }
+                } else { /* parsing a new cidmap value*/
+                    h->parseKeyName = copyStr(h, tk->val);  // get a copy in memory. This is freed when the value is assigned.
+                    // get end-key.
+                    addGLIFRec(h, 7, NULL);
+                }
+                tk = getToken(h, state);
+                if (!tokenEqualStr(tk, "</key>")) {
+                    tk->val[tk->length - 1] = 0;
+                    fatal(h, ufoErrParse, "Encountered element other than </key> when reading <key> name: %s, in fontinfo.plist file. Context: '%s'.\n", tk->val, getBufferContextPtr(h));
+                }
+            }
+
+        } else if (tokenEqualStr(tk, "<array>")) {
+            if (state != IN_KEY | state == 3) {
+                fatal(h, ufoErrParse, "Encountered <array> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
+            } else {
+                state = 3;
+            }
+            dnaSET_CNT(h->valueArray, 0);
+        } else if (tokenEqualStr(tk, "</array>")) {
+            if (state != 3) {
+                fatal(h, ufoErrParse, "Encountered </array> when not after <array> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
+            } else {
+                /* What happens here? Do I set the CID and iFD here, or just move along? */
+                if (h->parseKeyName == NULL)
+                    break;
+                setFontDictKey(h, NULL);
+                if (prevState >= IN_FDICT){
+                    state = prevState;
+                }else{
+                    state = 1;
+                }
+            }
+        } else if (tokenEqualStr(tk, "<array/>")) { /* is this ever reached?? */
+            if (state != IN_KEY && state != IN_FDICT) {
+                fatal(h, ufoErrParse, "Encountered <array/> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
+            } else {
+                dnaSET_CNT(h->valueArray, 0);
+                setFontDictKey(h, NULL);
+                state = 1;
+            }
+        } else if (tokenEqualStr(tk, "<string>")) {
+            state = doFontDictValue(h, "<string>", "</string>", state);
+        } else if (tokenEqualStr(tk, "<real>")) {
+            state = doFontDictValue(h, "<real>", "</real>", state);
+        } else if (tokenEqualStr(tk, "<integer>")) {
+            char *valueString = getKeyValue(h, "</integer>", state);
+            int index = h->data.glifRecs.cnt - 1;
+            GLIF_Rec *g = &h->data.glifRecs.array[index];
+            if (state == 9)
+                g->cid = atoi(valueString);
+            else if (state == 10)
+                g->iFD = atoi(valueString);
+            state = prevState;
+        } else if (tokenEqualStr(tk, "<date>")) {
+            state = doFontDictValue(h, "<date>", "</date>", state);
+        } else if (tokenEqualStr(tk, "<data>")) {
+            message(h, "Warning: encountered <data> element: skipping.");
+        } else if (tokenEqualStr(tk, "<false/>")) {
+            setFontDictKey(h, "0");
+            state--;
+        } else if (tokenEqualStr(tk, "<true/>")) {
+            setFontDictKey(h, "1");
+            state--;
+        } else if (state != 0) {
+            tk->val[tk->length - 1] = 0;
+            message(h, "Warning: discarding token '%s', in fontinfo.plist file. Context: '%s'.", tk->val, getBufferContextPtr(h));
+            if (state == IN_KEY)
+                state = 1;
+            else if (state == 3)
+                state = IN_KEY;
+        }
+    }
+}
 
 #define START_PUBLIC_ORDER 1256
 #define IN_PUBLIC_ORDER 1257
@@ -1234,13 +1550,14 @@ static void updateGLIFRec(ufoCtx h, int state) {
 #define ORDERING 1260
 #define SUPPLEMENT 1261
 #define CIDNAME 1255
+#define FDARRAY 1262
+#define CIDMAP 1263
 
 static int parseGlyphOrder(ufoCtx h) {
     int state = 0; /* 0 == start, 1= seen start of glyph, 2 = seen glyph name, 3 = in path, 4 in comment.  */
     int seenGO = 0;
     int prevState = 0;
     h->src.next = h->mark = NULL;
-
     h->cb.stm.clientFileName = "lib.plist";
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
@@ -1269,6 +1586,9 @@ static int parseGlyphOrder(ufoCtx h) {
             state = prevState;
         } else if (state == IN_COMMENT) {
             continue;
+        } else if ((tokenEqualStrN(tk, "<dict", 5)) && (state == CIDMAP)) {
+            parseCIDMap(h);
+            state = prevState;
         } else if (tokenEqualStrN(tk, "<dict", 5)) {
             // <dict/> case
             if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>'))
@@ -1283,24 +1603,33 @@ static int parseGlyphOrder(ufoCtx h) {
             } else {
                 // get key name
                 tk = getElementValue(h, state);
-                if (tokenEqualStr(tk, "</key>")) {
+                if (!strcmp(tk->val, "com.adobe.type.FSType")){
+                    h->parseKeyName = copyStr(h, tk->val);
+                    state = 2;
+                } else if (tokenEqualStr(tk, "</key>")) {
                     message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
                 } else {
-                    if (tokenEqualStr(tk, "com.adobe.type.cid.CIDFontName")) {
+                    if (tokenEqualStr(tk, "com.adobe.type.CIDFontName")) {
                         prevState = state;
                         state = CIDNAME;
-                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Registry")) {
+                    } else if (tokenEqualStr(tk, "com.adobe.type.Registry")) {
                         prevState = state;
                         state = REGISTRY;
-                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Ordering")) {
+                    } else if (tokenEqualStr(tk, "com.adobe.type.Ordering")) {
                         prevState = state;
                         state = ORDERING;
-                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Supplement")) {
+                    } else if (tokenEqualStr(tk, "com.adobe.type.Supplement")) {
                         prevState = state;
                         state = SUPPLEMENT;
                     } else if (tokenEqualStr(tk, "public.glyphOrder")) {
                         prevState = state;
                         state = START_PUBLIC_ORDER;
+                    }  else if (tokenEqualStr(tk, "com.adobe.type.postscriptFDArray")) {
+                        prevState = state;
+                        state = FDARRAY;
+                    }  else if (tokenEqualStr(tk, "com.adobe.type.postscriptCIDMap")) {
+                        prevState = state;
+                        state = CIDMAP;
                     }
                     // get end-key.
                     tk = getToken(h, state);
@@ -1315,6 +1644,9 @@ static int parseGlyphOrder(ufoCtx h) {
             if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
                 state = prevState;
             }
+        } else if ((tokenEqualStrN(tk, "<array", 6)) && (state == FDARRAY)) {
+            parseFDArray(h);
+            state = prevState;
         } else if ((tokenEqualStr(tk, "</array>")) && (state == IN_PUBLIC_ORDER)) {
             state = prevState;
         } else if ((tokenEqualStrN(tk, "<string", 7)) && ((state == REGISTRY) || (state == ORDERING) || (state == CIDNAME) )) {
@@ -1361,6 +1693,8 @@ static int parseGlyphOrder(ufoCtx h) {
                         }
                     }
                 }
+        } else if ((tokenEqualStrN(tk, "<integer", 8)) && (!strcmp(h->parseKeyName, "com.adobe.type.FSType"))) {
+            state = doFontDictValue(h, "<integer>", "</integer>", state);
         } else if ((tokenEqualStrN(tk, "<string", 7)) && (state == IN_PUBLIC_ORDER)) {
             if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
                 message(h, "Warning: Encountered empty <string/> in public.glyphOrder. Text: '%s'.", getBufferContextPtr(h));
@@ -1437,6 +1771,8 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
             return ufoErrSrcStream;
         }
     }
+    
+    qsort(h->data.glifRecs.array, h->data.glifRecs.cnt, sizeof(GLIF_Rec), glifRecNameComparator);
 
     dnaSET_CNT(h->valueArray, 0);
     fillbuf(h, 0);
@@ -1485,7 +1821,23 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
             if (altLayer) {
                 updateGLIFRec(h, state);
             } else {
-                addGLIFRec(h, state);
+                char* fileName = getKeyValue(h, "</string>", state);
+                if (fileName == NULL) {
+                    fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
+                }
+                int nameLength = strlen(fileName) - 5; // fileName - ".glif"
+                char *subbuff = memNew(h, (sizeof(char*) * nameLength));
+                memcpy(subbuff, &fileName[0], nameLength );
+                subbuff[nameLength] = '\0';
+                GLIF_Rec* foundGlyph = findGLIFRecByName(h, subbuff);
+                memFree(h, subbuff);
+                if (foundGlyph == NULL){
+                    addGLIFRec(h, state, fileName);
+                } else {
+                    foundGlyph->glifFileName = fileName;
+                    if (foundGlyph->glyphOrder == -1)
+                        foundGlyph->glyphOrder = getGlyphOrderIndex(h, h->parseKeyName);
+                }
             }
             state = 1;
         } else if (state != 0) {
@@ -1687,6 +2039,17 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
             currentiFD = -1;
             h->flags |= SEEN_END;
             break;
+        } else if (tokenEqualStr(tk, "name=")) {
+            tk = getToken(h, state);
+            char namebuff[4];
+            memcpy(&namebuff[0], tk->val, 3 );
+            namebuff[3] = '\0';
+            if (strcmp(namebuff, "cid") == 0) {
+                h->top.sup.flags |= ABF_CID_FONT;
+                h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
+                currentCID = glifRec -> cid;
+                currentiFD = glifRec -> iFD;
+            }
         } else if (tokenEqualStr(tk, "<unicode")) {
             if (state != 1)
                 continue;
@@ -1754,47 +2117,6 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
     return ufoSuccess;
 }
 
-static int cmpNumeric(const void* first, const void* second, void* ctx) {
-    int retVal;
-    if ((*(float*)first) == (*(float*)second))
-        retVal = 0;
-    else if ((*(float*)first) > (*(float*)second))
-        retVal = 1;
-    else
-        retVal = -1;
-    return retVal;
-}
-
-static void fixUnsetDictValues(ufoCtx h) {
-    abfTopDict* top = &h->top;
-    abfFontDict* fd0 = &h->top.FDArray.array[0];
-    abfPrivateDict* pd = &fd0->Private;
-
-    if (fd0->FontName.ptr == NULL) {
-        message(h, "Warning: No PS name specified in source UFO font.");
-    }
-
-    if (top->version.ptr == NULL) {
-        message(h, "Warning: No version specified in source UFO font.");
-    }
-
-    if (pd->StemSnapH.cnt > ABF_EMPTY_ARRAY) {
-        if (pd->StdHW == ABF_UNSET_REAL) {
-            pd->StdHW = pd->StemSnapH.array[0];
-        }
-        ctuQSort(pd->StemSnapH.array, pd->StemSnapH.cnt,
-                 sizeof(pd->StemSnapH.array[0]), cmpNumeric, h);
-    }
-    if (pd->StemSnapV.cnt > ABF_EMPTY_ARRAY) {
-        if (pd->StdVW == ABF_UNSET_REAL) {
-            pd->StdVW = pd->StemSnapV.array[0];
-        }
-        ctuQSort(pd->StemSnapV.array, pd->StemSnapV.cnt,
-                 sizeof(pd->StemSnapV.array[0]), cmpNumeric, h);
-    }
-    top->sup.srcFontType = abfSrcFontTypeUFOName;
-}
-
 static void skipToDictEnd(ufoCtx h) {
     int state = 0; /* 0 == start, 1=in first dict, 2 in key, 3= in value, 4=in array 4 in comment, 5 in child dict.*/
 
@@ -1808,14 +2130,6 @@ static void skipToDictEnd(ufoCtx h) {
             break;
         }
     } /* end while more tokens */
-}
-
-static void reallocFDArray(ufoCtx h){
-    float newFDArraySize = h->top.FDArray.cnt * 1.5;  /* x1.5 for efficiency */
-    abfFontDict* newFDArray = memNew(h, newFDArraySize * sizeof(abfFontDict));
-    memcpy(newFDArray, h->top.FDArray.array, (h->top.FDArray.cnt - 1) * sizeof(abfFontDict));
-    memFree(h, h->top.FDArray.array);
-    h->top.FDArray.array = newFDArray;
 }
 
 static int parseFontInfo(ufoCtx h) {
@@ -1850,35 +2164,16 @@ static int parseFontInfo(ufoCtx h) {
         } else if (state == 4) {
             continue;
         } else if (tokenEqualStr(tk, "<dict>")) {
-            if (state == 3){
-                state = 5;
-                if (prevState == 5) {  // NOT first fdict in FDArray
-                    currentiFD = currentiFD + 1;
-                    h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
-                    if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
-                        reallocFDArray(h);
-                    }
-                } else {
-                    h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
-                    if (h->top.version.ptr != NULL)
-                        h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
-                }
-            }else if (state == 5){
-                state = 6;
-            }else{
+            if (state > 0) {
+                skipToDictEnd(h);
+            } else
                 state = 1;
-            }
         } else if (tokenEqualStr(tk, "</dict>")) {
-            if (state == 6){
-                state = 5;
-            } else if (state == 5){
-                prevState = state;
-                state = 3;
-            } else{
-                break;
-            }
+            break;
+        } else if (state > 4) {
+            continue;
         } else if (tokenEqualStr(tk, "<key>")) {
-            if (state != 1 && state < 5) {
+            if (state != 1) {
                 fatal(h, ufoErrParse, "Encountered '<key>' while not in top level of first <dict>, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             }
             // get key name
@@ -1894,39 +2189,22 @@ static int parseFontInfo(ufoCtx h) {
                     fatal(h, ufoErrParse, "Encountered element other than </key> when reading <key> name: %s, in fontinfo.plist file. Context: '%s'.\n", tk->val, getBufferContextPtr(h));
                 }
             }
-            if (state != 5 && state != 6){
-                state = 2;
-            }
+            state = 2;
         } else if (tokenEqualStr(tk, "<array>")) {
-            if (state != 2 && state < 5) {
+            if (state != 2) {
                 fatal(h, ufoErrParse, "Encountered <array> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
-            } else {
-                if (state >= 5){
-                    prevState = state;
-                }
+            } else
                 state = 3;
-            }
             dnaSET_CNT(h->valueArray, 0);
         } else if (tokenEqualStr(tk, "</array>")) {
-            if (state == 5) {
-                if ( h->top.FDArray.array != &h->fdict ) {  // if more memory was allocated for FDArray
-                    memFree(h, h->top.FDArray.array);
-                }
-                state = 1;
-            } else if (state != 3) {
+            if (state != 3) {
                 fatal(h, ufoErrParse, "Encountered </array> when not after <array> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             } else {
-                if (h->parseKeyName == NULL)
-                    break;
                 setFontDictKey(h, NULL);
-                if (prevState >= 5){
-                    state = prevState;
-                }else{
-                    state = 1;
-                }
+                state = 1;
             }
         } else if (tokenEqualStr(tk, "<array/>")) {
-            if (state != 2 && state != 5) {
+            if (state != 2) {
                 fatal(h, ufoErrParse, "Encountered <array/> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             } else {
                 dnaSET_CNT(h->valueArray, 0);
