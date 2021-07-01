@@ -552,7 +552,7 @@ static void writeBlueValues(ufwCtx h, abfPrivateDict *privateDict){
     }
 }
 
-static int writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
+static void writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
     abfPrivateDict *privateDict;
     int i;
     int j;
@@ -599,10 +599,9 @@ static int writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
         writeLine(h, "\t</dict>");
     }
     writeLine(h, "\t</array>");
-    return 0;
 }
 
-static int writeCIDMap(ufwCtx h, abfTopDict *top, char *buffer) {
+static void writeCIDMap(ufwCtx h, abfTopDict *top, char *buffer) {
     int i;
     writeLine(h, "\t<key>com.adobe.type.postscriptCIDMap</key>");
     writeLine(h, "\t<dict>");
