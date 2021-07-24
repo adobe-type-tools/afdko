@@ -148,6 +148,10 @@ def roundSelectedFontInfo(fontInfo):
             elif prop_name in ('postscriptBlueFuzz', 'postscriptBlueShift',
                                'postscriptSlantAngle'):
                 round_val = round(prop_val, 2)
+
+            elif prop_name == 'italicAngle':
+                round_val = round(prop_val)
+
             else:
                 round_val = int(round(prop_val))
 
@@ -191,10 +195,6 @@ def postProcessInstance(fontPath, options):
     clearCustomLibs(dFont)
 
     if options.no_round:
-        # '-r/--no-round' option was used but certain values (glyph widths,
-        # kerning values, font info values) still need to be rounded because
-        # of how they are stored in the final OTF
-        roundSelectedFontInfo(dFont.info)
         roundGlyphWidths(dFont)
         roundKerningValues(dFont)
     else:
@@ -202,6 +202,10 @@ def postProcessInstance(fontPath, options):
         # when 'roundGeometry' = False
         roundPostscriptBlueScale(dFont.info)
         roundKerningValues(dFont)
+    # even if '-r/--no-round' option was used, certain values (glyph widths,
+    # kerning values, font info values) still need to be rounded because
+    # of how they are stored in the final OTF
+    roundSelectedFontInfo(dFont.info)
 
     dFont.save()
 
