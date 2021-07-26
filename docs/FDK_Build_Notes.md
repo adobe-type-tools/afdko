@@ -70,6 +70,14 @@ To run the tests manually/individually before installation you need to set a few
 
 ## Troubleshooting
 
+### `utfcpp` Timeout
+
+The Antlr 4 build process downloads its `utfcpp` dependency using a `git` protocol URL. In some situations this action can time out. As a workaround you can substitute the more reliable `https` URL by running this command (which will modify your git configuration):
+
+```
+git config --global url.https://github.com/.insteadOf git://github.com/
+```
+
 ### Antlr 4 Cpp runtime and Windows path lengths
 
 You may have trouble building the Antlr 4 Cpp runtime on Windows due to git
