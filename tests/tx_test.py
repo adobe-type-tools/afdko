@@ -1168,3 +1168,14 @@ def test_lib_removes_outlines_bug1366():
     expected_path = generate_ps_dump(expected_path)
     output_path = generate_ps_dump(output_path)
     assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
+
+def test_non_cid_ufo_parsing():
+    # Testing a UFO that is NOT cid-keyed but has glyphs named cidxxxxx is not
+    # parsed like a cid-keyed font
+    input_path = get_input_path("nonCID.ufo")
+    expected_path = get_expected_path("nonCID.pfa")
+    output_path = get_temp_file_path()
+    subprocess.call([TOOL, '-t1', '-o', output_path, input_path])
+    expected_path = generate_ps_dump(expected_path)
+    output_path = generate_ps_dump(output_path)
+    assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
