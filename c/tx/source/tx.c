@@ -8,7 +8,7 @@
 
 #include "tx_shared.h"
 
-#define TX_VERSION CTL_MAKE_VERSION(1, 2, 4)
+#define TX_VERSION CTL_MAKE_VERSION(1, 2, 5)
 
 #include "varread.h"
 
