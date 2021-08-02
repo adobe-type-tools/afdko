@@ -1169,6 +1169,7 @@ def test_lib_removes_outlines_bug1366():
     output_path = generate_ps_dump(output_path)
     assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
 
+
 def test_non_cid_ufo_parsing():
     # Testing a UFO that is NOT cid-keyed but has glyphs named cidxxxxx is not
     # parsed like a cid-keyed font
