@@ -1612,6 +1612,8 @@ static int parseGlyphOrder(ufoCtx h) {
                     if (tokenEqualStr(tk, "com.adobe.type.CIDFontName")) {
                         prevState = state;
                         state = CIDNAME;
+                        h->top.sup.flags |= ABF_CID_FONT;
+                        h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
                     } else if (tokenEqualStr(tk, "com.adobe.type.Registry")) {
                         prevState = state;
                         state = REGISTRY;
@@ -1973,6 +1975,12 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
         fprintf(stderr, "Failed to open glif file in parseGLIF. seek failed. %s.\n", glifRec->glifFilePath);
         return ufoErrSrcStream;
     }
+    
+    if (h->top.sup.flags & ABF_CID_FONT) { //if CID-keyed font, assign currentCID & currentiFD from glifRec
+        h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
+        currentCID = glifRec -> cid;
+        currentiFD = glifRec -> iFD;
+    }
 
     fillbuf(h, 0);
 
@@ -2039,17 +2047,6 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
             currentiFD = -1;
             h->flags |= SEEN_END;
             break;
-        } else if (tokenEqualStr(tk, "name=")) {
-            tk = getToken(h, state);
-            char namebuff[4];
-            memcpy(&namebuff[0], tk->val, 3 );
-            namebuff[3] = '\0';
-            if (strcmp(namebuff, "cid") == 0) {
-                h->top.sup.flags |= ABF_CID_FONT;
-                h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
-                currentCID = glifRec -> cid;
-                currentiFD = glifRec -> iFD;
-            }
         } else if (tokenEqualStr(tk, "<unicode")) {
             if (state != 1)
                 continue;
