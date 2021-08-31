@@ -1,6 +1,38 @@
 Changelog
 =========
 
+3.7.1 (released 2021-08-31)
+---------------------------
+- Switch to CMake-based builds, [documentation here](https://github.com/adobe-type-tools/afdko/blob/develop/docs/FDK_Build_Notes.md#build-system)
+  ([#1360](https://github.com/adobe-type-tools/afdko/pull/1360),
+  [#1367](https://github.com/adobe-type-tools/afdko/pull/1367),
+  [#1384](https://github.com/adobe-type-tools/afdko/pull/1384),
+  [#1372](https://github.com/adobe-type-tools/afdko/pull/1372))
+- [makeinstancesufo] fixes for fontMath 0.8.1 update
+  ([#1391](https://github.com/adobe-type-tools/afdko/pull/1391))
+- [tx] ufowrite for loop init declaration fix 
+  ([#1373](https://github.com/adobe-type-tools/afdko/pull/1373))
+- [tx] uforead deleting outlines fix
+  ([#1370](https://github.com/adobe-type-tools/afdko/pull/1370))
+- [tx] Windows line endings in binary files fix 
+  ([#1361](https://github.com/adobe-type-tools/afdko/pull/1361))
+- [makeotf] Fix for makeotf heap use after free
+  ([#1356](https://github.com/adobe-type-tools/afdko/pull/1356))
+- [tx] uforead, ufowrite, checkoutlinesufo fixes for reading & writing CID-keyed fonts 
+  ([#1353](https://github.com/adobe-type-tools/afdko/pull/1353))
+- [tx] t1read.c add error for fonts surpassing 65000 SID Limit 
+  ([#1347](https://github.com/adobe-type-tools/afdko/pull/1347))
+- [tx] cffread.c data type fix
+  ([#1344](https://github.com/adobe-type-tools/afdko/pull/1344))
+- [spec] Spec 6.4.iii: 'markClass' instead of 'mark' in example 4 (thanks @moyogo!)
+  ([#1336](https://github.com/adobe-type-tools/afdko/pull/1336))
+- [checkoutlinesufo] Moved list sort out of loop to not waste time sorting
+  ([#1331](https://github.com/adobe-type-tools/afdko/pull/1331))
+- [makeotf] aarch64 precision errors fix
+  ([#1329](https://github.com/adobe-type-tools/afdko/pull/1329))
+- [tests] Add cpplint check
+  ([#1325](https://github.com/adobe-type-tools/afdko/pull/1325))
+
 3.6.2 (released 2021-03-02)
 ---------------------------
 - [spec] Allow deleting glyphs via Multiple substitution (thanks @simoncozens!)
