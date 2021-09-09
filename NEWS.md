@@ -3,9 +3,10 @@ Changelog
 
 3.7.1 (released 2021-08-31)
 ---------------------------
-- Switch to CMake-based builds, [documentation here](https://github.com/adobe-type-tools/afdko/blob/develop/docs/FDK_Build_Notes.md#build-system)
+- [makeotfexe] **Port of Feature File Parser to Antlr 4**
+  ([#1367](https://github.com/adobe-type-tools/afdko/pull/1367))
+- [build] Switch to CMake-based builds -- [see documentation](https://github.com/adobe-type-tools/afdko/blob/develop/docs/FDK_Build_Notes.md#build-system)
   ([#1360](https://github.com/adobe-type-tools/afdko/pull/1360),
-  [#1367](https://github.com/adobe-type-tools/afdko/pull/1367),
   [#1384](https://github.com/adobe-type-tools/afdko/pull/1384),
   [#1372](https://github.com/adobe-type-tools/afdko/pull/1372))
 - [makeinstancesufo] fixes for fontMath 0.8.1 update
