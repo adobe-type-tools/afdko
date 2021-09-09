@@ -4,11 +4,18 @@ Changelog
 3.7.1 (released 2021-08-31)
 ---------------------------
 - [makeotfexe] **Port of Feature File Parser to Antlr 4**
-  ([#1367](https://github.com/adobe-type-tools/afdko/pull/1367))
+  ([#548](https://github.com/adobe-type-tools/afdko/issues/548),
+   [#1367](https://github.com/adobe-type-tools/afdko/pull/1367))
+- [spec] **OpenType Feature File Specification updated to v1.26** with the following ([here](https://github.com/adobe-type-tools/afdko/blob/26761e9616f8a52aa14e7041ac9cbb0e139a1d83/docs/OpenTypeFeatureFileSpecification.md)):
+  - `include` directive is "statement-only" 
+  - with the exception of `mark`, keywords cannot be used as lookup names or tags
+  - list of valid characters for tags has been updated
+  - tags cannot start with a digit or hyphen
 - [build] Switch to CMake-based builds -- [see documentation](https://github.com/adobe-type-tools/afdko/blob/develop/docs/FDK_Build_Notes.md#build-system)
-  ([#1360](https://github.com/adobe-type-tools/afdko/pull/1360),
-  [#1384](https://github.com/adobe-type-tools/afdko/pull/1384),
-  [#1372](https://github.com/adobe-type-tools/afdko/pull/1372))
+  ([#1124](https://github.com/adobe-type-tools/afdko/issues/1124),
+   [#1360](https://github.com/adobe-type-tools/afdko/pull/1360),
+   [#1384](https://github.com/adobe-type-tools/afdko/pull/1384),
+   [#1372](https://github.com/adobe-type-tools/afdko/pull/1372))
 - [makeinstancesufo] fixes for fontMath 0.8.1 update
   ([#1391](https://github.com/adobe-type-tools/afdko/pull/1391))
 - [tx] ufowrite for loop init declaration fix 
