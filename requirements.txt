@@ -9,5 +9,5 @@ fontMath==0.8.1
 fontTools[lxml,ufo,woff,unicode]==4.27.0
 psautohint==2.3.1
 tqdm==4.62.2
-ufonormalizer==0.6.0
+ufonormalizer==0.6.1
 ufoProcessor==1.9.0
