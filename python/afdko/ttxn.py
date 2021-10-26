@@ -2013,7 +2013,7 @@ class TTXNTTFont(TTFont):
     def __init__(self, file=None, res_name_or_index=None,
                  sfntVersion="\000\001\000\000", flavor=None,
                  checkChecksums=False, verbose=None, recalcBBoxes=True,
-                 allowVID=False, ignoreDecompileErrors=False,
+                 ignoreDecompileErrors=False,
                  recalcTimestamp=True, fontNumber=-1, lazy=None, quiet=None,
                  supressHints=False, showExtensionFlag=False):
 
@@ -2023,7 +2023,7 @@ class TTXNTTFont(TTFont):
         TTFont. __init__(self, file, res_name_or_index=res_name_or_index,
                          sfntVersion=sfntVersion, flavor=flavor,
                          checkChecksums=checkChecksums, verbose=verbose,
-                         recalcBBoxes=recalcBBoxes, allowVID=allowVID,
+                         recalcBBoxes=recalcBBoxes,
                          ignoreDecompileErrors=ignoreDecompileErrors,
                          recalcTimestamp=recalcTimestamp,
                          fontNumber=fontNumber, lazy=lazy, quiet=quiet)
@@ -2117,7 +2117,7 @@ def ttnDump(input_file, output, options, showExtensionFlag, supressHints=False,
     if options.unicodedata:
         from fontTools.unicode import setUnicodeData
         setUnicodeData(options.unicodedata)
-    ttf = TTXNTTFont(input_file, 0, allowVID=options.allowVID,
+    ttf = TTXNTTFont(input_file, 0,
                      ignoreDecompileErrors=options.ignoreDecompileErrors,
                      fontNumber=options.fontNumber, supressHints=supressHints,
                      showExtensionFlag=showExtensionFlag)
