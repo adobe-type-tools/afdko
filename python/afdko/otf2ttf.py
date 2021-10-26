@@ -154,7 +154,7 @@ def main(args=None):
 
     # Set the pool capacity to be the minimum of file quantity and CPU count
     maxPoolCapacity = min(os.cpu_count(), len(files))
-    # Limit parallel capacity to 60 on win32 to avoid WaitForMultipleObjects 
+    # Limit parallel capacity to 60 on win32 to avoid WaitForMultipleObjects
     # errors. See https://bugs.python.org/issue45077
     if sys.platform == "win32" and maxPoolCapacity >= 60:
         maxPoolCapacity = 60
