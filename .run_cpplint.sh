@@ -1,3 +1,5 @@
+set -ex
+
 cpplint --recursive --quiet c/detype1
 cpplint --recursive --quiet c/makeotf/include
 cpplint --recursive --quiet c/makeotf/resource

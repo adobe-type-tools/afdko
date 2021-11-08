@@ -34,7 +34,7 @@ projects.
 Installation
 ------------
 
-The AFDKO requires [Python](http://www.python.org/download) 3.6
+The AFDKO requires [Python](http://www.python.org/download) 3.7
 or later.
 
 Releases are available on the [Python Package
@@ -106,7 +106,7 @@ On the Mac, install these with:
 
 On Linux (Ubuntu 17.10 LTS or later), install these with:
 
-    apt-get -y install python3.6
+    apt-get -y install python3.7
     apt-get -y install python-pip
     apt-get -y install python-dev
     apt-get -y install uuid-dev
