@@ -8,6 +8,7 @@ on:
 
   pull_request:
     branches: [develop]
+    types: [opened]
     paths-ignore:
       - 'docs/**'
       - '**.md'
@@ -27,20 +28,20 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
         exclude:
           - os: macos-latest
-            python-version: 3.6
+            python-version: "3.7"
           - os: macos-latest
-            python-version: 3.7
+            python-version: "3.8"
           - os: macos-latest
-            python-version: 3.8
+            python-version: "3.10"
           - os: windows-latest
-            python-version: 3.6
+            python-version: "3.7"
           - os: windows-latest
-            python-version: 3.7
+            python-version: "3.8"
           - os: windows-latest
-            python-version: 3.8
+            python-version: "3.9"
 
     steps:
 
@@ -49,49 +50,54 @@ jobs:
       run: |
         echo "Reason for triggering: ${{ github.event.inputs.reason }}"
 
-    - uses: actions/checkout@v1
+    - name: Check out
+      uses: actions/checkout@v2
       with:
-        submodules: true
-
-    - name: Use MSBuild (Windows)
-      uses: microsoft/setup-msbuild@v1.0.2
-      with:
-        vs-version: '[16.4,]'
-      if: matrix.os == 'windows-latest'
+        fetch-depth: 0  # unshallow fetch for setuptools-scm
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt -r requirements-dev.txt
+    - name: Use MSBuild (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        vs-version: '[16.4,]'
+        msbuild-architecture: x64
 
     - name: Set Windows generator to Visual Studio
+      if: matrix.os == 'windows-latest'
       run: |
         echo "CMAKE_GENERATOR=Visual Studio 16 2019" >> $GITHUB_ENV
         echo "CMAKE_GENERATOR_PLATFORM=x64" >> $GITHUB_ENV
       shell: bash
-      if: matrix.os == 'windows-latest'
 
-    - name: Install AFDKO (Other)
+    - name: Install dependencies
       run: |
-        git config --global url.https://github.com/.insteadOf git://github.com/
-        pip install .
-        pip freeze --all
-      shell: bash
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements.txt -r requirements-dev.txt
 
-    - name: Lint Python code with flake8 using .flake8 config file
+    - name: Lint Python code with flake8 using .flake8 config file (Linux only)
+      if: matrix.os == 'ubuntu-latest'
       run: |
-        flake8 . --count --show-source --statistics --config=.flake8
+        flake8 --count --show-source --statistics --config=.flake8
 
     - name: Lint C code with cpplint using script (Linux only)
       if: matrix.os == 'ubuntu-latest'
       run: |
         ./.run_cpplint.sh
 
+    - name: Install AFDKO
+      run: |
+        python -m pip install .
+        python -m pip freeze --all
+
     - name: Test with pytest
       run: |
-        pytest --no-cov tests
+        python -m pytest --no-cov tests --color=yes
+
+    - name: Test uninstall AFDKO
+      run: |
+        python -m pip uninstall afdko -y

@@ -99,7 +99,7 @@ hotCtx hotNew(hotCallbacks *hotcb) {
     g->font.licenseID = NULL;
 
     /* Get current time */
-    
+
     time(&now);
     SAFE_LOCALTIME(&now, &g->time);
 
