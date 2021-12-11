@@ -1183,6 +1183,14 @@ static void writeGlyphFinalCurve(ufwCtx h, float *coords) {
     writeLine(h, "\" />");
 }
 
+int comparePoints(float f1, float f2)
+{
+    double precision = 0.05;
+    f1 = floor(f1*100+0.5)/100;
+    f2 = floor(f2*100+0.5)/100;
+    return fabs(f1 - f2) < precision;
+}
+
 static void writeContour(ufwCtx h) {
     OpRec *opRec;
     OpRec *opRec2;
@@ -1212,7 +1220,7 @@ static void writeContour(ufwCtx h) {
         lastCoords = opRec2->coords;
     }
 
-    if ((lastCoords[0] != opRec->coords[0]) || (lastCoords[1] != opRec->coords[1])) {
+    if ((comparePoints(lastCoords[0], opRec->coords[0]) == 0) || (comparePoints(lastCoords[1], opRec->coords[1]) == 0)) {
         opRec->opType = linetoType;
     } else if (opRec2->opType == linetoType) {
         opRec->opType = linetoType;
