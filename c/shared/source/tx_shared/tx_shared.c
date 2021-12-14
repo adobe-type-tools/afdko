@@ -5,6 +5,9 @@
 /* Code shared by tx, rotatefont, and mergefonts. */
 
 #include "tx_shared.h"
+#include <ftw.h>
+#include <unistd.h>
+#include <stdio.h>
 
 static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr);
 
@@ -2754,6 +2757,18 @@ static int ufw_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     return ufwGlyphCallbacks.beg(cb, info);
 }
 
+int removeUFOFile(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+{
+    int removeStatus = remove(fpath);
+    if (removeStatus == -1)
+        perror(fpath);
+    return removeStatus;
+}
+
+int removeUFODirectory(char *path) {
+    return nftw(path, removeUFOFile, 64, FTW_DEPTH | FTW_PHYS);
+}
+
 /* Begin font. */
 static void ufw_BegFont(txCtx h, abfTopDict *top) {
     struct stat fileStat;
@@ -2767,19 +2782,24 @@ static void ufw_BegFont(txCtx h, abfTopDict *top) {
         fatal(h, "Please specify a file path for the destination UFO font. UFO fonts cannot be serialized to stdout.");
     }
     /* if the UFO parent dir does not exist, make it.
-     If it does exist, complain and quit. */
+     If it does exist, delete it and create a new UFO parent dir. */
     statErrNo = stat(h->dst.stm.filename, &fileStat);
     if (statErrNo == 0) {
-        fatal(h, "Destination UFO font already exists:  %s.\n", h->dst.stm.filename);
-    } else {
-        char buffer[FILENAME_MAX];
-        mkdir_tx(h, h->dst.stm.filename);
-        if (h->ufr.altLayerDir != NULL)
-            sprintf(buffer, "%s/%s", h->file.dst, h->ufr.altLayerDir);
+        int removeStatus = removeUFODirectory(h->dst.stm.filename);
+        if (removeStatus == -1)
+            fatal(h, "Destination UFO font already existed, could not be deleted for overwrite: %s.\n", h->dst.stm.filename);
         else
-            sprintf(buffer, "%s/%s", h->file.dst, "glyphs");
-        mkdir_tx(h, buffer);
+            fprintf(stderr, "Destination UFO font overwritten:  %s.\n", h->dst.stm.filename);
     }
+    
+    char buffer[FILENAME_MAX];
+    mkdir_tx(h, h->dst.stm.filename);
+    if (h->ufr.altLayerDir != NULL)
+        sprintf(buffer, "%s/%s", h->file.dst, h->ufr.altLayerDir);
+    else
+        sprintf(buffer, "%s/%s", h->file.dst, "glyphs");
+    mkdir_tx(h, buffer);
+
 
     dstFileSetAutoName(h, top);
     if (ufwBegFont(h->ufow.ctx, h->ufow.flags, h->ufr.altLayerDir))
