@@ -15,6 +15,7 @@
 #include <string.h>
 #include <float.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -1183,7 +1184,7 @@ static void writeGlyphFinalCurve(ufwCtx h, float *coords) {
     writeLine(h, "\" />");
 }
 
-int pointsAreNearlyIdentical(float point1, float point2)
+bool pointsAreNearlyIdentical(float point1, float point2)
 {
     float precision = 0.015;
     point1 = RND_ON_WRITE(point1);
@@ -1220,8 +1221,8 @@ static void writeContour(ufwCtx h) {
         lastCoords = opRec2->coords;
     }
 
-    if ((pointsAreNearlyIdentical(lastCoords[0], opRec->coords[0]) == 0) ||
-        (pointsAreNearlyIdentical(lastCoords[1], opRec->coords[1]) == 0)  ) {
+    if ( !pointsAreNearlyIdentical(lastCoords[0], opRec->coords[0]) ||
+         !pointsAreNearlyIdentical(lastCoords[1], opRec->coords[1])  ) {
         opRec->opType = linetoType;
     } else if (opRec2->opType == linetoType) {
         opRec->opType = linetoType;
