@@ -1214,8 +1214,8 @@ def test_ufo_overwrite():
     input_path = get_input_path("flex.pfa")
     output_path = get_temp_dir_path('ufo-already-existed.ufo')
     runner(CMD + ['-a', '-o', 'ufo', '-f', input_path, output_path])
-    stderr_path = runner(CMD + ['-s', '-e', '-a', '-o', 'ufo', '-f', input_path, output_path])
+    stderr_path = runner(CMD + ['-s', '-e', '-a', '-o', 'ufo', '-f',
+                                input_path, output_path])
     with open(stderr_path, 'rb') as f:
         output = f.read()
     assert b'Destination UFO font overwritten: ' in output
-
