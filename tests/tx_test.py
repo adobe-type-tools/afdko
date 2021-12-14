@@ -1168,3 +1168,20 @@ def test_lib_removes_outlines_bug1366():
     expected_path = generate_ps_dump(expected_path)
     output_path = generate_ps_dump(output_path)
     assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
+
+def test_pfa_to_ufo_float_points():
+    """ Tests a PFA with glyphs containing floating-value points as
+        a start point. The start point should not be duplicated if there
+        was no duplicate point in the original PFA.
+
+        The problem stemmed from precision errors, where the end-point
+        (which is the start-point) does not appear exactly the same as
+        the start-point, causing it to create a new point.
+
+        The precision range for comparing floating-value points is now 0.015
+    """
+    input_path = get_input_path("pfa-start-pt-with-float.pfa")
+    expected_path = get_expected_path("pfa-start-pt-with-float.ufo")
+    output_path = get_temp_dir_path('pfa_to_ufo_temp.ufo')
+    runner(CMD + ['-a', '-o', 'ufo', '-f', input_path, output_path])
+    assert differ([expected_path, output_path])
