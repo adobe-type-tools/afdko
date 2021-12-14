@@ -1209,12 +1209,12 @@ def test_pfa_to_ufo_dup_points(input, expected, output):
 def test_ufo_overwrite():
     """ If output UFO already exists in destination, delete existing
         UFO directory, then make a new directory.
+        Input does not matter here.
     """
-    input_path = get_input_path("pfa-start-pt-with-float.pfa")
-    expected_path = get_expected_path("pfa-start-pt-with-float.ufo")
+    input_path = get_input_path("flex.pfa")
     output_path = get_temp_dir_path('ufo-already-existed.ufo')
     runner(CMD + ['-a', '-o', 'ufo', '-f', input_path, output_path])
-    stderr_path = runner(CMD + ['-a', '-o', 'ufo', '-f', input_path, output_path])
+    stderr_path = runner(CMD + ['-s', '-e', '-a', '-o', 'ufo', '-f', input_path, output_path])
     with open(stderr_path, 'rb') as f:
         output = f.read()
     assert b'Destination UFO font overwritten: ' in output

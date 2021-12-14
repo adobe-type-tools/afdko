@@ -6,8 +6,6 @@
 
 #include "tx_shared.h"
 #include <ftw.h>
-#include <unistd.h>
-#include <stdio.h>
 
 static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr);
 
