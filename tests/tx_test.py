@@ -1169,6 +1169,7 @@ def test_lib_removes_outlines_bug1366():
     output_path = generate_ps_dump(output_path)
     assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
 
+
 def test_pfa_to_ufo_float_points():
     """ Tests a PFA with glyphs containing floating-value points as
         a start point. The start point should not be duplicated if there
