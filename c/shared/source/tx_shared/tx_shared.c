@@ -5,7 +5,6 @@
 /* Code shared by tx, rotatefont, and mergefonts. */
 
 #include "tx_shared.h"
-#include <ftw.h>
 
 static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr);
 
