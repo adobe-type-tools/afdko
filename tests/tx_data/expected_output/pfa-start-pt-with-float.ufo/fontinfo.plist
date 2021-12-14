@@ -47,6 +47,14 @@
 		<integer>0</integer>
 		<integer>0</integer>
 	</array>
+	<key>postscriptStdHW</key>
+	<array>
+		<integer>0</integer>
+	</array>
+	<key>postscriptStdVW</key>
+	<array>
+		<integer>0</integer>
+	</array>
 	<key>postscriptBlueScale</key>
 	<real>0.037</real>
 	<key>postscriptBlueShift</key>
