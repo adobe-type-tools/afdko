@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#define _XOPEN_SOURCE 500
+#define __USE_XOPEN_EXTENDED 1
 #include <ftw.h>
 
 #if PLAT_MAC
