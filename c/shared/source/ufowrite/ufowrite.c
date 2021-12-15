@@ -1184,7 +1184,7 @@ static void writeGlyphFinalCurve(ufwCtx h, float *coords) {
     writeLine(h, "\" />");
 }
 
-bool pointsAreNearlyIdentical(float x1, float x2, float y1, float y2)
+bool pointsAreNearlyIdentical(float x1, float y1, float x2, float y2)
 {
     float precision = 0.015;
     return (fabs(x1 - x2) <= precision) && (fabs(y1 - y2) <= precision);
@@ -1219,7 +1219,7 @@ static void writeContour(ufwCtx h) {
         lastCoords = opRec2->coords;
     }
 
-    if (!pointsAreNearlyIdentical(lastCoords[0], opRec->coords[0], lastCoords[1], opRec->coords[1])) {
+    if (!pointsAreNearlyIdentical(lastCoords[0], lastCoords[1], opRec->coords[0], opRec->coords[1])) {
         opRec->opType = linetoType;
     } else if (opRec2->opType == linetoType) {
         opRec->opType = linetoType;
