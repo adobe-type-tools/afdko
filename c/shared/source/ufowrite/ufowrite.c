@@ -1205,11 +1205,15 @@ static void writeContour(ufwCtx h) {
     /* Fix up the start op. UFO fonts require a completely closed path, and no initial move-to.
     If the last op coords are not the same as the move-to:
       - change the initial move-to to a line-to.
-    else if the last op is a line-to:
-       - change the initial move-to op to a line-to, and remove the last op.
     else if the last op is a curve-to:
        - change the initial move-to type to a "initial curve-to" type - just writes the final curve point
-      -  change the final curve-to type to a "final curve-to" type - just writes the first two points of the curve.
+       - change the final curve-to type to a "final curve-to" type - just writes the first two points of the curve.
+    else if the last op is a line-to:
+        - Change the initial move-to op to a line-to
+        - Note:
+            - Previously, the last pt would also be removed if it was a duplicate point
+            - However, this code was removed because it interferes with duplicate points needed by variable fonts.
+            - The last point is not removed anymore, even if its a duplicate.
      */
     opRec = &h->path.opList.array[0];
     opRec2 = &h->path.opList.array[h->path.opList.cnt - 1];
@@ -1223,7 +1227,6 @@ static void writeContour(ufwCtx h) {
         opRec->opType = linetoType;
     } else if (opRec2->opType == linetoType) {
         opRec->opType = linetoType;
-        h->path.opList.cnt--;
     } else if (opRec2->opType == curvetoType) {
         opRec->opType = initialCurvetoType;
         opRec2->opType = finalCurvetoType;
