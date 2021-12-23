@@ -1171,7 +1171,7 @@ def test_lib_removes_outlines_bug1366():
 
 
 def test_pfa_to_ufo_float_points():
-    """ Tests a PFA with glyphs containing floating-value points as
+    """ Tests a PFA with glyphs containing floating-value curve points as
         a start point. The start point should not be duplicated if there
         was no duplicate point in the original PFA.
 
@@ -1184,5 +1184,23 @@ def test_pfa_to_ufo_float_points():
     input_path = get_input_path("pfa-start-pt-with-float.pfa")
     expected_path = get_expected_path("pfa-start-pt-with-float.ufo")
     output_path = get_temp_dir_path('pfa_to_ufo_temp.ufo')
+    runner(CMD + ['-a', '-o', 'ufo', '-f', input_path, output_path])
+    assert differ([expected_path, output_path])
+
+
+@pytest.mark.parametrize('input, expected, output', [
+    ('line.pfa', 'line.ufo', 'tmp1.ufo'),
+    ('curve-diff-sides.pfa', 'curve-diff-sides.ufo', 'tmp2.ufo'),
+    ('curve-same-sides.pfa', 'curve-same-sides.ufo', 'tmp3.ufo')
+])
+def test_pfa_to_ufo_dup_points(input, expected, output):
+    """
+    Tests a PFA with glyphs containing duplicate points at the start point.
+    These duplicate points are intentional and should be preserved when
+    writing the UFO.
+    """
+    input_path = get_input_path("dup-start-pts/" + input)
+    expected_path = get_expected_path("dup-start-pts/" + expected)
+    output_path = get_temp_dir_path(output)
     runner(CMD + ['-a', '-o', 'ufo', '-f', input_path, output_path])
     assert differ([expected_path, output_path])
