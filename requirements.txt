@@ -4,7 +4,7 @@
 # NOTE: hard-pinning (==) here gets relaxed to >= in setup.py
 lxml==4.7.1
 booleanOperations==0.9.0
-defcon[lxml,pens]==0.9.0
+defcon[lxml,pens]==0.10.0
 fontMath==0.8.1
 fontTools[woff,unicode,lxml,ufo]==4.27.1
 psautohint==2.3.1
