@@ -10,8 +10,8 @@ Copyright 2015-2021 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
-Document version 1.26
-Last updated 7 June 2021
+Document version 1.27
+Last updated 5 January 2022
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
 
@@ -3371,9 +3371,7 @@ nameid <id> [<string attribute>] <string>;
 ```
 
 An `<id>` is a number specifying the ID of the name string to be added to the
-name table. Note that IDs 2 and 6 (Family, Subfamily, Unique, Full, Version, and
-FontName) are reserved by the implementation and cannot be overridden; doing so
-will elicit a warning message and the record will be ignored.
+name table.
 
 An optional `<string attribute>` is one or three space delimited numbers that
 specify the platform, platform-specific, and language IDs to be stored in the
@@ -3414,17 +3412,20 @@ language id      0 (English)
 ```
 
 Putting this all together gives the following valid nameID formats and the IDs
-that are assigned.
+that are assigned:
 
-    representation              id  platform id platspec id language id
-    --------------------------- --- ----------- ----------- -----------
-    nameid 1 <string>;          1   3           1           0x0409
-    nameid 1 3 <string>;        1   3           1           0x0409
-    nameid 1 3 S L <string>;    1   3           S           L
-    nameid 1 1 <string>;        1   1           0           0
-    nameid 1 1 S L <string>;    1   1           S           L
+| feature file representation        | name id | platform id | encoding id | language id |
+| ---------------------------------- | ------- | ----------- | ----------- | ----------- |
+| `nameid`_`N`_`<string>;`           | _`N`_   | 3           | 1           | 0x0409      |
+| `nameid`_`N`_`3 <string>;`         | _`N`_   | 3           | 1           | 0x0409      |
+| `nameid`_`N`_`1 <string>;`         | _`N`_   | 1           | 0           | 0           |
+| `nameid`_`N`_`3`_`E L`_`<string>;` | _`N`_   | 3           | _`E`_       | _`L`_       |
+| `nameid`_`N`_`1`_`E L`_`<string>;` | _`N`_   | 1           | _`E`_       | _`L`_       |
 
-A string is composed of UTF-8 characters enclosed by ASCII double quote
+Key: _`N`_, _`E`_, and _`L`_ are numbers representing the nameID, platform-specific encodingID,
+and platform-specific languageID values.
+
+A `<string>` is composed of UTF-8 characters enclosed by ASCII double quote
 characters (`"`). Newlines embedded within the string are removed from the
 character sequence to be stored.
 
@@ -3456,6 +3457,14 @@ table name {
     nameid 9 1 "Joachim M\9fller-Lanc\8e";      # Macintosh (Mac Roman)
 } name;
 ```
+
+**Implementation Note**: The AFDKO `MakeOTF`/`makeotfexe` implementations do not
+support using feature syntax to override calculated values for nameIDs 1 through 6
+(Family, Subfamily, Unique, Full, Version, and PostScript names) by default. The
+`-overrideMenuNames` option can be supplied to either program to enable overriding
+of nameIDs 1, 3, 4, and 5 with `<nameid>`s supplied via a feature file. It is not
+possible in these implementations to override nameIDs 2 or 6. Please see the help
+for these programs for more information.
 
 <a name="9.f"></a>
 ### 9.f. OS/2 table
