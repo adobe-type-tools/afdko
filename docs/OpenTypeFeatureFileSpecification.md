@@ -3371,7 +3371,10 @@ nameid <id> [<string attribute>] <string>;
 ```
 
 An `<id>` is a number specifying the ID of the name string to be added to the
-name table.
+name table. Note that the implementation limits which nameIDs can be specified
+via this mechanism: specifically, overriding the values for nameIDs 2 and 6
+is not supported. Please see the **Implementation Note** at the end of this
+section for details.
 
 An optional `<string attribute>` is one or three space delimited numbers that
 specify the platform, platform-specific, and language IDs to be stored in the
@@ -3458,13 +3461,13 @@ table name {
 } name;
 ```
 
-**Implementation Note**: The AFDKO `MakeOTF`/`makeotfexe` implementations do not
-support using feature syntax to override calculated values for nameIDs 1 through 6
-(Family, Subfamily, Unique, Full, Version, and PostScript names) by default. The
+**Implementation Note**: By default, the AFDKO `MakeOTF`/`makeotfexe` implementations
+do not support using feature syntax to override the calculated values for nameIDs 1
+through 6 (Family, Subfamily, Unique, Full, Version, and PostScript names). The
 `-overrideMenuNames` option can be supplied to either program to enable overriding
-of nameIDs 1, 3, 4, and 5 with `<nameid>`s supplied via a feature file. It is not
-possible in these implementations to override nameIDs 2 or 6. Please see the help
-for these programs for more information.
+of nameIDs 1, 3, 4, and 5 with `<nameid>` entries supplied via a feature file.
+Overriding nameIDs 2 or 6 is not supported. Please see the help for these programs
+for more information.
 
 <a name="9.f"></a>
 ### 9.f. OS/2 table
