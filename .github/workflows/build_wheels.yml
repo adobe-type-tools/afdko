@@ -36,7 +36,17 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Build wheel
+    - name: Build wheel (only macosx_arm64)
+      if: matrix.os == 'macos-latest'
+      uses: pypa/cibuildwheel@v2.3.1
+      with:
+        output-dir: dist
+      env:
+        CIBW_BUILD: "cp39-*"
+        CIBW_ARCHS_MACOS: arm64
+        CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64' CXXFLAGS='-arch arm64' LDFLAGS='-arch arm64'"
+
+    - name: Build wheel (except macosx_arm64)
       uses: pypa/cibuildwheel@v2.3.1
       with:
         output-dir: dist
