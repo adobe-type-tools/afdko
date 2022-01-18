@@ -919,7 +919,7 @@ bool FeatCtx::tagAssign(Tag tag, enum TagType type, bool checkIfDef) {
     }
 
     if (checkIfDef && ta->find(tag) != ta->end()) {
-        if ((type == featureTag)) {
+        if (type == featureTag) {
             assert(t != NULL);
             *t = tag;
         }
