@@ -97,7 +97,7 @@ class FeatVisitor : public FeatParserBaseVisitor {
     antlrcpp::Any visitMark_statement(FeatParser::Mark_statementContext *ctx) override;
     antlrcpp::Any visitPosition(FeatParser::PositionContext *ctx) override;
     antlrcpp::Any visitParameters(FeatParser::ParametersContext *ctx) override;
-    antlrcpp::Any visitSizemenuname(FeatParser::SizemenunameContext *ctx);
+    antlrcpp::Any visitSizemenuname(FeatParser::SizemenunameContext *ctx) override;
     antlrcpp::Any visitFeatureNames(FeatParser::FeatureNamesContext *ctx) override;
     antlrcpp::Any visitSubtable(FeatParser::SubtableContext *ctx) override;
 
@@ -134,10 +134,10 @@ class FeatVisitor : public FeatParserBaseVisitor {
 
     antlrcpp::Any visitTable_STAT(FeatParser::Table_STATContext *ctx) override;
     antlrcpp::Any visitDesignAxis(FeatParser::DesignAxisContext *ctx) override;
-    antlrcpp::Any visitNameEntry(FeatParser::NameEntryContext *ctx);
+    antlrcpp::Any visitNameEntry(FeatParser::NameEntryContext *ctx) override;
     antlrcpp::Any visitAxisValue(FeatParser::AxisValueContext *ctx) override;
-    antlrcpp::Any visitAxisValueFlags(FeatParser::AxisValueFlagsContext *ctx);
-    antlrcpp::Any visitAxisValueLocation(FeatParser::AxisValueLocationContext *ctx);
+    antlrcpp::Any visitAxisValueFlags(FeatParser::AxisValueFlagsContext *ctx) override;
+    antlrcpp::Any visitAxisValueLocation(FeatParser::AxisValueLocationContext *ctx) override;
     antlrcpp::Any visitElidedFallbackName(FeatParser::ElidedFallbackNameContext *ctx) override;
     antlrcpp::Any visitElidedFallbackNameID(FeatParser::ElidedFallbackNameIDContext *ctx) override;
 
