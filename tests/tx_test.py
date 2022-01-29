@@ -3,6 +3,7 @@ import pytest
 import re
 import subprocess
 import time
+import shutil
 
 from afdko.fdkutils import (
     get_temp_file_path,
@@ -1207,15 +1208,24 @@ def test_pfa_to_ufo_dup_points(input, expected, output):
 
 
 def test_ufo_overwrite():
-    """ If output UFO already exists in destination, delete existing
-        UFO directory, then make a new directory.
-        Input does not matter here.
+    """ Test overwriting old UFO with new UFO if it exists at destination.
     """
-    input_path = get_input_path("flex.pfa")
+    # Create 1st UFO and duplicate for later comparison.
+    input_path_1 = get_input_path("flex.pfa")
+    input_path_2 = get_input_path("ufo2.pfa")
     output_path = get_temp_dir_path('ufo-already-existed.ufo')
-    runner(CMD + ['-a', '-o', 'ufo', '-f', input_path, output_path])
+    runner(CMD + ['-a', '-o', 'ufo', '-f', input_path_1, output_path])
+    dup_path = get_temp_dir_path('old-ufo.ufo')
+    shutil.copytree(output_path, dup_path)
+
+    # Create second UFO with same name & destination, but different PFA.
     stderr_path = runner(CMD + ['-s', '-e', '-a', '-o', 'ufo', '-f',
-                                input_path, output_path])
+                                input_path_2, output_path])
+
+    # assert that new UFO and old duplicated UFO are different.
+    assert not differ([output_path, dup_path])
+
+    # assert that overwritten message displays.
     with open(stderr_path, 'rb') as f:
         output = f.read()
     assert b'Destination UFO font overwritten: ' in output
