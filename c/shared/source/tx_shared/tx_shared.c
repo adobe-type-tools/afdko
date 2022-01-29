@@ -2754,22 +2754,42 @@ static int ufw_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     return ufwGlyphCallbacks.beg(cb, info);
 }
 
-int removeUFOFile(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
-{
-    int removeStatus = remove(fpath);
-    if (removeStatus == -1)
-        perror(fpath);
-    return removeStatus;
-}
-
-int removeUFODirectory(char *path) {
-    return nftw(path, removeUFOFile, 64, FTW_DEPTH | FTW_PHYS);
+/* traverses directory tree and removes all files, subdirectories, and root directory */
+int removeDir(char *path) {
+    DIR *d;
+    struct dirent *dir;
+    
+    if (!(d = opendir(path))) {
+        return -1;
+    }
+    
+    while ((dir = readdir(d)) != NULL) {
+      if ((strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)) {
+          continue;
+      }
+      
+      char fullPath[1024];
+      snprintf(fullPath, sizeof(fullPath), "%s/%s", path, dir->d_name);
+      
+      if (dir->d_type == DT_DIR) {
+          removeDir(fullPath); /* if directory, recursively delete contents */
+      } else {
+          if(remove(fullPath) != 0){ /* if file, remove */
+              return -1;
+          }
+      }
+   }
+    closedir(d);
+    if (rmdir(path) != 0)
+        return -1;
+    return 0;
 }
 
 /* Begin font. */
 static void ufw_BegFont(txCtx h, abfTopDict *top) {
     struct stat fileStat;
     int statErrNo;
+    int removeStatus = -1;
 
     h->cb.glyph.beg = ufw_GlyphBeg;
     h->cb.glyph.indirect_ctx = h;
@@ -2778,15 +2798,13 @@ static void ufw_BegFont(txCtx h, abfTopDict *top) {
     if (strcmp(h->dst.stm.filename, "-") == 0) {
         fatal(h, "Please specify a file path for the destination UFO font. UFO fonts cannot be serialized to stdout.");
     }
-    /* if the UFO parent dir does not exist, make it.
-     If it does exist, delete it and create a new UFO parent dir. */
+    /* if the UFO directory does not exist, make it.
+       If it does exist, remove it and create a new UFO directory. */
     statErrNo = stat(h->dst.stm.filename, &fileStat);
     if (statErrNo == 0) {
-        int removeStatus = removeUFODirectory(h->dst.stm.filename);
+        removeStatus = removeDir(h->dst.stm.filename);
         if (removeStatus == -1)
-            fatal(h, "Destination UFO font already existed, could not be deleted for overwrite: %s.\n", h->dst.stm.filename);
-        else
-            fprintf(stderr, "Destination UFO font overwritten:  %s.\n", h->dst.stm.filename);
+            fatal(h, "Destination UFO font already existed and could not be overwritten: %s.\n", h->dst.stm.filename);
     }
     
     char buffer[FILENAME_MAX];
@@ -2796,7 +2814,8 @@ static void ufw_BegFont(txCtx h, abfTopDict *top) {
     else
         sprintf(buffer, "%s/%s", h->file.dst, "glyphs");
     mkdir_tx(h, buffer);
-
+    if (removeStatus == 0)
+        fprintf(stderr, "Destination UFO font overwritten:  %s.\n", h->dst.stm.filename);
 
     dstFileSetAutoName(h, top);
     if (ufwBegFont(h->ufow.ctx, h->ufow.flags, h->ufr.altLayerDir))

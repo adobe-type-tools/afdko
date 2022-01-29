@@ -34,8 +34,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#define __USE_XOPEN_EXTENDED 1
-#include <ftw.h>
+#include <dirent.h>
+#include <unistd.h>
 
 #if PLAT_MAC
 #include <console.h>
