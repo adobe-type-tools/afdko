@@ -2806,7 +2806,7 @@ static void ufw_BegFont(txCtx h, abfTopDict *top) {
         if (removeStatus == -1)
             fatal(h, "Destination UFO font already existed and could not be overwritten: %s.\n", h->dst.stm.filename);
     }
-    
+
     char buffer[FILENAME_MAX];
     mkdir_tx(h, h->dst.stm.filename);
     if (h->ufr.altLayerDir != NULL)
