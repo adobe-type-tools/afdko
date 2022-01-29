@@ -2758,27 +2758,27 @@ static int ufw_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 int removeDir(char *path) {
     DIR *d;
     struct dirent *dir;
-    
+
     if (!(d = opendir(path))) {
         return -1;
     }
-    
+
     while ((dir = readdir(d)) != NULL) {
-      if ((strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)) {
-          continue;
-      }
-      
-      char fullPath[1024];
-      snprintf(fullPath, sizeof(fullPath), "%s/%s", path, dir->d_name);
-      
-      if (dir->d_type == DT_DIR) {
-          removeDir(fullPath); /* if directory, recursively delete contents */
-      } else {
-          if(remove(fullPath) != 0){ /* if file, remove */
-              return -1;
-          }
-      }
-   }
+        if ((strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)) {
+            continue;
+        }
+
+        char fullPath[1024];
+        snprintf(fullPath, sizeof(fullPath), "%s/%s", path, dir->d_name);
+
+        if (dir->d_type == DT_DIR) {
+            removeDir(fullPath); /* if directory, recursively delete contents */
+        } else {
+            if (remove(fullPath) != 0){ /* if file, remove */
+                return -1;
+            }
+        }
+    }
     closedir(d);
     if (rmdir(path) != 0)
         return -1;
