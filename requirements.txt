@@ -6,7 +6,7 @@ lxml==4.7.1
 booleanOperations==0.9.0
 defcon[lxml,pens]==0.10.0
 fontMath==0.9.1
-fontTools[woff,lxml,unicode,ufo]==4.28.5
+fontTools[unicode,woff,ufo,lxml]==4.29.0
 psautohint==2.3.1
 tqdm==4.62.3
 ufonormalizer==0.6.1
