@@ -8,7 +8,7 @@
 
 #include "tx_shared.h"
 
-#define TX_VERSION CTL_MAKE_VERSION(1, 2, 4)
+#define TX_VERSION CTL_MAKE_VERSION(1, 2, 5)
 
 #include "varread.h"
 
@@ -372,6 +372,9 @@ static void doFile(txCtx h, char *srcname) {
     char *p;
     struct stat fileStat;
     int statErrNo;
+
+    /* initialize fileStat */
+    memset(&fileStat, 0, sizeof(struct stat));
 
     /* Set src name */
     if (h->file.sr != NULL) {
