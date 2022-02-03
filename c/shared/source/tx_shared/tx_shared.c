@@ -2758,6 +2758,7 @@ static int ufw_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 int removeDir(char *path) {
     DIR *d;
     struct dirent *dir;
+    struct stat statbuf;
 
     if (!(d = opendir(path))) {
         return -1;
@@ -2771,7 +2772,11 @@ int removeDir(char *path) {
         char fullPath[1024];
         snprintf(fullPath, sizeof(fullPath), "%s/%s", path, dir->d_name);
 
-        if (dir->d_type == DT_DIR) {
+        if (stat(fullPath, &statbuf) != 0){
+            return 0;
+        }
+
+        if (S_ISDIR(statbuf.st_mode)) {
             removeDir(fullPath); /* if directory, recursively delete contents */
         } else {
             if (remove(fullPath) != 0){ /* if file, remove */
@@ -2804,7 +2809,7 @@ static void ufw_BegFont(txCtx h, abfTopDict *top) {
     if (statErrNo == 0) {
         removeStatus = removeDir(h->dst.stm.filename);
         if (removeStatus == -1)
-            fatal(h, "Destination UFO font already existed and could not be overwritten: %s.\n", h->dst.stm.filename);
+            fatal(h, "Destination UFO font already exists and could not be overwritten: %s.\n", h->dst.stm.filename);
     }
 
     char buffer[FILENAME_MAX];
