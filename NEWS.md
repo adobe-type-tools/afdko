@@ -1,6 +1,32 @@
 Changelog
 =========
 
+3.8.0 (released 2022-02-03)
+---------------------------
+- [python] **Drop Python 3.6, add Python 3.10 support**
+  ([#1456](https://github.com/adobe-type-tools/afdko/pull/1456))
+- [tx] Initialize variables in doFile
+  ([#1466](https://github.com/adobe-type-tools/afdko/pull/1466))
+- [ci] Build universal2 wheel instead of arm64 (thanks @miguelsousa!)
+  ([#1462](https://github.com/adobe-type-tools/afdko/pull/1462))
+- [ci] Add macOS arm64 wheel (thanks @miguelsousa!)
+  ([#1461](https://github.com/adobe-type-tools/afdko/pull/1461))
+- [c] Fix C-code coverage reporting (thanks @miguelsousa!)
+  ([#1460](https://github.com/adobe-type-tools/afdko/pull/1460))
+- [tx] Preserve intentional duplicate start points when PFA -> UFO
+  ([#1452](https://github.com/adobe-type-tools/afdko/pull/1452))
+- [tx] Fix unintentional duplicate start points caused by floating-value coordinates when PFA -> UFO
+  ([#1448](https://github.com/adobe-type-tools/afdko/pull/1448))
+- [README] Fix broken relative link in README
+  ([#1424](https://github.com/adobe-type-tools/afdko/pull/1424))
+- [ttxn] Update ttxn for fontTools 4.27.0 update
+  ([#1423](https://github.com/adobe-type-tools/afdko/pull/1423)
+  [#1418](https://github.com/adobe-type-tools/afdko/issues/1418))
+- [otf2ttf] Add throttling to OTF2TTF to avoid hangs on Windows with large CPU (thanks @be5invis!)
+  ([#1421](https://github.com/adobe-type-tools/afdko/pull/1421),
+   [#1420](https://github.com/adobe-type-tools/afdko/issues/1420))
+- [requirements] updated dependencies
+
 3.7.1 (released 2021-08-31)
 ---------------------------
 - [makeotfexe] **Port of Feature File Parser to Antlr 4**
