@@ -11,6 +11,10 @@
 
 #include "absfont.h"
 
+#include <libxml/tree.h>
+
+#include <libxml/parser.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -124,6 +128,9 @@ void ufoFree(ufoCtx h);
 
 /* ufoFree() destroys the library context and all the resources allocated to
    it. The temporary and debug data streams are closed. */
+
+static void *parseKeyContent(ufoCtx h, xmlNodePtr cur);
+
 
 enum {
 #undef CTL_DCL_ERR
