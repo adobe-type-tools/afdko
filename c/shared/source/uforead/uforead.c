@@ -1818,6 +1818,272 @@ static void reallocFDArray(ufoCtx h){
     h->top.FDArray.array = newFDArray;
 }
 
+static void parseXMLFile(ufoCtx h, const char* file,  const char* filetype, xmlDocPtr *doc, xmlNodePtr *cur){
+    xmlKeepBlanksDefault(0);
+    *doc = xmlParseFile(file);
+    if (doc == NULL) {
+        fatal(h, ufoErrParse, "Failed to parse '%s'.\n", file);
+    }
+
+    *cur = xmlDocGetRootElement(*doc);
+    if (cur == NULL) { // if document empty
+        xmlFreeDoc(*doc);
+        return(NULL);
+    }
+    
+    if (!xmlStrEqual((*cur)->name, (const xmlChar *) filetype)) {
+        fprintf(stderr,"document of the wrong type, root node != %s", filetype);
+        xmlFreeDoc(*doc);
+        return(NULL);
+    }
+    
+    *cur = (*cur)->xmlChildrenNode;
+    while ( cur && xmlIsBlankNode ( *cur ) ) {
+        *cur = (*cur) -> next;
+    }
+    if ( *cur == 0 ) {
+        xmlFreeDoc(*doc);
+        return ( NULL );
+    }
+    if ((!xmlStrEqual((*cur)->name, (const xmlChar *) "dict"))) {
+        fprintf(stderr,"Error reading outermost <dict> in %s.\n", file);
+        xmlFreeDoc(*doc);
+        return(NULL);
+    }
+}
+
+static void parseKey(unsigned char* *keyID, xmlNodePtr cur){
+    const char keyContent = "value";
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+        if (!xmlStrEqual(cur->name, (const xmlChar *) "text"))
+            continue;
+        *keyID = xmlNodeGetContent(cur);
+        printf("\nKey: %s \n", *keyID);
+        cur = cur->next;
+    }
+}
+
+static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
+    dnaSET_CNT(h->valueArray, 0);
+    
+    printf("Parsing XML Array\n");
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+        char* valueString = parseKeyContent(h, cur);
+        // returns index[i] value. Need to assign somewhere?...
+        if (valueString != NULL)
+            *dnaNEXT(h->valueArray) = valueString;
+        cur = cur->next;
+    }
+}
+
+static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
+    // go through an XML dict
+    unsigned char* *keyID;
+    printf("Parsing XML dict\n");
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+        parseKey(keyID, cur);
+        cur = cur->next;
+        void *ptr = parseKeyContent(h, cur);
+        cur = cur->next;
+    }
+}
+
+static void *parseKeyContent(ufoCtx h, xmlNodePtr cur){
+    if (xmlStrEqual(cur->name, (const xmlChar *) "string")) {
+        printf("string: %s\n", xmlNodeGetContent(cur));
+        void *ptr = xmlNodeGetContent(cur);
+        return ptr;
+    } else if (xmlStrEqual(cur->name, (const xmlChar *) "integer")) {
+        printf("integer: %s\n", xmlNodeGetContent(cur));
+        void *ptr = xmlNodeGetContent(cur);
+        return ptr;
+    } else if (xmlStrEqual(cur->name, (const xmlChar *) "dict")) {
+        parseXMLDict(h, cur);
+    } else if (xmlStrEqual(cur->name, (const xmlChar *) "array")) {
+        parseXMLArray(h, cur);
+    }
+}
+
+static void parseFDArray(ufoCtx h, xmlNodePtr cur){
+    // caller parsed the "FDArray" key, OR recognized an array.
+    // parse the ARRAY
+    
+    // parse each dictionary
+    
+    
+    /* initializing FDArray */
+    h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
+    if (h->top.version.ptr != NULL) /* I dont remember what this is about, revisit later: */
+        h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
+    
+    
+}
+
+static void setFontDictKey2(ufoCtx h, char* keyName, xmlNodePtr cur, xmlDocPtr doc) {
+    char* keyValue = h->parseKeyName;
+    abfTopDict* top = &h->top;
+    abfFontDict* fd = h->top.FDArray.array + currentiFD;
+    abfPrivateDict* pd = &fd->Private;
+    BluesArray* bluesArray;
+    abfFontMatrix* fontMatrix;
+
+    /* If we do not use a keyValue, we need to dispose of it
+     */
+    if (!strcmp(keyName, "copyright")) {
+        top->Copyright.ptr = keyValue;
+//    } else if (!strcmp(keyName, "trademark")) {
+//        char* copySymbol;
+//        top->Notice.ptr = keyValue;
+//        /* look for the (c) symbol U+00A9, which is 0xC2, 0xA9 in UTF-8 */
+//        copySymbol = strstr(keyValue, "\xC2\xA9");
+//        if (copySymbol != NULL) {
+//            /* if there is a copyright symbol (U+00A9),
+//               replace it with the word "Copyright" */
+//            char* cpy = "Copyright";
+//            char* newString = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
+//            /* set the 0xC2 to NULL to terminate the left side of the string */
+//            *copySymbol = '\0';
+//            /* use copySymbol + 2 to skip the NULL and the 0xA9
+//               to get the right side of the string */
+//            sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 2);
+//            top->Notice.ptr = newString;
+//        }
+//    } else if (!strcmp(keyName, "versionMajor")) {
+//        if (top->version.ptr == NULL)
+//            top->version.ptr = keyValue;
+//        else {
+//            char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
+//            sprintf(newString, "%s.%s", keyValue, top->version.ptr);
+//            memFree(h, top->version.ptr);
+//            top->version.ptr = newString;
+//            memFree(h, keyValue);
+//        }
+//    } else if (!strcmp(keyName, "versionMinor")) {
+//        if (top->version.ptr == NULL)
+//            top->version.ptr = keyValue;
+//        else {
+//            char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
+//            sprintf(newString, "%s.%s", top->version.ptr, keyValue);
+//            memFree(h, top->version.ptr);
+//            top->version.ptr = newString;
+//            memFree(h, keyValue);
+//        }
+    } else if (!strcmp(keyName, "postscriptFontName")) {
+        fd->FontName.ptr = (char*) parseKeyContent(h, cur);
+    } else if (!strcmp(keyName, "sampleDictionary")) {
+        h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
+        if (h->top.version.ptr != NULL)
+            h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
+        parseKeyContent(h, cur);
+        printf(" keyContent: %s\n", xmlNodeGetContent(cur));
+    } else if (!strcmp(keyName, "sampleArray")) {
+        parseKeyContent(h, cur);
+//        void *ptr = parseKeyContent(cur);
+//        fd->FontName.ptr = (char*) parseKeyContent(cur);
+//    } else if (!strcmp(keyName, "openTypeNamePreferredFamilyName")) {
+//        top->FamilyName.ptr = keyValue;
+//    } else if (!strcmp(keyName, "familyName")) {
+//        if (top->FamilyName.ptr == NULL)  // we don't re-set this if it was set by "openTypeNamePreferredFamilyName"
+//            top->FamilyName.ptr = keyValue;
+//        else
+//            memFree(h, keyValue);
+//    } else if (!strcmp(keyName, "postscriptFullName")) {
+//        top->FullName.ptr = keyValue;
+//    } else if (!strcmp(keyName, "postscriptWeightName")) {
+//        top->Weight.ptr = keyValue;
+//    } else if (!strcmp(keyName, "postscriptIsFixedPitch")) {
+//        top->isFixedPitch = atol(keyValue);
+//    } else if (!strcmp(keyName, "FSType")) {
+//        top->FSType = atoi(keyValue);
+//    } else if (!strcmp(keyName, "italicAngle")) {
+//        top->ItalicAngle = (float)strtod(keyValue, NULL);
+//    } else if (!strcmp(keyName, "postscriptUnderlinePosition")) {
+//        top->UnderlinePosition = (float)strtod(keyValue, NULL);
+//    } else if (!strcmp(keyName, "postscriptUnderlineThickness")) {
+//        top->UnderlineThickness = (float)strtod(keyValue, NULL);
+//    } else if (!strcmp(keyName, "unitsPerEm")) {
+//        double ppem = strtod(keyValue, NULL);
+//        top->sup.UnitsPerEm = (int)ppem;
+//        fd->FontMatrix.cnt = 6;
+//        fd->FontMatrix.array[0] = (float)(1.0 / ppem);
+//        fd->FontMatrix.array[1] = 0;
+//        fd->FontMatrix.array[2] = 0;
+//        fd->FontMatrix.array[3] = (float)(1.0 / ppem);
+//        fd->FontMatrix.array[4] = 0;
+//        fd->FontMatrix.array[5] = 0;
+//        memFree(h, keyValue);
+//    } else if (!strcmp(keyName, "FontName")) {
+//        fd->FontName.ptr = keyValue;
+//    } else if (!strcmp(keyName, "PaintType")) {
+//        fd->PaintType = atoi(keyValue);
+    } else if (!strcmp(keyName, "FontMatrix")) {
+        parseKeyContent(h, cur);
+        fontMatrix = &fd->FontMatrix;
+        setFontMatrix(h, fontMatrix, 6);
+//    } else if (!strcmp(keyName, "postscriptBlueFuzz")) {
+//        pd->BlueFuzz = (float)strtod(keyValue, NULL);
+//        memFree(h, keyValue);
+//    } else if (!strcmp(keyName, "postscriptBlueShift")) {
+//        pd->BlueShift = (float)strtod(keyValue, NULL);
+//        memFree(h, keyValue);
+//    } else if (!strcmp(keyName, "postscriptBlueScale")) {
+//        pd->BlueScale = (float)strtod(keyValue, NULL);
+//        memFree(h, keyValue);
+//    } else if (!strcmp(keyName, "postscriptForceBold")) {
+//        pd->ForceBold = atol(keyValue);
+    } else if (!strcmp(keyName, "postscriptBlueValues")) {
+        parseKeyContent(h, cur);
+        bluesArray = (BluesArray*)&pd->BlueValues;
+        setBluesArrayValue(h, bluesArray, 14);
+//    } else if (!strcmp(keyName, "postscriptOtherBlues")) {
+//        bluesArray = (BluesArray*)&pd->OtherBlues;
+//        setBluesArrayValue(h, bluesArray, 10);
+//    } else if (!strcmp(keyName, "postscriptFamilyBlues")) {
+//        bluesArray = (BluesArray*)&pd->FamilyBlues;
+//        setBluesArrayValue(h, bluesArray, 14);
+//    } else if (!strcmp(keyName, "postscriptFamilyOtherBlues")) {
+//        bluesArray = (BluesArray*)&pd->FamilyOtherBlues;
+//        setBluesArrayValue(h, bluesArray, 10);
+//    } else if (!strcmp(keyName, "postscriptStdHW")) {
+//        if (keyValue != NULL){
+//            pd->StdHW = (float)strtod(keyValue, NULL);
+//            memFree(h, keyValue);
+//        } else {
+//            pd->StdHW = (float)strtod(h->valueArray.array[0], NULL);
+//            memFree(h, h->valueArray.array[0]);
+//        }
+//    } else if (!strcmp(keyName, "postscriptStdVW")) {
+//        if (keyValue != NULL){
+//            pd->StdVW = (float)strtod(keyValue, NULL);
+//            memFree(h, keyValue);
+//        } else {
+//            pd->StdVW = (float)strtod(h->valueArray.array[0], NULL);
+//            memFree(h, h->valueArray.array[0]);
+//        }
+//    } else if (!strcmp(keyName, "postscriptStemSnapH")) {
+//        bluesArray = (BluesArray*)&pd->StemSnapH;
+//        setBluesArrayValue(h, bluesArray, 12);
+//    } else if (!strcmp(keyName, "postscriptStemSnapV")) {
+//        bluesArray = (BluesArray*)&pd->StemSnapV;
+//        setBluesArrayValue(h, bluesArray, 12);
+//    } else if (!strcmp(keyName, "LanguageGroup")) {
+//        pd->LanguageGroup = (float)strtod(keyValue, NULL);
+//        h->parseKeyName = NULL;
+//        memFree(h, keyValue);
+//    } else if (!strcmp(keyName, "ExpansionFactor")) {
+//        pd->ExpansionFactor = (float)strtod(keyValue, NULL);
+//        h->parseKeyName = NULL;
+//        memFree(h, keyValue);
+    } else {
+        // if it isn't used, free the string.
+        memFree(h, keyValue);
+    }
+}
+
+
 static int parseFontInfo(ufoCtx h) {
     int state = 0;     /* 0 == start, 1=in first dict, 2 in key, 3= in value, 4=in array 4 in comment, 5 in child dict.*/
     int prevState = 0; /* used to save prev state while in comment. */
@@ -1829,6 +2095,32 @@ static int parseFontInfo(ufoCtx h) {
         fixUnsetDictValues(h);
         return ufoSuccess;
     }
+    
+
+    // process file
+    xmlDocPtr doc;
+    xmlNodePtr cur;
+    const char* filename = "/Users/demir/Desktop/libxml2/ufo.ufo/fontinfo.plist";
+    const char* filetype = "plist";
+    parseXMLFile(h, filename, filetype, &doc, &cur);
+
+    // go through the keys
+    cur = cur->xmlChildrenNode;
+    unsigned char* keyID;
+    const char* keyContent;
+    while (cur != NULL) {
+        keyID = NULL;
+        if ((xmlStrEqual(cur->name, (const xmlChar *) "key"))) {
+            // parse key
+            parseKey(&keyID, cur);
+            char* keyName = (char*) keyID;
+            cur = cur->next;
+            // setFontDictKey
+            setFontDictKey2(h, keyName, cur, doc);
+        }
+        cur = cur->next;
+    }
+
 
     dnaSET_CNT(h->valueArray, 0);
     fillbuf(h, 0);
@@ -1858,7 +2150,7 @@ static int parseFontInfo(ufoCtx h) {
                     if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
                         reallocFDArray(h);
                     }
-                } else {
+                } else { // initializing the FDArray Dictionary
                     h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
                     if (h->top.version.ptr != NULL)
                         h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
