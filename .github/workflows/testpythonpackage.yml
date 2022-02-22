@@ -64,13 +64,13 @@ jobs:
       if: matrix.os == 'windows-latest'
       uses: microsoft/setup-msbuild@v1.1
       with:
-        vs-version: '[16.4,]'
+        # vs-version: '[16.4,]'
         msbuild-architecture: x64
 
     - name: Set Windows generator to Visual Studio
       if: matrix.os == 'windows-latest'
       run: |
-        echo "CMAKE_GENERATOR=Visual Studio 16 2019" >> $GITHUB_ENV
+        echo "CMAKE_GENERATOR=Visual Studio 17 2022" >> $GITHUB_ENV
         echo "CMAKE_GENERATOR_PLATFORM=x64" >> $GITHUB_ENV
       shell: bash
 
