@@ -35,7 +35,7 @@ jobs:
           - os: macos-latest
             python-version: "3.8"
           - os: macos-latest
-            python-version: "3.10"
+            python-version: "3.9"
           - os: windows-latest
             python-version: "3.7"
           - os: windows-latest
@@ -64,7 +64,7 @@ jobs:
       if: matrix.os == 'windows-latest'
       uses: microsoft/setup-msbuild@v1.1
       with:
-        # vs-version: '[16.4,]'
+        vs-version: '[17.0,]'
         msbuild-architecture: x64
 
     - name: Set Windows generator to Visual Studio
