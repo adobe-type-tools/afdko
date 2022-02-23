@@ -303,9 +303,12 @@ pdwCtx pdwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
         return NULL;
 
     /* Allocate context */
-    h = mem_cb->manage(mem_cb, NULL, sizeof(struct pdwCtx_));
+    h = (pdwCtx)mem_cb->manage(mem_cb, NULL, sizeof(struct pdwCtx_));
     if (h == NULL)
         return NULL;
+
+    /* Safety initialization */
+    memset(h, 0, sizeof(*h));
 
     /* Copy callbacks */
     h->cb.mem = *mem_cb;
