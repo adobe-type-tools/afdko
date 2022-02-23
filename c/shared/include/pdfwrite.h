@@ -7,7 +7,7 @@
 
 #include "ctlshare.h"
 
-#define PDW_VERSION CTL_MAKE_VERSION(1, 0, 6)
+#define PDW_VERSION CTL_MAKE_VERSION(1, 0, 7)
 
 #include "absfont.h"
 
