@@ -1,6 +1,12 @@
 Changelog
 =========
 
+3.8.1 (released 2022-02-24)
+---------------------------
+- [tx] Add safety initialization of pdwCtx structure in pdwNew
+  ([#1474](https://github.com/adobe-type-tools/afdko/pull/1474))
+- [requirements] updated dependencies
+
 3.8.0 (released 2022-02-03)
 ---------------------------
 - [python] **Drop Python 3.6, add Python 3.10 support**
