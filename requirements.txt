@@ -8,6 +8,6 @@ defcon[lxml,pens]==0.10.0
 fontMath==0.9.1
 fontTools[unicode,woff,ufo,lxml]==4.29.1
 psautohint==2.4.0
-tqdm==4.62.3
+tqdm==4.63.0
 ufonormalizer==0.6.1
 ufoProcessor==1.9.0
