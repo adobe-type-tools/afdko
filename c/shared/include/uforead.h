@@ -131,6 +131,8 @@ void ufoFree(ufoCtx h);
 
 static void *parseKeyContent(ufoCtx h, xmlNodePtr cur);
 
+static void setFontDictKey2(ufoCtx h, char* keyName, xmlNodePtr cur);
+
 
 enum {
 #undef CTL_DCL_ERR
