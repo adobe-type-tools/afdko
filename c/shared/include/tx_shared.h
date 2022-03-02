@@ -59,6 +59,9 @@
 #include <sys/time.h>
 #endif
 
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+
 /* ----------------------- Miscellaneous Definitions ----------------------- */
 
 #define ARRAY_LEN(t) (sizeof(t) / sizeof((t)[0]))
