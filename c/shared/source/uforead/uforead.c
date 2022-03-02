@@ -1851,7 +1851,7 @@ static void parseXMLFile(ufoCtx h, char* filename, const char* filetype, xmlDocP
     }
 }
 
-static void parseKey(unsigned char* *keyID, xmlNodePtr cur){
+static void parseKeyName(unsigned char* *keyID, xmlNodePtr cur){
     const char keyContent = "value";
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
@@ -1869,8 +1869,7 @@ static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
     printf("Parsing XML Array\n");
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
-        char* valueString = parseKeyContent(h, cur);
-        // returns index[i] value. Need to assign somewhere?...
+        void* valueString = parseKeyValue(h, cur);
         if (valueString != NULL)
             *dnaNEXT(h->valueArray) = valueString;
         cur = cur->next;
@@ -1883,9 +1882,9 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     printf("Parsing XML dict\n");
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
-        parseKey(&keyID, cur);
+        parseKeyName(&keyID, cur);
 //        cur = cur->next;
-//        void *ptr = parseKeyContent(h, cur);
+//        void *ptr = parseKeyValue(h, cur);
 
         char* keyName = (char*) keyID;
         cur = cur->next;
@@ -1904,7 +1903,7 @@ static bool isSimpleKey(xmlNodePtr cur){
     }
 }
 
-static void *parseKeyContent(ufoCtx h, xmlNodePtr cur){
+static void *parseKeyValue(ufoCtx h, xmlNodePtr cur){
     if (isSimpleKey(cur)) { /* if string, integer, or real */
         void *ptr = xmlNodeGetContent(cur);
         return ptr;
@@ -2143,6 +2142,8 @@ static int parseFontInfo(ufoCtx h) {
             // parse key
             parseKey(&keyID, cur);
             char* keyName = (char*) keyID;
+            parseKeyName(&keyID, cur);
+            keyName = (char*) keyID;
             cur = cur->next;
             // setFontDictKey
             setFontDictKey2(h, keyName, cur);
