@@ -15,6 +15,9 @@
 #endif
 #include <stdint.h>
 
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+
 /* CoreType Library Shared Definitions
    ===================================
    This library supplies definitions that are shared between members of the
