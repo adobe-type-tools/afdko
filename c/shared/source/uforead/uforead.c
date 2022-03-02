@@ -55,8 +55,9 @@ const char* t1HintKeyV1 = "com.adobe.type.autohint";
 const char* t1HintKeyV2 = "com.adobe.type.autohint.v2";
 int currentCID = -1;
 long CIDCount = 0;
-int currentiFD = 0;
+int currentiFD = -1;
 int FDArrayInitSize = 50;
+bool parsingFDArray = false;
 
 typedef struct
 {
