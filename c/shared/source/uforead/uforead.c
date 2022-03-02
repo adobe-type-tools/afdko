@@ -1819,12 +1819,13 @@ static void reallocFDArray(ufoCtx h){
     h->top.FDArray.array = newFDArray;
 }
 
-static void parseXMLFile(ufoCtx h, const char* file,  int size, const char* filetype, xmlDocPtr *doc, xmlNodePtr *cur){
+static void parseXMLFile(ufoCtx h, char* filename, const char* filetype, xmlDocPtr *doc, xmlNodePtr *cur){
     xmlKeepBlanksDefault(0);
-    *doc = xmlParseFile(file);
-//    xmlDoc *doc = xmlParseMemory(file, size);
+
+    h->cb.stm.xml_read(&h->cb.stm, h->stm.src, &h->src.buf, doc);
+    
     if (doc == NULL) {
-        fatal(h, ufoErrParse, "Failed to parse '%s'.\n", file);
+        fatal(h, ufoErrParse, "Failed to parse '%s'.\n", "file");
     }
 
     *cur = xmlDocGetRootElement(*doc);
