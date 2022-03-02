@@ -8,7 +8,5 @@ add_executable(rotatefont
 )
 
 target_include_directories(rotatefont PRIVATE ../../shared/include ../../shared/resource ../../shared/source/tx_shared)
-target_link_libraries(rotatefont PUBLIC tx_shared ${LIBXML2_LIBRARY})
-
-message(STATUS "rotatefont: LIBXML2_INCLUDE DIRS: ${LIBXML2_INCLUDE_DIR}")
+target_link_libraries(rotatefont PUBLIC tx_shared ${LIBXML2_LIBRARIES})
 install(TARGETS rotatefont DESTINATION bin)
