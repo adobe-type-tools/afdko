@@ -142,6 +142,7 @@ struct ctlStreamCallbacks_ {
     int (*seek)(ctlStreamCallbacks *cb, void *stream, long offset);
     long (*tell)(ctlStreamCallbacks *cb, void *stream);
     size_t (*read)(ctlStreamCallbacks *cb, void *stream, char **ptr);
+    size_t (*xml_read)(ctlStreamCallbacks *cb, int id, size_t size, xmlDocPtr *doc);
     size_t (*write)(ctlStreamCallbacks *cb,
                     void *stream, size_t count, char *ptr);
     int (*status)(ctlStreamCallbacks *cb, void *stream);

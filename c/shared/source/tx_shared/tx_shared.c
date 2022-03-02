@@ -204,6 +204,15 @@ static int tmp_close(txCtx h, Stream *s) {
 
 /* ---------------------------- Stream Callbacks --------------------------- */
 
+static char* stm_get_file(ctlStreamCallbacks *cb, int id, size_t size){
+    if (cb->clientFileName != NULL) {
+        txCtx h = cb->direct_ctx;
+        char *buffer = memNew(h, sizeof(char)*FILENAME_MAX);
+        sprintf(buffer, "%s/%s", h->file.src, cb->clientFileName);
+        return buffer;
+    }
+}
+
 /* Open stream. */
 static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size) {
     txCtx h = cb->direct_ctx;
@@ -405,6 +414,31 @@ static size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr) {
     return 0; /* Suppress compiler warning */
 }
 
+static size_t stm_xml_read(ctlStreamCallbacks *cb, void *stream, char **ptr, xmlDocPtr *doc){
+    int res, size = 1024;
+    char chars[1024];
+    xmlParserCtxtPtr ctxt;
+    
+    Stream *s = stream;
+    txCtx h = cb->direct_ctx;
+    if (h->seg.refill != NULL)
+        return h->seg.refill(h, ptr);
+    
+    *ptr = s->buf;
+    res = fread(s->buf, 1, 4, s->fp);
+    if (res > 0) {
+        ctxt = xmlCreatePushParserCtxt(NULL, NULL,
+                    s->buf, res, s->filename);
+        while ((res = fread(s->buf, 1, size, s->fp)) > 0) {
+            xmlParseChunk(ctxt, s->buf, res, 0);
+        }
+        xmlParseChunk(ctxt, s->buf, 0, 1);
+        *doc = ctxt->myDoc;
+        xmlFreeParserCtxt(ctxt);
+    }
+    return 0;
+}
+
 /* Write to stream. */
 static size_t stm_write(ctlStreamCallbacks *cb, void *stream,
                         size_t count, char *ptr) {
@@ -501,6 +535,7 @@ void stmInit(txCtx h) {
     h->cb.stm.seek = stm_seek;
     h->cb.stm.tell = stm_tell;
     h->cb.stm.read = stm_read;
+    h->cb.stm.xml_read = stm_xml_read;
     h->cb.stm.write = stm_write;
     h->cb.stm.status = stm_status;
     h->cb.stm.close = stm_close;
