@@ -1835,13 +1835,13 @@ static void parseXMLFile(ufoCtx h, char* filename, const char* filetype, xmlDocP
     *cur = xmlDocGetRootElement(*doc);
     if (cur == NULL) { // if document empty
         xmlFreeDoc(*doc);
-        return(NULL);
+//        return(NULL);
     }
     
     if (!xmlStrEqual((*cur)->name, (const xmlChar *) filetype)) {
         fprintf(stderr,"document of the wrong type, root node != %s", filetype);
         xmlFreeDoc(*doc);
-        return(NULL);
+//        return(NULL);
     }
     
     *cur = (*cur)->xmlChildrenNode;
@@ -1850,12 +1850,12 @@ static void parseXMLFile(ufoCtx h, char* filename, const char* filetype, xmlDocP
     }
     if ( *cur == 0 ) {
         xmlFreeDoc(*doc);
-        return ( NULL );
+//        return ( NULL );
     }
     if ((!xmlStrEqual((*cur)->name, (const xmlChar *) "dict"))) {
         fprintf(stderr,"Error reading outermost <dict> in %s.\n", "file");
         xmlFreeDoc(*doc);
-        return(NULL);
+//        return(NULL);
     }
 }
 
