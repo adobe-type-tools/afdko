@@ -204,15 +204,6 @@ static int tmp_close(txCtx h, Stream *s) {
 
 /* ---------------------------- Stream Callbacks --------------------------- */
 
-static char* stm_get_file(ctlStreamCallbacks *cb, int id, size_t size){
-    if (cb->clientFileName != NULL) {
-        txCtx h = cb->direct_ctx;
-        char *buffer = memNew(h, sizeof(char)*FILENAME_MAX);
-        sprintf(buffer, "%s/%s", h->file.src, cb->clientFileName);
-        return buffer;
-    }
-}
-
 /* Open stream. */
 static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size) {
     txCtx h = cb->direct_ctx;
