@@ -1923,7 +1923,8 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
 static bool isSimpleKey(xmlNodePtr cur){
     if (xmlStrEqual(cur->name, (const xmlChar *) "string" ) ||
         xmlStrEqual(cur->name, (const xmlChar *) "integer") ||
-        xmlStrEqual(cur->name, (const xmlChar *) "real")  ) {
+        xmlStrEqual(cur->name, (const xmlChar *) "real")    ||
+        xmlStrEqual(cur->name, (const xmlChar *) "date")) {
         return true;
     } else {
         return false;
@@ -1935,22 +1936,19 @@ static void *parseKeyValue(ufoCtx h, xmlNodePtr cur){
         void *ptr = xmlNodeGetContent(cur);
         return ptr;
     } else if (xmlStrEqual(cur->name, (const xmlChar *) "dict")) {
-//        printf("%s", xmlNodeGetContent(cur));
-//        xmlNodePtr dict = cur;
-//        return cur;
         parseXMLDict(h, cur);
     } else if (xmlStrEqual(cur->name, (const xmlChar *) "array")) {
         parseXMLArray(h, cur);
         return NULL; // returning NULL because value is in h->valueArray
+    }  else if (xmlStrEqual(cur->name, (const xmlChar *) "true")) {
+        return "1";
+    }  else if (xmlStrEqual(cur->name, (const xmlChar *) "false")) {
+        return "0";
     }
 }
 
 static int parseFontInfo(ufoCtx h) {
-    xmlDocPtr doc;
-    xmlNodePtr cur;
     const char* filetype = "plist";
-    unsigned char* keyID;
-    char* keyName;
     
     h->src.next = h->mark = NULL;
     h->cb.stm.clientFileName = "fontinfo.plist";
