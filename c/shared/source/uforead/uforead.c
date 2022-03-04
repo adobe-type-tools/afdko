@@ -1927,6 +1927,15 @@ static bool isSimpleKey(xmlNodePtr cur){
     }
 }
 
+static char* parseKeyError(ufoCtx h, xmlNodePtr cur){
+    if (xmlStrEqual(cur->name, (const xmlChar *) "key"))
+        fatal(h, ufoErrParse, "Encountered empty <key>"); //needs fix
+    else if(xmlStrEqual(cur->name, (const xmlChar *) "array"))
+        fatal(h, ufoErrParse, "Encountered empty <array>");
+    else
+        return NULL;
+}
+
 static void *parseKeyValue(ufoCtx h, xmlNodePtr cur){
     if (isSimpleKey(cur)) { /* if string, integer, or real */
         void *ptr = xmlNodeGetContent(cur);
@@ -1940,6 +1949,8 @@ static void *parseKeyValue(ufoCtx h, xmlNodePtr cur){
         return "1";
     }  else if (xmlStrEqual(cur->name, (const xmlChar *) "false")) {
         return "0";
+    } else {
+        return parseKeyError(h, cur);
     }
 }
 
