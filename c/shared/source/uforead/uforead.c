@@ -55,7 +55,7 @@ const char* t1HintKeyV1 = "com.adobe.type.autohint";
 const char* t1HintKeyV2 = "com.adobe.type.autohint.v2";
 int currentCID = -1;
 long CIDCount = 0;
-int currentiFD = -1;
+int currentiFD = 0;
 int FDArrayInitSize = 50;
 bool parsingFDArray = false;
 
@@ -958,17 +958,13 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
      */
     
     if (!strcmp(keyName, "postscriptFDArray")) {
-        printf("in postscriptFDArray\n");
         h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
         if (h->top.version.ptr != NULL)
             h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
         
         parsingFDArray = true;
+        currentiFD = -1;
         parseKeyValue(h, cur);
-        
-        h->top.FDArray.cnt = h->valueArray.cnt;
-//        currentiFD = currentiFD - 1;
-//        h->top.FDArray.cnt = h->top.FDArray.cnt - 1;
         parsingFDArray = false;
         
 //        if (h->top.FDArray.array != &h->fdict){ //if more memory was allocated for FDArray
@@ -1905,7 +1901,6 @@ static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
 static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     // go through an XML dict
     unsigned char* keyID;
-    printf("Parsing XML dict\n");
     cur = cur->xmlChildrenNode;
     
     if (parsingFDArray){
