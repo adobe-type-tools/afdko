@@ -963,9 +963,9 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         parseKeyValue(h, cur);
         parsingFDArray = false;
         
-//        if (h->top.FDArray.array != &h->fdict){ //if more memory was allocated for FDArray
-//            memFree(h, h->top.FDArray.array);
-//        }
+        if (h->top.FDArray.array != &h->fdict){ //if more memory was allocated for FDArray
+            memFree(h, h->top.FDArray.array);
+        }
     } else if (!strcmp(keyName, "PrivateDict")) {
         parsingFDArray = false;
         parseKeyValue(h, cur);
