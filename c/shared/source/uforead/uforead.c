@@ -952,18 +952,18 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
 
     /* If we do not use a keyValue, we need to dispose of it
      */
-    
+
     if (!strcmp(keyName, "postscriptFDArray")) {
         h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
         if (h->top.version.ptr != NULL)
             h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
-        
+
         parsingFDArray = true;
         currentiFD = -1;
         parseKeyValue(h, cur);
         parsingFDArray = false;
-        
-        if (h->top.FDArray.array != &h->fdict){ //if more memory was allocated for FDArray
+
+        if (h->top.FDArray.array != &h->fdict){  // if more memory was allocated for FDArray
             memFree(h, h->top.FDArray.array);
         }
     } else if (!strcmp(keyName, "PrivateDict")) {
@@ -1115,7 +1115,7 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     //        memFree(h, keyValue);
         }
     }
-    
+
     cur = cur->next;
 }
 
@@ -1820,29 +1820,29 @@ static void parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     xmlNodePtr cur;
     unsigned char* keyID;
     char* keyName;
-    
+
     xmlKeepBlanksDefault(0);
 
     h->cb.stm.xml_read(&h->cb.stm, h->stm.src, &h->src.buf, &doc);
-    
+
     if (doc == NULL) {
         fatal(h, ufoErrParse, "Failed to parse '%s'.\n", "file");
     }
 
     cur = xmlDocGetRootElement(doc);
-    if (cur == NULL) { // if document empty
+    if (cur == NULL) {  // if document empty
         xmlFreeDoc(doc);
 //        return(NULL);
     }
-    
+
     if (!xmlStrEqual((cur)->name, (const xmlChar *) filetype)) {
-        fprintf(stderr,"document of the wrong type, root node != %s", filetype);
+        fprintf(stderr, "document of the wrong type, root node != %s", filetype);
         xmlFreeDoc(doc);
 //        return(NULL);
     }
-    
+
     cur = (cur)->xmlChildrenNode;
-    while ( cur && xmlIsBlankNode ( cur ) ) {
+    while (cur && xmlIsBlankNode(cur)) {
         cur = (cur) -> next;
     }
     if ( cur == 0 ) {
@@ -1850,11 +1850,11 @@ static void parseXMLFile(ufoCtx h, char* filename, const char* filetype){
 //        return ( NULL );
     }
     if ((!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))) {
-        fprintf(stderr,"Error reading outermost <dict> in %s.\n", "file");
+        fprintf(stderr, "Error reading outermost <dict> in %s.\n", "file");
         xmlFreeDoc(doc);
 //        return(NULL);
     }
-    
+
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
         keyID = NULL;
@@ -1898,12 +1898,12 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     // go through an XML dict
     unsigned char* keyID;
     cur = cur->xmlChildrenNode;
-    
+
     if (parsingFDArray){
         currentiFD = currentiFD + 1;
         h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
     }
-    
+
     while (cur != NULL) {
         parseKeyName(&keyID, cur);
 //        cur = cur->next;
@@ -1929,22 +1929,22 @@ static bool isSimpleKey(xmlNodePtr cur){
 
 static char* parseKeyError(ufoCtx h, xmlNodePtr cur){
     if (xmlStrEqual(cur->name, (const xmlChar *) "key"))
-        fatal(h, ufoErrParse, "Encountered empty <key>"); //needs fix
-    else if(xmlStrEqual(cur->name, (const xmlChar *) "array"))
+        fatal(h, ufoErrParse, "Encountered empty <key>");  // needs fix
+    else if (xmlStrEqual(cur->name, (const xmlChar *) "array"))
         fatal(h, ufoErrParse, "Encountered empty <array>");
     else
         return NULL;
 }
 
 static void *parseKeyValue(ufoCtx h, xmlNodePtr cur){
-    if (isSimpleKey(cur)) { /* if string, integer, or real */
+    if (isSimpleKey(cur)) {  /* if string, integer, or real */
         void *ptr = xmlNodeGetContent(cur);
         return ptr;
     } else if (xmlStrEqual(cur->name, (const xmlChar *) "dict")) {
         parseXMLDict(h, cur);
     } else if (xmlStrEqual(cur->name, (const xmlChar *) "array")) {
         parseXMLArray(h, cur);
-        return NULL; // returning NULL because value is in h->valueArray
+        return NULL;  // returning NULL because value is in h->valueArray
     }  else if (xmlStrEqual(cur->name, (const xmlChar *) "true")) {
         return "1";
     }  else if (xmlStrEqual(cur->name, (const xmlChar *) "false")) {
@@ -1956,7 +1956,7 @@ static void *parseKeyValue(ufoCtx h, xmlNodePtr cur){
 
 static int parseFontInfo(ufoCtx h) {
     const char* filetype = "plist";
-    
+
     h->src.next = h->mark = NULL;
     h->cb.stm.clientFileName = "fontinfo.plist";
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
@@ -1965,11 +1965,11 @@ static int parseFontInfo(ufoCtx h) {
         fixUnsetDictValues(h);
         return ufoSuccess;
     }
-    
+
     dnaSET_CNT(h->valueArray, 0);
 
     parseXMLFile(h, h->cb.stm.clientFileName, filetype);
-    
+
     fixUnsetDictValues(h);
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
