@@ -1204,3 +1204,14 @@ def test_pfa_to_ufo_dup_points(input, expected, output):
     output_path = get_temp_dir_path(output)
     runner(CMD + ['-a', '-o', 'ufo', '-f', input_path, output_path])
     assert differ([expected_path, output_path])
+
+
+def test_non_FDArray_dict_parse():
+    """
+    Tests a UFO that has an array of dictionaries that is NOT an FDArray.
+    This allows non-CID keyed UFOs that have unknown structures
+    similar to FDArray in fontinfo.plist to parse properly.
+    """
+    ufo_input_path = get_input_path("nonCIDKeyed_nonFDArrayDict.ufo")
+    arg = [TOOL, '-t1', '-f', ufo_input_path]
+    assert subprocess.call(arg) == 0

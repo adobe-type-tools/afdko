@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="_cap.kaze.001" format="2">
+	<advance width="600"/>
+	<outline>
+		<contour>
+			<point x="100" y="-120" type="line"/>
+			<point x="900" y="-120" type="line"/>
+			<point x="900" y="880" type="line"/>
+			<point x="100" y="880" type="line"/>
+		</contour>
+	</outline>
+	<lib>
+		<dict>
+			<key>com.schriftgestaltung.Glyphs.Export</key>
+			<false/>
+		</dict>
+	</lib>
+</glyph>
