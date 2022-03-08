@@ -1915,6 +1915,8 @@ static int parseFontInfo(ufoCtx h) {
             dnaSET_CNT(h->valueArray, 0);
         } else if (tokenEqualStr(tk, "</array>")) {
             if (state == 5) {
+                if (parsingFDArray)
+                    parsingFDArray = false;
                 if ( h->top.FDArray.array != &h->fdict ) {  // if more memory was allocated for FDArray
                     memFree(h, h->top.FDArray.array);
                 }
