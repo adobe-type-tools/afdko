@@ -57,6 +57,7 @@ int currentCID = -1;
 long CIDCount = 0;
 int currentiFD = 0;
 int FDArrayInitSize = 50;
+bool parsingFDArray = false;
 
 typedef struct
 {
@@ -1852,16 +1853,18 @@ static int parseFontInfo(ufoCtx h) {
         } else if (tokenEqualStr(tk, "<dict>")) {
             if (state == 3){
                 state = 5;
-                if (prevState == 5) {  // NOT first fdict in FDArray
-                    currentiFD = currentiFD + 1;
-                    h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
-                    if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
-                        reallocFDArray(h);
+                if (parsingFDArray){
+                    if (prevState == 5) {  // NOT first fdict in FDArray
+                        currentiFD = currentiFD + 1;
+                        h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
+                        if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
+                            reallocFDArray(h);
+                        }
+                    } else {
+                        h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
+                        if (h->top.version.ptr != NULL)
+                            h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
                     }
-                } else {
-                    h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
-                    if (h->top.version.ptr != NULL)
-                        h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
                 }
             }else if (state == 5){
                 state = 6;
@@ -1901,6 +1904,9 @@ static int parseFontInfo(ufoCtx h) {
             if (state != 2 && state < 5) {
                 fatal(h, ufoErrParse, "Encountered <array> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             } else {
+                /* check if parsing FDArray */
+                if(!strcmp(h->parseKeyName, "postscriptFDArray"))
+                    parsingFDArray = true;
                 if (state >= 5){
                     prevState = state;
                 }
