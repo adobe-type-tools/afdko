@@ -1905,7 +1905,7 @@ static int parseFontInfo(ufoCtx h) {
                 fatal(h, ufoErrParse, "Encountered <array> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
             } else {
                 /* check if parsing FDArray */
-                if(!strcmp(h->parseKeyName, "postscriptFDArray"))
+                if (!strcmp(h->parseKeyName, "postscriptFDArray"))
                     parsingFDArray = true;
                 if (state >= 5){
                     prevState = state;
