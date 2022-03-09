@@ -40,6 +40,9 @@ jobs:
         python-version: "3.8"
 
     - name: Install libxml2
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
       env: 
         CIBW_BEFORE_ALL_LINUX: "yum install -y libxml2-devel"
         CIBW_ENVIRONMENT_LINUX: "CFLAGS='-I/usr/include/libxml2'"
