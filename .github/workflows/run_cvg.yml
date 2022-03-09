@@ -42,7 +42,7 @@ jobs:
 
     - name: Build AFDKO wheel
       env:
-        CFLAGS: '--coverage -I/usr/include/libxml2 ./configure'
+        CFLAGS: '--coverage -I/usr/lib/x86_64-linux-gnu/'
       run: |
         python -m pip install --upgrade pip
         python -m pip install build>=0.7.0
