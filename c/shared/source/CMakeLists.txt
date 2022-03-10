@@ -1,4 +1,5 @@
-include_directories(../include ../resource)
+find_package(LibXml2 REQUIRED)
+include_directories(../include ../resource ${LIBXML2_INCLUDE_DIR})
 
 MACRO(ADD_AFDKOLIB lm)
     file(GLOB sl_sources "${lm}/*")
@@ -70,6 +71,7 @@ target_link_libraries(tx_shared PUBLIC
     absfont
     dynarr
     varread
+    ${LIBXML2_LIBRARY}
 )
 
 if(HAVE_M_LIB)
