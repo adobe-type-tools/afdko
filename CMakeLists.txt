@@ -69,6 +69,9 @@ CHECK_LIBRARY_EXISTS(m floor "" HAVE_M_LIB)
 include(CTest)
 include(AddAFDKOTests)
 
+find_package(LibXml2 REQUIRED)
+include_directories(${LIBXML2_INCLUDE_DIR})
+
 add_subdirectory(c/shared/source)
 add_subdirectory(c/detype1/source)
 add_subdirectory(c/mergefonts/source)

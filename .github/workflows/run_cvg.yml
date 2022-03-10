@@ -29,7 +29,6 @@ jobs:
       if: github.event_name == 'workflow_dispatch'
       run: |
         echo "Reason for triggering: ${{ github.event.inputs.reason }}"
-
     - name: Check out
       uses: actions/checkout@v2
       with:
@@ -40,32 +39,20 @@ jobs:
       with:
         python-version: "3.8"
 
-    - name: Install libxml2
-      uses: actions/setup-python@v2
-      with:
-        python-version: "3.8"
-      env: 
-        CIBW_BEFORE_ALL_LINUX: "yum install -y libxml2-devel"
-        CIBW_ENVIRONMENT_LINUX: "CFLAGS='-I/opt/hostedtoolcache/Python/3.8.12/x64/lib/libxml2 ./configure'"
-
     - name: Build AFDKO wheel
       env:
-        CIBW_BEFORE_ALL_LINUX: "yum install -y libxml2-devel"
-        CFLAGS: '--coverage -I/opt/hostedtoolcache/Python/3.8.12/x64/lib/libxml2 ./configure'
+        CFLAGS: '--coverage -I/usr/include/libxml2'
       run: |
         python -m pip install --upgrade pip
         python -m pip install build>=0.7.0
         python -m build --wheel
-
     - name: Install AFDKO wheel
       run: |
         python -m pip install dist/*.whl -q
-
     - name: Generate Python and C coverage
       run: |
         python -m pip install pytest-cov -q
         python -m pytest tests --cov --cov-report=xml --color=yes
-
     - name: Upload coverage results
       run: |
         bash <(curl -s https://codecov.io/bash) -y .codecov.yml
