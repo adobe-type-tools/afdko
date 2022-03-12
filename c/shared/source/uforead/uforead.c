@@ -406,6 +406,10 @@ void ufoFree(ufoCtx h) {
     dnaFREE(h->data.opList);
     freeStrings(h);
     dnaFree(h->dna);
+    
+    if (h->top.FDArray.array != &h->fdict){  // if more memory was allocated for FDArray
+        memFree(h, h->top.FDArray.array);
+    }
 
     if (h->top.FDArray.array != &h->fdict){  // if more memory was allocated for FDArray
         memFree(h, h->top.FDArray.array);
@@ -966,10 +970,6 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         currentiFD = -1;
         parseKeyValue(h, cur);
         parsingFDArray = false;
-
-        if (h->top.FDArray.array != &h->fdict){  // if more memory was allocated for FDArray
-            memFree(h, h->top.FDArray.array);
-        }
     } else if (!strcmp(keyName, "PrivateDict")) {
         parsingFDArray = false;
         parseKeyValue(h, cur);
