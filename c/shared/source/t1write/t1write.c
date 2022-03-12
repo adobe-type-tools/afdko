@@ -758,7 +758,7 @@ static void writeRealArrayDef(t1wCtx h, char *key, long cnt, float *array) {
         return;
     writeFmt(h, "/%s [", key);
     sep = "";
-    while (cnt--) {
+    while (cnt-- > 0) {
         char buf[50];
         float value = *array++;
         writeStr(h, sep);
