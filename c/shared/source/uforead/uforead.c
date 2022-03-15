@@ -1860,10 +1860,13 @@ static int parseFontInfo(ufoCtx h) {
                         if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
                             reallocFDArray(h);
                         }
+                        abfFontDict* fd = h->top.FDArray.array + currentiFD;
+                        abfInitFontDict(fd);
                     } else {
                         h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
                         if (h->top.version.ptr != NULL)
                             h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
+                        abfInitFontDict(h->top.FDArray.array);
                     }
                 }
             }else if (state == 5){
