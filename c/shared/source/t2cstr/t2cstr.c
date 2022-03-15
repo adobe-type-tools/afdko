@@ -1084,8 +1084,7 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                         h->src.endOffset = h->aux->subrsEnd;
                     h->subrDepth++;
                     if (h->subrDepth > TX_MAX_SUBR_DEPTH) {
-                        message(h, "subr depth: %d\n", h->subrDepth);
-                        return t2cErrSubrDepth;
+                        message(h, "subr depth %d exceeds recursion limit %d (ignored)", h->subrDepth, TX_MAX_SUBR_DEPTH);
                     }
 
                     result = t2Decode(h, h->aux->subrs.offset[num], depth + 1);
@@ -1606,8 +1605,7 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
 
                     h->subrDepth++;
                     if (h->subrDepth > TX_MAX_SUBR_DEPTH) {
-                        message(h, "subr depth: %d\n", h->subrDepth);
-                        return t2cErrSubrDepth;
+                        message(h, "subr depth %d exceeds recursion limit %d (ignored)", h->subrDepth, TX_MAX_SUBR_DEPTH);
                     }
 
                     result = t2Decode(h, h->aux->gsubrs.offset[num], depth + 1);
