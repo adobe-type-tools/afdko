@@ -11,7 +11,7 @@
 
 #include "ctlshare.h"
 
-#define T2C_VERSION CTL_MAKE_VERSION(1, 0, 22)
+#define T2C_VERSION CTL_MAKE_VERSION(1, 0, 23)
 
 #include "absfont.h"
 
