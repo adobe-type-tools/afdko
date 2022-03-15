@@ -44,10 +44,11 @@ jobs:
       env:
         CFLAGS: '--coverage'
       run: |
+        git config --global url.https://github.com/.insteadOf git://github.com/
         python -m pip install --upgrade pip
         python -m pip install build>=0.7.0
         python -m build --wheel
-        git config --global url.https://github.com/.insteadOf git://github.com/
+        
 
     - name: Install AFDKO wheel
       run: |
