@@ -43,7 +43,6 @@ jobs:
         output-dir: dist
       run: |
         git config --global url.https://github.com/.insteadOf git://github.com/
-        python -m cibuildwheel --output-dir dist
       env:
         CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: universal2
@@ -55,7 +54,6 @@ jobs:
         output-dir: dist
       run: |
         git config --global url.https://github.com/.insteadOf git://github.com/
-        python -m cibuildwheel --output-dir dist
       env:
         CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: x86_64
@@ -68,6 +66,7 @@ jobs:
     - name: Build sdist (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
       run: |
+        git config --global url.https://github.com/.insteadOf git://github.com/
         python -m pip install --upgrade pip
         python -m pip install build>=0.7.0
         python -m build --sdist
