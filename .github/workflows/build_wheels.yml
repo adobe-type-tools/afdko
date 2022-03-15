@@ -41,6 +41,9 @@ jobs:
       uses: pypa/cibuildwheel@v2.3.1
       with:
         output-dir: dist
+      run: |
+        git config --global url.https://github.com/.insteadOf git://github.com/
+        python -m cibuildwheel --output-dir dist
       env:
         CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: universal2
@@ -50,6 +53,9 @@ jobs:
       uses: pypa/cibuildwheel@v2.3.1
       with:
         output-dir: dist
+      run: |
+        git config --global url.https://github.com/.insteadOf git://github.com/
+        python -m cibuildwheel --output-dir dist
       env:
         CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: x86_64
