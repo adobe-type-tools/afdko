@@ -91,6 +91,7 @@ jobs:
 
     - name: Install AFDKO
       run: |
+        git config --global url.https://github.com/.insteadOf git://github.com/
         python -m pip install .
         python -m pip freeze --all
 
