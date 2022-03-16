@@ -41,9 +41,8 @@ jobs:
       uses: pypa/cibuildwheel@v2.3.1
       with:
         output-dir: dist
-      run: |
-        git config --global url.https://github.com/.insteadOf git://github.com/
       env:
+        CIBW_BEFORE_ALL: git config --global url.https://github.com/.insteadOf git://github.com/
         CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: universal2
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'"
@@ -52,9 +51,8 @@ jobs:
       uses: pypa/cibuildwheel@v2.3.1
       with:
         output-dir: dist
-      run: |
-        git config --global url.https://github.com/.insteadOf git://github.com/
       env:
+        CIBW_BEFORE_ALL: git config --global url.https://github.com/.insteadOf git://github.com/
         CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: x86_64
         CIBW_ARCHS_WINDOWS: AMD64
