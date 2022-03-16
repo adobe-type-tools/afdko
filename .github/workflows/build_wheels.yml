@@ -43,6 +43,7 @@ jobs:
         output-dir: dist
       env:
         CIBW_BUILD: "cp39-*"
+        CIBW_BEFORE_ALL_MACOS: "git config --global url.https://github.com/.insteadOf git://github.com/"
         CIBW_ARCHS_MACOS: universal2
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'"
 
