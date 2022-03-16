@@ -42,7 +42,6 @@ jobs:
       with:
         output-dir: dist
       env:
-        CIBW_BEFORE_ALL_MACOS: "git config --global url.https://github.com/.insteadOf git://github.com/"
         CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: universal2
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'"
@@ -58,6 +57,7 @@ jobs:
         CIBW_ARCHS_LINUX: x86_64
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         CIBW_SKIP: "*musllinux*"
+        CIBW_BEFORE_ALL_MACOS: "git config --global url.https://github.com/.insteadOf git://github.com/"
         CIBW_BEFORE_ALL_WINDOWS: "git config --global url.https://github.com/.insteadOf git://github.com/"
         CIBW_BEFORE_ALL_LINUX: >
           "yum install -y libuuid-devel" &&
