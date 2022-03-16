@@ -61,8 +61,8 @@ jobs:
         CIBW_BEFORE_ALL_MACOS: "git config --global url.https://github.com/.insteadOf git://github.com/"
         CIBW_BEFORE_ALL_WINDOWS: "git config --global url.https://github.com/.insteadOf git://github.com/"
         CIBW_BEFORE_ALL_LINUX: >
-          "yum install -y libuuid-devel" &&
-          "git config --global url.https://github.com/.insteadOf git://github.com/"
+          yum install -y libuuid-devel &&
+          git config --global url.https://github.com/.insteadOf git://github.com/
 
     - name: Build sdist (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
