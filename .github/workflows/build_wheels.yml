@@ -21,6 +21,10 @@ jobs:
 
     steps:
 
+    - name: Git Config for GitHub Protocol
+      run: |
+        git config --global url.https://github.com/.insteadOf git://github.com/
+
     - name: Log reason (manual run only)
       if: github.event_name == 'workflow_dispatch'
       run: |
@@ -42,7 +46,6 @@ jobs:
       with:
         output-dir: dist
       env:
-        CIBW_BEFORE_ALL: git config --global url.https://github.com/.insteadOf git://github.com/
         CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: universal2
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'"
@@ -52,7 +55,6 @@ jobs:
       with:
         output-dir: dist
       env:
-        CIBW_BEFORE_ALL: git config --global url.https://github.com/.insteadOf git://github.com/
         CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: x86_64
         CIBW_ARCHS_WINDOWS: AMD64
@@ -63,8 +65,6 @@ jobs:
 
     - name: Build sdist (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
-      run: |
-        git config --global url.https://github.com/.insteadOf git://github.com/
         python -m pip install --upgrade pip
         python -m pip install build>=0.7.0
         python -m build --sdist
