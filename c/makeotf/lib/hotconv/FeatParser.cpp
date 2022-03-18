@@ -1,5 +1,5 @@
 
-// Generated from FeatParser.g4 by ANTLR 4.9.2
+// Generated from FeatParser.g4 by ANTLR 4.9.3
 
 
 #include "FeatParserVisitor.h"
@@ -471,9 +471,9 @@ FeatParser::LangsysAssignContext* FeatParser::langsysAssign() {
     setState(253);
     match(FeatParser::LANGSYS);
     setState(254);
-    dynamic_cast<LangsysAssignContext *>(_localctx)->script = tag();
+    antlrcpp::downCast<LangsysAssignContext *>(_localctx)->script = tag();
     setState(255);
-    dynamic_cast<LangsysAssignContext *>(_localctx)->lang = tag();
+    antlrcpp::downCast<LangsysAssignContext *>(_localctx)->lang = tag();
    
   }
   catch (RecognitionException &e) {
@@ -633,9 +633,9 @@ FeatParser::AnchorDefContext* FeatParser::anchorDef() {
     setState(265);
     match(FeatParser::ANCHOR_DEF);
     setState(266);
-    dynamic_cast<AnchorDefContext *>(_localctx)->xval = match(FeatParser::NUM);
+    antlrcpp::downCast<AnchorDefContext *>(_localctx)->xval = match(FeatParser::NUM);
     setState(267);
-    dynamic_cast<AnchorDefContext *>(_localctx)->yval = match(FeatParser::NUM);
+    antlrcpp::downCast<AnchorDefContext *>(_localctx)->yval = match(FeatParser::NUM);
     setState(270);
     _errHandler->sync(this);
 
@@ -644,10 +644,10 @@ FeatParser::AnchorDefContext* FeatParser::anchorDef() {
       setState(268);
       match(FeatParser::CONTOURPOINT);
       setState(269);
-      dynamic_cast<AnchorDefContext *>(_localctx)->cp = match(FeatParser::NUM);
+      antlrcpp::downCast<AnchorDefContext *>(_localctx)->cp = match(FeatParser::NUM);
     }
     setState(272);
-    dynamic_cast<AnchorDefContext *>(_localctx)->name = label();
+    antlrcpp::downCast<AnchorDefContext *>(_localctx)->name = label();
    
   }
   catch (RecognitionException &e) {
@@ -792,7 +792,7 @@ FeatParser::FeatureBlockContext* FeatParser::featureBlock() {
     setState(278);
     match(FeatParser::FEATURE);
     setState(279);
-    dynamic_cast<FeatureBlockContext *>(_localctx)->starttag = tag();
+    antlrcpp::downCast<FeatureBlockContext *>(_localctx)->starttag = tag();
     setState(281);
     _errHandler->sync(this);
 
@@ -838,7 +838,7 @@ FeatParser::FeatureBlockContext* FeatParser::featureBlock() {
     setState(289);
     match(FeatParser::RCBRACE);
     setState(290);
-    dynamic_cast<FeatureBlockContext *>(_localctx)->endtag = tag();
+    antlrcpp::downCast<FeatureBlockContext *>(_localctx)->endtag = tag();
     setState(291);
     match(FeatParser::SEMI);
    
@@ -1155,7 +1155,7 @@ FeatParser::LookupBlockTopLevelContext* FeatParser::lookupBlockTopLevel() {
     setState(316);
     match(FeatParser::LOOKUP);
     setState(317);
-    dynamic_cast<LookupBlockTopLevelContext *>(_localctx)->startlabel = label();
+    antlrcpp::downCast<LookupBlockTopLevelContext *>(_localctx)->startlabel = label();
     setState(319);
     _errHandler->sync(this);
 
@@ -1199,7 +1199,7 @@ FeatParser::LookupBlockTopLevelContext* FeatParser::lookupBlockTopLevel() {
     setState(327);
     match(FeatParser::RCBRACE);
     setState(328);
-    dynamic_cast<LookupBlockTopLevelContext *>(_localctx)->endlabel = label();
+    antlrcpp::downCast<LookupBlockTopLevelContext *>(_localctx)->endlabel = label();
     setState(329);
     match(FeatParser::SEMI);
    
@@ -1386,7 +1386,7 @@ FeatParser::LookupBlockOrUseContext* FeatParser::lookupBlockOrUse() {
     setState(336);
     match(FeatParser::LOOKUP);
     setState(337);
-    dynamic_cast<LookupBlockOrUseContext *>(_localctx)->startlabel = label();
+    antlrcpp::downCast<LookupBlockOrUseContext *>(_localctx)->startlabel = label();
     setState(350);
     _errHandler->sync(this);
 
@@ -1435,7 +1435,7 @@ FeatParser::LookupBlockOrUseContext* FeatParser::lookupBlockOrUse() {
       setState(347);
       match(FeatParser::RCBRACE);
       setState(348);
-      dynamic_cast<LookupBlockOrUseContext *>(_localctx)->endlabel = label();
+      antlrcpp::downCast<LookupBlockOrUseContext *>(_localctx)->endlabel = label();
     }
     setState(352);
     match(FeatParser::SEMI);
@@ -2604,7 +2604,7 @@ FeatParser::SubstituteContext* FeatParser::substitute() {
         setState(457);
         revtok();
         setState(458);
-        dynamic_cast<SubstituteContext *>(_localctx)->startpat = lookupPattern();
+        antlrcpp::downCast<SubstituteContext *>(_localctx)->startpat = lookupPattern();
         setState(464);
         _errHandler->sync(this);
 
@@ -2629,7 +2629,7 @@ FeatParser::SubstituteContext* FeatParser::substitute() {
             case FeatParser::NAMELABEL:
             case FeatParser::EXTNAME: {
               setState(461);
-              dynamic_cast<SubstituteContext *>(_localctx)->endpat = lookupPattern();
+              antlrcpp::downCast<SubstituteContext *>(_localctx)->endpat = lookupPattern();
               break;
             }
 
@@ -2645,7 +2645,7 @@ FeatParser::SubstituteContext* FeatParser::substitute() {
         setState(466);
         subtok();
         setState(467);
-        dynamic_cast<SubstituteContext *>(_localctx)->startpat = lookupPattern();
+        antlrcpp::downCast<SubstituteContext *>(_localctx)->startpat = lookupPattern();
         setState(473);
         _errHandler->sync(this);
 
@@ -2681,7 +2681,7 @@ FeatParser::SubstituteContext* FeatParser::substitute() {
             case FeatParser::NAMELABEL:
             case FeatParser::EXTNAME: {
               setState(470);
-              dynamic_cast<SubstituteContext *>(_localctx)->endpat = lookupPattern();
+              antlrcpp::downCast<SubstituteContext *>(_localctx)->endpat = lookupPattern();
               break;
             }
 
@@ -2851,7 +2851,7 @@ FeatParser::PositionContext* FeatParser::position() {
       | (1ULL << (FeatParser::NAMELABEL - 117))
       | (1ULL << (FeatParser::EXTNAME - 117)))) != 0)) {
       setState(481);
-      dynamic_cast<PositionContext *>(_localctx)->startpat = pattern();
+      antlrcpp::downCast<PositionContext *>(_localctx)->startpat = pattern();
     }
     setState(538);
     _errHandler->sync(this);
@@ -2928,7 +2928,7 @@ FeatParser::PositionContext* FeatParser::position() {
           | (1ULL << (FeatParser::NAMELABEL - 117))
           | (1ULL << (FeatParser::EXTNAME - 117)))) != 0)) {
           setState(505);
-          dynamic_cast<PositionContext *>(_localctx)->endpat = pattern();
+          antlrcpp::downCast<PositionContext *>(_localctx)->endpat = pattern();
         }
         break;
       }
@@ -2937,7 +2937,7 @@ FeatParser::PositionContext* FeatParser::position() {
         setState(508);
         match(FeatParser::MARKBASE);
         setState(509);
-        dynamic_cast<PositionContext *>(_localctx)->midpat = pattern();
+        antlrcpp::downCast<PositionContext *>(_localctx)->midpat = pattern();
         setState(511); 
         _errHandler->sync(this);
         _la = _input->LA(1);
@@ -2960,7 +2960,7 @@ FeatParser::PositionContext* FeatParser::position() {
           | (1ULL << (FeatParser::NAMELABEL - 117))
           | (1ULL << (FeatParser::EXTNAME - 117)))) != 0)) {
           setState(515);
-          dynamic_cast<PositionContext *>(_localctx)->endpat = pattern();
+          antlrcpp::downCast<PositionContext *>(_localctx)->endpat = pattern();
         }
         break;
       }
@@ -2970,7 +2970,7 @@ FeatParser::PositionContext* FeatParser::position() {
         setState(518);
         markligtok();
         setState(519);
-        dynamic_cast<PositionContext *>(_localctx)->midpat = pattern();
+        antlrcpp::downCast<PositionContext *>(_localctx)->midpat = pattern();
         setState(521); 
         _errHandler->sync(this);
         _la = _input->LA(1);
@@ -2993,7 +2993,7 @@ FeatParser::PositionContext* FeatParser::position() {
           | (1ULL << (FeatParser::NAMELABEL - 117))
           | (1ULL << (FeatParser::EXTNAME - 117)))) != 0)) {
           setState(525);
-          dynamic_cast<PositionContext *>(_localctx)->endpat = pattern();
+          antlrcpp::downCast<PositionContext *>(_localctx)->endpat = pattern();
         }
         break;
       }
@@ -3002,7 +3002,7 @@ FeatParser::PositionContext* FeatParser::position() {
         setState(528);
         match(FeatParser::MARK);
         setState(529);
-        dynamic_cast<PositionContext *>(_localctx)->midpat = pattern();
+        antlrcpp::downCast<PositionContext *>(_localctx)->midpat = pattern();
         setState(531); 
         _errHandler->sync(this);
         _la = _input->LA(1);
@@ -3025,7 +3025,7 @@ FeatParser::PositionContext* FeatParser::position() {
           | (1ULL << (FeatParser::NAMELABEL - 117))
           | (1ULL << (FeatParser::EXTNAME - 117)))) != 0)) {
           setState(535);
-          dynamic_cast<PositionContext *>(_localctx)->endpat = pattern();
+          antlrcpp::downCast<PositionContext *>(_localctx)->endpat = pattern();
         }
         break;
       }
@@ -3161,7 +3161,7 @@ FeatParser::ValueRecordContext* FeatParser::valueRecord() {
       setState(544);
       match(FeatParser::BEGINVALUE);
       setState(545);
-      dynamic_cast<ValueRecordContext *>(_localctx)->valuename = label();
+      antlrcpp::downCast<ValueRecordContext *>(_localctx)->valuename = label();
       setState(546);
       match(FeatParser::ENDVALUE);
       break;
@@ -4213,9 +4213,9 @@ FeatParser::BaseScriptContext* FeatParser::baseScript() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(644);
-    dynamic_cast<BaseScriptContext *>(_localctx)->script = tag();
+    antlrcpp::downCast<BaseScriptContext *>(_localctx)->script = tag();
     setState(645);
-    dynamic_cast<BaseScriptContext *>(_localctx)->db = tag();
+    antlrcpp::downCast<BaseScriptContext *>(_localctx)->db = tag();
     setState(647); 
     _errHandler->sync(this);
     _la = _input->LA(1);
@@ -5687,7 +5687,7 @@ FeatParser::NameIDContext* FeatParser::nameID() {
     setState(780);
     match(FeatParser::NAMEID);
     setState(781);
-    dynamic_cast<NameIDContext *>(_localctx)->id = genNum();
+    antlrcpp::downCast<NameIDContext *>(_localctx)->id = genNum();
     setState(788);
     _errHandler->sync(this);
 
@@ -5697,7 +5697,7 @@ FeatParser::NameIDContext* FeatParser::nameID() {
       | (1ULL << (FeatParser::NUMOCT - 131))
       | (1ULL << (FeatParser::NUM - 131)))) != 0)) {
       setState(782);
-      dynamic_cast<NameIDContext *>(_localctx)->plat = genNum();
+      antlrcpp::downCast<NameIDContext *>(_localctx)->plat = genNum();
       setState(786);
       _errHandler->sync(this);
 
@@ -5707,9 +5707,9 @@ FeatParser::NameIDContext* FeatParser::nameID() {
         | (1ULL << (FeatParser::NUMOCT - 131))
         | (1ULL << (FeatParser::NUM - 131)))) != 0)) {
         setState(783);
-        dynamic_cast<NameIDContext *>(_localctx)->spec = genNum();
+        antlrcpp::downCast<NameIDContext *>(_localctx)->spec = genNum();
         setState(784);
-        dynamic_cast<NameIDContext *>(_localctx)->lang = genNum();
+        antlrcpp::downCast<NameIDContext *>(_localctx)->lang = genNum();
       }
     }
     setState(790);
@@ -6087,7 +6087,7 @@ FeatParser::Os_2Context* FeatParser::os_2() {
           consume();
         }
         setState(812);
-        dynamic_cast<Os_2Context *>(_localctx)->num = match(FeatParser::NUM);
+        antlrcpp::downCast<Os_2Context *>(_localctx)->num = match(FeatParser::NUM);
         break;
       }
 
@@ -6114,7 +6114,7 @@ FeatParser::Os_2Context* FeatParser::os_2() {
           consume();
         }
         setState(814);
-        dynamic_cast<Os_2Context *>(_localctx)->unum = match(FeatParser::NUM);
+        antlrcpp::downCast<Os_2Context *>(_localctx)->unum = match(FeatParser::NUM);
         break;
       }
 
@@ -6123,7 +6123,7 @@ FeatParser::Os_2Context* FeatParser::os_2() {
         setState(815);
         match(FeatParser::FAMILY_CLASS);
         setState(816);
-        dynamic_cast<Os_2Context *>(_localctx)->gnum = genNum();
+        antlrcpp::downCast<Os_2Context *>(_localctx)->gnum = genNum();
         break;
       }
 
@@ -7481,9 +7481,9 @@ FeatParser::AnchorContext* FeatParser::anchor() {
     switch (_input->LA(1)) {
       case FeatParser::NUM: {
         setState(957);
-        dynamic_cast<AnchorContext *>(_localctx)->xval = match(FeatParser::NUM);
+        antlrcpp::downCast<AnchorContext *>(_localctx)->xval = match(FeatParser::NUM);
         setState(958);
-        dynamic_cast<AnchorContext *>(_localctx)->yval = match(FeatParser::NUM);
+        antlrcpp::downCast<AnchorContext *>(_localctx)->yval = match(FeatParser::NUM);
         setState(961);
         _errHandler->sync(this);
 
@@ -7492,7 +7492,7 @@ FeatParser::AnchorContext* FeatParser::anchor() {
           setState(959);
           match(FeatParser::CONTOURPOINT);
           setState(960);
-          dynamic_cast<AnchorContext *>(_localctx)->cp = match(FeatParser::NUM);
+          antlrcpp::downCast<AnchorContext *>(_localctx)->cp = match(FeatParser::NUM);
         }
         break;
       }
@@ -7506,7 +7506,7 @@ FeatParser::AnchorContext* FeatParser::anchor() {
       case FeatParser::MARK:
       case FeatParser::NAMELABEL: {
         setState(964);
-        dynamic_cast<AnchorContext *>(_localctx)->name = label();
+        antlrcpp::downCast<AnchorContext *>(_localctx)->name = label();
         break;
       }
 
@@ -8092,7 +8092,7 @@ FeatParser::GcLiteralElementContext* FeatParser::gcLiteralElement() {
       case FeatParser::EXTNAME: {
         enterOuterAlt(_localctx, 1);
         setState(1009);
-        dynamic_cast<GcLiteralElementContext *>(_localctx)->startg = glyph();
+        antlrcpp::downCast<GcLiteralElementContext *>(_localctx)->startg = glyph();
         setState(1012);
         _errHandler->sync(this);
 
@@ -8101,7 +8101,7 @@ FeatParser::GcLiteralElementContext* FeatParser::gcLiteralElement() {
           setState(1010);
           match(FeatParser::HYPHEN);
           setState(1011);
-          dynamic_cast<GcLiteralElementContext *>(_localctx)->endg = glyph();
+          antlrcpp::downCast<GcLiteralElementContext *>(_localctx)->endg = glyph();
         }
         break;
       }
