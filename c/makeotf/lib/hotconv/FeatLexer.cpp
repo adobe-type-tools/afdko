@@ -1,5 +1,5 @@
 
-// Generated from FeatLexer.g4 by ANTLR 4.9.2
+// Generated from FeatLexer.g4 by ANTLR 4.9.3
 
 
 #include "FeatLexer.h"
@@ -51,7 +51,7 @@ const atn::ATN& FeatLexer::getATN() const {
 
 void FeatLexer::action(RuleContext *context, size_t ruleIndex, size_t actionIndex) {
   switch (ruleIndex) {
-    case 141: A_LABELAction(dynamic_cast<antlr4::RuleContext *>(context), actionIndex); break;
+    case 141: A_LABELAction(antlrcpp::downCast<antlr4::RuleContext *>(context), actionIndex); break;
 
   default:
     break;
@@ -60,7 +60,7 @@ void FeatLexer::action(RuleContext *context, size_t ruleIndex, size_t actionInde
 
 bool FeatLexer::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
   switch (ruleIndex) {
-    case 143: return A_CLOSESempred(dynamic_cast<antlr4::RuleContext *>(context), predicateIndex);
+    case 143: return A_CLOSESempred(antlrcpp::downCast<antlr4::RuleContext *>(context), predicateIndex);
 
   default:
     break;
