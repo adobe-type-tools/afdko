@@ -401,11 +401,60 @@ void ufoFree(ufoCtx h) {
     dnaFREE(h->chars.byName);
     dnaFREE(h->chars.widths);
     dnaFREE(h->tmp);
+
+    for (int i = 0; i < h->data.glifRecs.cnt; i++){
+        GLIF_Rec rec = h->data.glifRecs.array[i];
+        /* rec.glyphName is not allocated on its own, so no need to free. */
+        if (rec.glifFileName != NULL)
+            memFree(h, rec.glifFileName);
+        if (rec.glifFilePath != NULL)
+            memFree(h, rec.glifFilePath);
+        if (rec.altLayerGlifFileName != NULL)
+            memFree(h, rec.altLayerGlifFileName);
+    }
     dnaFREE(h->data.glifRecs);
+
+    for (int i = 0; i < h->data.glifOrder.cnt; i++){
+        GlIFOrderRec rec = h->data.glifOrder.array[i];
+        if (rec.glyphName != NULL)
+            memFree(h, rec.glyphName);
+    }
     dnaFREE(h->data.glifOrder);
+
+    for (int i = 0; i < h->data.opList.cnt; i++){
+        OpRec rec = h->data.opList.array[i];
+        if (rec.pointName != NULL)
+            memFree(h, rec.pointName);
+    }
     dnaFREE(h->data.opList);
     freeStrings(h);
     dnaFree(h->dna);
+
+    if (h->top.cid.CIDFontName.ptr != NULL)
+        memFree(h, h->top.cid.CIDFontName.ptr);
+    if (h->top.cid.Registry.ptr != NULL)
+        memFree(h, h->top.cid.Registry.ptr);
+    if (h->top.cid.Ordering.ptr != NULL)
+        memFree(h, h->top.cid.Ordering.ptr);
+    if (h->top.Copyright.ptr != NULL)
+        memFree(h, h->top.Copyright.ptr);
+    if (h->top.Notice.ptr != NULL)
+        memFree(h, h->top.Notice.ptr);
+    if (h->top.version.ptr != NULL)
+        memFree(h, h->top.version.ptr);
+    if (h->fdict.FontName.ptr != NULL)
+        memFree(h, h->fdict.FontName.ptr);
+    if (h->top.FamilyName.ptr != NULL)
+        memFree(h, h->top.FamilyName.ptr);
+    if (h->top.FullName.ptr != NULL)
+        memFree(h, h->top.FullName.ptr);
+    if (h->top.Weight.ptr != NULL)
+        memFree(h, h->top.Weight.ptr);
+
+    if (h->top.FDArray.array != &h->fdict){  // if more memory was allocated for FDArray
+        memFree(h, h->top.FDArray.array);
+    }
+    memFree(h, h->parseKeyName);
 
     /* Close debug stream */
     if (h->stm.dbg != NULL)
@@ -954,67 +1003,91 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
     /* If we do not use a keyValue, we need to dispose of it
      */
     if (!strcmp(keyName, "copyright")) {
-        top->Copyright.ptr = keyValue;
+        top->Copyright.ptr = memNew(h, strlen(keyValue) + 2);
+        strcpy(top->Copyright.ptr, keyValue);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "trademark")) {
         char* copySymbol;
-        top->Notice.ptr = keyValue;
         /* look for the (c) symbol U+00A9, which is 0xC2, 0xA9 in UTF-8 */
         copySymbol = strstr(keyValue, "\xC2\xA9");
         if (copySymbol != NULL) {
             /* if there is a copyright symbol (U+00A9),
                replace it with the word "Copyright" */
             char* cpy = "Copyright";
-            char* newString = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
+            top->Notice.ptr = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
             /* set the 0xC2 to NULL to terminate the left side of the string */
             *copySymbol = '\0';
             /* use copySymbol + 2 to skip the NULL and the 0xA9
                to get the right side of the string */
-            sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 2);
-            top->Notice.ptr = newString;
+            sprintf(top->Notice.ptr, "%s%s%s", keyValue, "Copyright", copySymbol + 2);
+        } else {
+            top->Notice.ptr = memNew(h, strlen(keyValue) + 2);
+            strcpy(top->Notice.ptr, keyValue);
         }
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "versionMajor")) {
-        if (top->version.ptr == NULL)
-            top->version.ptr = keyValue;
-        else {
-            char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
-            sprintf(newString, "%s.%s", keyValue, top->version.ptr);
+        if (top->version.ptr == NULL){
+            top->version.ptr = memNew(h, strlen(keyValue) + 2);
+            strcpy(top->version.ptr, keyValue);
+        } else {
+            char* newString = memNew(h, strlen(top->version.ptr) + 2);
+            strcpy(newString, top->version.ptr);
             memFree(h, top->version.ptr);
-            top->version.ptr = newString;
-            memFree(h, keyValue);
+            top->version.ptr = memNew(h, strlen(newString) + strlen(keyValue) + 2);
+            sprintf(top->version.ptr, "%s.%s", newString, keyValue);
+            memFree(h, newString);
         }
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "versionMinor")) {
-        if (top->version.ptr == NULL)
-            top->version.ptr = keyValue;
-        else {
-            char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
-            sprintf(newString, "%s.%s", top->version.ptr, keyValue);
+        if (top->version.ptr == NULL){
+            top->version.ptr = memNew(h, strlen(keyValue) + 2);
+            strcpy(top->version.ptr, keyValue);
+        } else {
+            char* newString = memNew(h, strlen(top->version.ptr) + 2);
+            strcpy(newString, top->version.ptr);
             memFree(h, top->version.ptr);
-            top->version.ptr = newString;
-            memFree(h, keyValue);
+            top->version.ptr = memNew(h, strlen(newString) + strlen(keyValue) + 2);
+            sprintf(top->version.ptr, "%s.%s", newString, keyValue);
+            memFree(h, newString);
         }
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "postscriptFontName")) {
-        fd->FontName.ptr = keyValue;
+        fd->FontName.ptr = memNew(h, strlen(keyValue) + 2);
+        strcpy(fd->FontName.ptr, keyValue);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "openTypeNamePreferredFamilyName")) {
-        top->FamilyName.ptr = keyValue;
+        top->FamilyName.ptr = memNew(h, strlen(keyValue) + 2);
+        strcpy(top->FamilyName.ptr, keyValue);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "familyName")) {
-        if (top->FamilyName.ptr == NULL)  // we don't re-set this if it was set by "openTypeNamePreferredFamilyName"
-            top->FamilyName.ptr = keyValue;
-        else
-            memFree(h, keyValue);
+        if (top->FamilyName.ptr == NULL){  // we don't re-set this if it was set by "openTypeNamePreferredFamilyName"
+            top->FamilyName.ptr = memNew(h, strlen(keyValue) + 2);
+            strcpy(top->FamilyName.ptr, keyValue);
+        }
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "postscriptFullName")) {
-        top->FullName.ptr = keyValue;
+        top->FullName.ptr = memNew(h, strlen(keyValue) + 2);
+        strcpy(top->FullName.ptr, keyValue);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "postscriptWeightName")) {
-        top->Weight.ptr = keyValue;
+        top->Weight.ptr = memNew(h, strlen(keyValue) + 2);
+        strcpy(top->Weight.ptr, keyValue);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "postscriptIsFixedPitch")) {
         top->isFixedPitch = atol(keyValue);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "FSType")) {
         top->FSType = atoi(keyValue);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "italicAngle")) {
         top->ItalicAngle = (float)strtod(keyValue, NULL);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "postscriptUnderlinePosition")) {
         top->UnderlinePosition = (float)strtod(keyValue, NULL);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "postscriptUnderlineThickness")) {
         top->UnderlineThickness = (float)strtod(keyValue, NULL);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "unitsPerEm")) {
         double ppem = strtod(keyValue, NULL);
         top->sup.UnitsPerEm = (int)ppem;
@@ -1027,9 +1100,12 @@ static void setFontDictKey(ufoCtx h, char* keyValue) {
         fd->FontMatrix.array[5] = 0;
         memFree(h, keyValue);
     } else if (!strcmp(keyName, "FontName")) {
-        fd->FontName.ptr = keyValue;
+        fd->FontName.ptr = memNew(h, strlen(keyValue) + 2);
+        strcpy(fd->FontName.ptr, keyValue);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "PaintType")) {
         fd->PaintType = atoi(keyValue);
+        memFree(h, keyValue);
     } else if (!strcmp(keyName, "FontMatrix")) {
         fontMatrix = &fd->FontMatrix;
         setFontMatrix(h, fontMatrix, 6);
@@ -1185,6 +1261,7 @@ static void addGLIFRec(ufoCtx h, int state) {
     newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
     sprintf(newGLIFRec->glifFileName, "%s", fileName);
     newGLIFRec->altLayerGlifFileName = NULL;
+    memFree(h, fileName);
 }
 
 static int findGLIFRecByName(ufoCtx h, char *glyphName)
@@ -1224,6 +1301,7 @@ static void updateGLIFRec(ufoCtx h, int state) {
 
         glifRec->altLayerGlifFileName = memNew(h, 1 + strlen(fileName));
         sprintf(glifRec->altLayerGlifFileName, "%s", fileName);
+        memFree(h, fileName);
     }
 }
 
@@ -1352,7 +1430,9 @@ static int parseGlyphOrder(ufoCtx h) {
                         message(h, "Warning: Encountered empty <integer></integer>. Text: '%s'.", getBufferContextPtr(h));
                     } else {
                         if (state == SUPPLEMENT) {
-                            top->cid.Supplement = atol(copyStr(h, tk->val));
+                            char* supplementPtr = copyStr(h, tk->val);
+                            top->cid.Supplement = atol(supplementPtr);
+                            memFree(h, supplementPtr);
                             state = prevState;
                         }
                         tk = getToken(h, state);
@@ -1432,9 +1512,11 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
         if (altLayer) {
             h->hasAltLayer = false;
+            memFree(h, clientFilePath);
             return ufoSuccess;
         } else {
             fprintf(stderr, "Failed to read %s\n", h->cb.stm.clientFileName);
+            memFree(h, clientFilePath);
             return ufoErrSrcStream;
         }
     }
