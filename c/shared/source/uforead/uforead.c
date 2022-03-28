@@ -406,7 +406,7 @@ void ufoFree(ufoCtx h) {
     dnaFREE(h->data.opList);
     freeStrings(h);
     dnaFree(h->dna);
-    
+
     if (h->top.FDArray.array != &h->fdict){  // if more memory was allocated for FDArray
         memFree(h, h->top.FDArray.array);
     }
