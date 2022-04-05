@@ -213,27 +213,43 @@ static bool applyCIDFontInfo(txCtx h, bool fontisCID) {
     {
         fontisCID = 1;
         h->top->sup.flags |= ABF_CID_FONT;
-        h->top->cid.CIDFontName.ptr = mergeInfo->cidinfo.CIDFontName;
-        h->top->FullName.ptr = mergeInfo->cidinfo.FullName;
-        h->top->FamilyName.ptr = mergeInfo->cidinfo.FamilyName;
-        h->top->Copyright.ptr = mergeInfo->cidinfo.AdobeCopyright;
+
+        h->top->cid.CIDFontName.ptr = memNew(h, strlen(mergeInfo->cidinfo.CIDFontName) + 2);
+        strcpy(h->top->cid.CIDFontName.ptr, mergeInfo->cidinfo.CIDFontName);
+
+        h->top->FullName.ptr = memNew(h, strlen(mergeInfo->cidinfo.FullName) + 2);
+        strcpy(h->top->FullName.ptr, mergeInfo->cidinfo.FullName);
+
+        h->top->FamilyName.ptr = memNew(h, strlen(mergeInfo->cidinfo.FamilyName) + 2);
+        strcpy(h->top->FamilyName.ptr, mergeInfo->cidinfo.FamilyName);
+
+        h->top->Copyright.ptr = memNew(h, strlen(mergeInfo->cidinfo.AdobeCopyright) + 2);
+        strcpy(h->top->Copyright.ptr, mergeInfo->cidinfo.AdobeCopyright);
+
         if ((mergeInfo->cidinfo.AdobeCopyright[0] != ABF_EMPTY_ARRAY) ||
             (mergeInfo->cidinfo.Trademark[0] != ABF_EMPTY_ARRAY)) {
             h->top->Copyright.ptr = ABF_UNSET_PTR;
             h->top->Notice.ptr = ABF_UNSET_PTR;
         }
         if (mergeInfo->cidinfo.AdobeCopyright[0] != ABF_EMPTY_ARRAY) {
-            h->top->Notice.ptr = mergeInfo->cidinfo.AdobeCopyright;
+            h->top->Notice.ptr = memNew(h, strlen(mergeInfo->cidinfo.AdobeCopyright) + 2);
+            strcpy(h->top->Notice.ptr, mergeInfo->cidinfo.AdobeCopyright);
         }
         if (mergeInfo->cidinfo.Trademark[0] != ABF_EMPTY_ARRAY) {
-            if (mergeInfo->cidinfo.AdobeCopyright[0] == ABF_EMPTY_ARRAY)
-                h->top->Notice.ptr = mergeInfo->cidinfo.Trademark;
-            else {
-                strcat(h->top->Notice.ptr, " ");
-                strcat(h->top->Notice.ptr, mergeInfo->cidinfo.Trademark);
+            if (mergeInfo->cidinfo.AdobeCopyright[0] == ABF_EMPTY_ARRAY) {
+                h->top->Notice.ptr = memNew(h, strlen(mergeInfo->cidinfo.Trademark) + 2);
+                strcpy(h->top->Notice.ptr, mergeInfo->cidinfo.Trademark);
+            } else {
+                char* newString = memNew(h, strlen(h->top->Notice.ptr) + 2);
+                strcpy(newString, h->top->Notice.ptr);
+                memFree(h, h->top->Notice.ptr);
+                h->top->Notice.ptr = memNew(h, strlen(newString) + strlen(mergeInfo->cidinfo.Trademark) + 3);
+                sprintf(h->top->Notice.ptr, "%s %s", newString, mergeInfo->cidinfo.Trademark);
+                memFree(h, newString);
             }
         }
-        h->top->Weight.ptr = mergeInfo->cidinfo.Weight;
+        h->top->Weight.ptr = memNew(h, strlen(mergeInfo->cidinfo.Weight) + 2);
+        strcpy(h->top->Weight.ptr, mergeInfo->cidinfo.Weight);
         if (mergeInfo->cidinfo.isFixedPitch != ABF_UNSET_INT)
             h->top->isFixedPitch = mergeInfo->cidinfo.isFixedPitch;
         if (mergeInfo->cidinfo.fsType != ABF_UNSET_INT)
@@ -244,8 +260,12 @@ static bool applyCIDFontInfo(txCtx h, bool fontisCID) {
             for (x = 0; x < mergeInfo->XUID.cnt; x++)
                 h->top->XUID.array[x] = mergeInfo->XUID.array[x];
         }
-        h->top->cid.Registry.ptr = mergeInfo->cidinfo.Registry;
-        h->top->cid.Ordering.ptr = mergeInfo->cidinfo.Ordering;
+        h->top->cid.Registry.ptr = memNew(h, strlen(mergeInfo->cidinfo.Registry) + 2);
+        strcpy(h->top->cid.Registry.ptr, mergeInfo->cidinfo.Registry);
+
+        h->top->cid.Ordering.ptr  = memNew(h, strlen(mergeInfo->cidinfo.Ordering) + 2);
+        strcpy(h->top->cid.Ordering.ptr , mergeInfo->cidinfo.Ordering);
+
         h->top->cid.Supplement = mergeInfo->cidinfo.Supplement;
         h->top->cid.CIDFontVersion = mergeInfo->cidinfo.fontVersion;
         h->top->version.ptr = NULL;
@@ -268,9 +288,10 @@ static GAFileInfo *checkIFParentCIDCompatible(txCtx h, abfTopDict *local_top, bo
                 fatal(h, "Parent font is not a CID font, but its matching glyph alias file maps the glyphs to names rather than CID values");
 
             for (ifd = 0; ifd < local_top->FDArray.cnt; ifd++) {
-                if (gaf->FontName[0] != 0) /* if the GA file supplies an alternate FontName, use it .*/
-                    local_top->FDArray.array[ifd].FontName.ptr = gaf->FontName;
-
+                if (gaf->FontName[0] != 0){ /* if the GA file supplies an alternate FontName, use it .*/
+                    local_top->FDArray.array[ifd].FontName.ptr = memNew(h, strlen(gaf->FontName) + 2);
+                    strcpy(local_top->FDArray.array[ifd].FontName.ptr, gaf->FontName);
+                }
                 if (gaf->LanguageGroup != -1) /* if the GA file supplies a LanguageGroup, use it .*/
                     local_top->FDArray.array[ifd].Private.LanguageGroup = gaf->LanguageGroup;
             }

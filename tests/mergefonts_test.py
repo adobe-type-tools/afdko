@@ -5,6 +5,7 @@ from runner import main as runner
 from differ import main as differ
 from test_utils import (get_expected_path, get_temp_file_path, get_input_path,
                         generate_ps_dump)
+from afdko.fdkutils import (get_temp_dir_path)
 
 TOOL = 'mergefonts'
 CMD = ['-t', TOOL]
@@ -83,3 +84,28 @@ def test_camel_case():
     expected_path = generate_ps_dump(expected_path)
 
     assert differ([expected_path, actual_path, '-s', r'%ADOt1write:'])
+
+
+def test_merge_ufos():
+    """
+    Test merging cid-keyed and name-keyed UFOs into one.
+    """
+    # test cidkeyed UFOs:
+    input_ufo_a = get_input_path("mergeufo/cidkeyed/" + 'ufo-1.ufo')
+    input_alias_a = get_input_path("mergeufo/cidkeyed/" + 'alias1.txt')
+    input_ufo_b = get_input_path("mergeufo/cidkeyed/" + 'ufo-2.ufo')
+    input_alias_b = get_input_path("mergeufo/cidkeyed/" + 'alias2.txt')
+    expected_path = get_expected_path("cidkeyed-merge.ufo")
+    output_path = get_temp_dir_path("cidkeyed-merge.ufo")
+    subprocess.call([TOOL, output_path,
+                     input_alias_a, input_ufo_a,
+                     input_alias_b, input_ufo_b])
+    assert differ([expected_path, output_path])
+
+    # test namekeyed UFOs:
+    input_ufo_c = get_input_path("mergeufo/namekeyed/" + 'ufo-1.ufo')
+    input_ufo_d = get_input_path("mergeufo/namekeyed/" + 'ufo-2.ufo')
+    expected_path = get_expected_path("namekeyed-merge.ufo")
+    output_path = get_temp_dir_path("namekeyed-merge.ufo")
+    subprocess.call([TOOL, output_path, input_ufo_c, input_ufo_d])
+    assert differ([expected_path, output_path])
