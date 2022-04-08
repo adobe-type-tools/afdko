@@ -13,8 +13,6 @@ if(NOT DEFINED LIBXML2_TAG)
   set(LIBXML2_TAG master)
 endif()
 
-message("----LINE 15---\n")
-
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
   set(LIBXML2_OUTPUT_DIR ${LIBXML2_ROOT}/$(Configuration))
 elseif(${CMAKE_GENERATOR} MATCHES "Xcode.*")
@@ -23,7 +21,6 @@ else()
   set(LIBXML2_OUTPUT_DIR ${LIBXML2_ROOT})
 endif()
 
-message("----LINE 25---\n")
 
 if(MSVC)
   set(LIBXML2_STATIC_LIBRARIES
@@ -54,7 +51,6 @@ else()
   endif()
 endif()
 
-message("----LINE 56---\n")
 
 if(${CMAKE_GENERATOR} MATCHES ".* Makefiles")
   # This avoids
@@ -79,13 +75,11 @@ else()
           --target)
 endif()
 
-message("----LINE 81---\n")
 
 # if(NOT DEFINED LIBXML2_WITH_STATIC_CRT)
 #   set(LIBXML2_WITH_STATIC_CRT ON)
 # endif()
 
-message("----LINE 87---\n")
 
 ExternalProject_Add(
     libxml2_runtime
@@ -105,7 +99,6 @@ ExternalProject_Add(
     INSTALL_COMMAND ""
     EXCLUDE_FROM_ALL 1)
 
-message("----LINE 126---\n")
 
 # Separate build step as rarely people want both
 set(LIBXML2_BUILD_DIR ${LIBXML2_ROOT})
