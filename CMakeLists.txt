@@ -67,8 +67,15 @@ CHECK_LIBRARY_EXISTS(m floor "" HAVE_M_LIB)
 include(CTest)
 include(AddAFDKOTests)
 
-find_package(LibXml2 REQUIRED)
-include_directories(${LIBXML2_INCLUDE_DIR})
+# 2.9.13 is the latest ANTLR4 version
+set(LIBXML2_TAG tags/v2.9.13)
+include(ExternalLibXML2)
+
+# find_package(LibXml2 REQUIRED)
+# include_directories(${LIBXML2_INCLUDE_DIR})
+include_directories($<$<COMPILE_LANGUAGE:CXX>:${LIBXML2_INCLUDE_DIRS}>)
+# include(libxml2)
+# link_libraries(libxml2_static)
 
 add_subdirectory(c/shared/source)
 add_subdirectory(c/detype1/source)
@@ -80,3 +87,4 @@ add_subdirectory(c/spot/source)
 add_subdirectory(c/tx/source)
 add_subdirectory(c/type1/source)
 add_subdirectory(c/makeotf)
+# add_subdirectory(libxml2)
