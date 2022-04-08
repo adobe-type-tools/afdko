@@ -8,7 +8,7 @@ add_executable(mergefonts
 )
 
 target_include_directories(mergefonts PRIVATE ../../shared/include ../../shared/resource ../../shared/source/tx_shared)
-target_link_libraries(mergefonts PUBLIC tx_shared)
+target_link_libraries(mergefonts PUBLIC tx_shared libxml2_static)
 
 message(STATUS " mergefont: LIBXML2_INCLUDE DIRS: ${LIBXML2_INCLUDE_DIR}")
 install(TARGETS mergefonts DESTINATION bin)

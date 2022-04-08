@@ -73,7 +73,10 @@ include(ExternalLibXML2)
 
 # find_package(LibXml2 REQUIRED)
 # include_directories(${LIBXML2_INCLUDE_DIR})
-include_directories($<$<COMPILE_LANGUAGE:CXX>:${LIBXML2_INCLUDE_DIRS}>)
+# add_definitions(-DANTLR4CPP_STATIC)
+# set(ANTLR4_WITH_STATIC_CRT OFF)
+# message($<$<COMPILE_LANGUAGE:CXX>:${LIBXML2_INCLUDE_DIRS}>)
+include_directories(${LIBXML2_INCLUDE_DIRS}>)
 # include(libxml2)
 # link_libraries(libxml2_static)
 
