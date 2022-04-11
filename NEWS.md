@@ -1,6 +1,15 @@
 Changelog
 =========
 
+3.8.2 (released 2022-04-11)
+---------------------------
+- [tx] Fix Memory Crashes ([#1497](https://github.com/adobe-type-tools/afdko/pull/1497))
+- [antlr4] ANTLR v4.9.3 Upgrade ([#1491](https://github.com/adobe-type-tools/afdko/pull/1491))
+- [tx] ignore subr recursion limit ([#1484](https://github.com/adobe-type-tools/afdko/pull/1484))
+- [tx] Don't parse non-FDArray array of dictionaries in fontinfo.plist
+  ([#1478](https://github.com/adobe-type-tools/afdko/pull/1478))
+- [requirements] updated dependencies
+
 3.8.1 (released 2022-02-24)
 ---------------------------
 - [tx] Add safety initialization of pdwCtx structure in pdwNew
