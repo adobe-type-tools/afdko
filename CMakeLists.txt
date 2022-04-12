@@ -42,6 +42,15 @@ set(ANTLR4_WITH_STATIC_CRT OFF)
 set(ANTLR4_TAG tags/4.9.3)
 include(ExternalAntlr4Cpp)
 
+find_package(ZLIB REQUIRED)
+find_package(Iconv REQUIRED)
+find_package(LibLZMA REQUIRED)
+
+
+set(LIBXML2_TAG tags/v2.9.13)
+include(ExternalLibXML2)
+
+
 # sanitizer support
 # work around https://github.com/pypa/setuptools/issues/1928 with environment
 # variable
@@ -67,19 +76,6 @@ CHECK_LIBRARY_EXISTS(m floor "" HAVE_M_LIB)
 include(CTest)
 include(AddAFDKOTests)
 
-# 2.9.13 is the latest ANTLR4 version
-set(LIBXML2_TAG tags/v2.9.13)
-include(ExternalLibXML2)
-
-# find_package(LibXml2 REQUIRED)
-# include_directories(${LIBXML2_INCLUDE_DIR})
-# add_definitions(-DANTLR4CPP_STATIC)
-# set(ANTLR4_WITH_STATIC_CRT OFF)
-# message($<$<COMPILE_LANGUAGE:CXX>:${LIBXML2_INCLUDE_DIRS}>)
-include_directories(${LIBXML2_INCLUDE_DIRS}>)
-# include(libxml2)
-# link_libraries(libxml2_static)
-
 add_subdirectory(c/shared/source)
 add_subdirectory(c/detype1/source)
 add_subdirectory(c/mergefonts/source)
@@ -90,4 +86,3 @@ add_subdirectory(c/spot/source)
 add_subdirectory(c/tx/source)
 add_subdirectory(c/type1/source)
 add_subdirectory(c/makeotf)
-# add_subdirectory(libxml2)

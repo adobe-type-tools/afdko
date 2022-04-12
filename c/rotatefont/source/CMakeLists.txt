@@ -1,5 +1,3 @@
-# find_package(LibXml2 REQUIRED)
-
 add_executable(rotatefont
     rotateFont.c
     help.h
@@ -7,8 +5,6 @@ add_executable(rotatefont
     usage.h
 )
 
-target_include_directories(rotatefont PRIVATE ../../shared/include ../../shared/resource ../../shared/source/tx_shared)
-target_link_libraries(rotatefont PUBLIC tx_shared libxml2_static)
-
-message(STATUS "rotatefont: LIBXML2_INCLUDE DIRS: ${LIBXML2_INCLUDE_DIR}")
+target_include_directories(rotatefont PRIVATE ../../shared/include ../../shared/resource ../../shared/source/tx_shared ${LIBXML2_INCLUDE_DIRS})
+target_link_libraries(rotatefont PUBLIC tx_shared libxml2 ZLIB::ZLIB Iconv::Iconv LibLZMA::LibLZMA)
 install(TARGETS rotatefont DESTINATION bin)
