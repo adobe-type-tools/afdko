@@ -6,5 +6,5 @@ add_executable(tx
 )
 
 target_include_directories(tx PRIVATE ../../shared/include ../../shared/resource ../../shared/source/tx_shared ${LIBXML2_INCLUDE_DIRS})
-target_link_libraries(tx PUBLIC tx_shared libxml2 ZLIB::ZLIB Iconv::Iconv LibLZMA::LibLZMA)
+target_link_libraries(tx PUBLIC tx_shared libxml2)
 install(TARGETS tx DESTINATION bin)

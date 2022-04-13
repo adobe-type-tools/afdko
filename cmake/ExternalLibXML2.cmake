@@ -18,7 +18,10 @@ ExternalProject_Add(${LIBXML2_TARGET}
   GIT_TAG ${LIBXML2_TAG}
   SOURCE_DIR ${LIBXML2_SRC_DIR}
   CONFIGURE_COMMAND ${LIBXML2_SRC_DIR}/autogen.sh --without-python
-                                                  --prefix=${LIBXML2_INSTALL_DIR}
+                                                  --without-zlib
+                                                  --without-iconv
+                                                  --without-lzma
+                                                  --prefix=${LIBXML2_INSTALL_DIR}                                             
   BYPRODUCTS ${LIBXML2_LIBRARY}
   BUILD_COMMAND make
   INSTALL_COMMAND make install
