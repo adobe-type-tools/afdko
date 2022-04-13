@@ -71,9 +71,6 @@ target_link_libraries(tx_shared PUBLIC
     dynarr
     varread
     libxml2
-    ZLIB::ZLIB
-    Iconv::Iconv
-    LibLZMA::LibLZMA
 )
 
 if(HAVE_M_LIB)

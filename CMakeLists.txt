@@ -42,14 +42,8 @@ set(ANTLR4_WITH_STATIC_CRT OFF)
 set(ANTLR4_TAG tags/4.9.3)
 include(ExternalAntlr4Cpp)
 
-find_package(ZLIB REQUIRED)
-find_package(Iconv REQUIRED)
-find_package(LibLZMA REQUIRED)
-
-
 set(LIBXML2_TAG tags/v2.9.13)
 include(ExternalLibXML2)
-
 
 # sanitizer support
 # work around https://github.com/pypa/setuptools/issues/1928 with environment
