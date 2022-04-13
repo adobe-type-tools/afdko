@@ -23,8 +23,8 @@ ExternalProject_Add(${LIBXML2_TARGET}
                                                   --without-lzma
                                                   --prefix=${LIBXML2_INSTALL_DIR}                                             
   BYPRODUCTS ${LIBXML2_LIBRARY}
-  BUILD_COMMAND make
-  INSTALL_COMMAND make install
+  BUILD_COMMAND $(MAKE)
+  INSTALL_COMMAND $(MAKE) install
 )
 
 ExternalProject_Get_Property(${LIBXML2_TARGET} SOURCE_DIR)
