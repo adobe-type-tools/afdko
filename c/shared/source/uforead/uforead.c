@@ -972,6 +972,8 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         parsingFDArray = true;
     } else {
         char* keyValue = (char*) parseKeyValue(h, cur);
+        if (keyValue != NULL && !strcmp(keyValue, ""))
+            message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
         if (!strcmp(keyName, "copyright")) {
             top->Copyright.ptr = keyValue;
         } else if (!strcmp(keyName, "trademark")) {
