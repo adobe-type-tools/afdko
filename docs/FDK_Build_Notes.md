@@ -1,6 +1,6 @@
 # FDK Build Notes
 
-#### v1.3.0 June 2021
+#### v1.3.1 April 2022
 
 ## Overview
 These instructions are for users who wish to build the C programs in the AFDKO on their own. If you have obtained the AFDKO through [PyPI](https://pypi.org/project/afdko/) (`pip`), you can ignore this, as everything is pre-built for distribution on PyPI. These are really only for users who need to build on platforms that are not officially supported, or wish to make other custom changes.
@@ -93,9 +93,14 @@ Try running:
 git config --system core.longpaths true
 ```
 
+#### Previously opened Windows Issues:
+- Failed to build with Visual Studio 2019 [#1371](https://github.com/adobe-type-tools/afdko/issues/1371)
+- Failed to install AFDKO in Windows 7 32bit [#1501](https://github.com/adobe-type-tools/afdko/issues/1502)
+---
 #### Document Version History
 
 - Version 1.0.0
 - Version 1.2.0 July 18 2019
 - Version 1.2.1 - Convert to Markdown, update content - October 2019
 - Version 1.3.0 - Document switch to CMake-driven builds - June 2021
+- Version 1.3.1 - Add links to previously-opened Windows Issues - April 2022
