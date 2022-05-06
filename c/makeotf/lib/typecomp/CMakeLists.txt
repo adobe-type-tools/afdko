@@ -45,6 +45,9 @@ add_library(typecomp STATIC
     tc.c
 )
 
+target_include_directories(typecomp PRIVATE ${LIBXML2_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR_2})
+target_link_libraries(typecomp PUBLIC libxml2)
+
 target_compile_definitions(typecomp PRIVATE
     TC_HINT_CHECK=1
     TC_T13_SUPPORT=0
