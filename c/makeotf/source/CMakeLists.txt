@@ -1,5 +1,7 @@
 add_executable(makeotfexe main.cpp)
 
+target_include_directories(makeotfexe PRIVATE ${LIBXML2_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR_2})
+
 target_sources(makeotfexe PRIVATE
     cb.c
     cbpriv.c
@@ -21,7 +23,7 @@ target_sources(makeotfexe PRIVATE
     systemspecific.h
 )
 
-target_link_libraries(makeotfexe PRIVATE ctutil dynarr hotconv makeotf_pstoken typecomp makeotf_cffread)
+target_link_libraries(makeotfexe PRIVATE libxml2 ctutil dynarr hotconv makeotf_pstoken typecomp makeotf_cffread)
 
 if(HAVE_M_LIB)
     target_link_libraries(makeotfexe PRIVATE m)
