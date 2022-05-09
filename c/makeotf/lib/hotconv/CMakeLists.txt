@@ -68,8 +68,14 @@ add_library(hotconv STATIC
 )
 
 set_property(TARGET hotconv PROPERTY C_STANDARD 99)
-target_include_directories(hotconv PRIVATE AFTER $<$<COMPILE_LANGUAGE:CXX>:${ANTLR4_INCLUDE_DIRS}> ${LIBXML2_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR_2})
-target_link_libraries(hotconv PUBLIC libxml2 antlr4_static)
+target_include_directories(hotconv PRIVATE AFTER $<$<COMPILE_LANGUAGE:CXX>:${ANTLR4_INCLUDE_DIRS}>)
+target_link_libraries(hotconv PUBLIC antlr4_static)
+
+if(WIN32)
+    target_link_libraries(hotconv PUBLIC wsock32 ws2_32 libxml2)
+else()
+    target_link_libraries(hotconv PUBLIC ${LIBXML2_LIBRARY})
+endif()
 
 if ( CMAKE_COMPILER_IS_GNUCC )
     target_compile_options(hotconv PRIVATE -Wall -Wno-attributes)

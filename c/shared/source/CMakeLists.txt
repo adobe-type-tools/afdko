@@ -1,4 +1,4 @@
-include_directories(../include ../resource ${LIBXML2_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR_2})
+include_directories(../include ../resource)
 
 MACRO(ADD_AFDKOLIB lm)
     file(GLOB sl_sources "${lm}/*")
@@ -47,7 +47,6 @@ target_compile_definitions(tx_shared PRIVATE $<$<CONFIG:Debug>:CFW_DEBUG=1>)
 # These libraries are partially ordered
 
 target_link_libraries(tx_shared PUBLIC
-    libxml2
     cfembed
     cffread
     cffwrite
@@ -77,8 +76,9 @@ if(WIN32)
   target_compile_definitions(tx_shared PUBLIC -DLIBXML_STATIC)
   target_link_libraries(tx_shared PUBLIC wsock32 ws2_32 libxml2)
 else()
-  target_link_libraries(tx_shared PUBLIC libxml2)
+  target_link_libraries(tx_shared PUBLIC ${LIBXML2_LIBRARY})
 endif()
+
 
 if(HAVE_M_LIB)
     target_link_libraries(tx_shared PUBLIC m)
