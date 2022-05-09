@@ -2139,9 +2139,9 @@ special column title. When you specify the value of a class pair, you are
 specifying the value in only one cell of the spreadsheet. When you specify a
 series of kern pair rules between a particular left side class and a series of
 right side classes, you are filling in a series of cells in the row for the
-specific left side class. All cells for which no values are specified are set to
-0. When programs look for a kern value between “Ygrave” and something else, they
-look through the list of left side class definitions to find the first
+specific left side class. All cells for which no values are specified are set
+to 0. When programs look for a kern value between “Ygrave” and something
+else, they look through the list of left side class definitions to find the first
 occurrence of “Ygrave”. By definition, the first spreadsheet row which includes
 “Ygrave” will define the kern pair value of “Ygrave” with all other right-side
 classes, e.g spreadsheet columns. Since a pair value with a right-side period
