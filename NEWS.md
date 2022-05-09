@@ -1,6 +1,13 @@
 Changelog
 =========
 
+3.8.3 (released 2022-05-09)
+---------------------------
+- [requirements] updated dependencies
+- [docs] Add links to previously opened Windows build issues ([#1505](https://github.com/adobe-type-tools/afdko/pull/1505))
+- [docs] Fix line wrap in feature file spec ([#1509](https://github.com/adobe-type-tools/afdko/pull/1509))
+- [ci] Enable Codecov informational checks ([#1501](https://github.com/adobe-type-tools/afdko/pull/1501))
+
 3.8.2 (released 2022-04-11)
 ---------------------------
 - [tx] Fix Memory Crashes ([#1497](https://github.com/adobe-type-tools/afdko/pull/1497))
