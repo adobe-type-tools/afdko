@@ -965,6 +965,7 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
         if (h->top.version.ptr != NULL)
             h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
+        abfInitFontDict(h->top.FDArray.array);
 
         parsingFDArray = true;
         currentiFD = -1;
@@ -1908,6 +1909,11 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     if (parsingFDArray){
         currentiFD = currentiFD + 1;
         h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
+        if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
+            reallocFDArray(h);
+        }
+        abfFontDict* fd = h->top.FDArray.array + currentiFD;
+        abfInitFontDict(fd);
     }
 
     while (cur != NULL) {
