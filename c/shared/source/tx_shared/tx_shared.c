@@ -407,7 +407,7 @@ static size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr) {
 
 static size_t stm_xml_read(ctlStreamCallbacks *cb, void *stream, char **ptr, xmlDocPtr *doc){
     int res, size = BUFSIZ;
-    char chars[1024];
+    char chars[BUFSIZ];
     xmlParserCtxtPtr ctxt;
 
     Stream *s = stream;
