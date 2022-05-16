@@ -45,11 +45,10 @@ add_library(typecomp STATIC
     tc.c
 )
 
-if(WIN32)
-    # target_include_directories(typecomp PRIVATE ${LIBXML2_INCLUDE_DIR})
-    target_link_libraries(typecomp PUBLIC wsock32 ws2_32 libxml2)
-else()
+if(${LibXml2_FOUND})
     target_link_libraries(typecomp PUBLIC ${LIBXML2_LIBRARY})
+else()
+    target_link_libraries(typecomp PUBLIC ${LIBXML2_WIN_LIBRARIES})
 endif()
 
 target_compile_definitions(typecomp PRIVATE

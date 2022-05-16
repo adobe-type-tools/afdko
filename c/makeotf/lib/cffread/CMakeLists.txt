@@ -2,10 +2,10 @@ add_library(makeotf_cffread STATIC cffread.c)
 
 target_include_directories(makeotf_cffread PRIVATE AFTER $<$<COMPILE_LANGUAGE:CXX>:${ANTLR4_INCLUDE_DIRS}>)
 
-if(WIN32)
-    target_link_libraries(makeotf_cffread PUBLIC wsock32 ws2_32 libxml2)
-else()
+if(${LibXml2_FOUND})
     target_link_libraries(makeotf_cffread PUBLIC ${LIBXML2_LIBRARY})
+else()
+    target_link_libraries(makeotf_cffread PUBLIC ${LIBXML2_WIN_LIBRARIES})
 endif()
 
 target_link_libraries(makeotf_cffread PUBLIC antlr4_static)

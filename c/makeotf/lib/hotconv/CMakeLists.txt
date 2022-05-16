@@ -71,10 +71,10 @@ set_property(TARGET hotconv PROPERTY C_STANDARD 99)
 target_include_directories(hotconv PRIVATE AFTER $<$<COMPILE_LANGUAGE:CXX>:${ANTLR4_INCLUDE_DIRS}>)
 target_link_libraries(hotconv PUBLIC antlr4_static)
 
-if(WIN32)
-    target_link_libraries(hotconv PUBLIC wsock32 ws2_32 libxml2)
-else()
+if(${LibXml2_FOUND})
     target_link_libraries(hotconv PUBLIC ${LIBXML2_LIBRARY})
+else()
+    target_link_libraries(hotconv PUBLIC ${LIBXML2_WIN_LIBRARIES})
 endif()
 
 if ( CMAKE_COMPILER_IS_GNUCC )

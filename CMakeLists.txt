@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(afdko)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+# set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # This matches the MSVC_RUNTIME_LIBRARY property in
 # c/makeotf/source/CMakeLists.txt, which can theoretically be used to
@@ -43,7 +43,7 @@ set(ANTLR4_TAG tags/4.9.3)
 include(ExternalAntlr4Cpp)
 
 FIND_PACKAGE(LibXml2)
-IF (WIN32)
+IF (NOT ${LibXml2_FOUND})
    MESSAGE(STATUS "Could not locate LibXml2, will install externally.")
    set(LIBXML2_TAG tags/v2.9.13)
    include(ExternalLibXML2)

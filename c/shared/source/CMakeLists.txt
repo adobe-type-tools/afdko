@@ -72,11 +72,11 @@ target_link_libraries(tx_shared PUBLIC
     varread
 )
 
-if(WIN32)
-  target_compile_definitions(tx_shared PUBLIC -DLIBXML_STATIC)
-  target_link_libraries(tx_shared PUBLIC wsock32 ws2_32 libxml2)
+if(${LibXml2_FOUND})
+    target_link_libraries(tx_shared PUBLIC ${LIBXML2_LIBRARY})
 else()
-  target_link_libraries(tx_shared PUBLIC ${LIBXML2_LIBRARY})
+    target_compile_definitions(tx_shared PUBLIC -DLIBXML_STATIC)
+    target_link_libraries(tx_shared PUBLIC ${LIBXML2_WIN_LIBRARIES})
 endif()
 
 
