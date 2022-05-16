@@ -46,6 +46,8 @@ cmake --build build
 
 Note that unless you are using macOS or Windows you must have `libuuid` and its header files installed in order to build `makeotfexe`. These will typically be part of a package named `uuid-dev`, `libuuid-devel`, or `util-linux-libs`. (`libuuid` is a dependency of the Antlr 4 Cpp runtime, which is built by `cmake/ExternalAntlr4Cpp.cmake`. If you have build trouble after installing the library the [Antlr 4 Cpp runtime documentation](https://github.com/antlr/antlr4/tree/master/runtime/Cpp) may help.)
 
+In addition, the AFDKO uses the libxml2 library. On macOS and Linux, it will typically find the package. However, if it cannot find libxml2 (such as on Windows), libxml2 will be built by `cmake/ExternalAntlr4Cpp.cmake`.
+
 If the build is successful each program (e.g. makeotfexe) will be built as `build/bin/[program]`.  If you would like to install them in `/usr/local/bin` you can then run `cmake --build build -- install`.
 
 ### Noted CMake options
