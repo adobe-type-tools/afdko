@@ -1002,7 +1002,6 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
                 sprintf(newString, "%s.%s", keyValue, top->version.ptr);
                 memFree(h, top->version.ptr);
                 top->version.ptr = newString;
-    //            memFree(h, keyValue);
             }
         } else if (!strcmp(keyName, "versionMinor")) {
             if (top->version.ptr == NULL)
@@ -1012,7 +1011,6 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
                 sprintf(newString, "%s.%s", top->version.ptr, keyValue);
                 memFree(h, top->version.ptr);
                 top->version.ptr = newString;
-    //            memFree(h, keyValue);
             }
         } else if (!strcmp(keyName, "postscriptFontName")) {
             fd->FontName.ptr = keyValue;
@@ -1025,8 +1023,6 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         } else if (!strcmp(keyName, "familyName")) {
             if (top->FamilyName.ptr == NULL)  // we don't re-set this if it was set by "openTypeNamePreferredFamilyName"
                 top->FamilyName.ptr = keyValue;
-    //        else
-    //            memFree(h, keyValue);
         } else if (!strcmp(keyName, "postscriptFullName")) {
             top->FullName.ptr = keyValue;
         } else if (!strcmp(keyName, "postscriptWeightName")) {
@@ -1051,28 +1047,22 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
             fd->FontMatrix.array[3] = (float)(1.0 / ppem);
             fd->FontMatrix.array[4] = 0;
             fd->FontMatrix.array[5] = 0;
-    //        memFree(h, keyValue);
         } else if (!strcmp(keyName, "FontName")) {
             fd->FontName.ptr = parseKeyValue(h, cur);
         } else if (!strcmp(keyName, "PaintType")) {
             fd->PaintType = atoi(keyValue);
         } else if (!strcmp(keyName, "FontMatrix")) {
-    //        parseKeyValue(h, cur);
             fontMatrix = &fd->FontMatrix;
             setFontMatrix(h, fontMatrix, 6);
         } else if (!strcmp(keyName, "postscriptBlueFuzz")) {
             pd->BlueFuzz = (float)strtod(keyValue, NULL);
-    //        memFree(h, keyValue);
         } else if (!strcmp(keyName, "postscriptBlueShift")) {
             pd->BlueShift = (float)strtod(keyValue, NULL);
-    //        memFree(h, keyValue);
         } else if (!strcmp(keyName, "postscriptBlueScale")) {
             pd->BlueScale = (float)strtod(keyValue, NULL);
-    //        memFree(h, keyValue);
         } else if (!strcmp(keyName, "postscriptForceBold")) {
             pd->ForceBold = atol(keyValue);
         } else if (!strcmp(keyName, "postscriptBlueValues")) {
-    //        parseKeyValue(h, cur);
             bluesArray = (BluesArray*)&pd->BlueValues;
             setBluesArrayValue(h, bluesArray, 14);
         } else if (!strcmp(keyName, "postscriptOtherBlues")) {
@@ -1094,7 +1084,6 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         } else if (!strcmp(keyName, "postscriptStdVW")) {
             if (keyValue != NULL) {
                 pd->StdVW = (float)strtod(keyValue, NULL);
-    //            memFree(h, keyValue);
             } else {
                 pd->StdVW = (float)strtod(h->valueArray.array[0], NULL);
                 memFree(h, h->valueArray.array[0]);
@@ -1108,17 +1097,11 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         } else if (!strcmp(keyName, "LanguageGroup")) {
             pd->LanguageGroup = (float)strtod(keyValue, NULL);
             h->parseKeyName = NULL;
-    //        memFree(h, keyValue);
         } else if (!strcmp(keyName, "ExpansionFactor")) {
             pd->ExpansionFactor = (float)strtod(keyValue, NULL);
             h->parseKeyName = NULL;
-    //        memFree(h, keyValue);
-        } else {
-            // if it isn't used, free the string.
-    //        memFree(h, keyValue);
         }
     }
-
     cur = cur->next;
 }
 
@@ -1835,13 +1818,11 @@ static void parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     cur = xmlDocGetRootElement(doc);
     if (cur == NULL) {  // if document empty
         xmlFreeDoc(doc);
-//        return(NULL);
     }
 
     if (!xmlStrEqual((cur)->name, (const xmlChar *) filetype)) {
         fprintf(stderr, "document of the wrong type, root node != %s", filetype);
         xmlFreeDoc(doc);
-//        return(NULL);
     }
 
     cur = (cur)->xmlChildrenNode;
@@ -1850,12 +1831,10 @@ static void parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     }
     if ( cur == 0 ) {
         xmlFreeDoc(doc);
-//        return ( NULL );
     }
     if ((!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))) {
         fprintf(stderr, "Error reading outermost <dict> in %s.\n", "file");
         xmlFreeDoc(doc);
-//        return(NULL);
     }
 
     cur = cur->xmlChildrenNode;
@@ -1914,9 +1893,6 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
 
     while (cur != NULL) {
         parseKeyName(&keyID, cur);
-//        cur = cur->next;
-//        void *ptr = parseKeyValue(h, cur);
-
         char* keyName = (char*) keyID;
         cur = cur->next;
         setFontDictKey(h, keyName, cur);
