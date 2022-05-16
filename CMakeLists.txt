@@ -47,7 +47,7 @@ IF (NOT ${LibXml2_FOUND})
    MESSAGE(STATUS "Could not locate LibXml2, will install externally.")
    set(LIBXML2_TAG tags/v2.9.13)
    include(ExternalLibXML2)
-ENDIF(WIN32)
+ENDIF(NOT ${LibXml2_FOUND})
 include_directories(${LIBXML2_INCLUDE_DIR})
 
 

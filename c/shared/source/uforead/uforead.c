@@ -1926,6 +1926,7 @@ static void *parseKeyValue(ufoCtx h, xmlNodePtr cur){
         return ptr;
     } else if (xmlStrEqual(cur->name, (const xmlChar *) "dict")) {
         parseXMLDict(h, cur);
+        return NULL;
     } else if (xmlStrEqual(cur->name, (const xmlChar *) "array")) {
         parseXMLArray(h, cur);
         return NULL;  // returning NULL because value is in h->valueArray
