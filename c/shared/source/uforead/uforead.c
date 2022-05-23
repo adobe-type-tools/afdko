@@ -1801,7 +1801,7 @@ static void reallocFDArray(ufoCtx h){
     h->top.FDArray.array = newFDArray;
 }
 
-static void parseXMLFile(ufoCtx h, char* filename, const char* filetype){
+static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     xmlDocPtr doc;
     xmlNodePtr cur;
     unsigned char* keyID;
@@ -1812,29 +1812,33 @@ static void parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     h->cb.stm.xml_read(&h->cb.stm, h->stm.src, &h->src.buf, &doc);
 
     if (doc == NULL) {
-        fatal(h, ufoErrParse, "Failed to parse '%s'.\n", "file");
+        fatal(h, ufoErrParse, "Unable to read '%s'.\n", filename);
     }
 
     cur = xmlDocGetRootElement(doc);
-    if (cur == NULL) {  // if document empty
+    if (cur == NULL) {
         xmlFreeDoc(doc);
+        fatal(h, ufoErrSrcStream, "The %s file is empty.\n", filename);
     }
 
     if (!xmlStrEqual((cur)->name, (const xmlChar *) filetype)) {
-        fprintf(stderr, "document of the wrong type, root node != %s", filetype);
         xmlFreeDoc(doc);
+        fatal(h, ufoErrSrcStream, "File %s is of the wrong type, root node != %s.\n", filename, filetype);
     }
 
     cur = (cur)->xmlChildrenNode;
     while (cur && xmlIsBlankNode(cur)) {
         cur = (cur) -> next;
     }
-    if ( cur == 0 ) {
+
+    if ( cur == NULL ) {
         xmlFreeDoc(doc);
+        fatal(h, ufoErrSrcStream, "Error parsing XML file %s.\n", filename);
     }
+
     if ((!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))) {
-        fprintf(stderr, "Error reading outermost <dict> in %s.\n", "file");
         xmlFreeDoc(doc);
+        fatal(h, ufoErrSrcStream, "Error reading outermost <dict> in %s.\n", filename);
     }
 
     cur = cur->xmlChildrenNode;
@@ -1853,6 +1857,7 @@ static void parseXMLFile(ufoCtx h, char* filename, const char* filetype){
         }
         cur = cur->next;
     }
+    return ufoErrSrcStream;
 }
 
 static void parseKeyName(unsigned char* *keyID, xmlNodePtr cur){
@@ -1953,7 +1958,7 @@ static int parseFontInfo(ufoCtx h) {
 
     dnaSET_CNT(h->valueArray, 0);
 
-    parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    int parsingSuccess = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
 
     fixUnsetDictValues(h);
     h->cb.stm.close(&h->cb.stm, h->stm.src);
