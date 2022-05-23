@@ -1215,3 +1215,29 @@ def test_non_FDArray_dict_parse():
     ufo_input_path = get_input_path("nonCIDKeyed_nonFDArrayDict.ufo")
     arg = [TOOL, '-t1', '-f', ufo_input_path]
     assert subprocess.call(arg) == 0
+
+
+@pytest.mark.parametrize('file, msg, ret_code', [
+    ("empty-key-name", b'tx: (ufr) Warning: Encountered empty <key></key>', 0),
+    ("empty-key-value", b'Warning: Encountered empty <string> for fontinfo ' +
+                        b'key postscriptFontName. Skipping', 0),
+    ("missing-key-value", b'tx: (ufr) Encountered empty <key>', 6)
+])
+def test_ufo_fontinfo_parsing_errors(file, msg, ret_code):
+    folder = "ufo-parse-warns-errs/"
+    ufo_input_path = get_input_path(folder + file + ".ufo")
+    expected_path = get_expected_path(folder + file + ".subset")
+    output_path = get_temp_file_path()
+    arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
+                 ufo_input_path, output_path]
+    stderr_path = runner(arg)
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (msg) in output
+    if (ret_code == 0):
+        expected_path = generate_ps_dump(expected_path)
+        output_path = generate_ps_dump(output_path)
+        assert differ([expected_path, output_path])
+    else:
+        arg = [TOOL, '-t1', '-f', ufo_input_path]
+        assert subprocess.call(arg) == 6
