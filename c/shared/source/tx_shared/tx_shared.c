@@ -411,7 +411,6 @@ static size_t stm_xml_read(ctlStreamCallbacks *cb, void *stream, char **ptr, xml
 
     Stream *s = stream;
     txCtx h = cb->direct_ctx;
-    
     res = fread(s->buf, 1, 4, s->fp);
     if (res > 0) {
         ctxt = xmlCreatePushParserCtxt(NULL, NULL,
