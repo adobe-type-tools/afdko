@@ -1221,7 +1221,15 @@ def test_non_FDArray_dict_parse():
     ("empty-key-name", b'tx: (ufr) Warning: Encountered empty <key></key>', 0),
     ("empty-key-value", b'Warning: Encountered empty <string> for fontinfo ' +
                         b'key postscriptFontName. Skipping', 0),
-    ("missing-key-value", b'tx: (ufr) Encountered empty <key>', 6)
+    ("missing-key-value", b'tx: (ufr) Encountered empty <key>', 6),
+    ("bluesarray-string", b'tx: (ufr) Warning: Encountered empty or ' +
+                          b'invalid array for postscriptBlueValues. ' +
+                          b'Skipping', 0),
+    ("fontmatrix-string", b'tx: (ufr) Warning: Encountered empty or ' +
+                          b'invalid array for FontMatrix. Skipping', 0),
+    ("switched-string-and-array", b'tx: (ufr) Warning: Encountered empty or' +
+                                  b' invalid array for postscriptBlueValues.' +
+                                  b' Skipping', 0)
 ])
 def test_ufo_fontinfo_parsing_errors(file, msg, ret_code):
     folder = "ufo-parse-warns-errs/"
