@@ -298,16 +298,19 @@ void FeatCtx::msgPrefix(char **premsg, char **prefix) {
 }
 
 void FeatCtx::featMsg(int msgType, const char *fmt, ...) {
-    va_list ap;
+    va_list ap, cap;
     std::vector<char> buf;
     buf.resize(128);
 
     va_start(ap, fmt);
+    va_copy(cap, ap);
     int l = vsnprintf(buf.data(), 128, fmt, ap) + 1;
+    va_end(ap);
     if ( l > 128 ) {
         buf.resize(l);
-        vsnprintf(buf.data(), l, fmt, ap);
+        vsnprintf(buf.data(), l, fmt, cap);
     }
+    va_end(cap);
     hotMsg(g, msgType, buf.data());
 }
 
