@@ -984,6 +984,8 @@ static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyNam
 }
 
 static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
+    /* returns false when current key is NULL/ not parseable,
+       otherwise returns true */
     abfTopDict* top = &h->top;
     abfFontDict* fd = h->top.FDArray.array + currentiFD;
     abfPrivateDict* pd = &fd->Private;
@@ -1011,7 +1013,7 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     } else {
         char* keyValue = parseXMLKeyValue(h, cur);
         if (!keyValueValid(h, cur, keyValue, keyName))
-            return false;
+            return true;
         if (!strcmp(keyName, "copyright")) {
             top->Copyright.ptr = keyValue;
         } else if (!strcmp(keyName, "trademark")) {
@@ -1878,7 +1880,7 @@ static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     while (cur != NULL) {
         keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
-        if (setFontDictKey(h, keyName, cur))
+        if (setFontDictKey(h, keyName, cur) && cur != NULL)
            cur = cur->next;
     }
     return ufoErrSrcStream;
@@ -1933,7 +1935,7 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     while (cur != NULL) {
         char* keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
-        if (setFontDictKey(h, keyName, cur))
+        if (setFontDictKey(h, keyName, cur) && cur != NULL)
             cur = cur->next;
     }
 }
