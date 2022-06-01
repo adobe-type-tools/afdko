@@ -1859,31 +1859,30 @@ static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
 
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
-        keyID = NULL;
-        if ((xmlStrEqual(cur->name, (const xmlChar *) "key"))) {
-            parseKeyName(&keyID, cur);
-            if (keyID == NULL){
-                message(h, "Warning: Encountered empty <key></key>.");
-                cur = cur->next;
-                continue;
-            }
-            keyName = (char*) keyID;
-            cur = cur->next;
-            setFontDictKey(h, keyName, cur);
-        }
+        keyName = parseXMLKeyName(h, cur);
+        cur = cur->next;
+        setFontDictKey(h, keyName, cur);
         cur = cur->next;
     }
     return ufoErrSrcStream;
 }
 
-static void parseKeyName(unsigned char* *keyID, xmlNodePtr cur){
-    cur = cur->xmlChildrenNode;
-    while (cur != NULL) {
-        if (!xmlStrEqual(cur->name, (const xmlChar *) "text"))
-            continue;
-        *keyID = xmlNodeGetContent(cur);
-        cur = cur->next;
+static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur){
+    if ((xmlStrEqual(cur->name, (const xmlChar *) "key"))) {
+        cur = cur->xmlChildrenNode;
+        if (cur != NULL) {
+            if (xmlStrEqual(cur->name, (const xmlChar *) "text")) {
+                return (char*) xmlNodeGetContent(cur);
+            } else {
+                message(h, "Warning: Encountered non-text value %s within <key>.", cur->name);
+                return NULL;
+            }
+        } else {
+            message(h, "Warning: Encountered empty <key></key>.");
+            return NULL;
+        }
     }
+    return NULL;
 }
 
 static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
@@ -1913,8 +1912,7 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     }
 
     while (cur != NULL) {
-        parseKeyName(&keyID, cur);
-        char* keyName = (char*) keyID;
+        char* keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
         setFontDictKey(h, keyName, cur);
         cur = cur->next;

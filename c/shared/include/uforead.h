@@ -125,7 +125,7 @@ void ufoFree(ufoCtx h);
 /* ufoFree() destroys the library context and all the resources allocated to
    it. The temporary and debug data streams are closed. */
 
-static void parseKeyName(unsigned char* *keyID, xmlNodePtr cur);
+static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
 
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 
