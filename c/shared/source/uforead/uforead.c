@@ -927,23 +927,45 @@ static char* getKeyValue(ufoCtx h, char* endName, int state) {
     return value;
 }
 
-static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements) {
+static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements, char* arrayKeyName) {
     int i = 0;
+    if (h->valueArray.cnt == 0) {
+        message(h, "Warning: Encountered empty or invalid array for %s. Skipping", arrayKeyName);
+        return;
+    }
     bluesArray->cnt = h->valueArray.cnt;
     while ((i < h->valueArray.cnt) && (i < numElements)) {
         bluesArray->array[i] = (float)atof(h->valueArray.array[i]);
         memFree(h, h->valueArray.array[i]);
         i++;
     }
+    dnaSET_CNT(h->valueArray, 0);
 }
 
 static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) {
     int i = 0;
+    if (h->valueArray.cnt == 0) {
+        message(h, "Warning: Encountered empty or invalid array for FontMatrix. Skipping");
+        return;
+    }
     fontMatrix->cnt = h->valueArray.cnt;
     while ((i < h->valueArray.cnt) && (i < numElements)) {
         fontMatrix->array[i] = (float)atof(h->valueArray.array[i]);
         memFree(h, h->valueArray.array[i]);
         i++;
+    }
+    dnaSET_CNT(h->valueArray, 0);
+}
+
+/* check if dynamic valueArray items were freed and cnt set to 0 */
+static void freeValueArray(ufoCtx h){
+    if (h->valueArray.cnt != 0){
+        int i = 0;
+        while ((i < h->valueArray.cnt)) {
+            memFree(h, h->valueArray.array[i]);
+            i++;
+        }
+        dnaSET_CNT(h->valueArray, 0);
     }
 }
 
@@ -1063,36 +1085,36 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
             pd->ForceBold = atol(keyValue);
         } else if (!strcmp(keyName, "postscriptBlueValues")) {
             bluesArray = (BluesArray*)&pd->BlueValues;
-            setBluesArrayValue(h, bluesArray, 14);
+            setBluesArrayValue(h, bluesArray, 14, keyName);
         } else if (!strcmp(keyName, "postscriptOtherBlues")) {
             bluesArray = (BluesArray*)&pd->OtherBlues;
-            setBluesArrayValue(h, bluesArray, 10);
+            setBluesArrayValue(h, bluesArray, 10, keyName);
         } else if (!strcmp(keyName, "postscriptFamilyBlues")) {
             bluesArray = (BluesArray*)&pd->FamilyBlues;
-            setBluesArrayValue(h, bluesArray, 14);
+            setBluesArrayValue(h, bluesArray, 14, keyName);
         } else if (!strcmp(keyName, "postscriptFamilyOtherBlues")) {
             bluesArray = (BluesArray*)&pd->FamilyOtherBlues;
-            setBluesArrayValue(h, bluesArray, 10);
+            setBluesArrayValue(h, bluesArray, 10, keyName);
         } else if (!strcmp(keyName, "postscriptStdHW")) {
             if (keyValue != NULL) {
                 pd->StdHW = (float)strtod(keyValue, NULL);
             } else {
                 pd->StdHW = (float)strtod(h->valueArray.array[0], NULL);
-                memFree(h, h->valueArray.array[0]);
+                freeValueArray(h);
             }
         } else if (!strcmp(keyName, "postscriptStdVW")) {
             if (keyValue != NULL) {
                 pd->StdVW = (float)strtod(keyValue, NULL);
             } else {
                 pd->StdVW = (float)strtod(h->valueArray.array[0], NULL);
-                memFree(h, h->valueArray.array[0]);
+                freeValueArray(h);
             }
         } else if (!strcmp(keyName, "postscriptStemSnapH")) {
             bluesArray = (BluesArray*)&pd->StemSnapH;
-            setBluesArrayValue(h, bluesArray, 12);
+            setBluesArrayValue(h, bluesArray, 12, keyName);
         } else if (!strcmp(keyName, "postscriptStemSnapV")) {
             bluesArray = (BluesArray*)&pd->StemSnapV;
-            setBluesArrayValue(h, bluesArray, 12);
+            setBluesArrayValue(h, bluesArray, 12, keyName);
         } else if (!strcmp(keyName, "LanguageGroup")) {
             pd->LanguageGroup = (float)strtod(keyValue, NULL);
             h->parseKeyName = NULL;
@@ -1100,6 +1122,7 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
             pd->ExpansionFactor = (float)strtod(keyValue, NULL);
             h->parseKeyName = NULL;
         }
+        freeValueArray(h);
     }
     cur = cur->next;
 }
