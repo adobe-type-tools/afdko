@@ -1143,8 +1143,8 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
             h->parseKeyName = NULL;
         }
         freeValueArray(h);
-        return true;
     }
+    return true;
 }
 
 static int CTL_CDECL cmpOrderRecs(const void* first, const void* second, void* ctx) {
