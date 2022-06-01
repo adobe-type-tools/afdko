@@ -405,8 +405,8 @@ static size_t stm_read(ctlStreamCallbacks *cb, Stream *stream, char **ptr) {
     return 0; /* Suppress compiler warning */
 }
 
-    int res, size = BUFSIZ;
 static size_t stm_xml_read(ctlStreamCallbacks *cb, Stream *stream, xmlDocPtr *doc){
+    int res;
     xmlParserCtxtPtr ctxt;
 
     Stream *s = stream;
@@ -415,7 +415,7 @@ static size_t stm_xml_read(ctlStreamCallbacks *cb, Stream *stream, xmlDocPtr *do
     if (res > 0) {
         ctxt = xmlCreatePushParserCtxt(NULL, NULL,
                     s->buf, res, s->filename);
-        while ((res = fread(s->buf, 1, size, s->fp)) > 0) {
+        while ((res = fread(s->buf, 1, BUFSIZ, s->fp)) > 0) {
             xmlParseChunk(ctxt, s->buf, res, 0);
         }
         xmlParseChunk(ctxt, s->buf, 0, 1);
