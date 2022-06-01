@@ -927,6 +927,19 @@ static char* getKeyValue(ufoCtx h, char* endName, int state) {
     return value;
 }
 
+/* free dynamic valueArray and set cnt to 0 */
+static void freeValueArray(ufoCtx h){
+    if (h->valueArray.cnt != 0){
+        int i = 0;
+        while ((i < h->valueArray.cnt)) {
+            memFree(h, h->valueArray.array[i]);
+            i++;
+        }
+        dnaSET_CNT(h->valueArray, 0);
+        parsingValueArray = false;
+    }
+}
+
 static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements, char* arrayKeyName) {
     int i = 0;
     if (h->valueArray.cnt == 0) {
@@ -936,10 +949,9 @@ static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements
     bluesArray->cnt = h->valueArray.cnt;
     while ((i < h->valueArray.cnt) && (i < numElements)) {
         bluesArray->array[i] = (float)atof(h->valueArray.array[i]);
-        memFree(h, h->valueArray.array[i]);
         i++;
     }
-    dnaSET_CNT(h->valueArray, 0);
+    freeValueArray(h);
 }
 
 static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) {
@@ -951,21 +963,11 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
     fontMatrix->cnt = h->valueArray.cnt;
     while ((i < h->valueArray.cnt) && (i < numElements)) {
         fontMatrix->array[i] = (float)atof(h->valueArray.array[i]);
-        memFree(h, h->valueArray.array[i]);
         i++;
     }
-    dnaSET_CNT(h->valueArray, 0);
+    freeValueArray(h);
 }
 
-/* check if dynamic valueArray items were freed and cnt set to 0 */
-static void freeValueArray(ufoCtx h){
-    if (h->valueArray.cnt != 0){
-        int i = 0;
-        while ((i < h->valueArray.cnt)) {
-            memFree(h, h->valueArray.array[i]);
-            i++;
-        }
-        dnaSET_CNT(h->valueArray, 0);
     }
 }
 
