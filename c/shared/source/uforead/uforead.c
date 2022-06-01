@@ -954,9 +954,8 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     BluesArray* bluesArray;
     abfFontMatrix* fontMatrix;
 
-    /* If we do not use a keyValue, we need to dispose of it
-     */
-
+    if (keyName == NULL)
+        return;
     if (!strcmp(keyName, "postscriptFDArray")) {
         h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
         if (h->top.version.ptr != NULL)
@@ -1883,7 +1882,7 @@ static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
 
 static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     // go through an XML dict
-    unsigned char* keyID;
+    char* keyName;
     cur = cur->xmlChildrenNode;
 
     if (parsingFDArray){
