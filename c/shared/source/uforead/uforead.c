@@ -968,7 +968,7 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
     freeValueArray(h);
 }
 
-// TODO: add extra warnings for verbose-output
+// ToDo: add extra warnings for verbose-output
 static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyName){
     bool valid = true;
     if (keyValue == NULL) {
