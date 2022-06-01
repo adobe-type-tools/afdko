@@ -936,8 +936,8 @@ static void freeValueArray(ufoCtx h){
             i++;
         }
         dnaSET_CNT(h->valueArray, 0);
-        parsingValueArray = false;
     }
+    parsingValueArray = false;
 }
 
 static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements, char* arrayKeyName) {
@@ -968,14 +968,21 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
     freeValueArray(h);
 }
 
+// TODO: add extra warnings for verbose-output
 static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyName){
     bool valid = true;
-    if (keyValue == NULL && !parsingValueArray){
-        message(h, "Warning: Encountered missing value for fontinfo key %s. Skipping", keyName);
-        valid = false;
-    } else if (keyValue != NULL && !strcmp(keyValue, "")){
+    if (keyValue == NULL) {
+        if (!parsingValueArray)
+            valid = false;
+//            message(h, "Warning: Encountered missing value for fontinfo key %s. Skipping", keyName);
+        else if (parsingValueArray && h->valueArray.cnt == 0)
+            valid = false;
+//            message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
+    } else {
+        if (!strcmp(keyValue, "")){
         message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
         valid = false;
+        }
     }
     if (!valid)
         freeValueArray(h);  /* we free h->valueArray after parsing every key to clean up any leftover/invalid data */
@@ -993,7 +1000,6 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     abfFontMatrix* fontMatrix;
 
     if (keyName == NULL){
-        message(h, "Warning: Encountered missing <key> in fontinfo.plist. Skipping");
         return false;
     }
     if (!strcmp(keyName, "postscriptFDArray")) {
@@ -1906,6 +1912,7 @@ static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur){
 
 static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
     dnaSET_CNT(h->valueArray, 0);
+    parsingValueArray = true;
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
         char* valueString = parseXMLKeyValue(h, cur);
@@ -1913,8 +1920,6 @@ static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
             *dnaNEXT(h->valueArray) = valueString;
         cur = cur->next;
     }
-    if (h->valueArray.cnt > 0)
-        parsingValueArray = true;
 }
 
 static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
