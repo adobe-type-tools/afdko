@@ -986,14 +986,14 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
 
         parsingFDArray = true;
         currentiFD = -1;
-        parseKeyValue(h, cur);
+        parseXMLKeyValue(h, cur);
         parsingFDArray = false;
     } else if (!strcmp(keyName, "PrivateDict")) {
         parsingFDArray = false;
-        parseKeyValue(h, cur);
+        parseXMLKeyValue(h, cur);
         parsingFDArray = true;
     } else {
-        char* keyValue = (char*) parseKeyValue(h, cur);
+        char* keyValue = parseXMLKeyValue(h, cur);
         if (keyValue != NULL && !strcmp(keyValue, ""))
             message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
         if (!strcmp(keyName, "copyright")) {
@@ -1890,7 +1890,7 @@ static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
     dnaSET_CNT(h->valueArray, 0);
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
-        void* valueString = parseKeyValue(h, cur);
+        char* valueString = parseXMLKeyValue(h, cur);
         if (valueString != NULL)
             *dnaNEXT(h->valueArray) = valueString;
         cur = cur->next;
@@ -1941,7 +1941,7 @@ static char* parseKeyError(ufoCtx h, xmlNodePtr cur){
         return NULL;
 }
 
-static void *parseKeyValue(ufoCtx h, xmlNodePtr cur){
+static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
     if (isSimpleKey(cur)) {  /* if string, integer, or real */
         void *ptr = xmlNodeGetContent(cur);
         return ptr;

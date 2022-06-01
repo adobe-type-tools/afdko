@@ -127,7 +127,7 @@ void ufoFree(ufoCtx h);
 
 static void parseKeyName(unsigned char* *keyID, xmlNodePtr cur);
 
-static void *parseKeyValue(ufoCtx h, xmlNodePtr cur);
+static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 
 static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 
