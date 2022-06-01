@@ -1,5 +1,8 @@
 tx: --- tests/makeotf_data/input/bug751.ufo
 tx: (ufr) Warning: Encountered empty <string> for fontinfo key copyright. Skipping
+tx: (ufr) Warning: Encountered empty <array> for fontinfo key guidelines. Skipping
+tx: (ufr) Warning: Encountered empty <array> for fontinfo key postscriptFamilyBlues. Skipping
+tx: (ufr) Warning: Encountered empty <array> for fontinfo key postscriptFamilyOtherBlues. Skipping
 tx: (ufr) Warning: Encountered empty <string> for fontinfo key trademark. Skipping
 makeotf [Warning] Could not find default features file. Font will be built without any layout features.
 makeotfexe processing font <Exercise1-Regular>
