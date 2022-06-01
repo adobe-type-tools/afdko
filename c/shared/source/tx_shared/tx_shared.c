@@ -386,7 +386,7 @@ static long stm_tell(ctlStreamCallbacks *cb, void *stream) {
 }
 
 /* Read from stream. */
-static size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr) {
+static size_t stm_read(ctlStreamCallbacks *cb, Stream *stream, char **ptr) {
     Stream *s = stream;
     switch (s->type) {
         case stm_Src:
@@ -405,8 +405,8 @@ static size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr) {
     return 0; /* Suppress compiler warning */
 }
 
-static size_t stm_xml_read(ctlStreamCallbacks *cb, void *stream, char **ptr, xmlDocPtr *doc){
     int res, size = BUFSIZ;
+static size_t stm_xml_read(ctlStreamCallbacks *cb, Stream *stream, xmlDocPtr *doc){
     xmlParserCtxtPtr ctxt;
 
     Stream *s = stream;
