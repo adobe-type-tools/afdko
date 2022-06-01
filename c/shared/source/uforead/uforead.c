@@ -1035,10 +1035,6 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
             }
         } else if (!strcmp(keyName, "postscriptFontName")) {
             fd->FontName.ptr = keyValue;
-        } else if (!strcmp(keyName, "sampleArray")) {
-            parseKeyValue(h, cur);
-            void *ptr = keyValue;
-            fd->FontName.ptr = keyValue;
         } else if (!strcmp(keyName, "openTypeNamePreferredFamilyName")) {
             top->FamilyName.ptr = keyValue;
         } else if (!strcmp(keyName, "familyName")) {
@@ -1069,7 +1065,7 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
             fd->FontMatrix.array[4] = 0;
             fd->FontMatrix.array[5] = 0;
         } else if (!strcmp(keyName, "FontName")) {
-            fd->FontName.ptr = parseKeyValue(h, cur);
+            fd->FontName.ptr = keyValue;
         } else if (!strcmp(keyName, "PaintType")) {
             fd->PaintType = atoi(keyValue);
         } else if (!strcmp(keyName, "FontMatrix")) {
@@ -1124,7 +1120,6 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         }
         freeValueArray(h);
     }
-    cur = cur->next;
 }
 
 static int CTL_CDECL cmpOrderRecs(const void* first, const void* second, void* ctx) {
@@ -1826,7 +1821,6 @@ static void reallocFDArray(ufoCtx h){
 static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     xmlDocPtr doc;
     xmlNodePtr cur;
-    unsigned char* keyID;
     char* keyName;
 
     xmlKeepBlanksDefault(0);
