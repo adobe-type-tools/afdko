@@ -990,8 +990,10 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     BluesArray* bluesArray;
     abfFontMatrix* fontMatrix;
 
-    if (keyName == NULL)
+    if (keyName == NULL){
+        message(h, "Warning: Encountered missing <key> in fontinfo.plist. Skipping");
         return false;
+    }
     if (!strcmp(keyName, "postscriptFDArray")) {
         h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
         if (h->top.version.ptr != NULL)
@@ -1948,6 +1950,9 @@ static bool isSimpleKey(xmlNodePtr cur){
 }
 
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
+    if (cur == NULL) {
+        return NULL;
+    }
     if (isSimpleKey(cur)) {  /* if string, integer, or real */
         return (char*) xmlNodeGetContent(cur);
     } else if (xmlStrEqual(cur->name, (const xmlChar *) "dict")) {
