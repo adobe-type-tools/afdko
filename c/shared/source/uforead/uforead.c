@@ -39,7 +39,6 @@
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
-#include <stdbool.h>
 
 enum {
     ufoUnknown,
@@ -58,6 +57,7 @@ long CIDCount = 0;
 int currentiFD = 0;
 int FDArrayInitSize = 50;
 bool parsingFDArray = false;
+bool parsingValueArray = false;
 
 typedef struct
 {
@@ -968,10 +968,22 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
     freeValueArray(h);
 }
 
+static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyName){
+    bool valid = true;
+    if (keyValue == NULL && !parsingValueArray){
+        message(h, "Warning: Encountered missing value for fontinfo key %s. Skipping", keyName);
+        valid = false;
+    } else if (keyValue != NULL && !strcmp(keyValue, "")){
+        message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
+        valid = false;
     }
+    if (!valid)
+        freeValueArray(h);  /* we free h->valueArray after parsing every key to clean up any leftover/invalid data */
+
+    return valid;
 }
 
-static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
+static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     abfTopDict* top = &h->top;
     abfFontDict* fd = h->top.FDArray.array + currentiFD;
     abfPrivateDict* pd = &fd->Private;
@@ -979,7 +991,7 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     abfFontMatrix* fontMatrix;
 
     if (keyName == NULL)
-        return;
+        return false;
     if (!strcmp(keyName, "postscriptFDArray")) {
         h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
         if (h->top.version.ptr != NULL)
@@ -996,8 +1008,8 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         parsingFDArray = true;
     } else {
         char* keyValue = parseXMLKeyValue(h, cur);
-        if (keyValue != NULL && !strcmp(keyValue, ""))
-            message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
+        if (!keyValueValid(h, cur, keyValue, keyName))
+            return false;
         if (!strcmp(keyName, "copyright")) {
             top->Copyright.ptr = keyValue;
         } else if (!strcmp(keyName, "trademark")) {
@@ -1121,6 +1133,7 @@ static void setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
             h->parseKeyName = NULL;
         }
         freeValueArray(h);
+        return true;
     }
 }
 
@@ -1863,8 +1876,8 @@ static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     while (cur != NULL) {
         keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
-        setFontDictKey(h, keyName, cur);
-        cur = cur->next;
+        if (setFontDictKey(h, keyName, cur))
+           cur = cur->next;
     }
     return ufoErrSrcStream;
 }
@@ -1896,6 +1909,8 @@ static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
             *dnaNEXT(h->valueArray) = valueString;
         cur = cur->next;
     }
+    if (h->valueArray.cnt > 0)
+        parsingValueArray = true;
 }
 
 static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
@@ -1916,8 +1931,8 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     while (cur != NULL) {
         char* keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
-        setFontDictKey(h, keyName, cur);
-        cur = cur->next;
+        if (setFontDictKey(h, keyName, cur))
+            cur = cur->next;
     }
 }
 
@@ -1930,15 +1945,6 @@ static bool isSimpleKey(xmlNodePtr cur){
     } else {
         return false;
     }
-}
-
-static char* parseKeyError(ufoCtx h, xmlNodePtr cur){
-    if (xmlStrEqual(cur->name, (const xmlChar *) "key"))
-        fatal(h, ufoErrParse, "Encountered empty <key>");  // needs fix
-    else if (xmlStrEqual(cur->name, (const xmlChar *) "array"))
-        fatal(h, ufoErrParse, "Encountered empty <array>");
-    else
-        return NULL;
 }
 
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
@@ -1956,7 +1962,7 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
     }  else if (xmlStrEqual(cur->name, (const xmlChar *) "false")) {
         return "0";
     } else {
-        return parseKeyError(h, cur);
+        return NULL;
     }
 }
 
