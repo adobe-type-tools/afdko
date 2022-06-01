@@ -1219,6 +1219,10 @@ def test_non_FDArray_dict_parse():
 
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("empty-key-name", b'tx: (ufr) Warning: Encountered empty <key></key>', 0),
+    ("empty-key-name-fdarray", b'tx: (ufr) Warning: Encountered empty ' +
+                               b'<key></key>', 0),
+    ("invalid-key-name", b'tx: (ufr) Warning: Encountered non-text value ' +
+                               b'key within <key>', 0),
     ("empty-key-value", b'Warning: Encountered empty <string> for fontinfo ' +
                         b'key postscriptFontName. Skipping', 0),
     ("missing-key-value", b'tx: (ufr) Encountered empty <key>', 6),
