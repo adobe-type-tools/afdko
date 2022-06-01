@@ -1949,8 +1949,7 @@ static bool isSimpleKey(xmlNodePtr cur){
 
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
     if (isSimpleKey(cur)) {  /* if string, integer, or real */
-        void *ptr = xmlNodeGetContent(cur);
-        return ptr;
+        return (char*) xmlNodeGetContent(cur);
     } else if (xmlStrEqual(cur->name, (const xmlChar *) "dict")) {
         parseXMLDict(h, cur);
         return NULL;
