@@ -1225,7 +1225,8 @@ def test_non_FDArray_dict_parse():
                          b'key within <key>', 0),
     ("empty-key-value", b'Warning: Encountered empty <string> for fontinfo ' +
                         b'key postscriptFontName. Skipping', 0),
-    ("missing-key-value", b'tx: (ufr) Encountered empty <key>', 6),
+    ("missing-key-value", b'tx: (ufr) Warning: Encountered missing value for' +
+                          b' fontinfo key postscriptFontName', 0),
     ("bluesarray-string", b'tx: (ufr) Warning: Encountered empty or ' +
                           b'invalid array for postscriptBlueValues. ' +
                           b'Skipping', 0),
