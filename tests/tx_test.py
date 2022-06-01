@@ -1226,7 +1226,7 @@ def test_non_FDArray_dict_parse():
     ("missing-key-name", b'tx: (ufr) Warning: Encountered missing <key>' +
                          b' in fontinfo.plist. Skipping', 0),
     ("missing-key-name-2", b'tx: (ufr) Warning: Encountered missing <key>' +
-                           b' in fontinfo.plist. Skipping', 0)
+                           b' in fontinfo.plist. Skipping', 0),
     ("empty-key-value", b'Warning: Encountered empty <string> for fontinfo ' +
                         b'key postscriptFontName. Skipping', 0),
     ("missing-key-value", b'tx: (ufr) Warning: Encountered missing value for' +
@@ -1243,8 +1243,8 @@ def test_non_FDArray_dict_parse():
                                   b' Skipping', 0),
     ("empty-dict", b'', 0)
 ])
-def test_ufo_fontinfo_parsing_errors(file, msg, ret_code):
-    folder = "ufo-parse-warns-errs/"
+def test_ufo_fontinfo_parsing(file, msg, ret_code):
+    folder = "ufo-fontinfo-parsing/"
     ufo_input_path = get_input_path(folder + file + ".ufo")
     expected_path = get_expected_path(folder + file + ".subset")
     output_path = get_temp_file_path()
