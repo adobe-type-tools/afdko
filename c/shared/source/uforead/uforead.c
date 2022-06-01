@@ -1825,7 +1825,7 @@ static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
 
     xmlKeepBlanksDefault(0);
 
-    h->cb.stm.xml_read(&h->cb.stm, h->stm.src, &h->src.buf, &doc);
+    h->cb.stm.xml_read(&h->cb.stm, h->stm.src, &doc);
 
     if (doc == NULL) {
         fatal(h, ufoErrParse, "Unable to read '%s'.\n", filename);
