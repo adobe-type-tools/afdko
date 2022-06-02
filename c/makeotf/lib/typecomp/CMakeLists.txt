@@ -45,10 +45,14 @@ add_library(typecomp STATIC
     tc.c
 )
 
-if(${LibXml2_FOUND})
+if (${LibXml2_FOUND})
     target_link_libraries(typecomp PUBLIC ${LIBXML2_LIBRARY})
-else()
-    target_link_libraries(typecomp PUBLIC ${LIBXML2_WIN_LIBRARIES})
+else ()
+    if (WIN32)
+       target_link_libraries(typecomp PUBLIC ${LIBXML2_WIN_LIBRARIES})
+    else ()
+       target_link_libraries(typecomp PUBLIC ${LIBXML2_NONWIN_LIBRARIES})
+    endif()
 endif()
 
 target_compile_definitions(typecomp PRIVATE

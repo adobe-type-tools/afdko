@@ -75,8 +75,12 @@ target_link_libraries(tx_shared PUBLIC
 if(${LibXml2_FOUND})
     target_link_libraries(tx_shared PUBLIC ${LIBXML2_LIBRARY})
 else()
-    target_compile_definitions(tx_shared PUBLIC -DLIBXML_STATIC)
-    target_link_libraries(tx_shared PUBLIC ${LIBXML2_WIN_LIBRARIES})
+    if (WIN32)
+        target_compile_definitions(tx_shared PUBLIC -DLIBXML_STATIC)
+        target_link_libraries(tx_shared PUBLIC ${LIBXML2_WIN_LIBRARIES} tx_shared)
+    else ()
+        target_link_libraries(tx_shared PUBLIC ${LIBXML2_NONWIN_LIBRARIES})
+    endif()
 endif()
 
 

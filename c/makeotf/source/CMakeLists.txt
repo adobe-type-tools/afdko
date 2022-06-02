@@ -23,14 +23,18 @@ target_sources(makeotfexe PRIVATE
 
 target_link_libraries(makeotfexe PRIVATE ctutil dynarr hotconv makeotf_pstoken typecomp makeotf_cffread)
 
-if(HAVE_M_LIB)
+if (HAVE_M_LIB)
     target_link_libraries(makeotfexe PRIVATE m)
-endif()
+endif ()
 
-if(${LibXml2_FOUND})
+if (${LibXml2_FOUND})
     target_link_libraries(makeotfexe PUBLIC ${LIBXML2_LIBRARY})
-else()
-    target_link_libraries(makeotfexe PUBLIC ${LIBXML2_WIN_LIBRARIES})
+else ()
+    if (WIN32)
+       target_link_libraries(makeotfexe PUBLIC ${LIBXML2_WIN_LIBRARIES})
+    else ()
+       target_link_libraries(makeotfexe PUBLIC ${LIBXML2_NONWIN_LIBRARIES})
+    endif()
 endif()
 
 target_compile_definitions(makeotfexe PRIVATE MAKEOTFLIB_EXPORTS=1)

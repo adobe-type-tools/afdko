@@ -46,3 +46,5 @@ target_include_directories(libxml2 INTERFACE ${SOURCE_DIR}/include INTERFACE ${B
 set(LIBXML2_INCLUDE_DIR ${SOURCE_DIR}/include ${BINARY_DIR})
 
 set(LIBXML2_WIN_LIBRARIES wsock32 ws2_32 libxml2)
+
+set(LIBXML2_NONWIN_LIBRARIES libxml2)
