@@ -18,6 +18,10 @@
 	<dict>
 	<key>postscriptBlueValues</key>
     <string>invalid-string-for-bluesvaluesarray</string>
+	<key>postscriptStdHW</key>
+	<array>
+		<integer>35</integer>
+	</array>
 	</dict>
 	</dict>
 	</array>
