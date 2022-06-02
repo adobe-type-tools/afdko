@@ -1019,7 +1019,7 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     } else {
         char* keyValue = parseXMLKeyValue(h, cur);
         if (!keyValueValid(h, cur, keyValue, keyName))
-            return true;
+            return false;
         if (!strcmp(keyName, "copyright")) {
             top->Copyright.ptr = keyValue;
         } else if (!strcmp(keyName, "trademark")) {
