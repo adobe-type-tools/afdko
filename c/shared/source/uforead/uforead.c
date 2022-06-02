@@ -940,10 +940,11 @@ static void freeValueArray(ufoCtx h){
     parsingValueArray = false;
 }
 
+/* ToDo: add extra warnings for verbose-output */
 static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements, char* arrayKeyName) {
     int i = 0;
     if (h->valueArray.cnt == 0) {
-        message(h, "Warning: Encountered empty or invalid array for %s. Skipping", arrayKeyName);
+//        message(h, "Warning: Encountered empty or invalid array for %s. Skipping", arrayKeyName);
         return;
     }
     bluesArray->cnt = h->valueArray.cnt;
@@ -954,10 +955,11 @@ static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements
     freeValueArray(h);
 }
 
+/* ToDo: add extra warnings for verbose-output */
 static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) {
     int i = 0;
     if (h->valueArray.cnt == 0) {
-        message(h, "Warning: Encountered empty or invalid array for FontMatrix. Skipping");
+//        message(h, "Warning: Encountered empty or invalid array for FontMatrix. Skipping");
         return;
     }
     fontMatrix->cnt = h->valueArray.cnt;
@@ -968,7 +970,7 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
     freeValueArray(h);
 }
 
-// ToDo: add extra warnings for verbose-output
+/* ToDo: add extra warnings for verbose-output */
 static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyName){
     bool valid = true;
     if (keyValue == NULL) {
@@ -1892,6 +1894,7 @@ static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     return ufoErrSrcStream;
 }
 
+/* ToDo: add extra warnings for verbose-output*/
 static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur){
     if ((xmlStrEqual(cur->name, (const xmlChar *) "key"))) {
         cur = cur->xmlChildrenNode;
@@ -1899,11 +1902,11 @@ static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur){
             if (xmlStrEqual(cur->name, (const xmlChar *) "text")) {
                 return (char*) xmlNodeGetContent(cur);
             } else {
-                message(h, "Warning: Encountered non-text value %s within <key>.", cur->name);
+//                message(h, "Warning: Encountered non-text value %s within <key>.", cur->name);
                 return NULL;
             }
         } else {
-            message(h, "Warning: Encountered empty <key></key>.");
+//            message(h, "Warning: Encountered empty <key></key>.");
             return NULL;
         }
     }

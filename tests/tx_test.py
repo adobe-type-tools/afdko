@@ -1218,25 +1218,18 @@ def test_non_FDArray_dict_parse():
 
 
 @pytest.mark.parametrize('file, msg, ret_code', [
-    ("empty-key-name", b'tx: (ufr) Warning: Encountered empty <key></key>', 0),
-    ("empty-key-name-fdarray", b'tx: (ufr) Warning: Encountered empty ' +
-                               b'<key></key>', 0),
-    ("invalid-key-name", b'tx: (ufr) Warning: Encountered non-text value ' +
-                         b'key within <key>', 0),
+    ("empty-key-name", b'', 0),
+    ("empty-key-name-fdarray", b'', 0),
+    ("invalid-key-name", b'', 0),
     ("missing-key-name", b'', 0),
     ("missing-key-name-2", b'', 0),
     ("empty-key-value", b'Warning: Encountered empty <string> for fontinfo ' +
                         b'key postscriptFontName. Skipping', 0),
     ("missing-key-value", b'', 0),
     ("missing-key-value-2", b'', 0),
-    ("bluesarray-string", b'tx: (ufr) Warning: Encountered empty or ' +
-                          b'invalid array for postscriptBlueValues. ' +
-                          b'Skipping', 0),
-    ("fontmatrix-string", b'tx: (ufr) Warning: Encountered empty or ' +
-                          b'invalid array for FontMatrix. Skipping', 0),
-    ("switched-string-and-array", b'tx: (ufr) Warning: Encountered empty or' +
-                                  b' invalid array for postscriptBlueValues.' +
-                                  b' Skipping', 0),
+    ("bluesarray-string", b'', 0),
+    ("fontmatrix-string", b'', 0),
+    ("switched-string-and-array", b'', 0),
     ("empty-dict", b'', 0)
 ])
 def test_ufo_fontinfo_parsing(file, msg, ret_code):
