@@ -6,6 +6,19 @@ add_executable(mergefonts
 )
 
 target_include_directories(mergefonts PRIVATE ../../shared/include ../../shared/resource ../../shared/source/tx_shared)
-target_link_libraries(mergefonts PUBLIC tx_shared)
-install(TARGETS mergefonts DESTINATION bin)
 
+target_link_libraries(mergefonts PUBLIC tx_shared)
+
+if (${LibXml2_FOUND})
+    target_link_libraries(mergefonts PUBLIC ${LIBXML2_LIBRARY})
+else ()
+    add_dependencies(mergefonts ${LIBXML2_TARGET})
+    target_compile_definitions(mergefonts PUBLIC -DLIBXML_STATIC)
+    if (WIN32)
+        target_link_libraries(mergefonts PUBLIC ${LIBXML2_WIN_LIBRARIES})
+    else ()
+        target_link_libraries(mergefonts PUBLIC ${LIBXML2_NONWIN_LIBRARIES})
+    endif()
+endif()
+
+install(TARGETS mergefonts DESTINATION bin)
