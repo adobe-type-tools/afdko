@@ -42,6 +42,14 @@ set(ANTLR4_WITH_STATIC_CRT OFF)
 set(ANTLR4_TAG tags/4.9.3)
 include(ExternalAntlr4Cpp)
 
+FIND_PACKAGE(LibXml2)
+IF (NOT ${LibXml2_FOUND})
+   MESSAGE(STATUS "Could not locate LibXml2, will install externally.")
+   set(LIBXML2_TAG tags/v2.9.13)
+   include(ExternalLibXML2)
+ENDIF(NOT ${LibXml2_FOUND})
+include_directories(${LIBXML2_INCLUDE_DIR})
+
 # sanitizer support
 # work around https://github.com/pypa/setuptools/issues/1928 with environment
 # variable
