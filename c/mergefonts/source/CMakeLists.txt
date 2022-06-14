@@ -5,8 +5,6 @@ add_executable(mergefonts
     usage.h
 )
 
-add_dependencies(mergefonts ${LIBXML2_TARGET})
-
 target_include_directories(mergefonts PRIVATE ../../shared/include ../../shared/resource ../../shared/source/tx_shared)
 
 target_link_libraries(mergefonts PUBLIC tx_shared)
@@ -14,6 +12,7 @@ target_link_libraries(mergefonts PUBLIC tx_shared)
 if (${LibXml2_FOUND})
     target_link_libraries(mergefonts PUBLIC ${LIBXML2_LIBRARY})
 else ()
+    add_dependencies(mergefonts ${LIBXML2_TARGET})
     target_compile_definitions(mergefonts PUBLIC -DLIBXML_STATIC)
     if (WIN32)
         target_link_libraries(mergefonts PUBLIC ${LIBXML2_WIN_LIBRARIES})
