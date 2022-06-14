@@ -3,7 +3,23 @@ include_directories(../include ../resource)
 MACRO(ADD_AFDKOLIB lm)
     file(GLOB sl_sources "${lm}/*")
     add_library(${lm} STATIC ${sl_sources})
+    add_dependencies(${lm} ${LIBXML2_TARGET})
 ENDMACRO(ADD_AFDKOLIB)
+
+ADD_AFDKOLIB(tx_shared)
+
+if(${LibXml2_FOUND})
+    target_link_libraries(tx_shared PUBLIC ${LIBXML2_LIBRARY})
+else()
+    target_compile_definitions(tx_shared PUBLIC -DLIBXML_STATIC)
+    if (WIN32)
+        target_link_libraries(tx_shared PUBLIC ${LIBXML2_WIN_LIBRARIES})
+    else ()
+        target_link_libraries(tx_shared PUBLIC ${LIBXML2_NONWIN_LIBRARIES})
+    endif()
+endif()
+
+
 
 ADD_AFDKOLIB(absfont)
 ADD_AFDKOLIB(cfembed)
@@ -25,7 +41,6 @@ ADD_AFDKOLIB(t1read)
 ADD_AFDKOLIB(t1write)
 ADD_AFDKOLIB(t2cstr)
 ADD_AFDKOLIB(ttread)
-ADD_AFDKOLIB(tx_shared)
 ADD_AFDKOLIB(uforead)
 ADD_AFDKOLIB(ufowrite)
 ADD_AFDKOLIB(varread)
@@ -71,17 +86,6 @@ target_link_libraries(tx_shared PUBLIC
     dynarr
     varread
 )
-
-if(${LibXml2_FOUND})
-    target_link_libraries(tx_shared PUBLIC ${LIBXML2_LIBRARY})
-else()
-    target_compile_definitions(tx_shared PUBLIC -DLIBXML_STATIC)
-    if (WIN32)
-        target_link_libraries(tx_shared PUBLIC ${LIBXML2_WIN_LIBRARIES})
-    else ()
-        target_link_libraries(tx_shared PUBLIC ${LIBXML2_NONWIN_LIBRARIES})
-    endif()
-endif()
 
 
 if(HAVE_M_LIB)

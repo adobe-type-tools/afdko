@@ -45,6 +45,8 @@ add_library(typecomp STATIC
     tc.c
 )
 
+add_dependencies(typecomp ${LIBXML2_TARGET})
+
 if (${LibXml2_FOUND})
     target_link_libraries(typecomp PUBLIC ${LIBXML2_LIBRARY})
 else ()

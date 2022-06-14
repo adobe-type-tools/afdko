@@ -5,6 +5,8 @@ add_executable(rotatefont
     usage.h
 )
 
+add_dependencies(rotatefont ${LIBXML2_TARGET})
+
 target_include_directories(rotatefont PRIVATE ../../shared/include ../../shared/resource ../../shared/source/tx_shared)
 
 target_link_libraries(rotatefont PUBLIC tx_shared)

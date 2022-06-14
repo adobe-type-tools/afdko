@@ -5,6 +5,8 @@ add_executable(mergefonts
     usage.h
 )
 
+add_dependencies(mergefonts ${LIBXML2_TARGET})
+
 target_include_directories(mergefonts PRIVATE ../../shared/include ../../shared/resource ../../shared/source/tx_shared)
 
 target_link_libraries(mergefonts PUBLIC tx_shared)

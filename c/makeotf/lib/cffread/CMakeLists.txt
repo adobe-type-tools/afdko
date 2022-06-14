@@ -1,4 +1,5 @@
 add_library(makeotf_cffread STATIC cffread.c)
+add_dependencies(makeotf_cffread ${LIBXML2_TARGET})
 
 target_include_directories(makeotf_cffread PRIVATE AFTER $<$<COMPILE_LANGUAGE:CXX>:${ANTLR4_INCLUDE_DIRS}>)
 

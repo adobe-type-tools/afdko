@@ -1,4 +1,5 @@
 add_library(makeotf_pstoken STATIC pstoken.c)
+add_dependencies(makeotf_pstoken ${LIBXML2_TARGET})
 
 if (${LibXml2_FOUND})
     target_link_libraries(makeotf_pstoken PUBLIC ${LIBXML2_LIBRARY})
