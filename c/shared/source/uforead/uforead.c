@@ -1976,8 +1976,8 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
 }
 
 static int parseFontInfo(ufoCtx h) {
-    int state = 0;     /* 0 == start, 1=in first dict, 2 in key, 3= in value, 4=in array 4 in comment, 5 in child dict.*/
-    int prevState = 0; /* used to save prev state while in comment. */
+    const char* filetype = "plist";
+
     h->src.next = h->mark = NULL;
     h->cb.stm.clientFileName = "fontinfo.plist";
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
@@ -1988,149 +1988,10 @@ static int parseFontInfo(ufoCtx h) {
     }
 
     dnaSET_CNT(h->valueArray, 0);
-    fillbuf(h, 0);
 
-    h->flags &= ~((unsigned long)SEEN_END);
+    int parsingSuccess = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
 
-    while (!(h->flags & SEEN_END)) {
-        token* tk;
-        tk = getToken(h, state);
-
-        if (tokenEqualStr(tk, "<!--")) {
-            prevState = state;
-            state = 4;
-        } else if (tokenEqualStr(tk, "-->")) {
-            if (state != 4) {
-                fatal(h, ufoErrParse, "Encountered end comment token while not in comment, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
-            }
-            state = prevState;
-        } else if (state == 4) {
-            continue;
-        } else if (tokenEqualStr(tk, "<dict>")) {
-            if (state == 3){
-                state = 5;
-                if (parsingFDArray){
-                    if (prevState == 5) {  // NOT first fdict in FDArray
-                        currentiFD = currentiFD + 1;
-                        h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
-                        if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
-                            reallocFDArray(h);
-                        }
-                        abfFontDict* fd = h->top.FDArray.array + currentiFD;
-                        abfInitFontDict(fd);
-                    } else {
-                        h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
-                        if (h->top.version.ptr != NULL)
-                            h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
-                        abfInitFontDict(h->top.FDArray.array);
-                    }
-                }
-            }else if (state == 5){
-                state = 6;
-            }else{
-                state = 1;
-            }
-        } else if (tokenEqualStr(tk, "</dict>")) {
-            if (state == 6){
-                state = 5;
-            } else if (state == 5){
-                prevState = state;
-                state = 3;
-            } else{
-                break;
-            }
-        } else if (tokenEqualStr(tk, "<key>")) {
-            if (state != 1 && state < 5) {
-                fatal(h, ufoErrParse, "Encountered '<key>' while not in top level of first <dict>, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
-            }
-            // get key name
-            tk = getElementValue(h, state);
-            if (tokenEqualStr(tk, "</key>")) {
-                message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
-            } else {
-                h->parseKeyName = copyStr(h, tk->val);  // get a copy in memory. This is freed when the value is assigned.
-                // get end-key.
-                tk = getToken(h, state);
-                if (!tokenEqualStr(tk, "</key>")) {
-                    tk->val[tk->length - 1] = 0;
-                    fatal(h, ufoErrParse, "Encountered element other than </key> when reading <key> name: %s, in fontinfo.plist file. Context: '%s'.\n", tk->val, getBufferContextPtr(h));
-                }
-            }
-            if (state != 5 && state != 6){
-                state = 2;
-            }
-        } else if (tokenEqualStr(tk, "<array>")) {
-            if (state != 2 && state < 5) {
-                fatal(h, ufoErrParse, "Encountered <array> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
-            } else {
-                /* check if parsing FDArray */
-                if (!strcmp(h->parseKeyName, "postscriptFDArray"))
-                    parsingFDArray = true;
-                if (state >= 5){
-                    prevState = state;
-                }
-                state = 3;
-            }
-            dnaSET_CNT(h->valueArray, 0);
-        } else if (tokenEqualStr(tk, "</array>")) {
-            if (state == 5) {
-                if (parsingFDArray)
-                    parsingFDArray = false;
-                if ( h->top.FDArray.array != &h->fdict ) {  // if more memory was allocated for FDArray
-                    memFree(h, h->top.FDArray.array);
-                }
-                state = 1;
-            } else if (state != 3) {
-                fatal(h, ufoErrParse, "Encountered </array> when not after <array> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
-            } else {
-                if (h->parseKeyName == NULL)
-                    break;
-                setFontDictKey(h, NULL);
-                if (prevState >= 5){
-                    state = prevState;
-                }else{
-                    state = 1;
-                }
-            }
-        } else if (tokenEqualStr(tk, "<array/>")) {
-            if (state != 2 && state != 5) {
-                fatal(h, ufoErrParse, "Encountered <array/> when not after <key> element, in fontinfo.plist file. Context: '%s'.\n", getBufferContextPtr(h));
-            } else {
-                dnaSET_CNT(h->valueArray, 0);
-                setFontDictKey(h, NULL);
-                state = 1;
-            }
-        } else if (tokenEqualStr(tk, "<string>")) {
-            state = doFontDictValue(h, "<string>", "</string>", state);
-        } else if (tokenEqualStr(tk, "<real>")) {
-            state = doFontDictValue(h, "<real>", "</real>", state);
-        } else if (tokenEqualStr(tk, "<integer>")) {
-            state = doFontDictValue(h, "<integer>", "</integer>", state);
-        } else if (tokenEqualStr(tk, "<date>")) {
-            state = doFontDictValue(h, "<date>", "</date>", state);
-        } else if (tokenEqualStr(tk, "<data>")) {
-            message(h, "Warning: encountered <data> element: skipping.");
-        } else if (tokenEqualStr(tk, "<false/>")) {
-            setFontDictKey(h, "0");
-            state--;
-        } else if (tokenEqualStr(tk, "<true/>")) {
-            setFontDictKey(h, "1");
-            state--;
-        } else if (state != 0) {
-            tk->val[tk->length - 1] = 0;
-            message(h, "Warning: discarding token '%s', in fontinfo.plist file. Context: '%s'.", tk->val, getBufferContextPtr(h));
-            if (state == 2)
-                state = 1;
-            else if (state == 3)
-                state = 2;
-        }
-    } /* end while more tokens */
-
-    /* Currently, proscriptStdHW and postscriptStdVW have to be hand-edited in. If they haven't been provided,
-     use the first value of the stemsnap entries.
-    */
     fixUnsetDictValues(h);
-
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
     return ufoSuccess;
