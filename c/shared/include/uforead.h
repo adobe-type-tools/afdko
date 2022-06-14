@@ -125,6 +125,10 @@ void ufoFree(ufoCtx h);
 /* ufoFree() destroys the library context and all the resources allocated to
    it. The temporary and debug data streams are closed. */
 
+static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
+
+static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
+
 enum {
 #undef CTL_DCL_ERR
 #define CTL_DCL_ERR(name, string) name,

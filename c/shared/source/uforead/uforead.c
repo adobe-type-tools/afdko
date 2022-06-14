@@ -945,6 +945,27 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
 
 static void setFontDictKey(ufoCtx h, char* keyValue) {
     char* keyName = h->parseKeyName;
+/* ToDo: add extra warnings for verbose-output */
+static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyName){
+    bool valid = true;
+    if (keyValue == NULL) {
+        if (!parsingValueArray)
+            valid = false;
+//            message(h, "Warning: Encountered missing value for fontinfo key %s. Skipping", keyName);
+        else if (parsingValueArray && h->valueArray.cnt == 0)
+            valid = false;
+//            message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
+    } else {
+        if (!strcmp(keyValue, "")){
+        message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
+        valid = false;
+        }
+    }
+    if (!valid)
+        freeValueArray(h);  /* we free h->valueArray after parsing every key to clean up any leftover/invalid data */
+
+    return valid;
+}
     abfTopDict* top = &h->top;
     abfFontDict* fd = h->top.FDArray.array + currentiFD;
     abfPrivateDict* pd = &fd->Private;
@@ -1817,6 +1838,141 @@ static void reallocFDArray(ufoCtx h){
     memcpy(newFDArray, h->top.FDArray.array, (h->top.FDArray.cnt - 1) * sizeof(abfFontDict));
     memFree(h, h->top.FDArray.array);
     h->top.FDArray.array = newFDArray;
+}
+
+static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
+    xmlDocPtr doc;
+    xmlNodePtr cur;
+    char* keyName;
+
+    xmlKeepBlanksDefault(0);
+
+    h->cb.stm.xml_read(&h->cb.stm, h->stm.src, &doc);
+
+    if (doc == NULL) {
+        fatal(h, ufoErrParse, "Unable to read '%s'.\n", filename);
+    }
+
+    cur = xmlDocGetRootElement(doc);
+    if (cur == NULL) {
+        xmlFreeDoc(doc);
+        fatal(h, ufoErrSrcStream, "The %s file is empty.\n", filename);
+    }
+
+    if (!xmlStrEqual((cur)->name, (const xmlChar *) filetype)) {
+        xmlFreeDoc(doc);
+        fatal(h, ufoErrSrcStream, "File %s is of the wrong type, root node != %s.\n", filename, filetype);
+    }
+
+    cur = (cur)->xmlChildrenNode;
+    while (cur && xmlIsBlankNode(cur)) {
+        cur = (cur) -> next;
+    }
+
+    if ( cur == NULL ) {
+        xmlFreeDoc(doc);
+        fatal(h, ufoErrSrcStream, "Error parsing XML file %s.\n", filename);
+    }
+
+    if ((!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))) {
+        xmlFreeDoc(doc);
+        fatal(h, ufoErrSrcStream, "Error reading outermost <dict> in %s.\n", filename);
+    }
+
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+        keyName = parseXMLKeyName(h, cur);
+        cur = cur->next;
+        if (setFontDictKey(h, keyName, cur) && cur != NULL)
+           cur = cur->next;
+    }
+    return ufoErrSrcStream;
+}
+
+/* ToDo: add extra warnings for verbose-output*/
+static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur){
+    if ((xmlStrEqual(cur->name, (const xmlChar *) "key"))) {
+        cur = cur->xmlChildrenNode;
+        if (cur != NULL) {
+            if (xmlStrEqual(cur->name, (const xmlChar *) "text")) {
+                return (char*) xmlNodeGetContent(cur);
+            } else {
+//                message(h, "Warning: Encountered non-text value %s within <key>.", cur->name);
+                return NULL;
+            }
+        } else {
+//            message(h, "Warning: Encountered empty <key></key>.");
+            return NULL;
+        }
+    }
+    return NULL;
+}
+
+static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
+    dnaSET_CNT(h->valueArray, 0);
+    parsingValueArray = true;
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+        char* valueString = parseXMLKeyValue(h, cur);
+        if (valueString != NULL)
+            *dnaNEXT(h->valueArray) = valueString;
+        cur = cur->next;
+    }
+}
+
+static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
+    // go through an XML dict
+    char* keyName;
+    cur = cur->xmlChildrenNode;
+
+    if (parsingFDArray){
+        currentiFD = currentiFD + 1;
+        h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
+        if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
+            reallocFDArray(h);
+        }
+        abfFontDict* fd = h->top.FDArray.array + currentiFD;
+        abfInitFontDict(fd);
+    }
+
+    while (cur != NULL) {
+        char* keyName = parseXMLKeyName(h, cur);
+        cur = cur->next;
+        if (setFontDictKey(h, keyName, cur) && cur != NULL)
+            cur = cur->next;
+    }
+}
+
+static bool isSimpleKey(xmlNodePtr cur){
+    if (xmlStrEqual(cur->name, (const xmlChar *) "string" ) ||
+        xmlStrEqual(cur->name, (const xmlChar *) "integer") ||
+        xmlStrEqual(cur->name, (const xmlChar *) "real")    ||
+        xmlStrEqual(cur->name, (const xmlChar *) "date")) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
+    if (cur == NULL) {
+        return NULL;
+    }
+    if (isSimpleKey(cur)) {  /* if string, integer, or real */
+        return (char*) xmlNodeGetContent(cur);
+    } else if (xmlStrEqual(cur->name, (const xmlChar *) "dict")) {
+        parseXMLDict(h, cur);
+        return NULL;
+    } else if (xmlStrEqual(cur->name, (const xmlChar *) "array")) {
+        parseXMLArray(h, cur);
+        return NULL;  // returning NULL because value is in h->valueArray
+    }  else if (xmlStrEqual(cur->name, (const xmlChar *) "true")) {
+        return "1";
+    }  else if (xmlStrEqual(cur->name, (const xmlChar *) "false")) {
+        return "0";
+    } else {
+        return NULL;
+    }
 }
 
 static int parseFontInfo(ufoCtx h) {
