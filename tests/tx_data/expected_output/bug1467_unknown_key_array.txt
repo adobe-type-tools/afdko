@@ -1,0 +1,8 @@
+## Filename NameRecordsTest.ufo
+## Top Dict
+FamilyName          "NameRecordsTest"
+sup.srcFontType     UFO (name-keyed)
+sup.nGlyphs         1
+## FontDict[0]
+FontName            "NameRecordsTest"
+## Private
