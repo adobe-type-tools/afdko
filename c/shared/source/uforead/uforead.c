@@ -39,7 +39,6 @@
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
-#include <stdbool.h>
 
 enum {
     ufoUnknown,
@@ -58,6 +57,7 @@ long CIDCount = 0;
 int currentiFD = 0;
 int FDArrayInitSize = 50;
 bool parsingFDArray = false;
+bool parsingValueArray = false;
 
 typedef struct
 {
@@ -923,28 +923,49 @@ static char* getKeyValue(ufoCtx h, char* endName, int state) {
     return value;
 }
 
-static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements) {
+/* free dynamic valueArray and set cnt to 0 */
+static void freeValueArray(ufoCtx h){
+    if (h->valueArray.cnt != 0){
+        int i = 0;
+        while ((i < h->valueArray.cnt)) {
+            memFree(h, h->valueArray.array[i]);
+            i++;
+        }
+        dnaSET_CNT(h->valueArray, 0);
+    }
+    parsingValueArray = false;
+}
+
+/* ToDo: add extra warnings for verbose-output */
+static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements, char* arrayKeyName) {
     int i = 0;
+    if (h->valueArray.cnt == 0) {
+//        message(h, "Warning: Encountered empty or invalid array for %s. Skipping", arrayKeyName);
+        return;
+    }
     bluesArray->cnt = h->valueArray.cnt;
     while ((i < h->valueArray.cnt) && (i < numElements)) {
         bluesArray->array[i] = (float)atof(h->valueArray.array[i]);
-        memFree(h, h->valueArray.array[i]);
         i++;
     }
+    freeValueArray(h);
 }
 
+/* ToDo: add extra warnings for verbose-output */
 static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) {
     int i = 0;
+    if (h->valueArray.cnt == 0) {
+//        message(h, "Warning: Encountered empty or invalid array for FontMatrix. Skipping");
+        return;
+    }
     fontMatrix->cnt = h->valueArray.cnt;
     while ((i < h->valueArray.cnt) && (i < numElements)) {
         fontMatrix->array[i] = (float)atof(h->valueArray.array[i]);
-        memFree(h, h->valueArray.array[i]);
         i++;
     }
+    freeValueArray(h);
 }
 
-static void setFontDictKey(ufoCtx h, char* keyValue) {
-    char* keyName = h->parseKeyName;
 /* ToDo: add extra warnings for verbose-output */
 static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyName){
     bool valid = true;
@@ -966,182 +987,162 @@ static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyNam
 
     return valid;
 }
+
+static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
+    /* returns false when current key is NULL/ not parseable,
+       otherwise returns true */
     abfTopDict* top = &h->top;
     abfFontDict* fd = h->top.FDArray.array + currentiFD;
     abfPrivateDict* pd = &fd->Private;
     BluesArray* bluesArray;
     abfFontMatrix* fontMatrix;
 
-    /* If we do not use a keyValue, we need to dispose of it
-     */
-    if (!strcmp(keyName, "copyright")) {
-        top->Copyright.ptr = keyValue;
-    } else if (!strcmp(keyName, "trademark")) {
-        char* copySymbol;
-        top->Notice.ptr = keyValue;
-        /* look for the (c) symbol U+00A9, which is 0xC2, 0xA9 in UTF-8 */
-        copySymbol = strstr(keyValue, "\xC2\xA9");
-        if (copySymbol != NULL) {
-            /* if there is a copyright symbol (U+00A9),
-               replace it with the word "Copyright" */
-            char* cpy = "Copyright";
-            char* newString = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
-            /* set the 0xC2 to NULL to terminate the left side of the string */
-            *copySymbol = '\0';
-            /* use copySymbol + 2 to skip the NULL and the 0xA9
-               to get the right side of the string */
-            sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 2);
-            top->Notice.ptr = newString;
-        }
-    } else if (!strcmp(keyName, "versionMajor")) {
-        if (top->version.ptr == NULL)
-            top->version.ptr = keyValue;
-        else {
-            char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
-            sprintf(newString, "%s.%s", keyValue, top->version.ptr);
-            memFree(h, top->version.ptr);
-            top->version.ptr = newString;
-            memFree(h, keyValue);
-        }
-    } else if (!strcmp(keyName, "versionMinor")) {
-        if (top->version.ptr == NULL)
-            top->version.ptr = keyValue;
-        else {
-            char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
-            sprintf(newString, "%s.%s", top->version.ptr, keyValue);
-            memFree(h, top->version.ptr);
-            top->version.ptr = newString;
-            memFree(h, keyValue);
-        }
-    } else if (!strcmp(keyName, "postscriptFontName")) {
-        fd->FontName.ptr = keyValue;
-    } else if (!strcmp(keyName, "openTypeNamePreferredFamilyName")) {
-        top->FamilyName.ptr = keyValue;
-    } else if (!strcmp(keyName, "familyName")) {
-        if (top->FamilyName.ptr == NULL)  // we don't re-set this if it was set by "openTypeNamePreferredFamilyName"
+    if (keyName == NULL){
+        return false;
+    }
+    if (!strcmp(keyName, "postscriptFDArray")) {
+        h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
+        if (h->top.version.ptr != NULL)
+            h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
+        abfInitFontDict(h->top.FDArray.array);
+
+        parsingFDArray = true;
+        currentiFD = -1;
+        parseXMLKeyValue(h, cur);
+        parsingFDArray = false;
+    } else if (!strcmp(keyName, "PrivateDict")) {
+        parsingFDArray = false;
+        parseXMLKeyValue(h, cur);
+        parsingFDArray = true;
+    } else {
+        char* keyValue = parseXMLKeyValue(h, cur);
+        if (!keyValueValid(h, cur, keyValue, keyName))
+            return false;
+        if (!strcmp(keyName, "copyright")) {
+            top->Copyright.ptr = keyValue;
+        } else if (!strcmp(keyName, "trademark")) {
+            char* copySymbol;
+            top->Notice.ptr = keyValue;
+            /* look for the (c) symbol U+00A9, which is 0xC2, 0xA9 in UTF-8 */
+            copySymbol = strstr(keyValue, "\xC2\xA9");
+            if (copySymbol != NULL) {
+                /* if there is a copyright symbol (U+00A9),
+                   replace it with the word "Copyright" */
+                char* cpy = "Copyright";
+                char* newString = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
+                /* set the 0xC2 to NULL to terminate the left side of the string */
+                *copySymbol = '\0';
+                /* use copySymbol + 2 to skip the NULL and the 0xA9
+                   to get the right side of the string */
+                sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 2);
+                top->Notice.ptr = newString;
+            }
+        } else if (!strcmp(keyName, "versionMajor")) {
+            if (top->version.ptr == NULL)
+                top->version.ptr = keyValue;
+            else {
+                char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
+                sprintf(newString, "%s.%s", keyValue, top->version.ptr);
+                memFree(h, top->version.ptr);
+                top->version.ptr = newString;
+            }
+        } else if (!strcmp(keyName, "versionMinor")) {
+            if (top->version.ptr == NULL)
+                top->version.ptr = keyValue;
+            else {
+                char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
+                sprintf(newString, "%s.%s", top->version.ptr, keyValue);
+                memFree(h, top->version.ptr);
+                top->version.ptr = newString;
+            }
+        } else if (!strcmp(keyName, "postscriptFontName")) {
+            fd->FontName.ptr = keyValue;
+        } else if (!strcmp(keyName, "openTypeNamePreferredFamilyName")) {
             top->FamilyName.ptr = keyValue;
-        else
-            memFree(h, keyValue);
-    } else if (!strcmp(keyName, "postscriptFullName")) {
-        top->FullName.ptr = keyValue;
-    } else if (!strcmp(keyName, "postscriptWeightName")) {
-        top->Weight.ptr = keyValue;
-    } else if (!strcmp(keyName, "postscriptIsFixedPitch")) {
-        top->isFixedPitch = atol(keyValue);
-    } else if (!strcmp(keyName, "FSType")) {
-        top->FSType = atoi(keyValue);
-    } else if (!strcmp(keyName, "italicAngle")) {
-        top->ItalicAngle = (float)strtod(keyValue, NULL);
-    } else if (!strcmp(keyName, "postscriptUnderlinePosition")) {
-        top->UnderlinePosition = (float)strtod(keyValue, NULL);
-    } else if (!strcmp(keyName, "postscriptUnderlineThickness")) {
-        top->UnderlineThickness = (float)strtod(keyValue, NULL);
-    } else if (!strcmp(keyName, "unitsPerEm")) {
-        double ppem = strtod(keyValue, NULL);
-        top->sup.UnitsPerEm = (int)ppem;
-        fd->FontMatrix.cnt = 6;
-        fd->FontMatrix.array[0] = (float)(1.0 / ppem);
-        fd->FontMatrix.array[1] = 0;
-        fd->FontMatrix.array[2] = 0;
-        fd->FontMatrix.array[3] = (float)(1.0 / ppem);
-        fd->FontMatrix.array[4] = 0;
-        fd->FontMatrix.array[5] = 0;
-        memFree(h, keyValue);
-    } else if (!strcmp(keyName, "FontName")) {
-        fd->FontName.ptr = keyValue;
-    } else if (!strcmp(keyName, "PaintType")) {
-        fd->PaintType = atoi(keyValue);
-    } else if (!strcmp(keyName, "FontMatrix")) {
-        fontMatrix = &fd->FontMatrix;
-        setFontMatrix(h, fontMatrix, 6);
-    } else if (!strcmp(keyName, "postscriptBlueFuzz")) {
-        pd->BlueFuzz = (float)strtod(keyValue, NULL);
-        memFree(h, keyValue);
-    } else if (!strcmp(keyName, "postscriptBlueShift")) {
-        pd->BlueShift = (float)strtod(keyValue, NULL);
-        memFree(h, keyValue);
-    } else if (!strcmp(keyName, "postscriptBlueScale")) {
-        pd->BlueScale = (float)strtod(keyValue, NULL);
-        memFree(h, keyValue);
-    } else if (!strcmp(keyName, "postscriptForceBold")) {
-        pd->ForceBold = atol(keyValue);
-    } else if (!strcmp(keyName, "postscriptBlueValues")) {
-        bluesArray = (BluesArray*)&pd->BlueValues;
-        setBluesArrayValue(h, bluesArray, 14);
-    } else if (!strcmp(keyName, "postscriptOtherBlues")) {
-        bluesArray = (BluesArray*)&pd->OtherBlues;
-        setBluesArrayValue(h, bluesArray, 10);
-    } else if (!strcmp(keyName, "postscriptFamilyBlues")) {
-        bluesArray = (BluesArray*)&pd->FamilyBlues;
-        setBluesArrayValue(h, bluesArray, 14);
-    } else if (!strcmp(keyName, "postscriptFamilyOtherBlues")) {
-        bluesArray = (BluesArray*)&pd->FamilyOtherBlues;
-        setBluesArrayValue(h, bluesArray, 10);
-    } else if (!strcmp(keyName, "postscriptStdHW")) {
-        if (keyValue != NULL){
-            pd->StdHW = (float)strtod(keyValue, NULL);
-            memFree(h, keyValue);
-        } else {
-            pd->StdHW = (float)strtod(h->valueArray.array[0], NULL);
-            memFree(h, h->valueArray.array[0]);
+        } else if (!strcmp(keyName, "familyName")) {
+            if (top->FamilyName.ptr == NULL)  // we don't re-set this if it was set by "openTypeNamePreferredFamilyName"
+                top->FamilyName.ptr = keyValue;
+        } else if (!strcmp(keyName, "postscriptFullName")) {
+            top->FullName.ptr = keyValue;
+        } else if (!strcmp(keyName, "postscriptWeightName")) {
+            top->Weight.ptr = keyValue;
+        } else if (!strcmp(keyName, "postscriptIsFixedPitch")) {
+            top->isFixedPitch = atol(keyValue);
+        } else if (!strcmp(keyName, "FSType")) {
+            top->FSType = atoi(keyValue);
+        } else if (!strcmp(keyName, "italicAngle")) {
+            top->ItalicAngle = (float)strtod(keyValue, NULL);
+        } else if (!strcmp(keyName, "postscriptUnderlinePosition")) {
+            top->UnderlinePosition = (float)strtod(keyValue, NULL);
+        } else if (!strcmp(keyName, "postscriptUnderlineThickness")) {
+            top->UnderlineThickness = (float)strtod(keyValue, NULL);
+        } else if (!strcmp(keyName, "unitsPerEm")) {
+            double ppem = strtod(keyValue, NULL);
+            top->sup.UnitsPerEm = (int)ppem;
+            fd->FontMatrix.cnt = 6;
+            fd->FontMatrix.array[0] = (float)(1.0 / ppem);
+            fd->FontMatrix.array[1] = 0;
+            fd->FontMatrix.array[2] = 0;
+            fd->FontMatrix.array[3] = (float)(1.0 / ppem);
+            fd->FontMatrix.array[4] = 0;
+            fd->FontMatrix.array[5] = 0;
+        } else if (!strcmp(keyName, "FontName")) {
+            fd->FontName.ptr = keyValue;
+        } else if (!strcmp(keyName, "PaintType")) {
+            fd->PaintType = atoi(keyValue);
+        } else if (!strcmp(keyName, "FontMatrix")) {
+            fontMatrix = &fd->FontMatrix;
+            setFontMatrix(h, fontMatrix, 6);
+        } else if (!strcmp(keyName, "postscriptBlueFuzz")) {
+            pd->BlueFuzz = (float)strtod(keyValue, NULL);
+        } else if (!strcmp(keyName, "postscriptBlueShift")) {
+            pd->BlueShift = (float)strtod(keyValue, NULL);
+        } else if (!strcmp(keyName, "postscriptBlueScale")) {
+            pd->BlueScale = (float)strtod(keyValue, NULL);
+        } else if (!strcmp(keyName, "postscriptForceBold")) {
+            pd->ForceBold = atol(keyValue);
+        } else if (!strcmp(keyName, "postscriptBlueValues")) {
+            bluesArray = (BluesArray*)&pd->BlueValues;
+            setBluesArrayValue(h, bluesArray, 14, keyName);
+        } else if (!strcmp(keyName, "postscriptOtherBlues")) {
+            bluesArray = (BluesArray*)&pd->OtherBlues;
+            setBluesArrayValue(h, bluesArray, 10, keyName);
+        } else if (!strcmp(keyName, "postscriptFamilyBlues")) {
+            bluesArray = (BluesArray*)&pd->FamilyBlues;
+            setBluesArrayValue(h, bluesArray, 14, keyName);
+        } else if (!strcmp(keyName, "postscriptFamilyOtherBlues")) {
+            bluesArray = (BluesArray*)&pd->FamilyOtherBlues;
+            setBluesArrayValue(h, bluesArray, 10, keyName);
+        } else if (!strcmp(keyName, "postscriptStdHW")) {
+            if (keyValue != NULL) {
+                pd->StdHW = (float)strtod(keyValue, NULL);
+            } else {
+                pd->StdHW = (float)strtod(h->valueArray.array[0], NULL);
+                freeValueArray(h);
+            }
+        } else if (!strcmp(keyName, "postscriptStdVW")) {
+            if (keyValue != NULL) {
+                pd->StdVW = (float)strtod(keyValue, NULL);
+            } else {
+                pd->StdVW = (float)strtod(h->valueArray.array[0], NULL);
+                freeValueArray(h);
+            }
+        } else if (!strcmp(keyName, "postscriptStemSnapH")) {
+            bluesArray = (BluesArray*)&pd->StemSnapH;
+            setBluesArrayValue(h, bluesArray, 12, keyName);
+        } else if (!strcmp(keyName, "postscriptStemSnapV")) {
+            bluesArray = (BluesArray*)&pd->StemSnapV;
+            setBluesArrayValue(h, bluesArray, 12, keyName);
+        } else if (!strcmp(keyName, "LanguageGroup")) {
+            pd->LanguageGroup = (float)strtod(keyValue, NULL);
+            h->parseKeyName = NULL;
+        } else if (!strcmp(keyName, "ExpansionFactor")) {
+            pd->ExpansionFactor = (float)strtod(keyValue, NULL);
+            h->parseKeyName = NULL;
         }
-    } else if (!strcmp(keyName, "postscriptStdVW")) {
-        if (keyValue != NULL){
-            pd->StdVW = (float)strtod(keyValue, NULL);
-            memFree(h, keyValue);
-        } else {
-            pd->StdVW = (float)strtod(h->valueArray.array[0], NULL);
-            memFree(h, h->valueArray.array[0]);
-        }
-    } else if (!strcmp(keyName, "postscriptStemSnapH")) {
-        bluesArray = (BluesArray*)&pd->StemSnapH;
-        setBluesArrayValue(h, bluesArray, 12);
-    } else if (!strcmp(keyName, "postscriptStemSnapV")) {
-        bluesArray = (BluesArray*)&pd->StemSnapV;
-        setBluesArrayValue(h, bluesArray, 12);
-    } else if (!strcmp(keyName, "LanguageGroup")) {
-        pd->LanguageGroup = (float)strtod(keyValue, NULL);
-        h->parseKeyName = NULL;
-        memFree(h, keyValue);
-    } else if (!strcmp(keyName, "ExpansionFactor")) {
-        pd->ExpansionFactor = (float)strtod(keyValue, NULL);
-        h->parseKeyName = NULL;
-        memFree(h, keyValue);
-    } else {
-        // if it isn't used, free the string.
-        memFree(h, keyValue);
+        freeValueArray(h);
     }
-}
-
-static int doFontDictValue(ufoCtx h, char* keyName, char* endKeyName, int state) {
-    char* valueString = getKeyValue(h, endKeyName, state);
-    if (valueString == NULL) {
-        if (strcmp(h->parseKeyName, "styleName")) {
-            message(h, "Warning: Encountered empty %s for fontinfo key %s. Skipping", keyName, h->parseKeyName);
-            /* It is valid and common for styleName can be present and empty, when the style is "Regular".*/
-        }
-    }
-
-    if (state == 2)  // we are processing a key value.
-    {
-        if (valueString != NULL)
-            setFontDictKey(h, valueString);
-        state = 1;
-        memFree(h, h->parseKeyName);
-    } else if (state == 3)  // we are within an <array>, which is a key value
-    {
-        if (valueString != NULL)
-            *dnaNEXT(h->valueArray) = valueString;
-    } else if (state >= 5)  // we are within a <dict> within an <array> (an fDict in an FDArray), which is a key value
-    {
-        if (valueString != NULL) {
-            setFontDictKey(h, valueString);
-        }
-    } else {
-        memFree(h, h->parseKeyName);
-        fatal(h, ufoErrParse, "Encountered key value when not after <key> or <array> element. Text: '%s'.", getBufferContextPtr(h));
-    }
-    return state;
+    return true;
 }
 
 static int CTL_CDECL cmpOrderRecs(const void* first, const void* second, void* ctx) {

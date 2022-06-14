@@ -6,6 +6,7 @@
 #define UFOREAD_H
 
 #include "ctlshare.h"
+#include <stdbool.h>
 
 #define UFO_VERSION CTL_MAKE_VERSION(1, 1, 2)
 
@@ -128,6 +129,8 @@ void ufoFree(ufoCtx h);
 static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
 
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
+
+static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 
 enum {
 #undef CTL_DCL_ERR
