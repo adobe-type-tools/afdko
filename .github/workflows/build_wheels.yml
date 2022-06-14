@@ -44,7 +44,7 @@ jobs:
       env:
         CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: universal2
-        CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'"
+        CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64 -I/usr/include/libxml2' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'"
 
     - name: Build wheel (except macosx_universal2)
       uses: pypa/cibuildwheel@v2.3.1
@@ -57,7 +57,10 @@ jobs:
         CIBW_ARCHS_LINUX: x86_64
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         CIBW_SKIP: "*musllinux*"
-        CIBW_BEFORE_ALL_LINUX: yum install -y libuuid-devel
+        CIBW_BEFORE_ALL_LINUX: "yum install -y libuuid-devel && yum install -y libxml2-devel"
+        CIBW_BEFORE_BUILD_WINDOWS: "code --install libxml2"
+        CIBW_ENVIRONMENT_LINUX: "CFLAGS='-I/usr/include/libxml2'"
+        CIBW_ENVIRONMENT_WINDOWS: "CFLAGS='-I/usr/include/libxml2'"
 
     - name: Build sdist (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
