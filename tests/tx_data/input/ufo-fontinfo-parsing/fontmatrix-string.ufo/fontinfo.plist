@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>postscriptFontName</key>
+	<string>fontmatrix-string</string>
+	<key>FontMatrix</key>
+	<string>invalid-string-for-fontmatrix</string>
+	<key>trademark</key>
+	<string>Copyright 2014-2020 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'. Source is a trademark of Adobe in the United States and/or other countries.</string>
+</dict>
+</plist>
+<!-- 
+Tests for validating dynamic valueArrays in fontinfo.plist
+Warn user when there is invalid input for fontMatrix, even if
+default values are used.
+-->

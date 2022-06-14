@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>postscriptFontName</key>
+	<string>empty-key-name-in-fdarray</string>
+	<key>postscriptFDArray</key>
+	<array>
+	<dict>
+	<key></key>
+	<string>SourceHanSans-Heavy-Generic</string>
+	<key>PaintType</key>
+	<integer>3</integer>
+	<key>PrivateDict</key>
+	<dict>
+	<key>postscriptBlueValues</key>
+	<array>
+		<integer>-250</integer>
+		<integer>-250</integer>
+		<integer>1100</integer>
+		<integer>1100</integer>
+	</array>
+	</dict>
+	</dict>
+	</array>
+</dict>
+</plist>

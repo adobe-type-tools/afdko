@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>postscriptFontName</key>
+	<string>bluesarray-string-val</string>
+	<key>postscriptFDArray</key>
+	<array>
+	<dict>
+	<key>PrivateDict</key>
+	<dict>
+	<key>postscriptBlueValues</key>
+    <string>invalid-string-for-bluesvaluesarray</string>
+	<key>postscriptStdHW</key>
+	<array>
+		<integer>35</integer>
+	</array>
+	</dict>
+	</dict>
+	</array>
+</dict>
+</plist>
+<!-- 
+Tests for validating dynamic valueArrays in fontinfo.plist
+Warn user when there is invalid input for blueArrays
+-->
