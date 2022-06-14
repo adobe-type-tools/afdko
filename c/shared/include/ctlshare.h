@@ -15,6 +15,9 @@
 #endif
 #include <stdint.h>
 
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+
 /* CoreType Library Shared Definitions
    ===================================
    This library supplies definitions that are shared between members of the
@@ -139,6 +142,7 @@ struct ctlStreamCallbacks_ {
     int (*seek)(ctlStreamCallbacks *cb, void *stream, long offset);
     long (*tell)(ctlStreamCallbacks *cb, void *stream);
     size_t (*read)(ctlStreamCallbacks *cb, void *stream, char **ptr);
+    size_t (*xml_read)(ctlStreamCallbacks *cb, void *stream, xmlDocPtr *doc);
     size_t (*write)(ctlStreamCallbacks *cb,
                     void *stream, size_t count, char *ptr);
     int (*status)(ctlStreamCallbacks *cb, void *stream);

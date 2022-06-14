@@ -386,7 +386,7 @@ static long stm_tell(ctlStreamCallbacks *cb, void *stream) {
 }
 
 /* Read from stream. */
-static size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr) {
+static size_t stm_read(ctlStreamCallbacks *cb, Stream *stream, char **ptr) {
     Stream *s = stream;
     switch (s->type) {
         case stm_Src:
@@ -403,6 +403,26 @@ static size_t stm_read(ctlStreamCallbacks *cb, void *stream, char **ptr) {
             return tmp_read(s, ptr);
     }
     return 0; /* Suppress compiler warning */
+}
+
+static size_t stm_xml_read(ctlStreamCallbacks *cb, Stream *stream, xmlDocPtr *doc){
+    int res;
+    xmlParserCtxtPtr ctxt;
+
+    Stream *s = stream;
+    txCtx h = cb->direct_ctx;
+    res = fread(s->buf, 1, 4, s->fp);
+    if (res > 0) {
+        ctxt = xmlCreatePushParserCtxt(NULL, NULL,
+                    s->buf, res, s->filename);
+        while ((res = fread(s->buf, 1, BUFSIZ, s->fp)) > 0) {
+            xmlParseChunk(ctxt, s->buf, res, 0);
+        }
+        xmlParseChunk(ctxt, s->buf, 0, 1);
+        *doc = ctxt->myDoc;
+        xmlFreeParserCtxt(ctxt);
+    }
+    return 0;
 }
 
 /* Write to stream. */
@@ -501,6 +521,7 @@ void stmInit(txCtx h) {
     h->cb.stm.seek = stm_seek;
     h->cb.stm.tell = stm_tell;
     h->cb.stm.read = stm_read;
+    h->cb.stm.xml_read = stm_xml_read;
     h->cb.stm.write = stm_write;
     h->cb.stm.status = stm_status;
     h->cb.stm.close = stm_close;
