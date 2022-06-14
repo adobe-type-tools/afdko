@@ -407,6 +407,10 @@ void ufoFree(ufoCtx h) {
     freeStrings(h);
     dnaFree(h->dna);
 
+    if (h->top.FDArray.array != &h->fdict){  // if more memory was allocated for FDArray
+        memFree(h, h->top.FDArray.array);
+    }
+
     /* Close debug stream */
     if (h->stm.dbg != NULL)
         (void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
