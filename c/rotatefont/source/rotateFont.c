@@ -8,7 +8,7 @@
 
 #include "tx_shared.h"
 
-#define ROTATE_VERSION CTL_MAKE_VERSION(1, 2, 3) /* derived from tx */
+#define ROTATE_VERSION CTL_MAKE_VERSION(1, 3, 0) /* derived from tx */
 
 #define kHADV_NOT_SPECIFIED 11111.0 /* If the value is this, we don't overwrite the glyphs original advance width*/
 #define kkHADV_NOT_SPECIFIED_NAME "None"
