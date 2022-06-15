@@ -1262,3 +1262,15 @@ def test_unknown_fontinfoplist_key_bug1467():
     expected_path = get_expected_path("bug1467_unknown_key_array.txt")
     stdout_path = runner(CMD + ['-s', '-o', 'dump', '0', '-f', input_path])
     assert differ([expected_path, stdout_path, '-l', '1'])
+
+
+def test_unknown_fontinfoplist_key_bug1396():
+    """
+    Tests a UFO with an unknown key and a <string> value in fontinfo.plist.
+    Related to bug 1467.
+    The previous implementation of fontinfo.plist parsing would cause a crash
+    in this scenario. The switch to the libxml2 implementation resolves this.
+    """
+    input_path = get_input_path("bug1396_unknown_key_string.ufo")
+    arg = [TOOL, '-t1', '-f', input_path]
+    assert subprocess.call(arg) == 0
