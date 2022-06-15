@@ -1252,9 +1252,9 @@ def test_ufo_fontinfo_parsing(file, msg, ret_code):
         assert subprocess.call(arg) == 6
 
 
-def test_unknown_key_bug1467():
+def test_unknown_fontinfoplist_key_bug1467():
     """
-    Tests a UFO with an unknown key and an <array> value.
+    Tests a UFO with an unknown key and an <array> value in fontinfo.plist.
     The previous implementation of fontinfo.plist parsing would cause a crash
     in this scenario. The switch to the libxml2 implementation resolves this.
     """
