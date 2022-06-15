@@ -8,7 +8,7 @@
 
 #include "tx_shared.h"
 
-#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1, 2, 3) /* derived from tx */
+#define MERGEFONTS_VERSION CTL_MAKE_VERSION(1, 3, 0) /* derived from tx */
 
 #ifdef __cplusplus
 extern "C" {
