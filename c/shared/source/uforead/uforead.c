@@ -1303,6 +1303,27 @@ static int parseGlyphOrder(ufoCtx h) {
     dnaSET_CNT(h->valueArray, 0);
 
     int parsingSuccess = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    
+    if (h->data.glifOrder.cnt > 0) {
+        /* Sort the array by glyph name. */
+
+        ctuQSort(h->data.glifOrder.array, h->data.glifOrder.cnt,
+                 sizeof(h->data.glifOrder.array[0]), cmpOrderRecs, h);
+
+        /* weed out duplicates - these cause sorting to work differently depending on whether
+         we approach the pair from the top or bottom. */
+        {
+            int i = 1;
+            while (i < h->data.glifOrder.cnt) {
+                if (0 == strcmp(h->data.glifOrder.array[i].glyphName, h->data.glifOrder.array[i - 1].glyphName)) {
+                    /* set the glyph orders to be the same. First wins */
+                    h->data.glifOrder.array[i].order = h->data.glifOrder.array[i - 1].order;
+                    message(h, "Warning: glyph order contains duplicate entries for glyphs '%s'.", h->data.glifOrder.array[i].glyphName);
+                }
+                i++;
+            }
+        }
+    }
 
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
