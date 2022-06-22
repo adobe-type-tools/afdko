@@ -941,6 +941,23 @@ static void freeValueArray(ufoCtx h){
 }
 
 /* ToDo: add extra warnings for verbose-output */
+static void setGlifOrderArray(ufoCtx h, char* arrayKeyName) {
+    int i = 0;
+    if (h->valueArray.cnt == 0) {
+//        message(h, "Warning: Encountered empty or invalid array for %s. Skipping", arrayKeyName);
+        return;
+    }
+    while ((i < h->valueArray.cnt)) {
+        GlIFOrderRec* newGLIFOrderRec;
+        newGLIFOrderRec = dnaNEXT(h->data.glifOrder);
+        newGLIFOrderRec->glyphName = copyStr(h, h->valueArray.array[i]);
+        newGLIFOrderRec->order = h->data.glifOrder.cnt - 1;
+        i++;
+    }
+    freeValueArray(h);
+}
+
+/* ToDo: add extra warnings for verbose-output */
 static void setBluesArrayValue(ufoCtx h, BluesArray* bluesArray, int numElements, char* arrayKeyName) {
     int i = 0;
     if (h->valueArray.cnt == 0) {
@@ -1143,6 +1160,16 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         } else if (!strcmp(keyName, "ExpansionFactor")) {
             pd->ExpansionFactor = (float)strtod(keyValue, NULL);
             h->parseKeyName = NULL;
+        } else if (!strcmp(keyName, "public.glyphOrder")) {
+            setGlifOrderArray(h, keyName);
+        } else if (!strcmp(keyName, "com.adobe.type.cid.CIDFontName")) {
+            top->cid.CIDFontName.ptr = copyStr(h, keyValue);
+        } else if (!strcmp(keyName, "com.adobe.type.cid.Registry")) {
+            top->cid.Registry.ptr = copyStr(h, keyValue);
+        } else if (!strcmp(keyName, "com.adobe.type.cid.Ordering")) {
+            top->cid.Ordering.ptr = copyStr(h, keyValue);
+        } else if (!strcmp(keyName, "com.adobe.type.cid.Supplement")) {
+            top->cid.Supplement = atol(copyStr(h, keyValue));
         }
         freeValueArray(h);
     }
@@ -1263,177 +1290,22 @@ static void updateGLIFRec(ufoCtx h, int state) {
 #define CIDNAME 1255
 
 static int parseGlyphOrder(ufoCtx h) {
-    int state = 0; /* 0 == start, 1= seen start of glyph, 2 = seen glyph name, 3 = in path, 4 in comment.  */
-    int seenGO = 0;
-    int prevState = 0;
-    h->src.next = h->mark = NULL;
+    const char* filetype = "plist";
 
+    h->src.next = h->mark = NULL;
     h->cb.stm.clientFileName = "lib.plist";
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
-        fprintf(stderr, "Failed to read lib.plist\n");
+        message(h, "Warning: Failed to open fontinfo.plist in source UFO font. No PostScript FontDict values are specified. \n");
         return ufoErrSrcStream;
     }
-    abfTopDict* top = &h->top;
 
     dnaSET_CNT(h->valueArray, 0);
-    fillbuf(h, 0);
-    /* Read in file, then sort by glyph name */
 
-    while (!(seenGO || (h->flags & SEEN_END))) {
-        token* tk;
-        tk = getToken(h, state);
-
-        if (tk == NULL)
-            break;
-
-        if (tokenEqualStr(tk, "<!--")) {
-            prevState = state;
-            state = IN_COMMENT;
-        } else if (tokenEqualStr(tk, "-->")) {
-            if (state != IN_COMMENT)
-                fatal(h, ufoErrParse, "Encountered end comment token while not in comment.");
-            state = prevState;
-        } else if (state == IN_COMMENT) {
-            continue;
-        } else if (tokenEqualStrN(tk, "<dict", 5)) {
-            // <dict/> case
-            if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>'))
-                continue;
-            state++;
-        } else if (tokenEqualStr(tk, "</dict>")) {
-            state--;
-        } else if (tokenEqualStrN(tk, "<key", 4) && (state == 1)) /* if we are at the top level of the lib dict, check the key values */
-        {
-            if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
-                message(h, "Warning: Encountered empty <key/>. Text: '%s'.", getBufferContextPtr(h));
-            } else {
-                // get key name
-                tk = getElementValue(h, state);
-                if (tokenEqualStr(tk, "</key>")) {
-                    message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
-                } else {
-                    if (tokenEqualStr(tk, "com.adobe.type.cid.CIDFontName")) {
-                        prevState = state;
-                        state = CIDNAME;
-                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Registry")) {
-                        prevState = state;
-                        state = REGISTRY;
-                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Ordering")) {
-                        prevState = state;
-                        state = ORDERING;
-                    } else if (tokenEqualStr(tk, "com.adobe.type.cid.Supplement")) {
-                        prevState = state;
-                        state = SUPPLEMENT;
-                    } else if (tokenEqualStr(tk, "public.glyphOrder")) {
-                        prevState = state;
-                        state = START_PUBLIC_ORDER;
-                    }
-                    // get end-key.
-                    tk = getToken(h, state);
-                    if (!tokenEqualStr(tk, "</key>")) {
-                        tk->val[tk->length - 1] = 0;
-                        fatal(h, ufoErrParse, "Encountered element other than </key> when reading <key> name: %s. Text: '%s'.", tk->val, getBufferContextPtr(h));
-                    }
-                }
-            }
-        } else if ((tokenEqualStrN(tk, "<array", 6)) && (state == START_PUBLIC_ORDER)) {
-            state = IN_PUBLIC_ORDER;
-            if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
-                state = prevState;
-            }
-        } else if ((tokenEqualStr(tk, "</array>")) && (state == IN_PUBLIC_ORDER)) {
-            state = prevState;
-        } else if ((tokenEqualStrN(tk, "<string", 7)) && ((state == REGISTRY) || (state == ORDERING) || (state == CIDNAME) )) {
-            if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
-                message(h, "Warning: Encountered empty <string/>. Text: '%s'.", getBufferContextPtr(h));
-            } else {
-                tk = getElementValue(h, state);
-                if (tokenEqualStr(tk, "</string>")) {
-                    message(h, "Warning: Encountered empty <string></string>. Text: '%s'.", getBufferContextPtr(h));
-                } else {
-                    if (state == CIDNAME) {
-                        top->cid.CIDFontName.ptr = copyStr(h, tk->val);
-                        state = prevState;
-                    } else if (state == REGISTRY) {
-                        top->cid.Registry.ptr = copyStr(h, tk->val);
-                        state = prevState;
-                    } else if (state == ORDERING) {
-                        top->cid.Ordering.ptr = copyStr(h, tk->val);
-                        state = prevState;
-                    }
-                    tk = getToken(h, state);
-                    if (!tokenEqualStr(tk, "</string>")) {
-                        tk->val[tk->length - 1] = 0;
-                        fatal(h, ufoErrParse, "Encountered element other than </string> when reading <string> name: %s. Text: '%s'.", tk->val, getBufferContextPtr(h));
-                    }
-                }
-            }
-        } else if ((tokenEqualStrN(tk, "<integer", 8)) && (state == SUPPLEMENT)) {
-                if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
-                    message(h, "Warning: Encountered empty <integer/>. Text: '%s'.", getBufferContextPtr(h));
-                } else {
-                    tk = getElementValue(h, state);
-                    if (tokenEqualStr(tk, "</integer>")) {
-                        message(h, "Warning: Encountered empty <integer></integer>. Text: '%s'.", getBufferContextPtr(h));
-                    } else {
-                        if (state == SUPPLEMENT) {
-                            top->cid.Supplement = atol(copyStr(h, tk->val));
-                            state = prevState;
-                        }
-                        tk = getToken(h, state);
-                        if (!tokenEqualStr(tk, "</integer>")) {
-                            tk->val[tk->length - 1] = 0;
-                            fatal(h, ufoErrParse, "Encountered element other than </integer> when reading <string> name: %s. Text: '%s'.", tk->val, getBufferContextPtr(h));
-                        }
-                    }
-                }
-        } else if ((tokenEqualStrN(tk, "<string", 7)) && (state == IN_PUBLIC_ORDER)) {
-            if ((tk->val[tk->length - 2] == '/') && (tk->val[tk->length - 1] == '>')) {
-                message(h, "Warning: Encountered empty <string/> in public.glyphOrder. Text: '%s'.", getBufferContextPtr(h));
-            } else {
-                tk = getElementValue(h, state);
-                if (tokenEqualStr(tk, "</string>")) {
-                    message(h, "Warning: Encountered empty <string></string>. Text: '%s'.", getBufferContextPtr(h));
-                } else {
-                        GlIFOrderRec* newGLIFOrderRec;
-                        newGLIFOrderRec = dnaNEXT(h->data.glifOrder);
-                        newGLIFOrderRec->glyphName = copyStr(h, tk->val);  // get a copy in memory
-                        newGLIFOrderRec->order = h->data.glifOrder.cnt - 1;
-                        tk = getToken(h, state);
-                        if (!tokenEqualStr(tk, "</string>")) {
-                            tk->val[tk->length - 1] = 0;
-                            fatal(h, ufoErrParse, "Encountered element other than </string> when reading <string> name: %s. Text: '%s'.", tk->val, getBufferContextPtr(h));
-                        }
-                }
-            }
-        }
-    } /* end while more tokens */
-
-    if (h->data.glifOrder.cnt > 0) {
-        /* Sort the array by glyph name. */
-
-        ctuQSort(h->data.glifOrder.array, h->data.glifOrder.cnt,
-                 sizeof(h->data.glifOrder.array[0]), cmpOrderRecs, h);
-
-        /* weed out duplicates - these cause sorting to work differently depending on whether
-         we approach the pair from the top or bottom. */
-        {
-            int i = 1;
-            while (i < h->data.glifOrder.cnt) {
-                if (0 == strcmp(h->data.glifOrder.array[i].glyphName, h->data.glifOrder.array[i - 1].glyphName)) {
-                    /* set the glyph orders to be the same. First wins */
-                    h->data.glifOrder.array[i].order = h->data.glifOrder.array[i - 1].order;
-                    message(h, "Warning: glyph order contains duplicate entries for glyphs '%s'.", h->data.glifOrder.array[i].glyphName);
-                }
-                i++;
-            }
-        }
-    }
+    int parsingSuccess = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
 
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
-
     return ufoSuccess;
 }
 
