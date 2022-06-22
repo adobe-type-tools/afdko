@@ -707,18 +707,19 @@ def test_check_psname_in_fmndb_bug1171(explicit_fmndb):
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("missing-libplist-namekeyed", b"tx: (ufr) Warning: Failed to open " +
                                    b"lib.plist in source UFO font.", 0),
-    ("missing-libplist-cidkeyed", None, 2)
+    ("missing-libplist-cidkeyed",  b"tx: (ufr) Warning: Failed to open " +
+                                   b"lib.plist in source UFO font.", 0),
+    ("missing-libplist-cidkeyed-cid-identifiers", None, 2)
 ])
 def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
     """
-    if reading namekeyed UFO:
-        makeotf should not fail if optional lib.plist is not found,
-        and instead should display this tx warning msg.
-    if reading cidkeyed UFO:
-        makeotf should fail because tx fails as it expects values for
+    if reading namekeyed or cidkeyed UFO:
+        tx should not fail if optional lib.plist is not found.
+        Instead, warn the user.
+    if reading cidkeyed UFO with cid identifiers in glyphs:
+        tx later fails as it expects values for
         Registry, Ordering, Supplement and CIDFontName keys,
-        which are defined in lib.plist.
-        This tx warning msg should show up in makeotf.
+        which should be defined in lib.plist
     """
     folder = "ufo-libplist-parsing/"
     input_path = get_input_path(folder + file + ".ufo")
