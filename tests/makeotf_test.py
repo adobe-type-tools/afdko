@@ -702,3 +702,40 @@ def test_check_psname_in_fmndb_bug1171(explicit_fmndb):
     assert differ([expected_ttx, actual_ttx,
                    '-s', '<ttFont sfntVersion',
                    '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+
+
+@pytest.mark.parametrize('file, msg, ret_code', [
+    ("missing-libplist-namekeyed", b"tx: (ufr) Warning: Failed to open " +
+                                   b"lib.plist in source UFO font.", 0),
+    ("missing-libplist-cidkeyed", None, 2)
+])
+def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
+    """
+    if reading namekeyed UFO:
+        makeotf should not fail if optional lib.plist is not found,
+        and instead should display this tx warning msg.
+    if reading cidkeyed UFO:
+        makeotf should fail because tx fails as it expects values for
+        Registry, Ordering, Supplement and CIDFontName keys,
+        which are defined in lib.plist.
+        This tx warning msg should show up in makeotf.
+    """
+    folder = "ufo-libplist-parsing/"
+    input_path = get_input_path(folder + file + ".ufo")
+    out_font_path = get_temp_file_path()
+    args = CMD + ['-s', '-e', '-o',
+                  'f', f'_{input_path}',
+                  'o', f'_{out_font_path}']
+    stdout_path = runner(args)
+    with open(stdout_path, 'rb') as f:
+        output = f.read()
+
+    if msg is None:
+        # msg is in a file in expected_output
+        expected_path = get_expected_path(file + ".txt")
+        with open(expected_path, 'rb') as expected_msg:
+            msg = expected_msg.read()
+    assert msg in output
+
+    assert subprocess.call([TOOL, '-f', input_path,
+                            '-o', out_font_path]) == ret_code

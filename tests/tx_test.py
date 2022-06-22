@@ -1274,3 +1274,35 @@ def test_unknown_fontinfoplist_key_bug1396():
     input_path = get_input_path("bug1396_unknown_key_string.ufo")
     arg = [TOOL, '-t1', '-f', input_path]
     assert subprocess.call(arg) == 0
+
+
+@pytest.mark.parametrize('file, msg, ret_code', [
+    ("missing-libplist-namekeyed", b"tx: (ufr) Warning: Failed to open " +
+                                   b"lib.plist in source UFO font.", 0),
+    ("missing-libplist-cidkeyed", None, 6)
+])
+def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
+    """
+    if reading namekeyed UFO:
+        tx should not fail if optional lib.plist is not found.
+        Instead, warn the user.
+    if reading cidkeyed UFO:
+        tx later fails as it expects values for
+        Registry, Ordering, Supplement and CIDFontName keys,
+        which are defined in lib.plist
+    """
+    folder = "ufo-libplist-parsing/"
+    input_path = get_input_path(folder + file + ".ufo")
+    stdout_path = runner(CMD + ['-s', '-e', '-o', 't1', '-f',
+                         input_path])
+    with open(stdout_path, 'rb') as f:
+        output = f.read()
+
+    if msg is None:
+        # msg is in a file in expected_output
+        expected_path = get_expected_path(file + ".txt")
+        with open(expected_path, 'rb') as expected_msg:
+            msg = expected_msg.read()
+    assert msg in output
+
+    assert subprocess.call([TOOL, '-t1', '-f', input_path]) == ret_code

@@ -1,0 +1,8 @@
+tx: (ufr) Warning: No version specified in source UFO font.
+tx: (ufr) Warning: Failed to open lib.plist in source UFO font.
+
+tx: (ufr) Warning: glyph order does not contain glyph name 'cid00000'.
+tx: (ufr) Warning: glyph order does not contain glyph name 'cid17899'.
+tx: (ufr) Warning: glyph order does not contain glyph name 'cid17900'.
+tx: (ufr) Warning: glyph order does not contain glyph name 'cid17901'.
+tx: (t1w) bad font dictionary. Missing either the CID font name, or the Registry-Order-Supplement names.
