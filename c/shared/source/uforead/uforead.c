@@ -1297,14 +1297,14 @@ static int parseGlyphOrder(ufoCtx h) {
     h->cb.stm.clientFileName = "lib.plist";
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
-        message(h, "Warning: Failed to open lib.plist in source UFO font.\n");
+        message(h, "Warning: Unable to open lib.plist in source UFO font.");
         return ufoSuccess;
     }
 
     dnaSET_CNT(h->valueArray, 0);
 
     int parsingSuccess = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
-    
+
     if (h->data.glifOrder.cnt > 0) {
         /* Sort the array by glyph name. */
 
@@ -1886,7 +1886,7 @@ static int parseFontInfo(ufoCtx h) {
     h->cb.stm.clientFileName = "fontinfo.plist";
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
-        message(h, "Warning: Failed to open fontinfo.plist in source UFO font. No PostScript FontDict values are specified. \n");
+        message(h, "Warning: Unable to open fontinfo.plist in source UFO font. No PostScript FontDict values are specified. \n");
         fixUnsetDictValues(h);
         return ufoSuccess;
     }
