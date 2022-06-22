@@ -1225,9 +1225,10 @@ static long getGlyphOrderIndex(ufoCtx h, char* glyphName) {
 static void addGLIFRec(ufoCtx h, int state) {
     char* fileName;
     GLIF_Rec* newGLIFRec;
-    long int glyphOrder;
+    long int glyphOrder = ABF_UNSET_INT;
 
-    glyphOrder = getGlyphOrderIndex(h, h->parseKeyName);
+    if (h->data.glifOrder.cnt != 0)  /* only try to get glyphOrderIndex if cnt > 0 */
+        glyphOrder = getGlyphOrderIndex(h, h->parseKeyName);
     newGLIFRec = dnaNEXT(h->data.glifRecs);
     newGLIFRec->glyphName = h->parseKeyName;
     newGLIFRec->glyphOrder = glyphOrder;
@@ -1412,6 +1413,11 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
             message(h, "Warning: discarding token '%s", tk->val);
         }
     } /* end while more tokens */
+
+    /* 'glyph order does not contain glyph name' warnings in getGlyphOrderIndex are suppressed if glyphOrder count is 0 to reduce amount of warnings.
+        Instead, add one warning here.*/
+    if (h->data.glifOrder.cnt == 0)
+        message(h, "Warning: public.glyphOrder key is empty and does not contain glyph name for all %d glyphs. Consider defining this in lib.plist.", h->data.glifRecs.cnt);
 
     if (!altLayer) {
         if (h->data.glifOrder.cnt > 0) {
