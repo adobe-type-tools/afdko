@@ -1277,9 +1277,9 @@ def test_unknown_fontinfoplist_key_bug1396():
 
 
 @pytest.mark.parametrize('file, msg, ret_code', [
-    ("missing-libplist-namekeyed", b"tx: (ufr) Warning: Failed to open " +
+    ("missing-libplist-namekeyed", b"tx: (ufr) Warning: Unable to open " +
                                    b"lib.plist in source UFO font.", 0),
-    ("missing-libplist-cidkeyed",  b"tx: (ufr) Warning: Failed to open " +
+    ("missing-libplist-cidkeyed",  b"tx: (ufr) Warning: Unable to open " +
                                    b"lib.plist in source UFO font.", 0),
     ("missing-libplist-cidkeyed-cid-identifiers", None, 6)
 ])
