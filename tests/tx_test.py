@@ -1279,17 +1279,19 @@ def test_unknown_fontinfoplist_key_bug1396():
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("missing-libplist-namekeyed", b"tx: (ufr) Warning: Failed to open " +
                                    b"lib.plist in source UFO font.", 0),
-    ("missing-libplist-cidkeyed", None, 6)
+    ("missing-libplist-cidkeyed",  b"tx: (ufr) Warning: Failed to open " +
+                                   b"lib.plist in source UFO font.", 0),
+    ("missing-libplist-cidkeyed-cid-identifiers", None, 6)
 ])
 def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
     """
-    if reading namekeyed UFO:
+    if reading namekeyed or cidkeyed UFO:
         tx should not fail if optional lib.plist is not found.
         Instead, warn the user.
-    if reading cidkeyed UFO:
+    if reading cidkeyed UFO with cid identifiers in glyphs:
         tx later fails as it expects values for
         Registry, Ordering, Supplement and CIDFontName keys,
-        which are defined in lib.plist
+        which should be defined in lib.plist
     """
     folder = "ufo-libplist-parsing/"
     input_path = get_input_path(folder + file + ".ufo")
