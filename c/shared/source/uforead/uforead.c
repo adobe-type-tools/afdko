@@ -1296,8 +1296,8 @@ static int parseGlyphOrder(ufoCtx h) {
     h->cb.stm.clientFileName = "lib.plist";
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
-        message(h, "Warning: Failed to open fontinfo.plist in source UFO font. No PostScript FontDict values are specified. \n");
-        return ufoErrSrcStream;
+        message(h, "Warning: Failed to open lib.plist in source UFO font.\n");
+        return ufoSuccess;
     }
 
     dnaSET_CNT(h->valueArray, 0);
