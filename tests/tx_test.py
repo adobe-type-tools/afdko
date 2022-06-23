@@ -1276,11 +1276,13 @@ def test_unknown_fontinfoplist_key_bug1396():
     assert subprocess.call(arg) == 0
 
 
+libplist_warn = (b"tx: (ufr) Warning: Unable to open "
+                 b"lib.plist in source UFO font.")
+
+
 @pytest.mark.parametrize('file, msg, ret_code', [
-    ("missing-libplist-namekeyed", b"tx: (ufr) Warning: Unable to open " +
-                                   b"lib.plist in source UFO font.", 0),
-    ("missing-libplist-cidkeyed", b"tx: (ufr) Warning: Unable to open " +
-                                  b"lib.plist in source UFO font.", 0),
+    ("missing-libplist-namekeyed", libplist_warn, 0),
+    ("missing-libplist-cidkeyed", libplist_warn, 0),
     ("missing-libplist-cidkeyed-cid-identifiers", None, 6)
 ])
 def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
@@ -1308,3 +1310,34 @@ def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
     assert msg in output
 
     assert subprocess.call([TOOL, '-t1', '-f', input_path]) == ret_code
+
+
+glyphorder_warn = (b'tx: (ufr) Warning: public.glyphOrder key is empty'
+                   b' and does not contain glyph name for all 5 glyphs.'
+                   b' Consider defining this in lib.plist.')
+
+
+@pytest.mark.parametrize('file, msg, ret_code', [
+    ("normal", b'', 0),
+    ("empty-dict", glyphorder_warn, 0),
+    ("empty-key-name", glyphorder_warn, 0),
+    ("empty-key-value", glyphorder_warn, 0),
+])
+def test_ufo_libplist_parsing(file, msg, ret_code):
+    folder = "ufo-libplist-parsing/"
+    ufo_input_path = get_input_path(folder + file + ".ufo")
+    expected_path = get_expected_path(folder + file + ".pfa")
+    output_path = get_temp_file_path()
+    arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
+                 ufo_input_path, output_path]
+    stderr_path = runner(arg)
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (msg) in output
+    if (ret_code == 0):
+        expected_path = generate_ps_dump(expected_path)
+        output_path = generate_ps_dump(output_path)
+        assert differ([expected_path, output_path])
+    else:
+        arg = [TOOL, '-t1', '-f', ufo_input_path]
+        assert subprocess.call(arg) == 6
