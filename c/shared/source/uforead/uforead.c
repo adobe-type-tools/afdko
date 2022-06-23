@@ -1417,7 +1417,7 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
     /* 'glyph order does not contain glyph name' warnings in getGlyphOrderIndex are suppressed if glyphOrder count is 0 to reduce amount of warnings.
         Instead, add one warning here.*/
     if (h->data.glifOrder.cnt == 0)
-        message(h, "Warning: public.glyphOrder key is empty and does not contain glyph name for all %d glyphs. Consider defining this in lib.plist.", h->data.glifRecs.cnt);
+        message(h, "Warning: public.glyphOrder key is empty and does not contain glyph name for all %ld glyphs. Consider defining this in lib.plist.", h->data.glifRecs.cnt);
 
     if (!altLayer) {
         if (h->data.glifOrder.cnt > 0) {
