@@ -1857,14 +1857,14 @@ finish:
 
 /* Parse boolean value and return 0 if false and 1 if true. */
 static long parseBool(t1rCtx h, int kKey) {
-    long bool = 0; /* Suppress optimizer warning */
+    long boole = 0; /* Suppress optimizer warning */
     pstToken *token = getToken(h);
     switch (token->type) {
         case pstOperator:
             if (pstMatch(h->pst, token, "false"))
-                bool = 0;
+                boole = 0;
             else if (pstMatch(h->pst, token, "true"))
-                bool = 1;
+                boole = 1;
             else
                 badKeyValue(h, kKey);
             break;
@@ -1896,14 +1896,14 @@ static long parseBool(t1rCtx h, int kKey) {
                 badKeyValue(h, kKey);
 
             if (kKey == kForceBold)
-                bool = value >= h->mm.ForceBoldThreshold;
+                boole = value >= h->mm.ForceBoldThreshold;
             else
-                bool = value >= 0.5;
+                boole = value >= 0.5;
         } break;
         default:
             badKeyValue(h, kKey);
     }
-    return bool;
+    return boole;
 }
 
 /* Parse font matrix. Return 1 if Top dict FontMatrix else 0. */

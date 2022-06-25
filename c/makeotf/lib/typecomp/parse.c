@@ -2428,12 +2428,12 @@ static void saveForceBold(parseCtx h, DICT *dict, int iKey) {
         char *end = p + token->length;
 
         while ((p += strspn(p, " []{}")) < end) {
-            char *bool = p;
+            char *boole = p;
 
             p += strcspn(p, " ]}");
-            if (strncmp(bool, "false", 5) == 0) {
+            if (strncmp(boole, "false", 5) == 0) {
                 array[cnt++] = 0;
-            } else if (strncmp(bool, "true", 4) == 0) {
+            } else if (strncmp(boole, "true", 4) == 0) {
                 array[cnt++] = 1;
             } else {
                 badKeyValue(h, iKey);
