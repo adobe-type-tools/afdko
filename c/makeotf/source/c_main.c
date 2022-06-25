@@ -40,8 +40,6 @@ jmp_buf mark;
 
 int KeepGoing = 0;
 
-typedef char bool;
-
 static char *progname; /* Program name */
 static cbCtx cbctx;    /* Client callback context */
 
