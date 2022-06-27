@@ -58,6 +58,7 @@ jobs:
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         CIBW_SKIP: "*musllinux*"
         CIBW_BEFORE_ALL_LINUX: "yum install -y libuuid-devel && yum install -y libxml2-devel"
+        CIBW_REPAIR_WHEEL_COMMAND_LINUX: 'auditwheel repair -w {dest_dir} {wheel} && python ../scripts/patchwheel.py {dest_dir}'
         CIBW_ENVIRONMENT_LINUX: "CFLAGS='-I/usr/include/libxml2'"
 
     - name: Build sdist (Ubuntu only)
