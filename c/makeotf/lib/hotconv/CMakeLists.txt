@@ -71,7 +71,7 @@ set_property(TARGET hotconv PROPERTY C_STANDARD 99)
 target_include_directories(hotconv PRIVATE AFTER $<$<COMPILE_LANGUAGE:CXX>:${ANTLR4_INCLUDE_DIRS}>)
 target_link_libraries(hotconv PUBLIC antlr4_static)
 
-if (${LibXml2_FOUND})
+if ((${LibXml2_FOUND}) AND (NOT "${CMAKE_SYSTEM}" MATCHES "Linux"))
     target_link_libraries(hotconv PUBLIC ${LIBXML2_LIBRARY})
 else ()
     add_dependencies(hotconv ${LIBXML2_TARGET})

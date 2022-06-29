@@ -8,7 +8,7 @@ add_executable(tx
 target_include_directories(tx PRIVATE ../../shared/include ../../shared/resource ../../shared/source/tx_shared)
 target_link_libraries(tx PUBLIC tx_shared)
 
-if(${LibXml2_FOUND})
+if ((${LibXml2_FOUND}) AND (NOT "${CMAKE_SYSTEM}" MATCHES "Linux"))
     target_link_libraries(tx PUBLIC ${LIBXML2_LIBRARY})
 else()
     add_dependencies(tx ${LIBXML2_TARGET})
