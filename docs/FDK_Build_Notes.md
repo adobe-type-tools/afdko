@@ -48,6 +48,9 @@ Note that unless you are using macOS or Windows you must have `libuuid` and its 
 
 If the build is successful each program (e.g. makeotfexe) will be built as `build/bin/[program]`.  If you would like to install them in `/usr/local/bin` you can then run `cmake --build build -- install`.
 
+AFDKO uses libxml2 for parsing in tx. If libxml2 is not found in the system, it will be installed through CMake externally in `ExternalLibXML2.cmake` and statically linked. This is usually the case for Windows. 
+Currently, libxml2 will also be statically linked in Linux due to a [bug found in the linux python wheels when dynamically linked](https://github.com/adobe-type-tools/afdko/issues/1525).
+
 ### Noted CMake options
 
 These options can be added to the end of the first CMake command above:

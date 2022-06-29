@@ -42,13 +42,16 @@ set(ANTLR4_WITH_STATIC_CRT OFF)
 set(ANTLR4_TAG tags/4.9.3)
 include(ExternalAntlr4Cpp)
 
+
 FIND_PACKAGE(LibXml2)
-IF (NOT ${LibXml2_FOUND})
-   MESSAGE(STATUS "Could not locate LibXml2, will install externally.")
+IF ((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux")
+   MESSAGE(STATUS "Could not locate LibXml2 or system is Linux, will install externally & statically link")
    set(LIBXML2_TAG tags/v2.9.13)
    include(ExternalLibXML2)
-ENDIF(NOT ${LibXml2_FOUND})
-include_directories(${LIBXML2_INCLUDE_DIR})
+   include_directories(${LIBXML2_STATIC_INCLUDE_DIR})
+ELSE ((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux")
+   include_directories(${LIBXML2_INCLUDE_DIR})
+ENDIF((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux")
 
 # sanitizer support
 # work around https://github.com/pypa/setuptools/issues/1928 with environment

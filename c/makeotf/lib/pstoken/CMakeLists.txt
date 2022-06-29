@@ -1,6 +1,6 @@
 add_library(makeotf_pstoken STATIC pstoken.c)
 
-if (${LibXml2_FOUND})
+if ((${LibXml2_FOUND}) AND (NOT "${CMAKE_SYSTEM}" MATCHES "Linux"))
     target_link_libraries(makeotf_pstoken PUBLIC ${LIBXML2_LIBRARY})
 else ()
     add_dependencies(makeotf_pstoken ${LIBXML2_TARGET})
