@@ -152,11 +152,12 @@ def main(args=None):
 
     files = list(chain.from_iterable(map(glob.glob, options.input)))
 
-    # Set the pool capacity to be the minimum of file quantity and CPU count
-    maxPoolCapacity = min(os.cpu_count(), len(files))
+    # Set the pool capacity to be the minimum of file quantity and CPU count,
+    # at least 1.
+    maxPoolCapacity = max(min(os.cpu_count(), len(files)), 1)
     # Limit parallel capacity to 60 on win32 to avoid WaitForMultipleObjects
     # errors. See https://bugs.python.org/issue45077
-    if sys.platform == "win32" and maxPoolCapacity >= 60:
+    if sys.platform == "win32" and maxPoolCapacity > 60:
         maxPoolCapacity = 60
     # Do not use "with" statement, or code coverage will malfunction.
     pool = Pool(maxPoolCapacity)
