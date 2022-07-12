@@ -999,7 +999,7 @@ static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyNam
 //            message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
     } else {
         if (!strcmp(keyValue, "")){
-        message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
+//        message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
         valid = false;
         }
     }
@@ -1391,7 +1391,7 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
             // get key name
             tk = getElementValue(h, state);
             if (tokenEqualStr(tk, "</key>")) {
-                message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
+//                message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
             } else {
                 h->parseKeyName = copyStr(h, tk->val);  // get a copy in memory
                 // get end-key.
