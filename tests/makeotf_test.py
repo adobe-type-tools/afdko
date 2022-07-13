@@ -641,6 +641,10 @@ def test_delete_zero_kb_font_on_fail_bug736():
 
 
 def test_duplicate_warning_messages_bug751():
+    """
+    These warning messages have been temporarily removed.
+    We'll add them back once we add a verbose option.
+    """
     input_filename = 'bug751.ufo'
     expected_path = get_expected_path('bug751.txt')
     otf_path = get_temp_file_path()
@@ -650,7 +654,7 @@ def test_duplicate_warning_messages_bug751():
                'f', f'_{get_input_path(input_filename)}',
                'o', f'_{otf_path}'])
 
-    assert differ([expected_path, stderr_path, '-l', '1',
+    assert differ([expected_path, stderr_path,
                    '-s', 'Built development mode font'])
 
 
