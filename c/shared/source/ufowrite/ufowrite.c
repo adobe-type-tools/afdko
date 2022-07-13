@@ -833,13 +833,13 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
 
     if (top->UnderlinePosition != cff_DFLT_UnderlinePosition) {
         writeLine(h, "\t<key>postscriptUnderlinePosition</key>");
-        sprintf(buffer, "\t<integer>%d</integer>", (int)round(0.5 + top->UnderlinePosition));
+        sprintf(buffer, "\t<integer>%d</integer>", (int)floor(0.5 + top->UnderlinePosition));
         writeLine(h, buffer);
     }
 
     if (top->UnderlineThickness != cff_DFLT_UnderlineThickness) {
         writeLine(h, "\t<key>postscriptUnderlineThickness</key>");
-        sprintf(buffer, "\t<integer>%d</integer>", (int)round(0.5 + top->UnderlineThickness));
+        sprintf(buffer, "\t<integer>%d</integer>", (int)floor(0.5 + top->UnderlineThickness));
         writeLine(h, buffer);
     }
 
