@@ -7,7 +7,7 @@
 
 #include "ctlshare.h"
 
-#define UFW_VERSION CTL_MAKE_VERSION(1, 0, 9)
+#define UFW_VERSION CTL_MAKE_VERSION(1, 1, 0)
 
 #include "absfont.h"
 
