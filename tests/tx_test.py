@@ -1340,3 +1340,16 @@ def test_ufo_libplist_parsing(file, msg, ret_code):
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
         assert subprocess.call(arg) == 6
+
+
+def test_ufo_underline_writing_bug1534():
+    """
+    Tests that ufowrite writes correct values (with new rounding)
+    for postscriptUnderlinePosition and postscriptUnderlineThickness.
+    """
+    input_path = get_input_path("underline.otf")
+    expected_path = get_expected_path("bug1534.ufo")
+    output_path = get_temp_dir_path("bug1534.ufo")
+    arg = [TOOL, '-ufo', '-o', output_path, input_path]
+    subprocess.call(arg)
+    assert differ([expected_path, output_path])
