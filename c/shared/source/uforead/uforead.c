@@ -1790,7 +1790,7 @@ static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
         if (setFontDictKey(h, keyName, cur) && cur != NULL)
            cur = cur->next;
     }
-    return ufoErrSrcStream;
+    return ufoSuccess;
 }
 
 /* ToDo: add extra warnings for verbose-output*/
@@ -1899,7 +1899,7 @@ static int parseFontInfo(ufoCtx h) {
     fixUnsetDictValues(h);
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
-    return ufoSuccess;
+    return parsingSuccess;
 }
 
 static int parseUFO(ufoCtx h) {
