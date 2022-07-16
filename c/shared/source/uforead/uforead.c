@@ -1881,6 +1881,7 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
 
 static int parseFontInfo(ufoCtx h) {
     const char* filetype = "plist";
+    currentiFD = 0;
 
     h->src.next = h->mark = NULL;
     h->cb.stm.clientFileName = "fontinfo.plist";
