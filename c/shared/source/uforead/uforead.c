@@ -47,6 +47,12 @@ enum {
     ufoNotSet,
 };
 
+enum contentsParsingState{
+    None,
+    parsingDefaultLayer,
+    parsingAltLayer
+};
+
 #define kMaxToken 1024
 #define kMaxName 64
 const char* t1HintKey = "com.adobe.type.autohint";
@@ -58,6 +64,8 @@ int currentiFD = 0;
 int FDArrayInitSize = 50;
 bool parsingFDArray = false;
 bool parsingValueArray = false;
+enum contentsParsingState parsingContentsLayer = None;
+
 
 typedef struct
 {
@@ -1009,7 +1017,7 @@ static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyNam
     return valid;
 }
 
-static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
+static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur, char* filename) { //rename to something else? enum?
     /* returns false when current key is NULL/ not parseable,
        otherwise returns true */
     abfTopDict* top = &h->top;
@@ -1032,14 +1040,19 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         parseXMLKeyValue(h, cur);
         parsingFDArray = false;
     } else if (!strcmp(keyName, "PrivateDict")) {
-        parsingFDArray = false;
+        parsingFDArray = false; //this is only set when parsing root of FDArray, not sub-dicts within a dict
         parseXMLKeyValue(h, cur);
         parsingFDArray = true;
     } else {
         char* keyValue = parseXMLKeyValue(h, cur);
         if (!keyValueValid(h, cur, keyValue, keyName))
             return false;
-        if (!strcmp(keyName, "copyright")) {
+
+        if (parsingContentsLayer == parsingDefaultLayer) {
+            addGLIFRec(h, keyName, keyValue);
+        } else if (parsingContentsLayer == parsingAltLayer) {
+            updateGLIFRec(h, keyName, keyValue);
+        } else if (!strcmp(keyName, "copyright")) {
             top->Copyright.ptr = keyValue;
         } else if (!strcmp(keyName, "trademark")) {
             char* copySymbol;
@@ -1222,18 +1235,16 @@ static long getGlyphOrderIndex(ufoCtx h, char* glyphName) {
     return orderIndex;
 }
 
-static void addGLIFRec(ufoCtx h, int state) {
-    char* fileName;
+static void addGLIFRec(ufoCtx h, char* glyphName, char* fileName) {
     GLIF_Rec* newGLIFRec;
     long int glyphOrder = ABF_UNSET_INT;
 
     if (h->data.glifOrder.cnt != 0)  /* only try to get glyphOrderIndex if cnt > 0 */
-        glyphOrder = getGlyphOrderIndex(h, h->parseKeyName);
+        glyphOrder = getGlyphOrderIndex(h, glyphName);
     newGLIFRec = dnaNEXT(h->data.glifRecs);
-    newGLIFRec->glyphName = h->parseKeyName;
+    newGLIFRec->glyphName = glyphName;
     newGLIFRec->glyphOrder = glyphOrder;
-    fileName = getKeyValue(h, "</string>", state);
-    if (fileName == NULL) {
+    if (fileName == NULL) {  //test this
         fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
     }
     newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
@@ -1255,23 +1266,17 @@ static int findGLIFRecByName(ufoCtx h, char *glyphName)
     return -1;
 }
 
-static void updateGLIFRec(ufoCtx h, int state) {
+static void updateGLIFRec(ufoCtx h, char* glyphName, char* fileName) {
     int index;
-    char *glyphName;
-
-    glyphName = h->parseKeyName;
 
     index = findGLIFRecByName(h, glyphName);
     if (index == -1) {
         message(h, "Warning: glyph '%s' is in the processed layer but not in the default layer.", glyphName);
-        getKeyValue(h, "</string>", state); /* consume the file name */
     } else {
-        char* fileName;
         GLIF_Rec* glifRec;
 
         glifRec = &h->data.glifRecs.array[index];
 
-        fileName = getKeyValue(h, "</string>", state);
         if (fileName == NULL) {
             fatal(h, ufoErrParse, "Encountered glyph reference in alternate layer's contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
         }
@@ -1332,16 +1337,16 @@ static int parseGlyphOrder(ufoCtx h) {
 }
 
 static int parseGlyphList(ufoCtx h, bool altLayer) {
-    int state = 0; /* 0 == start, 1= seen start of glyph, 2 = seen glyph name, 3 = in path, 4 in comment.  */
-    int prevState = 0;
-    h->src.next = h->mark = NULL;
+    const char* filetype = "plist";
     char *clientFilePath;
     char *plistFileName = "/contents.plist";
 
     if (altLayer) {
+        parsingContentsLayer = parsingAltLayer;
         clientFilePath = memNew(h, 2 + strlen(h->altLayerDir) + strlen(plistFileName));
         strcpy(clientFilePath, h->altLayerDir);
     } else {
+        parsingContentsLayer = parsingDefaultLayer;
         clientFilePath = memNew(h, 2 + strlen(h->defaultLayerDir) + strlen(plistFileName));
         strcpy(clientFilePath, h->defaultLayerDir);
     }
@@ -1360,65 +1365,16 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
     }
 
     dnaSET_CNT(h->valueArray, 0);
-    fillbuf(h, 0);
-
-    h->metrics.defaultWidth = 0;
-    h->flags &= ~SEEN_END;
-
-    while (!(h->flags & SEEN_END)) {
-        token* tk;
-        tk = getToken(h, state);
-
-        if (tokenEqualStr(tk, "<!--")) {
-            prevState = state;
-            state = 4;
-        } else if (tokenEqualStr(tk, "-->")) {
-            if (state != 4)
-                fatal(h, ufoErrParse, "Encountered end comment token while not in comment.");
-            state = prevState;
-        } else if (state == 4) {
-            continue;
-        } else if (tokenEqualStr(tk, "<dict>")) {
-            if (state > 0)
-                fatal(h, ufoErrParse, "Encountered second <dict while in first");
-            state = 1;
-        } else if (tokenEqualStr(tk, "</dict>")) {
-            h->flags |= SEEN_END;
-            break;  // end processing at end of first dict.
-        } else if (tokenEqualStr(tk, "<key>")) {
-            if (state != 1)
-                fatal(h, ufoErrParse, "Encountered <key> while not in top level of first <dict>");
-            // get key name
-            tk = getElementValue(h, state);
-            if (tokenEqualStr(tk, "</key>")) {
-//                message(h, "Warning: Encountered empty <key></key>. Text: '%s'.", getBufferContextPtr(h));
-            } else {
-                h->parseKeyName = copyStr(h, tk->val);  // get a copy in memory
-                // get end-key.
-                tk = getToken(h, state);
-                if (!tokenEqualStr(tk, "</key>")) {
-                    tk->val[tk->length - 1] = 0;
-                    fatal(h, ufoErrParse, "Encountered element other than </key> when reading <key> name: %s. Text: '%s'.", tk->val, getBufferContextPtr(h));
-                }
-            }
-            state = 2;
-        } else if ((tokenEqualStr(tk, "<string>")) && (state == 2)) {
-            if (altLayer) {
-                updateGLIFRec(h, state);
-            } else {
-                addGLIFRec(h, state);
-            }
-            state = 1;
-        } else if (state != 0) {
-            message(h, "Warning: discarding token '%s", tk->val);
-        }
-    } /* end while more tokens */
-
-    /* 'glyph order does not contain glyph name' warnings in getGlyphOrderIndex are suppressed if glyphOrder count is 0 to reduce amount of warnings.
+    
+    int parsingSuccess = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    
+    /* 'glyph order does not contain glyph name' warnings in getGlyphOrderIndex are suppressed
+        if glyphOrder count is 0 to reduce amount of warnings.
         Instead, add one warning here.*/
     if (h->data.glifOrder.cnt == 0)
         message(h, "Warning: public.glyphOrder key is empty and does not contain glyph name for all %ld glyphs. Consider defining this in lib.plist.", h->data.glifRecs.cnt);
 
+    /* process the glyph order layers */
     if (!altLayer) {
         if (h->data.glifOrder.cnt > 0) {
             ctuQSort(h->data.glifRecs.array, h->data.glifRecs.cnt,
@@ -1436,6 +1392,7 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
 
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
+    parsingContentsLayer = None;
 
     memFree(h, clientFilePath);
     return ufoSuccess;
@@ -1787,7 +1744,7 @@ static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     while (cur != NULL) {
         keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
-        if (setFontDictKey(h, keyName, cur) && cur != NULL)
+        if (setFontDictKey(h, keyName, cur, filename) && cur != NULL)
            cur = cur->next;
     }
     return ufoSuccess;
@@ -1842,7 +1799,7 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     while (cur != NULL) {
         char* keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
-        if (setFontDictKey(h, keyName, cur) && cur != NULL)
+        if (setFontDictKey(h, keyName, cur, "dict") && cur != NULL)
             cur = cur->next;
     }
 }
