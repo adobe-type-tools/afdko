@@ -126,13 +126,17 @@ void ufoFree(ufoCtx h);
 /* ufoFree() destroys the library context and all the resources allocated to
    it. The temporary and debug data streams are closed. */
 
+static void addGLIFRec(ufoCtx h, char* keyName, char* keyValue);
+
+static void updateGLIFRec(ufoCtx h, char* glyphName, char* fileName);
+
 static int parseXMLFile(ufoCtx h, char* filename, const char* filetype);
 
 static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
 
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 
-static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
+static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur, char* filename);
 
 enum {
 #undef CTL_DCL_ERR
