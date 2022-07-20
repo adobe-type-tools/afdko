@@ -1333,7 +1333,7 @@ static int parseGlyphOrder(ufoCtx h) {
 
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
-    return ufoSuccess;
+    return parsingSuccess;
 }
 
 static int parseGlyphList(ufoCtx h, bool altLayer) {
