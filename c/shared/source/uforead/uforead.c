@@ -296,6 +296,12 @@ static long getWidth(ufoCtx h, STI sti);
 static int addChar(ufoCtx h, STI sti, Char** chr);
 static int CTL_CDECL postMatchChar(const void* key, const void* value,
                                    void* ctx);
+static void addGLIFRec(ufoCtx h, char* keyName, char* keyValue);
+static void updateGLIFRec(ufoCtx h, char* glyphName, char* fileName);
+static int parseXMLFile(ufoCtx h, char* filename, const char* filetype);
+static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
+static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
+static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 
 /* -------------------------- Error Support ------------------------ */
 
