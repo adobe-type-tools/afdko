@@ -1353,3 +1353,35 @@ def test_ufo_underline_writing_bug1534():
     arg = [TOOL, '-ufo', '-o', output_path, input_path]
     subprocess.call(arg)
     assert differ([expected_path, output_path])
+
+
+glyph_not_in_dflt_warn = (b"tx: (ufr) Warning: glyph 'foo' is"
+                          b" in the processed layer but not in"
+                          b" the default layer.")
+
+
+@pytest.mark.parametrize('file, msg, ret_code', [
+    ("wrong-keyname-type", b'', 0),
+    ("wrong-keyvalue-type-dict", b'', 0),
+    ("wrong-keyvalue-type-int", b'', 0),
+    ("not-in-default", glyph_not_in_dflt_warn, 0),
+    ("missing-glif-file", b'', 0),
+])
+def test_ufo_contentsplist_parsing(file, msg, ret_code):
+    folder = "ufo-contentsplist-parsing/"
+    ufo_input_path = get_input_path(folder + file + ".ufo")
+    expected_path = get_expected_path(folder + file + ".pfa")
+    output_path = get_temp_file_path()
+    arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
+                 ufo_input_path, output_path]
+    stderr_path = runner(arg)
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (msg) in output
+    if (ret_code == 0):
+        expected_path = generate_ps_dump(expected_path)
+        output_path = generate_ps_dump(output_path)
+        assert differ([expected_path, output_path])
+    else:
+        arg = [TOOL, '-t1', '-f', ufo_input_path]
+        assert subprocess.call(arg) == 6
