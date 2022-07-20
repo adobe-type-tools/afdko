@@ -136,7 +136,7 @@ static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
 
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 
-static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur, char* filename);
+static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 
 enum {
 #undef CTL_DCL_ERR
