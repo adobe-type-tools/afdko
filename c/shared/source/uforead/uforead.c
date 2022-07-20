@@ -1017,7 +1017,7 @@ static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyNam
     return valid;
 }
 
-static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur, char* filename) { //rename to something else? enum?
+static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     /* returns false when current key is NULL/ not parseable,
        otherwise returns true */
     abfTopDict* top = &h->top;
@@ -1040,7 +1040,7 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur, char* filena
         parseXMLKeyValue(h, cur);
         parsingFDArray = false;
     } else if (!strcmp(keyName, "PrivateDict")) {
-        parsingFDArray = false; //this is only set when parsing root of FDArray, not sub-dicts within a dict
+        parsingFDArray = false;  // this is only set when parsing root of FDArray, not sub-dicts within a dict
         parseXMLKeyValue(h, cur);
         parsingFDArray = true;
     } else {
@@ -1244,7 +1244,7 @@ static void addGLIFRec(ufoCtx h, char* glyphName, char* fileName) {
     newGLIFRec = dnaNEXT(h->data.glifRecs);
     newGLIFRec->glyphName = glyphName;
     newGLIFRec->glyphOrder = glyphOrder;
-    if (fileName == NULL) {  //test this
+    if (fileName == NULL) {
         fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
     }
     newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
@@ -1365,9 +1365,9 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
     }
 
     dnaSET_CNT(h->valueArray, 0);
-    
-    int parsingSuccess = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
-    
+
+     int parsingSuccess = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+
     /* 'glyph order does not contain glyph name' warnings in getGlyphOrderIndex are suppressed
         if glyphOrder count is 0 to reduce amount of warnings.
         Instead, add one warning here.*/
@@ -1744,7 +1744,7 @@ static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     while (cur != NULL) {
         keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
-        if (setFontDictKey(h, keyName, cur, filename) && cur != NULL)
+        if (setFontDictKey(h, keyName, cur) && cur != NULL)
            cur = cur->next;
     }
     return ufoSuccess;
@@ -1799,7 +1799,7 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     while (cur != NULL) {
         char* keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
-        if (setFontDictKey(h, keyName, cur, "dict") && cur != NULL)
+        if (setFontDictKey(h, keyName, cur) && cur != NULL)
             cur = cur->next;
     }
 }
@@ -1821,6 +1821,8 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
     }
     if (isSimpleKey(cur)) {  /* if string, integer, or real */
         return (char*) xmlNodeGetContent(cur);
+    } else if (parsingContentsLayer == parsingDefaultLayer || parsingContentsLayer == parsingAltLayer) {
+        return NULL; /* Only simple keys allowed when parsing contents.plist*/
     } else if (xmlStrEqual(cur->name, (const xmlChar *) "dict")) {
         parseXMLDict(h, cur);
         return NULL;
