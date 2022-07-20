@@ -288,23 +288,8 @@
     <key>com.adobe.type.postscriptFDArray</key>
     <array>
       <dict>
-        <key>ExpansionFactor</key>
-        <real>0.06</real>
-        <key>FontMatrix</key>
-        <array>
-          <real>0.001</real>
-          <integer>0</integer>
-          <integer>0</integer>
-          <real>0.001</real>
-          <integer>0</integer>
-          <integer>0</integer>
-        </array>
-        <key>FontName</key>
+       <key>FontName</key>
         <string>SourceHanSans-Heavy-Generic</string>
-        <key>LanguageGroup</key>
-        <integer>1</integer>
-        <key>PaintType</key>
-        <integer>0</integer>
         <key>postscriptBlueFuzz</key>
         <integer>1</integer>
         <key>postscriptBlueScale</key>
