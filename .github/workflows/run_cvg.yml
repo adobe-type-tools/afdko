@@ -30,12 +30,12 @@ jobs:
       run: |
         echo "Reason for triggering: ${{ github.event.inputs.reason }}"
     - name: Check out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0  # unshallow fetch for setuptools-scm
 
     - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: "3.8"
 
