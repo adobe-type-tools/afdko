@@ -17,12 +17,12 @@ jobs:
       run: |
         echo "Reason for triggering: ${{ github.event.inputs.reason }}"
 
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Set up Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: 3.7
 
