@@ -1,0 +1,22 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+      "config:base"
+    ],
+    "schedule": ["every weekend"],
+    "groupName": "all dependencies",
+    "separateMajorMinor": false,
+    "groupSlug": "all",
+    "packageRules": [
+      {
+        "matchPackagePatterns": [
+          "*"
+        ],
+        "groupName": "all dependencies",
+        "groupSlug": "all"
+      }
+    ],
+    "lockFileMaintenance": {
+      "enabled": false
+    }  
+  }
