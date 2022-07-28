@@ -3371,7 +3371,7 @@ nameid <id> [<string attribute>] <string>;
 ```
 
 An `<id>` is a number specifying the ID of the name string to be added to the
-name table. Note that IDs 2 and 6 (Family, Subfamily, Unique, Full, Version, and
+name table. Note that IDs 1 through 6 (Family, Subfamily, Unique, Full, Version, and
 FontName) are reserved by the implementation and cannot be overridden; doing so
 will elicit a warning message and the record will be ignored.
 
