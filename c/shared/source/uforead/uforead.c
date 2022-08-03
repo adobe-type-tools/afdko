@@ -298,10 +298,11 @@ static int CTL_CDECL postMatchChar(const void* key, const void* value,
                                    void* ctx);
 static void addGLIFRec(ufoCtx h, char* keyName, char* keyValue);
 static void updateGLIFRec(ufoCtx h, char* glyphName, char* fileName);
-static int parseXMLFile(ufoCtx h, char* filename, const char* filetype);
+static xmlNodePtr parseXMLFile(ufoCtx h, char* filename, const char* filetype);
 static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
+static int parseXMLPlist(ufoCtx h, xmlNodePtr cur);
 
 /* -------------------------- Error Support ------------------------ */
 
@@ -1314,7 +1315,8 @@ static int parseGlyphOrder(ufoCtx h) {
 
     dnaSET_CNT(h->valueArray, 0);
 
-    int parsingSuccess = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    int parsingSuccess = parseXMLPlist(h, cur);
 
     if (h->data.glifOrder.cnt > 0) {
         /* Sort the array by glyph name. */
@@ -1372,7 +1374,8 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
 
     dnaSET_CNT(h->valueArray, 0);
 
-     int parsingSuccess = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    int parsingSuccess = parseXMLPlist(h, cur);
 
     /* 'glyph order does not contain glyph name' warnings in getGlyphOrderIndex are suppressed
         if glyphOrder count is 0 to reduce amount of warnings.
@@ -1707,10 +1710,9 @@ static void reallocFDArray(ufoCtx h){
     h->top.FDArray.array = newFDArray;
 }
 
-static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
+static xmlNodePtr parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     xmlDocPtr doc;
     xmlNodePtr cur;
-    char* keyName;
 
     xmlKeepBlanksDefault(0);
 
@@ -1746,14 +1748,7 @@ static int parseXMLFile(ufoCtx h, char* filename, const char* filetype){
         fatal(h, ufoErrSrcStream, "Error reading outermost <dict> in %s.\n", filename);
     }
 
-    cur = cur->xmlChildrenNode;
-    while (cur != NULL) {
-        keyName = parseXMLKeyName(h, cur);
-        cur = cur->next;
-        if (setFontDictKey(h, keyName, cur) && cur != NULL)
-           cur = cur->next;
-    }
-    return ufoSuccess;
+    return cur;
 }
 
 /* ToDo: add extra warnings for verbose-output*/
@@ -1844,6 +1839,17 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
     }
 }
 
+static int parseXMLPlist(ufoCtx h, xmlNodePtr cur){
+    char* keyName;
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+        keyName = parseXMLKeyName(h, cur);
+        cur = cur->next;
+        if (setFontDictKey(h, keyName, cur) && cur != NULL)
+           cur = cur->next;
+    }
+}
+
 static int parseFontInfo(ufoCtx h) {
     const char* filetype = "plist";
     currentiFD = 0;
@@ -1859,7 +1865,8 @@ static int parseFontInfo(ufoCtx h) {
 
     dnaSET_CNT(h->valueArray, 0);
 
-    int parsingSuccess = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    int parsingSuccess = parseXMLPlist(h, cur);
 
     fixUnsetDictValues(h);
     h->cb.stm.close(&h->cb.stm, h->stm.src);
