@@ -2701,8 +2701,8 @@ def runMakeOTF(makeOTFParams):
                 outputPath, tempPath, makeOTFParams.fontinfoPath)
             convertfonttocid.mergeFontToCFF(tempPath, outputPath, doSubr)
 
-        except(convertfonttocid.FontInfoParseError,
-               convertfonttocid.FontParseError):
+        except (convertfonttocid.FontInfoParseError,
+                convertfonttocid.FontParseError):
             raise
 
         if not os.path.exists(outputPath):

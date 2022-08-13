@@ -156,7 +156,7 @@ def test_date_and_time(args, input_filename):
                 # and now should be less than an hour. That should be enough
                 # even for some of the slower CI processes. ;-)
                 hours_diff = abs(now - file_time) / 3600
-                assert(hours_diff < 1)
+                assert hours_diff < 1
                 break
 
     # Make sure we actually found a date and checked it.

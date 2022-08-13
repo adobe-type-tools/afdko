@@ -109,8 +109,8 @@ def test_fontsetplot():
             'g', '_2-7', '=pageIncludeTitle', '_0', f'_{fp1}', f'_{fp2}'])
     expected_path = get_expected_path(pdf_filename)
 
-    assert(differ([expected_path, save_path,
-                   '-s', '/CreationDate', '-e', 'macroman']))
+    assert differ([expected_path, save_path,
+                   '-s', '/CreationDate', '-e', 'macroman'])
 
 
 @pytest.mark.parametrize('filename', ['SourceSansPro-Black',
@@ -169,5 +169,5 @@ def test_fontsetplot_ttf_with_components_bug1125():
             '=pageIncludeTitle', '_0', f'_{font_path}'])
     expected_path = get_expected_path(pdf_filename)
 
-    assert(differ([expected_path, save_path,
-                   '-s', '/CreationDate', '-e', 'macroman']))
+    assert differ([expected_path, save_path,
+                   '-s', '/CreationDate', '-e', 'macroman'])

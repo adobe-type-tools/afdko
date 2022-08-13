@@ -73,7 +73,7 @@ def test_date_and_time1():
         now = time.time()
         file_time = time.mktime(time.strptime(line, '%a %b %d %H:%M:%S %Y'))
         hours_diff = abs(now - file_time) / 3600
-        assert(hours_diff < 1)
+        assert hours_diff < 1
 
 
 def test_date_and_time2():
@@ -92,5 +92,5 @@ def test_date_and_time2():
 
     with open(actual_path) as output_file:
         text = output_file.read()
-        assert('regular.otf\tMon Aug 31 14:44:59 2015' in text)
-        assert('font.cef\t' + cef_time_str in text)
+        assert 'regular.otf\tMon Aug 31 14:44:59 2015' in text
+        assert 'font.cef\t' + cef_time_str in text

@@ -358,8 +358,8 @@ def test_feature_recursion_bug628():
 
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert(b"Can't include [feat.fea]; maximum "
-           b"include levels <50> reached") in output
+    assert (b"Can't include [feat.fea]; maximum "
+            b"include levels <50> reached") in output
 
 
 @pytest.mark.parametrize('arg', [[], ['gs']])
@@ -421,8 +421,8 @@ def test_overflow_bug731():
 
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert(b"subtable offset too large (1003c) in "
-           b"lookup 0 type 3") in output
+    assert (b"subtable offset too large (1003c) in "
+            b"lookup 0 type 3") in output
 
 
 def test_base_anchor_bug811():
