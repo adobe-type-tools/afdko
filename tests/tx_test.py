@@ -801,7 +801,7 @@ def test_dcf_with_infinite_recursion_bug775():
     dcf_path = get_temp_file_path()
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-a', '-o', 'dcf', '-f', font_path, dcf_path])
-    assert(err.value.returncode == 1)  # exit code of 1, not segfault of -11
+    assert err.value.returncode == 1  # exit code of 1, not segfault of -11
     expected_path = get_expected_path(
         'subr_test_font_infinite_recursion.dcf.txt')
     assert differ([expected_path, dcf_path])
@@ -834,7 +834,7 @@ def test_svg_missing_fontname_bug883(filename):
     svg_path = get_temp_file_path()
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-a', '-o', 'svg', '-f', font_path, svg_path])
-    assert(err.value.returncode == 6)  # exit code of 6, not segfault of -11
+    assert err.value.returncode == 6  # exit code of 6, not segfault of -11
 
 
 @pytest.mark.parametrize('option', ['dump', 'dcf'])
@@ -900,7 +900,7 @@ def test_missing_glyph_names_pr905_cef():
     output_path = get_temp_file_path()
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-a', '-o', 'cef', '-f', input_path, output_path])
-    assert(err.value.returncode > 0)  # error code, not segfault of -11
+    assert err.value.returncode > 0  # error code, not segfault of -11
 
 
 def test_var_bug_913():
@@ -931,7 +931,7 @@ def test_bug_940():
     output_path = get_temp_file_path()
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-a', '-o', 'cff2', '-f', input_path, output_path])
-    assert(err.value.returncode > 0)  # error code, not segfault or success
+    assert err.value.returncode > 0  # error code, not segfault or success
 
 
 def test_too_many_glyphs_pr955():
@@ -939,7 +939,7 @@ def test_too_many_glyphs_pr955():
     output_path = get_temp_file_path()
     with pytest.raises(subprocess.CalledProcessError) as err:
         runner(CMD + ['-a', '-o', 'cff', '-f', input_path, output_path])
-    assert(err.value.returncode > 0)  # error code, not hang or success
+    assert err.value.returncode > 0  # error code, not hang or success
 
 
 def test_ttread_varinst():
@@ -990,7 +990,7 @@ def test_date_and_time_afm():
         file_time = time.mktime(
             time.strptime(file_time_str, '%a %b %d %H:%M:%S %Y'))
         hours_diff = abs(now - file_time) / 3600
-        assert(hours_diff < 1)
+        assert hours_diff < 1
 
 
 def test_date_and_time_ps():
@@ -1011,7 +1011,7 @@ def test_date_and_time_ps():
         file_time = time.mktime(
             time.strptime(file_date_and_time_str, '%m/%d/%y %H:%M'))
         hours_diff = abs(now - file_time) / 3600
-        assert(hours_diff < 1)
+        assert hours_diff < 1
 
 
 def test_date_and_time_pdf():
@@ -1029,24 +1029,24 @@ def test_date_and_time_pdf():
         lines = output_file.readlines()
         creation_date_str = re.split(r'[()]', lines[13])[1]
         mod_date_str = re.split(r'[()]', lines[14])[1]
-        assert(creation_date_str == mod_date_str)
+        assert creation_date_str == mod_date_str
         (date_time_str, tz_hr_str, tz_min_str) = \
             re.split(r"[:+\-Z']", creation_date_str)[1:4]
         creation_time = time.mktime(
             time.strptime(date_time_str, '%Y%m%d%H%M%S'))
         hours_diff = abs(now - creation_time) / 3600
-        assert(hours_diff < 1)
+        assert hours_diff < 1
         creation_tz_hr = int(tz_hr_str)
-        assert(creation_tz_hr == tz_hr)
+        assert creation_tz_hr == tz_hr
         creation_tz_min = int(tz_min_str)
-        assert(creation_tz_min == tz_min)
+        assert creation_tz_min == tz_min
         file_date_str = re.split(r"[():]", lines[36])[2].strip()
         file_time_str = re.split(r"[() ]", lines[38])[3]
         file_date_time_str = file_date_str + ' ' + file_time_str
         file_time = time.mktime(
             time.strptime(file_date_time_str, "%d %b %y %H:%M"))
         hours_diff = abs(now - file_time) / 3600
-        assert(hours_diff < 1)
+        assert hours_diff < 1
 
 
 def test_overlap_removal():
