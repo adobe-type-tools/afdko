@@ -2,16 +2,16 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef CTUTIL_H
-#define CTUTIL_H
-
-#include "ctlshare.h"
-
-#define CTU_VERSION CTL_MAKE_VERSION(2, 0, 3)
+#ifndef SHARED_INCLUDE_CTUTIL_H_
+#define SHARED_INCLUDE_CTUTIL_H_
 
 #include <stddef.h> /* For size_t */
 #include <stdio.h>  /* For size_t */
 #include <time.h>   /* For struct tm */
+
+#include "ctlshare.h"
+
+#define CTU_VERSION CTL_MAKE_VERSION(2, 0, 3)
 
 #ifdef __cplusplus
 extern "C" {
@@ -113,4 +113,4 @@ float roundf(float x);
 }
 #endif
 
-#endif /* CTUTIL_H */
+#endif  // SHARED_INCLUDE_CTUTIL_H_

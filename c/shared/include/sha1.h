@@ -2,8 +2,9 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef SHA1_H
-#define SHA1_H
+#ifndef SHARED_INCLUDE_SHA1_H_
+#define SHARED_INCLUDE_SHA1_H_
+
 #include <stdlib.h> /* to get size_t */
 
 /**********************************************
@@ -92,7 +93,7 @@ sha1_pctx sha1_init(sha1_malloc client_malloc, void *hook);
                                   failure will occur
                                      if client_malloc callback is NULL or
                                      if client_malloc callback returns NULL or
-                                     if sizeof(Card32) != 4 (the implementation
+                                     if sizeof(uint32_t) != 4 (the implementation
                                         requires that a 4 byte unsigned integer
                                         type exists)
                                 */
@@ -138,4 +139,5 @@ int sha1_finalize(sha1_pctx ctx, sha1_free client_free,
    hash rate is about 4,000,000 bytes/sec.
 
 */
-#endif /* SHA1_H */
+
+#endif  // SHARED_INCLUDE_SHA1_H_

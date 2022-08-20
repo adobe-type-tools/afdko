@@ -21,12 +21,12 @@ typedef struct
     FWord minLeftSideBearing;
     FWord minRightSideBearing;
     FWord xMaxExtent;
-    Int16 caretSlopeRise;
-    Int16 caretSlopeRun;
-    Int16 caretOffset;
-    Int16 reserved[4];
-    Int16 metricDataFormat;
-    Card16 numberOfLongHorMetrics;
+    int16_t caretSlopeRise;
+    int16_t caretSlopeRun;
+    int16_t caretOffset;
+    int16_t reserved[4];
+    int16_t metricDataFormat;
+    uint16_t numberOfLongHorMetrics;
 } hheaTbl;
 
 #endif /* FORMAT_HHEA_H */

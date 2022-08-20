@@ -23,7 +23,7 @@
 typedef struct
 {
     uFWord *width; /* [nMasters] */
-    Int16 *extrap; /* (6.10 fixed) [nMasters] */
+    int16_t *extrap; /* (6.10 fixed) [nMasters] */
 } GlyphInfo;
 
 /* Per-master design data */
@@ -44,10 +44,10 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card16 flags;
-    Byte8 fontName[34]; /* FontName (Pascal string) */
-    Card16 nGlyphs;
-    Card16 nMasters;
+    uint16_t flags;
+    int8_t fontName[34]; /* FontName (Pascal string) */
+    uint16_t nGlyphs;
+    uint16_t nMasters;
     FWord underlinePosition;
     FWord underlineThickness;
     GlyphInfo *glyph;   /* [nGlyphs] */

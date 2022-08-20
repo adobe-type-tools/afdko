@@ -14,8 +14,8 @@
 typedef struct
 {
     Fixed version;
-    Card16 flags;
-    Card8 data[64];
+    uint16_t flags;
+    uint8_t data[64];
 } FNTPTbl;
 
 #endif /* FORMAT_FNTP_H */

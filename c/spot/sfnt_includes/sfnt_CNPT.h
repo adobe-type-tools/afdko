@@ -13,8 +13,8 @@
 
 typedef struct
 {
-    Card16 firstPoint;
-    Card16 nPoints;
+    uint16_t firstPoint;
+    uint16_t nPoints;
 } Element0;
 #define ELEMENT0_SIZE (SIZEOF(Element0, firstPoint) + \
                        SIZEOF(Element0, nPoints))
@@ -27,8 +27,8 @@ typedef struct
 typedef struct
 {
     GlyphId glyphId;
-    Card16 firstPoint;
-    Card16 nPoints;
+    uint16_t firstPoint;
+    uint16_t nPoints;
 } Element1;
 #define ELEMENT1_SIZE (SIZEOF(Element1, glyphId) +    \
                        SIZEOF(Element1, firstPoint) + \
@@ -36,9 +36,9 @@ typedef struct
 
 typedef struct
 {
-    Card16 searchRange;
-    Card16 entrySelector;
-    Card16 rangeShift;
+    uint16_t searchRange;
+    uint16_t entrySelector;
+    uint16_t rangeShift;
     Element1 *index;
 } Format1;
 #define FORMAT1_SIZE (SIZEOF(Format1, searchRange) +   \
@@ -48,15 +48,15 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card16 format;
-    Card16 flags;
-    Card32 indexLength;
+    uint16_t format;
+    uint16_t flags;
+    uint32_t indexLength;
     GlyphId firstGlyph;
-    Card16 nElements;
+    uint16_t nElements;
     void *formatSpecific;
     struct
     {
-        Card32 cnt;
+        uint32_t cnt;
         CNPTPoint *point;
     } points;
 } CNPTTbl;

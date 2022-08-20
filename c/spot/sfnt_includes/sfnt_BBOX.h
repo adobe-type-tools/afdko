@@ -22,9 +22,9 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card16 flags;
-    Card16 nGlyphs;
-    Card16 nMasters;
+    uint16_t flags;
+    uint16_t nGlyphs;
+    uint16_t nMasters;
     BBox *bbox; /* [nGlyphs] */
 } BBOXTbl;
 

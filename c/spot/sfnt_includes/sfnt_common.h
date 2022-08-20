@@ -10,26 +10,26 @@
 #define FORMAT_COMMON_H
 
 /* Apple's definitions */
-typedef Int32 Fixed;
-#define FWord Int16
-#define uFWord Card16
-#define F2Dot14 Int16
-#define F4Dot12 Int16
+typedef int32_t Fixed;
+#define FWord int16_t
+#define uFWord uint16_t
+#define F2Dot14 int16_t
+#define F4Dot12 int16_t
 #define VERSION(a, b) \
-    (((Int32)(a) << 16) | (b) << 12) /* Strange but true, thanks Apple */
+    (((int32_t)(a) << 16) | (b) << 12) /* Strange but true, thanks Apple */
 
 /* Return field size from declaration (definition not needed). Not strictly
    portable but too useful to ignore! */
 #define SIZEOF(s, f) sizeof(((s *)0)->f)
 
-typedef Card16 GlyphId; /* A Glyph id; 0- .notdef, 0xffff- undefined */
+typedef uint16_t GlyphId; /* A Glyph id; 0- .notdef, 0xffff- undefined */
 
 #ifndef TTO_H
 typedef struct _Lookup *Lookup; /* Opaque pointer to Apple Lookup table */
 #endif
 
 /* Table tags */
-#define TAG(a, b, c, d) ((Card32)(a) << 24 | (Card32)(b) << 16 | (c) << 8 | (d))
+#define TAG(a, b, c, d) ((uint32_t)(a) << 24 | (uint32_t)(b) << 16 | (c) << 8 | (d))
 
 #define ALMX_ TAG('A', 'L', 'M', 'X')
 #define BASE_ TAG('B', 'A', 'S', 'E')

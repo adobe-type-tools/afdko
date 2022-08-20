@@ -14,13 +14,13 @@
 typedef struct
 {
     Fixed Version;
-    Card16 Flags;
+    uint16_t Flags;
 #define TYP1_NO_SEAC (1 << 0)
-    Card16 GlyphCount;
-    Card32 TotalLength;
-    Card32 AsciiLength;
-    Card32 BinaryLength;
-    Int32 SubrMaxLength;
+    uint16_t GlyphCount;
+    uint32_t TotalLength;
+    uint32_t AsciiLength;
+    uint32_t BinaryLength;
+    int32_t SubrMaxLength;
 } TYP1Tbl;
 #define TYP1_HDR_SIZE (SIZEOF(TYP1Tbl, Version) +      \
                        SIZEOF(TYP1Tbl, Flags) +        \

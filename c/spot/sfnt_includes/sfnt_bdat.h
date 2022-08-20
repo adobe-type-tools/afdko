@@ -9,7 +9,7 @@
 
 #include "sfnt_sbit.h"
 
-typedef da_DCL(Card8, StrikeType);
+typedef da_DCL(uint8_t, StrikeType);
 
 typedef StrikeType *StrikePtr;
 
@@ -34,13 +34,13 @@ typedef struct _bdatGlyphBitmap_Format2 {
 #if 0
 typedef struct _bdatGlyphBitmap_Format4 /* not used by Adobe */
 {
-    Card32 whiteTreeOffset;
-    Card32 blackTreeOffset;
-    Card32 glyphDataOffset;
-    Card8 *whiteTree;
-    Card8 *blackTree;
+    uint32_t whiteTreeOffset;
+    uint32_t blackTreeOffset;
+    uint32_t glyphDataOffset;
+    uint8_t *whiteTree;
+    uint8_t *blackTree;
     ;
-    Card8 *glyphdata;
+    uint8_t *glyphdata;
 } bdatGlyphBitmap_Format4;
 #endif
 
@@ -48,9 +48,9 @@ typedef struct _bdatGlyphBitmap_Format5 /* PREFERRED format */
 {
     /* Mono Metrics are in "bloc" portion */
     GlyphId _startgid, _endgid;
-    Card32 _imagesize; /* size in bytes */
-    Card16 _resY;      /* bits in em square */
-    Card16 _gridsq;    /* actual grid square ( sometimes less than _resY) */
+    uint32_t _imagesize; /* size in bytes */
+    uint16_t _resY;      /* bits in em square */
+    uint16_t _gridsq;    /* actual grid square ( sometimes less than _resY) */
     StrikeType data;   /* bit-aligned bitmap data, padded to byte boundary */
 } bdatGlyphBitmap_Format5;
 
@@ -76,21 +76,21 @@ typedef union _bdatFormat {
 
 typedef struct _bdatFormats /* internal: for construction only */
 {
-    Card32 _fileoffsetfromstart;
-    Card32 _bytelen;
+    uint32_t _fileoffsetfromstart;
+    uint32_t _bytelen;
     sbitBitmapDataFormats _dfmttype;
-    Card8 _index;
-    Card32 _num; /* number of entries in the _fmt */
+    uint8_t _index;
+    uint32_t _num; /* number of entries in the _fmt */
     bdatFormat _fmt;
     /* Refer to this bdat's 'blocFormats' so that we can update the 'imageDataOffset' entry when we write out this bdat */
-    Card16 _mainblocsubtablearrayindex; /* index into the Main bloc SubtableArray */
-    Card16 _subtablearrayindex;         /*  index into _that_ array */
+    uint16_t _mainblocsubtablearrayindex; /* index into the Main bloc SubtableArray */
+    uint16_t _subtablearrayindex;         /*  index into _that_ array */
 } bdatFormats;
 
 typedef struct _bdatHeaderRecord {
 #define BDAT_HEADER_VERSION 0x00020000
     Fixed version;
-    Card16 _numentries;
+    uint16_t _numentries;
     DCL_ARRAY(bdatFormats, _formatlist);
 } bdatHeaderRecord;
 

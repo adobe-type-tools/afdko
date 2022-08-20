@@ -4,8 +4,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0.
 This license is available at: http://opensource.org/licenses/Apache-2.0.
 */
 
-#ifndef SAFETIME_H
-#define SAFETIME_H
+#ifndef SHARED_INCLUDE_SAFETIME_H_
+#define SHARED_INCLUDE_SAFETIME_H_
 
 #ifdef _WIN32
 #define SAFE_LOCALTIME(x, y)    localtime_s(y, x)
@@ -19,4 +19,4 @@ This license is available at: http://opensource.org/licenses/Apache-2.0.
 #define SAFE_GMTIME(x, y)       gmtime_r(x, y)
 #endif /* WIN32 */
 
-#endif /* SAFETIME_H */
+#endif  // SHARED_INCLUDE_SAFETIME_H_

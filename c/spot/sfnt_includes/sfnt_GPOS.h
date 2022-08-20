@@ -41,10 +41,10 @@ enum {
 
 typedef struct
 {
-    Int16 XPlacement;
-    Int16 YPlacement;
-    Int16 XAdvance;
-    Int16 YAdvance;
+    int16_t XPlacement;
+    int16_t YPlacement;
+    int16_t XAdvance;
+    int16_t YAdvance;
     Offset XPlaDevice; /* => Device */
     Offset YPlaDevice; /* => Device */
     Offset XAdvDevice; /* => Device */
@@ -54,45 +54,45 @@ typedef struct
 /* --- Anchor Table --- */
 typedef struct
 {
-    Card16 AnchorFormat; /* =1 */
-    Int16 XCoordinate;
-    Int16 YCoordinate;
+    uint16_t AnchorFormat; /* =1 */
+    int16_t XCoordinate;
+    int16_t YCoordinate;
 } AnchorFormat1;
 
 typedef struct
 {
-    Card16 AnchorFormat; /* =2 */
-    Int16 XCoordinate;
-    Int16 YCoordinate;
-    Card16 AnchorPoint;
+    uint16_t AnchorFormat; /* =2 */
+    int16_t XCoordinate;
+    int16_t YCoordinate;
+    uint16_t AnchorPoint;
 } AnchorFormat2;
 
 typedef struct
 {
-    Card16 AnchorFormat; /* =3 */
-    Int16 XCoordinate;
-    Int16 YCoordinate;
+    uint16_t AnchorFormat; /* =3 */
+    int16_t XCoordinate;
+    int16_t YCoordinate;
     OFFSET(DeviceTable *, XDeviceTable);
     OFFSET(DeviceTable *, YDeviceTable);
 } AnchorFormat3;
 
 typedef struct
 {
-    Card16 AnchorFormat; /* =4 */
-    Card16 XIdAnchor;
-    Card16 YIdAnchor;
+    uint16_t AnchorFormat; /* =4 */
+    uint16_t XIdAnchor;
+    uint16_t YIdAnchor;
 } AnchorFormat4;
 
 /* --- Mark Array --- */
 typedef struct
 {
-    Card16 Class;
+    uint16_t Class;
     OFFSET(void *, MarkAnchor); /* => Anchor */
 } MarkRecord;
 
 typedef struct
 {
-    Card16 MarkCount;
+    uint16_t MarkCount;
     MarkRecord *MarkRecord; /* [MarkCount] */
 } MarkArray;
 
@@ -103,31 +103,31 @@ typedef struct
 
 typedef struct
 {
-    Card16 ComponentCount;
+    uint16_t ComponentCount;
     ComponentRecord *ComponentRecord; /* [ComponentCount] */
 } LigatureAttach;
 
 typedef struct
 {
-    Card16 LigatureCount;
+    uint16_t LigatureCount;
     OFFSET_ARRAY(LigatureAttach, LigatureAttach); /* => LigatureAttach[LigatureCount] */
 } LigatureArray;
 
 /* --- Single Adjustment (type 1) --- */
 typedef struct
 {
-    Card16 PosFormat;         /* =1 */
+    uint16_t PosFormat;         /* =1 */
     OFFSET(void *, Coverage); /* => Coverage */
-    Card16 ValueFormat;
+    uint16_t ValueFormat;
     ValueRecord Value;
 } SinglePosFormat1;
 
 typedef struct
 {
-    Card16 PosFormat;         /* =2 */
+    uint16_t PosFormat;         /* =2 */
     OFFSET(void *, Coverage); /* => Coverage */
-    Card16 ValueFormat;
-    Card16 ValueCount;
+    uint16_t ValueFormat;
+    uint16_t ValueCount;
     ValueRecord *Value; /* [ValueCount] */
 } SinglePosFormat2;
 
@@ -141,17 +141,17 @@ typedef struct
 
 typedef struct
 {
-    Card16 PairValueCount;
+    uint16_t PairValueCount;
     PairValueRecord *PairValueRecord; /* [PairValueCount] */
 } PairSet;
 
 typedef struct
 {
-    Card16 PosFormat;         /* =1 */
+    uint16_t PosFormat;         /* =1 */
     OFFSET(void *, Coverage); /* => Coverage */
-    Card16 ValueFormat1;
-    Card16 ValueFormat2;
-    Card16 PairSetCount;
+    uint16_t ValueFormat1;
+    uint16_t ValueFormat2;
+    uint16_t PairSetCount;
     OFFSET_ARRAY(PairSet, PairSet); /* [PairSetCount] */
 } PosPairFormat1;
 
@@ -168,14 +168,14 @@ typedef struct
 
 typedef struct
 {
-    Card16 PosFormat;         /* =2 */
+    uint16_t PosFormat;         /* =2 */
     OFFSET(void *, Coverage); /* => Coverage */
-    Card16 ValueFormat1;
-    Card16 ValueFormat2;
+    uint16_t ValueFormat1;
+    uint16_t ValueFormat2;
     OFFSET(void *, ClassDef1); /* => ClassDef */
     OFFSET(void *, ClassDef2); /* => ClassDef */
-    Card16 Class1Count;
-    Card16 Class2Count;
+    uint16_t Class1Count;
+    uint16_t Class2Count;
     Class1Record *Class1Record; /* [Class1Count] */
 } PosPairFormat2;
 
@@ -188,9 +188,9 @@ typedef struct
 
 typedef struct
 {
-    Card16 PosFormat; /* =1 */
+    uint16_t PosFormat; /* =1 */
     OFFSET(void *, Coverage);
-    Card16 EntryExitCount;
+    uint16_t EntryExitCount;
     EntryExitRecord *EntryExitRecord; /* [EntryExitCount] */
 } CursivePosFormat1;
 
@@ -207,26 +207,26 @@ typedef struct
 
 typedef struct
 {
-    Card16 BaseCount;
+    uint16_t BaseCount;
     BaseRecord *BaseRecord; /* [BaseCount] */
 } BaseArray;
 
 typedef struct
 {
-    Card16 PosFormat;             /* =1 */
+    uint16_t PosFormat;             /* =1 */
     OFFSET(void *, MarkCoverage); /* => Coverage */
     OFFSET(void *, BaseCoverage); /* => Coverage */
-    Card16 ClassCount;
+    uint16_t ClassCount;
     OFFSET(MarkArray, MarkArray); /* => MarkArray */
     OFFSET(BaseArray, BaseArray); /* => BaseArray */
 } MarkBasePosFormat1;
 
 typedef struct
 {
-    Card16 PosFormat;                 /* =1 */
+    uint16_t PosFormat;                 /* =1 */
     OFFSET(void *, MarkCoverage);     /* => Coverage */
     OFFSET(void *, LigatureCoverage); /* => Coverage */
-    Card16 ClassCount;
+    uint16_t ClassCount;
     OFFSET(MarkArray, MarkArray);         /* => MarkArray */
     OFFSET(LigatureArray, LigatureArray); /* => LigatureArray */
 } MarkToLigPosFormat1;
@@ -235,60 +235,60 @@ typedef struct
 
 typedef struct
 {
-    Card16 SequenceIndex;
-    Card16 LookupListIndex;
+    uint16_t SequenceIndex;
+    uint16_t LookupListIndex;
 } PosLookupRecord;
 
 typedef struct
 {
-    Card16 GlyphCount;
-    Card16 PosCount;
+    uint16_t GlyphCount;
+    uint16_t PosCount;
     GlyphId *Input;                   /* [GlyphCount - 1] */
     PosLookupRecord *PosLookupRecord; /* [PosCount] */
 } PosRule;
 
 typedef struct
 {
-    Card16 PosRuleCount;
+    uint16_t PosRuleCount;
     OFFSET_ARRAY(PosRule, PosRule); /* [PosRuleCount] */
 } PosRuleSet;
 
 typedef struct
 {
-    Card16 PosFormat; /* =1 */
+    uint16_t PosFormat; /* =1 */
     OFFSET(void *, Coverage);
-    Card16 PosRuleSetCount;
+    uint16_t PosRuleSetCount;
     OFFSET_ARRAY(PosRuleSet, PosRuleSet); /* [PosRuleSetCount] */
 } ContextPosFormat1;
 
 typedef struct
 {
-    Card16 GlyphCount;
-    Card16 PosCount;
-    Card16 *Class;                    /* [GlyphCount - 1] */
+    uint16_t GlyphCount;
+    uint16_t PosCount;
+    uint16_t *Class;                    /* [GlyphCount - 1] */
     PosLookupRecord *PosLookupRecord; /* [PosCount] */
 } PosClassRule;
 
 typedef struct
 {
-    Card16 PosClassRuleCnt;
+    uint16_t PosClassRuleCnt;
     OFFSET_ARRAY(PosClassRule, PosClassRule); /* [PosClassRuleCnt] */
 } PosClassSet;
 
 typedef struct
 {
-    Card16 PosFormat; /* =2 */
+    uint16_t PosFormat; /* =2 */
     OFFSET(void *, Coverage);
     OFFSET(void *, ClassDef);
-    Card16 PosClassSetCnt;
+    uint16_t PosClassSetCnt;
     OFFSET_ARRAY(PosClassSet, PosClassSet); /* [PosClassSetCnt] */
 } ContextPosFormat2;
 
 typedef struct
 {
-    Card16 PosFormat; /* =3 */
-    Card16 GlyphCount;
-    Card16 PosCount;
+    uint16_t PosFormat; /* =3 */
+    uint16_t GlyphCount;
+    uint16_t PosCount;
     OFFSET_ARRAY(void *, CoverageArray); /* [GlyphCount] */
     PosLookupRecord *PosLookupRecord;    /* [PosCount] */
 } ContextPosFormat3;
@@ -296,78 +296,78 @@ typedef struct
 /* --- Chaining Contextual Substitution (type 8) --- */
 typedef struct
 {
-    Card16 BacktrackGlyphCount;
+    uint16_t BacktrackGlyphCount;
     GlyphId *Backtrack; /* [BacktrackGlyphCount] */
-    Card16 InputGlyphCount;
+    uint16_t InputGlyphCount;
     GlyphId *Input; /* [InputGlyphCount -1] */
-    Card16 LookaheadGlyphCount;
+    uint16_t LookaheadGlyphCount;
     GlyphId *Lookahead; /* [LookaheadGlyphCount] */
-    Card16 PosCount;
+    uint16_t PosCount;
     PosLookupRecord *PosLookupRecord; /* [PosCount] */
 } ChainPosRule;
 
 typedef struct
 {
-    Card16 ChainPosRuleCount;
+    uint16_t ChainPosRuleCount;
     OFFSET_ARRAY(ChainPosRule, ChainPosRule); /* [ChainPosRuleCount] */
 } ChainPosRuleSet;
 
 typedef struct
 {
-    Card16 PosFormat; /* =1 */
+    uint16_t PosFormat; /* =1 */
     OFFSET(void *, Coverage);
-    Card16 ChainPosRuleSetCount;
+    uint16_t ChainPosRuleSetCount;
     OFFSET_ARRAY(ChainPosRuleSet, ChainPosRuleSet); /* [ChainPosRuleSetCount]*/
 } ChainContextPosFormat1;
 
 typedef struct
 {
-    Card16 BacktrackGlyphCount;
-    Card16 *Backtrack; /* [BacktrackGlyphCount] */
-    Card16 InputGlyphCount;
-    Card16 *Input; /* [InputGlyphCount - 1] */
-    Card16 LookaheadGlyphCount;
-    Card16 *Lookahead; /* [LookaheadGlyphCount] */
-    Card16 PosCount;
+    uint16_t BacktrackGlyphCount;
+    uint16_t *Backtrack; /* [BacktrackGlyphCount] */
+    uint16_t InputGlyphCount;
+    uint16_t *Input; /* [InputGlyphCount - 1] */
+    uint16_t LookaheadGlyphCount;
+    uint16_t *Lookahead; /* [LookaheadGlyphCount] */
+    uint16_t PosCount;
     PosLookupRecord *PosLookupRecord; /* [PosCount] */
 } ChainPosClassRule;
 
 typedef struct
 {
-    Card16 ChainPosClassRuleCnt;
+    uint16_t ChainPosClassRuleCnt;
     OFFSET_ARRAY(ChainPosClassRule, ChainPosClassRule); /* [ChainPosClassRuleCnt]*/
 } ChainPosClassSet;
 
 typedef struct
 {
-    Card16 PosFormat; /* =2 */
+    uint16_t PosFormat; /* =2 */
     OFFSET(void *, Coverage);
     OFFSET(void *, BackTrackClassDef);
     OFFSET(void *, InputClassDef);
     OFFSET(void *, LookAheadClassDef);
-    Card16 ChainPosClassSetCnt;
+    uint16_t ChainPosClassSetCnt;
     OFFSET_ARRAY(ChainPosClassSet, ChainPosClassSet); /* [ChainPosClassSetCnt] */
 } ChainContextPosFormat2;
 
 typedef struct
 {
-    Card16 PosFormat; /* =3 */
-    Card16 BacktrackGlyphCount;
+    uint16_t PosFormat; /* =3 */
+    uint16_t BacktrackGlyphCount;
     OFFSET_ARRAY(void *, Backtrack); /* [BacktrackGlyphCount] offsets to coverage tables */
-    Card16 InputGlyphCount;
+    uint16_t InputGlyphCount;
     OFFSET_ARRAY(void *, Input); /* [InputGlyphCount] offsets to coverage tables */
-    Card16 LookaheadGlyphCount;
+    uint16_t LookaheadGlyphCount;
     OFFSET_ARRAY(void *, Lookahead); /* [LookaheadGlyphCount] offsets to coverage tables*/
-    Card16 PosCount;
+    uint16_t PosCount;
     PosLookupRecord *PosLookupRecord; /* [PosCount] */
 } ChainContextPosFormat3;
 
 /* --- Extension Lookup (type 9) --- */
 typedef struct
 {
-    Card16 PosFormat; /* =1 */
-    Card16 ExtensionLookupType;
-    Card32 ExtensionOffset;
+    uint16_t PosFormat; /* =1 */
+    uint16_t ExtensionLookupType;
+    uint32_t ExtensionOffset;
     void *subtable; /*pointer to the table in the overflow subtable*/
 } ExtensionPosFormat1;
 

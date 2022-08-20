@@ -17,8 +17,8 @@ typedef struct
     GlyphId ligglyph;
     Fixed lowerLimit;
     Fixed upperLimit;
-    Card16 order;
-    Card16 nGlyphs;
+    uint16_t order;
+    uint16_t nGlyphs;
     GlyphId *glyph;
 } DecompAction;
 #define DECOMP_HDR_SIZE (SIZEOF(DecompAction, lowerLimit) + \
@@ -29,9 +29,9 @@ typedef struct
 /* Post compensation action header */
 typedef struct
 {
-    Card16 class;
-    Card16 type;
-    Card32 length;
+    uint16_t class;
+    uint16_t type;
+    uint32_t length;
     void *typeSpecific;
 } ActionHdr;
 #define ACTION_HDR_SIZE (SIZEOF(ActionHdr, class) + \
@@ -50,21 +50,21 @@ enum {
 /* Post compensation action list */
 typedef struct
 {
-    Card32 nActions;
+    uint32_t nActions;
     ActionHdr *action;
 } PostcompAction;
 
 /* Width delta pair */
 typedef struct
 {
-    Card32 class;
+    uint32_t class;
     Fixed beforeGrowLimit;
     Fixed beforeShrinkLimit;
     Fixed afterGrowLimit;
     Fixed afterShrinkLimit;
-    Card16 growFlags;
+    uint16_t growFlags;
 #define FLAG_UNLIMITED (1 << 12)
-    Card16 shrinkFlags;
+    uint16_t shrinkFlags;
 } WidthDeltaPair;
 #define WDC_SIZE (SIZEOF(WidthDeltaPair, class) +             \
                   SIZEOF(WidthDeltaPair, beforeGrowLimit) +   \
@@ -77,24 +77,24 @@ typedef struct
 /* Width delta cluster */
 typedef struct
 {
-    Card32 nPairs;
+    uint32_t nPairs;
     WidthDeltaPair *pair;
 } WidthDeltaCluster;
 
 /* Direction header */
 typedef struct
 {
-    Card16 classOffset;
-    Card16 wdcOffset;
-    Card16 pcOffset;
+    uint16_t classOffset;
+    uint16_t wdcOffset;
+    uint16_t pcOffset;
     struct
     {
         Lookup lookup;
 #define WDC_LOOKUP_INTL 256
 #define WDC_LOOKUP_INCR 256
         DCL_ARRAY(WidthDeltaCluster, record);
-        Card16 lookupSize; /* Size of the lookup table (bytes) */
-        Card16 dataSize;   /* Size of the wdc data (bytes) */
+        uint16_t lookupSize; /* Size of the lookup table (bytes) */
+        uint16_t dataSize;   /* Size of the wdc data (bytes) */
     } wdc;
     struct
     {
@@ -102,7 +102,7 @@ typedef struct
 #define PC_LOOKUP_INTL 5
 #define PC_LOOKUP_INCR 5
         DCL_ARRAY(PostcompAction, record);
-        Card16 totalSize; /* Size of the lookup table + pc data (bytes) */
+        uint16_t totalSize; /* Size of the lookup table + pc data (bytes) */
     } pc;
 } DirectionHdr;
 #define DIRECTION_HDR_SIZE (SIZEOF(DirectionHdr, classOffset) + \
@@ -113,9 +113,9 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card16 format;
-    Card16 horizOffset;
-    Card16 vertOffset;
+    uint16_t format;
+    uint16_t horizOffset;
+    uint16_t vertOffset;
     DirectionHdr horiz;
     DirectionHdr vert;
 } justTbl;

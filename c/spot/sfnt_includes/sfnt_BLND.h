@@ -13,7 +13,7 @@
 
 typedef struct
 {
-    Card16 designCoord;
+    uint16_t designCoord;
     Fixed normalizedValue;
 } Map;
 #define MAP_SIZE (SIZEOF(Map, designCoord) + \
@@ -21,14 +21,14 @@ typedef struct
 
 typedef struct
 {
-    Card16 flags;
+    uint16_t flags;
 #define FLAG_MAP (1 << 0) /* Axis has map information */
-    Card16 minRange;
-    Card16 maxRange;
-    Card8 *type;
-    Card8 *longLabel;
-    Card8 *shortLabel;
-    Card16 nMaps;
+    uint16_t minRange;
+    uint16_t maxRange;
+    uint8_t *type;
+    uint8_t *longLabel;
+    uint8_t *shortLabel;
+    uint16_t nMaps;
     Map *map;
 } AxisInfo;
 #define AXIS_INFO_HDR_SIZE (SIZEOF(AxisInfo, flags) +    \
@@ -45,10 +45,10 @@ typedef struct
 
 typedef struct
 {
-    Card8 code;
-    Card8 flags; /* Unused */
-    Card16 axis;
-    Card16 nDeltas;
+    uint8_t code;
+    uint8_t flags; /* Unused */
+    uint16_t axis;
+    uint16_t nDeltas;
     Delta *delta;
 } SPOT_Style;
 #define STYLE_HDR_SIZE (SIZEOF(Style, code) +  \
@@ -58,47 +58,47 @@ typedef struct
 
 typedef struct
 {
-    Card16 *coord;
-    Card32 offset;
-    Int16 FONDId;
-    Int16 NFNTId;
+    uint16_t *coord;
+    uint32_t offset;
+    int16_t FONDId;
+    int16_t NFNTId;
 } Instance;
 
 /* Design to weight vector conversion */
 typedef struct
 {
-    Card16 CDVNum;
-    Card16 CDVLength;
-    Card16 NDVNum;
-    Card16 NDVLength;
-    Card16 lenBuildCharArray;
-    Card8 *CDVSubr;
-    Card8 *NDVSubr;
+    uint16_t CDVNum;
+    uint16_t CDVLength;
+    uint16_t NDVNum;
+    uint16_t NDVLength;
+    uint16_t lenBuildCharArray;
+    uint8_t *CDVSubr;
+    uint8_t *NDVSubr;
 } D2WV;
 
 typedef struct
 {
-    Card16 version;
-    Card16 flags;
+    uint16_t version;
+    uint16_t flags;
 #define FLAG_CHAMELEON (1 << 0) /* Font is chameleon */
-    Card16 nAxes;
-    Card16 nMasters;
-    Card16 languageId; /* Unused */
-    Card16 iRegular;
-    Card16 nOffsets;
-    Card32 *axisOffset;
-    Card32 masterNameOffset;
-    Card32 styleOffset;
-    Card32 instanceOffset;
-    Card32 instanceNameOffset;
-    Card32 d2wvOffset; /* != 0 if design to weight vector code in font */
+    uint16_t nAxes;
+    uint16_t nMasters;
+    uint16_t languageId; /* Unused */
+    uint16_t iRegular;
+    uint16_t nOffsets;
+    uint32_t *axisOffset;
+    uint32_t masterNameOffset;
+    uint32_t styleOffset;
+    uint32_t instanceOffset;
+    uint32_t instanceNameOffset;
+    uint32_t d2wvOffset; /* != 0 if design to weight vector code in font */
     AxisInfo *axisInfo;
-    DCL_ARRAY(Card8, masterNames);
-    Card16 nStyles;
+    DCL_ARRAY(uint8_t, masterNames);
+    uint16_t nStyles;
     SPOT_Style *style;
-    Card16 nInstances;
+    uint16_t nInstances;
     Instance *instance;
-    DCL_ARRAY(Card8, instanceNames);
+    DCL_ARRAY(uint8_t, instanceNames);
     D2WV d2wv;
 } BLNDTbl;
 

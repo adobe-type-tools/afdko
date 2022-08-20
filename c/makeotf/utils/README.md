@@ -11,5 +11,5 @@ This script generates the file `uniblock.h` from the Microsoft definition of the
 
 To run the script:
 ```bash
-$ python3 generate_uniblock.py > ../lib/hotconv/uniblock.h
+$ python3 generate_uniblock.py > ../hotconv/uniblock.h
 ```

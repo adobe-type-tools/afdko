@@ -13,16 +13,16 @@
 
 typedef struct
 {
-    Card8 type;
-    Card8 nValues;
-    Int16 *value;
+    uint8_t type;
+    uint8_t nValues;
+    int16_t *value;
 } Hint;
 
 typedef struct
 {
     Fixed version;
-    Card32 flags;
-    Card16 nHints;
+    uint32_t flags;
+    uint16_t nHints;
     Hint *hint;
 } CSNPTbl;
 

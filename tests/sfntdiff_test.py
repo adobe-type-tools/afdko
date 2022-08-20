@@ -59,7 +59,7 @@ def test_not_font_files():
                                                   'not_a_font_2.otf'])
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert b'[WARNING]: unsupported/bad file' in output
+    assert b'WARNING: unsupported/bad file' in output
     assert b'not_a_font_1.otf] (ignored)' in output
     assert b'not_a_font_2.otf] (ignored)' in output
 

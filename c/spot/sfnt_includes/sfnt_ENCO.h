@@ -13,16 +13,16 @@
 
 typedef struct
 {
-    Card16 format;
+    uint16_t format;
 } Format0;
 #define FORMAT0_SIZE SIZEOF(Format0, format)
 
 typedef struct
 {
-    Card16 format;
-    Card16 count;
+    uint16_t format;
+    uint16_t count;
     GlyphId *glyphId;
-    Card8 *code;
+    uint8_t *code;
 } Format1;
 #define FORMAT1_SIZE(n) (SIZEOF(Format1, format) +      \
                          SIZEOF(Format1, count) +       \
@@ -32,7 +32,7 @@ typedef struct
 
 typedef struct
 {
-    Card16 format;
+    uint16_t format;
     GlyphId glyphId[256];
 } Format2;
 #define FORMAT2_SIZE (SIZEOF(Format2, format) + \
@@ -41,7 +41,7 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card32 *offset;
+    uint32_t *offset;
     DCL_ARRAY(void *, encoding);
 } ENCOTbl;
 

@@ -2,6 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+// NOLINT(build/header_guard)
+
 /*
  * Type 1 and 2 charstring operators.
  *
@@ -89,12 +91,12 @@
 #define tx_not              tx_ESC(5)
 #define t2_reservedESC6     tx_ESC(6)
 #define t2_reservedESC7     tx_ESC(7)
-#define t2_reservedESC8     tx_ESC(8)
+#define tx_store            tx_ESC(8)
 #define tx_abs              tx_ESC(9)
 #define tx_add              tx_ESC(10)
 #define tx_sub              tx_ESC(11)
 #define tx_div              tx_ESC(12)
-#define t2_reservedESC13    tx_ESC(13)
+#define tx_load             tx_ESC(13)
 #define tx_neg              tx_ESC(14)
 #define tx_eq               tx_ESC(15)
 #define t2_reservedESC16    tx_ESC(16)
@@ -143,8 +145,6 @@
 #define t1_hstem3           tx_ESC(2)
 #define t1_seac             tx_ESC(6)   /* Deprecated */
 #define t1_sbw              tx_ESC(7)
-#define t1_store            tx_ESC(8)
-#define t1_load             tx_ESC(13)
 #define t1_callother        tx_ESC(16)
 #define t1_pop              tx_ESC(17)
 #define t1_div2             tx_ESC(25)
@@ -157,7 +157,7 @@
 #define t1_otherPreflex1    1
 #define t1_otherPreflex2    2
 #define t1_otherHintSubs    3
-#define t1_otherReserved4   4
+#define t1_otherUniqueId    4
 #define t1_otherGlobalColor 6
 #define t1_otherReserved7   7
 #define t1_otherReserved8   8
@@ -178,7 +178,7 @@
 #define t1_otherDiv         23
 #define t1_otherPut         24
 #define t1_otherGet         25
-#define t1_otherReserved26  26
+#define t1_otherPSPut       26
 #define t1_otherIfelse      27
 #define t1_otherRandom      28
 #define t1_otherDup         29
@@ -196,7 +196,10 @@
 #define CFF2_MAX_OP_STACK     513 /* Max  stack for CFF2 dict and charstrings.*/
 #define TX_MAX_CALL_STACK      10 /* Max callsubr stack depth */
 #define T2_MAX_STEMS           96 /* Max stems */
-#define TX_STD_FLEX_DEPTH      50 /* Standard flex depth (100ths/pixel) */
+#define TX_MAX_MASTERS         16 /* Max master designs */
+#define TX_MAX_AXES            15 /* Max design axes */
+#define TX_MAX_AXIS_MAPS       12 /* Max axis maps (piecewise division) */
+#define TX_STD_FLEX_HEIGHT     50 /* Standard flex height (100ths/pixel) */
 #define TX_MAX_BLUE_VALUES     14 /* 14 values (7 pairs) */
 #define TX_MAX_OTHER_BLUES     10 /* 10 values (5 pairs) */
 #define TX_MAX_STEM_SNAP       12 /* Max StemSnap elements */
@@ -216,9 +219,9 @@
 
 
 /* load/store registry ids */
-#define T1_REG_WV           0   /* WeightVector */
-#define T1_REG_NDV          1   /* NormalizedDesignVector */
-#define T1_REG_UDV          2   /* UserDesignVector */
+#define TX_REG_WV           0   /* WeightVector */
+#define TX_REG_NDV          1   /* NormalizedDesignVector */
+#define TX_REG_UDV          2   /* UserDesignVector */
 
 #define RND_ON_READ(val) (((int)((val)*10000))/10000.0) /* Truncate at 4 decimal places, the most that CFF supports as a real. I truncate because if a value is a hair below x.5, I don't want it rounding up to x.5, which will later round to x+1.*/
 #define RND_ON_WRITE(val) (roundf(val*100)/100.0)  /* round to 2 decimal places for output. */

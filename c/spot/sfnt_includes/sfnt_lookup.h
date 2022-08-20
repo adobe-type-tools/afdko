@@ -114,17 +114,17 @@
 
 typedef struct
 {
-    Card16 format;
-    Card16 *value;
+    uint16_t format;
+    uint16_t *value;
 } Lookup0;
 
 typedef struct
 {
-    Card16 segmentSize;
-    Card16 nSegments;
-    Card16 searchRange;
-    Card16 entrySelector;
-    Card16 rangeShift;
+    uint16_t segmentSize;
+    uint16_t nSegments;
+    uint16_t searchRange;
+    uint16_t entrySelector;
+    uint16_t rangeShift;
 } BinSearchHdr;
 #define BIN_SEARCH_HDR_SIZE (SIZEOF(BinSearchHdr, segmentSize) +   \
                              SIZEOF(BinSearchHdr, nSegments) +     \
@@ -136,7 +136,7 @@ typedef struct
 {
     GlyphId lastGlyph;
     GlyphId firstGlyph;
-    Card16 *value;
+    uint16_t *value;
 } Segment2;
 #define SEGMENT2_HDR_SIZE (SIZEOF(Segment2, lastGlyph) + \
                            SIZEOF(Segment2, firstGlyph))
@@ -145,10 +145,10 @@ typedef struct
 
 typedef struct
 {
-    Card16 format;
+    uint16_t format;
     BinSearchHdr search;
     Segment2 *segment;
-    Card16 *data; /* Only used by opbd */
+    uint16_t *data; /* Only used by opbd */
 } Lookup2;
 
 typedef struct
@@ -156,9 +156,9 @@ typedef struct
     GlyphId lastGlyph;
     GlyphId firstGlyph;
     union {
-        Card32 size32;
+        uint32_t size32;
 #define SHARED_DATA (1 << 31) /* Flags single shared metrics data */
-        Card16 size16;
+        uint16_t size16;
     } offset;
 } Segment4;
 #define SEGMENT4_OFFSET32_SIZE (SIZEOF(Segment4, lastGlyph) +  \
@@ -171,16 +171,16 @@ typedef struct
 
 typedef struct
 {
-    Card16 format;
+    uint16_t format;
     BinSearchHdr search;
     Segment4 *segment;
-    Card16 *data;
+    uint16_t *data;
 } Lookup4;
 
 typedef struct
 {
     GlyphId glyphId;
-    Card16 *value;
+    uint16_t *value;
 } Segment6;
 #define SEGMENT6_HDR_SIZE (SIZEOF(Segment6, glyphId))
 #define SEGMENT6_SIZE (SEGMENT6_HDR_SIZE + \
@@ -188,18 +188,18 @@ typedef struct
 
 typedef struct
 {
-    Card16 format;
+    uint16_t format;
     BinSearchHdr search;
     Segment6 *segment;
-    Card16 *data; /* Only used by opbd */
+    uint16_t *data; /* Only used by opbd */
 } Lookup6;
 
 typedef struct
 {
-    Card16 format;
+    uint16_t format;
     GlyphId firstGlyph;
-    Card16 nGlyphs;
-    Card16 *value;
+    uint16_t nGlyphs;
+    uint16_t *value;
 } Lookup8;
 
 #endif /* FORMAT_LOOKUP_H */

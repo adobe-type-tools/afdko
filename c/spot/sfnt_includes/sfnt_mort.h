@@ -14,10 +14,10 @@
 /* Feature table entry */
 typedef struct
 {
-    Card16 feature;
-    Card16 setting;
-    Card32 enableFlags;
-    Card32 disableFlags;
+    uint16_t feature;
+    uint16_t setting;
+    uint32_t enableFlags;
+    uint32_t disableFlags;
 } Feature;
 #define FEATURE_ENTRY_SIZE (SIZEOF(Feature, feature) +     \
                             SIZEOF(Feature, setting) +     \
@@ -44,8 +44,8 @@ typedef struct
 
 /* Mort subtable */
 typedef struct _table {
-    Card16 length;
-    Card16 coverage;
+    uint16_t length;
+    uint16_t coverage;
 #define COVERAGE_VERTICAL   (1 << 15)
 #define COVERAGE_DESCENDING (1 << 14)
 #define COVERAGE_CONTEXT    1
@@ -59,9 +59,9 @@ typedef struct _table {
 /* Subtable header */
 typedef struct
 {
-    Card16 feature;
-    Card16 setting;
-    Card32 selector;
+    uint16_t feature;
+    uint16_t setting;
+    uint32_t selector;
     Table list; /* Subtable list for this feature/setting */
 } Subtable;
 #define SUBTABLE_HDR_SIZE (SIZEOF(Table, length) +   \
@@ -71,10 +71,10 @@ typedef struct
 /* Chain */
 typedef struct
 {
-    Card32 defaultFlags;
-    Card32 length;
-    Card16 nFeatures;
-    Card16 nSubtables;
+    uint32_t defaultFlags;
+    uint32_t length;
+    uint16_t nFeatures;
+    uint16_t nSubtables;
     DCL_ARRAY(Feature, feature);
     Subtable subtable[32];
 } Chain;
@@ -86,7 +86,7 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card32 nChains;
+    uint32_t nChains;
     DCL_ARRAY(Chain, chain);
 } mortTbl;
 

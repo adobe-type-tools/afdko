@@ -24,10 +24,10 @@ typedef struct
 
 typedef struct
 {
-    Card16 nPairs;
-    Card16 searchRange;
-    Card16 entrySelector;
-    Card16 rangeShift;
+    uint16_t nPairs;
+    uint16_t searchRange;
+    uint16_t entrySelector;
+    uint16_t rangeShift;
     Pair *pair;
 } Format0;
 #define FORMAT0_HDR_SIZE (SIZEOF(Format0, nPairs) +        \
@@ -39,9 +39,9 @@ typedef struct
 typedef struct
 {
     GlyphId firstGlyph;
-    Card16 nGlyphs;
-    Card16 *classes;
-    Card16 nClasses; /* [Not in format] */
+    uint16_t nGlyphs;
+    uint16_t *classes;
+    uint16_t nClasses; /* [Not in format] */
 } Class;
 #define CLASS_SIZE(n) (SIZEOF(Class, firstGlyph) + \
                        SIZEOF(Class, nGlyphs) +    \
@@ -49,10 +49,10 @@ typedef struct
 
 typedef struct
 {
-    Card16 rowWidth;
-    Card16 leftClassOffset;
-    Card16 rightClassOffset;
-    Card16 arrayOffset;
+    uint16_t rowWidth;
+    uint16_t leftClassOffset;
+    uint16_t rightClassOffset;
+    uint16_t arrayOffset;
     FWord *array;
     Class left;
     Class right;
@@ -66,15 +66,15 @@ typedef struct
 
 typedef struct
 {
-    Card16 glyphCount;
-    Card8 kernValueCount;
-    Card8 leftClassCount;
-    Card8 rightClassCount;
-    Card8 flags;
+    uint16_t glyphCount;
+    uint8_t kernValueCount;
+    uint8_t leftClassCount;
+    uint8_t rightClassCount;
+    uint8_t flags;
     FWord *kernValue;
-    Card8 *leftClass;
-    Card8 *rightClass;
-    Card8 *kernIndex;
+    uint8_t *leftClass;
+    uint8_t *rightClass;
+    uint8_t *kernIndex;
 } Format3;
 
 #define FORMAT3_HDR_SIZE (SIZEOF(Format3, glyphCount) +      \
@@ -86,10 +86,10 @@ typedef struct
 /* ### Apple format kern table */
 typedef struct
 {
-    Card32 length;
-    Card16 coverage;
+    uint32_t length;
+    uint16_t coverage;
 #define COVERAGE_FORMAT 0x00ff
-    Card16 tupleIndex;
+    uint16_t tupleIndex;
     void *format;
 } Subtable;
 #define SUBTABLE_HDR_SIZE (SIZEOF(Subtable, length) +   \
@@ -99,7 +99,7 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card32 nTables;
+    uint32_t nTables;
     DCL_ARRAY(Subtable, subtable);
 } kernTbl;
 #define TBL_HDR_SIZE (SIZEOF(kernTbl, version) + \
@@ -108,9 +108,9 @@ typedef struct
 /* ### Microsoft format kern table (really Apple's earlier design) */
 typedef struct
 {
-    Card16 version;
-    Card16 length;
-    Card16 coverage;
+    uint16_t version;
+    uint16_t length;
+    uint16_t coverage;
 #define MS_COVERAGE_FORMAT 0xff00
     void *format;
 } MSSubtable;
@@ -120,8 +120,8 @@ typedef struct
 
 typedef struct
 {
-    Card16 version;
-    Card16 nTables;
+    uint16_t version;
+    uint16_t nTables;
     MSSubtable *subtable;
 } MSkernTbl;
 #define MS_TBL_HDR_SIZE (SIZEOF(MSkernTbl, version) + \

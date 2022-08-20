@@ -26,8 +26,8 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card16 flags;
-    Card16 nMasters;
+    uint16_t flags;
+    uint16_t nMasters;
     FWord *before;         /* [nMasters] */
     FWord *after;          /* [nMasters] */
     FWord *caretSlopeRise; /* [nMasters] */

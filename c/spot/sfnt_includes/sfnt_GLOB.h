@@ -14,7 +14,7 @@
 typedef struct
 {
     Fixed version;
-    Card16 flags;
+    uint16_t flags;
 #define GLOB_ITALIC      (1 << 0)  /* Italic font */
 #define GLOB_BOLD        (1 << 1)  /* Bold font */
 #define GLOB_SERIF       (1 << 2)  /* Serif font */
@@ -25,7 +25,7 @@ typedef struct
 #define GLOB_SERIF_AXIS  (1 << 10) /* Has serif axis */
 #define GLOB_CHAMELEON   (1 << 14) /* Is chameleon font */
 #define GLOB_INSTANCE_OK (1 << 15) /* Can make text instance */
-    Card16 nMasters;
+    uint16_t nMasters;
     Fixed matrix[6];           /* ???Not convinced this is needed */
     Fixed *italicAngle;        /* [nMasters] */
     FWord *bboxLeft;           /* [nMasters] */
@@ -39,13 +39,13 @@ typedef struct
     FWord *dominantV;          /* [nMasters] */
     FWord *avgWidth;           /* [nMasters]. Windows ANSI encoding */
     FWord *maxWidth;           /* [nMasters]. Windows ANSI encoding */
-    Card8 defaultChar;         /* Windows ANSI encoding */
-    Card8 breakChar;           /* Windows ANSI encoding */
-    Card16 unitsPerEm;
-    Card16 macsfntId;
-    Card16 winMenuNameOffset;
-    Card8 winFileNamePrefix[5];
-    Card8 *names; /* String pool */
+    uint8_t defaultChar;         /* Windows ANSI encoding */
+    uint8_t breakChar;           /* Windows ANSI encoding */
+    uint16_t unitsPerEm;
+    uint16_t macsfntId;
+    uint16_t winMenuNameOffset;
+    uint8_t winFileNamePrefix[5];
+    uint8_t *names; /* String pool */
 } GLOBTbl;
 #define WIN_MENU_NAME_OFFSET(n)                \
     (SIZEOF(GLOBTbl, version) +                \

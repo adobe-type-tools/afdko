@@ -13,9 +13,9 @@
 
 typedef struct
 {
-    Card16 version;
-    Card16 numGlyphs;
-    Card8 *yPels;
+    uint16_t version;
+    uint16_t numGlyphs;
+    uint8_t *yPels;
 } LTSHTbl;
 
 #endif /* FORMAT_LTSH_H */

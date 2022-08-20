@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef DYNARR_H
-#define DYNARR_H
+#ifndef SHARED_INCLUDE_DYNARR_H_
+#define SHARED_INCLUDE_DYNARR_H_
 
 #include "ctlshare.h"
 
@@ -382,4 +382,4 @@ void dnaGetVersion(ctlVersionCallbacks *cb);
 }
 #endif
 
-#endif /* DYNARR_H */
+#endif  // SHARED_INCLUDE_DYNARR_H_

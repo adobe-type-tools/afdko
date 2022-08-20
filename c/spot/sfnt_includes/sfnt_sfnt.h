@@ -12,13 +12,13 @@
 /* TrueType Collection Header */
 typedef struct
 {
-    Card32 TTCTag;
+    uint32_t TTCTag;
     Fixed Version;
-    Card32 DirectoryCount;
-    Card32 *TableDirectory; /* [DirectoryCount] */
-    Card32 DSIGTag;
-    Card32 DSIGLength;
-    Card32 DSIGOffset;
+    uint32_t DirectoryCount;
+    uint32_t *TableDirectory; /* [DirectoryCount] */
+    uint32_t DSIGTag;
+    uint32_t DSIGLength;
+    uint32_t DSIGOffset;
 } ttcfTbl;
 
 #define TTC_HDR_SIZEV1 (SIZEOF(ttcfTbl, TTCTag) +  \
@@ -36,10 +36,10 @@ typedef struct
 
 typedef struct
 {
-    Card32 tag;
-    Card32 checksum;
-    Card32 offset;
-    Card32 length;
+    uint32_t tag;
+    uint32_t checksum;
+    uint32_t offset;
+    uint32_t length;
 } Entry;
 #define ENTRY_SIZE (SIZEOF(Entry, tag) +      \
                     SIZEOF(Entry, checksum) + \
@@ -49,10 +49,10 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card16 numTables;
-    Card16 searchRange;
-    Card16 entrySelector;
-    Card16 rangeShift;
+    uint16_t numTables;
+    uint16_t searchRange;
+    uint16_t entrySelector;
+    uint16_t rangeShift;
     Entry *directory; /* [numTables] */
 } sfntTbl;
 #define DIR_HDR_SIZE (SIZEOF(sfntTbl, version) +       \

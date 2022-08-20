@@ -14,7 +14,7 @@
 typedef struct
 {
     Fixed version;
-    Card16 format;
+    uint16_t format;
     Lookup lookup;
 } opbdTbl;
 #define TBL_HDR_SIZE (SIZEOF(opbdTbl, version) + \

@@ -2,6 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+// NOLINT(build/header_guard)
+
 /*
  * Adobe Glyph List v1.2, sorted by glyph name. 1051 entries.
  *
@@ -19,8 +21,8 @@
  * This is an aggregate initializer for an array of structs of type:
  * typedef struct
  *     {
- *     char *glyphName;       // PostScript glyph name
- *     unsigned short uv;     // Unicode value
+ *     const char *glyphName;  // PostScript glyph name
+ *     unsigned short uv;      // Unicode value
  *     } UnicodeChar;
  */
 

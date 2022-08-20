@@ -1,7 +1,7 @@
-Sun Apr 29 01:41:16 2018
-sfntdiff (2.21217) (-d 4)  files:
-< sfntdiff_data/regular.otf
-> sfntdiff_data/bold.otf
+Thu Aug 25 21:59:30 2022
+sfntdiff (3.0.1) (-d 4)  files:
+< input/regular.otf
+> input/bold.otf
 < 'CFF ' table checksum=8472c5fa
 > 'CFF ' table checksum=4581066f
 < 'CFF ' table length=0000058d
@@ -41,11 +41,11 @@ sfntdiff (2.21217) (-d 4)  files:
 > head macStyle=0001
 'hhea' differs.
 'hmtx' differs.
-< name record[ 2]={platformId= 3, scriptId= 1, languageId= 409, nameId=   2, length=  14, offset=00fe} [Microsoft,Unicode,English(American),Style] "Regular"
-> name record[ 2]={platformId= 3, scriptId= 1, languageId= 409, nameId=   2, length=   8, offset=00fe} [Microsoft,Unicode,English(American),Style] "Bold"
-< name record[ 3]={platformId= 3, scriptId= 1, languageId= 409, nameId=   3, length=  76, offset=010c} [Microsoft,Unicode,English(American),UniqueId] "2.020;ADBO;SourceSansPro-Regular;ADOBE"
-> name record[ 3]={platformId= 3, scriptId= 1, languageId= 409, nameId=   3, length=  70, offset=0106} [Microsoft,Unicode,English(American),UniqueId] "2.020;ADBO;SourceSansPro-Bold;ADOBE"
-< name record[ 4]={platformId= 3, scriptId= 1, languageId= 409, nameId=   4, length=  30, offset=00e0} [Microsoft,Unicode,English(American),Full] "Source Sans Pro"
-> name record[ 4]={platformId= 3, scriptId= 1, languageId= 409, nameId=   4, length=  40, offset=014c} [Microsoft,Unicode,English(American),Full] "Source Sans Pro Bold"
-< name record[ 6]={platformId= 3, scriptId= 1, languageId= 409, nameId=   6, length=  42, offset=01c8} [Microsoft,Unicode,English(American),PostScript] "SourceSansPro-Regular"
-> name record[ 6]={platformId= 3, scriptId= 1, languageId= 409, nameId=   6, length=  36, offset=01e4} [Microsoft,Unicode,English(American),PostScript] "SourceSansPro-Bold"
+< name record[ 2]={platformId= 3, scriptId= 1, languageId= 409, nameId=   2, length=  14, offset=00fe} [Microsoft,Unicode BMP only,English(American),Style] "Regular"
+> name record[ 2]={platformId= 3, scriptId= 1, languageId= 409, nameId=   2, length=   8, offset=00fe} [Microsoft,Unicode BMP only,English(American),Style] "Bold"
+< name record[ 3]={platformId= 3, scriptId= 1, languageId= 409, nameId=   3, length=  76, offset=010c} [Microsoft,Unicode BMP only,English(American),UniqueId] "2.020;ADBO;SourceSansPro-Regular;ADOBE"
+> name record[ 3]={platformId= 3, scriptId= 1, languageId= 409, nameId=   3, length=  70, offset=0106} [Microsoft,Unicode BMP only,English(American),UniqueId] "2.020;ADBO;SourceSansPro-Bold;ADOBE"
+< name record[ 4]={platformId= 3, scriptId= 1, languageId= 409, nameId=   4, length=  30, offset=00e0} [Microsoft,Unicode BMP only,English(American),Full] "Source Sans Pro"
+> name record[ 4]={platformId= 3, scriptId= 1, languageId= 409, nameId=   4, length=  40, offset=014c} [Microsoft,Unicode BMP only,English(American),Full] "Source Sans Pro Bold"
+< name record[ 6]={platformId= 3, scriptId= 1, languageId= 409, nameId=   6, length=  42, offset=01c8} [Microsoft,Unicode BMP only,English(American),PostScript] "SourceSansPro-Regular"
+> name record[ 6]={platformId= 3, scriptId= 1, languageId= 409, nameId=   6, length=  36, offset=01e4} [Microsoft,Unicode BMP only,English(American),PostScript] "SourceSansPro-Bold"

@@ -11,16 +11,16 @@
 
 typedef struct
 {
-    Card16 rangeMaxPPEM;
-    Card16 rangeGaspBehavior;
+    uint16_t rangeMaxPPEM;
+    uint16_t rangeGaspBehavior;
 #define GASP_GRIDFIT (1 << 0)
 #define GASP_DOGRAY  (1 << 1)
 } GaspRange;
 
 typedef struct
 {
-    Card16 version;
-    Card16 numRanges;
+    uint16_t version;
+    uint16_t numRanges;
     GaspRange *gaspRange; /* [numRanges] */
 } gaspTbl;
 

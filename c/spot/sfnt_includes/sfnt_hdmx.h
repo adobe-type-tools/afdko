@@ -13,16 +13,16 @@
 
 typedef struct
 {
-    Card8 pixelsPerEm;
-    Card8 maxWidth;
-    Card8 *widths;
+    uint8_t pixelsPerEm;
+    uint8_t maxWidth;
+    uint8_t *widths;
 } DeviceRecord;
 
 typedef struct
 {
-    Card16 version;
-    Card16 nRecords;
-    Card32 recordSize;
+    uint16_t version;
+    uint16_t nRecords;
+    uint32_t recordSize;
     DeviceRecord *record;
 } hdmxTbl;
 #define TBL_HDR_SIZE (SIZEOF(hdmxTbl, version) +  \

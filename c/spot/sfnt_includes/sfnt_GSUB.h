@@ -26,31 +26,31 @@ enum {
 /* --- Single Substitution (type 1) --- */
 typedef struct
 {
-    Card16 SubstFormat; /* =1 */
+    uint16_t SubstFormat; /* =1 */
     OFFSET(void *, Coverage);
-    Int16 DeltaGlyphId;
+    int16_t DeltaGlyphId;
 } SingleSubstFormat1;
 
 typedef struct
 {
-    Card16 SubstFormat; /* =2 */
+    uint16_t SubstFormat; /* =2 */
     OFFSET(void *, Coverage);
-    Card16 GlyphCount;
+    uint16_t GlyphCount;
     GlyphId *Substitute; /* [GlyphCount] */
 } SingleSubstFormat2;
 
 /* --- Multiple Substitution (type 2) --- */
 typedef struct
 {
-    Card16 GlyphCount;
+    uint16_t GlyphCount;
     GlyphId *Substitute; /* [GlyphCount] */
 } Sequence;
 
 typedef struct
 {
-    Card16 SubstFormat; /* =1 */
+    uint16_t SubstFormat; /* =1 */
     OFFSET(void *, Coverage);
-    Card16 SequenceCount;
+    uint16_t SequenceCount;
     OFFSET_ARRAY(Sequence, Sequence); /* [SequenceCount] */
 } MultipleSubstFormat1;
 
@@ -59,15 +59,15 @@ typedef struct
 /* --- Alternate Substitution (type 3) --- */
 typedef struct
 {
-    Card16 GlyphCount;
+    uint16_t GlyphCount;
     GlyphId *Alternate; /* [GlyphCount] */
 } AlternateSet;
 
 typedef struct
 {
-    Card16 SubstFormat; /* =1 */
+    uint16_t SubstFormat; /* =1 */
     OFFSET(void *, Coverage);
-    Card16 AlternateSetCnt;
+    uint16_t AlternateSetCnt;
     OFFSET_ARRAY(AlternateSet, AlternateSet); /* [AlternateSetCnt] */
 } AlternateSubstFormat1;
 
@@ -75,81 +75,81 @@ typedef struct
 typedef struct
 {
     GlyphId LigGlyph;
-    Card16 CompCount;
+    uint16_t CompCount;
     GlyphId *Component; /* [CompCount - 1] */
 } Ligature;
 
 typedef struct
 {
-    Card16 LigatureCount;
+    uint16_t LigatureCount;
     OFFSET_ARRAY(Ligature, Ligature); /* [LigatureCount] */
 } LigatureSet;
 
 typedef struct
 {
-    Card16 SubstFormat; /* =1 */
+    uint16_t SubstFormat; /* =1 */
     OFFSET(void *, Coverage);
-    Card16 LigSetCount;
+    uint16_t LigSetCount;
     OFFSET_ARRAY(LigatureSet, LigatureSet); /* [LigSetCount] */
 } LigatureSubstFormat1;
 
 /* --- Contextual Substitution (type 5) --- */
 typedef struct
 {
-    Card16 SequenceIndex;
-    Card16 LookupListIndex;
+    uint16_t SequenceIndex;
+    uint16_t LookupListIndex;
 } SubstLookupRecord;
 
 typedef struct
 {
-    Card16 GlyphCount;
-    Card16 SubstCount;
+    uint16_t GlyphCount;
+    uint16_t SubstCount;
     GlyphId *Input;                       /* [GlyphCount - 1] */
     SubstLookupRecord *SubstLookupRecord; /* [SubstCount] */
 } SubRule;
 
 typedef struct
 {
-    Card16 SubRuleCount;
+    uint16_t SubRuleCount;
     OFFSET_ARRAY(SubRule, SubRule); /* [SubRuleCount] */
 } SubRuleSet;
 
 typedef struct
 {
-    Card16 SubstFormat; /* =1 */
+    uint16_t SubstFormat; /* =1 */
     OFFSET(void *, Coverage);
-    Card16 SubRuleSetCount;
+    uint16_t SubRuleSetCount;
     OFFSET_ARRAY(SubRuleSet, SubRuleSet); /* [SubRuleSetCount] */
 } ContextSubstFormat1;
 
 typedef struct
 {
-    Card16 GlyphCount;
-    Card16 SubstCount;
-    Card16 *Class;                        /* [GlyphCount - 1] */
+    uint16_t GlyphCount;
+    uint16_t SubstCount;
+    uint16_t *Class;                        /* [GlyphCount - 1] */
     SubstLookupRecord *SubstLookupRecord; /* [SubstCount] */
 } SubClassRule;
 
 typedef struct
 {
-    Card16 SubClassRuleCnt;
+    uint16_t SubClassRuleCnt;
     OFFSET_ARRAY(SubClassRule, SubClassRule); /* [SubClassRuleCnt] */
 } SubClassSet;
 
 typedef struct
 {
-    Card16 SubstFormat; /* =2 */
+    uint16_t SubstFormat; /* =2 */
     OFFSET(void *, Coverage);
     OFFSET(void *, ClassDef);
-    Card16 SubClassSetCnt;
+    uint16_t SubClassSetCnt;
     OFFSET_ARRAY(SubClassSet, SubClassSet); /* [SubClassSetCnt] */
 } ContextSubstFormat2;
 
 typedef struct
 {
-    Card16 SubstFormat; /* =3 */
-    Card16 GlyphCount;
-    Card16 SubstCount;
+    uint16_t SubstFormat; /* =3 */
+    uint16_t GlyphCount;
+    uint16_t SubstCount;
     OFFSET_ARRAY(void *, CoverageArray);  /* [GlyphCount] */
     SubstLookupRecord *SubstLookupRecord; /* [SubstCount] */
 } ContextSubstFormat3;
@@ -157,90 +157,90 @@ typedef struct
 /* --- Chaining Contextual Substitution (type 6) --- */
 typedef struct
 {
-    Card16 BacktrackGlyphCount;
+    uint16_t BacktrackGlyphCount;
     GlyphId *Backtrack; /* [BacktrackGlyphCount] */
-    Card16 InputGlyphCount;
+    uint16_t InputGlyphCount;
     GlyphId *Input; /* [InputGlyphCount -1] */
-    Card16 LookaheadGlyphCount;
+    uint16_t LookaheadGlyphCount;
     GlyphId *Lookahead; /* [LookaheadGlyphCount] */
-    Card16 SubstCount;
+    uint16_t SubstCount;
     SubstLookupRecord *SubstLookupRecord; /* [SubstCount] */
 } ChainSubRule;
 
 typedef struct
 {
-    Card16 ChainSubRuleCount;
+    uint16_t ChainSubRuleCount;
     OFFSET_ARRAY(ChainSubRule, ChainSubRule); /* [ChainSubRuleCount] */
 } ChainSubRuleSet;
 
 typedef struct
 {
-    Card16 SubstFormat; /* =1 */
+    uint16_t SubstFormat; /* =1 */
     OFFSET(void *, Coverage);
-    Card16 ChainSubRuleSetCount;
+    uint16_t ChainSubRuleSetCount;
     OFFSET_ARRAY(ChainSubRuleSet, ChainSubRuleSet); /* [ChainSubRuleSetCount]*/
 } ChainContextSubstFormat1;
 
 typedef struct
 {
-    Card16 BacktrackGlyphCount;
-    Card16 *Backtrack; /* [BacktrackGlyphCount] */
-    Card16 InputGlyphCount;
-    Card16 *Input; /* [InputGlyphCount - 1] */
-    Card16 LookaheadGlyphCount;
-    Card16 *Lookahead; /* [LookaheadGlyphCount] */
-    Card16 SubstCount;
+    uint16_t BacktrackGlyphCount;
+    uint16_t *Backtrack; /* [BacktrackGlyphCount] */
+    uint16_t InputGlyphCount;
+    uint16_t *Input; /* [InputGlyphCount - 1] */
+    uint16_t LookaheadGlyphCount;
+    uint16_t *Lookahead; /* [LookaheadGlyphCount] */
+    uint16_t SubstCount;
     SubstLookupRecord *SubstLookupRecord; /* [SubstCount] */
 } ChainSubClassRule;
 
 typedef struct
 {
-    Card16 ChainSubClassRuleCnt;
+    uint16_t ChainSubClassRuleCnt;
     OFFSET_ARRAY(ChainSubClassRule, ChainSubClassRule); /* [ChainSubClassRuleCnt]*/
 } ChainSubClassSet;
 
 typedef struct
 {
-    Card16 SubstFormat; /* =2 */
+    uint16_t SubstFormat; /* =2 */
     OFFSET(void *, Coverage);
     OFFSET(void *, BackTrackClassDef);
     OFFSET(void *, InputClassDef);
     OFFSET(void *, LookAheadClassDef);
-    Card16 ChainSubClassSetCnt;
+    uint16_t ChainSubClassSetCnt;
     OFFSET_ARRAY(ChainSubClassSet, ChainSubClassSet); /* [ChainSubClassSetCnt] */
 } ChainContextSubstFormat2;
 
 typedef struct
 {
-    Card16 SubstFormat; /* =3 */
-    Card16 BacktrackGlyphCount;
+    uint16_t SubstFormat; /* =3 */
+    uint16_t BacktrackGlyphCount;
     OFFSET_ARRAY(void *, Backtrack); /* [BacktrackGlyphCount] */
-    Card16 InputGlyphCount;
+    uint16_t InputGlyphCount;
     OFFSET_ARRAY(void *, Input); /* [InputGlyphCount] */
-    Card16 LookaheadGlyphCount;
+    uint16_t LookaheadGlyphCount;
     OFFSET_ARRAY(void *, Lookahead); /* [LookaheadGlyphCount] */
-    Card16 SubstCount;
+    uint16_t SubstCount;
     SubstLookupRecord *SubstLookupRecord; /* [SubstCount] */
 } ChainContextSubstFormat3;
 
 typedef struct
 {
-    Card16 SubstFormat; /* =3 */
+    uint16_t SubstFormat; /* =3 */
     OFFSET(void *, InputCoverage);
-    Card16 BacktrackGlyphCount;
+    uint16_t BacktrackGlyphCount;
     OFFSET_ARRAY(void *, Backtrack); /* [BacktrackGlyphCount] */
-    Card16 LookaheadGlyphCount;
+    uint16_t LookaheadGlyphCount;
     OFFSET_ARRAY(void *, Lookahead); /* [LookaheadGlyphCount] */
-    Card16 GlyphCount;
+    uint16_t GlyphCount;
     GlyphId *Substitutions; /* [SubstCount] */
 } ReverseChainContextSubstFormat1;
 
 /* --- Extended Substitution (type 7) --- */
 typedef struct
 {
-    Card16 SubstFormat; /* =1 */
-    Card16 OverflowLookupType;
-    Card32 OverflowOffset;
+    uint16_t SubstFormat; /* =1 */
+    uint16_t OverflowLookupType;
+    uint32_t OverflowOffset;
     void *subtable; /*pointer to the table in the overflow subtable*/
 } OverflowSubstFormat1;
 

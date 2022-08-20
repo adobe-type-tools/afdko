@@ -12,17 +12,17 @@
 #define MMFX_VERSION VERSION(1, 0)
 
 typedef struct _MMFXMetric {
-    Card16 id;    /* Metric id */
-    Int16 length; /* Charstring length */
-    Int32 index;  /* Charstring index */
+    uint16_t id;    /* Metric id */
+    int16_t length; /* Charstring length */
+    int32_t index;  /* Charstring index */
 } MMFXMetric;
 
 typedef struct _MMFXTbl {
     Fixed version;
-    Card16 nMetrics;
-    Card16 offSize; /* 2 or 4 byte length indicator */
-    Int32 *offset;  /* [nMetrics] */
-    Card8 *cstrs;   /* Charstrings */
+    uint16_t nMetrics;
+    uint16_t offSize; /* 2 or 4 byte length indicator */
+    int32_t *offset;  /* [nMetrics] */
+    uint8_t *cstrs;   /* Charstrings */
 } MMFXTbl;
 
 #endif /* FORMAT_MMFX_H */

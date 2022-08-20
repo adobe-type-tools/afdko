@@ -11,12 +11,12 @@
 
 typedef struct
 {
-    Card16 *offsets;
+    uint16_t *offsets;
 } Format0;
 
 typedef struct
 {
-    Card32 *offsets;
+    uint32_t *offsets;
 } Format1;
 
 typedef struct

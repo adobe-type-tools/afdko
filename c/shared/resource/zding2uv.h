@@ -2,6 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+// NOLINT(build/header_guard)
+
 /* Predefined Zapf Dingbats Unicode encoding aggregate initializer.
    Elements are structs of glyph name (char *) and Unicode value (unsigned
    short). Sorted by glyph name. Search by glyph name, get Unicode value. */

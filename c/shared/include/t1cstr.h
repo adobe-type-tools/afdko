@@ -6,8 +6,8 @@
  * Type 1 charstring services.
  */
 
-#ifndef T1CSTR_H
-#define T1CSTR_H
+#ifndef SHARED_INCLUDE_T1CSTR_H_
+#define SHARED_INCLUDE_T1CSTR_H_
 
 #include "ctlshare.h"
 
@@ -15,7 +15,7 @@
 
 #include "absfont.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 extern "C" {
 #endif
 
@@ -48,8 +48,7 @@ int t1cUnprotect(int lenIV, long *length, char *cipher, char *plain);
    CJK fonts (identified by the /RunInt key value of /eCCRun) but otherwise
    operates identically to t1cDecrypt(). */
 
-typedef struct
-{
+typedef struct {
     long flags;
 #define T1C_WIDTH_ONLY   (1 << 0)
 #define T1C_USE_MATRIX   (1 << 1) /* Matrix applied to entire charstring; used by 'rotateFont'.*/
@@ -177,7 +176,7 @@ enum {
    positive non-zero error code that is defined in the above enumeration that
    is built from t1cerr.h. */
 
-char *t1cErrStr(int err_code);
+const char *t1cErrStr(int err_code);
 
 /* t1cErrStr() maps the "err_code" parameter to a null-terminated error 
    string. */
@@ -187,8 +186,8 @@ void t1cGetVersion(ctlVersionCallbacks *cb);
 /* t1cGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 }
 #endif
 
-#endif /* T1CSTR_H */
+#endif  // SHARED_INCLUDE_T1CSTR_H_

@@ -1,0 +1,20 @@
+/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+      This software is licensed as OpenSource, under the Apache License, Version 2.0.
+         This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
+// NOLINT(build/header_guard)
+"[-cef options: default none]\n"
+"-F <FontName>   replace FontName in output file\n"
+"-cefsvg         generate SVG font instead of CEF font\n"
+"\n"
+"CEF mode writes CEF (Compact Embedded Font) formatted data from an abstract\n"
+"font. The -F (FontName) option specifies a new PostScript FontName that\n"
+"replaces the one from the source font. The -cefsvg option tells the cefembed\n"
+"library to write out an SVG font instead of a CEF font.\n"
+"\n"
+"For example, the command:\n"
+"\n"
+"    tx -cef -g C,E,F -a rdr_____.pfb\n"
+"\n"
+"will create a CEF file called rdr_____.cef that contains only the glyphs named\n"
+"\".notdef\", \"C\", \"E\", \"F\".\n"

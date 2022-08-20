@@ -2,13 +2,15 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+// NOLINT(build/header_guard)
+
 /* Predefined CFF standard string id aggregate initializer.
    Elements of type:
 
    struct
        {
        SID id;
-       char *strng;
+       const char *strng;
        };
 
    Sorted by string. Search by name, get SID. */

@@ -3,6 +3,5 @@ major  =2
 minor  =0
 hdrSize=5
 offSize=0
-tx: --- bug895_charstring.otf
-tx: charstring too short
-tx: fatal error
+tx: --- /home/skef/src/afdko3/afdko2/tests/tx_data/input/bad/bug895_charstring.otf
+  FATAL: charstring too short

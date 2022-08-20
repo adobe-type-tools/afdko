@@ -14,8 +14,8 @@
 typedef struct
 {
     Fixed version;
-    Card16 format;
-    Card16 defaultProps;
+    uint16_t format;
+    uint16_t defaultProps;
     Lookup lookup;
 } propTbl;
 

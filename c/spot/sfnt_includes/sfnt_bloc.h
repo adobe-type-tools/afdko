@@ -10,24 +10,24 @@
 #include "sfnt_sbit.h"
 
 typedef struct _blocBitmapSizeTable {
-    Card32 indexSubTableArrayOffset; /* offset to corresponding index */
+    uint32_t indexSubTableArrayOffset; /* offset to corresponding index */
                                      /* subtable array from beginning */
                                      /* of "bloc"                     */
-    Card32 indexTableSize;           /* length of corresponding index subtables and array   */
-    Card32 numberofIndexSubTables;   /* number of index subtables.                          */
+    uint32_t indexTableSize;           /* length of corresponding index subtables and array   */
+    uint32_t numberofIndexSubTables;   /* number of index subtables.                          */
                                      /* There is a subtable for each range or format change */
-    Card32 colorRef;                 /* set to 0. ignore for now                            */
+    uint32_t colorRef;                 /* set to 0. ignore for now                            */
     sbitLineMetrics hori;
     sbitLineMetrics vert;
     GlyphId startGlyphIndex;
     GlyphId endGlyphIndex;
-    Card8 ppemX; /* target horizontal pixels/em */
-    Card8 ppemY;
-    Card8 bitDepth;
-    Int8 flags;
+    uint8_t ppemX; /* target horizontal pixels/em */
+    uint8_t ppemY;
+    uint8_t bitDepth;
+    int8_t flags;
 #define BLOC_FLAG_HORIZONTAL (1 << 0)
 #define BLOC_FLAG_VERTICAL (1 << 1)
-    Card8 _index;
+    uint8_t _index;
 } blocBitmapSizeTable;
 
 #define BLOCBITMAPSIZETABLE_SIZE (SIZEOF(blocBitmapSizeTable, indexSubTableArrayOffset) + \
@@ -46,9 +46,9 @@ typedef struct _blocBitmapSizeTable {
 /* ...................BLOC SUBTABLES.................................... */
 
 typedef struct _blocIndexSubHeader {
-    Card16 indexFormat;     /* sbitBitmapIndexFormats */
-    Card16 imageFormat;     /* sbitBitmapDataFormats  */
-    Card32 imageDataOffset; /*offset to corresponding image data from beginning of bdat table*/
+    uint16_t indexFormat;     /* sbitBitmapIndexFormats */
+    uint16_t imageFormat;     /* sbitBitmapDataFormats  */
+    uint32_t imageDataOffset; /*offset to corresponding image data from beginning of bdat table*/
 } blocIndexSubHeader;
 
 #define BLOCINDEXSUBHEADER_SIZE (SIZEOF(blocIndexSubHeader, indexFormat) + \
@@ -59,20 +59,20 @@ typedef struct _blocIndexSubHeader {
    uncompressed PROPORTIONALLY-spaced glyphs */
 typedef struct _blocIndexSubtable_Format1 {
     blocIndexSubHeader header;
-    Card32 _numoffsets;
-    DCL_ARRAY(Card32, offsetArray); /* offsetArray[glyphIndex] + imageDataOffset ==> start of bitmap data for glyph. */
+    uint32_t _numoffsets;
+    DCL_ARRAY(uint32_t, offsetArray); /* offsetArray[glyphIndex] + imageDataOffset ==> start of bitmap data for glyph. */
                                     /* sizeOfArray = lastGlyph - firstGlyph + 1                                      */
 } blocIndexSubtable_Format1;
 
 #define BLOCFORMAT1_SIZE(first, last)            \
     (SIZEOF(blocIndexSubtable_Format1, header) + \
-     sizeof(Card32) * ((last) - (first) + 1))
+     sizeof(uint32_t) * ((last) - (first) + 1))
 
 /* format 2 has fixed-length images of the same format for
    MONO-spaced glyphs */
 typedef struct _blocIndexSubtable_Format2 {
     blocIndexSubHeader header;
-    Card32 imageSize;            /* images may be compressed, bit-aligned or byte-aligned */
+    uint32_t imageSize;            /* images may be compressed, bit-aligned or byte-aligned */
     sbitBigGlyphMetrics Metrics; /* all glyphs share same metrics */
 } blocIndexSubtable_Format2;
 
@@ -85,17 +85,17 @@ typedef struct _blocIndexSubtable_Format2 {
    Must be padded to a long-word boundary. */
 typedef struct _blocIndexSubtable_Format3 {
     blocIndexSubHeader header;
-    Card32 _numoffsets;
-    DCL_ARRAY(Card16, offsetArray);
+    uint32_t _numoffsets;
+    DCL_ARRAY(uint16_t, offsetArray);
 } blocIndexSubtable_Format3;
 
 #define BLOCFORMAT3_SIZE(first, last)            \
     (SIZEOF(blocIndexSubtable_Format1, header) + \
-     sizeof(Card16) * ((last) - (first) + 1))
+     sizeof(uint16_t) * ((last) - (first) + 1))
 
 typedef struct _blocCodeOffsetPair {
     GlyphId glyphCode; /* code of glyph present */
-    Card16 offset;     /* location in "bdat" */
+    uint16_t offset;     /* location in "bdat" */
 } blocCodeOffsetPair;
 #define BLOCCODEOFFSETPAIR_SIZE (SIZEOF(blocCodeOffsetPair, glyphCode) + \
                                  SIZEOF(blocCodeOffsetPair, offset))
@@ -104,7 +104,7 @@ typedef struct _blocCodeOffsetPair {
    PROPORTIONAL metrics */
 typedef struct _blocIndexSubtable_Format4 {
     blocIndexSubHeader header;
-    Card32 numGlyphs;
+    uint32_t numGlyphs;
     DCL_ARRAY(blocCodeOffsetPair, glyphArray); /* one per glyph */
 } blocIndexSubtable_Format4;
 
@@ -117,9 +117,9 @@ typedef struct _blocIndexSubtable_Format4 {
    fixed-sized, MONO-spaced metrics */
 typedef struct _blocIndexSubtable_Format5 {
     blocIndexSubHeader header;
-    Card32 imageSize;
+    uint32_t imageSize;
     sbitBigGlyphMetrics Metrics;
-    Card32 numGlyphs;
+    uint32_t numGlyphs;
     DCL_ARRAY(blocCodeOffsetPair, glyphArray); /* one per glyph */
 } blocIndexSubtable_Format5;
 
@@ -142,18 +142,18 @@ typedef union _blocFormat {
 
 typedef struct _blocFormats /* internal: for construction only */
 {
-    Card32 _bytelen;
+    uint32_t _bytelen;
     sbitBitmapIndexFormats _fmttype;
-    Card16 _index;
+    uint16_t _index;
     blocFormat _fmt;
 } blocFormats;
 
 typedef struct _blocIndexSubTableArrayElt {
     GlyphId firstGlyphIndex;
     GlyphId lastGlyphIndex;
-    Card32 additionalOffsetToIndexSubtable; /* add to indexSubTableArrayOffset to get offset from beginning of "bloc" table */
+    uint32_t additionalOffsetToIndexSubtable; /* add to indexSubTableArrayOffset to get offset from beginning of "bloc" table */
     blocFormats _subtable;
-    Card16 _index; /* index in subtable array */
+    uint16_t _index; /* index in subtable array */
 } blocIndexSubTableArrayElt;
 
 #define BLOCINDEXSUBTABLEARRAYELT_SIZE (SIZEOF(blocIndexSubTableArrayElt, firstGlyphIndex) + \
@@ -161,15 +161,15 @@ typedef struct _blocIndexSubTableArrayElt {
                                         SIZEOF(blocIndexSubTableArrayElt, additionalOffsetToIndexSubtable))
 
 typedef struct _blocIndexSubTableArray {
-    Card16 _numarrayelts;
+    uint16_t _numarrayelts;
     DCL_ARRAY(blocIndexSubTableArrayElt, _elts);
-    Card16 _index; /* index in Main bloc SubTableArray */
+    uint16_t _index; /* index in Main bloc SubTableArray */
 } blocIndexSubTableArray;
 
 typedef struct _blocTableHeader {
 #define BLOC_HEADER_VERSION 0x00020000
     Fixed version;
-    Card32 numSizes;
+    uint32_t numSizes;
     DCL_ARRAY(blocBitmapSizeTable, bitmapSizeTable); /* array [numSizes] */
     /* for construction: array[numSizes].
        one-to-one correspondence with bitmapSizeTable  */

@@ -24,17 +24,17 @@
 /* Common header for all formats */
 typedef struct
 {
-    Card16 format;
-    Card16 length;
-    Card16 languageId; /* Documented as revision */
+    uint16_t format;
+    uint16_t length;
+    uint16_t languageId; /* Documented as revision */
 } FormatHdr;
 
 typedef struct
 {
-    Card16 format;
-    Card16 length;
-    Card16 languageId; /* Documented as revision */
-    Card8 glyphId[256];
+    uint16_t format;
+    uint16_t length;
+    uint16_t languageId; /* Documented as revision */
+    uint8_t glyphId[256];
 } Format0;
 #define FORMAT0_SIZE (SIZEOF(Format0, format) +     \
                       SIZEOF(Format0, length) +     \
@@ -43,10 +43,10 @@ typedef struct
 
 typedef struct
 {
-    Card16 firstCode;
-    Card16 entryCount;
-    Int16 idDelta;
-    Card16 idRangeOffset;
+    uint16_t firstCode;
+    uint16_t entryCount;
+    int16_t idDelta;
+    uint16_t idRangeOffset;
 } Segment2;
 #define SEGMENT2_SIZE (SIZEOF(Segment2, firstCode) +  \
                        SIZEOF(Segment2, entryCount) + \
@@ -55,13 +55,13 @@ typedef struct
 
 typedef struct
 {
-    Card16 format;
-    Card16 length;
-    Card16 languageId; /* Documented as revision */
-    Card16 segmentKeys[256];
-    Card16 _nSegments;
+    uint16_t format;
+    uint16_t length;
+    uint16_t languageId; /* Documented as revision */
+    uint16_t segmentKeys[256];
+    uint16_t _nSegments;
     DCL_ARRAY(Segment2, segment);
-    Card16 _nGlyphs;
+    uint16_t _nGlyphs;
     DCL_ARRAY(GlyphId, glyphId);
 } Format2;
 #define FORMAT2_SIZE(segs, glyphs) (SIZEOF(Format2, format) +               \
@@ -73,18 +73,18 @@ typedef struct
 
 typedef struct
 {
-    Card16 format;
-    Card16 length;
-    Card16 languageId; /* Documented as revision */
-    Card16 segCountX2;
-    Card16 searchRange;
-    Card16 entrySelector;
-    Card16 rangeShift;
-    Card16 *endCode;
-    Card16 password;
-    Card16 *startCode;
-    Int16 *idDelta;
-    Card16 *idRangeOffset;
+    uint16_t format;
+    uint16_t length;
+    uint16_t languageId; /* Documented as revision */
+    uint16_t segCountX2;
+    uint16_t searchRange;
+    uint16_t entrySelector;
+    uint16_t rangeShift;
+    uint16_t *endCode;
+    uint16_t password;
+    uint16_t *startCode;
+    int16_t *idDelta;
+    uint16_t *idRangeOffset;
     DCL_ARRAY(GlyphId, glyphId);
 } Format4;
 #define FORMAT4_SIZE(segs, glyphs)         \
@@ -105,12 +105,12 @@ typedef struct
 
 typedef struct
 {
-    Card16 format;
-    Card16 length;
-    Card16 languageId;
-    Card16 firstCode;
-    Card16 entryCount;
-    Card16 *glyphId;
+    uint16_t format;
+    uint16_t length;
+    uint16_t languageId;
+    uint16_t firstCode;
+    uint16_t entryCount;
+    uint16_t *glyphId;
 } Format6;
 #define FORMAT6_SIZE(glyphs) (SIZEOF(Format6, format) +     \
                               SIZEOF(Format6, length) +     \
@@ -121,49 +121,49 @@ typedef struct
 
 typedef struct
 {
-    Card32 startCharCode;
-    Card32 endCharCode;
-    Card32 startGlyphID;
+    uint32_t startCharCode;
+    uint32_t endCharCode;
+    uint32_t startGlyphID;
 } Format12Group;
 
 typedef struct
 {
-    Card16 format;
-    Card16 reserved;
-    Card32 length;
-    Card32 languageId; /* Documented as revision */
-    Card32 nGroups;
+    uint16_t format;
+    uint16_t reserved;
+    uint32_t length;
+    uint32_t languageId; /* Documented as revision */
+    uint32_t nGroups;
     DCL_ARRAY(Format12Group, group);
 } Format12;
 
 typedef struct
 {
-    Card32 uv;     /* first Unicode value in range of UV's for default UVS's */
-    Card8 addlCnt; /* Number of consecutive UV's after first */
+    uint32_t uv;     /* first Unicode value in range of UV's for default UVS's */
+    uint8_t addlCnt; /* Number of consecutive UV's after first */
 } DefaultUVSRecord;
 
 typedef struct
 {
-    Card32 uv;      /*  Unicode value  */
-    Card16 glyphID; /*glyphID for UVS glyph */
+    uint32_t uv;      /*  Unicode value  */
+    uint16_t glyphID; /*glyphID for UVS glyph */
 } ExtendedUVSRecord;
 
 typedef struct
 {
-    Card32 uvs;
-    Card32 defaultUVSoffset;
-    Card32 extUVSOffset;
-    Card32 numDefEntries;
-    Card32 numExtEntries;
+    uint32_t uvs;
+    uint32_t defaultUVSoffset;
+    uint32_t extUVSOffset;
+    uint32_t numDefEntries;
+    uint32_t numExtEntries;
     DCL_ARRAY(DefaultUVSRecord, defUVSEntries);
     DCL_ARRAY(ExtendedUVSRecord, extUVSEntries);
 } UVSRecord;
 
 typedef struct
 {
-    Card16 format;
-    Card32 length;
-    Card32 numUVSRecords; /* Documented as revision */
+    uint16_t format;
+    uint32_t length;
+    uint32_t numUVSRecords; /* Documented as revision */
     DCL_ARRAY(UVSRecord, uvsRecs);
 } Format14;
 
@@ -178,9 +178,9 @@ typedef struct
 
 typedef struct
 {
-    Card16 platformId;
-    Card16 scriptId;
-    Card32 offset;
+    uint16_t platformId;
+    uint16_t scriptId;
+    uint32_t offset;
     void *format;
 } Encoding;
 #define ENCODING_SIZE (SIZEOF(Encoding, platformId) + \
@@ -189,8 +189,8 @@ typedef struct
 
 typedef struct
 {
-    Card16 version;
-    Card16 nEncodings;
+    uint16_t version;
+    uint16_t nEncodings;
     DCL_ARRAY(Encoding, encoding);
 } cmapTbl;
 #define TBL_HDR_SIZE (SIZEOF(cmapTbl, version) + \

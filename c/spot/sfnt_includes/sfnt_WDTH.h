@@ -14,10 +14,10 @@
 typedef struct
 {
     Fixed version;
-    Card16 flags;
+    uint16_t flags;
 #define LONG_OFFSETS (1 << 0)
-    Card16 nMasters;
-    Card16 nRanges;
+    uint16_t nMasters;
+    uint16_t nRanges;
     GlyphId *firstGlyph; /* [nRanges + 1] */
     void *offset;        /* [nRanges + 1] (16- or 32-bit entries) */
     uFWord *width;       /* [variable] (on the order of (1|nGlyphs) * nMasters) */

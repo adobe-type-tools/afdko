@@ -13,16 +13,16 @@
 
 typedef struct
 {
-    Card32 Tag;
-    Card16 Default;
-    Card16 Scale;
+    uint32_t Tag;
+    uint16_t Default;
+    uint16_t Scale;
 } Axis;
 
 typedef struct
 {
     Fixed Version;
-    Card16 Flags;
-    Card16 AxisCount;
+    uint16_t Flags;
+    uint16_t AxisCount;
     Axis *axis;
 } MMVRTbl;
 
