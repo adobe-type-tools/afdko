@@ -13,15 +13,15 @@
 
 typedef struct
 {
-    Card16 glyphIndex;
-    Int16 vertOriginY;
+    uint16_t glyphIndex;
+    int16_t vertOriginY;
 } vertOriginYMetric;
 
 typedef struct
 {
-    Card16 major, minor;
-    Int16 defaultVertOriginY;
-    Card16 numVertOriginYMetrics;
+    uint16_t major, minor;
+    int16_t defaultVertOriginY;
+    uint16_t numVertOriginYMetrics;
     vertOriginYMetric *vertMetrics;
 } VORGTbl;
 

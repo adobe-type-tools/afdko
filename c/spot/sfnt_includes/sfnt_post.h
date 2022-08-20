@@ -11,20 +11,20 @@
 
 typedef struct
 {
-    Card16 numberGlyphs;
-    Card16 *glyphNameIndex;
-    Card8 *names;
+    uint16_t numberGlyphs;
+    uint16_t *glyphNameIndex;
+    uint8_t *names;
 } Format2_0;
 
 typedef struct
 {
-    Card16 numberGlyphs;
-    Int8 *offset;
+    uint16_t numberGlyphs;
+    int8_t *offset;
 } Format2_5;
 
 typedef struct
 {
-    Card16 *code;
+    uint16_t *code;
 } Format4_0;
 
 typedef struct
@@ -33,11 +33,11 @@ typedef struct
     Fixed italicAngle;
     FWord underlinePosition;
     FWord underlineThickness;
-    Card32 isFixedPitch;
-    Card32 minMemType42;
-    Card32 maxMemType42;
-    Card32 minMemType1;
-    Card32 maxMemType1;
+    uint32_t isFixedPitch;
+    uint32_t minMemType42;
+    uint32_t maxMemType42;
+    uint32_t minMemType1;
+    uint32_t maxMemType1;
     void *format;
 } postTbl;
 #define TBL_HDR_SIZE (SIZEOF(postTbl, version) +            \

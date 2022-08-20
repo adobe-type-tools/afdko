@@ -13,20 +13,20 @@
 
 typedef struct
 {
-    Card16 setting;
-    Card16 nameId;
+    uint16_t setting;
+    uint16_t nameId;
 } SettingName;
 #define SETTING_NAME_SIZE (SIZEOF(SettingName, setting) + \
                            SIZEOF(SettingName, nameId))
 
 typedef struct
 {
-    Card16 feature;
-    Card16 nSettings;
-    Card32 settingOffset;
-    Card16 featureFlags;
+    uint16_t feature;
+    uint16_t nSettings;
+    uint32_t settingOffset;
+    uint16_t featureFlags;
 #define FLAG_EXCLUSIVE (1 << 15)
-    Card16 nameId;
+    uint16_t nameId;
     DCL_ARRAY(SettingName, setting);
 } FeatureName;
 #define FEATURE_NAME_SIZE (SIZEOF(FeatureName, feature) +       \
@@ -38,9 +38,9 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card16 nNames;
-    Card16 nSets;     /* Unused */
-    Card32 setOffset; /* Unused */
+    uint16_t nNames;
+    uint16_t nSets;     /* Unused */
+    uint32_t setOffset; /* Unused */
     DCL_ARRAY(FeatureName, feature);
 } featTbl;
 #define TBL_HDR_SIZE (SIZEOF(featTbl, version) + \

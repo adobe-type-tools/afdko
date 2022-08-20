@@ -13,12 +13,12 @@
 
 typedef struct
 {
-    Card32 axisTag;
+    uint32_t axisTag;
     Fixed minValue;
     Fixed defaultValue;
     Fixed maxValue;
-    Card16 flags;
-    Card16 nameId;
+    uint16_t flags;
+    uint16_t nameId;
 } Axis;
 #define AXIS_SIZE (SIZEOF(Axis, axisTag) +      \
                    SIZEOF(Axis, minValue) +     \
@@ -29,9 +29,9 @@ typedef struct
 
 typedef struct
 {
-    Card16 nameId;
-    Card16 flags;
-    Card16 psNameId; /* This field may not be present in font */
+    uint16_t nameId;
+    uint16_t flags;
+    uint16_t psNameId; /* This field may not be present in font */
     Fixed *coord;
 } Instance;
 #define INSTANCE_SIZE(axes) (SIZEOF(Instance, nameId) +   \
@@ -42,12 +42,12 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card16 offsetToData;
-    Card16 countSizePairs;
-    Card16 axisCount;
-    Card16 axisSize;
-    Card16 instanceCount;
-    Card16 instanceSize;
+    uint16_t offsetToData;
+    uint16_t countSizePairs;
+    uint16_t axisCount;
+    uint16_t axisSize;
+    uint16_t instanceCount;
+    uint16_t instanceSize;
     Axis *axis;
     Instance *instance;
 } fvarTbl;

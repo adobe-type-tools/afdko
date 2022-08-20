@@ -17,8 +17,8 @@ typedef struct
     FWord *Ascent;
     FWord *Descent;
     FWord *LineGap;
-    Int16 *CaretSlopeRise;
-    Int16 *CaretSlopeRun;
+    int16_t *CaretSlopeRise;
+    int16_t *CaretSlopeRun;
     FWord *CaretOffset;
 } HFMXTbl;
 

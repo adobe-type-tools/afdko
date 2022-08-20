@@ -1,0 +1,617 @@
+/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
+/* type1.c -- translate human readable text to a type 1 font */
+
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdlib.h>
+#ifdef _MSC_VER /* defined by Microsoft Compiler */
+#include <fcntl.h>
+#include <io.h>
+#endif
+
+#define streq(s, t) (strcmp(s, t) == 0)
+#define length_of(array) ((sizeof(array)) / (sizeof *(array)))
+
+static const char *panicname = "detype1";
+static void panic(const char *fmt, ...) {
+    va_list args;
+    fprintf(stderr, "%s: ", panicname);
+    va_start(args, fmt);
+    vfprintf(stderr, fmt, args);
+    va_end(args);
+    fprintf(stderr, "\n");
+    exit(1);
+}
+
+int inmode = 0;
+int col = 0;
+static uint8_t *mainbuffer = NULL;
+static int inmain = 0;
+static int mainlen = 0;
+
+/*
+ * encryption code -- this is used for both eexec and charstrings
+ */
+
+#define C1 ((uint16_t)52845)
+#define C2 ((uint16_t)22719)
+#define key_eexec ((uint16_t)55665)
+#define key_charstring ((uint16_t)4330)
+
+uint16_t g_key = key_eexec;
+
+static void put1(int c) {
+    if (inmain >= mainlen) {
+        if (mainlen == 0) {
+            mainlen = BUFSIZ;
+            mainbuffer = malloc(mainlen);
+        } else {
+            uint8_t *p;
+            mainlen *= 4;
+            p = realloc(mainbuffer, mainlen);
+            if (p == NULL) {
+                free(mainbuffer);
+                mainbuffer = NULL;
+            } else {
+                mainbuffer = p;
+            }
+        }
+        if (mainbuffer == NULL)
+            panic("out of memory");
+    }
+    mainbuffer[inmain++] = c;
+}
+
+static void flushtext(FILE *fp) {
+    int i;
+    unsigned int j;
+    if (mainbuffer[inmain - 2] == '\r')
+        inmain--;
+    mainbuffer[inmain - 1] = ' ';
+    j = inmain;
+    if (inmode == 1) {
+        putc(0x80, fp);
+        putc(0x01, fp);
+        putc(j, fp);
+        j >>= 8;
+        putc(j, fp);
+        j >>= 8;
+        putc(j, fp);
+        j >>= 8;
+        putc(j, fp);
+    }
+    for (i = 0; i < inmain; i++)
+        putc(mainbuffer[i], fp);
+    inmain = 0;
+}
+
+static void flusheexec(FILE *fp) {
+    int i;
+    unsigned int j;
+    j = inmain;
+    if (inmode == 1) {
+        putc(0x80, fp);
+        putc(0x02, fp);
+        putc(j, fp);
+        j >>= 8;
+        putc(j, fp);
+        j >>= 8;
+        putc(j, fp);
+        j >>= 8;
+        putc(j, fp);
+    }
+    for (i = 0; i < inmain; i++)
+        putc(mainbuffer[i], fp);
+    inmain = 0;
+}
+
+static void flushfinish(FILE *fp) {
+    if (inmode == 1) {
+        putc(0x80, fp);
+        putc(0x03, fp);
+    }
+}
+
+static uint8_t Encrypt(uint8_t plain, uint16_t *keyp) {
+    uint16_t key = *keyp;
+    uint8_t cipher = plain ^ (key >> 8);
+    *keyp = (cipher + key) * C1 + C2;
+    return cipher;
+}
+
+static int get1(FILE *fp) {
+    if (inmode == 0) {
+        int c = getc(fp);
+        if (c == '~') {
+            inmode = 1;
+            return getc(fp);
+        } else {
+            inmode = 2;
+            return c;
+        }
+    }
+    return getc(fp);
+}
+
+/*
+ * eeputchar -- write a character in hex encoded format, suitable for eexec
+ */
+
+static void eeputchar(int c) {
+    c = (int)Encrypt((uint8_t)c, &g_key);
+    if (inmode == 1) {
+        put1(c);
+    } else {
+        char text[3];
+        snprintf(text, sizeof(text), "%02x", c);
+        put1(text[0]);
+        put1(text[1]);
+        if (++col == 32) {
+            put1('\n');
+            col = 0;
+        }
+    }
+}
+
+/*
+ * charstring -- decode charstrings
+ */
+
+static char *charstring(uint8_t *csbuf, const char *s, int *lenp) {
+    int i;
+    char token[100], *t;
+    uint8_t *cs = csbuf;
+
+    static const char
+        *const cmd[] = {
+            "reserved_0",
+            "hstem",
+            "reserved_2",
+            "vstem",
+            "vmoveto",
+            "rlineto",
+            "hlineto",
+            "vlineto",
+            "rrcurveto",
+            "closepath",
+            "callsubr",
+            "return",
+            NULL,
+            "hsbw",
+            "endchar",
+            "reserved_15",
+            "blend",
+            "reserved_17",
+            "hstemhm",
+            "hintmask",
+            "cntrmask",
+            "rmoveto",
+            "hmoveto",
+            "vstemhm",
+            "rcurveline",
+            "rlinecurve",
+            "vvcurveto",
+            "hhcurveto",
+            "extendednumber",
+            "callgsubr",
+            "vhcurveto",
+            "hvcurveto",
+        },
+        *const esc[] = {
+            "dotsection",
+            "vstem3",
+            "hstem3",
+            "and",
+            "or",
+            "not",
+            "seac",
+            "sbw",
+            "store",
+            "abs",
+            "add",
+            "sub",
+            "div",
+            "load",
+            "neg",
+            "eq",
+            "callother",
+            "pop",
+            "drop",
+            "reservedESC_19",
+            "put",
+            "get",
+            "ifelse",
+            "random",
+            "mul",
+            "div2",
+            "sqrt",
+            "dup",
+            "exch",
+            "index",
+            "roll",
+            "reservedESC_31",
+            "reservedESC_32",
+            "setcurrentpoint",
+            "hflex",
+            "flex",
+            "hflex1",
+            "flex1",
+            "cntron",
+            "reservedESC_39",
+            "reservedESC_40",
+            "reservedESC_41",
+            "reservedESC_42",
+            "reservedESC_43",
+            "reservedESC_44",
+            "reservedESC_45",
+            "reservedESC_46",
+            "reservedESC_47",
+            "reservedESC_48",
+            "reservedESC_49",
+            "reservedESC_50"
+        };
+
+nexttoken:
+    while (isspace(*s))
+        s++;
+    for (t = token; !isspace(*s); s++)
+        *t++ = *s;
+    *t = '\0';
+    if (streq(token, "}")) {
+        *lenp = (int)(cs - csbuf);
+        while (isspace(s[-1]))
+            --s;
+        return (char *)s;
+    }
+    for (i = 0; i < (int)length_of(cmd); i++)
+        if (cmd[i] != NULL && streq(cmd[i], token)) {
+            *cs++ = i;
+            goto nexttoken;
+        }
+    for (i = 0; i < (int)length_of(esc); i++)
+        if (esc[i] != NULL && streq(esc[i], token)) {
+            *cs++ = 12;
+            *cs++ = i;
+            goto nexttoken;
+        }
+    for (t = token; isdigit(*t) || (t == token && *t == '-'); t++) {
+        // noop
+    }
+    if (*t == '\0') {
+        long n = strtol(token, NULL, 0);
+        if (-107 <= n && n <= 107)
+            *cs++ = (uint8_t)(n + 139);
+        else if (108 <= n && n <= 1131) {
+            n -= 108;
+            *cs++ = (uint8_t)((n >> 8) + 247);
+            *cs++ = (uint8_t)n;
+        } else if (-1131 <= n && n <= -108) {
+            n = -n - 108;
+            *cs++ = (uint8_t)((n >> 8) + 251);
+            *cs++ = (uint8_t)n;
+        } else {
+            *cs++ = 255;
+            *cs++ = (uint8_t)((uint32_t)n >> 24);
+            *cs++ = (uint8_t)((uint32_t)n >> 16);
+            *cs++ = (uint8_t)((uint32_t)n >> 8);
+            *cs++ = (uint8_t)n;
+        }
+        goto nexttoken;
+    }
+    panic("bad token in charstring: %s", token);
+    return NULL;
+}
+
+/*
+ * getlenIV -- find the lenIV value from the to be encrypted text
+ */
+
+static int getlenIV(const char *s, const char *end) {
+    static const char key[] = "/lenIV";
+    const char *k = key;
+    for (; s < end; s++)
+        if (*s != *k)
+            k = key;
+        else if (*++k == '\0')
+            return atoi(++s);
+    return 4;
+}
+
+/*
+ * eeappend, snarfeexec, writeeexec -- create the eexec encrypted portions of the file
+ */
+
+static char *eebuf = 0;
+static int eecount = 0, eelen = 0;
+static void eeappend(int c) {
+    if (eecount >= eelen) {
+        char *p;
+        if (eelen == 0) {
+            eelen = BUFSIZ;
+            eebuf = malloc(eelen);
+        } else {
+            eelen *= 4;
+            p = realloc(eebuf, eelen);
+            if (p == NULL) {
+                free(eebuf);
+                eebuf = NULL;
+            } else {
+                eebuf = p;
+            }
+        }
+        if (eebuf == NULL)
+            panic("out of memory");
+    }
+    eebuf[eecount++] = c;
+}
+
+#define CSBUF_SIZE 65536
+static void writeeexec(void) {
+    char *s, *end;
+    int lenIV;
+    uint8_t *csbuf;
+
+    csbuf = malloc(CSBUF_SIZE);
+    if (csbuf == NULL)
+        panic("out of memory");
+    memset(csbuf, 0, CSBUF_SIZE);
+
+    s = eebuf;
+    end = &s[eecount];
+    lenIV = getlenIV(s, end);
+
+    while (s < end) {
+        if (s[0] != '#' || s[1] != '#') {
+            if (s[0] == 0x0D) /* exclude CR so Win & Mac have same output */
+                s++;
+            else
+                eeputchar(*s++);
+        } else {
+            int i, len;
+            uint16_t key = key_charstring;
+            char *t, RD[20], prefix[40];
+
+            s += 2;
+            while (isspace(*s))
+                s++;
+            for (t = RD; !isspace(*s); s++)
+                *t++ = *s;
+            *t = '\0';
+            while (isspace(*s))
+                s++;
+            if (*s++ != '{')
+                panic("expected ``{'' after ``## %s''", RD);
+            while (isspace(*s))
+                s++;
+
+            s = charstring(csbuf, s, &len);
+            if (s >= end)
+                panic("charstring extended past end of encrypted region");
+            if (len > CSBUF_SIZE)
+                panic("charstring too long");
+
+            if (lenIV >= 0) {
+                snprintf(prefix, sizeof(prefix), "%d %s ", len + lenIV, RD);
+                for (t = prefix; *t != '\0'; t++)
+                    eeputchar(*t);
+                for (i = 0; i < lenIV; i++)
+                    eeputchar(Encrypt('x', &key));
+                for (i = 0; i < len; i++)
+                    eeputchar(Encrypt(csbuf[i], &key));
+            } else {
+                snprintf(prefix, sizeof(prefix), "%d %s ", len, RD);
+                for (t = prefix; *t != '\0'; t++)
+                    eeputchar(*t);
+                for (i = 0; i < len; i++)
+                    eeputchar(csbuf[i]);
+            }
+        }
+    }
+    free(csbuf);
+}
+
+static void snarfeexec(FILE *fp) {
+    int c;
+    static const char closefile[] = "%currentfile closefile";
+    const char *cp = closefile, *s;
+    eecount = 0;
+    eelen = 0;
+    while ((c = get1(fp)) != EOF)
+        if (c != *cp) {
+            for (s = closefile; s < cp; s++)
+                eeappend(*s);
+            eeappend(c);
+            cp = closefile;
+        } else if (*++cp == '\0') {
+            for (s = closefile + 1; *s != '\0'; s++)
+                eeappend(*s);
+            return;
+        }
+    panic("EOF in ciphertext region");
+}
+
+static void ciphertext(FILE *fp1) {
+    snarfeexec(fp1);
+    eeputchar('y');
+    eeputchar('o');
+    eeputchar('g');
+    eeputchar('i');
+    writeeexec();
+    eeputchar('\n');
+}
+
+static void cleartext(FILE *fp1, FILE *fp2) {
+    int c;
+    const char eexec[] = "%currentfile eexec";
+    const char *ee = eexec;
+    while ((c = get1(fp1)) != EOF)
+        if (c != *ee) {
+            const char *s;
+            for (s = eexec; s < ee; s++)
+                put1(*s);
+            put1(c);
+            ee = eexec;
+        } else if (*++ee == '\0') {
+            for (c = 1; eexec[c] != 0; c++) put1(eexec[c]);
+            while ((c = get1(fp1)) != EOF && isspace(c))
+                put1(c);
+            if (c == EOF)
+                break;
+            ungetc(c, fp1);
+            return;
+        }
+    flushtext(fp2);
+    flushfinish(fp2);
+    exit(0);
+}
+
+static void epilogue(FILE *fp1) {
+    int i, c, j;
+    const char zeros[] =
+        "0000000000000000000000000000000000000000000000000000000000000000\n";
+    while ((c = get1(fp1)) == '0' || c == '\n' || c == '\r') {
+        // noop
+    }
+    if (c == EOF)
+        panic("EOF before cleartomark");
+    put1('\n');
+    for (i = 0; i < 8; i++)
+        for (j = 0; zeros[j] != 0; j++) put1(zeros[j]);
+    put1(c);
+}
+
+static void type1(FILE *fp1, FILE *fp2) {
+    for (;;) {
+        g_key = key_eexec;
+        col = 0;
+        cleartext(fp1, fp2);
+        flushtext(fp2);
+        ciphertext(fp1);
+        flusheexec(fp2);
+        epilogue(fp1);
+        eecount = 0;
+    }
+}
+
+/*
+ * main, usage -- command line parsing
+ */
+
+static void usage(void) {
+#if _MSC_VER
+    _setmode(_fileno(stdout), _O_TEXT);
+#endif
+    printf("usage: type1 [text [font]]\n");
+}
+
+#ifndef _MSC_VER /* Unix */
+extern int getopt(int argc, char **argv, char *optstring);
+extern int optind;
+extern char *optarg;
+#else  /* dos */
+
+static char *optarg;
+static int optind = 1;
+static int opterr = 0;
+
+int getopt(int argc, char **argv, char *opstring) {
+    char *s;
+
+    /* have all our command line arguments ? */
+    if (optind >= argc)
+        return EOF;
+
+    /* Is this a valid options (starts with '-') */
+    if (argv[optind][0] != '-')
+        return EOF;
+
+    /* '--' means end of options */
+    if (argv[optind][1] == '-') {
+        optind++;
+        return EOF;
+    }
+
+    /* is this option in our list of valid options ? */
+    s = strchr(opstring, (int)(argv[optind][1]));
+
+    /* if no match return question mark */
+    if (s == NULL) {
+        fprintf(stderr, "Unknown Option encountered: %s\n", argv[optind]);
+        return '?';
+    }
+
+    /* Does this option have an argument */
+    if (s[1] == ':') {
+        optind++;
+        if (optind < argc)
+            optarg = argv[optind];
+        else {
+            fprintf(stderr, "No argument present for %s\n", argv[optind]);
+            return '?';
+        }
+    } else
+        optarg = NULL;
+    optind++;
+
+    return (int)*s;
+}
+#endif /* getopt(3) definition for dos */
+
+int main__type1(int argc, char *argv[]) {
+    int c;
+    while ((c = getopt(argc, argv, "h")) != EOF)
+        switch (c) {
+            case 'h':
+                usage();
+                exit(0);
+            default:
+                usage();
+                exit(1);
+        }
+    if (optind == argc) {
+#if _MSC_VER
+        _setmode(_fileno(stdin), _O_BINARY);
+        _setmode(_fileno(stdout), _O_BINARY);
+#endif /* _MSC_VER */
+        type1(stdin, stdout);
+    } else if (optind + 1 == argc) {
+        FILE *fp = fopen(argv[optind], "rb");
+        if (fp == NULL) {
+            perror(argv[optind]);
+            return 1;
+        }
+        panicname = argv[optind];
+#if _MSC_VER
+        _setmode(_fileno(stdout), _O_BINARY);
+#endif /* _MSC_VER */
+        type1(fp, stdout);
+        fclose(fp);
+    } else if (optind + 2 == argc) {
+        FILE *fp1 = fopen(argv[optind], "rb");
+        FILE *fp2;
+        if (fp1 == NULL) {
+            perror(argv[optind]);
+            return 1;
+        }
+        fp2 = fopen(argv[optind + 1], "wb");
+        if (fp2 == NULL) {
+            fclose(fp1);
+            perror(argv[optind + 1]);
+            return 1;
+        }
+        panicname = argv[optind];
+        type1(fp1, fp2);
+        fclose(fp1);
+        fclose(fp2);
+    } else {
+        usage();
+        return 1;
+    }
+    return 0;
+}

@@ -2,15 +2,12 @@
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
-#ifndef HOT_H
-#define HOT_H
+#ifndef MAKEOTF_INCLUDE_HOTCONV_H_
+#define MAKEOTF_INCLUDE_HOTCONV_H_
 
-#include <stddef.h> /* For size_t */
-#include <stdint.h> /* For int32_t */
+#include <memory>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "slogger.h"
 
 #define HOT_VERSION 0x010101 /* Library version (1.1.1) */
 /* Major, minor, build = (HOT_VERSION >> 16) & 0xff, (HOT_VERSION >> 8) & 0xff, HOT_VERSION & 0xff) */
@@ -142,7 +139,7 @@ inside the (1,0,0) nameID 5 "Version: string. */
 typedef struct hotCtx_ *hotCtx; /* Opaque library context */
 typedef struct hotCallbacks_ hotCallbacks;
 
-hotCtx hotNew(hotCallbacks *cb);
+hotCtx hotNew(hotCallbacks *cb, std::shared_ptr<slogger> logger = {});
 
 /* hotNew() initializes the library and returns an opaque context that is
    subsequently passed to all the other library functions. It must be the first
@@ -173,13 +170,14 @@ hotCtx hotNew(hotCallbacks *cb);
    BUFSIZ would be a good choice because it will match the underlying low-level
    system input functions. */
 
-/* Message types (for use with message callback) */
+/* Message types */
 enum {
-    hotHEADING,
     hotNOTE,
     hotWARNING,
     hotERROR,
-    hotFATAL
+    hotFATAL,
+    hotINDENT,
+    hotFLUSH
 };
 
 struct hotCallbacks_ {
@@ -208,7 +206,7 @@ struct hotCallbacks_ {
 
    PostScript data input: */
 
-    char *(*psId)(void *ctx);
+    const char *(*psId)(void *ctx);
 
     /* [Optional] psId() should provide a way of identifying the source of the
    current PostScript input font data. This would typically be a filename and
@@ -225,7 +223,7 @@ struct hotCallbacks_ {
 
    CFF data input/output: */
 
-    char *(*cffId)(void *ctx);
+    const char *(*cffId)(void *ctx);
 
     /* [Optional] cffId() should provide a way of identifying the destination of
    the CFF data that is produced during conversion. This would typically be a
@@ -267,9 +265,9 @@ struct hotCallbacks_ {
 
    OTF data input/output: */
 
-    char *(*otfId)(void *ctx);
+    const char *(*otfId)(void *ctx);
     void (*otfWrite1)(void *ctx, int c);
-    void (*otfWriteN)(void *ctx, long count, char *ptr);
+    void (*otfWriteN)(void *ctx, long count, const char *ptr);
     long (*otfTell)(void *ctx);
     void (*otfSeek)(void *ctx, long offset);
     char *(*otfRefill)(void *ctx, long *count);
@@ -284,7 +282,7 @@ struct hotCallbacks_ {
 
    Feature file data input: */
 
-    char *(*featTopLevelFile)(void *ctx);
+    const char *(*featTopLevelFile)(void *ctx);
     void (*featAddAnonData)(void *ctx, const char *data, long count,
                             unsigned long tag);
 
@@ -324,34 +322,35 @@ struct hotCallbacks_ {
    these functions onto tmpfile(), fwrite(), rewind() or fseek(), fread(), and
    fclose(), respectively.) */
 
-    char *(*getFinalGlyphName)(void *ctx, char *gname);
+    const char *(*getFinalGlyphName)(void *ctx, const char *gname);
 
     /* [Optional] getFinalGlyphName() is called in order to convert an aliased
      glyph name (a user-friendly glyph name used within the feature file and
      source font) to a final name that is used internally within the OpenType
      font. If no such mapping exists the gname argument is returned. */
 
-    char *(*getSrcGlyphName)(void *ctx, char *gname);
+    const char *(*getSrcGlyphName)(void *ctx, const char *gname);
 
     /* [Optional] getSrcGlyphName() is called in order to retrieve an aliased
      glyph name (a user-friendly glyph name used within the feature file and
      source font) from the final name that is used  within the output OpenType
      font. If no such mapping exists the gname argument is returned. */
 
-    char *(*getUVOverrideName)(void *ctx, char *gname);
+    char *(*getUVOverrideName)(void *ctx, const char *gname);
 
     /* [Optional] getUVOverrideName() is called in order to get a user-supplied UV value for
        the glyph, in the form of a u<UV hex Code> glyph name. If there is no
        override value for the glyph, then the function returns NULL. isFinal specifies whether
        the gname passed in is a final name or an alias name */
 
-    void (*getAliasAndOrder)(void *ctx, char *oldName, char **newName, long int *order);
+    void (*getAliasAndOrder)(void *ctx, const char *oldName, const char **newName,
+                             long int *order);
     /* Optional. If present,  parse.c will call it to get a new name, and an ordering index. These are
        used to rename the glyphs in the font, and establish a new glyph order. */
 
     /*  Unicode Variation Selection file data input: */
 
-    char *(*uvsOpen)(void *ctx, char *name);
+    const char *(*uvsOpen)(void *ctx, const char *name);
     char *(*uvsGetLine)(void *ctx, char *buffer, long *count);
     void (*uvsClose)(void *ctx);
 };
@@ -384,8 +383,7 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOv
 #define HOT_SUPRESS__WIDTH_OPT (1<<14) /* suppress width optimization in CFF: makes it easier to poke at charstrings with other tools */
 #define HOT_VERBOSE            (1<<15) /* Print all warnings and notes: else suppress the most annoying ones. */
 
-struct hotReadFontOverrides_           /* Record for instructions to modify font as it is read in. */
-    {
+struct hotReadFontOverrides_ {  // Record for instructions to modify font as it is read in.
     long syntheticWeight;
     unsigned long maxNumSubrs;
 };
@@ -396,8 +394,7 @@ struct hotReadFontOverrides_           /* Record for instructions to modify font
    as it is read in. This currently only carries an override for the weight coordinate
    of the built-in substitution MM font, for adding new glyphs. */
 
-enum /* Font types */
-{
+enum {  // Font types
     hotSingleMaster,
     hotCID
 };
@@ -420,10 +417,9 @@ void hotAddMiscData(hotCtx g,
    client. The data structure fields are described below. */
 
 /* 8-bit encoding that maps code (index) to glyph name */
-typedef char *hotEncoding[256];
+typedef const char *hotEncoding[256];
 
-struct hotCommonData_ /* Miscellaneous data record */
-{
+struct hotCommonData_ {  // Miscellaneous data record
     long flags; /* This filed is masked with 0x1ff (bits 0-8), and the       */
                 /* result is used in the input font processing modules. This */
                 /* is copied into txCtx->fonts.flags, for which additional   */
@@ -463,13 +459,13 @@ struct hotCommonData_ /* Miscellaneous data record */
 #define HOT_WIN (1 << 6)               /* Windows data */
 #define HOT_MAC (1 << 7)               /* Macintosh data */
 #define HOT_EURO_ADDED (1 << 8)        /* Flags Euro glyph added to CFF data */
-    char *clientVers;
+    const char *clientVers;
     long nKernPairs;
     hotEncoding *encoding;
     short fsSelectionMask_on;
     short fsSelectionMask_off;
     unsigned short os2Version;
-    char *licenseID;
+    const char *licenseID;
 };
 
 /* The flags field passes style information and the data source (Windows or
@@ -512,8 +508,7 @@ struct hotCommonData_ /* Miscellaneous data record */
      field. The client would typically access this information from a font
      conversion database. */
 
-struct hotWinData_ /* Windows-specific data */
-{
+struct hotWinData_ {  // Windows-specific data
     short nUnencChars;
     unsigned char Family;
 #define HOT_DONTCARE    0
@@ -545,8 +540,7 @@ struct hotWinData_ /* Windows-specific data */
    BreakChar should be set from pfm.FirstChar + pfm.BreakChar. Also see
    description of the Family field. */
 
-struct hotMacData_ /* Macintosh-specific data */
-{
+struct hotMacData_ {  // Macintosh-specific data
     hotEncoding *encoding;
     long cmapScript;
     long cmapLanguage;
@@ -596,7 +590,7 @@ void hotAddUnencChar(hotCtx g, int iChar, char *name);
    glyphs of a kern pair with a name when one or both glyphs are unencoded.
    This name is subsequently converted into a glyph id by the library. */
 
-typedef char *(*hotCMapId)(void *ctx);
+typedef const char *(*hotCMapId)(void *ctx);
 typedef char *(*hotCMapRefill)(void *ctx, long *count);
 void hotAddCMap(hotCtx g, hotCMapId id, hotCMapRefill refill);
 
@@ -624,7 +618,7 @@ void hotAddCMap(hotCtx g, hotCMapId id, hotCMapRefill refill);
    (A file-based client might map this function to fread() and fill buffers of
    BUFSIZ bytes.) */
 
-void hotAddUVSMap(hotCtx g, char *uvsFileName);
+void hotAddUVSMap(hotCtx g, const char *uvsFileName);
 
 /* hotAddUVSMap() parses the input file uvsFileName to build a cmap format 14 subtable.
 The uvsFileName is the file path to a specification for a set of Unicode variation Selectors.
@@ -731,7 +725,7 @@ void hotAddAnonTable(hotCtx g, unsigned long tag, hotAnonRefill refill);
    do not persist across multiple fonts and must be supplied via calls
    hotAddAnonTable() before hotConvert() is called for each font. */
 
-unsigned short hotMapName2GID(hotCtx g, char *gname);
+unsigned short hotMapName2GID(hotCtx g, const char *gname);
 unsigned short hotMapPlatEnc2GID(hotCtx g, int code);
 unsigned short hotMapCID2GID(hotCtx g, unsigned short cid);
 
@@ -798,8 +792,4 @@ void hotFree(hotCtx g);
 /* Environment variables used to set default values */
 #define kFSTypeEnviron "FDK_FSTYPE"
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* HOT_H */
+#endif  // MAKEOTF_INCLUDE_HOTCONV_H_

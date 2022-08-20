@@ -6,15 +6,18 @@
  * Abstract Font Descriptor.
  */
 
-#ifndef ABFDESC_H
-#define ABFDESC_H
+#ifndef SHARED_INCLUDE_ABFDESC_H_
+#define SHARED_INCLUDE_ABFDESC_H_
+
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
+extern "C" {
+#endif
 
 /* An abstract font descriptor is composed of a single fixed-length
    "abfFontDescHeader" followed by one or more variable-length
    "abfFontDescElement"s (see below). */
 
-typedef struct /* Font descriptor element */
-{
+typedef struct {  // Font descriptor element
     /* The following "flags" field is used to represent font parameters having
        values of fixed size. 
 
@@ -74,8 +77,7 @@ typedef struct /* Font descriptor element */
     float values[1]; /* [valueCnt] */
 } abfFontDescElement;
 
-typedef struct /* Font descriptor header */
-{
+typedef struct {  // Font descriptor header
     unsigned short length;       /* Total size in bytes of descriptor */
     unsigned short FDElementCnt; /* Count of "abfFontDescElement"s */
     float FontBBox[4];
@@ -101,4 +103,8 @@ typedef struct /* Font descriptor header */
    descriptor. The number of elements is available via the "FDElementCnt" field
    in the abfFontDescHeader. */
 
-#endif /* ABFDESC_H */
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
+}
+#endif
+
+#endif  // SHARED_INCLUDE_ABFDESC_H_

@@ -13,41 +13,41 @@
 
 typedef struct
 {
-    Card16 BaseTagCount;
+    uint16_t BaseTagCount;
     Tag *BaselineTag; /* [BaseTagCount] */
 } BaseTagList;
 
 typedef struct
 {
-    Card16 BaseCoordFormat; /* =1 */
-    Int16 Coordinate;
+    uint16_t BaseCoordFormat; /* =1 */
+    int16_t Coordinate;
 } BaseCoordFormat1;
 
 typedef struct
 {
-    Card16 BaseCoordFormat; /* =2 */
-    Int16 Coordinate;
+    uint16_t BaseCoordFormat; /* =2 */
+    int16_t Coordinate;
     GlyphId ReferenceGlyph;
-    Card16 BaseCoordPoint;
+    uint16_t BaseCoordPoint;
 } BaseCoordFormat2;
 
 typedef struct
 {
-    Card16 BaseCoordFormat; /* =3 */
-    Int16 Coordinate;
+    uint16_t BaseCoordFormat; /* =3 */
+    int16_t Coordinate;
     OFFSET(DeviceTable, DeviceTable);
 } BaseCoordFormat3;
 
 typedef struct
 {
-    Card16 BaseCoordFormat; /* =4 */
-    Card16 IdBaseCoord;
+    uint16_t BaseCoordFormat; /* =4 */
+    uint16_t IdBaseCoord;
 } BaseCoordFormat4;
 
 typedef struct
 {
-    Card16 DefaultIndex;
-    Card16 BaseCoordCount;
+    uint16_t DefaultIndex;
+    uint16_t BaseCoordCount;
     OFFSET_ARRAY(void *, BaseCoord); /* [BaseCoordCount] */
 } BaseValues;
 
@@ -62,7 +62,7 @@ typedef struct
 {
     OFFSET(void *, MinCoord);
     OFFSET(void *, MaxCoord);
-    Card16 FeatMinMaxCount;
+    uint16_t FeatMinMaxCount;
     FeatMinMaxRecord *FeatMinMaxRecord; /* [FeatMinMaxCount] */
 } MinMax;
 
@@ -76,7 +76,7 @@ typedef struct
 {
     OFFSET(BaseValues, BaseValues);
     OFFSET(MinMax, DefaultMinMax);
-    Card16 BaseLangSysCount;
+    uint16_t BaseLangSysCount;
     BaseLangSysRecord *BaseLangSysRecord; /* [BaseLangSysCount] */
 } BaseScript;
 
@@ -88,7 +88,7 @@ typedef struct
 
 typedef struct
 {
-    Card16 BaseScriptCount;
+    uint16_t BaseScriptCount;
     BaseScriptRecord *BaseScriptRecord; /* [BaseScriptCount] */
 } BaseScriptList;
 

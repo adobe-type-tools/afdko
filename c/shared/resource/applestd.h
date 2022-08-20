@@ -2,6 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+// NOLINT(build/header_guard)
+
 /*
  * Standard Apple Glyph Ordering (258 entries) aggregate initializer.
  * https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6post.html

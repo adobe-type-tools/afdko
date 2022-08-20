@@ -84,7 +84,7 @@ def test_missing_table_delete_bug160():
                                 '-f', LIGHT, actual_path])
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert b'[WARNING]: table missing (xyz )' in output
+    assert b'WARNING: table missing (xyz )' in output
     assert font_has_table(get_input_path(LIGHT), 'GSUB')
     assert not font_has_table(actual_path, 'GSUB')
 
@@ -95,7 +95,7 @@ def test_missing_table_extract_bug160():
                                 'x', f'_xyz,head={actual_path}'])
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert b'[WARNING]: table missing (xyz )' in output
+    assert b'WARNING: table missing (xyz )' in output
     expected_path = get_expected_path('head_light.tb')
     assert differ([expected_path, actual_path, '-m', 'bin'])
 
