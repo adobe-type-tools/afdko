@@ -1,8 +1,8 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef TYPECOMP_H
-#define TYPECOMP_H
+#ifndef MAKEOTF_INCLUDE_TYPECOMP_H_
+#define MAKEOTF_INCLUDE_TYPECOMP_H_
 
 #include <stddef.h> /* For size_t */
 
@@ -36,7 +36,6 @@ tcCtx tcNew(tcCallbacks *cb);
 /* Message types (for use with message callback, adatpted from hotconv.h) */
 
 enum {
-    tcHEADING,
     tcNOTE,
     tcWARNING,
     tcERROR,
@@ -69,7 +68,7 @@ struct tcCallbacks_ {
 
    PostScript data input: */
 
-    char *(*psId)(void *ctx);
+    const char *(*psId)(void *ctx);
 
     /* [Optional] psId() should provide a way of identifying the source of the
    current input font data. This would typically be a filename and is used in
@@ -94,7 +93,7 @@ struct tcCallbacks_ {
 
    CFF data output: */
 
-    char *(*cffId)(void *ctx);
+    const char *(*cffId)(void *ctx);
 
     /* [Optional] cffId() should provide a way of identifying the destination of
    the CFF data. This would typically be a filename and is used in conjunction
@@ -132,7 +131,7 @@ struct tcCallbacks_ {
    fread(), and fclose(), respectively.) */
 
     void (*glyphMap)(void *ctx, unsigned short nGlyphs, unsigned short gid,
-                     char *gname, unsigned short cid);
+                     const char *gname, unsigned short cid);
 
     /* [Optional] glyphMap() passes the gid mapping for each glyph in the CFF font
    back to the client. This permits a client to determine the glyph layout
@@ -148,7 +147,8 @@ struct tcCallbacks_ {
    cid argument is always set to zero for non-CID fonts. The gname string
    is not persistent and should be copied if needed later. */
 
-    void (*getAliasAndOrder)(void *ctx, char *oldName, char **newName, long int *order);
+    void (*getAliasAndOrder)(void *ctx, const char *oldName,
+                             const char **newName, long int *order);
 
    /* Optional. If present,  parse.c will call it to get a new name, and an
       ordering index. These are used to rename the glyphs in the font, and
@@ -168,7 +168,7 @@ void tcAddFont(tcCtx g, long flags);
    function. Compaction features may be controlled by the flags argument
    (described below). */
 
-void tcAddCopyright(tcCtx g, char *copyright);
+void tcAddCopyright(tcCtx g, const char *copyright);
 
 void tcSetMaxNumSubrsOverride(tcCtx g, unsigned long maxNumSubrs);
 
@@ -184,7 +184,8 @@ long tcGetWeightOverride(tcCtx g);
 /* tcGetWeightOverride() is called to set the synthetic weight to be used
    in the design vector, when adding synthetic glyphs */
 
-void tcWrapSet(tcCtx g, char *name, char *version, char *master);
+void tcWrapSet(tcCtx g, const char *name, const char *version,
+               const char *master);
 
 /* tcWrapSet() is called to wrap a FontSet with a PostScript wrapper that makes
    the FontSet usable as a PostScript interpreter core FontSet. The
@@ -241,4 +242,4 @@ void tcFree(tcCtx g);
 }
 #endif
 
-#endif /* TYPECOMP_H */
+#endif /* MAKEOTF_INCLUDE_TYPECOMP_H_ */

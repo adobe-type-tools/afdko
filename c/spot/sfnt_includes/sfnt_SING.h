@@ -16,18 +16,18 @@
 
 typedef struct
 {
-    Card16 tableVersionMajor;
-    Card16 tableVersionMinor;
-    Card16 glyphletVersion;
-    Card16 permissions;
-    Card16 mainGID;
-    Card16 unitsPerEm;
-    Int16 vertAdvance;
-    Int16 vertOrigin;
-    Card8 uniqueName[SING_UNIQUENAMELEN];
-    Card8 METAMD5[SING_MD5LEN];
-    Card8 nameLength;
-    Card8 *baseGlyphName; /* name array */
+    uint16_t tableVersionMajor;
+    uint16_t tableVersionMinor;
+    uint16_t glyphletVersion;
+    uint16_t permissions;
+    uint16_t mainGID;
+    uint16_t unitsPerEm;
+    int16_t vertAdvance;
+    int16_t vertOrigin;
+    uint8_t uniqueName[SING_UNIQUENAMELEN];
+    uint8_t METAMD5[SING_MD5LEN];
+    uint8_t nameLength;
+    uint8_t *baseGlyphName; /* name array */
 } SINGTbl;
 
 #endif /* FORMAT_SING_H */

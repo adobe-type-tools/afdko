@@ -2,6 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+// NOLINT(build/header_guard)
+
 /* Predefined CFF standard string id table aggregate initializer.
    Elements are strings. Index by SID, get name. */
 

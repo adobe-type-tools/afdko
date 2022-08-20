@@ -13,14 +13,14 @@
 
 typedef struct
 {
-    Card32 tag;
+    uint32_t tag;
     Fixed value;
 } FontDescriptor;
 
 typedef struct
 {
     Fixed version;
-    Card32 nDescriptors;
+    uint32_t nDescriptors;
     FontDescriptor *descriptor;
 } fdscTbl;
 

@@ -13,12 +13,12 @@
 
 typedef struct
 {
-    Card16 platformId;
-    Card16 scriptId;
-    Card16 languageId;
-    Card16 nameId;
-    Card16 length;
-    Card16 offset;
+    uint16_t platformId;
+    uint16_t scriptId;
+    uint16_t languageId;
+    uint16_t nameId;
+    uint16_t length;
+    uint16_t offset;
 } NameRecord;
 #define NAME_REC_SIZE (SIZEOF(NameRecord, platformId) + \
                        SIZEOF(NameRecord, scriptId) +   \
@@ -29,21 +29,21 @@ typedef struct
 
 typedef struct
 {
-    Card16 length;
-    Card16 offset;
+    uint16_t length;
+    uint16_t offset;
 } LangTagRecord;
 #define LANG_TAG_REC_SIZE (SIZEOF(LangTagRecord, length) + \
                            SIZEOF(LangTagRecord, offset))
 
 typedef struct
 {
-    Card16 format;
-    Card16 count;
-    Card16 stringOffset;
+    uint16_t format;
+    uint16_t count;
+    uint16_t stringOffset;
     DCL_ARRAY(NameRecord, record);
-    Card16 langTagCount;
+    uint16_t langTagCount;
     DCL_ARRAY(LangTagRecord, langTag);
-    DCL_ARRAY(Card8, strings);
+    DCL_ARRAY(uint8_t, strings);
 } nameTbl;
 #define TBL_HDR_SIZE (SIZEOF(nameTbl, format) + \
                       SIZEOF(nameTbl, count) +  \

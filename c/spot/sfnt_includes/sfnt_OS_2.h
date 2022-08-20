@@ -11,42 +11,42 @@
 
 typedef struct
 {
-    Card16 version;
+    uint16_t version;
 
-    Card16 averageWidth;
-    Card16 weightClass;
-    Card16 widthClass;
-    Card16 type;
-    Card16 subscriptXSize;
-    Card16 subscriptYSize;
-    Int16 subscriptXOffset;
-    Int16 subscriptYOffset;
-    Card16 superscriptXSize;
-    Card16 superscriptYSize;
-    Int16 superscriptXOffset;
-    Int16 superscriptYOffset;
-    Card16 strikeoutSize;
-    Int16 strikeoutPosition;
-    Card16 familyClass;
-    Card8 panose[10];
-    Card32 charRange[4];
-    Card8 vendor[4];
-    Card16 selection;
-    Card16 firstChar;
-    Card16 lastChar;
-    Int16 typographicAscent;
-    Int16 typographicDescent;
-    Int16 typographicLineGap;
-    Card16 windowsAscent;
-    Card16 windowsDescent;
-    Card32 CodePageRange[2];        /* Version 1 */
-    Int16 XHeight;                  /* Version 2 */
-    Int16 CapHeight;                /* Version 2 */
-    Card16 DefaultChar;             /* Version 2 */
-    Card16 BreakChar;               /* Version 2 */
-    Int16 maxContext;               /* Version 2 */
-    Card16 usLowerOpticalPointSize; /* Version 5 */
-    Card16 usUpperOpticalPointSize; /* Version 5 */
+    uint16_t averageWidth;
+    uint16_t weightClass;
+    uint16_t widthClass;
+    uint16_t type;
+    uint16_t subscriptXSize;
+    uint16_t subscriptYSize;
+    int16_t subscriptXOffset;
+    int16_t subscriptYOffset;
+    uint16_t superscriptXSize;
+    uint16_t superscriptYSize;
+    int16_t superscriptXOffset;
+    int16_t superscriptYOffset;
+    uint16_t strikeoutSize;
+    int16_t strikeoutPosition;
+    uint16_t familyClass;
+    uint8_t panose[10];
+    uint32_t charRange[4];
+    uint8_t vendor[4];
+    uint16_t selection;
+    uint16_t firstChar;
+    uint16_t lastChar;
+    int16_t typographicAscent;
+    int16_t typographicDescent;
+    int16_t typographicLineGap;
+    uint16_t windowsAscent;
+    uint16_t windowsDescent;
+    uint32_t CodePageRange[2];        /* Version 1 */
+    int16_t XHeight;                  /* Version 2 */
+    int16_t CapHeight;                /* Version 2 */
+    uint16_t DefaultChar;             /* Version 2 */
+    uint16_t BreakChar;               /* Version 2 */
+    int16_t maxContext;               /* Version 2 */
+    uint16_t usLowerOpticalPointSize; /* Version 5 */
+    uint16_t usUpperOpticalPointSize; /* Version 5 */
 } OS_2Tbl;
 
 #endif /* FORMAT_OS_2_H */

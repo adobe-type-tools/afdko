@@ -6,10 +6,9 @@
   fp.h -- Interface to Floating/Fixed package.
 */
 
-#ifndef FP_H
-#define FP_H
+#ifndef SHARED_INCLUDE_SUPPORTFP_H_
+#define SHARED_INCLUDE_SUPPORTFP_H_
 
-#include "supportpublictypes.h"
 /*
  * Math Library Interface
  */
@@ -23,65 +22,31 @@
  */
 
 #include <math.h>
-
-#ifndef WINATM
-#define WINATM 0
-#endif
-
-#if WINATM
-
-#include "atmtypes.h"
-
-#include "fpadjust.h"
-
-#else /* WINATM */
+#include <stdint.h>
 
 #ifndef FIXEDFUNC
 #define FIXEDFUNC
 #endif /* FIXEDFUNC */
 
-#endif /* WINATM */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Reals and Fixed point */
+typedef int32_t Fixed; /*  16 bits of integer, 16 bits of fraction */
 
 /*
  * Floating Point Interface
  */
 
-/* Exported Procedures */
-
-#define os_ceil ceil
-#define os_floor floor
-#define os_fabs fabs
-#define os_log10 log10
-#define os_sqrt sqrt
-#define os_atof atof
-
 /* Inline Procedures */
 
-/* The following macros implement comparisons of real (float) values
-   with zero. If IEEESOFT is true (defined in environment.h), these
-   comparisons are done more efficiently than the general floating
-   point compare subroutines would typically do them.
-   Note: the argument r must be a simple variable (not an expression)
-   of type real (float); it must not be a formal parameter
-   of a procedure, which is a double even if declared to be a float.
- */
-
-#if IEEESOFT
-#define RtoILOOPHOLE(r) (*(integer *)(&(r)))
-#define RealEq0(r) ((RtoILOOPHOLE(r) << 1) == 0)
-#define RealNe0(r) ((RtoILOOPHOLE(r) << 1) != 0)
-#define RealGt0(r) (RtoILOOPHOLE(r) > 0)
-#define RealGe0(r) ((RtoILOOPHOLE(r) >= 0) || RealEq0(r))
-#define RealLt0(r) ((RtoILOOPHOLE(r) < 0) && RealNe0(r))
-#define RealLe0(r) (RtoILOOPHOLE(r) <= 0)
-#else /* IEEESOFT */
 #define RealEq0(r) ((r) == 0.0)
 #define RealNe0(r) ((r) != 0.0)
 #define RealGt0(r) ((r) > 0.0)
 #define RealGe0(r) ((r) >= 0.0)
 #define RealLt0(r) ((r) < 0.0)
 #define RealLe0(r) ((r) <= 0.0)
-#endif /* IEEESOFT */
 
 #ifndef fabs
 #define fabs(x) (RealLt0(x) ? -(x) : (x))
@@ -141,8 +106,8 @@ typedef int /* Fixed, */ Frac, UFrac, *PFrac;
 typedef long int /* Fixed, */ Frac, UFrac, *PFrac;
 #endif
 
-#define FixedPosInf MAXinteger
-#define FixedNegInf MINinteger
+#define FixedPosInf ((Fixed)0x7FFFFFFF)
+#define FixedNegInf ((Fixed)0x80000000)
 
 /* Pass arguments in registers, if using a Metrowerks compiler and target is a 68K */
 
@@ -181,7 +146,7 @@ extern Frac FIXEDFUNC fracdiv(Frac x, Frac y);
    Divides the Frac number x by the Frac number y and returns a
    Fixed result. */
 
-extern Fixed FIXEDFUNC ufixratio(Card32 x, Card32 y);
+extern Fixed FIXEDFUNC ufixratio(uint32_t x, uint32_t y);
 /* Divides the unsigned integer x by the unsigned integer y and
    returns a Fixed result. */
 
@@ -219,13 +184,13 @@ extern Frac dbltofrac(double d);
    actually of type double!
  */
 
-extern procedure fixtopflt(Fixed x, float *pf);
+extern void fixtopflt(Fixed x, float *pf);
 /* Converts the Fixed number x to a float and stores the result at *pf. */
 
 extern Fixed pflttofix(float *pf);
 /* Converts the float number at *pf to a Fixed and returns it. */
 
-extern procedure fractopflt(Frac x, float *pf);
+extern void fractopflt(Frac x, float *pf);
 /* Converts the Frac number x to a float and stores the result at *pf. */
 
 extern Frac pflttofrac(float *pf);
@@ -235,32 +200,32 @@ extern Frac pflttofrac(float *pf);
    probably make some/all of this macros later
 */
 
-extern Fixed FCeilFModN(Fixed x, Card16 n);
-extern Fixed FFloorFModN(Fixed x, Card16 n);
-extern Fixed FRoundFModN(Fixed x, Card16 n);
-extern Int32 ICeilModN(Int32 x, Card16 n);
-extern Int32 IFloorModN(Int32 x, Card16 n);
-extern Fixed FFloorFModNR(Fixed v, Card16 n, Int16 r);
-extern Fixed FCeilFModNR(Fixed v, Card16 n, Int16 r);
-extern Fixed FRoundFModNR(Fixed v, Card16 n, Int16 r);
+extern Fixed FCeilFModN(Fixed x, uint16_t n);
+extern Fixed FFloorFModN(Fixed x, uint16_t n);
+extern Fixed FRoundFModN(Fixed x, uint16_t n);
+extern int32_t ICeilModN(int32_t x, uint16_t n);
+extern int32_t IFloorModN(int32_t x, uint16_t n);
+extern Fixed FFloorFModNR(Fixed v, uint16_t n, int16_t r);
+extern Fixed FCeilFModNR(Fixed v, uint16_t n, int16_t r);
+extern Fixed FRoundFModNR(Fixed v, uint16_t n, int16_t r);
 
 /* Inline Procedures */
 
-#define FixInt(x) ((Fixed)((Card32)(x) << 16))
+#define FixInt(x) ((Fixed)((uint32_t)(x) << 16))
 /* Converts the integer x to a Fixed and returns it. */
 
-#define FTrunc(x) ((integer)((x) >> 16))
+#define FTrunc(x) ((Fixed)((x) >> 16))
 /* Converts the Fixed number x to an integer, truncating it to the
    next lower integer value, and returns it. */
 
-#define FTruncF(x) ((integer)((x)&0xFFFF0000))
+#define FTruncF(x) ((Fixed)((x)&0xFFFF0000))
 /* Returns the Fixed value that represents the next lower integer value. */
 
-#define FRound(x) ((integer)(((x) + (FIXEDHALF)) >> 16))
+#define FRound(x) ((Fixed)(((x) + (FIXEDHALF)) >> 16))
 /* Converts the Fixed number x to an integer, rounding it to the
    nearest integer value, and returns it. */
 
-#define FRoundF(x) ((integer)(((x) + (FIXEDHALF)) & 0xFFFF0000))
+#define FRoundF(x) ((Fixed)(((x) + (FIXEDHALF)) & 0xFFFF0000))
 /* Returns x as a Fixed number, with its integer part rounded to the
    nearest integer value, and its fraction part 0. */
 
@@ -270,6 +235,8 @@ extern Fixed FRoundFModNR(Fixed v, Card16 n, Int16 r);
 #define FracToFixed(f) ((f) >> 14)
 #define FixedToFrac(f) ((f) << 14)
 
-#endif /* FP_H */
-/* v004 taft Tue Nov 22 14:09:28 PST 1988 */
-/* v005 brotz Fri Feb 17 11:16:46 PST 1989 */
+#ifdef __cplusplus
+}
+#endif
+
+#endif  // SHARED_INCLUDE_SUPPORTFP_H_

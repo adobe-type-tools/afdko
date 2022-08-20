@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef CTLSHARE_H
-#define CTLSHARE_H
+#ifndef SHARED_INCLUDE_CTLSHARE_H_
+#define SHARED_INCLUDE_CTLSHARE_H_
 
 #ifdef __EPOC32__
 /* The Symbian platform does not define NULL in stddef.h (an is therefore
@@ -17,6 +17,12 @@
 
 #include <libxml/tree.h>
 #include <libxml/parser.h>
+
+#include "supportdefines.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* CoreType Library Shared Definitions
    ===================================
@@ -36,7 +42,7 @@
 /* CTL_MAKE_VERSION combines the "major", "branch", and "minor" parameters into
    a single value of type long. */
 
-char *CTL_SPLIT_VERSION(char *version_buf, int version);
+char *CTL_SPLIT_VERSION(char *version_buf, int buflen, int version);
 
 /* CTL_SPLIT_VERSION splits the "version" parameter into its comma-separated
    major, branch, and minor component values that may be passed to printf,
@@ -137,14 +143,14 @@ typedef struct ctlStreamCallbacks_ ctlStreamCallbacks;
 struct ctlStreamCallbacks_ {
     void *direct_ctx;
     void *indirect_ctx;
-    char *clientFileName;  // set by clients which need to open private files.
+    const char *clientFileName;  // set by clients which need to open private files.
     void *(*open)(ctlStreamCallbacks *cb, int id, size_t size);
     int (*seek)(ctlStreamCallbacks *cb, void *stream, long offset);
     long (*tell)(ctlStreamCallbacks *cb, void *stream);
     size_t (*read)(ctlStreamCallbacks *cb, void *stream, char **ptr);
     size_t (*xml_read)(ctlStreamCallbacks *cb, void *stream, xmlDocPtr *doc);
     size_t (*write)(ctlStreamCallbacks *cb,
-                    void *stream, size_t count, char *ptr);
+                    void *stream, size_t count, const char *ptr);
     int (*status)(ctlStreamCallbacks *cb, void *stream);
     int (*close)(ctlStreamCallbacks *cb, void *stream);
 };
@@ -213,8 +219,7 @@ struct ctlStreamCallbacks_ {
    [required] status() returns the status of a stream. The returns values are
    specified by the enumerations: */
 
-enum /* Stream status */
-{
+enum {  // Stream status
     CTL_STREAM_OK,    /* Functioning normally */
     CTL_STREAM_ERROR, /* Error occurred */
     CTL_STREAM_END    /* At end-of-stream */
@@ -290,8 +295,7 @@ enum {
 
 /* -------------------------- Stream Data Access -------------------------- */
 
-typedef struct
-{
+typedef struct {
     long cnt;
     long *offset; /* [cnt] */
 } ctlSubrs;
@@ -307,8 +311,7 @@ typedef struct
    increasing order but no such guarantee
    is made by the t1read library. */
 
-typedef struct
-{
+typedef struct {
     long begin;
     long end;
 } ctlRegion;
@@ -350,7 +353,7 @@ struct ctlSharedStmCallbacks_ {
     uint32_t (*read4)(ctlSharedStmCallbacks *h);
 
     /* Error message. */
-    void (*message)(ctlSharedStmCallbacks *h, char *msg, ...);
+    void (*message)(ctlSharedStmCallbacks *h, const char *msg, ...);
 };
 
 /* ctlSharedStmCallbacks is used for reading SFNT tables shared by multiple font formats.
@@ -470,7 +473,7 @@ typedef struct ctlVersionCallbacks_ ctlVersionCallbacks;
 struct ctlVersionCallbacks_ {
     void *ctx;
     unsigned long called;
-    void (*getversion)(ctlVersionCallbacks *cb, int version, char *libname);
+    void (*getversion)(ctlVersionCallbacks *cb, int version, const char *libname);
 };
 
 enum {
@@ -519,42 +522,8 @@ enum {
    also available via the "cb" parameter so that the client may access the
    "ctx" field if necessary. */
 
-/* ---------------------- Security Functions ---------------------- */
-
-#ifdef _MSC_VER
-#define FPRINTF_S fprintf_s
-#define VFPRINTF_S vfprintf_s
-#define SPRINTF_S sprintf_s
-#define VSPRINTF_S vsprintf_s
-#define SSCANF_S sscanf_s
-#define STRCPY_S(d, ds, s) strcpy_s(d, ds, s)
-#define STRNCPY_S(d, ds, s, n) strncpy_s(d, ds, s, n)
-#define STRCAT_S(d, ds, s) strcat_s(d, ds, s)
-#else
-#ifndef FPRINTF_S
-#define FPRINTF_S fprintf
-#endif
-#ifndef VFPRINTF_S
-#define VFPRINTF_S vfprintf
-#endif
-#ifndef SPRINTF_S
-#define SPRINTF_S(b, l, f, ...) sprintf(b, f, ##__VA_ARGS__)
-#endif
-#ifndef VSPRINTF_S
-#define VSPRINTF_S vsnprintf
-#endif
-#ifndef SSCANF_S
-#define SSCANF_S sscanf
-#endif
-#ifndef STRCPY_S
-#define STRCPY_S(d, ds, s) strcpy(d, s)
-#endif
-#ifndef STRNCPY_S
-#define STRNCPY_S(d, ds, s, n) strncpy(d, s, n)
-#endif
-#ifndef STRCAT_S
-#define STRCAT_S(d, ds, s) strcat(d, s)
-#endif
+#ifdef __cplusplus
+}
 #endif
 
-#endif /* CTLSHARE_H */
+#endif  // SHARED_INCLUDE_CTLSHARE_H_

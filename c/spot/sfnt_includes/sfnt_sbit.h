@@ -8,21 +8,21 @@
 #define SBIT_VERSION VERSION(1, 0)
 
 typedef struct _sbitLineMetrics {
-    Int8 ascender;
-    Int8 descender;
-    Card8 widthMax;
-    Int8 caretSlopeNumerator;
-    Int8 caretSlopeDenominator;
-    Int8 caretOffset;
-    Int8 minOriginSB;  /* min of horiBearingX  */
+    int8_t ascender;
+    int8_t descender;
+    uint8_t widthMax;
+    int8_t caretSlopeNumerator;
+    int8_t caretSlopeDenominator;
+    int8_t caretOffset;
+    int8_t minOriginSB;  /* min of horiBearingX  */
                        /*       (vertBearingY) */
-    Int8 minAdvanceSB; /* min of horiAdvance - horiBearingX + width  */
+    int8_t minAdvanceSB; /* min of horiAdvance - horiBearingX + width  */
                        /*       (vertAdvance - vertBearing + height) */
-    Int8 maxBeforeBL;  /* max of horiBearingX  */
+    int8_t maxBeforeBL;  /* max of horiBearingX  */
                        /*       (vertBearingY) */
-    Int8 minAfterBL;   /* min of horiBearingY - height */
+    int8_t minAfterBL;   /* min of horiBearingY - height */
                        /*       (vertBearingX - width) */
-    Int16 padding;     /* long-word align */
+    int16_t padding;     /* long-word align */
 } sbitLineMetrics;
 
 #define SBITLINEMETRICS_SIZE (SIZEOF(sbitLineMetrics, ascender) +              \
@@ -62,14 +62,14 @@ typedef enum {
 
 /* ....................GLYPH METRICS................................... */
 typedef struct _sbitBigGlyphMetrics {
-    Card8 height;
-    Card8 width;
-    Int8 horiBearingX;
-    Int8 horiBearingY;
-    Card8 horiAdvance;
-    Int8 vertBearingX;
-    Int8 vertBearingY;
-    Card8 vertAdvance;
+    uint8_t height;
+    uint8_t width;
+    int8_t horiBearingX;
+    int8_t horiBearingY;
+    uint8_t horiAdvance;
+    int8_t vertBearingX;
+    int8_t vertBearingY;
+    uint8_t vertAdvance;
 } sbitBigGlyphMetrics;
 
 #define SBITBIGGLYPHMETRICS_SIZE (SIZEOF(sbitBigGlyphMetrics, height) +       \
@@ -82,11 +82,11 @@ typedef struct _sbitBigGlyphMetrics {
                                   SIZEOF(sbitBigGlyphMetrics, vertAdvance))
 
 typedef struct _sbitSmallGlyphMetrics {
-    Card8 height;
-    Card8 width;
-    Int8 bearingX;
-    Int8 bearingY;
-    Card8 advance;
+    uint8_t height;
+    uint8_t width;
+    int8_t bearingX;
+    int8_t bearingY;
+    uint8_t advance;
 } sbitSmallGlyphMetrics;
 
 #define SBITSMALLGLYPHMETRICS_SIZE (SIZEOF(sbitSmallGlyphMetrics, height) +   \

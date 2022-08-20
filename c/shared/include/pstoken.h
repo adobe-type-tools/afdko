@@ -2,14 +2,14 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef PSTOKEN_H
-#define PSTOKEN_H
+#ifndef SHARED_INCLUDE_PSTOKEN_H_
+#define SHARED_INCLUDE_PSTOKEN_H_
 
 #include "ctlshare.h"
 
 #define PST_VERSION CTL_MAKE_VERSION(2, 0, 11)
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 extern "C" {
 #endif
 
@@ -132,11 +132,10 @@ typedef enum {
 } pstType;
 
 /* Input token */
-typedef struct
-{
+typedef struct {
     pstType type;
     long length;
-    char *value;
+    const char *value;
 } pstToken;
 
 /* Several functions use the pstToken data type to describe a single PostScript
@@ -155,14 +154,14 @@ int pstGetToken(pstCtx h, pstToken *token);
    if its value is needed beyond the next pstGetToken() call. This function
    returns 0 if successful or an error code otherwise. */
 
-int pstFindToken(pstCtx h, pstToken *token, char *value);
+int pstFindToken(pstCtx h, pstToken *token, const char *value);
 
 /* pstFindToken() returns the next token in the input stream that matches the
    token specified by the "value" parameter. If the matching token is found 0
    is returned otherwise an error code is returned (most likely pstEndStream).
    The value parameter is specified as a null-terminated string. */
 
-int pstMatch(pstCtx h, pstToken *token, char *value);
+int pstMatch(pstCtx h, pstToken *token, const char *value);
 
 /* pstMatchValue() returns 1 if the "token" parameter's value field matches the
    null-terminated string specified by the "value" parameter, otherwise it
@@ -181,13 +180,13 @@ double pstConvReal(pstCtx h, pstToken *token);
    function for a description of the values returned on overflow or
    underflow conditions. */
 
-char *pstConvString(pstCtx h, pstToken *token, long *length);
+const char *pstConvString(pstCtx h, pstToken *token, long *length);
 
 /* pstConvString() forms a new string by removing the delimiters from the
    string "token" parameter and returns a new pointer and length accordingly.
    If the token isn't a string, NULL is returned. */
 
-char *pstConvLiteral(pstCtx h, pstToken *token, long *length);
+const char *pstConvLiteral(pstCtx h, pstToken *token, long *length);
 
 /* pstConvLiteral() forms a new string by removing the leading / from the
    literal "token" parameter and returns a new pointer and length accordingly.
@@ -246,7 +245,7 @@ enum {
    error code that is defined in the above enumeration that is built from
    psterr.h. */
 
-char *pstErrStr(int err_code);
+const char *pstErrStr(int err_code);
 
 /* pstErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
@@ -256,8 +255,8 @@ void pstGetVersion(ctlVersionCallbacks *cb);
 /* pstGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 }
 #endif
 
-#endif /* PSTOKEN_H */
+#endif  // SHARED_INCLUDE_PSTOKEN_H_

@@ -2,15 +2,15 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef CFEMBED_H
-#define CFEMBED_H
+#ifndef SHARED_INCLUDE_CFEMBED_H_
+#define SHARED_INCLUDE_CFEMBED_H_
 
 #include "ctlshare.h"
 #include "sfntwrite.h"
 
 #define CEF_VERSION CTL_MAKE_VERSION(2, 0, 25)
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 extern "C" {
 #endif
 
@@ -100,22 +100,19 @@ enum {
     CEF_VID_BEGIN = 64000 /* Beginning of virtual id (VID) range */
 };
 
-typedef struct /* Glyph specification */
-{
+typedef struct {  // Glyph specification
     unsigned short clientflags;
     unsigned short id; /* NID/GID/CID/VID */
     unsigned long uv;  /* was: short */
 } cefSubsetGlyph;
 
-typedef struct /* Kerning pair */
-{
+typedef struct {  // Kerning pair
     unsigned short first;
     unsigned short second;
     short value;
 } cefKernPair;
 
-typedef struct /* Embedding specification */
-{
+typedef struct {  // Embedding specification
     unsigned short flags;
 #define CEF_FORCE_LANG_1       (1 << 0) /* Force LanguageGroup 1 */
 #define CEF_WRITE_SVG          (1 << 1) /* Write SVG font instead of CEF font */
@@ -123,14 +120,12 @@ typedef struct /* Embedding specification */
     char *newFontName;
     float *UDV;
     char *URL;
-    struct /* Subset glyphs */
-    {
+    struct {  // Subset glyphs
         long cnt;
         cefSubsetGlyph *array;
-        char **names;
+        const char **names;
     } subset;
-    struct /* Kern pairs */
-    {
+    struct {  // Kern pairs
         long cnt;
         cefKernPair *array;
     } kern;
@@ -297,7 +292,7 @@ enum {
    positive non-zero error code that is defined in the above enumeration that
    is built from ceferr.h. */
 
-char *cefErrStr(int err_code);
+const char *cefErrStr(int err_code);
 
 /* cefErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
@@ -318,19 +313,16 @@ void cefGetVersion(ctlVersionCallbacks *cb);
 #include <stdlib.h>
 #include "cfembed.h"
 
-typedef struct
-{
+typedef struct {
     FILE *fp;
     char buf[BUFSIZ];
 } Stream;
 
-typedef struct
-{
+typedef struct {
     /* ... */
     char *srcfile;
     char *dstfile;
-    struct
-    {
+    struct {
         Stream src;
         Stream dst;
         Stream tmp0;
@@ -447,8 +439,8 @@ int main(void) {
 }
 #endif /* Example */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 }
 #endif
 
-#endif /* CFEMBED_H */
+#endif  // SHARED_INCLUDE_CFEMBED_H_

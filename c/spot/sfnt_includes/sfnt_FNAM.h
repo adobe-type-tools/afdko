@@ -13,21 +13,21 @@
 
 typedef struct
 {
-    Card8 style;
-    Card8 *name;
+    uint8_t style;
+    uint8_t *name;
 } Client;
 
 typedef struct
 {
-    Card16 nClients; /* Temporary, not part of format */
+    uint16_t nClients; /* Temporary, not part of format */
     Client *client;
 } Encoding;
 
 typedef struct
 {
     Fixed version;
-    Card16 nEncodings;
-    Card16 *offset;
+    uint16_t nEncodings;
+    uint16_t *offset;
     Encoding *encoding;
 } FNAMTbl;
 

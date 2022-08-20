@@ -14,13 +14,13 @@
 typedef struct
 {
     Fixed Version;
-    Card16 Flags;
+    uint16_t Flags;
 #define CID_REARRANGED_FONT (1 << 0)
-    Card16 CIDCount;
-    Card32 TotalLength;
-    Card32 AsciiLength;
-    Card32 BinaryLength;
-    Card16 FDCount;
+    uint16_t CIDCount;
+    uint32_t TotalLength;
+    uint32_t AsciiLength;
+    uint32_t BinaryLength;
+    uint16_t FDCount;
 } CID_Tbl;
 #define CID__HDR_SIZE (SIZEOF(CID_Tbl, Version) +      \
                        SIZEOF(CID_Tbl, Flags) +        \

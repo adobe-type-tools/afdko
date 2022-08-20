@@ -13,7 +13,7 @@
 
 typedef struct
 {
-    Card16 glyphIdDelta;
+    uint16_t glyphIdDelta;
     FWord *hAdv;   /* [nMasters] */
     FWord *hOrigX; /* [nMasters] */
     FWord *vAdv;   /* [nMasters] */
@@ -28,8 +28,8 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card16 flags;
-    Card16 nMasters;
+    uint16_t flags;
+    uint16_t nMasters;
     GlyphId firstGlyph;
     GlyphId lastGlyph;
     Lookup lookup;

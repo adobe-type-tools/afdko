@@ -2,27 +2,10 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-/*
-  except.h
-*/
-
 /* exception handling */
 
-#ifndef EXCEPT_H
-#define EXCEPT_H
-
-#ifndef WINATM
-#define WINATM 0
-#endif
-
-#include "supportenvironment.h"
-#include "supportpublictypes.h"
-#if OS == os_mach
-#include "supportossyslib.h"
-#elif !WINATM
-#include <stdlib.h>
-#endif
-/* #include CANTHAPPEN */ /* To include Abort processing, by reference */
+#ifndef SHARED_INCLUDE_SUPPORTEXCEPT_H_
+#define SHARED_INCLUDE_SUPPORTEXCEPT_H_
 
 #if defined(USE_CXX_EXCEPTION) && !defined(__cplusplus)
 #error("must be compiled as C++ to use C++ exception as error handling")
@@ -35,12 +18,12 @@
 #ifdef setjmp_h
 #include setjmp_h
 #else /* setjmp_h */
-#ifdef VAXC
-#include setjmp
-#else /* VAXC */
 #include <setjmp.h>
-#endif /* VAXC */
 #endif /* setjmp_h */
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /* 
@@ -183,7 +166,7 @@ typedef struct _t_Exc_buf {
 
 /* Exported Procedures */
 
-extern procedure os_raise(_Exc_Buf *buf, int Code, char *Message);
+extern void os_raise(_Exc_Buf *buf, int Code, char *Message);
 /* Initiates an exception; always called via the RAISE macro.
    This procedure never returns; instead, the stack is unwound and
    control passes to the beginning of the exception handler statements
@@ -200,30 +183,6 @@ extern procedure os_raise(_Exc_Buf *buf, int Code, char *Message);
    If there is no dynamically enclosing exception handler, os_raise
    writes an error message to os_stderr and aborts with CantHappen.
  */
-
-#if !defined(USE_CXX_EXCEPTION) && !WINATM && OS != os_windowsNT
-#ifndef setjmp
-extern int setjmp(jmp_buf buf);
-#endif
-/* Saves the caller's environment in the buffer (which is an array
-   type and therefore passed by pointer), then returns the value zero.
-   It may return again if longjmp is executed subsequently (see below).
- */
-
-/*extern _CRTIMP procedure CDECL longjmp (jmp_buf  buf, int  value);*/
-/* Restores the environment saved by an earlier call to setjmp,
-   unwinding the stack and causing setjmp to return again with
-   value as its return value (which must be non-zero).
-   The procedure that called setjmp must not have returned or
-   otherwise terminated. The saved environment must be at an earlier
-   place on the same stack as the call to longjmp (in other words,
-   it must not be in a different coroutine). It is legal to call
-   longjmp in a signal handler and to restore an environment
-   outside the signal handler; longjmp must be able to unwind
-   the signal cleanly in such a case.
- */
-
-#endif /* !WINATM */
 
 /* In-line Procedures */
 
@@ -245,4 +204,8 @@ extern int setjmp(jmp_buf buf);
    component.
 */
 
-#endif /* EXCEPT_H */
+#ifdef __cplusplus
+}
+#endif
+
+#endif  // SHARED_INCLUDE_SUPPORTEXCEPT_H_

@@ -13,26 +13,26 @@
 
 typedef struct
 {
-    Card8* longLabel;
-    Card8* shortLabel;
+    uint8_t* longLabel;
+    uint8_t* shortLabel;
 } MMSDAxisRec;
 
 typedef struct
 {
-    Card16 nAxes;
-    Card16 axisSize;
+    uint16_t nAxes;
+    uint16_t axisSize;
     MMSDAxisRec* axis; /* [nAxes] */
 } MMSDAxisTbl;
 
 typedef struct
 {
-    Card8* nameSuffix;
+    uint8_t* nameSuffix;
 } MMSDInstanceRec;
 
 typedef struct
 {
-    Card16 nInstances;
-    Card16 instanceSize;
+    uint16_t nInstances;
+    uint16_t instanceSize;
     MMSDInstanceRec* instance; /* [nIntances] */
 } MMSDInstanceTbl;
 
@@ -44,26 +44,26 @@ typedef struct
 
 typedef struct
 {
-    Card8 axis;
-    Card8 flags;
+    uint8_t axis;
+    uint8_t flags;
     MMSDActionRec action[2];
 } MMSDStyleRec;
 
 typedef struct
 {
-    Card16 nStyles;
-    Card16 styleSize;
+    uint16_t nStyles;
+    uint16_t styleSize;
     MMSDStyleRec* style; /* [nStyles] */
 } MMSDStyleTbl;
 
 typedef struct _MMSDTbl {
     Fixed version;
-    Card16 flags;
+    uint16_t flags;
 #define MMSD_USE_FOR_SUBST (1 << 0) /* May be used for substitution */
 #define MMSD_CANT_INSTANCE (1 << 1) /* Can't make instance */
-    Card16 axisOffset;
-    Card16 instanceOffset;
-    Card16 styleOffset;
+    uint16_t axisOffset;
+    uint16_t instanceOffset;
+    uint16_t styleOffset;
     MMSDAxisTbl axis;
     MMSDInstanceTbl instance;
     MMSDStyleTbl style;

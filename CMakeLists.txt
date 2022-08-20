@@ -2,28 +2,35 @@ cmake_minimum_required(VERSION 3.16)
 
 project(afdko)
 
-# set(CMAKE_VERBOSE_MAKEFILE ON)
+# Change and uncomment to build directly with cmake (outside of pip)
+# set(CMAKE_MODULE_PATH /usr/lib/python3.10/site-packages/skbuild/resources/cmake)
+# set(CMAKE_MODULE_PATH /opt/homebrew/lib/python3.9/site-packages/skbuild/resources/cmake)
+# set(CMAKE_FIND_FRAMEWORK_EXTRA_LOCATIONS /opt/homebrew/Cellar/python@3.9/3.9.13_4/Frameworks/Python.framework)
 
-# This matches the MSVC_RUNTIME_LIBRARY property in
-# c/makeotf/source/CMakeLists.txt, which can theoretically be used to
-# statically link the runtime on Windows. However, the neededruntime DLL
-# seems to be present in Windows and setting this caused problems in testing.
-# (Setting ANTLR4_WITH_STATIC_CRT below to ON may or may not fix the problem.)
-# cmake_policy(SET CMP0091 NEW) # Style of MSVC runtime selection
+# set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # RelWithDebInfo builds an optimized binary but includes debugging symbols
 # Other common possibilities are "Debug" and "Release"
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build type configuration" FORCE)
+#    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build type configuration" FORCE)
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type configuration" FORCE)
 endif()
 message(STATUS "Build type is ${CMAKE_BUILD_TYPE}")
 
 set(CMAKE_CXX_STANDARD 11)
 
 # scikit-build
-if(SKBUILD)
-    find_package(PythonExtensions REQUIRED)
-endif()
+find_package(PythonLibs REQUIRED)
+find_package(PythonExtensions REQUIRED)
+find_package(Cython REQUIRED)
+set(SKBUILD_LINK_LIBRARIES_KEYWORD PRIVATE)
+
+add_compile_definitions(STRIP_EXTERN_C)
+
+# Uncomment to export main__XXX functions in shared object on Linux
+# function(_set_python_extension_symbol_visibility _target)
+#   message("Skipping _set_python_extension_symbol_visibility")
+# endfunction()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -36,12 +43,13 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # https://www.antlr.org/download/antlr4-cpp-runtime-4.9.3-source.zip
 # set(ANTLR4_ZIP_REPOSITORY "/path_to_antlr4_archive/a4.zip")
 
-add_definitions(-DANTLR4CPP_STATIC)
+add_compile_definitions(ANTLR4CPP_STATIC)
 set(ANTLR4_WITH_STATIC_CRT OFF)
 # 4.9.3 is the latest ANTLR4 version
 set(ANTLR4_TAG tags/4.9.3)
 include(ExternalAntlr4Cpp)
 
+# libxml2 configuration
 
 if (DEFINED ENV{FORCE_BUILD_LIBXML2})
     set(BUILD_STATIC_LIBXML2 TRUE)
@@ -63,6 +71,7 @@ if (${BUILD_STATIC_LIBXML2})
     include_directories(${LIBXML2_STATIC_INCLUDE_DIR})
     set(NEED_LIBXML2_DEPEND TRUE)
     if (WIN32)
+        add_compile_definitions(LIBXML_STATIC)
         set(CHOSEN_LIBXML2_LIBRARY ${LIBXML2_WIN_LIBRARIES})
     else()
         set(CHOSEN_LIBXML2_LIBRARY ${LIBXML2_NONWIN_LIBRARIES})
@@ -84,27 +93,36 @@ endif()
 include(AddSanitizer)
 add_sanitizer("${ADD_SANITIZER}")
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Ported from old build files, XXX not sure if all of these are needed
 if(WIN32)
-    add_compile_definitions(CTL_CDECL=__cdecl CDECL=__cdecl
-        OS=os_windowsNT ISP=isp_i80486 _CRT_SECURE_NO_DEPRECATE
-        $<$<CONFIG:Release>:NDEBUG>)
+    add_compile_definitions(CTL_CDECL=__cdecl OS=os_windowsNT $<$<CONFIG:Release>:NDEBUG>)
 endif()
 
 include(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(m floor "" HAVE_M_LIB)
 
-include(CTest)
-include(AddAFDKOTests)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_subdirectory(c/shared/source)
-add_subdirectory(c/detype1/source)
-add_subdirectory(c/mergefonts/source)
-add_subdirectory(c/rotatefont/source)
-add_subdirectory(c/sfntdiff/source)
-add_subdirectory(c/sfntedit/source)
-add_subdirectory(c/spot/source)
-add_subdirectory(c/tx/source)
-add_subdirectory(c/type1/source)
+add_library(_internal MODULE)
+python_extension_module(_internal)
+
+if (HAVE_M_LIB)
+    target_link_libraries(_internal PRIVATE m)
+endif ()
+
+target_link_libraries(_internal PRIVATE ${CHOSEN_LIBXML2_LIBRARY})
+
+add_subdirectory(cython)
+add_subdirectory(c/shared)
+add_subdirectory(c/detype1)
+add_subdirectory(c/mergefonts)
+add_subdirectory(c/rotatefont)
+add_subdirectory(c/sfntdiff)
+add_subdirectory(c/sfntedit)
+add_subdirectory(c/spot)
+add_subdirectory(c/type1)
 add_subdirectory(c/makeotf)
+
+target_link_libraries(_internal PRIVATE adapter detype1 type1 makeotf spot sfntedit sfntdiff mergefonts rotatefont shared antlr4_static)
+
+install(TARGETS _internal LIBRARY DESTINATION python/afdko)

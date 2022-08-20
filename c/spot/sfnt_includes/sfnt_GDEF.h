@@ -12,45 +12,45 @@
 /* --- Caret Values --- */
 typedef struct
 {
-    Card16 CaretValueFormat; /* =1 */
-    Card16 Coordinate;
+    uint16_t CaretValueFormat; /* =1 */
+    uint16_t Coordinate;
 } CaretValueFormat1;
 
 typedef struct
 {
-    Card16 CaretValueFormat; /* =2 */
-    Card16 CaretValuePoint;
+    uint16_t CaretValueFormat; /* =2 */
+    uint16_t CaretValuePoint;
 } CaretValueFormat2;
 
 typedef struct
 {
-    Card16 CaretValueFormat; /* =3 */
-    Card16 Coordinate;
+    uint16_t CaretValueFormat; /* =3 */
+    uint16_t Coordinate;
     OFFSET(DeviceTable, DeviceTable); /* => DeviceTable */
 } CaretValueFormat3;
 
 typedef struct
 {
-    Card16 CaretValueFormat; /* =4 */
-    Card16 IdCaretValue;
+    uint16_t CaretValueFormat; /* =4 */
+    uint16_t IdCaretValue;
 } CaretValueFormat4;
 
 typedef struct
 {
-    Card16 PointCount;
-    Card16 *PointIndex; /* [PointCount] */
+    uint16_t PointCount;
+    uint16_t *PointIndex; /* [PointCount] */
 } AttachPoint;
 
 typedef struct
 {
     OFFSET(void *, Coverage); /* Coverage type */
-    Card16 GlyphCount;
+    uint16_t GlyphCount;
     OFFSET_ARRAY(AttachPoint, AttachPoint);
 } AttachList;
 
 typedef struct
 {
-    Card16 CaretCount;
+    uint16_t CaretCount;
     OFFSET_ARRAY(CaretValueFormat3, CaretValue); /* CaretValueFormat3 is the largest of the three; */
                                                  /* this gives enough memory when we allocate      */
                                                  /* an array of these things                       */
@@ -59,14 +59,14 @@ typedef struct
 typedef struct
 {
     OFFSET(void *, Coverage); /* => Coverage */
-    Card16 LigGlyphCount;
+    uint16_t LigGlyphCount;
     OFFSET_ARRAY(LigGlyph, LigGlyph);
 } LigCaretList;
 
 typedef struct
 {
-    Card16 MarkSetTableFormat;
-    Card16 MarkSetCount;
+    uint16_t MarkSetTableFormat;
+    uint16_t MarkSetCount;
     LOFFSET_ARRAY(void *, Coverage);
 } MarkGlyphSetsDef;
 
@@ -78,7 +78,7 @@ typedef struct
     OFFSET(LigCaretList, LigCaretList);
     OFFSET(void *, MarkAttachClassDef);
     OFFSET(MarkGlyphSetsDef, MarkGlyphSetsDef);
-    IntX hasMarkAttachClassDef;
+    int hasMarkAttachClassDef;
 } GDEFTbl;
 
 #endif /* SFNTGDEF_H */
