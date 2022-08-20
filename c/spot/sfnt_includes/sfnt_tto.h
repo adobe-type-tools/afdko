@@ -10,13 +10,13 @@
 #define FORMAT_TTO_H
 
 /* Special types */
-typedef Card32 Tag;
+typedef uint32_t Tag;
 /* In the file an Offset is a byte offset of data relative to some format
    component, normally the beginning of the record it belongs to. The
    OFFSET macros allow a simple declaration of both the byte offset field and
    a structure containing the data for that offset. */
-typedef Card16 Offset;
-typedef Card32 LOffset;
+typedef uint16_t Offset;
+typedef uint32_t LOffset;
 
 #define OFFSET(type, name) \
     Offset name;           \
@@ -36,9 +36,9 @@ typedef Card32 LOffset;
 typedef struct
 {
     Offset LookupOrder; /* => LookupOrder, Reserved=NULL */
-    Card16 ReqFeatureIndex;
-    Card16 FeatureCount;
-    Card16 *FeatureIndex; /* [FeatureCount] */
+    uint16_t ReqFeatureIndex;
+    uint16_t FeatureCount;
+    uint16_t *FeatureIndex; /* [FeatureCount] */
 } LangSys;
 
 typedef struct
@@ -50,7 +50,7 @@ typedef struct
 typedef struct
 {
     OFFSET(LangSys, DefaultLangSys);
-    Card16 LangSysCount;
+    uint16_t LangSysCount;
     LangSysRecord *LangSysRecord; /* [LangSysCount] */
 } Script;
 
@@ -62,7 +62,7 @@ typedef struct
 
 typedef struct
 {
-    Card16 ScriptCount;
+    uint16_t ScriptCount;
     ScriptRecord *ScriptRecord; /* [ScriptCount] */
 } ScriptList;
 
@@ -71,8 +71,8 @@ typedef void *FeatureParam; /* Fake type until MS specs this */
 typedef struct
 {
     OFFSET(FeatureParam, FeatureParam); /* =>FeatureParam, Reserved=NULL */
-    Card16 LookupCount;
-    Card16 *LookupListIndex; /* [LookupCount] */
+    uint16_t LookupCount;
+    uint16_t *LookupListIndex; /* [LookupCount] */
 } Feature;
 
 typedef struct
@@ -83,15 +83,15 @@ typedef struct
 
 typedef struct
 {
-    Card16 FeatureCount;
+    uint16_t FeatureCount;
     FeatureRecord *FeatureRecord; /* [FeatureCount] */
 } FeatureList;
 
 /* --- LookupList --- */
 typedef struct
 {
-    Card16 LookupType;
-    Card16 LookupFlag;
+    uint16_t LookupType;
+    uint16_t LookupFlag;
 #define RightToLeft         (1 << 0)
 #define IgnoreBaseGlyphs    (1 << 1)
 #define IgnoreLigatures     (1 << 2)
@@ -101,22 +101,22 @@ typedef struct
 #define kNumNamedLookups    6
 #define DumpLookupSeen      (1 << 8) /* our own flag for "spot" */
 
-    Card16 SubTableCount;
+    uint16_t SubTableCount;
     OFFSET_ARRAY(void *, SubTable); /* [SubTableCount] */
-    Card16 MarkFilteringSet;
+    uint16_t MarkFilteringSet;
 } Lookup;
 
 typedef struct
 {
-    Card16 LookupCount;
+    uint16_t LookupCount;
     OFFSET_ARRAY(Lookup, Lookup); /* [LookupCount] */
 } LookupList;
 
 /* --- Coverage --- */
 typedef struct
 {
-    Card16 CoverageFormat; /* =1 */
-    Card16 GlyphCount;
+    uint16_t CoverageFormat; /* =1 */
+    uint16_t GlyphCount;
     GlyphId *GlyphArray; /* [GlyphCount] */
 } CoverageFormat1;
 
@@ -124,49 +124,49 @@ typedef struct
 {
     GlyphId Start;
     GlyphId End;
-    Card16 StartCoverageIndex;
+    uint16_t StartCoverageIndex;
 } RangeRecord;
 
 typedef struct
 {
-    Card16 CoverageFormat; /* =2 */
-    Card16 RangeCount;
+    uint16_t CoverageFormat; /* =2 */
+    uint16_t RangeCount;
     RangeRecord *RangeRecord; /* [RangeCount] */
 } CoverageFormat2;
 
 /* --- ClassDef --- */
 typedef struct
 {
-    Card16 ClassFormat; /* =1 */
+    uint16_t ClassFormat; /* =1 */
     GlyphId StartGlyph;
-    Card16 GlyphCount;
-    Card16 *ClassValueArray; /* [GlyphCount] */
+    uint16_t GlyphCount;
+    uint16_t *ClassValueArray; /* [GlyphCount] */
 } ClassDefFormat1;
 
 typedef struct
 {
     GlyphId Start;
     GlyphId End;
-    Card16 Class;
+    uint16_t Class;
 } ClassRangeRecord;
 
 typedef struct
 {
-    Card16 ClassFormat; /* =2 */
-    Card16 ClassRangeCount;
+    uint16_t ClassFormat; /* =2 */
+    uint16_t ClassRangeCount;
     ClassRangeRecord *ClassRangeRecord; /* [ClassRangeCount] */
 } ClassDefFormat2;
 
 /* --- DeviceTable --- */
 typedef struct
 {
-    Card16 StartSize;
-    Card16 EndSize;
-    Card16 DeltaFormat;
+    uint16_t StartSize;
+    uint16_t EndSize;
+    uint16_t DeltaFormat;
 #define DeltaBits2 1
 #define DeltaBits4 2
 #define DeltaBits8 3
-    Card16 *DeltaValue; /* [((EndSize-StartSize+1)*(2^DeltaFormat)+15)/16] */
+    uint16_t *DeltaValue; /* [((EndSize-StartSize+1)*(2^DeltaFormat)+15)/16] */
 } DeviceTable;
 
 #endif /* FORMAT_TTO_H */

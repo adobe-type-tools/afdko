@@ -1,331 +1,423 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
+/***********************************************************************/
 
-#ifndef PUBLIC_CFFREAD_H
-#define PUBLIC_CFFREAD_H
+#ifndef SHARED_INCLUDE_CFFREAD_H_
+#define SHARED_INCLUDE_CFFREAD_H_
 
-#include "ctlshare.h"
-
-#define CFR_VERSION CTL_MAKE_VERSION(2, 1, 3)
-
-#include "absfont.h"
+#include <stddef.h> /* For [u]int32_t */
+#include <stdint.h> /* For size_t */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define CFF_VERSION 0x010005 /* Library version */
+#define MAX_XUID_SIZE 50
+
 /* Compact Font Format (CFF) Parser Library
    ========================================
-   This library parses information in CFF FontSets containing only one single
-   master or CID-keyed font.
-
-   This library is initialized with a single call to cfrNew() which allocates
-   an opaque context (cfrCtx) which is passed to subsequent functions and is
-   destroyed by a single call to cfrFree(). Thus, multiple contexts may be
-   concurrently allocated permitting operation in a multi-threaded environment.
-
-   A new font is opened and parsed and top level font data is returned by
-   calling cfrBegFont(). Glyph data may then be accessed using the
-   cfrIterateGlyphs(), cfrGetGlyphByTag(), cfrGetGlyphByName(),
-   cfrGetGlyphByCID() or t1cGetByStdEnc() functions.
-
-   The regions of the source stream occupied by various CFF data structs may be
-   obtained by calling cfrGetSingleRegions() and cfrGetRepeatRegions(). The
-   values associated with the "defaultWidthX" and "nominalWidthX" DICT
-   operators may be obtained by calling cfrGetWidths().
-
-   Finally, a font may be closed by calling cfrEndFont(). */
-
-typedef struct cfrCtx_ *cfrCtx;
-cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL);
-
-#define CFR_CHECK_ARGS CTL_CHECK_ARGS_CALL(CFR_VERSION)
-
-/* cfrNew() initializes the library and returns an opaque context (cfrCtx) that
-   is subsequently passed to all the other library functions. It must be the
-   first function in the library to be called by the client. The client passes
-   a set of memory and stream callback functions (described in ctlshare.h) to
-   the library via the mem_cb and stm_cb parameters.
-
-   The CFR_CHECK_ARGS macro is passed as the last parameter to cfrNew() in
-   order to perform a client/library compatibility check.
-
-   The optional debug data stream (CFR_DBG_STREAM_ID) is opened by this call.
-   The debug stream provides more detailed error and warning messages than is
-   available via cfrErrStr(). If the client doesn't require the debug data
-   stream, NULL should be returned from its stream open call. */
-
-int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top, float *UDV);
-
-#define CFR_UPDATE_OPS              (1 << 0)
-#define CFR_USE_MATRIX              (1 << 1)
-#define CFR_NO_ENCODING             (1 << 2)
-#define CFR_SHALLOW_READ            (1 << 3)
-#define CFR_SEEN_GLYPH              (1 << 6) /* have seen a glyph */
-#define CFR_FLATTEN_VF              (1 << 8)
-#define CFR_SHORT_VF_NAME           (1 << 9)
-#define CFR_UNUSE_VF_NAMED_INSTANCE (1 << 10)
-#define CFR_CFF2_ONLY   (1<<11)
-
-/* cfrBegFont() is called to initiate a new font parse. The source data stream
-   (CFR_SRC_STREAM_ID) is opened, positioned at the offset specified by the
-   "origin" parameter, parsed, and dictionary values are stored in the data
-   structure pointed to by the "top" parameter (which will remain stable until
-   cfrEndFont() is called).
-
-   The "origin" parameter can either be the stream offset of the first
-   byte of a CFF header or the first byte of an OpenType font (OTF), or
-   the first byte of an TTC font which contains OTF fonts. In the latter
-   two cases the library will automatically locate the CFF table and
-   seek to it before attempting to parse the CFF data.
-
-   The ttcIndex parameter selects which font to use in a TTC. This has effect
-   only when the font file is a TTC font.
-
-   The "flags" parameter allows client control over the parse by setting bits
-   as follows:
-
-   CFR_UPDATE_OPS - charstrings using the deprecated seac operator are
-   converted to a regular path by combining the component glyphs and the
-   deprecated dotsection operator is removed
-
-   CFR_USE_MATRIX - transform charstring path coordinates using the font's own
-   FontMatrix. This facility would not normally be used during font format
-   conversion since it is generally better to leave the path coordinates
-   unmodified and specify a non-default matrix in the font. However, it is
-   useful for drawing or manipulating glyph outline data.
-
-   CFR_NO_ENCODING - don't read the encoding and set all glyphs unencoded. This
-   options should be used when reading the CFF table from an OTF font since
-   the font is encoded using the data in the cmap table and not CFF table.
-
-   CFR_SHALLOW_READ - don't read FDArray or glyph related data like the
-   charstring, the charset, or the encoding data. This flag should be used when
-   the client wants to read only the following information quickly: name INDEX,
-   string INDEX, gsubrs INDEX, and top dict. Glyph access functions like
-   cfrIterateGlyphs, cfrGetGlyphByTag, cfrGetGlyphByName, cfrGetGlyphByCID may
-   not be called with a font parsed with this flag set.
-
-   CFR_FLATTEN_VF - flatten CFF2 variable font data for a given user design
-   vector.
-
-   CFR_SHORT_VF_NAME - when flattening a CFF2 variable font, a generated
-   instance PS name will be limited to 63 characters, as opposed to 127
-   characters as documented in Adobe Tech Notes 5902.
-
-   CFR_UNUSE_VF_NAMED_INSTANCE - when flattening a CFF2 variable font, the
-   instance PS name is generated from the design vector as documented in Tech
-   Notes 5902 regarding named instances in the fvar table. If the flag is
-   unset, a PS name of a named instance is used if there is a match.
-
-   CFR_CFF2_ONLY - don't read the CFF table even if it is available in the font along with CFF2.
-   This flag is assumed when CFR_FLATTEN_VF is set.
-
-   The "UDV" parameter specifies the User Design Vector to be used in
-   flattening (snapshotting) a CFF2 variable font. If NULL, the font is
-   flattened at the default instance. The parameter may be set to NULL for
-   non-variable fonts.
-*/
-
-int cfrIterateGlyphs(cfrCtx h, abfGlyphCallbacks *glyph_cb);
-
-/* cfrIterateGlyphs() is called to iterate through all the glyph data in the
-   font. (The number of glyphs in the font is passed back to the client via the
-   "top" parameter to cfrBegFont() in the "sup.nGlyphs" field.) Glyph data is
-   passed back to the client via the callbacks specified via the "glyph_cb"
-   parameter (see absfont.h).
-
-   Glyphs are presented to the client in glyph index order. Each glyph may be
-   identified from the "info" parameter that is passed back to the client via
-   the beg() callback (the glyph index is specified via the "tag" field).
-
-   The client can control whether path data is read or ignored by the value
-   returned from beg() and can thus use this interface to select a subset of
-   glyphs or just enumerate the glyph set without reading any path data. */
-
-int cfrGetGlyphByTag(cfrCtx h,
-                     unsigned short tag, abfGlyphCallbacks *glyph_cb);
-int cfrGetGlyphByName(cfrCtx h,
-                      char *gname, abfGlyphCallbacks *glyph_cb);
-int cfrGetGlyphByCID(cfrCtx h,
-                     unsigned short cid, abfGlyphCallbacks *glyph_cb);
-
-/* cfrGetGlyphByTag(), cfrGetGlyphByName(), cfrGetGlyphByCID() are called
-   obtain glyph data from a glyph selected by its tag (described above), its
-   name, or its CID, respectively. The glyph name is specified by as a
-   null-terminated string via the "gname" parameter.
-
-   These functions return cfrErrNoGlyph if the requested glyph is not present
-   in the font or the access method is incompatible with the font type. */
-
-int cfrGetGlyphByStdEnc(cfrCtx h, int stdcode, abfGlyphCallbacks *glyph_cb);
-
-/* cfrGetGlyphByStdEnc() is called to obtain glyph data from a glyph selected
-   by its standard encoding specified by the "stdcode" parameter (which is
-   really an alias for a standard glyph name). It is primarily intended to be
-   used when the client is subsetting a font that contains glyphs composed
-   using the seac operator. When a client selects such a glyph they must ensure
-   that the base and accent glyphs are also present in the subset. This may be
-   achieved by calling cfrGetStdEncGlyph() with the "bchar" and "achar"
-   parameters from the seac() glyph callback taking special note of the
-   ABF_GLYPH_SEEN flags parameter so that repeated glyph definitions are
-   avoided. */
-
-int cfrResetGlyphs(cfrCtx h);
-
-/* cfrResetGlyphs() may be called at any time after the cfrIterateGlyphs() or
-   cfrGetGlyphBy*() functions have been called to reset the record of the
-   glyphs seen (called back) by the client. This is achieved by clearing the
-   ABF_GLYPH_SEEN bit in the abfGlyphInfo flags field of each glyph.
-
-   A client wishing to have direct access to the charstring data may do so by
-   utilizing the source stream (CFR_SRC_STREAM_ID) offsets for subroutines and
-   charstrings. The regions of the source stream occupied by the global subr
-   INDEX and the local subr INDEX are available via cfrGetSingleRegions() and
-   cfrGetRepeatRegions(). The per-glyph charstring information is available in
-   the "abfGlyphInfo.sup" field. In order to obtain per-glyph offset data the
-   client must ask for glyph data via one of the 5 functions specified above
-   and then issue an ABF_SKIP_RET from the glyphBeg() callback so that the
-   charstring is not parsed and called back in the usual manner. */
-
-typedef struct
-{
-    ctlRegion Header;
-    ctlRegion NameINDEX;
-    ctlRegion TopDICTINDEX;
-    ctlRegion StringINDEX;
-    ctlRegion GlobalSubrINDEX;
-    ctlRegion Encoding;
-    ctlRegion Charset;
-    ctlRegion FDSelect;
-    ctlRegion VarStore;
-    ctlRegion CharStringsINDEX;
-    ctlRegion FDArrayINDEX;
-} cfrSingleRegions;
-
-const cfrSingleRegions *cfrGetSingleRegions(cfrCtx h);
-
-/* cfrGetSingleRegions() is called to get the src stream regions occupied by
-   the CFF data struct identified by its field name. This functions returns a
-   pointer to a structure containing regions that appear only once per-font.
-
-   Note: The "Encoding" and "Charset" regions need special processing because
-   the "begin" field of the region either contains a predefined encoding or
-   charset value or it contains the stream offset of a custom encoding. In the
-   former case the "end" field of the region contains -1 and in the later case
-   it contains the byte following the custom encoding.
-
-   Predefined encoding and charset values are enumerated in dictops.h. */
-
-typedef struct
-{
-    ctlRegion PrivateDICT;
-    ctlRegion LocalSubrINDEX;
-} cfrRepeatRegions;
-
-const cfrRepeatRegions *cfrGetRepeatRegions(cfrCtx h, int iFD);
-
-/* cfrGetRepeatRegions() is called to get the src stream regions occupied by
-   the CFF data struct identified by its field name. This function returns a
-   pointer to a structure containing regions in the FDArray that may appear
-   more than once per-font. The "iFD" parameter selects the font dictionary
-   containing the regions to be returned. If the "iFD" parameter is invalid a
-   NULL pointer is returned.
-
-   Note: a Private DICT is required but it may be empty (0-length). */
-
-int cfrGetWidths(cfrCtx h, int iFD,
-                 float *defaultWidthX, float *nominalWidthX);
-
-/* cfrGetWidths() is called to get the values of the default and nominal widths
-   associated with a font dictionary selected by the "iFD" parameter. The
-   function returns 0 on success and 1 if the "iFD" parameter is invalid. */
-
-const unsigned char *cfrGetStdEnc2GIDMap(cfrCtx h);
-
-/* cfrGetStdEnc2GIDMap() returns an array of 256 elements which map character
-   codes in standard encoding to glyph indexes for the current font. It is
-   intended to be used for rasterizing glyphs that use the deprecated Type 2
-   seac specification which is encoded as a 4-operand endchar operator. Glyphs
-   in fonts using seac are expected to be ordered by their SID and therefore
-   the maximum glyph index of a glyph in standard encoding is 149 (germandbls)
-   which can easily be stored in a byte. */
-
-int cfrEndFont(cfrCtx h);
-
-/* cfrEndFont() is called to terminate a font parse initiated with
-   cfrBegFont(). The input stream is closed as a result of calling this
-   function. */
-
-void cfrFree(cfrCtx h);
-
-/* cfrFree() destroys the library context and all the resources allocated to
-   it. */
-
-typedef long (*cfrlastResortInstanceNameCallback)(void *clientCtx, float *udv, long numAxes,
-                                                  char *prefixStr, long prefixLen,
-                                                  char *nameBuffer, long nameBufferLen);
-/* CFF2 variable font last resort naming callback
-
-   If successful, the function should return a positive length of the string
-   returned in nameBuffer.
-
-   If unsuccessful, the function returns a non-positive number.
-
-   clientCtx - context pointer passed to cfrSetLastResortInstanceNameCallback
-
-   udv - user design vector specifying the variable font instance
-
-   numAxes - the number of axes, or the length of udv array
-
-   prefixStr - a null-terminated string of the variable font family name,
-               to be used as a prefix of the instance name
-
-   prefixLen - length of the prefix string
-
-   nameBuffer - string buffer where a null-terminated Postscript name of the
-                variable font instance should be returned by the client
-
-   nameBufferLen - the length of the nameBuffer (including a null-byte) */
-
-void cfrSetLastResortInstanceNameCallback(cfrCtx h, cfrlastResortInstanceNameCallback cb, void *clientCtx);
-
-/* cfrSetLastResortInstanceNameCallback() allows a client to provide a callback
-   function to be called when a flattened CFF2 variable font cannot be
-   determined with a named instance in the fvar table or using the algorithm
-   described in Adobe TechNotes 5902 "Generating PostScript Names for Fonts
-   Using OpenType Font Variations". The callback function is called to give the
-   client a chance to name a font instance adequately.
-
-   If no callback is provided, a last-resort instance is named as a font family
-   name prefix followed by "-<hex>" where <hex> is a hex string generated by
-   hashing the design vector of the instance. */
-
+   This library parses information in CFF fonts and provides an interface for
+   executing metric charstrings in conjunction with these fonts. Input data
+   containing one single master, multiple master, or CID-keyed font is
+   supported. (Multiple-font FontSets are not supported.)
+
+   This library is initialized with a single call to cffNew() for each font to
+   be parsed which allocates an opaque context (cffCtx) which is passed to
+   subsequent functions and is destroyed by a single call to cffFree(). Thus,
+   multiple contexts may be concurrently allocated permitting operation in a
+   multi-threaded environment.
+
+   Once a context has been allocated, a client may call cffGetFontInfo() to get
+   global information about the font or make calls to cffGetGlyphInfo() or
+   cffGetGlyphWidth() to get per-glyph information. These calls return
+   information for the default instance of a multiple master font unless a
+   prior call is made to either cffSetUDV() or cffSetWV() which override the
+   default. The "set" and "get" functions may be freely intermixed to fetch
+   values for a number of different instances.
+
+   The cffExecMetric() and cffExecLocalMetric() functions provide a facility
+   for executing metric charstrings and returning the array of values that
+   remained on the stack when the endchar operator was encountered.
+
+   Path information may be optionally returned by calling cffGetGlyphInfo()
+   with a non-NULL cb argument.
+
+   Exception handling, memory management, and data input are implemented via a
+   number of client-supplied callback functions passed to the cffNew() function
+   via the cffStdCallbacks data structure. These are described in detail below.
+
+   Data input is provided by the seek() and refill() client functions. These
+   provide a window onto the CFF data. The CFF data may be just a part of a
+   larger aggregate object (e.g. an OpenType font). In this case the client may
+   arrange for the seek() and refill() to traverse the entire object and pass
+   the offset of the start of the CFF data to the cffNew() function rather than
+   passing 0. This offers the advantage of using the same data input routines
+   for parsing the CFF font and multiple master metric data. */
+
+typedef struct cffCtx_ *cffCtx;
+typedef struct cffStdCallbacks_ cffStdCallbacks;
+
+cffCtx cffNew(cffStdCallbacks *cb, long offset);
+
+/* cffNew() initializes the library and returns an opaque context that is
+   subsequently passed to all the other library functions. It must be the first
+   function in the library to be called by the client. The client passes a set
+   of callback functions to the library via the cb argument which is an
+   cffStdCallbacks data structure whose fields are described below. Optional
+   fields should be passed with a NULL value if not required. */
+
+/* Message types (for use with message callback) */
 enum {
-#undef CTL_DCL_ERR
-#define CTL_DCL_ERR(name, string) name,
-#include "cfrerr.h"
-    cfrErrCount
+    cffWARNING = 1,
+    cffERROR,
+    cffFATAL
 };
 
-/* Library functions return either zero (cfrSuccess) to indicate success or a
-   positive non-zero error code that is defined in the above enumeration that
-   is built from cfrerr.h. */
+struct cffStdCallbacks_ {
+    void *ctx;
 
-char *cfrErrStr(int err_code);
+    /* [Optional] ctx is a client context that is passed back to the client
+       as the first parameter to the callback functions. It is intended to be
+       used in multi-threaded environments. */
 
-/* cfrErrStr() maps the "err_code" parameter to a null-terminated error
-   string. */
+    void (*fatal)(void *ctx);
 
-void cfrGetVersion(ctlVersionCallbacks *cb);
+    /* [Required] fatal() is an exception handler that is called if an
+       irrecoverable error is encountered during parsing. The current context
+       is destroyed and all allocated resources released before fatal() is
+       called. This function must NOT return and the client should use
+       longjmp() to return control to a point prior to calling cffNew(). */
 
-/* cfrGetVersion() returns the library version number and name via the client
-   callbacks passed with the "cb" parameter (see ctlshare.h). */
+    void (*message)(void *ctx, int type, char *text);
+
+    /* [Optional] message() simply passes a message back to the client as a
+       null-terminated string. Three message types are supported: cffWARNING,
+       cffERROR, and cffFATAL. A client is free to handle messages in any
+       manner they choose. */
+
+    void *(*malloc)(void *ctx, size_t size);
+    void (*free)(void *ctx, void *ptr);
+
+    /* [Required] The malloc() and free() functions manage memory in the same
+       manner as the Standard C Library functions of the same name. (This means
+       that they must observe the alignment requirements imposed by the
+       standard.) The client is required to handle any error conditions that
+       may arise. Specifically, a client must ensure requested memory is
+       available and must never return a NULL pointer from malloc(). */
+
+    char *(*cffSeek)(void *ctx, long offset, long *count);
+
+    /* [Required] cffSeek() is called in order to seek to an absolute position
+       in the input data specified by the offset parameter. It returns a
+       pointer to the new data (beginning at that offset) and the count of the
+       number of bytes of new data available via the count parameter. A client
+       should protect itself by checking that the offset lies within the data
+       region. (A file-based client might map this function to a call to
+       fseek() followed by fread().) */
+
+    char *(*cffRefill)(void *ctx, long *count);
+
+    /* [Required] cffRefill() is called in order to refill the library's input
+       buffer. It returns a pointer to the new data and the count of the number
+       of bytes of new data available via the count parameter. (A file-based
+       client might map this function to fread().)
+
+       It is important (for performance reasons) to choose an input buffer size
+       that isn't too small. For file-based clients a buffer size of BUFSIZ
+       would be a good choice because it will match the underlying low-level
+       input functions. */
+};
+
+typedef int32_t cffFixed; /* 16.16 fixed point */
+
+void cffSetUDV(cffCtx h, int nAxes, cffFixed *UDV);
+void cffSetWV(cffCtx h, int nMasters, cffFixed *WV);
+void cffSetBadGIDOK(cffCtx h);
+
+/* cffSetUDV() and cffSetWV() allow the implicit default instance of a multiple
+   master font to be overridden with an explicit instance specified either as a
+   user design vector in the case of cffSetUDV(), or as a weight vector in the
+   case of cffSetWV(). The "set" and "get" functions may be freely intermixed
+   to fetch values for a number of different instances. */
+
+typedef struct cffFontInfo_ cffFontInfo;
+
+cffFontInfo *cffGetFontInfo(cffCtx h);
+
+/* cffGetFontInfo retrieve font-wide information about a font via the pointer
+   to cffFontInfo data structure the function returns. This data structure is
+   described below. */
+
+#include "txops.h"
+
+typedef unsigned short cffSID; /* String identifier */
+typedef short cffFWord;        /* Font metric in em-relative units */
+
+#define CFF_SID_UNDEF 0xffff /* SID of undefined string */
+#define CFF_UNENC (-1)       /* Unencoded glyph code */
+
+typedef struct {  // Bounding box
+    cffFWord left;
+    cffFWord bottom;
+    cffFWord right;
+    cffFWord top;
+} cffBBox;
+
+struct cffFontInfo_ {
+    struct {  // PostScript font name
+        short length;
+        long offset;
+    } FontName;
+    cffSID version;    /* Optional */
+    cffSID Notice;     /* Optional */
+    cffSID Copyright;  /* Optional */
+    cffSID FamilyName; /* Optional */
+    cffSID FullName;   /* Optional */
+    cffBBox FontBBox;
+    unsigned short unitsPerEm;
+    cffFWord isFixedPitch;
+    cffFixed ItalicAngle;
+    cffFWord UnderlinePosition;
+    cffFWord UnderlineThickness;
+    uint32_t UniqueID;
+    uint32_t XUID[MAX_XUID_SIZE + 1];
+    short Encoding; /* Predefined or custom encoding (see below) */
+    short charset;  /* Predefined or custom charset (see below) */
+    struct {
+        short nAxes;
+        short nMasters;
+        short lenBuildCharArray;
+        cffSID NDV;
+        cffSID CDV;
+        cffFixed UDV[TX_MAX_AXES]; /* Default User design vector */
+        cffSID axisTypes[TX_MAX_AXES];
+    } mm;
+    struct {  // CID data (optional)
+        double version;
+        cffSID registry;
+        cffSID ordering;
+        short supplement;
+        struct {  // Vertical origin vector
+            cffFWord x;
+            cffFWord y;
+        } vOrig;
+    } cid;
+    unsigned short nGlyphs; /* Glyph count */
+};
+
+enum {  // Encoding type
+    CFF_STD_ENC,
+    CFF_EXP_ENC,
+    CFF_CUSTOM_ENC
+};
+enum {  // Charset types
+    CFF_ISO_CS,
+    CFF_EXP_CS,
+    CFF_EXPSUB_CS,
+    CFF_CUSTOM_CS
+};
+
+/* Optional unset cffSID fields are indicated with an SID value of
+   CFF_SID_UNDEF. A CID font is indicated by having a defined cid.registry SID
+   value. A multiple master font is indicated by mm.nMasters being greater than
+   1. */
+
+typedef struct cffGlyphInfo_ cffGlyphInfo;
+typedef struct cffPathCallbacks_ cffPathCallbacks;
+
+cffGlyphInfo *cffGetGlyphInfo(cffCtx h, unsigned gid, cffPathCallbacks *cb);
+
+/* cffGetGlyphInfo() returns information about the glyph specified by the gid
+   argument. The information is returned via a pointer to a cffGlyphInfo data
+   structure which is described below. The optional cb argument permits the
+   client to obtain path information from the glyph as its charstring data is
+   parsed. This is described in detail below. If this facility isn't required
+   the cb argument should be set to NULL. */
+
+typedef struct cffSupCode_ cffSupCode;
+struct cffSupCode_ {  // Supplementary encoding
+    cffSupCode *next;
+    unsigned char code;
+};
+
+struct cffGlyphInfo_ {  // Glyph information
+    unsigned short id; /* SID/CID */
+    short code;        /* Encoding (unencoded=-1) */
+    cffFWord hAdv;     /* Horizontal advance width */
+    cffFWord vAdv;     /* Vertical advance width */
+    cffBBox bbox;      /* Bounding box */
+    cffSupCode *sup;   /* Supplementary encodings (linked list) */
+};
+
+/* The id field is interpreted as a CID for CIDFonts and an SID otherwise. The
+   sup field, when non-NULL, points to a chain of supplementary encodings for
+   the glyph. This is a rare occurrence but some fonts have glyphs that have
+   multiple encodings.
+
+   The path callback functions are optionally supplied to cffGetGlyphInfo() via
+   the cffPathCallbacks data structure which is passed to the function as a
+   pointer (passing a NULL pointer will disable all path callbacks). All the
+   path callback functions are optional and the corresponding field should be
+   set to NULL if a particular callback is not required.
+
+   Each disconnected subpath within a glyph is bracketed by calls to newpath()
+   and closepath(). Each subpath begins with a single call to moveto()
+   followed by calls to lineto(), curveto(), and hintmask() in any order. The
+   end of path information for a particular glyph is signaled by a call to
+   endchar().
+
+   The first subpath may be preceded by calls to hintstem() which can be used
+   to build up a hint stem list for a particular glyph. The stems in the stem
+   list are numbered consecutively from 0 beginning with the first stem. This
+   stem list may be used in conjunction with hintmask() to determine which
+   hints are active at any point in the path. These stems in the stem list
+   correspond to the hint mask bits passed via hintmask(). The most significant
+   bit of the first byte of the hint mask corresponds to stem 0, the next
+   highest bit to stem 1, and so on.
+
+   All coordinate data passed via callback arguments represents absolute data
+   in font units. */
+
+#define CFF_MAX_MASK_BYTES (T2_MAX_STEMS / 8) /* Maximum hint mask bytes */
+
+struct cffPathCallbacks_ {
+    void (*newpath)(void *ctx);
+
+    /* [optional] newpath() is called immediately before the path construction
+   callbacks: moveto(), lineto(), and curveto(), are called for a new subpath.
+   */
+
+    void (*moveto)(void *ctx, cffFixed x1, cffFixed y1);
+
+    /* [optional] moveto() is called at the beginning of a new subpath in order to
+   set the current point to (x1, y1). */
+
+    void (*lineto)(void *ctx, cffFixed x1, cffFixed y1);
+
+    /* [optional] lineto() is called to add a line segment to the current path from
+   the current point to (x1, y1). The current point becomes (x1, y1). */
+
+    void (*curveto)(void *ctx, int flex,
+                    cffFixed x1, cffFixed y1,
+                    cffFixed x2, cffFixed y2,
+                    cffFixed x3, cffFixed y3);
+
+    /* [optional] curveto() is called to add a cubic Bezier curve segment to the
+   current path from the current point guided by control points (x1, y1) and
+   (x2, y2) and terminating at point (x3, y3). The current point becomes (x3,
+   y3). The flex argument is set to 1 if the curve is part of a flex feature
+   and set to 0 otherwise. A flex feature consists of two consecutive curveto()
+   calls with their flex arguments set to 1. */
+
+    void (*closepath)(void *ctx);
+
+    /* [optional] closepath() is called to signal the end of a subpath. */
+
+    void (*endchar)(void *ctx);
+
+    /* [optional] endchar() is called to signal the end of the path definition of
+   the current glyph. */
+
+    void (*hintstem)(void *ctx, int vert, cffFixed edge0, cffFixed edge1);
+
+    /* [optional] hintstem() is called before the first subpath to indicate a hint
+   stem that will be activated by a subsequent hintmask in the current glyph.
+   Typically, multiple hint stems are used to construct a stem list for the
+   current glyph. The vert argument is set to 1 to indicate a vertical stem and
+   set to 0 to indicate a horizontal stem. The horizontal stems precede the
+   vertical stems in the stem list and within each direction group the stems
+   are organized by increasing values of the edge0 argument. The edge0 argument
+   generally represents the left or bottom edge of a stem and the edge1
+   argument generally represents the right or top edge of a stem. The width of
+   a stem is calculated as (edge1 - edge0). Edge (ghost) hints are represented
+   by negative stem widths of -20 for a right or top edge and -21 for a left or
+   bottom edge. */
+
+    void (*hintmask)(void *ctx, int cntr, int n, char mask[CFF_MAX_MASK_BYTES]);
+
+    /* [optional] hintmask() is called to establish a new set of stem hints. The
+   active stem hints are specified by bits set to 1 and inactive stem hints are
+   specified by bits set to 0 in the mask argument. The number of valid data
+   bytes in the mask is exactly the number needed to represent the number of
+   stems in the hint stem list. For convenience the number of valid bytes is
+   passed in argument n and is fixed for all hintmask functions within a single
+   glyph. The cntr argument is set to 1 to indicate that the stem hints are to
+   be used for counter control and set to 0 to indicate stem control. */
+};
+
+void cffGetGlyphWidth(cffCtx h, unsigned gid, cffFWord *hAdv, cffFWord *vAdv);
+
+/* cffGetGlyphWidth() provides quick access to the horizontal and vertical
+   advance widths of a glyph specified by the gid argument without the overhead
+   of parsing the entire charstring that is implicit in cffGetGlyphInfo(). hAdv
+   or vAdv may be set to NULL if not needed. */
+
+void cffGetGlyphOrg(cffCtx h, unsigned gid,
+                    unsigned short *id, short *code, cffSupCode **sup);
+
+/* cffGetGlyphOrg() provides quick access to the SID/CID and the encoding(s) of
+   the specified glyph without the overhead of parsing the entire charstring
+   that is implicit in cffGetGlyphInfo(). The value passed via the id argument
+   is interpreted as a CID for CIDFonts and an SID otherwise. The value passed
+   via the code argument is an encoding in the range 0-255 or -1 if there is no
+   encoding for the specified glyph. The value passed by the sup argument, when
+   non-NULL, points to a chain of supplementary encodings for the glyph. When
+   the value passed via the code argument is -1, indicating an unencoded glyph,
+   there can be no supplementary encoding and therefore the value passed via
+   the sup argument will be NULL. */
+
+int cffExecMetric(cffCtx h, long offset, cffFixed result[T2_MAX_OP_STACK]);
+
+/* cffExecMetric() provides a facility for executing multiple master metric
+   charstrings and returning the array of values that remained on the stack
+   when the endchar operator was encountered. (The charstrings must not contain
+   drawing operators or subroutine calls in order to ensure correct operation.)
+   The client must initialize the library in the usual way with a call to
+   cffNew() and is also required to set up the seek() and refill() callback
+   functions before calling cffExecMetric() so that they provide the requested
+   bytes from the metric charstring. If the metric charstrings are combined
+   together into a single block of data the set up can be performed once and
+   different metric charstrings can be executed by calling cffExecMetric() with
+   different values for the offset parameter. Calls to cffSetUDV() or
+   cffSetWV() may be freely intermixed with calls to cffExecMetric() or
+   cffExecLocalMetric() permitting metrics to be executed for different
+   instances. The results are returned via a client-supplied array parameter
+   that is large enough to contain T2_MAX_OP_STACK values (from txops.h). The
+   count of the number of values copied into the array is returned by
+   cffExecMetric(). The first element of the array represents the bottommost
+   stack value. */
+
+int cffExecLocalMetric(cffCtx h, char *cstr, long length, cffFixed *result);
+
+/* cffExecLocalMetric() is identical to cffExecMetric() except that the client
+   specifies the multiple master metric charstring to be executed by a pointer
+   to the start of the charstring (the cstr parameter) and the number of bytes
+   of data available (the length parameter) instead of by an offset. The seek()
+   and refill() callbacks will not be used when reading the charstring. This is
+   useful in situations where the charstring is not within the CFF font
+   itself. */
+
+int cffGetString(cffCtx h,
+                 cffSID sid, unsigned *length, char **ptr, long *offset);
+
+/* cffGetString() provides a facility for translating a string id (SID) into a
+    a string pointer and length. This function returns 1 if SID corresponds to
+    one of the standard CFF strings otherwise it returns 0. In the former case
+    a pointer to the null-terminated standard string is returned via the ptr
+    parameter. In the latter case the absolute CFF data offset of the string is
+    returned via the offset argument which must be converted to string pointer
+    by the client. In either case the string length is returned by the length
+    argument. */
+
+void cffFree(cffCtx h);
+
+/* cffFree() destroys the library context and all the resources allocated to
+   it. */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* PUBLIC_CFFREAD_H */
+#endif  // SHARED_INCLUDE_CFFREAD_H_

@@ -12,31 +12,31 @@
 #define head_VERSION VERSION(1, 0)
 
 #define DATE_TIME_SIZE 8
-typedef Card8 longDateTime[DATE_TIME_SIZE];
+typedef uint8_t longDateTime[DATE_TIME_SIZE];
 
 typedef struct
 {
     Fixed version;
     Fixed fontRevision;
-    Card32 checkSumAdjustment;
-    Card32 magicNumber;
+    uint32_t checkSumAdjustment;
+    uint32_t magicNumber;
 #define head_MAGIC 0x5F0F3CF5
-    Card16 flags;
+    uint16_t flags;
 #define head_SET_LSB (1 << 1)
-    Card16 unitsPerEm;
+    uint16_t unitsPerEm;
     longDateTime created;
     longDateTime modified;
     FWord xMin;
     FWord yMin;
     FWord xMax;
     FWord yMax;
-    Card16 macStyle;
-    Card16 lowestRecPPEM;
-    Int16 fontDirectionHint;
+    uint16_t macStyle;
+    uint16_t lowestRecPPEM;
+    int16_t fontDirectionHint;
 #define head_STRONGL2R 1
-    Int16 indexToLocFormat;
+    int16_t indexToLocFormat;
 #define head_LONGOFFSETSUSED 1
-    Int16 glyphDataFormat;
+    int16_t glyphDataFormat;
 } headTbl;
 
 #endif /* FORMAT_HEAD_H */

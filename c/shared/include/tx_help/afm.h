@@ -1,0 +1,23 @@
+/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
+
+// NOLINT(build/header_guard)
+"[-afm options: default none]\n"
+"\n"
+"AFM mode write an Adobe Font Metrics format representation of an abstract font.\n"
+"This is a lightweight implementation that is primarily intended for testing and\n"
+"debugging usage; it departs from the AFM specification in a number of ways:\n"
+"\n"
+"o the metrics data is expressed in the font's character space units which may\n"
+"  not be 1000 units/em as required by the specification. The character space\n"
+"  units are recorded in UnitPerEm comment in the font metrics section\n",
+"o the character count specified by the StartCharMetrics keyword may be too\n"
+"  large if the font has been subset using the -g option\n"
+"\n"
+"For example, the command:\n"
+"\n"
+"    tx -afm -a rdr_____.pfb\n"
+"\n"
+"will write an AFM representation of the font file \"rdr_____.pfb\" to the file\n"
+"\"rdr_____.afm\".\n"

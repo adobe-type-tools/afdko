@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef PUBLIC_DICTOPS_H
-#define PUBLIC_DICTOPS_H
+#ifndef SHARED_RESOURCE_DICTOPS_H_
+#define SHARED_RESOURCE_DICTOPS_H_
 
 /*
  * CFF dictionary operator definitions.
@@ -14,6 +14,7 @@
  *                  Top     Private     FDs     PDs
  *                  ---     -------     ---     ---
  * name-keyed       x       x
+ * multiple master  x       x
  * synthetic        x
  * CID-keyed        x                   x       x
  * chameleon        x
@@ -30,6 +31,7 @@
  * imposed upon dict op ordering:
  *
  * Synthetic/top:   Must begin with cff_SyntheticBase.
+ * MM/top:          Must begin with cff_numMasters.
  * CID/top:         Must begin with cff_ROS.
  * Chameleon/top:   Must begin with cff_Chameleon.
  * Private/PD:      cff_OtherBlues must follow cff_BlueValues and
@@ -112,7 +114,7 @@
 #define cff_BaseFontBlend           cff_ESC(23) /* Top/FD (instance UDV) */
 #define cff_numMasters              cff_ESC(24)
 #define cff_reservedESC25           cff_ESC(25)
-#define cff_reservedESC26           cff_ESC(26)
+#define cff_reservedESC26           cff_ESC(26) /* Was MM BlendAxisTypes */
 #define cff_reservedESC27           cff_ESC(27)
 #define cff_reservedESC28           cff_ESC(28)
 #define cff_reservedESC29           cff_ESC(29)
@@ -155,21 +157,19 @@
 #define cff_DFLT_nominalWidthX      0
 
 /* Predefined charsets (cff_charset operands) */
-enum
-    {
+enum {
     cff_ISOAdobeCharset,
     cff_ExpertCharset,
     cff_ExpertSubsetCharset,
     cff_PredefCharsetCount,
     cff_CharSetfromPost,
-    };
+};
 
 /* Predefined encodings (cff_Encoding operands) */
-enum
-    {
+enum {
     cff_StandardEncoding,
     cff_ExpertEncoding,
     cff_PredefEncodingCount
-    };
+};
 
-#endif /* PUBLIC_DICTOPS_H */
+#endif  // SHARED_RESOURCE_DICTOPS_H_

@@ -14,9 +14,9 @@
 typedef struct
 {
     Fixed level;
-    Card16 nameId;
-    Card16 offset;
-    Int16 *value; /* Actually part of track data structure */
+    uint16_t nameId;
+    uint16_t offset;
+    int16_t *value; /* Actually part of track data structure */
 } Entry;
 #define ENTRY_SIZE (SIZEOF(Entry, level) +  \
                     SIZEOF(Entry, nameId) + \
@@ -24,9 +24,9 @@ typedef struct
 
 typedef struct
 {
-    Card16 nTracks;
-    Card16 nSizes;
-    Card32 sizeOffset;
+    uint16_t nTracks;
+    uint16_t nSizes;
+    uint32_t sizeOffset;
     DCL_ARRAY(Entry, track);
     Fixed *size;
     /* Track values here */
@@ -38,10 +38,10 @@ typedef struct
 typedef struct
 {
     Fixed version;
-    Card16 format;
-    Card16 horizOffset;
-    Card16 vertOffset;
-    Card16 reserved;
+    uint16_t format;
+    uint16_t horizOffset;
+    uint16_t vertOffset;
+    uint16_t reserved;
     Data horiz;
     Data vert;
 } trakTbl;

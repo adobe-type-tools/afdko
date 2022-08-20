@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef TTREAD_H
-#define TTREAD_H
+#ifndef SHARED_INCLUDE_TTREAD_H_
+#define SHARED_INCLUDE_TTREAD_H_
 
 #include "ctlshare.h"
 
@@ -11,7 +11,7 @@
 
 #include "absfont.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 extern "C" {
 #endif
 
@@ -97,7 +97,7 @@ int ttrIterateGlyphs(ttrCtx h, abfGlyphCallbacks *glyph_cb);
 int ttrGetGlyphByTag(ttrCtx h,
                      unsigned short tag, abfGlyphCallbacks *glyph_cb);
 int ttrGetGlyphByName(ttrCtx h,
-                      char *gname, abfGlyphCallbacks *glyph_cb);
+                      const char *gname, abfGlyphCallbacks *glyph_cb);
 
 /* ttrGetGlyphByTag() and ttrGetGlyphByName() are called obtain glyph data from
    a glyph selected by its tag value (glyph index) or its name, respectively.
@@ -136,7 +136,7 @@ enum {
    error code that is defined in the above enumeration that is built from
    ttrerr.h. */
 
-char *ttrErrStr(int err_code);
+const char *ttrErrStr(int err_code);
 
 /* ttrErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
@@ -146,8 +146,8 @@ void ttrGetVersion(ctlVersionCallbacks *cb);
 /* ttrGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 }
 #endif
 
-#endif /* TTREAD_H */
+#endif  // SHARED_INCLUDE_TTREAD_H_

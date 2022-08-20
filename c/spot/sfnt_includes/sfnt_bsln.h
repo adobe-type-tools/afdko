@@ -13,33 +13,33 @@
 
 typedef struct
 {
-    Card16 deltas[32];
+    uint16_t deltas[32];
 } Format0;
 
 typedef struct
 {
-    Card16 deltas[32];
+    uint16_t deltas[32];
     Lookup *mapping;
 } Format1;
 
 typedef struct
 {
     GlyphId stdGlyph;
-    Card16 ctlPoints[32];
+    uint16_t ctlPoints[32];
 } Format2;
 
 typedef struct
 {
     GlyphId stdGlyph;
-    Card16 ctlPoints[32];
+    uint16_t ctlPoints[32];
     Lookup *mapping;
 } Format3;
 
 typedef struct
 {
     Fixed version;
-    Card16 format;
-    Card16 defaultBaseline;
+    uint16_t format;
+    uint16_t defaultBaseline;
     void *part;
 } bslnTbl;
 

@@ -2,13 +2,15 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+// NOLINT(build/header_guard)
+
 /* Standard encoding aggregate initializer.
    Element of type:
 
    struct
        {
        unsigned char code;
-       char *gname;
+       const char *gname;
        };
 
    Sorted by glyph name. Search by glyph name, get code. */

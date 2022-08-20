@@ -6,32 +6,11 @@
  Code shared by tx, rotatefont, and mergefonts.
  */
 
-#ifndef TX_SHARED_H
-#define TX_SHARED_H
-
-#include "ctlshare.h"
-#include "cfembed.h"
-#include "cffread.h"
-#include "cffwrite.h"
-#include "ctutil.h"
-#include "dynarr.h"
-#include "pdfwrite.h"
-#include "sfntread.h"
-#include "t1read.h"
-#include "ttread.h"
-#include "t1write.h"
-#include "svread.h"
-#include "svgwrite.h"
-#include "uforead.h"
-#include "ufowrite.h"
-#include "txops.h"
-#include "dictops.h"
-#include "abfdesc.h"
-#include "sha1.h"
-
-#undef global /* Remove conflicting definition from buildch */
+#ifndef SHARED_INCLUDE_TX_SHARED_H_
+#define SHARED_INCLUDE_TX_SHARED_H_
 
 #include <stdio.h>
+#define _CRT_RAND_S
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -62,6 +41,35 @@
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 
+#include <memory>
+
+#include "ctlshare.h"
+#include "cfembed.h"
+#include "cffread_abs.h"
+#include "cffwrite.h"
+#include "ctutil.h"
+#include "dynarr.h"
+#include "pdfwrite.h"
+#include "sfntread.h"
+#include "slogger.h"
+#include "smem.h"
+#include "t1read.h"
+#include "ttread.h"
+#include "t1write.h"
+#include "svread.h"
+#include "svgwrite.h"
+#include "uforead.h"
+#include "ufowrite.h"
+#include "txops.h"
+#include "dictops.h"
+#include "abfdesc.h"
+#include "sha1.h"
+
+#undef global /* Remove conflicting definition from buildch */
+
+#define TX_DEF_VERSION CTL_MAKE_VERSION(1, 3, 0)
+#define TX_DEF_NAME "tx"
+
 /* ----------------------- Miscellaneous Definitions ----------------------- */
 
 #define ARRAY_LEN(t) (sizeof(t) / sizeof((t)[0]))
@@ -86,12 +94,24 @@
 #define sig_UFO CTL_TAG('<', '?', 'x', 'm')
 /* Generate n-bit mask */
 #define N_BIT_MASK(n) (~(~0UL << (n)))
+
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
+extern "C" {
+#endif
+
+enum {  // Option enumeration
+    txopt_None, /* Not an option */
+#define DCL_OPT(string, index) index,
+#include "tx_help/tx_options.h"
+    txopt_Count
+};
+
+
 enum { MAX_VERSION_SIZE = 100 };
 
 typedef struct txCtx_ *txCtx; /* tx program context */
 
-typedef struct /* Macintosh resource info */
-{
+typedef struct {  // Macintosh resource info
     ctlTag type;
     unsigned short id;
     unsigned long name; /* Name offset then name index */
@@ -100,21 +120,18 @@ typedef struct /* Macintosh resource info */
     unsigned long length; /* Length of resource data */
 } ResInfo;
 
-typedef struct /* AppleSingle/Double entry descriptor */
-{
+typedef struct {  // AppleSingle/Double entry descriptor
     unsigned long id;
     long offset;
     unsigned long length;
 } EntryDesc;
 
-typedef struct /* Glyph name to Unicode value mapping */
-{
-    char *gname;
+typedef struct {  // Glyph name to Unicode value mapping
+    const char *gname;
     unsigned short uv;
 } Name2UV;
 
-enum /* Stream types */
-{
+enum {  // Stream types
     stm_Src,    /* Source */
     stm_SrcUFO, /* Source */
     stm_Dst,    /* Destination */
@@ -124,27 +141,24 @@ enum /* Stream types */
 
 #define TMPSIZE 50000 /* Temporary stream buffer size */
 
-typedef struct /* Data stream */
-{
+typedef struct {  // Data stream
     short type;
     short flags;
 #define STM_TMP_ERR    (1 << 0) /* Temporary stream error occurred */
 #define STM_DONT_CLOSE (1 << 1) /* Don't close stream */
-    char *filename;
+    const char *filename;
     FILE *fp;
     char *buf;
     size_t pos; /* Tmp stream position */
 } Stream;
 
-typedef struct /* Font record */
-{
+typedef struct {  // Font record
     int type;    /* Font technology type */
     int iTTC;    /* TrueType Collection index */
     long offset; /* File offset */
 } FontRec;
 
-typedef struct /* CFF subr data */
-{
+typedef struct {  // CFF subr data
     unsigned long count;
     unsigned char offSize;
     unsigned long offset; /* Offset array base */
@@ -153,16 +167,14 @@ typedef struct /* CFF subr data */
     unsigned short bias;
 } SubrInfo;
 
-typedef struct /* cmap format 4 segment */
-{
+typedef struct {  // cmap format 4 segment
     unsigned short endCode;
     unsigned short startCode;
     short idDelta;
     unsigned long idRangeOffset; /* changed from unsigned short */
 } cmapSegment4;
 
-enum /* Charstring types */
-{
+enum {  // Charstring types
     dcf_CharString,
     dcf_GlobalSubr,
     dcf_LocalSubr
@@ -175,8 +187,7 @@ typedef size_t (*SegRefillFunc)(txCtx h, char **ptr);
 typedef void (*abfGlyphWidthCallback)(abfGlyphCallbacks *cb, float hAdv);
 typedef void (*DumpElementProc)(txCtx h, long index, const ctlRegion *region);
 
-enum /* Source font technology types */
-{
+enum {  // Source font technology types
     src_Type1,    /* Type 1 */
     src_OTF,      /* OTF */
     src_CFF,      /* Naked CFF */
@@ -187,8 +198,7 @@ enum /* Source font technology types */
 /* Note that for mergeFonts.c, SVG is supported only as a merge font,
    and not as the first in the set. */
 
-enum /* Operation modes */
-{
+enum {  // Operation modes
     mode_dump,
     mode_ps,
     mode_afm,
@@ -210,20 +220,54 @@ enum {
     FAIL_INACTIVE = -2 /* Inactivate memory allocation failure */
 };
 
-typedef struct
-{
+typedef struct {
     unsigned long regionCount;
 } RegionInfo;
 
-enum WhichApp {
-    APP_TX,
-    APP_ROTATEFONT,
-    APP_MERGEFONTS
+/* The txExtCtx structure replaces the APP enum and the appSpecificInfo
+   pointer while reducing the code duplicated between tx vs rotatefont
+   and mergefont. The tx "app" is now part tx_shared in the form of
+   main__tx defined at the bottom.
+
+   Most of the callbacks represent points that in the previous code 
+   branched off the app enum value. And indeed most aren't used because 
+   there is a reasonable default, so the value here records the branching
+   point.  processOption allows the addition of new options and the 
+   overriding of existing options. "usage" through "modehelp" allow
+   overriding those help messages.
+ */
+
+
+typedef struct txExtCtx_ *txExtCtx;
+
+struct txExtCtx_ {
+    void *extData;
+    const char *progname;             // Required
+    long flags;
+#define EXT_SKIP_SEEN       (1 <<  0)
+#define EXT_NO_SKIP_NOTDEF  (1 <<  1)
+    long version;                     // Required
+    /* Return: i to continue processing this option
+               i+1 to process next option (skip this option)
+               i+n to skip n options
+               -1 to force failure */
+    int (*processOption)(txExtCtx e, int argc, char *argv[], int i);
+    void (*free)(txExtCtx e);
+    void (*usage)(txExtCtx e);
+    void (*help)(txExtCtx e);
+    void (*modehelp)(txExtCtx e);
+    void (*doFileCB)(txExtCtx e);
+    void (*cfr_ReadFontCB)(txExtCtx e);
+    void (*cff_BegFontCB)(txExtCtx e);
+    void (*cff_EndFontCB)(txExtCtx e);
+    void (*cff_EndSetCB)(txExtCtx e);
+    void (*cff_SetModeCB)(txExtCtx e);
+    void (*t1_BegFontCB)(txExtCtx e);
+    void (*t1_EndFontCB)(txExtCtx e);
+    void (*t1_SetModeCB)(txExtCtx e);
 };
 
 struct txCtx_ {
-    char *progname;                   /* This program's name (for diagnostics) */
-    enum WhichApp app;                /* this application (used in shared code) */
     long flags;                       /* Control flags */
 #define SEEN_MODE           (1 <<  0) /* Flags mode option seen */
 #define DONE_FILE           (1 <<  1) /* Processed font file */
@@ -240,14 +284,12 @@ struct txCtx_ {
 #define SUBSET_SKIP_NOTDEF  (1 << 12) /* While this is set, don't force the notdef into the current subset. */
 #define SUBSET_HAS_NOTDEF   (1 << 13) /* Indicates that notdef has been added, no need to force it in.*/
 #define PATH_REMOVE_OVERLAP (1 << 14) /* Do not remove path overlaps */
-#define PATH_SUPRESS_HINTS  (1 << 15) /* Do not remove path overlaps */
+#define PATH_SUPRESS_HINTS  (1 << 15) /* XXX */
     int mode;                         /* Current mode */
-    char *modename;                   /* Name of current mode */
-    void *appSpecificInfo;            /* different data for rotateFont.c & mergeFonts.c */
-    void (*appSpecificFree)(txCtx h); /* free for app-specific info */
+    const char *modename;             /* Name of current mode */
+    txExtCtx ext;                     /* Extension context (if any) */
     abfTopDict *top;                  /* Top dictionary */
-    struct                            /* Source data */
-    {
+    struct {                          /* Source data */
         int type;                        /* Font technology type */
         Stream stm;                      /* Input stream */
         long offset;                     /* Buffer offset */
@@ -261,8 +303,7 @@ struct txCtx_ {
         dnaDCL(float, widths);           /* Source glyph width for -t1 -3 mode */
         dnaDCL(Stream, streamStack);     /* support recursive opening of source stream files ( for components) */
     } src;
-    struct /* Destination data */
-    {
+    struct {  // Destination data
         Stream stm;       /* Output stream */
         char buf[BUFSIZ]; /* Buffer data */
         void (*begset)(txCtx h);
@@ -271,143 +312,120 @@ struct txCtx_ {
         void (*endset)(txCtx h);
     } dst;
     dnaDCL(FontRec, fonts); /* Source font records */
-    struct                  /* Macintosh resources */
-    {
+    struct {                /* Macintosh resources */
         dnaDCL(ResInfo, map); /* Resource map */
         dnaDCL(char, names);  /* Resource names */
     } res;
-    struct /* AppleSingle/Double data */
-    {
+    struct {  // AppleSingle/Double data
         unsigned long magic;        /* Magic #, 00051600-single, 00051607-double */
         unsigned long version;      /* Format version */
         dnaDCL(EntryDesc, entries); /* Entry descriptors */
     } asd;
-    struct /* Font data segment */
-    {
+    struct {  // Font data segment
         SegRefillFunc refill; /* Format-specific refill */
         size_t left;          /* Bytes remaining in segment */
     } seg;
-    struct /* Script file data */
-    {
+    struct {  // Script file data
         char *buf;            /* Whole file buffer */
         dnaDCL(char *, args); /* Arg list */
     } script;
-    struct /* File processing */
-    {
+    struct {  // File processing
         char *sr; /* Source root path */
         char *sd; /* Source directory path */
         char *dd; /* Destination directory path */
         char src[FILENAME_MAX];
         char dst[FILENAME_MAX];
     } file;
-    struct /* Random subset data */
-    {
+    struct {  // Random subset data
         dnaDCL(unsigned short, glyphs); /* Tag list */
         dnaDCL(char, args);             /* Simulated -g args */
     } subset;
-    struct /* Option args */
-    {
+    struct {  // Option args
         char *U;
         char *i;
         char *p;
         char *P;
-        struct /* Glyph list (g option) */
-        {
+        struct {  // Glyph list (g option)
             int cnt;       /* Substring count */
             char *substrs; /* Concatenated substrings */
         } g;
-        struct
-        {
+        struct {
             int level;
         } path;
-        struct /* cef-specific */
-        {
+        struct {  // cef-specific
             unsigned short flags; /* cefEmbedSpec flags */
             char *F;
         } cef;
     } arg;
-    struct /* t1read library */
-    {
+    struct {  // t1read library
         t1rCtx ctx;
         Stream tmp;
         Stream dbg;
         long flags;
     } t1r;
-    struct /* cffread library */
-    {
+    struct {  // cffread library
         cfrCtx ctx;
         Stream dbg;
         long flags;
     } cfr;
-    struct /* ttread library */
-    {
+    struct {  // ttread library
         ttrCtx ctx;
         Stream dbg;
         long flags;
     } ttr;
-    struct /* svread library */
-    {
+    struct {  // svread library
         svrCtx ctx;
         Stream tmp;
         Stream dbg;
         long flags;
     } svr;
-    struct /* uforead library */
-    {
+    struct {  // uforead library
         ufoCtx ctx;
         Stream src;
         Stream dbg;
         long flags;
         char *altLayerDir;
     } ufr;
-    struct /* cffwrite library */
-    {
+    struct {  // cffwrite library
         cfwCtx ctx;
         Stream tmp;
         Stream dbg;
         long flags;
         unsigned long maxNumSubrs;
     } cfw;
-    struct /* cfembed library */
-    {
+    struct {  // cfembed library
         cefCtx ctx;
         Stream src;
         Stream tmp0;
         Stream tmp1;
         dnaDCL(cefSubsetGlyph, subset);
-        dnaDCL(char *, gnames);
+        dnaDCL(const char *, gnames);
         dnaDCL(unsigned short, lookup); /* Glyph lookup */
     } cef;
-    struct /* abf facilities */
-    {
+    struct {  // abf facilities
         abfCtx ctx;
         struct abfDumpCtx_ dump;
         struct abfDrawCtx_ draw;
         struct abfMetricsCtx_ metrics;
         struct abfAFMCtx_ afm;
     } abf;
-    struct /* pdfwrite library */
-    {
+    struct {  // pdfwrite library
         pdwCtx ctx;
         long flags;
         long level;
     } pdw;
-    struct /* Metrics mode data */
-    {
+    struct {  // Metrics mode data
         int level; /* Output level */
-        struct     /* Metric data */
-        {
+        struct {   // Metric data
             struct abfMetricsCtx_ ctx;
             abfGlyphCallbacks cb;
         } metrics;
-        struct /* Aggregate bbox */
-        {
+        struct {  // Aggregate bbox
             float left;
             float bottom;
             float right;
             float top;
-            struct /* Glyph that set value */
-            {
+            struct {  // Glyph that set value
                 abfGlyphInfo *left;
                 abfGlyphInfo *bottom;
                 abfGlyphInfo *right;
@@ -415,8 +433,7 @@ struct txCtx_ {
             } setby;
         } bbox;
     } mtx;
-    struct /* t1write library */
-    {
+    struct {  // t1write library
         long options;             /* Control options */
 #define T1W_NO_UID       (1 << 0) /* Remove UniqueID keys */
 #define T1W_DECID        (1 << 1) /* -decid option */
@@ -432,8 +449,7 @@ struct txCtx_ {
         long fd;               /* -decid target fd */
         dnaDCL(char, gnames); /* -decid glyph names */
     } t1w;
-    struct /* svgwrite library */
-    {
+    struct {  // svgwrite library
         long options; /* Control options */
         svwCtx ctx;
         unsigned short unrec;
@@ -441,15 +457,13 @@ struct txCtx_ {
         Stream dbg;
         long flags; /* Library flags */
     } svw;
-    struct /* ufowrite library */
-    {
+    struct {  // ufowrite library
         ufwCtx ctx;
         Stream tmp;
         Stream dbg;
         long flags; /* Library flags */
     } ufow;
-    struct /* Dump cff mode */
-    {
+    struct {  // Dump cff mode
         long flags; /* Control flags */
 #define DCF_Header           (1 <<  0)
 #define DCF_NameINDEX        (1 <<  1)
@@ -472,7 +486,7 @@ struct txCtx_ {
 #define DCF_END_HINTS        (1 << 19) /* have seen moveto */
 
         int level;                    /* Dump level */
-        char *sep;                    /* Flowed text separator */
+        const char *sep;              /* Flowed text separator */
         SubrInfo global;              /* Global subrs */
         dnaDCL(SubrInfo, local);      /* Local subrs */
         dnaDCL(unsigned char, glyph); /* Per-glyph stem count */
@@ -483,27 +497,22 @@ struct txCtx_ {
         SubrInfo *fd;    /* Current local info */
         int subrDepth;   /* Subroutine call depth */
     } dcf;
-    struct /* Operand stack */
-    {
+    struct {  // Operand stack
         long cnt;
         float array[CFF2_MAX_OP_STACK];
     } stack;
-    struct /* Font Dict filter */
-    {
+    struct {  // Font Dict filter
         dnaDCL(int, fdIndices); /* Source glyph width for -t1 -3 mode */
     } fd;
-    struct /* OTF cmap encoding */
-    {
+    struct {  // OTF cmap encoding
         dnaDCL(unsigned long, encoding);
         dnaDCL(cmapSegment4, segment);
     } cmap;
-    struct /* Library contexts */
-    {
+    struct {  // Library contexts
         dnaCtx dna; /* dynarr library */
         sfrCtx sfr; /* sfntread library */
     } ctx;
-    struct /* Callbacks */
-    {
+    struct {  // Callbacks
         ctlMemoryCallbacks mem;
         ctlStreamCallbacks stm;
         abfGlyphCallbacks glyph;
@@ -511,13 +520,17 @@ struct txCtx_ {
         abfGlyphCallbacks save;
         int selected;
     } cb;
-    struct /* Memory allocation failure simulation data */
-    {
+    struct {  // Memory allocation failure simulation data
         long iCall; /* Index of next call to mem_manange */
         long iFail; /* Index of failing call or FAIL_REPORT or FAIL_INACTIVE */
     } failmem;
     long maxOpStack;
+    unsigned int randseed;
+    std::shared_ptr<slogger> logger;
 };
+
+#define TX_PROGNAME(h) (h->ext ? h->ext->progname : "tx")
+#define TX_VERSION(h) (h->ext ? h->ext->version : TX_DEF_VERSION)
 
 /* Check stack contains at least n elements. */
 #define CHKUFLOW(n)                                                 \
@@ -554,29 +567,33 @@ struct txCtx_ {
 /* SID to standard string length */
 #define SID2STD_LEN 391 /* number of entries in stdstr1.h */
 
-enum /* Glyph selector types */
-{
+enum {  // Glyph selector types
     sel_by_tag,
     sel_by_cid,
     sel_by_name
 };
 
+void txNew(txCtx h, txExtCtx ext);
+void txFree(txCtx h);
+int txGetOptionIndex(const char *key);
+int getOptionIndex(const char *key, const char *option_array[], int oa_len);
+int run_tx(txCtx h, int argc, char *argv[]);
+void doSingleFileSet(txCtx h, const char *srcname);
+
 void buildFontList(txCtx h);
-void callbackGlyph(txCtx h, int type, unsigned short id, char *name);
+void callbackGlyph(txCtx h, int type, unsigned short id, const char *name);
 void callbackSubset(txCtx h);
-void dcf_ParseTableArg(txCtx h, char *arg);
-void dstFileSetName(txCtx h, char *filename);
-void CTL_CDECL fatal(txCtx h, char *fmt, ...);
-void fileError(txCtx h, char *filename);
+void dcf_ParseTableArg(txCtx h, const char *arg);
+void dstFileSetName(txCtx h, const char *filename);
+void CTL_CDECL fatal(txCtx h, const char *fmt, ...);
+void fileError(txCtx h, const char *filename);
 float *getUDV(txCtx h);
 void memInit(txCtx h);
-void memFree(txCtx h, void *ptr);
-void *memNew(txCtx h, size_t size);
 void parseFDSubset(txCtx h);
 void prepOTF(txCtx h);
 void prepSubset(txCtx h);
-void printText(int cnt, char *text[]);
-long randrange(long N);
+void printText(int cnt, const char *text[]);
+long randrange(txCtx h, long N);
 void *safeManage(ctlMemoryCallbacks *cb, void *old, size_t size);
 void seedtime(void);
 void setMode(txCtx h, int mode);
@@ -587,4 +604,8 @@ void t1rReadFont(txCtx h, long origin);
 void ttrReadFont(txCtx h, long origin, int iTTC);
 void ufoReadFont(txCtx h, long origin);
 
-#endif /* TX_SHARED_H */
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
+}
+#endif
+
+#endif  // SHARED_INCLUDE_TX_SHARED_H_

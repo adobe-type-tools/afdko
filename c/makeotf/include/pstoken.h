@@ -7,8 +7,8 @@
  * Simple top-level PostScript tokenizer.
  */
 
-#ifndef MAKEOTF_PSTOKEN_H
-#define MAKEOTF_PSTOKEN_H
+#ifndef MAKEOTF_INCLUDE_PSTOKEN_H_
+#define MAKEOTF_INCLUDE_PSTOKEN_H_
 #include <stdint.h>
 #include <stddef.h>
 
@@ -19,8 +19,8 @@ extern "C" {
 #endif
 
 /* Define to supply Microsoft-specific function calling info, e.g. __cdecl */
-#ifndef CDECL
-#define CDECL
+#ifndef CTL_CDECL
+#define CTL_CDECL
 #endif
 
 #define PSTOKEN_VERSION 0x010004 /* Library version */
@@ -68,7 +68,7 @@ typedef struct {
     void (*message)(void *ctx, int type, const char *text); /* (optional) */
 
     /* PostScript data input */
-    char *(*psId)(void *ctx); /* Data id (optional) */
+    const char *(*psId)(void *ctx); /* Data id (optional) */
     char *(*psRefill)(void *ctx, long *count);
     psBuf *buf; /* Input grow buffer */
 } psCallbacks;
@@ -112,10 +112,10 @@ void psSkipBinary(psCtx h, long nBytes);
  * psConvHexString  Convert hexadecimal string token to integer value
  */
 psToken *psGetToken(psCtx h);
-int psMatchToken(psCtx h, psToken *token, int type, char *value);
-psToken *psFindToken(psCtx h, int type, char *value);
+int psMatchToken(psCtx h, psToken *token, int type, const char *value);
+psToken *psFindToken(psCtx h, int type, const char *value);
 
-int psMatchValue(psCtx h, psToken *token, char *strng);
+int psMatchValue(psCtx h, psToken *token, const char *strng);
 char *psGetValue(psCtx h, psToken *token);
 
 int32_t psGetInteger(psCtx h);
@@ -131,11 +131,11 @@ char *psConvLiteral(psCtx h, psToken *token, unsigned *length);
 uint32_t psConvHexString(psCtx h, psToken *token);
 
 /* Exception handling */
-void CDECL psWarning(psCtx h, char *fmt, ...);
-void CDECL psFatal(psCtx h, char *fmt, ...);
+void CTL_CDECL psWarning(psCtx h, const char *fmt, ...);
+void CTL_CDECL psFatal(psCtx h, const char *fmt, ...);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* MAKEOTF_PSTOKEN_H */
+#endif /* MAKEOTF_INCLUDE_PSTOKEN_H_ */

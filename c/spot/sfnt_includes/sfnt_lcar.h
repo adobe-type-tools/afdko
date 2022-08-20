@@ -14,14 +14,14 @@
 typedef struct
 {
     GlyphId ligGlyph; /* [Not in format] */
-    Card16 cnt;
-    Int16 *partial;
+    uint16_t cnt;
+    int16_t *partial;
 } LigCaretEntry;
 
 typedef struct
 {
     Fixed version;
-    Card16 format;
+    uint16_t format;
     Lookup lookup;
     DCL_ARRAY(LigCaretEntry, entry);
 } lcarTbl;

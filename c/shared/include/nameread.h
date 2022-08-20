@@ -2,14 +2,14 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef NAMEREAD_H
-#define NAMEREAD_H
+#ifndef SHARED_INCLUDE_NAMEREAD_H_
+#define SHARED_INCLUDE_NAMEREAD_H_
 
 #include "ctlshare.h"
 #include "sfntread.h"
 #include "varread.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 extern "C" {
 #endif
 
@@ -20,8 +20,7 @@ extern "C" {
 
 /* constants/types */
 
-typedef struct /* name record */
-{
+typedef struct {  // name record
     unsigned short platformId;
     unsigned short platspecId;
     unsigned short languageId;
@@ -263,8 +262,8 @@ long nam_generateLastResortInstancePSName(nam_name nameTbl,
     is added at the end of the name string, so the actual length of the name will be at most
     instanceNameLen-1. */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 }
 #endif
 
-#endif /* NAMEREAD_H */
+#endif  // SHARED_INCLUDE_NAMEREAD_H_

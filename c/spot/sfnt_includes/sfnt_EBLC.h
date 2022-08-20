@@ -10,24 +10,24 @@
 #include "sfnt_sbit.h"
 
 typedef struct _EBLCBitmapSizeTable {
-    Card32 indexSubTableArrayOffset; /* offset to corresponding index */
+    uint32_t indexSubTableArrayOffset; /* offset to corresponding index */
                                      /* subtable array from beginning */
                                      /* of "EBLC"                     */
-    Card32 indexTableSize;           /* length of corresponding index subtables and array   */
-    Card32 numberofIndexSubTables;   /* number of index subtables.                          */
+    uint32_t indexTableSize;           /* length of corresponding index subtables and array   */
+    uint32_t numberofIndexSubTables;   /* number of index subtables.                          */
                                      /* There is a subtable for each range or format change */
-    Card32 colorRef;                 /* set to 0. ignore for now                            */
+    uint32_t colorRef;                 /* set to 0. ignore for now                            */
     sbitLineMetrics hori;
     sbitLineMetrics vert;
     GlyphId startGlyphIndex;
     GlyphId endGlyphIndex;
-    Card8 ppemX; /* target horizontal pixels/em */
-    Card8 ppemY;
-    Card8 bitDepth;
-    Int8 flags;
+    uint8_t ppemX; /* target horizontal pixels/em */
+    uint8_t ppemY;
+    uint8_t bitDepth;
+    int8_t flags;
 #define EBLC_FLAG_HORIZONTAL (1 << 0)
 #define EBLC_FLAG_VERTICAL (1 << 1)
-    Card8 _index;
+    uint8_t _index;
 } EBLCBitmapSizeTable;
 
 #define EBLCBITMAPSIZETABLE_SIZE (SIZEOF(EBLCBitmapSizeTable, indexSubTableArrayOffset) + \
@@ -46,9 +46,9 @@ typedef struct _EBLCBitmapSizeTable {
 /* ...................EBLC SUBTABLES.................................... */
 
 typedef struct _EBLCIndexSubHeader {
-    Card16 indexFormat;     /* sbitBitmapIndexFormats */
-    Card16 imageFormat;     /* sbitBitmapDataFormats  */
-    Card32 imageDataOffset; /*offset to corresponding image data from beginning of EBDT table*/
+    uint16_t indexFormat;     /* sbitBitmapIndexFormats */
+    uint16_t imageFormat;     /* sbitBitmapDataFormats  */
+    uint32_t imageDataOffset; /*offset to corresponding image data from beginning of EBDT table*/
 } EBLCIndexSubHeader;
 
 #define EBLCINDEXSUBHEADER_SIZE (SIZEOF(EBLCIndexSubHeader, indexFormat) + \
@@ -59,20 +59,20 @@ typedef struct _EBLCIndexSubHeader {
    uncompressed PROPORTIONALLY-spaced glyphs */
 typedef struct _EBLCIndexSubtable_Format1 {
     EBLCIndexSubHeader header;
-    Card32 _numoffsets;
-    DCL_ARRAY(Card32, offsetArray); /* offsetArray[glyphIndex] + imageDataOffset ==> start of bitmap data for glyph. */
+    uint32_t _numoffsets;
+    DCL_ARRAY(uint32_t, offsetArray); /* offsetArray[glyphIndex] + imageDataOffset ==> start of bitmap data for glyph. */
                                     /* sizeOfArray = lastGlyph - firstGlyph + 1                                      */
 } EBLCIndexSubtable_Format1;
 
 #define EBLCFORMAT1_SIZE(first, last)            \
     (SIZEOF(EBLCIndexSubtable_Format1, header) + \
-     sizeof(Card32) * ((last) - (first) + 1))
+     sizeof(uint32_t) * ((last) - (first) + 1))
 
 /* format 2 has fixed-length images of the same format for
    MONO-spaced glyphs */
 typedef struct _EBLCIndexSubtable_Format2 {
     EBLCIndexSubHeader header;
-    Card32 imageSize;            /* images may be compressed, bit-aligned or byte-aligned */
+    uint32_t imageSize;            /* images may be compressed, bit-aligned or byte-aligned */
     sbitBigGlyphMetrics Metrics; /* all glyphs share same metrics */
 } EBLCIndexSubtable_Format2;
 
@@ -85,17 +85,17 @@ typedef struct _EBLCIndexSubtable_Format2 {
    Must be padded to a long-word boundary. */
 typedef struct _EBLCIndexSubtable_Format3 {
     EBLCIndexSubHeader header;
-    Card32 _numoffsets;
-    DCL_ARRAY(Card16, offsetArray);
+    uint32_t _numoffsets;
+    DCL_ARRAY(uint16_t, offsetArray);
 } EBLCIndexSubtable_Format3;
 
 #define EBLCFORMAT3_SIZE(first, last)            \
     (SIZEOF(EBLCIndexSubtable_Format1, header) + \
-     sizeof(Card16) * ((last) - (first) + 1))
+     sizeof(uint16_t) * ((last) - (first) + 1))
 
 typedef struct _EBLCCodeOffsetPair {
     GlyphId glyphCode; /* code of glyph present */
-    Card16 offset;     /* location in "EBDT" */
+    uint16_t offset;     /* location in "EBDT" */
 } EBLCCodeOffsetPair;
 #define EBLCCODEOFFSETPAIR_SIZE (SIZEOF(EBLCCodeOffsetPair, glyphCode) + \
                                  SIZEOF(EBLCCodeOffsetPair, offset))
@@ -104,7 +104,7 @@ typedef struct _EBLCCodeOffsetPair {
    PROPORTIONAL metrics */
 typedef struct _EBLCIndexSubtable_Format4 {
     EBLCIndexSubHeader header;
-    Card32 numGlyphs;
+    uint32_t numGlyphs;
     DCL_ARRAY(EBLCCodeOffsetPair, glyphArray); /* one per glyph */
 } EBLCIndexSubtable_Format4;
 
@@ -117,9 +117,9 @@ typedef struct _EBLCIndexSubtable_Format4 {
    fixed-sized, MONO-spaced metrics */
 typedef struct _EBLCIndexSubtable_Format5 {
     EBLCIndexSubHeader header;
-    Card32 imageSize;
+    uint32_t imageSize;
     sbitBigGlyphMetrics Metrics;
-    Card32 numGlyphs;
+    uint32_t numGlyphs;
     DCL_ARRAY(EBLCCodeOffsetPair, glyphArray); /* one per glyph */
 } EBLCIndexSubtable_Format5;
 
@@ -142,18 +142,18 @@ typedef union _EBLCFormat {
 
 typedef struct _EBLCFormats /* internal: for construction only */
 {
-    Card32 _bytelen;
+    uint32_t _bytelen;
     sbitBitmapIndexFormats _fmttype;
-    Card16 _index;
+    uint16_t _index;
     EBLCFormat _fmt;
 } EBLCFormats;
 
 typedef struct _EBLCIndexSubTableArrayElt {
     GlyphId firstGlyphIndex;
     GlyphId lastGlyphIndex;
-    Card32 additionalOffsetToIndexSubtable; /* add to indexSubTableArrayOffset to get offset from beginning of "EBLC" table */
+    uint32_t additionalOffsetToIndexSubtable; /* add to indexSubTableArrayOffset to get offset from beginning of "EBLC" table */
     EBLCFormats _subtable;
-    Card16 _index; /* index in subtable array */
+    uint16_t _index; /* index in subtable array */
 } EBLCIndexSubTableArrayElt;
 
 #define EBLCINDEXSUBTABLEARRAYELT_SIZE (SIZEOF(EBLCIndexSubTableArrayElt, firstGlyphIndex) + \
@@ -161,15 +161,15 @@ typedef struct _EBLCIndexSubTableArrayElt {
                                         SIZEOF(EBLCIndexSubTableArrayElt, additionalOffsetToIndexSubtable))
 
 typedef struct _EBLCIndexSubTableArray {
-    Card16 _numarrayelts;
+    uint16_t _numarrayelts;
     DCL_ARRAY(EBLCIndexSubTableArrayElt, _elts);
-    Card16 _index; /* index in Main EBLC SubTableArray */
+    uint16_t _index; /* index in Main EBLC SubTableArray */
 } EBLCIndexSubTableArray;
 
 typedef struct _EBLCTableHeader {
 #define EBLC_HEADER_VERSION 0x00020000
     Fixed version;
-    Card32 numSizes;
+    uint32_t numSizes;
     DCL_ARRAY(EBLCBitmapSizeTable, bitmapSizeTable); /* array [numSizes] */
     /* for construction: array[numSizes].
        one-to-one correspondence with bitmapSizeTable  */

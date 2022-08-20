@@ -2,8 +2,8 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef SVGWRITE_H
-#define SVGWRITE_H
+#ifndef SHARED_INCLUDE_SVGWRITE_H_
+#define SHARED_INCLUDE_SVGWRITE_H_
 
 #include "ctlshare.h"
 
@@ -11,7 +11,7 @@
 
 #include "absfont.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 extern "C" {
 #endif
 
@@ -128,7 +128,7 @@ enum {
    positive non-zero error code that is defined in the above enumeration that
    is built from svwerr.h. */
 
-char *svwErrStr(int err_code);
+const char *svwErrStr(int err_code);
 
 /* svwErrStr() maps the "err_code" parameter to a null-terminated error
    string. */
@@ -138,8 +138,8 @@ void svwGetVersion(ctlVersionCallbacks *cb);
 /* svwGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 }
 #endif
 
-#endif /* SVGWRITE_H */
+#endif  // SHARED_INCLUDE_SVGWRITE_H_

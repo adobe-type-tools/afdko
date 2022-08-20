@@ -2,15 +2,14 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef VARREAD_H
-#define VARREAD_H
+#ifndef SHARED_INCLUDE_VARREAD_H_
+#define SHARED_INCLUDE_VARREAD_H_
 
 #include "sfntread.h"
-#include "supportpublictypes.h"
 #include "supportfp.h"
 #include "absfont.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 extern "C" {
 #endif
 
@@ -23,7 +22,7 @@ extern "C" {
 #define F2DOT14_TO_FIXED(v) (((Fixed)(v)) << 2)
 #define FIXED_TO_F2DOT14(v) ((var_F2dot14)(((Fixed)(v) + 0x00000002) >> 2))
 
-typedef Int16 var_F2dot14; /* 2.14 fixed point number */
+typedef int16_t var_F2dot14; /* 2.14 fixed point number */
 
 /* item variation store */
 
@@ -394,8 +393,8 @@ void varreadGetVersion(ctlVersionCallbacks *cb);
 /* varreadGetVersion() returns the library version number and name via the client
     callbacks passed with the "cb" parameter (see ctlshare.h). */
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 }
 #endif
 
-#endif /* VARREAD_H */
+#endif  // SHARED_INCLUDE_VARREAD_H_
