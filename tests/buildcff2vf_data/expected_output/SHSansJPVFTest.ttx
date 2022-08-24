@@ -6,7 +6,7 @@
     <minor value="0"/>
     <CFFFont name="CFF2Font">
       <FontMatrix value="0.001 0 0 0.001 0 0"/>
-      <FDSelect format="3"/>
+      <FDSelect format="0"/>
       <FDArray>
         <FontDict index="0">
           <Private>
