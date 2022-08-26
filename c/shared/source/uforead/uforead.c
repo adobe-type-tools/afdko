@@ -304,6 +304,7 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static int parseXMLPlist(ufoCtx h, xmlNodePtr cur);
 static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, int state, Transform* transform);
+static int parseXMLComponent(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb, Transform* transform);
 static int parseXMLAnchor(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec);
 
 /* -------------------------- Error Support ------------------------ */
@@ -2111,125 +2112,83 @@ static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, 
 
 static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Transform* transform);
 
-static int parseComponent(ufoCtx h, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb, int state, Transform* transform) {
+
+static int setParseXMLComponentValue(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform, Transform localTransform, Transform *newTransform, int result) {
+    Transform concatTransform;
+    if (gi == NULL) {
+        fprintf(stderr, "Missing component base attribute. Glyph: %s, Context: %s.\n", glifRec->glifFilePath, getBufferContextPtr(h));
+        result = ufoErrNoGlyph;
+        return result;
+    }
+
+    /* Figure out transforms */
+    if (transform == NULL) {
+        if (localTransform.isDefault)
+            newTransform = NULL;
+        else
+            newTransform = &localTransform;
+    } else {
+        if (localTransform.isDefault)
+            newTransform = transform;
+        else if (transform->isOffsetOnly == 1) {
+            localTransform.mtx[4] += transform->mtx[4];
+            localTransform.mtx[5] += transform->mtx[5];
+            newTransform = &localTransform;
+            // localTransform.isOffsetOnly remains unchanged
+        } else {
+            newTransform = &concatTransform;
+            matMult(concatTransform.mtx, localTransform.mtx, transform->mtx);
+            concatTransform.isOffsetOnly = 0;
+            concatTransform.isDefault = 0;
+        }
+    }
+    result = parseGLIF(h, gi, glyph_cb, newTransform);
+    h->cb.stm.seek(&h->cb.stm, h->stm.src, 0);
+    fillbuf(h, 0);
+    h->stack.flags &= ~PARSE_END;
+    return result;
+}
+
+
+static int parseXMLComponent(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb, Transform* transform) {
     int result = ufoSuccess;
     abfGlyphInfo* gi = NULL;
-
-    token* tk;
-    char* end;
-    int prevState = outlineStart;
     Transform localTransform;        // transform specified in component
     Transform* newTransform = NULL;  // result of multiplication with existing transform.
     float val;
 
     setTransformMtx(&localTransform, 1.0, 0, 0, 1.0, 0, 0, 1, 1);
 
-    while (1) {
-        tk = getToken(h, state);
-        if (tk == NULL) {
-            fatal(h, ufoErrParse, "Encountered end of buffer before end of component. Glyph: %s, Context: %s.\n", glifRec->glifFilePath, getBufferContextPtr(h));
-        } else if (tokenEqualStr(tk, "<!--")) {
-            prevState = state;
-            state = outlineInComment;
-        } else if (tokenEqualStr(tk, "-->")) {
-            if (state != outlineInComment) {
-                fatal(h, ufoErrParse, "Encountered end comment token while not in comment in component. Glyph: %s, Context: %s.\n", glifRec->glifFilePath, getBufferContextPtr(h));
-            }
-            state = prevState;
-        } else if (state == outlineInComment) {
-            continue;
-        } else if (tokenEqualStr(tk, "base=")) {
+    xmlAttr *attr = cur->properties;
+    while (attr != NULL) {
+        if (xmlAttrEqual(attr, "base")){
             size_t index;
-            char* glyphName;
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            *end = 0;
-            glyphName = tk->val;
+            char* glyphName = getXmlAttrValue(attr);
             if (!ctuLookup(glyphName, h->chars.byName.array, h->chars.byName.cnt,
                            sizeof(h->chars.byName.array[0]), postMatchChar, &index, h)) {
                 fprintf(stderr, "Could not find component base glyph %s. parent Glyph: %s\n", glyphName, glifRec->glifFilePath);
                 result = ufoErrNoGlyph;
                 break;
             }
-
             gi = &h->chars.index.array[h->chars.byName.array[index]];
-        } else if (tokenEqualStr(tk, "xScale=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            *end = 0;
-            val = (float)strtod(tk->val, &end);
-            setTransformValue(&localTransform, val, 0);
-        } else if (tokenEqualStr(tk, "yScale=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            *end = 0;
-            val = (float)strtod(tk->val, &end);
-            setTransformValue(&localTransform, val, 3);
-        } else if (tokenEqualStr(tk, "xyScale=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            *end = 0;
-            val = (float)strtod(tk->val, &end);
-            setTransformValue(&localTransform, val, 1);
-        } else if (tokenEqualStr(tk, "yxScale=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            *end = 0;
-            val = (float)strtod(tk->val, &end);
-            setTransformValue(&localTransform, val, 2);
-        } else if (tokenEqualStr(tk, "xOffset=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            *end = 0;
-            val = (float)strtod(tk->val, &end);
-            setTransformValue(&localTransform, val, 4);
-        } else if (tokenEqualStr(tk, "yOffset=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            *end = 0;
-            val = (float)strtod(tk->val, &end);
-            setTransformValue(&localTransform, val, 5);
-        } else if (tokenEqualStr(tk, "/>")) {
-            long filePos;
-            Transform concatTransform;
-            if (gi == NULL) {
-                fprintf(stderr, "Missing component base attribute. Glyph: %s, Context: %s.\n", glifRec->glifFilePath, getBufferContextPtr(h));
-                result = ufoErrNoGlyph;
-                break;
-            }
-            /* save the current stream */
-            filePos = h->src.offset + (h->src.next - h->src.buf);
-
-            /* Figure out transforms */
-            if (transform == NULL) {
-                if (localTransform.isDefault)
-                    newTransform = NULL;
-                else
-                    newTransform = &localTransform;
-            } else {
-                if (localTransform.isDefault)
-                    newTransform = transform;
-                else if (transform->isOffsetOnly == 1) {
-                    localTransform.mtx[4] += transform->mtx[4];
-                    localTransform.mtx[5] += transform->mtx[5];
-                    newTransform = &localTransform;
-                    // localTransform.isOffsetOnly remains unchanged
-                } else {
-                    newTransform = &concatTransform;
-                    matMult(concatTransform.mtx, localTransform.mtx, transform->mtx);
-                    concatTransform.isOffsetOnly = 0;
-                    concatTransform.isDefault = 0;
-                }
-            }
-            result = parseGLIF(h, gi, glyph_cb, newTransform);
-            h->cb.stm.seek(&h->cb.stm, h->stm.src, filePos);
-            fillbuf(h, filePos);
-            h->stack.flags &= ~PARSE_END;
-            break;
         } else {
-            continue;
+            val = (float)atof(getXmlAttrValue(attr));
+            if (xmlAttrEqual(attr, "xScale"))
+                setTransformValue(&localTransform, val, 0);
+            else if (xmlAttrEqual(attr, "yScale"))
+                setTransformValue(&localTransform, val, 3);
+            else if (xmlAttrEqual(attr, "xyScale"))
+                setTransformValue(&localTransform, val, 1);
+            else if (xmlAttrEqual(attr, "yxScale"))
+                setTransformValue(&localTransform, val, 2);
+            else if (xmlAttrEqual(attr, "xOffset"))
+                setTransformValue(&localTransform, val, 4);
+            else if (xmlAttrEqual(attr, "yOffset"))
+                setTransformValue(&localTransform, val, 5);
         }
+        attr = attr->next;
     }
+    result = setParseXMLComponentValue(h, gi, glyph_cb, glifRec, transform, localTransform, newTransform, result);
     return result;
 }
 
