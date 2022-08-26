@@ -303,6 +303,7 @@ static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static int parseXMLPlist(ufoCtx h, xmlNodePtr cur);
+static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, int state, Transform* transform);
 static int parseXMLAnchor(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec);
 
 /* -------------------------- Error Support ------------------------ */
@@ -2021,111 +2022,90 @@ static int parseNote(ufoCtx h, GLIF_Rec* glifRec, int state) {
     return result;
 }
 
-static int parsePoint(ufoCtx h, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, int state, Transform* transform) {
-    // we've seen the point element name, Parse until we see the end.
-    token* tk;
+static int setPointKeyValue(ufoCtx h, abfGlyphCallbacks* glyph_cb, float x, float y, int type, char* pointName, Transform* transform){
+    int result = ufoSuccess;
+    if ((transform != NULL) && (!transform->isDefault)) {
+        float* mtx = (float*)transform->mtx;
+        float xnew = mtx[0] * x + mtx[2] * y + mtx[4];
+        y = mtx[1] * x + mtx[3] * y + mtx[5];
+        x = xnew;
+    }
+    CHKOFLOW(2);
+    PUSH(x);
+    PUSH(y);
+    switch (type) {
+        case 0:
+            if (pointName != NULL)
+                h->hints.pointName = pointName; /* we need to save the point name for later reference only for off-curve points, to be passed into the curve OpRec */
+            break;
+        case 1: {
+            doOp_mt(h, glyph_cb, pointName);
+            h->hints.pointName = NULL;
+            break;
+        }
+        case 2: {
+            doOp_dt(h, glyph_cb, pointName);
+            h->hints.pointName = NULL;
+            break;
+        }
+        case 3: {
+            /* The hint set which precedes a curve is referenced in the point name for the first point of the curve.
+            This is currently stored in h->hints.pointName. Save, it, then set h->hints.pointName to NULL.
+
+             A curve has a point name in the final point only when the point is the first point of the contour,
+             and the last two points are at the end of the contour. In this case,  h->hints.pointName is always NULL,
+             and the hint reference is applied before the move-to of the contour.*/
+
+            if (pointName != NULL)
+                doOp_ct(h, glyph_cb, pointName);
+            else if (h->hints.pointName != NULL)
+                doOp_ct(h, glyph_cb, h->hints.pointName);
+            else
+                doOp_ct(h, glyph_cb, NULL);
+            h->hints.pointName = NULL; /* don't free h->hints.pointName; it is now references from the opRec. */
+            break;
+        }
+    }
+    return result;
+}
+
+static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, int state, Transform* transform) {
     float x = 0;
     float y = 0;
     int type = 0;
-    char* end;
     char* pointName = NULL;
-    int prevState = outlineStart;
     int result = ufoSuccess;
-
-    while (1) {
-        tk = getToken(h, state);
-        if (tk == NULL) {
-            fatal(h, ufoErrParse, "Encountered end of buffer before end of glyph.%s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
-        } else if (tokenEqualStr(tk, "<!--")) {
-            prevState = state;
-            state = outlineInComment;
-        } else if (tokenEqualStr(tk, "-->")) {
-            if (state != outlineInComment) {
-                fatal(h, ufoErrParse, "Encountered end comment token while not in comment. Glyph %s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
-            }
-            state = prevState;
-        } else if (state == outlineInComment) {
-            continue;
-        } else if (tokenEqualStr(tk, "x=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            x = (float)strtod(tk->val, &end);
-        } else if (tokenEqualStr(tk, "y=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            y = (float)strtod(tk->val, &end);
-        } else if (tokenEqualStr(tk, "name=")) {
-            tk = getAttribute(h, state);
-            if (tk->length > 0) {
-                pointName = memNew(h, tk->length + 1);
-                end = tk->val + tk->length;
-                strncpy(pointName, tk->val, tk->length);
-                pointName[tk->length] = 0;
-            }
-        } else if (tokenEqualStr(tk, "type=")) {
-            tk = getAttribute(h, state);
-            if (tokenEqualStr(tk, "move"))
+    
+    xmlAttr *attr = cur->properties;
+    while (attr != NULL) {
+        if (xmlAttrEqual(attr, "x"))
+            x = (float)strtod(getXmlAttrValue(attr), NULL);
+        else if (xmlAttrEqual(attr, "y"))
+            y = (float)strtod(getXmlAttrValue(attr), NULL);
+        else if (xmlAttrEqual(attr, "name")) {  // needs testing
+            char* temp = getXmlAttrValue(attr);
+            size_t nameLen = strlen(temp) + 1;
+            pointName = memNew(h, nameLen);
+            strncpy(pointName, temp, nameLen);
+        } else if (xmlAttrEqual(attr, "type")) {
+            char* strType = getXmlAttrValue(attr);
+            if (!strcmp(strType, "move"))
                 type = 1;
-            else if (tokenEqualStr(tk, "line"))
+            else if (!strcmp(strType, "line"))
                 type = 2;
-            else if (tokenEqualStr(tk, "curve"))
+            else if (!strcmp(strType, "curve"))
                 type = 3;
-            else if (tokenEqualStr(tk, "offcurve"))
+            else if (!strcmp(strType, "offcurve"))
                 continue;  // type is already set to 0. x and y will get pushed on the stack, and no other operation will happen.
             else {
-                tk->val[tk->length - 1] = 0;
-                fatal(h, ufoErrParse, "Encountered unsupported point type '%s' in glyph '%s'. Context: %s.\n", tk->val, glifRec->glyphName, getBufferContextPtr(h));
+                fatal(h, ufoErrParse, "Encountered unsupported point type '%s' in glyph '%s'. Context: %s.\n", type, glifRec->glyphName, getBufferContextPtr(h));
                 result = ufoErrParse;
                 break;
             }
-        } else if (tokenEqualStr(tk, "/>")) {
-            if ((transform != NULL) && (!transform->isDefault)) {
-                float* mtx = (float*)transform->mtx;
-                float xnew = mtx[0] * x + mtx[2] * y + mtx[4];
-                y = mtx[1] * x + mtx[3] * y + mtx[5];
-                x = xnew;
-            }
-            CHKOFLOW(2);
-            PUSH(x);
-            PUSH(y);
-            switch (type) {
-                case 0:
-                    if (pointName != NULL)
-                        h->hints.pointName = pointName; /* we need to save the point name for later reference only for off-curve points, to be passed into the curve OpRec */
-                    break;
-                case 1: {
-                    doOp_mt(h, glyph_cb, pointName);
-                    h->hints.pointName = NULL;
-                    break;
-                }
-                case 2: {
-                    doOp_dt(h, glyph_cb, pointName);
-                    h->hints.pointName = NULL;
-                    break;
-                }
-                case 3: {
-                    /* The hint set which precedes a curve is referenced in the point name for the first point of the curve.
-                    This is currently stored in h->hints.pointName. Save, it, then set h->hints.pointName to NULL.
-
-                     A curve has a point name in the final point only when the point is the first point of the contour,
-                     and the last two points are at the end of the contour. In this case,  h->hints.pointName is always NULL,
-                     and the hint reference is applied before the move-to of the contour.*/
-
-                    if (pointName != NULL)
-                        doOp_ct(h, glyph_cb, pointName);
-                    else if (h->hints.pointName != NULL)
-                        doOp_ct(h, glyph_cb, h->hints.pointName);
-                    else
-                        doOp_ct(h, glyph_cb, NULL);
-                    h->hints.pointName = NULL; /* don't free h->hints.pointName; it is now references from the opRec. */
-                    break;
-                }
-            }
-            break;
-        } else {
-            continue;
         }
+        attr = attr->next;
     }
+    result = setPointKeyValue(h, glyph_cb, x, y, type, pointName, transform);
     return result;
 }
 
