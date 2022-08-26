@@ -303,6 +303,7 @@ static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static int parseXMLPlist(ufoCtx h, xmlNodePtr cur);
+static int parseXMLAnchor(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec);
 
 /* -------------------------- Error Support ------------------------ */
 
@@ -1965,7 +1966,7 @@ static int parseGuideline(ufoCtx h, GLIF_Rec* glifRec, int state) {
     return result;
 }
 
-static int parseAnchor(ufoCtx h, GLIF_Rec* glifRec, int state) {
+static int parseXMLAnchor(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec) {
     token* tk;
     char* end;
     int prevState = outlineStart;
@@ -1975,61 +1976,33 @@ static int parseAnchor(ufoCtx h, GLIF_Rec* glifRec, int state) {
     anchor = memNew(h, sizeof(anchorRec));
     memset(anchor, 0, sizeof(anchorRec));
 
-    while (1) {
-        tk = getToken(h, state);
-        if (tk == NULL) {
-            fatal(h, ufoErrParse, "Encountered end of buffer before end of glyph.%s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
-        } else if (tokenEqualStr(tk, "<!--")) {
-            prevState = state;
-            state = outlineInComment;
-        } else if (tokenEqualStr(tk, "-->")) {
-            if (state != outlineInComment) {
-                fatal(h, ufoErrParse, "Encountered end comment token while not in comment. Glyph %s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
-            }
-            state = prevState;
-        } else if (state == outlineInComment) {
-            continue;
-        } else if (tokenEqualStr(tk, "x=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            anchor->x = (float)strtod(tk->val, &end);
-        } else if (tokenEqualStr(tk, "y=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            anchor->y = (float)strtod(tk->val, &end);
-        } else if (tokenEqualStr(tk, "name=")) {
-            tk = getAttribute(h, state);
-            if (tk->length > 0) {
-                anchor->name = memNew(h, tk->length + 1);
-                end = tk->val + tk->length;
-                strncpy(anchor->name, tk->val, tk->length);
-                anchor->name[tk->length] = 0;
-            }
-        } else if (tokenEqualStr(tk, "color=")) {
-            tk = getAttribute(h, state);
-            if (tk->length > 0) {
-                anchor->color = memNew(h, tk->length + 1);
-                end = tk->val + tk->length;
-                strncpy(anchor->color, tk->val, tk->length);
-                anchor->color[tk->length] = 0;
-            }
-        } else if (tokenEqualStr(tk, "identifier=")) {
-            tk = getAttribute(h, state);
-            if (tk->length > 0) {
-                anchor->identifier = memNew(h, tk->length + 1);
-                end = tk->val + tk->length;
-                strncpy(anchor->identifier, tk->val, tk->length);
-                anchor->identifier[tk->length] = 0;
-            }
-        } else if (tokenEqualStr(tk, "/>")) {
-            memFree(h, anchor);
-            /* ToDo: instead of freeing it, append the anchor record to a
-                     dynamic array in, or associated with, the glyph record */
-            break;
-        } else {
-            continue;
+    xmlAttr *attr = cur->properties;
+    while (attr != NULL) {
+        if (xmlAttrEqual(attr, "x"))
+            anchor->x = (float)atof(getXmlAttrValue(attr));
+        else if (xmlAttrEqual(attr, "y"))
+            anchor->y = (float)atof(getXmlAttrValue(attr));
+        else if (xmlAttrEqual(attr, "name")) {
+            char* temp = getXmlAttrValue(attr);
+            size_t nameLen = strlen(temp) + 1;
+            anchor->name = memNew(h, nameLen);
+            strncpy(anchor->name, temp, nameLen);
+        } else if (xmlAttrEqual(attr, "color")) {
+            char* temp = getXmlAttrValue(attr);
+            size_t nameLen = strlen(temp) + 1;
+            anchor->color = memNew(h, nameLen);
+            strncpy(anchor->color, temp, nameLen);
+        } else if (xmlAttrEqual(attr, "identifier")) {
+            char* temp = getXmlAttrValue(attr);
+            size_t nameLen = strlen(temp) + 1;
+            anchor->identifier = memNew(h, nameLen);
+            strncpy(anchor->identifier, temp, nameLen);
         }
+        attr = attr->next;
     }
+    memFree(h, anchor);
+    /* ToDo: instead of freeing it, append the anchor record to a
+             dynamic array in, or associated with, the glyph record */
     return result;
 }
 
