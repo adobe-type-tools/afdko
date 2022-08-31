@@ -613,18 +613,21 @@ def test_outline_from_processed_layer_bug703():
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
-def test_unhandled_ufo_glif_token_bug705():
-    input_filename = 'bug705.ufo'
-    otf_path = get_temp_file_path()
+# We've decided to reduce verbosity until we add verbose flags.
+# In the meantime, the new libxml2 parser simply ignores tokens
+# it doesn't recognize.
+# def test_unhandled_ufo_glif_token_bug705():
+#     input_filename = 'bug705.ufo'
+#     otf_path = get_temp_file_path()
 
-    stderr_path = runner(
-        CMD + ['-s', '-e', '-o',
-               'f', f'_{get_input_path(input_filename)}',
-               'o', f'_{otf_path}'])
+#     stderr_path = runner(
+#         CMD + ['-s', '-e', '-o',
+#                'f', f'_{get_input_path(input_filename)}',
+#                'o', f'_{otf_path}'])
 
-    with open(stderr_path, 'rb') as f:
-        output = f.read()
-    assert b"unhandled token: <foo" in output
+#     with open(stderr_path, 'rb') as f:
+#         output = f.read()
+#     assert b"unhandled token: <foo" in output
 
 
 def test_delete_zero_kb_font_on_fail_bug736():
