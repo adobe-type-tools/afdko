@@ -1045,7 +1045,6 @@ static void setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
 //    }
     if (h->hints.hintMasks.cnt > 1)
         stemFlags |= ABF_NEW_HINTS;
-    
     int i = 0;
     if (h->valueArray.cnt == 0)
         return;
@@ -1600,9 +1599,9 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
         fprintf(stderr, "Failed to open glif file in parseGLIF. seek failed. %s.\n", glifRec->glifFilePath);
         return ufoErrSrcStream;
     }
-    
+
     dnaSET_CNT(h->valueArray, 0);
-    
+
     xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
     int parsingSuccess = parseXMLGlif(h, cur, tag, unicode, NULL, glifRec, NULL);
 
@@ -1746,7 +1745,7 @@ static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, in
     } else if (parsingGlifsState == parsingGlif) {
         if (xmlKeyEqual(cur, "outline")) {
             cur = cur->xmlChildrenNode;
-            while(cur != NULL) {
+            while (cur != NULL) {
                 if (xmlKeyEqual(cur, "contour")) {
                     parseXMLContour(h, cur, glifRec, glyph_cb, transform);
                 } else if (xmlKeyEqual(cur, "component")) {
@@ -1766,7 +1765,7 @@ static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, in
            parseXMLKeyValue(h, cur);
            cur = cur->next;
        }
-   }
+    }
 }
 
 /* ToDo: add extra warnings for verbose-output*/
@@ -2081,7 +2080,7 @@ static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, 
     int type = 0;
     char* pointName = NULL;
     int result = ufoSuccess;
-    
+
     xmlAttr *attr = cur->properties;
     while (attr != NULL) {
         if (xmlAttrEqual(attr, "x"))
@@ -2159,7 +2158,7 @@ static int parseXMLContour(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyph
     h->stack.flags |= PARSE_PATH;
     h->stack.flags &= ~((unsigned long)PARSE_SEEN_MOVETO);
     xmlNodePtr curChild = cur->xmlChildrenNode;
-    while(curChild != NULL){
+    while (curChild != NULL){
         if (xmlKeyEqual(curChild, "point")){
             int result = parseXMLPoint(h, curChild, glyph_cb, glifRec, 2, transform);
         }
@@ -3215,7 +3214,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
     h->stack.hintflags = 0;
     h->stack.flags = 0;
     h->hints.pointName = NULL;
-    
+
     xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
     int parsingSuccess = parseXMLGlif(h, cur, gi->tag, NULL, glyph_cb, glifRec, transform);
 
