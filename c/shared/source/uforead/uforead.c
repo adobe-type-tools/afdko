@@ -311,7 +311,7 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static int parseXMLPlist(ufoCtx h, xmlNodePtr cur);
 static int parseXMLGlif(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicode, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform);
-static char* parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform);
+static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform);
 static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, int state, Transform* transform);
 static int parseXMLComponent(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb, Transform* transform);
 static int parseXMLAnchor(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec);
@@ -1732,7 +1732,7 @@ static char* getXmlAttrValue(xmlAttr *attr){
     return (char*) attr->children->content;
 }
 
-static char* parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform) {
+static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform) {
     xmlAttr *attr = cur->properties;
     if (parsingGlifsState == preParsingGlif) {
         if (xmlKeyEqual(cur, "advance")) {
@@ -1759,15 +1759,14 @@ static char* parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, i
         } else if (xmlKeyEqual(cur, "guideline")) {
             parseXMLGuideline(h, cur, tag, glyph_cb, glifRec);
         }
-        if (xmlKeyEqual(cur, "lib")) {  /* so nice it's parsed twice. (parsed in both preParseGLIF and parseGLIF until these two are merged in the future.) */
-           cur = cur->xmlChildrenNode;
-           while (cur != NULL) {
-               parseXMLKeyValue(h, cur);
-               cur = cur->next;
-           }
-       }
-    return NULL;
     }
+    if (xmlKeyEqual(cur, "lib")) {  /* so nice it's parsed twice. (parsed in both preParseGLIF and parseGLIF until these two are merged in the future.) */
+       cur = cur->xmlChildrenNode;
+       while (cur != NULL) {
+           parseXMLKeyValue(h, cur);
+           cur = cur->next;
+       }
+   }
 }
 
 /* ToDo: add extra warnings for verbose-output*/
@@ -1878,7 +1877,7 @@ static int parseXMLPlist(ufoCtx h, xmlNodePtr cur) {
 static int parseXMLGlif(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicode, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform) {
     char* keyName;
     while (cur != NULL) {
-        keyName = parseXMLGLIFKey(h, cur, unicode, tag, glyph_cb, glifRec, transform);
+        parseXMLGLIFKey(h, cur, unicode, tag, glyph_cb, glifRec, transform);
         cur = cur->next;
     }
     if (parsingGlifsState == preParsingGlif) {
