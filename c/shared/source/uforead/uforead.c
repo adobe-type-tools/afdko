@@ -1493,7 +1493,7 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
     parsingContentsLayer = None;
 
     memFree(h, clientFilePath);
-    return ufoSuccess;
+    return parsingSuccess;
 }
 
 static int preParseGLIF(ufoCtx h, GLIF_Rec* newGLIFRec, int tag);
@@ -1818,7 +1818,8 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
         }
         abfFontDict* fd = h->top.FDArray.array + currentiFD;
         abfInitFontDict(fd);
-    }
+    } else if (parsingHintSetListArray)
+        dnaNEXT(h->hints.hintMasks);
 
     while (cur != NULL) {
         char* keyName = parseXMLKeyName(h, cur);
@@ -1862,7 +1863,7 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
     }
 }
 
-static int parseXMLPlist(ufoCtx h, xmlNodePtr cur){
+static int parseXMLPlist(ufoCtx h, xmlNodePtr cur) {
     char* keyName;
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
@@ -1871,6 +1872,9 @@ static int parseXMLPlist(ufoCtx h, xmlNodePtr cur){
         if (setFontDictKey(h, keyName, cur) && cur != NULL)
            cur = cur->next;
     }
+    return ufoSuccess;
+}
+
 static int parseXMLGlif(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicode, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform) {
     char* keyName;
     while (cur != NULL) {
@@ -1962,6 +1966,7 @@ static int parseXMLGuideline(ufoCtx h, xmlNodePtr cur, int tag, abfGlyphCallback
             size_t nameLen = strlen(temp) + 1;
             guideline->identifier = memNew(h, nameLen);
         }
+        attr = attr->next;
     }
     memFree(h, guideline);
     /* ToDo: instead of freeing it, append the guideline record to a
