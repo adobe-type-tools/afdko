@@ -1713,6 +1713,21 @@ static xmlNodePtr parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     return cur;
 }
 
+static bool xmlKeyEqual(xmlNodePtr cur, char* name){
+    if (cur != NULL)
+        return xmlStrEqual(cur->name, (const xmlChar *) name);
+    else
+        return false;
+}
+
+static bool xmlAttrEqual(xmlAttr *attr, char* name){
+    return xmlStrEqual(attr->name, (const xmlChar *) name);
+}
+
+static char* getXmlAttrValue(xmlAttr *attr){
+    return (char*) attr->children->content;
+}
+
 static char* parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform) {
     xmlAttr *attr = cur->properties;
     if (parsingGlifsState == preParsingGlif) {
