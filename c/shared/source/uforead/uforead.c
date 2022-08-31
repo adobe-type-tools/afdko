@@ -1544,14 +1544,12 @@ static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin,
 }
 
 static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
-    // set width, stores offset to outline data, Does not parse it.
-    int state = 0; /* 0 == start, 1= seen start of glyph,  4 in comment.  */
-    int prevState = 0;
-    long i;
-    long char_begin = 0;
-    long char_end = 0;
-    long glyphWidth;
-    unsigned long unicode = ABF_GLYPH_UNENC;
+    parsingContentsLayer = None;
+    const char* filetype = "glyph";
+    int char_begin = 0;
+    int char_end = 0;
+    unsigned long *unicode = memNew(h, sizeof(unsigned long));
+    *unicode = ABF_GLYPH_UNENC;
     char tempVal[kMaxName];
     char tempName[kMaxName];
     token* tk;
@@ -1591,137 +1589,15 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
         fprintf(stderr, "Failed to open glif file in parseGLIF. seek failed. %s.\n", glifRec->glifFilePath);
         return ufoErrSrcStream;
     }
-
-    fillbuf(h, 0);
-
-    h->flags &= ~SEEN_END;
-    while (!(h->flags & SEEN_END)) {
-        tk = getToken(h, state);
-        if (tk == NULL) {
-            if (state != 0) {
-                *(h->src.end - 1) = 0; /* truncate buffer string */
-                fatal(h, ufoErrParse, "Encountered end of buffer before end of glyph.%s.", h->src.buf);
-            } else
-                break;
-        }
-
-        if (tokenEqualStr(tk, "<!--")) {
-            prevState = state;
-            state = 4;
-        } else if (tokenEqualStr(tk, "-->")) {
-            if (state != 4)
-                fatal(h, ufoErrParse, "Encountered end comment token while not in comment.");
-            state = prevState;
-        } else if (state == 4) {
-            continue;
-        } else if (tokenEqualStr(tk, "<lib>")) {
-            prevState = state;
-            state = inCustomLib;
-        } else if (tokenEqualStr(tk, "</lib>")) {
-            state = prevState;
-        } else if (tokenEqualStr(tk, "com.adobe.type.cid.CID") && state == inCustomLib) {
-            state = inCIDNumber;
-        } else if (tokenEqualStr(tk, "<integer>") && state == inCIDNumber) {
-            tk = getToken(h, state);
-            currentCID = atoi(tk->val);
-            h->top.sup.flags |= ABF_CID_FONT;
-            h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
-            state = inCustomLib;
-        } else if (tokenEqualStr(tk, "com.adobe.type.cid.iFD") && state == inCustomLib) {
-            state = inFDNumber;
-        } else if (tokenEqualStr(tk, "<integer>") && state == inFDNumber) {
-            tk = getToken(h, state);
-            currentiFD = atoi(tk->val);
-            state = inCustomLib;
-        } else if (tokenEqualStr(tk, "<glyph")) {
-            if (state != 0) {
-                fatal(h, ufoErrParse, "Encountered start glyph token while processing another glyph.%s.", getBufferContextPtr(h));
-            }
-            state = 1;
-            char_begin = 0;
-            char_end = 0;
-            /* Set default width and name, to be used if these values are not supplied by the glyph attributes. */
-            sprintf(tempName, "gid%05d", (unsigned short)h->chars.index.cnt);
-        } else if (tokenEqualStr(tk, "<glyph>")) {
-            if (state != 0) {
-                fatal(h, ufoErrParse, "Encountered start glyph token while processing another glyph.%s.", getBufferContextPtr(h));
-            }
-            state = 1;
-            char_begin = 0;
-            char_end = 0;
-            /* Set default width and name, to be used if these values are not supplied by the glyph attributes. */
-            sprintf(tempName, "gid%05d", (unsigned short)h->chars.index.cnt);
-        } else if (tokenEqualStr(tk, "</glyph>")) {
-            addCharFromGLIF(h, tag, glifRec->glyphName, char_begin, char_end, unicode);
-            currentCID = -1;
-            currentiFD = -1;
-            h->flags |= SEEN_END;
-            break;
-        } else if (tokenEqualStr(tk, "<unicode")) {
-            if (state != 1)
-                continue;
-            tk = getToken(h, state);
-            if (!tokenEqualStr(tk, "hex="))
-                fatal(h, ufoErrParse, "Encountered unknown attribute of <unicode>.%s.", tk->val);
-
-            tk = getAttribute(h, state);
-            {
-                strncpy(tempVal, tk->val + 1, tk->length - 2); /* remove final ";" and initial '&' */
-                tempVal[0] = '0';
-                tempVal[tk->length - 1] = 0;
-
-                unicode = strtol(tk->val, NULL, 16);
-            }
-
-        } else if (tokenEqualStr(tk, "<advance")) {
-            if (state != 1)
-                continue;
-            i = 0;
-            while (i++ < 2) {
-                tk = getToken(h, state);
-                if (tokenEqualStr(tk, "width=")) {
-                    getAttribute(h, state);
-                    strncpy(tempVal, tk->val, tk->length);
-                    tempVal[tk->length] = 0;
-                    glyphWidth = atol(tempVal);
-                    setWidth(h, tag, glyphWidth);
-                }
-                if (tokenEqualStr(tk, "advance=")) {
-                    getAttribute(h, state);
-                    strncpy(tempVal, tk->val, tk->length);
-                    tempVal[tk->length] = 0;
-                    glyphWidth = atol(tempVal);
-                    setWidth(h, tag, glyphWidth);
-                }
-                if (tokenEqualStr(tk, "height=")) {
-                    getAttribute(h, state);
-                    /* just discard it, as we don't currently use it */
-                }
-            }
-        } else if (tokenEqualStr(tk, "<outline>")) {
-            if (state != 1) {
-                continue;
-            }
-            state = 2;
-            char_begin = tk->offset + 9; /* skip <outline> tag */
-        } else if (tokenEqualStr(tk, "</outline>")) {
-            char_end = tk->offset;
-
-            if (state != 2) {
-                continue;
-            }
-            char_end = tk->offset;
-        } else if (isUnknownAttribute(tk)) {
-            getToken(h, state);
-            /* discard its value.*/
-        } else if (tokenEqualStr(tk, "/>")) {
-            continue;
-        }
-    } /* end while more tokens */
+    
+    dnaSET_CNT(h->valueArray, 0);
+    
+    xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    int parsingSuccess = parseXMLGlif(h, cur, tag, unicode, NULL, glifRec, NULL);
 
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
-    return ufoSuccess;
+    return parsingSuccess;
 }
 
 static int cmpNumeric(const void* first, const void* second, void* ctx) {
