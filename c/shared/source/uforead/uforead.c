@@ -1785,6 +1785,10 @@ static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur){
 //            message(h, "Warning: Encountered empty <key></key>.");
             return NULL;
         }
+    } else {
+        if ((xmlStrEqual(cur->name, (const xmlChar *) "advance"))) {
+            return "advance";
+        }
     }
     return NULL;
 }
