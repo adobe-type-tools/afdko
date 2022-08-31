@@ -3098,6 +3098,8 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
      re-issue it as the original point type at the end of the path.
      */
 
+    const char* filetype = "glyph";
+    parsingGlifsState = parsingGlif;
     int result = ufoSuccess;
     int state = outlineStart;
     int prevState = outlineStart;
@@ -3113,212 +3115,18 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
     h->cb.stm.clientFileName = glifRec->glifFilePath;
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
 
-    /* Note that in preParseGlyph, we found the start of the <outline> element, and set gi->sup.begin
-    to that, so we can seek to this and skip all the preceding stuff, if any.
-    */
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, gi->sup.begin)) {
         fprintf(stderr, "Failed to open glif file in parseGLIFOutline. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
         fatal(h, ufoErrSrcStream, 0);
     }
 
-    if (gi->sup.begin == 0) {
-        /* This is a non-marking glyph. Just return. */
-
-        h->cb.stm.close(&h->cb.stm, h->stm.src);
-        return result;
-    }
-
-    fillbuf(h, gi->sup.begin);
-
     h->stack.cnt = 0;
     h->stack.hintflags = 0;
     h->stack.flags = 0;
     h->hints.pointName = NULL;
-
-    do {
-        token* tk;
-        tk = getToken(h, state);
-        if (tk == NULL) {
-            if (state != outlineStart) {
-                fatal(h, ufoErrParse, "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-            }
-            h->stack.flags = PARSE_END;
-        } else {
-            if (tokenEqualStr(tk, "<!--")) {
-                prevState = state;
-                state = outlineInComment;
-            } else if (tokenEqualStr(tk, "-->")) {
-                if (state != outlineInComment) {
-                    fatal(h, ufoErrParse, "Encountered end comment token while not in comment. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                }
-                state = prevState;
-            } else if (state == outlineInComment) {
-                continue;
-            } else if (tokenEqualStrN(tk, "<contour", 8)) {
-                if (state != outlineStart) {
-                    fatal(h, ufoErrParse, "Encountered </contour> token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                }
-                state = outlineInContour;
-                if (tk->length == 8) {
-                    tk = getToken(h, state);
-                    while (tk->val[tk->length - 1] != '>')
-                        tk = getToken(h, state);
-
-                    // advance to end token
-                }
-                contourStartOpIndex = h->data.opList.cnt;  // This will be the index of the first op in the new contour.
-                h->stack.flags |= PARSE_PATH;
-                h->stack.flags &= ~((unsigned long)PARSE_SEEN_MOVETO);
-            } else if (tokenEqualStr(tk, "</contour>")) {
-                if (state != outlineInContour) {
-                    fatal(h, ufoErrParse, "Encountered </contour> token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                }
-                state = outlineStart;
-
-                if (h->data.opList.cnt > 1) {
-                    OpRec* firstOpRec = &h->data.opList.array[contourStartOpIndex];
-                    /* Now we need to fix up the OpList. In GLIF, there is usually no explicit start point, as the format expresses
-                     the path segments as a complete closed path, with no explicit start point.
-
-                     I use the first path operator end point as the start point, and convert this first operator to move-to.
-                     If the first path operator was a line-to, then I do not add it to the end of the op-list, as it should become an implicit rather than explicit close path.
-                     If it is a curve, then I need to add it to the oplist as the final path segment. */
-                    if (firstOpRec->opType == linetoType) {
-                        /* I just need to convert this to a move-to. The final line-to will become implicit */
-                        firstOpRec->opType = movetoType;
-                    } else if (firstOpRec->opType == curvetoType) {
-                        /* The first two points for the curve should be on the stack.
-                       If there is a hint set for this last curve, it was part of the first point element for the curve
-                       and is currently stored in  h->hints.pointName.
-                       If there is a pointName in the firstOpRec, it belongs in the first move-to.
-                        */
-                        /* Add the final curve-to to the opList.*/
-                        CHKOFLOW(2);
-                        PUSH(firstOpRec->coords[0]);
-                        PUSH(firstOpRec->coords[1]);
-                        doOp_ct(h, glyph_cb, h->hints.pointName); /* adds a new curve opRec to the op list, using the point name (if any) of the first point of the curve.  */
-
-                        /* doOp_ct can resize the opList array, invalidating the firstOpRec pointer */
-                        firstOpRec = &h->data.opList.array[contourStartOpIndex];
-                        firstOpRec->opType = movetoType;
-
-                        h->hints.pointName = NULL;
-                    }
-                }
-                h->stack.flags &= ~((unsigned long)(PARSE_PATH | PARSE_SEEN_MOVETO));
-            } else if (tokenEqualStr(tk, "<point")) {
-                if (state != outlineInContour) {
-                    fatal(h, ufoErrParse, "Encountered <point token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                }
-                state = outlineInPoint;
-                result = parsePoint(h, glyph_cb, glifRec, state, transform);
-                state = outlineInContour;
-                if (ufoSuccess != result)
-                    break;
-            } else if (tokenEqualStr(tk, "<component")) {
-                if (state != outlineStart) {
-                    fatal(h, ufoErrParse, "Encountered <component token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                }
-                state = outlineInComponent;
-                result = parseComponent(h, glifRec, glyph_cb, state, transform);
-                state = outlineStart;
-                if (ufoSuccess != result)
-                    break;
-            } else if (tokenEqualStr(tk, "<lib>")) {
-                if (state == outlineStart) {
-                    state = outlineInLib;
-                }
-            } else if (tokenEqualStr(tk, "</lib>")) {
-                if (state == outlineInLib) {
-                    state = outlineStart;
-                }
-            } else if (tokenEqualStr(tk, "<dict>")) {
-                if (state == outlineInLib) {
-                    state = outlineInLibDict;
-                }
-            } else if (tokenEqualStr(tk, "</dict>")) {
-                if (state == outlineInLibDict) {
-                    state = outlineInLib;
-                }
-            } else if (tokenEqualStr(tk, "<key>")) {
-                if (state == outlineInLibDict)  // This consumes the "<\key>" token, whether or not it is an Adobe key.
-                {
-                    char* valueString = getKeyValue(h, "</key>", state);
-                    if (valueString == NULL) {
-                        fatal(h, ufoErrParse, "Encountered empty <key> for GLIF lib/dict. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                        continue;
-                    }
-
-                    if (tk == NULL) {
-                        fatal(h, ufoErrParse, "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                        h->stack.flags = PARSE_END;
-                    }
-
-                    if (0 == strcmp(valueString, t1HintKeyV1)) {
-                        tk = getToken(h, state);
-                        if (tk == NULL) {
-                            fatal(h, ufoErrParse, "Encountered end of buffer before end of glyph when parsing t1 hint key. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                            h->stack.flags = PARSE_END;
-                        }
-
-                        if (tokenEqualStr(tk, "<data>")) {
-                            parseType1HintDataV1(h, glifRec, transform);
-                        }
-                    } else if (0 == strcmp(valueString, t1HintKeyV2)) {
-                        tk = getToken(h, state);
-                        if (tk == NULL) {
-                            fatal(h, ufoErrParse, "Encountered end of buffer before end of glyph when parsing t1 hint key. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                            h->stack.flags = PARSE_END;
-                        }
-
-                        if (tokenEqualStr(tk, "<dict>")) {
-                            parseType1HintDataV2(h, glifRec, transform);
-                        }
-                    } else {
-                        /* We just saw a <key>data<\key> for a  third party <lib><dict>. We want to skip tokens until we see the end of the data. */
-                        skipData(h, glifRec);
-                    }
-                }
-            } else if (tokenEqualStr(tk, "</outline>")) {
-                if (state != outlineStart) {
-                    fatal(h, ufoErrParse, "Encountered </outline> token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                }
-            } else if (tokenEqualStr(tk, "</glyph>")) {
-                /* The normal exit */
-                h->cb.stm.close(&h->cb.stm, h->stm.src);
-                return result;
-            } else if (tokenEqualStr(tk, "<anchor")) {
-                if (state != outlineStart) {
-                    fatal(h, ufoErrParse, "Encountered <anchor token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                }
-                state = otherInAnchor;
-                result = parseAnchor(h, glifRec, state);
-                state = outlineStart;
-                if (ufoSuccess != result)
-                    break;
-            } else if (tokenEqualStr(tk, "<note>")) {
-                prevState = state;
-                state = otherInNote;
-                parseNote(h, glifRec, state);
-                state = prevState;
-                if (ufoSuccess != result)
-                    break;
-            } else if (tokenEqualStr(tk, "<guideline")) {
-                if (state != outlineStart) {
-                    fatal(h, ufoErrParse, "Encountered <guideline token unexpectedly. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                }
-                state = otherInGuideline;
-                result = parseGuideline(h, glifRec, state);
-                state = outlineStart;
-                if (ufoSuccess != result)
-                    break;
-            } else {
-                if ((state != outlineInLib) && (state != outlineInLibDict)) {
-                    fatal(h, ufoErrParse, "parseGLIF: unhandled token: %s. Glyph: %s. Context: %s.\n", tk->val, glifRec->glyphName, getBufferContextPtr(h));
-                }
-            }
-        }
-    } while (!(h->stack.flags & PARSE_END));
+    
+    xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    int parsingSuccess = parseXMLGlif(h, cur, gi->tag, NULL, glyph_cb, glifRec, transform);
 
     /* An odd exit - didn't see  "</glyph>"  */
     h->cb.stm.close(&h->cb.stm, h->stm.src);
