@@ -53,6 +53,11 @@ enum contentsParsingState{
     parsingAltLayer
 };
 
+enum glifParsingState{
+    preParsingGlif,
+    parsingGlif
+};
+
 #define kMaxToken 1024
 #define kMaxName 64
 const char* t1HintKey = "com.adobe.type.autohint";
@@ -65,6 +70,7 @@ int FDArrayInitSize = 50;
 bool parsingFDArray = false;
 bool parsingValueArray = false;
 enum contentsParsingState parsingContentsLayer = None;
+enum glifParsingState parsingGlifsState = preParsingGlif;
 
 
 typedef struct
@@ -1842,6 +1848,19 @@ static int parseXMLPlist(ufoCtx h, xmlNodePtr cur){
         if (setFontDictKey(h, keyName, cur) && cur != NULL)
            cur = cur->next;
     }
+static int parseXMLGlif(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicode, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform) {
+    char* keyName;
+    while (cur != NULL) {
+        keyName = parseXMLGLIFKey(h, cur, unicode, tag, glyph_cb, glifRec, transform);
+        cur = cur->next;
+    }
+    if (parsingGlifsState == preParsingGlif) {
+        addCharFromGLIF(h, tag, glifRec->glyphName, 0, 0, *unicode);
+        currentCID = -1;
+        currentiFD = -1;
+    }
+    h->flags |= SEEN_END;
+    return ufoSuccess;
 }
 
 static int parseFontInfo(ufoCtx h) {
