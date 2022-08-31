@@ -1694,14 +1694,15 @@ static xmlNodePtr parseXMLFile(ufoCtx h, char* filename, const char* filetype){
 
     if ( cur == NULL ) {
         xmlFreeDoc(doc);
-        fatal(h, ufoErrSrcStream, "Error parsing XML file %s.\n", filename);
+        return NULL;
     }
 
-    if ((!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))) {
-        xmlFreeDoc(doc);
-        fatal(h, ufoErrSrcStream, "Error reading outermost <dict> in %s.\n", filename);
+    if (!strcmp("plist", filetype)) {
+        if ((!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))) {
+            xmlFreeDoc(doc);
+            fatal(h, ufoErrSrcStream, "Error reading outermost <dict> in %s.\n", filename);
+        }
     }
-
     return cur;
 }
 
