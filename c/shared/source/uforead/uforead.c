@@ -1896,7 +1896,7 @@ static int parseUFO(ufoCtx h) {
     return retVal;
 }
 
-static int parseGuideline(ufoCtx h, GLIF_Rec* glifRec, int state) {
+static int parseXMLGuideline(ufoCtx h, xmlNodePtr cur, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec) {
     token* tk;
     char* end;
     int prevState = outlineStart;
@@ -1906,65 +1906,33 @@ static int parseGuideline(ufoCtx h, GLIF_Rec* glifRec, int state) {
     guideline = memNew(h, sizeof(guidelineRec));
     memset(guideline, 0, sizeof(guidelineRec));
 
-    while (1) {
-        tk = getToken(h, state);
-        if (tk == NULL) {
-            fatal(h, ufoErrParse, "Encountered end of buffer before end of glyph.%s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
-        } else if (tokenEqualStr(tk, "<!--")) {
-            prevState = state;
-            state = outlineInComment;
-        } else if (tokenEqualStr(tk, "-->")) {
-            if (state != outlineInComment) {
-                fatal(h, ufoErrParse, "Encountered end comment token while not in comment. Glyph %s. Context: %s\n", glifRec->glifFilePath, getBufferContextPtr(h));
-            }
-            state = prevState;
-        } else if (state == outlineInComment) {
-            continue;
-        } else if (tokenEqualStr(tk, "x=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            guideline->x = (float)strtod(tk->val, &end);
-        } else if (tokenEqualStr(tk, "y=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            guideline->y = (float)strtod(tk->val, &end);
-        } else if (tokenEqualStr(tk, "angle=")) {
-            tk = getAttribute(h, state);
-            end = tk->val + tk->length;
-            guideline->angle = (float)strtod(tk->val, &end);
-        } else if (tokenEqualStr(tk, "name=")) {
-            tk = getAttribute(h, state);
-            if (tk->length > 0) {
-                guideline->name = memNew(h, tk->length + 1);
-                end = tk->val + tk->length;
-                strncpy(guideline->name, tk->val, tk->length);
-                guideline->name[tk->length] = 0;
-            }
-        } else if (tokenEqualStr(tk, "color=")) {
-            tk = getAttribute(h, state);
-            if (tk->length > 0) {
-                guideline->color = memNew(h, tk->length + 1);
-                end = tk->val + tk->length;
-                strncpy(guideline->color, tk->val, tk->length);
-                guideline->color[tk->length] = 0;
-            }
-        } else if (tokenEqualStr(tk, "identifier=")) {
-            tk = getAttribute(h, state);
-            if (tk->length > 0) {
-                guideline->identifier = memNew(h, tk->length + 1);
-                end = tk->val + tk->length;
-                strncpy(guideline->identifier, tk->val, tk->length);
-                guideline->identifier[tk->length] = 0;
-            }
-        } else if (tokenEqualStr(tk, "/>")) {
-            memFree(h, guideline);
-            /* ToDo: instead of freeing it, append the guideline record to a
-                     dynamic array in, or associated with, the glyph record */
-            break;
-        } else {
-            continue;
+    xmlAttr *attr = cur->properties;
+    while (attr != NULL) {
+        if (xmlAttrEqual(attr, "x"))
+            guideline->x = (float)strtod(getXmlAttrValue(attr), NULL);
+        else if (xmlAttrEqual(attr, "y"))
+            guideline->y = (float)strtod(getXmlAttrValue(attr), NULL);
+        else if (xmlAttrEqual(attr, "angle"))
+            guideline->angle = (float)strtod(getXmlAttrValue(attr), NULL);
+        else if (xmlAttrEqual(attr, "name")) {
+            char* temp = getXmlAttrValue(attr);
+            size_t nameLen = strlen(temp) + 1;
+            guideline->name = memNew(h, nameLen);
+            strncpy(guideline->name, temp, nameLen);
+        } else if (xmlAttrEqual(attr, "color")) {
+            char* temp = getXmlAttrValue(attr);
+            size_t nameLen = strlen(temp) + 1;
+            guideline->color = memNew(h, nameLen);
+            strncpy(guideline->color, temp, nameLen);
+        } else if (xmlAttrEqual(attr, "identifier")) {
+            char* temp = getXmlAttrValue(attr);
+            size_t nameLen = strlen(temp) + 1;
+            guideline->identifier = memNew(h, nameLen);
         }
     }
+    memFree(h, guideline);
+    /* ToDo: instead of freeing it, append the guideline record to a
+             dynamic array in, or associated with, the glyph record */
     return result;
 }
 
