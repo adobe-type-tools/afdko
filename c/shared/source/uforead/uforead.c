@@ -1005,6 +1005,63 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
     freeValueArray(h);
 }
 
+static void setFlexListArrayValue(ufoCtx h) {
+    int i = 0;
+    if (h->valueArray.cnt == 0)
+        return;
+    while ((i < h->valueArray.cnt)) {
+        char* pointName = memNew(h, strlen(h->valueArray.array[i]));
+        strcpy(pointName, h->valueArray.array[i]);
+        *dnaNEXT(h->hints.flexOpList) = pointName;
+        i++;
+    }
+    freeValueArray(h);
+}
+
+static void setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
+    StemHint* stem;
+    float pos = 0;
+    float width = 0;
+    int stemFlags = 0;
+    int count = 0;
+    int isH = !(stemFlags & ABF_VERT_STEM);
+//    if ((transform != NULL) && (!transform->isOffsetOnly)) { looks like transform is ALWAYS NULL
+//        /* We omit stems if the stems are being skewed */
+//        if (isH && (transform->mtx[2] != 0.0))
+//            return result;
+//        if ((!isH) && (transform->mtx[1] != 0.0))
+//            return result;
+//    }
+    if (h->hints.hintMasks.cnt > 1)
+        stemFlags |= ABF_NEW_HINTS;
+    
+    int i = 0;
+    if (h->valueArray.cnt == 0)
+        return;
+    while ((i < h->valueArray.cnt)) {
+        char* stemType = strtok(h->valueArray.array[i], " ");
+        if (!strcmp(stemType, "hstem"))
+            stemFlags = 0;
+        else if (!strcmp(stemType, "vstem"))
+            stemFlags |= ABF_VERT_STEM;
+        else if (!strcmp(stemType, "hstem3"))
+            stemFlags |= ABF_STEM3_STEM;
+        else if (!strcmp(stemType, "vstem3")) {
+            stemFlags |= ABF_VERT_STEM;
+            stemFlags |= ABF_STEM3_STEM;
+        }
+        stem = dnaNEXT(curHintMask->maskStems);
+        pos = (float) atof(strtok(NULL, " "));
+        width = (float) atof(strtok(NULL, " "));
+        stem->edge = pos;
+        stem->width = width;
+        stem->flags = stemFlags;
+        i++;
+        stemFlags = 0;
+    }
+    freeValueArray(h);
+}
+
 /* ToDo: add extra warnings for verbose-output */
 static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyName){
     bool valid = true;
