@@ -1754,6 +1754,44 @@ static xmlNodePtr parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     return cur;
 }
 
+static char* parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform) {
+    xmlAttr *attr = cur->properties;
+    if (parsingGlifsState == preParsingGlif) {
+        if (xmlKeyEqual(cur, "advance")) {
+            if (xmlAttrEqual(attr, "width") || xmlAttrEqual(attr, "advance"))
+                setWidth(h, tag, atoi(getXmlAttrValue(attr)));
+        } else if (xmlKeyEqual(cur, "unicode")) {
+            if (xmlAttrEqual(attr, "hex")){
+                *unicode = strtol(getXmlAttrValue(attr), NULL, 16);
+          }
+        }
+    } else if (parsingGlifsState == parsingGlif) {
+        if (xmlKeyEqual(cur, "outline")) {
+            cur = cur->xmlChildrenNode;
+            while(cur != NULL) {
+                if (xmlKeyEqual(cur, "contour")) {
+                    parseXMLContour(h, cur, glifRec, glyph_cb, transform);
+                } else if (xmlKeyEqual(cur, "component")) {
+                    parseXMLComponent(h, cur, glifRec, glyph_cb, transform);
+                }
+                cur = cur->next;
+            }
+        } else if (xmlKeyEqual(cur, "anchor")) {
+            parseXMLAnchor(h, cur, glifRec);
+        } else if (xmlKeyEqual(cur, "guideline")) {
+            parseXMLGuideline(h, cur, tag, glyph_cb, glifRec);
+        }
+        if (xmlKeyEqual(cur, "lib")) {  /* so nice it's parsed twice. (parsed in both preParseGLIF and parseGLIF until these two are merged in the future.) */
+           cur = cur->xmlChildrenNode;
+           while (cur != NULL) {
+               parseXMLKeyValue(h, cur);
+               cur = cur->next;
+           }
+       }
+    return NULL;
+    }
+}
+
 /* ToDo: add extra warnings for verbose-output*/
 static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur){
     if ((xmlStrEqual(cur->name, (const xmlChar *) "key"))) {
