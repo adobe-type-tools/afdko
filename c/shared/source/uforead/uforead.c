@@ -306,6 +306,7 @@ static int parseXMLPlist(ufoCtx h, xmlNodePtr cur);
 static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, int state, Transform* transform);
 static int parseXMLComponent(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb, Transform* transform);
 static int parseXMLAnchor(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec);
+static int parseXMLContour(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb, Transform* transform);
 
 /* -------------------------- Error Support ------------------------ */
 
@@ -2105,6 +2106,49 @@ static int setParseXMLComponentValue(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbac
     fillbuf(h, 0);
     h->stack.flags &= ~PARSE_END;
     return result;
+}
+
+static int parseXMLContour(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb, Transform* transform){
+    long contourStartOpIndex = h->data.opList.cnt;
+    h->stack.flags |= PARSE_PATH;
+    h->stack.flags &= ~((unsigned long)PARSE_SEEN_MOVETO);
+    xmlNodePtr curChild = cur->xmlChildrenNode;
+    while(curChild != NULL){
+        if (xmlKeyEqual(curChild, "point")){
+            int result = parseXMLPoint(h, curChild, glyph_cb, glifRec, 2, transform);
+        }
+        curChild = curChild->next;
+    }
+    if (h->data.opList.cnt > 1) {
+        OpRec* firstOpRec = &h->data.opList.array[contourStartOpIndex];
+        /* Now we need to fix up the OpList. In GLIF, there is usually no explicit start point, as the format expresses
+         the path segments as a complete closed path, with no explicit start point.
+
+         I use the first path operator end point as the start point, and convert this first operator to move-to.
+         If the first path operator was a line-to, then I do not add it to the end of the op-list, as it should become an implicit rather than explicit close path.
+         If it is a curve, then I need to add it to the oplist as the final path segment. */
+        if (firstOpRec->opType == linetoType) {
+            /* I just need to convert this to a move-to. The final line-to will become implicit */
+            firstOpRec->opType = movetoType;
+        } else if (firstOpRec->opType == curvetoType) {
+            /* The first two points for the curve should be on the stack.
+           If there is a hint set for this last curve, it was part of the first point element for the curve
+           and is currently stored in  h->hints.pointName.
+           If there is a pointName in the firstOpRec, it belongs in the first move-to.
+            */
+            /* Add the final curve-to to the opList.*/
+            CHKOFLOW(2);
+            PUSH(firstOpRec->coords[0]);
+            PUSH(firstOpRec->coords[1]);
+            doOp_ct(h, glyph_cb, h->hints.pointName); /* adds a new curve opRec to the op list, using the point name (if any) of the first point of the curve.  */
+
+            /* doOp_ct can resize the opList array, invalidating the firstOpRec pointer */
+            firstOpRec = &h->data.opList.array[contourStartOpIndex];
+            firstOpRec->opType = movetoType;
+
+            h->hints.pointName = NULL;
+        }
+    }
 }
 
 
