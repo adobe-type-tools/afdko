@@ -1250,6 +1250,19 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
             top->cid.Ordering.ptr = copyStr(h, keyValue);
         } else if (!strcmp(keyName, "com.adobe.type.cid.Supplement")) {
             top->cid.Supplement = atol(copyStr(h, keyValue));
+        } else if (!strcmp(keyName, "com.adobe.type.cid.CID")) {
+            currentCID = atoi(keyValue);
+            h->top.sup.flags |= ABF_CID_FONT;
+            h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
+        } else if (!strcmp(keyName, "com.adobe.type.cid.iFD")) {
+            currentiFD = atoi(keyValue);
+        } else if (!strcmp(keyName, "flexList")) {
+            setFlexListArrayValue(h);
+        } else if (!strcmp(keyName, "pointTag")) {
+            curHintMask->pointName = memNew(h, strlen(keyValue));
+            strcpy(curHintMask->pointName, keyValue);
+        } else if (!strcmp(keyName, "stems")) {
+            setStemsArrayValue(h, curHintMask);
         }
         freeValueArray(h);
     }
