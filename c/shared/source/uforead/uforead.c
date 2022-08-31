@@ -1092,6 +1092,7 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     abfPrivateDict* pd = &fd->Private;
     BluesArray* bluesArray;
     abfFontMatrix* fontMatrix;
+    HintMask* curHintMask = h->hints.hintMasks.array + (h->hints.hintMasks.cnt - 1);  /* get the last hintMask in hintMasks array*/
 
     if (keyName == NULL){
         return false;
@@ -1110,6 +1111,10 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         parsingFDArray = false;  // this is only set when parsing root of FDArray, not sub-dicts within a dict
         parseXMLKeyValue(h, cur);
         parsingFDArray = true;
+    } else if (!strcmp(keyName, "hintSetList")) {
+        parsingHintSetListArray = true;
+        parseXMLKeyValue(h, cur);
+        parsingHintSetListArray = false;
     } else {
         char* keyValue = parseXMLKeyValue(h, cur);
         if (!keyValueValid(h, cur, keyValue, keyName))
