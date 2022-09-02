@@ -2103,7 +2103,7 @@ static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, 
             else if (!strcmp(strType, "offcurve"))
                 continue;  // type is already set to 0. x and y will get pushed on the stack, and no other operation will happen.
             else {
-                fatal(h, ufoErrParse, "Encountered unsupported point type '%s' in glyph '%s'. Context: %s.\n", type, glifRec->glyphName, getBufferContextPtr(h));
+                fatal(h, ufoErrParse, "Encountered unsupported point type '%s' in glyph '%s'. Context: %s.\n", strType, glifRec->glyphName, getBufferContextPtr(h));
                 result = ufoErrParse;
                 break;
             }
@@ -2158,9 +2158,10 @@ static int parseXMLContour(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyph
     h->stack.flags |= PARSE_PATH;
     h->stack.flags &= ~((unsigned long)PARSE_SEEN_MOVETO);
     xmlNodePtr curChild = cur->xmlChildrenNode;
+    int result = ufoSuccess;
     while (curChild != NULL){
         if (xmlKeyEqual(curChild, "point")){
-            int result = parseXMLPoint(h, curChild, glyph_cb, glifRec, 2, transform);
+            result = parseXMLPoint(h, curChild, glyph_cb, glifRec, 2, transform);
         }
         curChild = curChild->next;
     }
@@ -2194,6 +2195,7 @@ static int parseXMLContour(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyph
             h->hints.pointName = NULL;
         }
     }
+    return result;
 }
 
 
