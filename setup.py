@@ -16,7 +16,7 @@ classifiers = [
     'Operating System :: POSIX :: Linux',
 ]
 
-setup_requires=[ 'wheel', 'setuptools_scm', 'scikit-build', 'cython' ];
+setup_requires = ['wheel', 'setuptools_scm', 'scikit-build', 'cython']
 
 try:
     if LegacyVersion(get_cmake_version()) < LegacyVersion("3.16"):
@@ -30,9 +30,11 @@ try:
 except shutil.Error:
     setup_requires.append('ninja')
 
+
 def _get_requirements():
     with io.open("requirements.txt", encoding="utf-8") as requirements:
         return [rl.replace("==", ">=") for rl in requirements.readlines()]
+
 
 # concatenate README and NEWS into long_description so they are
 # displayed on the afdko project page on PyPI
@@ -74,35 +76,36 @@ setup(name="afdko",
       ],
       install_requires=_get_requirements(),
       entry_points={
-          'console_scripts': [ # "afdko=afdko.afdko:main",
-                               "buildcff2vf=afdko.buildcff2vf:main",
-                               "buildmasterotfs=afdko.buildmasterotfs:main",
-                               "comparefamily=afdko.comparefamily:main",
-                               "checkoutlinesufo=afdko.checkoutlinesufo:main",
-                               "makeotf=afdko.makeotf:main",
-                               "makeinstancesufo=afdko.makeinstancesufo:main",
-                               "otc2otf=afdko.otc2otf:main",
-                               "otf2otc=afdko.otf2otc:main",
-                               "otf2ttf=afdko.otf2ttf:main",
-                               "ttfcomponentizer=afdko.ttfcomponentizer:main",
-                               "ttfdecomponentizer=afdko.ttfdecomponentizer:main",
-                               "ttxn=afdko.ttxn:main",
-                               "charplot=afdko.proofpdf:charplot",
-                               "digiplot=afdko.proofpdf:digiplot",
-                               "fontplot=afdko.proofpdf:fontplot",
-                               "fontplot2=afdko.proofpdf:fontplot2",
-                               "fontsetplot=afdko.proofpdf:fontsetplot",
-                               "hintplot=afdko.proofpdf:hintplot",
-                               "waterfallplot=afdko.proofpdf:waterfallplot",
-                               "detype1=afdko._internal:detype1",
-                               "makeotfexe=afdko._internal:makeotfexe",
-                               "mergefonts=afdko._internal:mergefonts",
-                               "rotatefont=afdko._internal:rotatefont",
-                               "sfntdiff=afdko._internal:sfntdiff",
-                               "sfntedit=afdko._internal:sfntedit",
-                               "spot=afdko._internal:spot",
-                               "tx=afdko._internal:tx",
-                               "type1=afdko._internal:type1",
-                             ],
+          'console_scripts':
+              [   # "afdko=afdko.afdko:main",
+                  "buildcff2vf=afdko.buildcff2vf:main",
+                  "buildmasterotfs=afdko.buildmasterotfs:main",
+                  "comparefamily=afdko.comparefamily:main",
+                  "checkoutlinesufo=afdko.checkoutlinesufo:main",
+                  "makeotf=afdko.makeotf:main",
+                  "makeinstancesufo=afdko.makeinstancesufo:main",
+                  "otc2otf=afdko.otc2otf:main",
+                  "otf2otc=afdko.otf2otc:main",
+                  "otf2ttf=afdko.otf2ttf:main",
+                  "ttfcomponentizer=afdko.ttfcomponentizer:main",
+                  "ttfdecomponentizer=afdko.ttfdecomponentizer:main",
+                  "ttxn=afdko.ttxn:main",
+                  "charplot=afdko.proofpdf:charplot",
+                  "digiplot=afdko.proofpdf:digiplot",
+                  "fontplot=afdko.proofpdf:fontplot",
+                  "fontplot2=afdko.proofpdf:fontplot2",
+                  "fontsetplot=afdko.proofpdf:fontsetplot",
+                  "hintplot=afdko.proofpdf:hintplot",
+                  "waterfallplot=afdko.proofpdf:waterfallplot",
+                  "detype1=afdko._internal:detype1",
+                  "makeotfexe=afdko._internal:makeotfexe",
+                  "mergefonts=afdko._internal:mergefonts",
+                  "rotatefont=afdko._internal:rotatefont",
+                  "sfntdiff=afdko._internal:sfntdiff",
+                  "sfntedit=afdko._internal:sfntedit",
+                  "spot=afdko._internal:spot",
+                  "tx=afdko._internal:tx",
+                  "type1=afdko._internal:type1",
+              ],
       },
       )
