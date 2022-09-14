@@ -1049,7 +1049,7 @@ static void setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
     if (h->valueArray.cnt == 0)
         return;
     while ((i < h->valueArray.cnt)) {
-        char* stemType = strtok(h->valueArray.array[i], " ");
+        char* stemType = strtok_r(h->valueArray.array[i], " ", &h->valueArray.array[i]);
         if (!strcmp(stemType, "hstem"))
             stemFlags = 0;
         else if (!strcmp(stemType, "vstem"))
@@ -1061,8 +1061,8 @@ static void setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
             stemFlags |= ABF_STEM3_STEM;
         }
         stem = dnaNEXT(curHintMask->maskStems);
-        pos = (float) atof(strtok(NULL, " "));
-        width = (float) atof(strtok(NULL, " "));
+        pos = (float) atof(strtok_r(h->valueArray.array[i], " ", &h->valueArray.array[i]));
+        width = (float) atof(strtok_r(h->valueArray.array[i], " ", &h->valueArray.array[i]));
         stem->edge = pos;
         stem->width = width;
         stem->flags = stemFlags;
@@ -2120,7 +2120,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
 static int setParseXMLComponentValue(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform, Transform localTransform, Transform *newTransform, int result) {
     Transform concatTransform;
     if (gi == NULL) {
-        fprintf(stderr, "Missing component base attribute. Glyph: %s, Context: %s.\n", glifRec->glifFilePath, getBufferContextPtr(h));
+        message(h, "Missing component base attribute. Glyph: %s, Context: %s.\n", glifRec->glifFilePath, getBufferContextPtr(h));
         result = ufoErrNoGlyph;
         return result;
     }

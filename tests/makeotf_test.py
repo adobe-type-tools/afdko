@@ -613,6 +613,7 @@ def test_outline_from_processed_layer_bug703():
     assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
+## TODO: Add this test back after adding verbosity flags
 # We've decided to reduce verbosity until we add verbose flags.
 # In the meantime, the new libxml2 parser simply ignores tokens
 # it doesn't recognize.
