@@ -40,17 +40,15 @@
 #include <math.h>
 #include <float.h>
 
+#if defined(WIN32) || defined(WIN64)
+# define strtok_r strtok_s
+#endif
+
 enum {
     ufoUnknown,
     ufoNumeric,
     ufoOperator,
     ufoNotSet,
-};
-
-
-enum contentsParsingState {
-    parsingDefaultLayer,
-    parsingAltLayer
 };
 
 enum parsingUFOFileState {
