@@ -47,15 +47,20 @@ enum {
     ufoNotSet,
 };
 
-enum contentsParsingState{
-    None,
+
+enum contentsParsingState {
     parsingDefaultLayer,
     parsingAltLayer
 };
 
-enum glifParsingState{
-    preParsingGlif,
-    parsingGlif
+enum parsingUFOFileState {
+    None,
+    parsingFontInfo,
+    parsingLib,
+    parsingContentsDflt,
+    parsingContentsAlt,
+    preParsingGLIF,
+    parsingGLIF
 };
 
 #define kMaxToken 1024
@@ -63,16 +68,7 @@ enum glifParsingState{
 const char* t1HintKey = "com.adobe.type.autohint";
 const char* t1HintKeyV1 = "com.adobe.type.autohint";
 const char* t1HintKeyV2 = "com.adobe.type.autohint.v2";
-int currentCID = -1;
-long CIDCount = 0;
-int currentiFD = 0;
 int FDArrayInitSize = 50;
-bool parsingFDArray = false;
-bool parsingHintSetListArray = false;
-bool parsingValueArray = false;
-enum contentsParsingState parsingContentsLayer = None;
-enum glifParsingState parsingGlifsState = preParsingGlif;
-
 
 typedef struct
 {
@@ -278,6 +274,15 @@ struct ufoCtx_ {
         ctlStreamCallbacks stm;
     } cb;
     dnaCtx dna;
+    struct {
+       int currentCID;
+       long CIDCount;
+       int  currentiFD;
+       bool parsingFDArray;
+       bool parsingHintSetListArray;
+       bool parsingValueArray;
+       enum parsingUFOFileState parsingUFOFile;
+    } parseState;
     struct
     {
         _Exc_Buf env;
@@ -966,7 +971,7 @@ static void freeValueArray(ufoCtx h){
         }
         dnaSET_CNT(h->valueArray, 0);
     }
-    parsingValueArray = false;
+    h->parseState.parsingValueArray = false;
 }
 
 /* ToDo: add extra warnings for verbose-output */
@@ -1076,10 +1081,10 @@ static void setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
 static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyName){
     bool valid = true;
     if (keyValue == NULL) {
-        if (!parsingValueArray)
+        if (!h->parseState.parsingValueArray)
             valid = false;
 //            message(h, "Warning: Encountered missing value for fontinfo key %s. Skipping", keyName);
-        else if (parsingValueArray && h->valueArray.cnt == 0)
+        else if (h->parseState.parsingValueArray && h->valueArray.cnt == 0)
             valid = false;
 //            message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
     } else {
@@ -1098,7 +1103,7 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     /* returns false when current key is NULL/ not parseable,
        otherwise returns true */
     abfTopDict* top = &h->top;
-    abfFontDict* fd = h->top.FDArray.array + currentiFD;
+    abfFontDict* fd = h->top.FDArray.array + h->parseState.currentiFD;
     abfPrivateDict* pd = &fd->Private;
     BluesArray* bluesArray;
     abfFontMatrix* fontMatrix;
@@ -1113,26 +1118,26 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
             h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
         abfInitFontDict(h->top.FDArray.array);
 
-        parsingFDArray = true;
-        currentiFD = -1;
+        h->parseState.parsingFDArray = true;
+        h->parseState.currentiFD = -1;
         parseXMLKeyValue(h, cur);
-        parsingFDArray = false;
+        h->parseState.parsingFDArray = false;
     } else if (!strcmp(keyName, "PrivateDict")) {
-        parsingFDArray = false;  // this is only set when parsing root of FDArray, not sub-dicts within a dict
+        h->parseState.parsingFDArray = false;  // this is only set when parsing root of FDArray, not sub-dicts within a dict
         parseXMLKeyValue(h, cur);
-        parsingFDArray = true;
+        h->parseState.parsingFDArray = true;
     } else if (!strcmp(keyName, "hintSetList")) {
-        parsingHintSetListArray = true;
+        h->parseState.parsingHintSetListArray = true;
         parseXMLKeyValue(h, cur);
-        parsingHintSetListArray = false;
+        h->parseState.parsingHintSetListArray = false;
     } else {
         char* keyValue = parseXMLKeyValue(h, cur);
         if (!keyValueValid(h, cur, keyValue, keyName))
             return false;
 
-        if (parsingContentsLayer == parsingDefaultLayer) {
+        if (h->parseState.parsingUFOFile == parsingContentsDflt) {
             addGLIFRec(h, keyName, keyValue);
-        } else if (parsingContentsLayer == parsingAltLayer) {
+        } else if (h->parseState.parsingUFOFile == parsingContentsAlt) {
             updateGLIFRec(h, keyName, keyValue);
         } else if (!strcmp(keyName, "copyright")) {
             top->Copyright.ptr = keyValue;
@@ -1266,11 +1271,11 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         } else if (!strcmp(keyName, "com.adobe.type.cid.Supplement")) {
             top->cid.Supplement = atol(copyStr(h, keyValue));
         } else if (!strcmp(keyName, "com.adobe.type.cid.CID")) {
-            currentCID = atoi(keyValue);
+            h->parseState.currentCID = atoi(keyValue);
             h->top.sup.flags |= ABF_CID_FONT;
             h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
         } else if (!strcmp(keyName, "com.adobe.type.cid.iFD")) {
-            currentiFD = atoi(keyValue);
+            h->parseState.currentiFD = atoi(keyValue);
         } else if (!strcmp(keyName, "flexList")) {
             setFlexListArrayValue(h);
         } else if (!strcmp(keyName, "pointTag")) {
@@ -1392,6 +1397,7 @@ static void updateGLIFRec(ufoCtx h, char* glyphName, char* fileName) {
 
 static int parseGlyphOrder(ufoCtx h) {
     const char* filetype = "plist";
+    h->parseState.parsingUFOFile = parsingLib;
 
     h->src.next = h->mark = NULL;
     h->cb.stm.clientFileName = "lib.plist";
@@ -1438,11 +1444,11 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
     char *plistFileName = "/contents.plist";
 
     if (altLayer) {
-        parsingContentsLayer = parsingAltLayer;
+        h->parseState.parsingUFOFile = parsingContentsAlt;
         clientFilePath = memNew(h, 2 + strlen(h->altLayerDir) + strlen(plistFileName));
         strcpy(clientFilePath, h->altLayerDir);
     } else {
-        parsingContentsLayer = parsingDefaultLayer;
+        h->parseState.parsingUFOFile = parsingContentsDflt;
         clientFilePath = memNew(h, 2 + strlen(h->defaultLayerDir) + strlen(plistFileName));
         strcpy(clientFilePath, h->defaultLayerDir);
     }
@@ -1489,7 +1495,6 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
 
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
-    parsingContentsLayer = None;
 
     memFree(h, clientFilePath);
     return parsingSuccess;
@@ -1524,14 +1529,14 @@ static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin,
         chr->flags = 0;
         chr->tag = tag;
         chr->iFD = 0;
-        if (currentCID >= 0) {
-            chr->cid = currentCID;
-            if (currentiFD < 0){
+        if (h->parseState.currentCID >= 0) {
+            chr->cid = h->parseState.currentCID;
+            if (h->parseState.currentiFD < 0){
                     fatal(h, ufoErrParse, "Warning: glyph '%s' missing FDArray index within <lib> dict", glyphName);
             }
-            chr->iFD = currentiFD;
-            if (currentCID > CIDCount) {
-                CIDCount = (long)currentCID + 1;
+            chr->iFD = h->parseState.currentiFD;
+            if (h->parseState.currentCID > h->parseState.CIDCount) {
+                h->parseState.CIDCount = (long)h->parseState.currentCID + 1;
             }
         } else if (h->top.sup.flags & ABF_CID_FONT){
             fatal(h, ufoErrParse, "Warning: glyph '%s' missing CID number within <lib> dict", glyphName);
@@ -1554,7 +1559,7 @@ static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin,
 }
 
 static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
-    parsingContentsLayer = None;
+    h->parseState.parsingUFOFile = preParsingGLIF;
     const char* filetype = "glyph";
     int char_begin = 0;
     int char_end = 0;
@@ -1733,7 +1738,7 @@ static char* getXmlAttrValue(xmlAttr *attr){
 
 static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform) {
     xmlAttr *attr = cur->properties;
-    if (parsingGlifsState == preParsingGlif) {
+    if (h->parseState.parsingUFOFile == preParsingGLIF) {
         if (xmlKeyEqual(cur, "advance")) {
             if (xmlAttrEqual(attr, "width") || xmlAttrEqual(attr, "advance"))
                 setWidth(h, tag, atoi(getXmlAttrValue(attr)));
@@ -1742,7 +1747,7 @@ static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, in
                 *unicode = strtol(getXmlAttrValue(attr), NULL, 16);
           }
         }
-    } else if (parsingGlifsState == parsingGlif) {
+    } else if (h->parseState.parsingUFOFile == parsingGLIF) {
         if (xmlKeyEqual(cur, "outline")) {
             cur = cur->xmlChildrenNode;
             while (cur != NULL) {
@@ -1793,7 +1798,7 @@ static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur){
 
 static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
     dnaSET_CNT(h->valueArray, 0);
-    parsingValueArray = true;
+    h->parseState.parsingValueArray = true;
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
         char* valueString = parseXMLKeyValue(h, cur);
@@ -1808,15 +1813,15 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     char* keyName;
     cur = cur->xmlChildrenNode;
 
-    if (parsingFDArray){
-        currentiFD = currentiFD + 1;
+    if (h->parseState.parsingFDArray){
+        h->parseState.currentiFD = h->parseState.currentiFD + 1;
         h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
         if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
             reallocFDArray(h);
         }
-        abfFontDict* fd = h->top.FDArray.array + currentiFD;
+        abfFontDict* fd = h->top.FDArray.array + h->parseState.currentiFD;
         abfInitFontDict(fd);
-    } else if (parsingHintSetListArray)
+    } else if (h->parseState.parsingHintSetListArray)
         dnaNEXT(h->hints.hintMasks);
 
     while (cur != NULL) {
@@ -1844,7 +1849,7 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
     }
     if (isSimpleKey(cur)) {  /* if string, integer, or real */
         return (char*) xmlNodeGetContent(cur);
-    } else if (parsingContentsLayer == parsingDefaultLayer || parsingContentsLayer == parsingAltLayer) {
+    } else if (h->parseState.parsingUFOFile == parsingContentsDflt || h->parseState.parsingUFOFile == parsingContentsAlt) {
         return NULL; /* Only simple keys allowed when parsing contents.plist*/
     } else if (xmlStrEqual(cur->name, (const xmlChar *) "dict")) {
         parseXMLDict(h, cur);
@@ -1879,10 +1884,10 @@ static int parseXMLGlif(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicod
         parseXMLGLIFKey(h, cur, unicode, tag, glyph_cb, glifRec, transform);
         cur = cur->next;
     }
-    if (parsingGlifsState == preParsingGlif) {
+    if (h->parseState.parsingUFOFile == preParsingGLIF) {
         addCharFromGLIF(h, tag, glifRec->glyphName, 0, 0, *unicode);
-        currentCID = -1;
-        currentiFD = -1;
+        h->parseState.currentCID = -1;
+        h->parseState.currentiFD = -1;
     }
     h->flags |= SEEN_END;
     return ufoSuccess;
@@ -1890,7 +1895,8 @@ static int parseXMLGlif(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicod
 
 static int parseFontInfo(ufoCtx h) {
     const char* filetype = "plist";
-    currentiFD = 0;
+    h->parseState.currentiFD = 0;
+    h->parseState.parsingUFOFile = parsingFontInfo;
 
     h->src.next = h->mark = NULL;
     h->cb.stm.clientFileName = "fontinfo.plist";
@@ -3191,7 +3197,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
      */
 
     const char* filetype = "glyph";
-    parsingGlifsState = parsingGlif;
+    h->parseState.parsingUFOFile = parsingGLIF;
     int result = ufoSuccess;
     int state = outlineStart;
     int prevState = outlineStart;
@@ -3420,6 +3426,14 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
 
     h->top.FDArray.cnt = 1;
     h->top.FDArray.array = &h->fdict;
+    
+    h->parseState.parsingFDArray = false;
+    h->parseState.parsingHintSetListArray = false;
+    h->parseState.parsingValueArray = false;
+    h->parseState.parsingUFOFile = None;
+    h->parseState.currentCID = -1;
+    h->parseState.CIDCount = 0;
+    h->parseState.currentiFD = 0;
 
     /* init glyph data structures used */
     h->valueArray.cnt = 0;
@@ -3485,7 +3499,7 @@ int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks* glyph_cb) {
             return res;
     }
     if (h->top.sup.flags & ABF_CID_FONT) {
-        h->top.cid.CIDCount = CIDCount;
+        h->top.cid.CIDCount = h->parseState.CIDCount;
     }
     HANDLER
     return Exception.Code;
