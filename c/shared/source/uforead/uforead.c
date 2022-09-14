@@ -1026,7 +1026,7 @@ static void setFlexListArrayValue(ufoCtx h) {
     if (h->valueArray.cnt == 0)
         return;
     while ((i < h->valueArray.cnt)) {
-        char* pointName = memNew(h, strlen(h->valueArray.array[i]));
+        char* pointName = memNew(h, strlen(h->valueArray.array[i]) + 1);
         strcpy(pointName, h->valueArray.array[i]);
         *dnaNEXT(h->hints.flexOpList) = pointName;
         i++;
@@ -1107,7 +1107,12 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     abfPrivateDict* pd = &fd->Private;
     BluesArray* bluesArray;
     abfFontMatrix* fontMatrix;
-    HintMask* curHintMask = h->hints.hintMasks.array + (h->hints.hintMasks.cnt - 1);  /* get the last hintMask in hintMasks array*/
+    HintMask* curHintMask;
+
+    if (h->hints.hintMasks.cnt > 0)
+        curHintMask = h->hints.hintMasks.array + (h->hints.hintMasks.cnt - 1);  /* get the last hintMask in hintMasks array*/
+    else
+        curHintMask = h->hints.hintMasks.array;
 
     if (keyName == NULL){
         return false;
@@ -1279,7 +1284,7 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         } else if (!strcmp(keyName, "flexList")) {
             setFlexListArrayValue(h);
         } else if (!strcmp(keyName, "pointTag")) {
-            curHintMask->pointName = memNew(h, strlen(keyValue));
+            curHintMask->pointName = memNew(h, strlen(keyValue) + 1);
             strcpy(curHintMask->pointName, keyValue);
         } else if (!strcmp(keyName, "stems")) {
             setStemsArrayValue(h, curHintMask);
@@ -3426,7 +3431,7 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
 
     h->top.FDArray.cnt = 1;
     h->top.FDArray.array = &h->fdict;
-    
+
     h->parseState.parsingFDArray = false;
     h->parseState.parsingHintSetListArray = false;
     h->parseState.parsingValueArray = false;
