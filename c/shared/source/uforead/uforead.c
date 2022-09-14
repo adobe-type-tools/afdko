@@ -1074,6 +1074,7 @@ static void setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
         i++;
         stemFlags = 0;
     }
+    h->valueArray.cnt = h->valueArray.cnt - i;
     freeValueArray(h);
 }
 
