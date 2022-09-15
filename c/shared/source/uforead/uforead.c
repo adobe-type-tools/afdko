@@ -1024,8 +1024,7 @@ static void setFlexListArrayValue(ufoCtx h) {
     if (h->valueArray.cnt == 0)
         return;
     while ((i < h->valueArray.cnt)) {
-        char* pointName = memNew(h, strlen(h->valueArray.array[i]) + 1);
-        strcpy(pointName, h->valueArray.array[i]);
+        char* pointName = copyStr(h, h->valueArray.array[i]);
         *dnaNEXT(h->hints.flexOpList) = pointName;
         i++;
     }
@@ -1283,8 +1282,7 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         } else if (!strcmp(keyName, "flexList")) {
             setFlexListArrayValue(h);
         } else if (!strcmp(keyName, "pointTag")) {
-            curHintMask->pointName = memNew(h, strlen(keyValue) + 1);
-            strcpy(curHintMask->pointName, keyValue);
+            curHintMask->pointName = copyStr(h, keyValue);
         } else if (!strcmp(keyName, "stems")) {
             setStemsArrayValue(h, curHintMask);
         }
@@ -1961,18 +1959,13 @@ static int parseXMLGuideline(ufoCtx h, xmlNodePtr cur, int tag, abfGlyphCallback
             guideline->angle = (float)strtod(getXmlAttrValue(attr), NULL);
         else if (xmlAttrEqual(attr, "name")) {
             char* temp = getXmlAttrValue(attr);
-            size_t nameLen = strlen(temp) + 1;
-            guideline->name = memNew(h, nameLen);
-            strncpy(guideline->name, temp, nameLen);
+            guideline->name = copyStr(h, temp);
         } else if (xmlAttrEqual(attr, "color")) {
             char* temp = getXmlAttrValue(attr);
-            size_t nameLen = strlen(temp) + 1;
-            guideline->color = memNew(h, nameLen);
-            strncpy(guideline->color, temp, nameLen);
+            guideline->color = copyStr(h, temp);
         } else if (xmlAttrEqual(attr, "identifier")) {
             char* temp = getXmlAttrValue(attr);
-            size_t nameLen = strlen(temp) + 1;
-            guideline->identifier = memNew(h, nameLen);
+            guideline->identifier = copyStr(h, temp);
         }
         attr = attr->next;
     }
@@ -2000,19 +1993,13 @@ static int parseXMLAnchor(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec) {
             anchor->y = (float)atof(getXmlAttrValue(attr));
         else if (xmlAttrEqual(attr, "name")) {
             char* temp = getXmlAttrValue(attr);
-            size_t nameLen = strlen(temp) + 1;
-            anchor->name = memNew(h, nameLen);
-            strncpy(anchor->name, temp, nameLen);
+            anchor->name = copyStr(h, temp);
         } else if (xmlAttrEqual(attr, "color")) {
             char* temp = getXmlAttrValue(attr);
-            size_t nameLen = strlen(temp) + 1;
-            anchor->color = memNew(h, nameLen);
-            strncpy(anchor->color, temp, nameLen);
+            anchor->color = copyStr(h, temp);
         } else if (xmlAttrEqual(attr, "identifier")) {
             char* temp = getXmlAttrValue(attr);
-            size_t nameLen = strlen(temp) + 1;
-            anchor->identifier = memNew(h, nameLen);
-            strncpy(anchor->identifier, temp, nameLen);
+            anchor->identifier = copyStr(h, temp);
         }
         attr = attr->next;
     }
@@ -2099,9 +2086,7 @@ static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, 
             y = (float)strtod(getXmlAttrValue(attr), NULL);
         else if (xmlAttrEqual(attr, "name")) {  // needs testing
             char* temp = getXmlAttrValue(attr);
-            size_t nameLen = strlen(temp) + 1;
-            pointName = memNew(h, nameLen);
-            strncpy(pointName, temp, nameLen);
+            pointName = copyStr(h, temp);
         } else if (xmlAttrEqual(attr, "type")) {
             char* strType = getXmlAttrValue(attr);
             if (!strcmp(strType, "move"))
