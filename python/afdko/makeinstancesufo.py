@@ -342,7 +342,7 @@ def run(options):
 
     logger.info("Built %s instances." % newInstancesCount)
     # Remove glyph.lib and font.lib (except for "public.glyphOrder")
-    pool = multiprocessing.Pool(os.cpu_count() - 1)
+    pool = multiprocessing.Pool(os.cpu_count())
     pool.starmap(postProcessInstance, [(instancePath, options)
                                        for instancePath in newInstancesList])
 
