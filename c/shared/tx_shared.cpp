@@ -702,7 +702,7 @@ void seedtime(txCtx h) {
 
 /* Return a random number in the range [0 - N). */
 long randrange(txCtx h, long N) {
-    return (long)((double)rand_r(&h->randseed) / ((double)RAND_MAX + 1) * N);
+    return (long)((double)RAND_R(&h->randseed) / ((double)RAND_MAX + 1) * N);
 }
 
 /* ------------------------------- dump mode ------------------------------- */
@@ -1703,7 +1703,7 @@ static void cef_EndFont(txCtx h) {
                 break; /* Use names */
             case src_OTF:
             case src_CFF:
-                if (rand_r(&h->randseed) & 0x0100)
+                if (RAND_R(&h->randseed) & 0x0100)
                     goto initspec;
                 break; /* Use names 50% of the time */
             case src_TrueType:

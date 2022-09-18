@@ -657,7 +657,7 @@ void proofDestroyContext(ProofContextPtr *ctxptr) {
             spotInform(SPOT_MSG_prufNUMPAGES, proofPageCount(*ctxptr));
             WinPrintClose((*ctxptr));
             if ((*ctxptr)->lpPassThrough) {
-                memFree((*ctxptr)->lpPassThrough);
+                sMemFree((*ctxptr)->lpPassThrough);
                 (*ctxptr)->lpPassThrough = NULL;
             }
 #endif
@@ -959,7 +959,7 @@ ProofContextPtr proofInitContext(proofOutputType where,
                         retries++;
                     }
                     len = strlen(tempname);
-                    ctx->psfilename = memNew(sizeof(int8_t) * (len + 1));
+                    ctx->psfilename = sMemNew(sizeof(int8_t) * (len + 1));
                     strcpy(ctx->psfilename, tempname);
                     if ((ctx->psfileptr = fopen(tempname, "w")) == (FILE *)NULL)
                         fatal(SPOT_MSG_prufNOOPENF);
@@ -970,7 +970,7 @@ ProofContextPtr proofInitContext(proofOutputType where,
                         retries++;
                     }
                     len = strlen(tempname);
-                    ctx->psfilename = memNew(sizeof(int8_t) * (len + 1));
+                    ctx->psfilename = sMemNew(sizeof(int8_t) * (len + 1));
                     strcpy(ctx->psfilename, tempname);
                     if ((ctx->psfileptr = fopen(tempname, "w")) == (FILE *)NULL)
                         fatal(SPOT_MSG_prufNOOPENF);
@@ -988,7 +988,7 @@ ProofContextPtr proofInitContext(proofOutputType where,
                     retries++;
                 }
                 len = strlen(tempname);
-                ctx->psfilename = memNew(sizeof(int8_t) * (len + 1));
+                ctx->psfilename = sMemNew(sizeof(int8_t) * (len + 1));
                 strcpy(ctx->psfilename, tempname);
                 if ((ctx->psfileptr = fopen(tempname, "w")) == (FILE *)NULL)
                     fatal(SPOT_MSG_prufNOOPENF);
@@ -1011,7 +1011,7 @@ ProofContextPtr proofInitContext(proofOutputType where,
             if ((!WinPrintOpen(ctx)) || (ctx->winPrinterDC == NULL))
                 fatal(SPOT_MSG_prufCANTPS);
 
-            if ((ctx->lpPassThrough = (LPSTR)memNew(sizeof(int8_t) * (PASSTHROUGHSIZE + 6))) == NULL)
+            if ((ctx->lpPassThrough = (LPSTR)sMemNew(sizeof(int8_t) * (PASSTHROUGHSIZE + 6))) == NULL)
                 fatal(SPOT_MSG_prufNOBUFMEM);
 
             spotInform(SPOT_MSG_prufPREPPS);
@@ -1041,13 +1041,13 @@ ProofContextPtr proofInitContext(proofOutputType where,
                         retries++;
                     }
                     len = strlen(tempname);
-                    ctx->psfilename = memNew(sizeof(int8_t) * (len + 1));
+                    ctx->psfilename = sMemNew(sizeof(int8_t) * (len + 1));
                     strcpy(ctx->psfilename, tempname);
                     if ((ctx->psfileptr = fopen(tempname, "w")) == (FILE *)NULL)
                         fatal(SPOT_MSG_prufNOOPENF);
                 } else { /* whole thing is specified */
                     len = strlen(PSFilenameorPATTorNULL);
-                    ctx->psfilename = memNew(sizeof(int8_t) * (len + 1));
+                    ctx->psfilename = sMemNew(sizeof(int8_t) * (len + 1));
                     strcpy(ctx->psfilename, PSFilenameorPATTorNULL);
                     if ((ctx->psfileptr = fopen(PSFilenameorPATTorNULL, "w")) == (FILE *)NULL)
                         fatal(SPOT_MSG_prufNOOPENF);
@@ -1067,7 +1067,7 @@ ProofContextPtr proofInitContext(proofOutputType where,
                     retries++;
                 }
                 len = strlen(tempname);
-                ctx->psfilename = memNew(sizeof(int8_t) * (len + 1));
+                ctx->psfilename = sMemNew(sizeof(int8_t) * (len + 1));
                 strcpy(ctx->psfilename, tempname);
                 if ((ctx->psfileptr = fopen(tempname, "w")) == (FILE *)NULL)
                     fatal(SPOT_MSG_prufNOOPENF);
@@ -1087,14 +1087,14 @@ ProofContextPtr proofInitContext(proofOutputType where,
                     sprintf(tempname, "/tmp/%s_%s_XXXXXX", spotGlobal.progname, PSFilenameorPATTorNULL);
                     mktemp(tempname);
                     len = strlen(tempname);
-                    ctx->psfilename = memNew(sizeof(int8_t) * (len + 1));
+                    ctx->psfilename = sMemNew(sizeof(int8_t) * (len + 1));
                     strcpy(ctx->psfilename, tempname);
                     if ((ctx->psfileptr = fopen(tempname, "w")) == (FILE *)NULL)
                         fatal(SPOT_MSG_prufNOOPENF);
                     /*fprintf(stderr, "Proof file is %n", tempname);*/
                 } else { /* whole thing is specified */
                     len = strlen(PSFilenameorPATTorNULL);
-                    ctx->psfilename = memNew(sizeof(int8_t) * (len + 1));
+                    ctx->psfilename = sMemNew(sizeof(int8_t) * (len + 1));
                     strcpy(ctx->psfilename, PSFilenameorPATTorNULL);
                     if ((ctx->psfileptr = fopen(PSFilenameorPATTorNULL, "w")) == (FILE *)NULL)
                         fatal(SPOT_MSG_prufNOOPENF);
@@ -1105,7 +1105,7 @@ ProofContextPtr proofInitContext(proofOutputType where,
                 sprintf(tempname, "/tmp/%s.ps_XXXXXX", spotGlobal.progname);
                 mktemp(tempname);
                 len = strlen(tempname);
-                ctx->psfilename = memNew(sizeof(int8_t) * (len + 1));
+                ctx->psfilename = sMemNew(sizeof(int8_t) * (len + 1));
                 strcpy(ctx->psfilename, tempname);
                 if ((ctx->psfileptr = fopen(tempname, "w")) == (FILE *)NULL)
                     fatal(SPOT_MSG_prufNOOPENF);
@@ -1934,7 +1934,7 @@ int16_t WinPrintOpen(ProofContext *ctx) {
     /* get name of default printer */
     if (GetProfileString("windows", "device", ",,,", defaultprintername, 255) == 0) {
         /* failed */
-        warning(SPOT_MSG_prufNOTPSDEV);
+        spotWarning(SPOT_MSG_prufNOTPSDEV);
         return (-1);
     } else {
         char *ptr;
@@ -1943,16 +1943,16 @@ int16_t WinPrintOpen(ProofContext *ctx) {
     }
 
     EnumPrinters(PRINTER_ENUM_LOCAL, NULL, 2, NULL, 0, &bytesRequired, &dwStructCount);
-    pinfo2 = (PRINTER_INFO_2 *)memNew(bytesRequired);
+    pinfo2 = (PRINTER_INFO_2 *)sMemNew(bytesRequired);
     bResult = EnumPrinters(PRINTER_ENUM_LOCAL, NULL, 2, (LPBYTE)pinfo2,
                            bytesRequired, &dwNeeded, &dwReturned);
     if (bResult == 0) {
-        memFree(pinfo2);
+        sMemFree(pinfo2);
         ctx->winPrinterDC = NULL;
         return (-1);
     } else {
         if (dwReturned < 1) {
-            memFree(pinfo2);
+            sMemFree(pinfo2);
             ctx->winPrinterDC = NULL;
             return (-1);
         }
@@ -1989,11 +1989,11 @@ int16_t WinPrintOpen(ProofContext *ctx) {
             break;
     }
 
-    memFree(pinfo2);
+    sMemFree(pinfo2);
 
     if (ctx->winPrinterDC == NULL) {
         /* failed */
-        warning(SPOT_MSG_prufNOTPSDEV);
+        spotWarning(SPOT_MSG_prufNOTPSDEV);
         return (-1);
     }
     /* Open document */

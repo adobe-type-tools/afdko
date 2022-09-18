@@ -75,7 +75,6 @@ typedef struct {
     short metrics[4];
 } MetricsInfo;
 
-#define METRICSINFOEMPTY (MetricsInfo) { -1, { 0, 0, 0, 0 } }
 #define METRICSINFOEMPTYPP { -1, { 0, 0, 0, 0 } }
 
 typedef struct {

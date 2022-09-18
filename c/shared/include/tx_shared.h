@@ -10,6 +10,7 @@
 #define SHARED_INCLUDE_TX_SHARED_H_
 
 #include <stdio.h>
+#define _CRT_RAND_S
 #include <stdlib.h>
 #include <stdbool.h>
 

@@ -22,6 +22,8 @@ extern "C" {
 #endif
 
 #ifdef _MSC_VER
+#define RAND_R rand_s
+#define STRTOK_R strtok_s
 #define FPRINTF_S fprintf_s
 #define VFPRINTF_S vfprintf_s
 #define SPRINTF_S sprintf_s
@@ -31,6 +33,12 @@ extern "C" {
 #define STRNCPY_S(d, ds, s, n) strncpy_s(d, ds, s, n)
 #define STRCAT_S(d, ds, s) strcat_s(d, ds, s)
 #else
+#ifndef RAND_R
+#define RAND_R rand_r
+#endif
+#ifndef STRTOK_R
+#define STRTOK_R strtok_r
+#endif
 #ifndef FPRINTF_S
 #define FPRINTF_S fprintf
 #endif

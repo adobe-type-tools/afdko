@@ -781,7 +781,7 @@ void SfntEdit::checkChecksums() {
 /* Make extract filename from option filename or src filename plus table tag */
 std::string SfntEdit::makexFilename(Tag tag, const Table &tbl) {
     if (!tbl.xfilename.empty())
-        return tbl.xfilename;
+        return tbl.xfilename.string();
     else {
         std::string tagstr;
 
@@ -800,7 +800,7 @@ std::string SfntEdit::makexFilename(Tag tag, const Table &tbl) {
         fs::path filename = srcfilepath;
         filename.replace_extension(tagstr);
 
-        return filename;
+        return filename.string();
     }
 }
 

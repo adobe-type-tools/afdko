@@ -504,6 +504,9 @@ static void type1(FILE *fp1, FILE *fp2) {
  */
 
 static void usage(void) {
+#if _MSC_VER
+    _setmode(_fileno(stdout), _O_TEXT);
+#endif
     printf("usage: type1 [text [font]]\n");
 }
 

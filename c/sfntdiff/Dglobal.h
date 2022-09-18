@@ -20,7 +20,7 @@
 
 #define DCL_ARRAY(type, name) type *name
 
-#define ISPRINT(c) (isprint((c)) && isascii((c)))
+#define ISPRINT(c) (isprint((c)) && isascii((c)) && (c) != 9)
 
 extern int level;
 extern int DiffExists;

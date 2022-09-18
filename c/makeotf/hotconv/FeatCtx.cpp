@@ -884,6 +884,7 @@ Tag FeatCtx::str2tag(const std::string &tagName) {
     } else {
         int i;
         char buf[5];
+        memset(buf, 0, sizeof(buf));
         STRCPY_S(buf, sizeof(buf), tagName.c_str());
         for (i = 3; buf[i] == '\0'; i--)
             buf[i] = ' ';

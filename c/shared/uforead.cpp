@@ -1589,7 +1589,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
 
             tk = getAttribute(h, state);
             {
-                STRCPY_S(tempVal, tk->length - 1, tk->val + 1); /* remove final ";" and initial '&' */
+                STRNCPY_S(tempVal, sizeof(tempVal), tk->val+1, tk->length-2); /* remove final ";" and initial '&' */
                 tempVal[0] = '0';
                 tempVal[tk->length - 1] = 0;
 
@@ -1604,14 +1604,14 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
                 tk = getToken(h, state);
                 if (tokenEqualStr(tk, "width=")) {
                     getAttribute(h, state);
-                    STRCPY_S(tempVal, tk->length+1, tk->val);
+                    STRNCPY_S(tempVal, sizeof(tempVal), tk->val, tk->length);
                     tempVal[tk->length] = 0;
                     glyphWidth = atol(tempVal);
                     setWidth(h, tag, glyphWidth);
                 }
                 if (tokenEqualStr(tk, "advance=")) {
                     getAttribute(h, state);
-                    STRCPY_S(tempVal, tk->length+1, tk->val);
+                    STRNCPY_S(tempVal, sizeof(tempVal), tk->val, tk->length);
                     tempVal[tk->length] = 0;
                     glyphWidth = atol(tempVal);
                     setWidth(h, tag, glyphWidth);

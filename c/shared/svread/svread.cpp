@@ -893,12 +893,12 @@ static int parseSVG(svrCtx h) {
                     unicode = '>';
                     snprintf(tempName, sizeof(tempName), "greater");
                 } else {
-                    STRCPY_S(tempVal, tk->length+1, tk->val);
+                    STRNCPY_S(tempVal, sizeof(tempVal), tk->val, tk->length);
                     message(h, "Encountered bad Unicode value: '%s'.", tempVal);
                     continue;
                 }
             } else {
-                STRCPY_S(tempVal, tk->length-1, tk->val+1); /* remove final ";" and initial '&' */
+                STRNCPY_S(tempVal, sizeof(tempVal), tk->val+1, tk->length-2); /* remove final ";" and initial '&' */
                 tempVal[0] = '0';
                 tempVal[tk->length - 1] = 0;
 
@@ -912,7 +912,7 @@ static int parseSVG(svrCtx h) {
                 fatal(h, svrErrParse, "Error parsing horiz-adv-x value. Glyph index: %ld.", h->chars.index.cnt);
                 return svrErrParse; /* should not reach this line, but it makes Xcode happy */
             }
-            STRCPY_S(tempVal, tk->length+1, tk->val);
+            STRNCPY_S(tempVal, sizeof(tempVal), tk->val, tk->length);
             tempVal[tk->length] = 0;
             width = atol(tempVal);
 

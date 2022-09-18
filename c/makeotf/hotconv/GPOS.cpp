@@ -1752,7 +1752,7 @@ void GPOSAddPair(hotCtx g, void *subtableInfo, GNode *first, GNode *second, cons
         /* glyph. The parser enforces that if first->metricsInfo == null,   */
         /* then the second value record must exist.                         */
         first->metricsInfo = second->metricsInfo;
-        second->metricsInfo = METRICSINFOEMPTY;
+        second->metricsInfo = METRICSINFOEMPTYPP;
         metricsCnt1 = first->metricsInfo.cnt;
         values1 = first->metricsInfo.metrics;
     } else {

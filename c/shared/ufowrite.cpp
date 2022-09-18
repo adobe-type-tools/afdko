@@ -1055,7 +1055,7 @@ static void mapGlyphToGLIFName(char *glyphName, char *glifName) {
         }
     }
     *q = 0x00;
-    STRCAT_S(glifName, sizeof(glifName), ".glif");
+    STRCAT_S(glifName, MAX_UFO_GLYPH_NAME, ".glif");
 }
 
 /* Begin new glyph definition. */

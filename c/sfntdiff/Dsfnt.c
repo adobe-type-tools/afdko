@@ -288,7 +288,7 @@ static void scanTagsExclude(int8_t *actualarg) {
 
     STRCPY_S(arg, sizeof(arg), actualarg);  // otherwise "actualarg" (argv[*]) gets trounced
 
-    for (p = strtok_r(arg, ",", &stsave); p != NULL; p = strtok_r(NULL, ",", &stsave)) {
+    for (p = STRTOK_R(arg, ",", &stsave); p != NULL; p = STRTOK_R(NULL, ",", &stsave)) {
         int8_t tag[5];
 
         if (sscanf(p, "%4[^\n]", tag) != 1 || strlen(tag) != 4) {
@@ -313,7 +313,7 @@ static void scanTagsInclude(int8_t *actualarg) {
 
     STRCPY_S(arg, sizeof(arg), actualarg);  // otherwise "actualarg" (argv[*]) gets trounced
 
-    for (p = strtok_r(arg, ",", &stsave); p != NULL; p = strtok_r(NULL, ",", &stsave)) {
+    for (p = STRTOK_R(arg, ",", &stsave); p != NULL; p = STRTOK_R(NULL, ",", &stsave)) {
         int8_t tag[5];
 
         if (sscanf(p, "%4[^\n]", tag) != 1 || strlen(tag) != 4) {

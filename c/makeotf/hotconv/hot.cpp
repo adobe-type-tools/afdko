@@ -432,7 +432,7 @@ char *hotReadFont(hotCtx g, int flags, int *psinfo, hotReadFontOverrides *fontOv
         if (length > sizeof(g->font.version.PS) - 1) {
             length = sizeof(g->font.version.PS) - 1;
         }
-        STRCPY_S(g->font.version.PS, length+1, p);
+        STRNCPY_S(g->font.version.PS, sizeof(g->font.version.PS), p, length);
         g->font.version.PS[length] = '\0';
     } else {
         STRCPY_S(g->font.version.PS, sizeof(g->font.version.PS),
