@@ -1,0 +1,5 @@
+{
+'.notdef': ['w500', ['autohint']],
+'exclam': ['f64882722fcbd3a3cd1bd6b83061c23a218d3372729f68d04cb7b35036d31b6a6cdaeedeabd23dbb82897de3cddeb26c5aab71440239f4d82569ee4bf8afacd9', ['autohint']],
+'hashMapVersion': (1, 0),
+}

@@ -1385,3 +1385,27 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
         assert subprocess.call(arg) == 6
+
+
+@pytest.mark.parametrize('file, msg, ret_code', [
+    ("flex", b'', 0),
+    ("flex3", b'', 0),
+])
+def test_ufo_glifs_parsing(file, msg, ret_code):
+    folder = "ufo-glifs-parsing/"
+    ufo_input_path = get_input_path(folder + file + ".ufo")
+    expected_path = get_expected_path(folder + file + ".pfa")
+    output_path = get_temp_file_path()
+    arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
+                 ufo_input_path, output_path]
+    stderr_path = runner(arg)
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (msg) in output
+    if (ret_code == 0):
+        expected_path = generate_ps_dump(expected_path)
+        output_path = generate_ps_dump(output_path)
+        assert differ([expected_path, output_path])
+    else:
+        arg = [TOOL, '-t1', '-f', ufo_input_path]
+        assert subprocess.call(arg) == 6
