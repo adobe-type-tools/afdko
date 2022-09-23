@@ -1028,18 +1028,6 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
     freeValueArray(h);
 }
 
-static void setFlexListArrayValue(ufoCtx h) {
-    int i = 0;
-    if (h->valueArray.cnt == 0)
-        return;
-    while ((i < h->valueArray.cnt)) {
-        char* pointName = copyStr(h, h->valueArray.array[i]);
-        *dnaNEXT(h->hints.flexOpList) = pointName;
-        i++;
-    }
-    freeValueArray(h);
-}
-
 static void setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
     StemHint* stem;
     float pos = 0;
@@ -2996,56 +2984,29 @@ static int parseHintSetListV2(ufoCtx h, GLIF_Rec* glifRec, Transform* transform)
 
 static int parseFlexListV2(ufoCtx h, xmlNodePtr cur) {
     int result = ufoSuccess;
-    int state = outlineInHintData;
-    int prevState = outlineInHintData;
     char* pointName;
 
-    while (1) {
-        token* tk;
-        tk = getToken(h, state);
-        if (tk == NULL) {
-            fatal(h, ufoErrParse, "Encountered end of buffer before end of glyph. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-        } else if (tokenEqualStr(tk, "<!--")) {
-            prevState = state;
-            state = outlineInComment;
-        } else if (tokenEqualStr(tk, "-->")) {
-            if (state != outlineInComment) {
-                fatal(h, ufoErrParse, "Encountered end comment token while not in comment. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-            }
-            state = prevState;
-        } else if (state == outlineInComment) {
-            continue;
-        } else if (tokenEqualStr(tk, "<array>") && (state == outlineInHintData)) {
-            state = outlineInFlexList;
-            continue;
-        } else if (tokenEqualStr(tk, "</array>") && (state == outlineInFlexList)) {
-            return result;
-        } else if (tokenEqualStr(tk, "<string>") && (state == outlineInFlexList)) {
-            tk = getToken(h, state);
-            if (tk == NULL) {
-                fatal(h, ufoErrParse, "Encountered end of buffer before end of glyph.. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-            } else if (tk->val[0] == '<') {
-                fatal(h, ufoErrParse, "Entry in flexList was empty. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-            } else if ((transform == NULL) || ((transform->mtx[1] == 0) && (transform->mtx[2] == 0))) { /* Omit flex if the transform exists and has any skew. */
-                pointName = memNew(h, tk->length + 1);
-                strcpy(pointName, tk->val);
-                // pointName[tk->length+1] = 0;
-
-                tk = getToken(h, state);
-                if (!tokenEqualStr(tk, "</string>")) {
-                    fatal(h, ufoErrParse, "Failed to find end of element for <string>flexPointName. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-                }
-
-                *dnaNEXT(h->hints.flexOpList) = pointName;
-                pointName = NULL;
-            }
-        } else {
-            fatal(h, ufoErrParse, "parseFlexListV2: unhandled token: %s. Glyph: %s. Context: %s\n.", tk->val, glifRec->glyphName, getBufferContextPtr(h));
+    xmlAttr *attr = cur->properties;
+    while (attr != NULL) {
+        if (xmlAttrEqual(attr, "hintSetList")) {
+            parseHintSetListV2(h, cur);
             continue;
         }
     }
 
     return result;
+}
+
+static void setFlexListArrayValue(ufoCtx h) {
+    int i = 0;
+    if (h->valueArray.cnt == 0)
+        return;
+    while ((i < h->valueArray.cnt)) {
+        char* pointName = copyStr(h, h->valueArray.array[i]);
+        *dnaNEXT(h->hints.flexOpList) = pointName;
+        i++;
+    }
+    freeValueArray(h);
 }
 
 static int parseType1HintDataV2(ufoCtx h, xmlNodePtr cur, char* keyName, char* keyValue) {
