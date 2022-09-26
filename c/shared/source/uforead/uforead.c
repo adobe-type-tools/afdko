@@ -315,21 +315,22 @@ static long getWidth(ufoCtx h, STI sti);
 static int addChar(ufoCtx h, STI sti, Char** chr);
 static int CTL_CDECL postMatchChar(const void* key, const void* value,
                                    void* ctx);
+static bool strEqual(char* string1, char* string2);
 static void addGLIFRec(ufoCtx h, char* keyName, char* keyValue);
 static void updateGLIFRec(ufoCtx h, char* glyphName, char* fileName);
 static xmlNodePtr parseXMLFile(ufoCtx h, char* filename, const char* filetype);
 static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
-static int parseXMLPlist(ufoCtx h, xmlNodePtr cur);
-static int parseXMLGlif(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicode, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec);
+static int parseXMLPlistFile(ufoCtx h, xmlNodePtr cur);
+static int parseXMLGlifFile(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicode, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec);
 static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, int tag, abfGlyphCallbacks* glyph_cb);
 static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, int state);
 static int parseXMLComponent(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb);
 static int parseXMLAnchor(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec);
 static int parseXMLContour(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb);
 static int parseXMLGuideline(ufoCtx h, xmlNodePtr cur, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec);
-static int parseType1HintDataV2(ufoCtx h, xmlNodePtr cur, char* keyName, char* keyValue);
+static int parseType1HintDataV2(ufoCtx h, xmlNodePtr cur);
 
 /* -------------------------- Error Support ------------------------ */
 
@@ -1040,7 +1041,7 @@ static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyNam
             valid = false;
 //            message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
     } else {
-        if (!strcmp(keyValue, "")){
+        if (strEqual(keyValue, "")){
 //        message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
         valid = false;
         }
@@ -1344,7 +1345,7 @@ static int parseGlyphOrder(ufoCtx h) {
     dnaSET_CNT(h->valueArray, 0);
 
     xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
-    int parsingSuccess = parseXMLPlist(h, cur);
+    int parsingSuccess = parseXMLPlistFile(h, cur);
 
     if (h->data.glifOrder.cnt > 0) {
         /* Sort the array by glyph name. */
@@ -1403,7 +1404,7 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
     dnaSET_CNT(h->valueArray, 0);
 
     xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
-    int parsingSuccess = parseXMLPlist(h, cur);
+    int parsingSuccess = parseXMLPlistFile(h, cur);
 
     /* 'glyph order does not contain glyph name' warnings in getGlyphOrderIndex are suppressed
         if glyphOrder count is 0 to reduce amount of warnings.
@@ -1542,7 +1543,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
     dnaSET_CNT(h->valueArray, 0);
 
     xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
-    int parsingSuccess = parseXMLGlif(h, cur, tag, unicode, NULL, glifRec);
+    int parsingSuccess = parseXMLGlifFile(h, cur, tag, unicode, NULL, glifRec);
 
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
@@ -1699,7 +1700,7 @@ static void parseXMLLib(ufoCtx h, xmlNodePtr cur) {
             } else if (h->parseState.UFOFile == parsingGLIF) {  /* when called from parseGLIF */
                 if (strEqual(keyName, "com.adobe.type.autohint.v2")) {
                     h->parseState.parsingType1HintDataV2 = true;
-                    parseType1HintDataV2(h, cur->children, keyName, NULL);
+                    parseType1HintDataV2(h, cur->children);
                 }
             }
             cur = cur->next;
@@ -1797,7 +1798,7 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     } else if (h->parseState.parsingHintSetListArray)
         dnaNEXT(h->hints.hintMasks);
     if (h->parseState.parsingType1HintDataV2) {
-        parseType1HintDataV2(h, cur, keyName, NULL);
+        parseType1HintDataV2(h, cur);
         cur = NULL;
     }
 
@@ -1843,7 +1844,7 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
     }
 }
 
-static int parseXMLPlist(ufoCtx h, xmlNodePtr cur) {
+static int parseXMLPlistFile(ufoCtx h, xmlNodePtr cur) {
     char* keyName;
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
@@ -1855,7 +1856,7 @@ static int parseXMLPlist(ufoCtx h, xmlNodePtr cur) {
     return ufoSuccess;
 }
 
-static int parseXMLGlif(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicode, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec) {
+static int parseXMLGlifFile(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicode, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec) {
     char* keyName;
     while (cur != NULL) {
         parseXMLGLIFKey(h, cur, unicode, tag, glyph_cb);
@@ -1887,7 +1888,7 @@ static int parseFontInfo(ufoCtx h) {
     dnaSET_CNT(h->valueArray, 0);
 
     xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
-    int parsingSuccess = parseXMLPlist(h, cur);
+    int parsingSuccess = parseXMLPlistFile(h, cur);
 
     fixUnsetDictValues(h);
     h->cb.stm.close(&h->cb.stm, h->stm.src);
@@ -2062,13 +2063,13 @@ static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, 
             pointName = copyStr(h, temp);
         } else if (xmlAttrEqual(attr, "type")) {
             char* strType = getXmlAttrValue(attr);
-            if (!strcmp(strType, "move"))
+            if (strEqual(strType, "move"))
                 type = 1;
-            else if (!strcmp(strType, "line"))
+            else if (strEqual(strType, "line"))
                 type = 2;
-            else if (!strcmp(strType, "curve"))
+            else if (strEqual(strType, "curve"))
                 type = 3;
-            else if (!strcmp(strType, "offcurve"))
+            else if (strEqual(strType, "offcurve"))
                 continue;  // type is already set to 0. x and y will get pushed on the stack, and no other operation will happen.
             else {
                 fatal(h, ufoErrParse, "Encountered unsupported point type '%s' in glyph '%s'. Context: %s.\n", strType, glifRec->glyphName, getBufferContextPtr(h));
@@ -2325,6 +2326,7 @@ static int parseStemV2(ufoCtx h, HintMask* curHintMask, int stemFlags, char* ste
             return result;
     }
 
+    // ToDo: Add warning in verbose mode if its wrong hint type (stem instead of stem3)
     pos = (float) atof(strtok_r(stemValues, " ", &stemValues));
     width = (float) atof(strtok_r(stemValues, " ", &stemValues));
 
@@ -2352,11 +2354,14 @@ static int parseStem3V2(ufoCtx h, HintMask* curHintMask, int stemFlags, char* st
     int result = ufoSuccess;
     float coords[] = {0, 0, 0, 0, 0, 0};
     int isH = !(stemFlags & ABF_VERT_STEM);
-    int count;
+    int count = 0;
     Transform* transform = h->parseState.GLIFInfo.transform;
 
-    for (count = 0; count < 6; count++) {
-        coords[count] = (float) atof(strtok_r(stemValues, " ", &stemValues));
+    while (count < 6 && stemValues != NULL) {
+        // ToDo: Add warning message if amount of stems not correct
+        float stem = (float) atof(strtok_r(stemValues, " ", &stemValues));
+        coords[count] = stem;
+        count++;
     }
 
     if ((transform != NULL) && (!transform->isDefault)) {
@@ -2406,15 +2411,15 @@ static void setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
     while ((i < h->valueArray.cnt)) {
         char* stemValues;
         char* stemType = strtok_r(h->valueArray.array[i], " ", &stemValues);
-        if (!strcmp(stemType, "hstem")) {
+        if (strEqual(stemType, "hstem")) {
             parseStemV2(h, curHintMask, stemFlags, stemValues);
-        } else if (!strcmp(stemType, "hstem3")) {
+        } else if (strEqual(stemType, "hstem3")) {
             stemFlags |= ABF_STEM3_STEM;
             parseStem3V2(h, curHintMask, stemFlags, stemValues);
-        } else if (!strcmp(stemType, "vstem")) {
+        } else if (strEqual(stemType, "vstem")) {
             stemFlags |= ABF_VERT_STEM;
             parseStemV2(h, curHintMask, stemFlags, stemValues);
-        } else if (!strcmp(stemType, "vstem3")) {
+        } else if (strEqual(stemType, "vstem3")) {
             stemFlags |= ABF_VERT_STEM;
             stemFlags |= ABF_STEM3_STEM;
             parseStem3V2(h, curHintMask, stemFlags, stemValues);
@@ -2463,7 +2468,9 @@ static void setFlexListArrayValue(ufoCtx h) {
     freeValueArray(h);
 }
 
-static int parseType1HintDataV2(ufoCtx h, xmlNodePtr cur, char* keyName, char* keyValue) {
+static int parseType1HintDataV2(ufoCtx h, xmlNodePtr cur) {
+    char* keyName;
+    char* keyValue;
     int result = ufoSuccess;
     GLIF_Rec* glifRec = h->parseState.GLIFInfo.glifRec;
     HintMask* curHintMask;
@@ -2475,7 +2482,7 @@ static int parseType1HintDataV2(ufoCtx h, xmlNodePtr cur, char* keyName, char* k
         curHintMask = h->hints.hintMasks.array;
 
     while (cur != NULL) {
-        char* keyName = parseXMLKeyName(h, cur);
+        keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
         if (strEqual(keyName, "hintSetList")) {
             parseHintSetListV2(h, cur);
@@ -2483,7 +2490,7 @@ static int parseType1HintDataV2(ufoCtx h, xmlNodePtr cur, char* keyName, char* k
             parseXMLKeyValue(h, cur);
             setFlexListArrayValue(h);
         } else if (strEqual(keyName, "pointTag")) {
-            char* keyValue = parseXMLKeyValue(h, cur);
+            keyValue = parseXMLKeyValue(h, cur);
             curHintMask->pointName = copyStr(h, keyValue);
         } else if (strEqual(keyName, "stems")) {
             parseXMLKeyValue(h, cur);
@@ -2612,7 +2619,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
     h->hints.pointName = NULL;
 
     xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
-    int parsingSuccess = parseXMLGlif(h, cur, gi->tag, NULL, glyph_cb, glifRec);
+    int parsingSuccess = parseXMLGlifFile(h, cur, gi->tag, NULL, glyph_cb, glifRec);
 
     /* An odd exit - didn't see  "</glyph>"  */
     h->cb.stm.close(&h->cb.stm, h->stm.src);
