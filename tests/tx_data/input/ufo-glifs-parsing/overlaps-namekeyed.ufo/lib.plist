@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.schriftgestaltung.DisplayStrings</key>
+	<array>
+		<string>/A.001</string>
+		<string>/A.002</string>
+	</array>
+	<key>com.schriftgestaltung.disablesAutomaticAlignment</key>
+	<false/>
+	<key>com.schriftgestaltung.font.customParameters</key>
+	<array>
+		<dict>
+			<key>name</key>
+			<string>AnchorColors</string>
+			<key>value</key>
+			<dict/>
+		</dict>
+	</array>
+	<key>com.schriftgestaltung.fontMasterID</key>
+	<string>FEBDD159-0FDF-4D29-B626-32CC1F2F6FC9</string>
+	<key>com.schriftgestaltung.glyphOrder</key>
+	<false/>
+	<key>com.schriftgestaltung.useNiceNames</key>
+	<true/>
+	<key>public.glyphOrder</key>
+	<array>
+		<string>A</string>
+		<string>A.001</string>
+		<string>A.002</string>
+	</array>
+</dict>
+</plist>
