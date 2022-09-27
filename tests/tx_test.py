@@ -1390,6 +1390,18 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("flex", b'', 0),
     ("flex3", b'', 0),
+    ("empty-contour", b'', 0),
+    ("empty-flexlist", b'', 0),
+    ("empty-stems", b'', 0),
+    ("missing-glif", b'Failed to open glif file in parseGLIF:' +
+                     b' glyphs/missing.glif.', 3),
+    ("one-stem-hstem", b'', 0),
+    ("one-stem-hstem3", b'', 0),
+    ("wrong-amount-stems-hstem", b'', 0),
+    ("wrong-amount-stems-hstem3", b'', 0),
+    ("wrong-type-stem-hstem", b'', 0),
+    ("overlaps-cidkeyed", b'', 0),
+    ("overlaps-namekeyed", b'', 0),
 ])
 def test_ufo_glifs_parsing(file, msg, ret_code):
     folder = "ufo-glifs-parsing/"
@@ -1408,4 +1420,4 @@ def test_ufo_glifs_parsing(file, msg, ret_code):
         assert differ([expected_path, output_path])
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
-        assert subprocess.call(arg) == 6
+        assert subprocess.call(arg) == ret_code
