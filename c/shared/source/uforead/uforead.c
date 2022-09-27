@@ -1532,11 +1532,11 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
         h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     }
     if (h->stm.src == NULL) {
-        fprintf(stderr, "Failed to open glif file in parseGLIF. h->stm.src == NULL. %s.\n", glifRec->glifFilePath);
+        fprintf(stderr, "Failed to open glif file in parseGLIF: %s.\n", glifRec->glifFilePath);
         return ufoErrSrcStream;
     }
     if (h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
-        fprintf(stderr, "Failed to open glif file in parseGLIF. seek failed. %s.\n", glifRec->glifFilePath);
+        fprintf(stderr, "Failed to open glif file in parseGLIF: %s.\n", glifRec->glifFilePath);
         return ufoErrSrcStream;
     }
 
@@ -2327,8 +2327,8 @@ static int parseStemV2(ufoCtx h, HintMask* curHintMask, int stemFlags, char* ste
     }
 
     // ToDo: Add warning in verbose mode if its wrong hint type (stem instead of stem3)
-    pos = (float) atof(strtok_r(stemValues, " ", &stemValues));
-    width = (float) atof(strtok_r(stemValues, " ", &stemValues));
+    pos = (float) strtod(stemValues, &stemValues);
+    width = (float) strtod(stemValues, &stemValues);
 
     if ((transform != NULL) && (!transform->isDefault)) {
         float* mtx = (float*)transform->mtx;
@@ -2358,11 +2358,14 @@ static int parseStem3V2(ufoCtx h, HintMask* curHintMask, int stemFlags, char* st
     Transform* transform = h->parseState.GLIFInfo.transform;
 
     while (count < 6 && stemValues != NULL) {
-        // ToDo: Add warning message if amount of stems not correct
-        float stem = (float) atof(strtok_r(stemValues, " ", &stemValues));
+        float stem = (float) strtod(stemValues, &stemValues);
         coords[count] = stem;
         count++;
     }
+
+    // ToDo: Add warning message if amount of stems not correct
+    if (count != 6)
+        return -1;
 
     if ((transform != NULL) && (!transform->isDefault)) {
         float* mtx = (float*)transform->mtx;
