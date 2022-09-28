@@ -1230,12 +1230,12 @@ def test_non_FDArray_dict_parse():
     ("fontmatrix-string", b'', 0),
     ("switched-string-and-array", b'', 0),
     ("empty-dict", b'', 0),
-    ("only-version-minor", b'', 0),
-    ("double-version-major", b'', 0),
+    ("version-minor-only", b'', 0),
+    ("version-major-dup", b'', 0),
     ("missing-fontinfoplist", b"Warning: Unable to open fontinfo.plist in" +
                               b" source UFO font. No PostScript FontDict " +
                               b"values are specified.", 5),
-    ("missing-width", b"", 0)
+    ("missing-width-attr", b"", 0)
 ])
 def test_ufo_fontinfo_parsing(file, msg, ret_code):
     folder = "ufo-fontinfo-parsing/"
