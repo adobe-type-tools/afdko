@@ -407,12 +407,14 @@ static size_t stm_read(ctlStreamCallbacks *cb, Stream *stream, char **ptr) {
 
 static size_t stm_xml_read(ctlStreamCallbacks *cb, Stream *stream, xmlDocPtr *doc){
     int res;
+    int readAmt = 0;
     xmlParserCtxtPtr ctxt;
 
     Stream *s = stream;
     txCtx h = cb->direct_ctx;
     res = fread(s->buf, 1, 4, s->fp);
     if (res > 0) {
+        readAmt = res;
         ctxt = xmlCreatePushParserCtxt(NULL, NULL,
                     s->buf, res, s->filename);
         while ((res = fread(s->buf, 1, BUFSIZ, s->fp)) > 0) {
@@ -421,8 +423,9 @@ static size_t stm_xml_read(ctlStreamCallbacks *cb, Stream *stream, xmlDocPtr *do
         xmlParseChunk(ctxt, s->buf, 0, 1);
         *doc = ctxt->myDoc;
         xmlFreeParserCtxt(ctxt);
-    }
-    return 0;
+        return readAmt;
+    } else
+        return 0;
 }
 
 /* Write to stream. */

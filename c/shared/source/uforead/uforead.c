@@ -1617,19 +1617,20 @@ static void reallocFDArray(ufoCtx h){
 static xmlNodePtr parseXMLFile(ufoCtx h, char* filename, const char* filetype){
     xmlDocPtr doc;
     xmlNodePtr cur;
+    int result;
 
     xmlKeepBlanksDefault(0);
 
-    h->cb.stm.xml_read(&h->cb.stm, h->stm.src, &doc);
+    result = h->cb.stm.xml_read(&h->cb.stm, h->stm.src, &doc);
 
-    if (doc == NULL) {
-        fatal(h, ufoErrParse, "Unable to read '%s'.\n", filename);
+    if (result == 0) {
+        fatal(h, ufoErrParse, "The %s file is empty.\n", filename);
     }
 
     cur = xmlDocGetRootElement(doc);
     if (cur == NULL) {
         xmlFreeDoc(doc);
-        fatal(h, ufoErrSrcStream, "The %s file is empty.\n", filename);
+        fatal(h, ufoErrSrcStream, "Unable to read '%s'.\n", filename);
     }
 
     if (!xmlStrEqual((cur)->name, (const xmlChar *) filetype)) {
@@ -1671,7 +1672,10 @@ static bool xmlKeyEqual(xmlNodePtr cur, char* name){
 }
 
 static bool xmlAttrEqual(xmlAttr *attr, char* name){
-    return xmlStrEqual(attr->name, (const xmlChar *) name);
+    if (attr != NULL)
+        return xmlStrEqual(attr->name, (const xmlChar *) name);
+    else
+        return false;
 }
 
 static char* getXmlAttrValue(xmlAttr *attr){

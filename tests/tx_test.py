@@ -1229,7 +1229,13 @@ def test_non_FDArray_dict_parse():
     ("bluesarray-string", b'', 0),
     ("fontmatrix-string", b'', 0),
     ("switched-string-and-array", b'', 0),
-    ("empty-dict", b'', 0)
+    ("empty-dict", b'', 0),
+    ("only-version-minor", b'', 0),
+    ("double-version-major", b'', 0),
+    ("missing-fontinfoplist", b"Warning: Unable to open fontinfo.plist in" +
+                              b" source UFO font. No PostScript FontDict " +
+                              b"values are specified.", 5),
+    ("missing-width", b"", 0)
 ])
 def test_ufo_fontinfo_parsing(file, msg, ret_code):
     folder = "ufo-fontinfo-parsing/"
@@ -1248,7 +1254,7 @@ def test_ufo_fontinfo_parsing(file, msg, ret_code):
         assert differ([expected_path, output_path])
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
-        assert subprocess.call(arg) == 6
+        assert subprocess.call(arg) == ret_code
 
 
 def test_unknown_fontinfoplist_key_bug1467():
@@ -1315,12 +1321,17 @@ glyphorder_warn = (b'tx: (ufr) Warning: public.glyphOrder key is empty'
                    b' and does not contain glyph name for all 5 glyphs.'
                    b' Consider defining this in lib.plist.')
 
+glyphorder_dup_warn = (b"(ufr) Warning: glyph order contains duplicate" +
+                       b" entries for glyphs 'a'.")
+
 
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("normal", b'', 0),
     ("empty-dict", glyphorder_warn, 0),
     ("empty-key-name", glyphorder_warn, 0),
     ("empty-key-value", glyphorder_warn, 0),
+    ("duplicate-gliforder", glyphorder_dup_warn, 0),
+    ("dict_error", b"Error reading outermost <dict> in lib.plist.", 3)
 ])
 def test_ufo_libplist_parsing(file, msg, ret_code):
     folder = "ufo-libplist-parsing/"
@@ -1339,7 +1350,7 @@ def test_ufo_libplist_parsing(file, msg, ret_code):
         assert differ([expected_path, output_path])
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
-        assert subprocess.call(arg) == 6
+        assert subprocess.call(arg) == ret_code
 
 
 def test_ufo_underline_writing_bug1534():
@@ -1366,6 +1377,10 @@ glyph_not_in_dflt_warn = (b"tx: (ufr) Warning: glyph 'foo' is"
     ("wrong-keyvalue-type-int", b'', 0),
     ("not-in-default", glyph_not_in_dflt_warn, 0),
     ("missing-glif-file", b'', 0),
+    ("unable-to-parse", b"Unable to read \'glyphs/contents.plist\'.", 3),
+    ("empty-parse", b"The glyphs/contents.plist file is empty.", 6),
+    ("wrong-type", b"File glyphs/contents.plist is of the " +
+                   b"wrong type, root node != plist.", 3)
 ])
 def test_ufo_contentsplist_parsing(file, msg, ret_code):
     folder = "ufo-contentsplist-parsing/"
@@ -1384,7 +1399,7 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
         assert differ([expected_path, output_path])
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
-        assert subprocess.call(arg) == 6
+        assert subprocess.call(arg) == ret_code
 
 
 @pytest.mark.parametrize('file, msg, ret_code', [
@@ -1402,6 +1417,8 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("wrong-type-stem-hstem", b'', 0),
     ("overlaps-cidkeyed", b'', 0),
     ("overlaps-namekeyed", b'', 0),
+    ("dup-glif", b"Warning: duplicate charstring" +
+                 b" <exclam> (discarded)", 0)
 ])
 def test_ufo_glifs_parsing(file, msg, ret_code):
     folder = "ufo-glifs-parsing/"
