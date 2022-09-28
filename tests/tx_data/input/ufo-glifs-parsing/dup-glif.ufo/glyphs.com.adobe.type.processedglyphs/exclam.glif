@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="exclam" format="2">
+  <advance width="450"/>
+  <outline>
+    <contour>
+      <point x="100" y="0" type="line" name="hintSet0000"/>
+      <point x="139" y="3" name="flexCurve0001"/>
+      <point x="178" y="5"/>
+      <point x="225" y="5" type="curve"/>
+      <point x="272" y="5"/>
+      <point x="311" y="3"/>
+      <point x="350" y="0" type="curve"/>
+      <point x="350" y="55" type="line"/>
+      <point x="275" y="55" type="line"/>
+      <point x="272" y="94"/>
+      <point x="270" y="133"/>
+      <point x="270" y="180" type="curve"/>
+      <point x="270" y="227"/>
+      <point x="272" y="266"/>
+      <point x="275" y="305" type="curve"/>
+      <point x="350" y="305" type="line"/>
+      <point x="350" y="356" type="line"/>
+      <point x="311" y="353" name="flexCurve0009"/>
+      <point x="272" y="351"/>
+      <point x="225" y="351" type="curve"/>
+      <point x="178" y="351"/>
+      <point x="139" y="353"/>
+      <point x="100" y="356" type="curve"/>
+      <point x="100" y="305" type="line"/>
+      <point x="175" y="305" type="line"/>
+      <point x="178" y="266"/>
+      <point x="180" y="227"/>
+      <point x="180" y="180" type="curve"/>
+      <point x="180" y="133"/>
+      <point x="178" y="94"/>
+      <point x="175" y="55" type="curve"/>
+      <point x="100" y="55" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>flexList</key>
+        <array>
+          <string>flexCurve0001</string>
+          <string>flexCurve0009</string>
+        </array>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 0 55</string>
+              <string>hstem 305 51</string>
+              <string>vstem 180 90</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>f64882722fcbd3a3cd1bd6b83061c23a218d3372729f68d04cb7b35036d31b6a6cdaeedeabd23dbb82897de3cddeb26c5aab71440239f4d82569ee4bf8afacd9</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>
