@@ -1240,7 +1240,7 @@ def test_non_FDArray_dict_parse():
 def test_ufo_fontinfo_parsing(file, msg, ret_code):
     folder = "ufo-fontinfo-parsing/"
     ufo_input_path = get_input_path(folder + file + ".ufo")
-    expected_path = get_expected_path(folder + file + ".subset")
+    expected_path = get_expected_path(folder + file + ".pfa")
     output_path = get_temp_file_path()
     arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
                  ufo_input_path, output_path]
