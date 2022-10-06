@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="exclam" format="2">
+  <advance width="450"/>
+  <outline>
+    <contour>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>flexList</key>
+        <array>
+          <string>flexCurve0001</string>
+          <string>flexCurve0009</string>
+        </array>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 0 55</string>
+              <string>hstem 305 51</string>
+              <string>vstem 180 90</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>f64882722fcbd3a3cd1bd6b83061c23a218d3372729f68d04cb7b35036d31b6a6cdaeedeabd23dbb82897de3cddeb26c5aab71440239f4d82569ee4bf8afacd9</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

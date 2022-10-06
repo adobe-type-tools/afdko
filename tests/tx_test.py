@@ -1418,7 +1418,19 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("overlaps-cidkeyed", b'', 0),
     ("overlaps-namekeyed", b'', 0),
     ("dup-glif", b"Warning: duplicate charstring" +
-                 b" <exclam> (discarded)", 0)
+                 b" <exclam> (discarded)", 0),
+    ("missing-cid-value", b"Warning: glyph 'cid45107' missing CID" +
+                          b" number within <lib> dict", 6),
+    ("missing-advance", b'', 0),
+    ("missing-autohint", b'', 0),
+    ("missing-contours", b'', 0),
+    ("missing-glif", b"Failed to open glif file in parseGLIF:" +
+                     b" glyphs/missing.glif.", 3),
+    ("missing-hintsetlist", b'', 0),
+    ("missing-outline", b'', 0),
+    ("missing-point-tag", b'', 0),
+    ("missing-stems", b'', 0),
+    ("missing-width2", b'', 0)
 ])
 def test_ufo_glifs_parsing(file, msg, ret_code):
     folder = "ufo-glifs-parsing/"
