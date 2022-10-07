@@ -322,8 +322,8 @@ static void saveop(cstrCtx h, int op) {
     /* Save op */
     switch (op) {
         case t2_blend:
-            cfwMessage(h->g, "CFF2 error - unexpected blend op  <%s>",
-                       h->glyph.info->gname.ptr);
+            h->g->logger->log(sERROR, "CFF2 error - unexpected blend op  <%s>",
+                              h->glyph.info->gname.ptr);
             break;
 
         case tx_hlineto:
@@ -2104,9 +2104,6 @@ static void checkOverlap(cstrCtx h, HintMask hintmask) {
     int i;
     Stem *last;
 
-    if (h->g->stm.dbg == NULL) {
-        return; /* Debug stream deactivated */
-    }
     /* Find bits set and compare corresponding stems */
     last = NULL;
     for (i = 0; i < h->masksize; i++) {
@@ -2359,10 +2356,6 @@ static void printWarn(cstrCtx h) {
     cfwCtx g = h->g;
     int i;
 
-    if (g->stm.dbg == NULL) {
-        return;
-    }
-
     for (i = 0; i < warn_cnt; i++) {
         if ((h->glyphwarning & (1 << i)) &&
             ((g->flags & CFW_WARN_DUP_HINTSUBS) || i != warn_hint1)) {
@@ -2374,11 +2367,11 @@ static void printWarn(cstrCtx h) {
             }
 
             if (h->glyph.info->flags & ABF_GLYPH_CID) {
-                cfwMessage(h->g,
-                           "%s <cid-%hu>", msg, h->glyph.info->cid);
+                h->g->logger->log(sWARNING, "%s <cid-%hu>", msg,
+                                  h->glyph.info->cid);
             } else {
-                cfwMessage(h->g, "%s <%s>",
-                           msg, h->glyph.info->gname.ptr);
+                h->g->logger->log(sWARNING, "%s <%s>", msg,
+                                  h->glyph.info->gname.ptr);
             }
         }
     }
@@ -2389,14 +2382,10 @@ void printFinalWarn(cfwCtx g) {
     cstrCtx h = g->ctx.cstr;
     int i;
 
-    if (g->stm.dbg == NULL) {
-        return;
-    }
-
     for (i = 0; i < warn_cnt; i++) {
         if (h->warning[i] > TC_MAX_WARNINGS) {
             const char *msg = warnMsg(i);
-            cfwMessage(h->g, "There are %d additional reports of '%s'.\n", h->warning[i] - TC_MAX_WARNINGS, msg);
+            g->logger->log(sWARNING, "There are %d additional reports of '%s'.\n", h->warning[i] - TC_MAX_WARNINGS, msg);
         }
         h->warning[i] = 0;
     }

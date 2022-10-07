@@ -1273,8 +1273,8 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
 
         chrstr_length = glyph->cstr.length;
         if (chrstr_length > 65535) {
-            cfwMessage(g,
-                       "Warning: CharString of GID %ld is %ld bytes long. "
+            g->logger->log(sWARNING,
+                       "CharString of GID %ld is %ld bytes long. "
                        "CharStrings longer than 65535 bytes might not be "
                        "supported by some implementations.",
                        i, chrstr_length);
@@ -1301,7 +1301,7 @@ static void writeCharStringsINDEX(controlCtx h, cff_Font *font) {
             long n;
             float r = glyph->hAdv - fd->width.nominal;
             if (r < -32768 || r >= 32768)
-                cfwMessage(h->g, "out of numeric range width %g in glyph %ld", r, i);
+                g->logger->log(sWARNING, "out of numeric range width %g in glyph %ld", r, i);
             n = (long)r;
             length = (numsize(r) <= 3) ? cfwEncInt(n, t) : cfwEncReal(r, t);
             cfwWrite(g, length, (char *)t);
@@ -1419,9 +1419,6 @@ int cfwBegSet(cfwCtx g, long flags) {
     h->FontSet.cnt = 0;
     if (flags & CFW_WRITE_CFF2)
         h->flags |= FONTSET_CFF2;
-
-    /* Open debug stream */
-    g->stm.dbg = g->cb.stm.open(&g->cb.stm, CFW_DBG_STREAM_ID, 0);
 
     return 0;
 }
@@ -2128,11 +2125,6 @@ int cfwEndSet(cfwCtx g) {
     cfwCstrReuse(g);
     cfwSubrReuse(g);
 
-    /* Close debug stream */
-    if (g->stm.dbg != NULL) {
-        (void)g->cb.stm.close(&g->cb.stm, g->stm.dbg);
-    }
-
     HANDLER
     return g->err.code;
     END_HANDLER
@@ -2183,7 +2175,7 @@ static void dnaFailInit(cfwCtx g) {
 
 /* Validate client and create context. */
 cfwCtx cfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL) {
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger) {
     cfwCtx g;
 
     /* Check client/library compatibility */
@@ -2204,7 +2196,11 @@ cfwCtx cfwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     g->cb.stm = *stm_cb;
     g->stm.dst = NULL;
     g->stm.tmp = NULL;
-    g->stm.dbg = NULL;
+
+    if (logger == nullptr)
+        g->logger = slogger::getLogger("cffwrite");
+    else
+        g->logger = logger;
 
     /* Set error handler */
     DURING_EX(g->err.env)
@@ -2250,6 +2246,10 @@ void cfwFree(cfwCtx g) {
     cfwCstrFree(g);
     cfwSubrFree(g);
 
+    // Wouldn't normally need this but as long as the context may
+    // not be allocated with new we need to manage this semi-manually
+    g->logger = nullptr;
+
     /* Free service libraries */
     dnaFree(g->ctx.dnaSafe);
     dnaFree(g->ctx.dnaFail);
@@ -2260,35 +2260,16 @@ void cfwFree(cfwCtx g) {
 
 /* ----------------------------- Error Handling ---------------------------- */
 
-/* Write message to debug stream from va_list. */
-static void vmessage(cfwCtx g, const char *fmt, va_list ap) {
-    char text[500];
-
-    if (g->stm.dbg == NULL) {
-        return; /* Debug stream not available */
-    }
-    VSPRINTF_S(text, sizeof(text), fmt, ap);
-    (void)g->cb.stm.write(&g->cb.stm, g->stm.dbg, strlen(text), text);
-}
-
-/* Write message to debug stream from varargs. */
-void CTL_CDECL cfwMessage(cfwCtx g, const char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vmessage(g, fmt, ap);
-    va_end(ap);
-}
-
 /* Handle fatal error. */
 void CTL_CDECL cfwFatal(cfwCtx g, int err_code, const char *fmt, ...) {
     if (fmt == NULL) {
         /* Write standard error message */
-        cfwMessage(g, "%s", cfwErrStr(err_code));
+        g->logger->log(sFATAL, "%s", cfwErrStr(err_code));
     } else {
         /* Write font-specific error message */
         va_list ap;
         va_start(ap, fmt);
-        vmessage(g, fmt, ap);
+        g->logger->vlog(sFATAL, fmt, ap);
         va_end(ap);
     }
     g->err.code = (int16_t)err_code;

@@ -129,7 +129,6 @@ struct t1wCtx_ {
     struct {  // Streams
         void *dst;
         void *tmp;
-        void *dbg;
     } stm;
     struct {  // Client callbacks
         ctlMemoryCallbacks mem;
@@ -141,17 +140,14 @@ struct t1wCtx_ {
         _Exc_Buf env;
         int code;
     } err;
+    std::shared_ptr<slogger> logger;
 };
 
 /* ----------------------------- Error Handling ---------------------------- */
 
 /* Handle fatal error. */
 static void fatal(t1wCtx h, int err_code) {
-    if (h->stm.dbg != NULL) {
-        /* Write error message to debug stream */
-        const char *text = t1wErrStr(err_code);
-        (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
-    }
+    h->logger->msg(sFATAL, t1wErrStr(err_code));
     h->err.code = err_code;
     RAISE(&h->err.env, err_code, NULL);
 }
@@ -1908,7 +1904,7 @@ static void writeCIDKeyedFont(t1wCtx h) {
 
 /* Validate client and create context. */
 t1wCtx t1wNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL) {
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger) {
     t1wCtx h;
 
     /* Check client/library compatibility */
@@ -1930,7 +1926,6 @@ t1wCtx t1wNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h->dna = NULL;
     h->stm.dst = NULL;
     h->stm.tmp = NULL;
-    h->stm.dbg = NULL;
     h->err.code = t1wSuccess;
     h->cb.sing.get_stream = NULL;
 
@@ -1949,13 +1944,15 @@ t1wCtx t1wNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     dnaINIT(h->dna, h->stems, 20, 80);
     dnaINIT(h->dna, h->subrs, 5, 100);
 
+    if (logger == nullptr)
+        h->logger = slogger::getLogger("t1write");
+    else
+        h->logger = logger;
+
     /* Open tmp stream */
     h->stm.tmp = h->cb.stm.open(&h->cb.stm, T1W_TMP_STREAM_ID, 0);
     if (h->stm.tmp == NULL)
         goto cleanup;
-
-    /* Open debug stream */
-    h->stm.dbg = h->cb.stm.open(&h->cb.stm, T1W_DBG_STREAM_ID, 0);
 
     return h;
 
@@ -1974,16 +1971,16 @@ void t1wFree(t1wCtx h) {
     if (h->stm.tmp != NULL)
         (void)h->cb.stm.close(&h->cb.stm, h->stm.tmp);
 
-    /* Close debug stream */
-    if (h->stm.dbg != NULL)
-        (void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
-
     dnaFREE(h->glyphs);
     dnaFREE(h->cstr);
     dnaFREE(h->cntrs);
     dnaFREE(h->stems);
     dnaFREE(h->subrs);
     dnaFree(h->dna);
+
+    // Need this until we're sure t1wCtx is always allocated without
+    // malloc.
+    h->logger = nullptr;
 
     /* Free library context */
     h->cb.mem.manage(&h->cb.mem, h, 0);

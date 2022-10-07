@@ -712,7 +712,7 @@ def test_check_psname_in_fmndb_bug1171(explicit_fmndb):
                    '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
 
 
-libplist_warn = (b"tx: (ufr) Warning: Unable to open "
+libplist_warn = (b"Unable to open "
                  b"lib.plist in source UFO font.")
 
 

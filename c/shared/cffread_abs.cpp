@@ -152,7 +152,6 @@ struct cfrCtx_ {  // Context
     dnaDCL(unsigned short, glyphsByCID);  /* Glyphs sorted by cid */
     struct {                              /* Streams */
         void *src;
-        void *dbg;
     } stm;
     struct {  // Source stream
         Offset origin; /* Origin offset of font */
@@ -194,6 +193,7 @@ struct cfrCtx_ {  // Context
     struct {  // Error handling
         _Exc_Buf env;
     } err;
+    std::shared_ptr<slogger> logger;
 };
 
 static void encListFree(cfrCtx h, abfEncoding *node);
@@ -201,27 +201,9 @@ static void setupSharedStream(cfrCtx h);
 
 /* ----------------------------- Error Handling ---------------------------- */
 
-/* Write message to debug stream from va_list. */
-static void vmessage(cfrCtx h, const char *fmt, va_list ap) {
-    char text[500];
-    if (h->stm.dbg == NULL)
-        return; /* Debug stream not available */
-
-    VSPRINTF_S(text, sizeof(text), fmt, ap);
-    (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
-}
-
-/* Write message to debug stream from varargs. */
-static void CTL_CDECL message(cfrCtx h, const char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vmessage(h, fmt, ap);
-    va_end(ap);
-}
-
 /* Handle fatal error. */
 static void fatal(cfrCtx h, int err_code) {
-    message(h, "%s", cfrErrStr(err_code));
+    h->logger->msg(sFATAL, cfrErrStr(err_code));
     RAISE(&h->err.env, err_code, NULL);
 }
 
@@ -277,7 +259,7 @@ static void initFDArray(void *ctx, long cnt, cfrFDInfo *info) {
 
 /* Validate client and create context. */
 cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL) {
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger) {
     cfrCtx h;
 
     /* Check client/library compatibility */
@@ -320,8 +302,10 @@ cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     dnaINIT(h->ctx.dna, h->string.ptrs, 16, 256);
     dnaINIT(h->ctx.dna, h->string.buf, 200, 2000);
 
-    /* Open optional debug stream */
-    h->stm.dbg = h->cb.stm.open(&h->cb.stm, CFR_DBG_STREAM_ID, 0);
+    if (logger == nullptr)
+        h->logger = slogger::getLogger("cffread");
+    else
+        h->logger = logger;
 
     /* Set up shared source stream callbacks */
     setupSharedStream(h);
@@ -376,6 +360,7 @@ void cfrFree(cfrCtx h) {
 
     /* Free dynamic arrays */
     for (i = 0; i < h->FDArray.cnt; i++) {
+        h->FDArray.array[i].aux.logger = nullptr;
         if (h->FDArray.array[i].fdict)
             freePrivateBlends(h, &h->FDArray.array[i].fdict->Private);
     }
@@ -405,9 +390,8 @@ void cfrFree(cfrCtx h) {
     dnaFree(h->ctx.dna);
     sfrFree(h->ctx.sfr);
 
-    /* Close debug stream */
-    if (h->stm.dbg != NULL)
-        (void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
+    // Needed while context could still be malloc-ed
+    h->logger = nullptr;
 
     /* Free library context */
     h->cb.mem.manage(&h->cb.mem, h, 0);
@@ -984,7 +968,7 @@ static int setNumMasters(cfrCtx h, unsigned short vsindex) {
     int numMasters = h->stack.numRegions = var_getIVDRegionCountForIndex(h->cff2.varStore, vsindex);
 
     if (!var_getIVSRegionIndices(h->cff2.varStore, vsindex, h->cff2.regionIndices, h->cff2.regionListCount)) {
-        message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
+        h->logger->log(sWARNING, "inconsistent region indices detected in item variation store subtable %d", vsindex);
         numMasters = 0;
     }
     return numMasters;
@@ -1042,7 +1026,7 @@ static const char *savePostScript(cfrCtx h, const char *str) {
             memmove((void *)p, q + n, strlen(p) + 1 - (q - p + n));
 
             if (h->top.FSType != ABF_UNSET_INT)
-                message(h,
+                h->logger->msg(sWARNING,
                         "two FSTypes (OS/2 value retained, "
                         "CFF value removed)");
             else
@@ -1158,7 +1142,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                                    &priv->blendValues.OtherBlues.cnt,
                                    priv->blendValues.OtherBlues.array);
                 else
-                    message(h, "OtherBlues empty array (ignored)");
+                    h->logger->msg(sWARNING, "OtherBlues empty array (ignored)");
                 break;
             case cff_FamilyBlues:
                 if (h->stack.cnt > 0)
@@ -1169,7 +1153,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                                    priv->blendValues.FamilyBlues.array);
 
                 else
-                    message(h, "FamilyBlues empty array (ignored)");
+                    h->logger->msg(sWARNING, "FamilyBlues empty array (ignored)");
                 break;
             case cff_FamilyOtherBlues:
                 if (h->stack.cnt > 0)
@@ -1180,7 +1164,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                                    priv->blendValues.FamilyOtherBlues.array);
 
                 else
-                    message(h, "FamilyBlues empty array (ignored)");
+                    h->logger->msg(sWARNING, "FamilyBlues empty array (ignored)");
                 break;
             case cff_StdHW:
                 saveBlend(h, &priv->StdHW, &priv->blendValues.StdHW);
@@ -1333,7 +1317,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                     case cff_reservedESC15:
                         /* Was cff_ForceBoldThreshold but was erroneously retained in
                      snapshot MMs by cffsub. Report, but otherwise ignore. */
-                        message(h, "defunct /ForceBoldThreshold operator (ignored)");
+                        h->logger->msg(sWARNING, "defunct /ForceBoldThreshold operator (ignored)");
                         break;
                     case cff_SyntheticBase:
                     case cff_Chameleon:
@@ -1344,14 +1328,14 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                      of -1 which is a no-op so can be safely ignored. */
                         if (h->stack.cnt != 1 || INDEX_INT(0) != -1)
                             fatal(h, cfrErrDICTOp);
-                        message(h, "defunct /lenIV operator (ignored)");
+                        h->logger->msg(sWARNING, "defunct /lenIV operator (ignored)");
                         break;
                     case cff_numMasters:
                         /* Was cff_MultipleMaster so this must be one of the old test
                      MMs that are no longer supported. There are too many things
                      that will break if an attempt is made to continue so just
                      print a helpful message and quit. */
-                        message(h, "defunct /MultipleMaster operator");
+                        h->logger->log(sWARNING, "defunct /MultipleMaster operator");
                         break;
                     case cff_reservedESC40:
                         /* Was an experimental cff_VToHOrigin but the experiment was
@@ -1360,7 +1344,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                      in their implementation of "Save As PDF" when subsetting
                      fonts. Since it has never done anything it can be safely
                      ignored. */
-                        message(h, "defunct /VToHOrigin operator (ignored)");
+                        h->logger->log(sWARNING, "defunct /VToHOrigin operator (ignored)");
                         break;
                     case cff_reservedESC41:
                         /* Was an experimental cff_defaultWidthY but the experiment was
@@ -1369,7 +1353,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                      in their implementation of "Save As PDF" when subsetting
                      fonts. Since it has never done anything it can be safely
                      ignored. */
-                        message(h, "defunct /defaultWidthY operator (ignored)");
+                        h->logger->log(sWARNING, "defunct /defaultWidthY operator (ignored)");
                         break;
                     case cff_reservedESC25:
                     case cff_reservedESC26:
@@ -1377,10 +1361,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                     case cff_reservedESC28:
                     case cff_reservedESC29:
                     default:
-                        if (h->stm.dbg == NULL)
-                            fatal(h, cfrErrDICTOp);
-                        else
-                            message(h, "invalid DICT op ESC%hu (ignored)", byte0);
+                        h->logger->log(sERROR, "invalid DICT op ESC%hu (ignored)", byte0);
                 } /* End: switch (escop) */
                 break;
             case cff_UniqueID:
@@ -1497,10 +1478,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
             case cff_reserved26:
             case cff_reserved27:
             case cff_reserved255:
-                if (h->stm.dbg == NULL)
-                    fatal(h, cfrErrDICTOp);
-                else
-                    message(h, "Invalid DICT op %hu (ignored)", byte0);
+                h->logger->log(sERROR, "Invalid DICT op %hu (ignored)", byte0);
         } /* End: switch (byte0) */
         if (h->flags & CFR_SEEN_BLEND) {
             int j = 0;
@@ -1534,7 +1512,7 @@ static void readSubrINDEX(cfrCtx h, ctlRegion *region, SubrOffsets *offsets) {
         cntSize = 4;
         cnt = readN(h, cntSize);
         if (cnt > SUBR_INDEX_CNT_LIMIT) {
-            message(h, "subroutine count [%d] exceeds limit [%d]", cnt, SUBR_INDEX_CNT_LIMIT);
+            h->logger->log(sWARNING, "subroutine count [%d] exceeds limit [%d]", cnt, SUBR_INDEX_CNT_LIMIT);
             fatal(h, cfrErrINDEXHeader);
         }
     } else {
@@ -1677,7 +1655,7 @@ static void initFDInfo(cfrCtx h, int iFD) {
     if (h->flags & CFR_UPDATE_OPS)
         fd->aux.flags |= T2C_UPDATE_OPS;
     fd->aux.src = h->stm.src;
-    fd->aux.dbg = h->stm.dbg;
+    fd->aux.logger = h->logger;
     fd->aux.stm = &h->cb.stm;
     fd->aux.subrs.cnt = 0;
     fd->aux.gsubrs.cnt = 0;
@@ -1813,7 +1791,7 @@ static void readCharStringsINDEX(cfrCtx h, short flags) {
         /* Validate object length */
         length = info->sup.end - info->sup.begin;
         if (length > 65535) {
-            message(h,
+            h->logger->log(sWARNING,
                     "Warning: CharString of GID %ld is %ld bytes long. "
                     "CharStrings longer than 65535 bytes might not be "
                     "supported by some implementations.",
@@ -1949,7 +1927,7 @@ static void postRead(cfrCtx h) {
         return; /* Optional table missing */
 
     if (invalidStreamOffset(h, table->offset + POST_HEADER_SIZE - 1)) {
-        message(h, "post: header outside stream bounds");
+        h->logger->log(sWARNING, "post: header outside stream bounds");
         return;
     }
 
@@ -1974,7 +1952,7 @@ static void postRead(cfrCtx h) {
     }
 
     if (invalidStreamOffset(h, table->offset + table->length - 1)) {
-        message(h, "post: table truncated");
+        h->logger->log(sWARNING, "post: table truncated");
         goto parseError;
     }
 
@@ -1983,12 +1961,12 @@ static void postRead(cfrCtx h) {
     /* Parse format 2.0 data */
     numGlyphs = read2(h);
     if (numGlyphs != h->glyphs.cnt)
-        message(h, "post 2.0: name index size doesn't match numGlyphs");
+        h->logger->log(sWARNING, "post 2.0: name index size doesn't match numGlyphs");
 
     /* Validate table length against size of glyphNameIndex */
     length = (long)(table->length - (srcTell(h) - table->offset));
     if (length < numGlyphs * 2) {
-        message(h, "post 2.0: table truncated (table ignored)");
+        h->logger->log(sWARNING, "post 2.0: table truncated (table ignored)");
         goto parseError;
     }
 
@@ -1999,7 +1977,7 @@ static void postRead(cfrCtx h) {
         unsigned short nid = read2(h);
         h->post.fmt2.glyphNameIndex.array[i] = nid;
         if (nid > 32767) {
-            message(h, "post 2.0: invalid name id (table ignored)");
+            h->logger->log(sWARNING, "post 2.0: invalid name id (table ignored)");
             goto parseError;
         } else if (nid > 257)
             strCount = MAX(strCount, nid-257);
@@ -2020,13 +1998,13 @@ static void postRead(cfrCtx h) {
         h->post.fmt2.strings.array[i] = p;
         p += length;
         if (p > end) {
-            message(h, "post 2.0: invalid strings");
+            h->logger->log(sWARNING, "post 2.0: invalid strings");
             goto parseError;
         }
     }
     *p = '\0';
     if (p != end)
-        message(h, "post 2.0: string data didn't reach end of table");
+        h->logger->log(sWARNING, "post 2.0: string data didn't reach end of table");
 
     return; /* Success */
 
@@ -2191,7 +2169,7 @@ static void readCharset(cfrCtx h) {
                         long nLeft = readN(h, size);
                         while (nLeft-- >= 0) {
                             if (gid >= h->glyphs.cnt) {
-                                message(h, "extra mappings in Charset ignored");
+                                h->logger->log(sWARNING, "extra mappings in Charset ignored");
                                 break;
                             }
                             addID(h, gid++, id++);
@@ -2518,7 +2496,7 @@ static void makeupCFF2Info(cfrCtx h) {
         srcSeek(h, table->offset + 18);
         unitsPerEm = read2(h);
         if (!unitsPerEm) {
-            message(h, "head: zero unitsPerEm (1000 assumed)");
+            h->logger->log(sWARNING, "head: zero unitsPerEm (1000 assumed)");
             unitsPerEm = 1000;
         }
 
@@ -2641,9 +2619,9 @@ void cfrSetLastResortInstanceNameCallback(cfrCtx h, cfrlastResortInstanceNameCal
 static void report_error(abfErrCallbacks *cb, int err_code, int iFD) {
     cfrCtx h = (cfrCtx)cb->ctx;
     if (iFD == -1)
-        message(h, "%s (ignored)", abfErrStr(err_code));
+        h->logger->log(sWARNING, "%s (ignored)", abfErrStr(err_code));
     else
-        message(h, "%s FD[%d] (ignored)", abfErrStr(err_code), iFD);
+        h->logger->log(sWARNING, "%s FD[%d] (ignored)", abfErrStr(err_code), iFD);
 }
 
 /* Begin reading new font. */
@@ -2817,14 +2795,10 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
     *top = &h->top;
 
     /* Validate dictionaries */
-    if (h->stm.dbg == NULL)
-        abfCheckAllDicts(NULL, &h->top);
-    else {
-        abfErrCallbacks cb;
-        cb.ctx = h;
-        cb.report_error = report_error;
-        abfCheckAllDicts(&cb, &h->top);
-    }
+    abfErrCallbacks cb;
+    cb.ctx = h;
+    cb.report_error = report_error;
+    abfCheckAllDicts(&cb, &h->top);
 
     /* Fill glyphs array */
     if (!(flags & CFR_SHALLOW_READ)) {
@@ -2856,7 +2830,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
     /* Check each Private dict contained a BlueValues operator */
     for (i = 0; i < h->fdicts.cnt; i++)
         if (!(h->FDArray.array[i].flags & SEEN_BLUE_VALUES))
-            message(h, "/BlueValues missing: FD[%ld]", i);
+            h->logger->log(sWARNING, "/BlueValues missing: FD[%ld]", i);
 
     HANDLER
     return Exception.Code;
@@ -2907,9 +2881,9 @@ static void readGlyph(cfrCtx h,
     result = t2cParse(info->sup.begin, info->sup.end, aux, gid, cff2_cb, glyph_cb, &h->cb.mem);
     if (result) {
         if (info->flags & ABF_GLYPH_CID)
-            message(h, "(t2c) %s <cid-%hu>", t2cErrStr(result), info->cid);
+            h->logger->log(sWARNING, "(t2c) %s <cid-%hu>", t2cErrStr(result), info->cid);
         else
-            message(h, "(t2c) %s <%s>", t2cErrStr(result), info->gname.ptr);
+            h->logger->log(sWARNING, "(t2c) %s <%s>", t2cErrStr(result), info->gname.ptr);
         fatal(h, cfrErrCstrParse);
     }
 
@@ -3182,7 +3156,8 @@ static uint32_t sharedSrcRead4(ctlSharedStmCallbacks *h) {
 void sharedSrcMessage(ctlSharedStmCallbacks *h, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    vmessage((cfrCtx)h->direct_ctx, fmt, ap);
+    cfrCtx g = (cfrCtx)h->direct_ctx;
+    g->logger->vlog(sWARNING, fmt, ap);
     va_end(ap);
 }
 

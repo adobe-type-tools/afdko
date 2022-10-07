@@ -1893,7 +1893,7 @@ static void addMember(subrCtx h, Subr *subr) {
                 list[listlength++] = link->subr;
                 if (listlength >= LISTSIZE) {
 #if TC_DEBUG
-                    fprintf(stderr, "Typecomp Error: List Overflow\n");
+                    h->g->logger->msg(sERROR, "Typecomp Error: List Overflow");
 #endif
                     sMemFree(list);
                     dnaFREE(subrStack);
@@ -1905,7 +1905,7 @@ static void addMember(subrCtx h, Subr *subr) {
                 list[listlength++] = link->subr;
                 if (listlength >= LISTSIZE) {
 #if TC_DEBUG
-                    fprintf(stderr, "Typecomp Error: List Overflow\n");
+                    h->g->logger->msg(sERROR, "Typecomp Error: List Overflow");
 #endif
                     sMemFree(list);
                     dnaFREE(subrStack);
@@ -2966,7 +2966,7 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
         resetSubrCount(h, 0);
 
         if (h->subrStackOvl) {
-            cfwMessage(h->g, "subr stack depth exceeded (reduced)");
+            g->logger->msg(sWARNING, "subr stack depth exceeded (reduced)");
         }
 
         initLocalSubrs(h, 1);
@@ -3033,7 +3033,7 @@ void cfwSubrSubrize(cfwCtx g, int nFonts, subr_Font *fonts) {
             }
 
             if (h->subrStackOvl) {
-                cfwMessage(h->g, "subr stack depth exceeded (reduced)");
+                g->logger->msg(sWARNING, "subr stack depth exceeded (reduced)");
             }
         }
 

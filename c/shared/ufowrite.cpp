@@ -73,7 +73,6 @@ struct ufwCtx_ {
     struct {  // Streams
         void *dst;
         void *tmp;
-        void *dbg;
     } stm;
     struct {  // Client callbacks
         ctlMemoryCallbacks mem;
@@ -84,17 +83,14 @@ struct ufwCtx_ {
         _Exc_Buf env;
         int code;
     } err;
+    std::shared_ptr<slogger> logger;
 };
 
 /* ----------------------------- Error Handling ---------------------------- */
 
 /* Handle fatal error. */
 static void fatal(ufwCtx h, int err_code) {
-    if (h->stm.dbg != NULL) {
-        /* Write error message to debug stream */
-        const char *text = ufwErrStr(err_code);
-        (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
-    }
+    h->logger->msg(sFATAL, ufwErrStr(err_code));
     h->err.code = err_code;
     RAISE(&h->err.env, err_code, NULL);
 }
@@ -237,7 +233,7 @@ static void writeLine(ufwCtx h, const char *s) {
 
 /* Validate client and create context. */
 ufwCtx ufwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL) {
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger) {
     ufwCtx h;
 
     /* Check client/library compatibility */
@@ -257,13 +253,17 @@ ufwCtx ufwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 
     h->dna = NULL;
     h->stm.dst = NULL;
-    h->stm.dbg = NULL;
     h->err.code = ufwSuccess;
     h->lastiFD = ABF_UNSET_INT;
 
     /* Copy callbacks */
     h->cb.mem = *mem_cb;
     h->cb.stm = *stm_cb;
+
+    if (logger == nullptr)
+        h->logger = slogger::getLogger("ufowrite");
+    else
+        h->logger = logger;
 
     /* Initialize service library */
     h->dna = dnaNew(&h->cb.mem, DNA_CHECK_ARGS);
@@ -274,9 +274,6 @@ ufwCtx ufwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 
     dnaINIT(h->dna, h->glyphs, 256, 750);
     dnaINIT(h->dna, h->path.opList, 256, 750);
-
-    /* Open debug stream */
-    h->stm.dbg = h->cb.stm.open(&h->cb.stm, UFW_DBG_STREAM_ID, 0);
 
     return h;
 
@@ -291,14 +288,12 @@ void ufwFree(ufwCtx h) {
     if (h == NULL)
         return;
 
-    /* Close debug stream */
-    if (h->stm.dbg != NULL) {
-        (void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
-        h->stm.dbg = NULL;
-    }
     dnaFREE(h->glyphs);
     dnaFREE(h->path.opList);
     dnaFree(h->dna);
+
+    // Needed until we're sure context isn't malloc-ed
+    h->logger = nullptr;
 
     /* Free library context */
     h->cb.mem.manage(&h->cb.mem, h, 0);

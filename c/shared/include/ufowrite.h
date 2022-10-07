@@ -5,15 +5,14 @@
 #ifndef SHARED_INCLUDE_UFOWRITE_H_
 #define SHARED_INCLUDE_UFOWRITE_H_
 
+#include <memory>
+
 #include "ctlshare.h"
+#include "slogger.h"
 
 #define UFW_VERSION CTL_MAKE_VERSION(1, 1, 0)
 
 #include "absfont.h"
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-extern "C" {
-#endif
 
 /* UFO Font Format Generation Library
    =====================================
@@ -46,7 +45,7 @@ extern "C" {
 
 typedef struct ufwCtx_ *ufwCtx;
 ufwCtx ufwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL);
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger = nullptr);
 
 #define UFW_CHECK_ARGS CTL_CHECK_ARGS_CALL(UFW_VERSION)
 
@@ -114,9 +113,5 @@ void ufwGetVersion(ctlVersionCallbacks *cb);
    callbacks passed with the "cb" parameter (see ctlshare.h). */
 
 #define MAX_UFO_GLYPH_NAME 256
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-}
-#endif
 
 #endif  // SHARED_INCLUDE_UFOWRITE_H_

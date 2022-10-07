@@ -5,15 +5,14 @@
 #ifndef SHARED_INCLUDE_T2CSTR_H_
 #define SHARED_INCLUDE_T2CSTR_H_
 
+#include <memory>
+
 #include "ctlshare.h"
+#include "slogger.h"
 
 #define T2C_VERSION CTL_MAKE_VERSION(1, 0, 23)
 
 #include "absfont.h"
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-extern "C" {
-#endif
 
 typedef struct {
     long flags;
@@ -37,10 +36,10 @@ typedef struct {
     unsigned char achar;
     float matrix[6];
     float WV[4];
-    void *dbg;
     unsigned short default_vsIndex; /* this is the vsindex set in the private dict. */
     struct var_itemVariationStore_ *varStore;
     float *scalars;
+    std::shared_ptr<slogger> logger;
 } t2cAuxData;
 
 typedef struct cff2GlyphCallbacks_ cff2GlyphCallbacks;
@@ -168,9 +167,5 @@ void t2cGetVersion(ctlVersionCallbacks *cb);
 
 /* t2cGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-}
-#endif
 
 #endif  // SHARED_INCLUDE_T2CSTR_H_

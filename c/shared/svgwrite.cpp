@@ -49,7 +49,6 @@ struct svwCtx_ {
     struct {  // Streams
         void *dst;
         void *tmp;
-        void *dbg;
     } stm;
     struct {  // Client callbacks
         ctlMemoryCallbacks mem;
@@ -60,17 +59,14 @@ struct svwCtx_ {
         _Exc_Buf env;
         int code;
     } err;
+    std::shared_ptr<slogger> logger;
 };
 
 /* ----------------------------- Error Handling ---------------------------- */
 
 /* Handle fatal error. */
 static void fatal(svwCtx h, int err_code) {
-    if (h->stm.dbg != NULL) {
-        /* Write error message to debug stream */
-        const char *text = svwErrStr(err_code);
-        (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
-    }
+    h->logger->msg(sFATAL, svwErrStr(err_code));
     h->err.code = err_code;
     RAISE(&h->err.env, err_code, NULL);
 }
@@ -265,7 +261,7 @@ static void CTL_CDECL writeFmt(svwCtx h, const char *fmt, ...) {
 
 /* Validate client and create context. */
 svwCtx svwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL) {
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger) {
     svwCtx h;
 
     /* Check client/library compatibility */
@@ -283,7 +279,6 @@ svwCtx svwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h->glyphs.size = 0;
     h->dna = NULL;
     h->stm.dst = NULL;
-    h->stm.dbg = NULL;
     h->err.code = svwSuccess;
 
     /* Copy callbacks */
@@ -297,8 +292,10 @@ svwCtx svwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 
     dnaINIT(h->dna, h->glyphs, 256, 750);
 
-    /* Open debug stream */
-    h->stm.dbg = h->cb.stm.open(&h->cb.stm, SVW_DBG_STREAM_ID, 0);
+    if (logger == nullptr)
+        h->logger = slogger::getLogger("svgwrite");
+    else
+        h->logger = logger;
 
     return h;
 
@@ -313,12 +310,11 @@ void svwFree(svwCtx h) {
     if (h == NULL)
         return;
 
-    /* Close debug stream */
-    if (h->stm.dbg != NULL)
-        (void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
-
     dnaFREE(h->glyphs);
     dnaFree(h->dna);
+
+    // Need this until we're sure context isn't allocated with malloc
+    h->logger = nullptr;
 
     /* Free library context */
     h->cb.mem.manage(&h->cb.mem, h, 0);
