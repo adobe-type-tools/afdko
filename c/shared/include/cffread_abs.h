@@ -5,15 +5,14 @@
 #ifndef SHARED_INCLUDE_CFFREAD_ABS_H_
 #define SHARED_INCLUDE_CFFREAD_ABS_H_
 
+#include <memory>
+
 #include "ctlshare.h"
+#include "slogger.h"
 
 #define CFR_VERSION CTL_MAKE_VERSION(2, 1, 3)
 
 #include "absfont.h"
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-extern "C" {
-#endif
 
 /* Compact Font Format (CFF) Parser Library
    ========================================
@@ -39,7 +38,7 @@ extern "C" {
 
 typedef struct cfrCtx_ *cfrCtx;
 cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL);
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger = nullptr);
 
 #define CFR_CHECK_ARGS CTL_CHECK_ARGS_CALL(CFR_VERSION)
 
@@ -321,9 +320,5 @@ void cfrGetVersion(ctlVersionCallbacks *cb);
 
 /* cfrGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-}
-#endif
 
 #endif  // SHARED_INCLUDE_CFFREAD_ABS_H_

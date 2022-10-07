@@ -380,7 +380,6 @@ struct ttrCtx_ {
     dnaDCL(char, tmp1); /* Temporary buffer 1 */
     struct {            /* Streams */
         void *src;
-        void *dbg;
     } stm;
     struct {  // Source stream
         long offset;   /* Buffer offset */
@@ -414,6 +413,7 @@ struct ttrCtx_ {
         _Exc_Buf env;
         int code;
     } err;
+    std::shared_ptr<slogger> logger;
 };
 
 /* ----------------------------- forward declaration ---------------------------- */
@@ -422,35 +422,16 @@ static void setupSharedStream(ttrCtx h);
 
 /* ----------------------------- Error Handling ---------------------------- */
 
-/* Write message to debug stream from va_list. */
-static void vmessage(ttrCtx h, const char *fmt, va_list ap) {
-    char text[500];
-
-    if (h->stm.dbg == NULL)
-        return; /* Debug stream not available */
-
-    VSPRINTF_S(text, sizeof(text), fmt, ap);
-    (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
-}
-
-/* Write message to debug stream from varargs. */
-static void CTL_CDECL message(ttrCtx h, const char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vmessage(h, fmt, ap);
-    va_end(ap);
-}
-
 /* Handle fatal error. */
 static void CTL_CDECL fatal(ttrCtx h, int err_code, const char *fmt, ...) {
     if (fmt == NULL)
         /* Write standard error message */
-        message(h, "%s", ttrErrStr(err_code));
+        h->logger->msg(sFATAL, ttrErrStr(err_code));
     else {
         /* Write font-specific error message */
         va_list ap;
         va_start(ap, fmt);
-        vmessage(h, fmt, ap);
+        h->logger->vlog(sFATAL, fmt, ap);
         va_end(ap);
     }
     h->err.code = err_code;
@@ -480,7 +461,7 @@ static void dna_init(ttrCtx h) {
 
 /* Validate client and create context. */
 ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL) {
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger) {
     ttrCtx h;
 
     /* Check client/library compatibility */
@@ -518,7 +499,6 @@ ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h->gvar.sharedTuples.size = 0;
     h->tmp0.size = 0;
     h->tmp1.size = 0;
-    h->stm.dbg = NULL;
     h->ctx.dna = NULL;
     h->ctx.sfr = NULL;
     h->vf.axisCount = 0;
@@ -558,8 +538,10 @@ ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     dnaINIT(h->ctx.dna, h->tmp0, 200, 500);
     dnaINIT(h->ctx.dna, h->tmp1, 200, 500);
 
-    /* Open debug stream */
-    h->stm.dbg = h->cb.stm.open(&h->cb.stm, TTR_DBG_STREAM_ID, 0);
+    if (logger == nullptr)
+        h->logger = slogger::getLogger("ttread");
+    else
+        h->logger = logger;
 
     /* set up shared stream used for variable fonts */
     setupSharedStream(h);
@@ -601,10 +583,8 @@ void ttrFree(ttrCtx h) {
     dnaFree(h->ctx.dna);
     sfrFree(h->ctx.sfr);
 
-    /* Close debug stream */
-    if (h->stm.dbg != NULL)
-        (void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
-
+    // Needed while the context may be malloc-ed
+    h->logger = nullptr;
     /* Free library context */
     h->cb.mem.manage(&h->cb.mem, h, 0);
 }
@@ -756,7 +736,8 @@ static uint32_t sharedSrcRead4(ctlSharedStmCallbacks *h) {
 static void sharedSrcMessage(ctlSharedStmCallbacks *h, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    vmessage((ttrCtx)h->direct_ctx, fmt, ap);
+    ttrCtx g = (ttrCtx)h->direct_ctx;
+    g->logger->vlog(sWARNING, fmt, ap);
     va_end(ap);
 }
 
@@ -824,7 +805,7 @@ static void headRead(ttrCtx h) {
     /* Read and validate table version */
     h->head.version = read4(h);
     if (h->head.version != sfr_v1_0_tag)
-        message(h, "invalid head table version");
+        h->logger->msg(sWARNING, "invalid head table version");
 
     /* Read rest of table */
     h->head.fontRevision = read4(h);
@@ -857,7 +838,7 @@ static void hheaRead(ttrCtx h) {
     /* Read and validate table version */
     h->hhea.version = read4(h);
     if (h->hhea.version != sfr_v1_0_tag)
-        message(h, "invalid hhea table version");
+        h->logger->msg(sWARNING, "invalid hhea table version");
 
     /* Read rest of table */
     h->hhea.ascender = read2(h);
@@ -890,7 +871,7 @@ static void maxpRead(ttrCtx h) {
     /* Read and validate table version */
     h->maxp.version = read4(h);
     if (h->maxp.version != sfr_v1_0_tag)
-        message(h, "invalid maxp table version");
+        h->logger->msg(sWARNING, "invalid maxp table version");
 
     /* Read rest of table */
     h->maxp.numGlyphs = read2(h);
@@ -999,7 +980,7 @@ static void gvarRead(ttrCtx h) {
 
     h->gvar.version = read2(h);
     if (h->gvar.version != 1) {
-        message(h, "invalid gvar table version");
+        h->logger->log(sERROR, "invalid gvar table version");
         return;
     }
     read2(h); /* minor version */
@@ -1511,7 +1492,7 @@ static void nameRead(ttrCtx h) {
     int i;
     sfrTable *table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('n', 'a', 'm', 'e'));
     if (table == NULL) {
-        message(h, "name table missing");
+        h->logger->msg(sERROR, "name table missing");
         h->name.records.cnt = 0;
         return;
     }
@@ -1520,7 +1501,7 @@ static void nameRead(ttrCtx h) {
     /* Read and validate table format */
     h->name.format = read2(h);
     if (h->name.format != 0)
-        message(h, "invalid name table format");
+        h->logger->msg(sERROR, "invalid name table format");
 
     /* Read rest of header */
     h->name.count = read2(h);
@@ -1605,7 +1586,7 @@ static void postRead(ttrCtx h) {
         return; /* Optional table missing */
 
     if (invalidStreamOffset(h, table->offset + POST_HEADER_SIZE - 1)) {
-        message(h, "post: header outside stream bounds");
+        h->logger->log(sWARNING, "post: header outside stream bounds");
         return;
     }
 
@@ -1625,7 +1606,7 @@ static void postRead(ttrCtx h) {
         return; /* Successfully read header */
 
     if (invalidStreamOffset(h, table->offset + table->length - 1)) {
-        message(h, "post: table truncated");
+        h->logger->msg(sWARNING, "post: table truncated");
         goto parseError;
     }
 
@@ -1634,12 +1615,12 @@ static void postRead(ttrCtx h) {
     /* Parse format 2.0 data */
     numGlyphs = read2(h);
     if (numGlyphs != h->maxp.numGlyphs)
-        message(h, "post 2.0: name index size doesn't match numGlyphs");
+        h->logger->msg(sWARNING, "post 2.0: name index size doesn't match numGlyphs");
 
     /* Validate table length against size of glyphNameIndex */
     length = table->length - (srcTell(h) - table->offset);
     if (length < numGlyphs * 2) {
-        message(h, "post 2.0: table truncated (table ignored)");
+        h->logger->msg(sWARNING, "post 2.0: table truncated (table ignored)");
         goto parseError;
     }
 
@@ -1649,7 +1630,7 @@ static void postRead(ttrCtx h) {
         unsigned short nid = read2(h);
         h->post.fmt2.glyphNameIndex.array[i] = nid;
         if (nid > 32767) {
-            message(h, "post 2.0: invalid name id (table ignored)");
+            h->logger->msg(sWARNING, "post 2.0: invalid name id (table ignored)");
             goto parseError;
         } else if (nid > 257)
             if (nid > maxID)
@@ -1672,13 +1653,13 @@ static void postRead(ttrCtx h) {
             h->post.fmt2.strings.array[i] = p;
             p += length;
             if (p > end) {
-                message(h, "post 2.0: invalid strings");
+                h->logger->msg(sWARNING, "post 2.0: invalid strings");
                 goto parseError;
             }
         }
         *p = '\0';
         if (p != end)
-            message(h, "post 2.0: string data didn't reach end of table");
+            h->logger->msg(sWARNING, "post 2.0: string data didn't reach end of table");
     }
     return; /* Success */
 
@@ -1764,7 +1745,7 @@ static void cmapRead(ttrCtx h) {
     EncRec *enc;
     sfrTable *table = sfrGetTableByTag(h->ctx.sfr, CTL_TAG('c', 'm', 'a', 'p'));
     if (table == NULL) {
-        message(h, "cmap table missing");
+        h->logger->msg(sWARNING, "cmap table missing");
         h->cmap.encodings.cnt = 0;
         return;
     }
@@ -1773,7 +1754,7 @@ static void cmapRead(ttrCtx h) {
     /* Read and validate table format */
     h->cmap.version = read2(h);
     if (h->cmap.version != 0)
-        message(h, "invalid cmap table version");
+        h->logger->msg(sWARNING, "invalid cmap table version");
 
     /* Read rest of header */
     h->cmap.nEncodings = read2(h);
@@ -1800,7 +1781,7 @@ static void cmapRead(ttrCtx h) {
 /* Add encoding to glyph. */
 static void encAdd(ttrCtx h, GID gid, unsigned short code) {
     if (gid >= h->glyphs.cnt)
-        message(h, "encoding for nonexistent glyph (ignored)");
+        h->logger->msg(sWARNING, "encoding for nonexistent glyph (ignored)");
     else {
         Encoding *enc = dnaNEXT(h->encodings);
         enc->code = code;
@@ -1842,7 +1823,7 @@ static void cmapReadFmt4(ttrCtx h) {
         unsigned short idRangeOffset = read2(h);
         if (idRangeOffset == 0xffff) {
             idRangeOffset = 0; /* Fix Fontographer bug */
-            message(h, "cmap: invalid idRangeOffset in segment[%ld] (fixed)", i);
+            h->logger->log(sWARNING, "cmap: invalid idRangeOffset in segment[%ld] (fixed)", i);
         }
         h->cmap.segments.array[i].idRangeOffset =
             (idRangeOffset == 0) ? 0 : offset + idRangeOffset;
@@ -2042,9 +2023,9 @@ static STI nameGet(ttrCtx h, unsigned short nameId) {
 static void report_error(abfErrCallbacks *cb, int err_code, int iFD) {
     ttrCtx h = (ttrCtx) cb->ctx;
     if (iFD == -1)
-        message(h, "%s (ignored)", abfErrStr(err_code));
+        h->logger->log(sERROR, "%s (ignored)", abfErrStr(err_code));
     else
-        message(h, "%s FD[%d] (ignored)", abfErrStr(err_code), iFD);
+        h->logger->log(sERROR, "%s FD[%d] (ignored)", abfErrStr(err_code), iFD);
 }
 
 /* Return 1 if glyph is unnamed else 0. */
@@ -2156,7 +2137,7 @@ static void assignPost2Names(ttrCtx h) {
             const char *gname = post2GetName(h, (unsigned short)i);
             if (gname != NULL) {
                 if (gname[0] == '\0')
-                    message(h, "gid[%ld]: empty name", i);
+                    h->logger->log(sWARNING, "gid[%ld]: empty name", i);
                 else {
                     assignGlyphNameRef(h, (unsigned short)i, gname);
                     if (h->unnamed == 0)
@@ -2459,7 +2440,7 @@ static void fillClientData(ttrCtx h) {
     if (font->FontName.impl == STI_UNDEF) {
         const char *unknown = "unknown";
         if (h->name.records.cnt != 0)
-            message(h, "name: FontName missing");
+            h->logger->msg(sWARNING, "name: FontName missing");
         /* 64-bit warning fixed by cast here HO */
         font->FontName.impl = addString(h, (int)strlen(unknown), unknown);
     }
@@ -2478,14 +2459,10 @@ static void fillClientData(ttrCtx h) {
     top->sup.nGlyphs = h->glyphs.cnt;
 
     /* Validate dictionaries */
-    if (h->stm.dbg == NULL)
-        abfCheckAllDicts(NULL, &h->top);
-    else {
-        abfErrCallbacks cb;
-        cb.ctx = h;
-        cb.report_error = report_error;
-        abfCheckAllDicts(&cb, &h->top);
-    }
+    abfErrCallbacks cb;
+    cb.ctx = h;
+    cb.report_error = report_error;
+    abfCheckAllDicts(&cb, &h->top);
 
     assignNamesAndEncoding(h);
 
@@ -2828,7 +2805,7 @@ static void glyfReadCompound(ttrCtx h, GID gid, GID *mtx_gid, int depth) {
                     glyfReadSimple(h, component, nContours, (int)iStart);
             } else {
                 if (depth == h->maxp.maxComponentDepth)
-                    message(h, "gid[%hu]: max component depth exceeded (ignored)",
+                    h->logger->log(sWARNING, "gid[%hu]: max component depth exceeded (ignored)",
                             gid);
                 if (depth >= GLYF_MAX_COMPONENT_DEPTH)
                     fatal(h, ttrErrBadGlyphData,
@@ -3350,7 +3327,7 @@ int ttrResetGlyphs(ttrCtx h) {
 int ttrEndFont(ttrCtx h) {
     int result = sfrEndFont(h->ctx.sfr);
     if (result) {
-        message(h, "(sfr) %s", sfrErrStr(result));
+        h->logger->msg(sERROR, sfrErrStr(result));
         return ttrErrSfntread;
     }
 

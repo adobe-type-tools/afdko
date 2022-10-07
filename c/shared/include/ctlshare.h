@@ -235,23 +235,18 @@ enum {  // Stream status
 enum {
     T1R_SRC_STREAM_ID, /* t1read */
     T1R_TMP_STREAM_ID,
-    T1R_DBG_STREAM_ID,
 
     TTR_SRC_STREAM_ID, /* ttread */
-    TTR_DBG_STREAM_ID,
 
     CFR_SRC_STREAM_ID, /* cffread */
-    CFR_DBG_STREAM_ID,
 
     SFR_SRC_STREAM_ID, /* sfntread (default) */
 
     T1W_DST_STREAM_ID, /* t1write */
     T1W_TMP_STREAM_ID,
-    T1W_DBG_STREAM_ID,
 
     CFW_DST_STREAM_ID, /* cffwrite */
     CFW_TMP_STREAM_ID,
-    CFW_DBG_STREAM_ID,
 
     PDW_DST_STREAM_ID, /* pdfwrite */
 
@@ -259,7 +254,6 @@ enum {
 
     SVW_DST_STREAM_ID, /* svgwrite */
     SVW_TMP_STREAM_ID,
-    SVW_DBG_STREAM_ID,
 
     CEF_SRC_STREAM_ID, /* cfembed */
     CEF_DST_STREAM_ID,
@@ -270,19 +264,13 @@ enum {
 
     T2C_SRC_STREAM_ID, /* t2cstr */
 
-    BZR_SRC_STREAM_ID, /* bezread */
-    BZR_DBG_STREAM_ID,
-
     SVR_SRC_STREAM_ID, /* svgread */
     SVR_TMP_STREAM_ID,
-    SVR_DBG_STREAM_ID,
 
     UFO_SRC_STREAM_ID, /* ufo read format */
-    UFO_DBG_STREAM_ID,
 
     UFW_DST_STREAM_ID, /* ufowrite */
     UFW_TMP_STREAM_ID,
-    UFW_DBG_STREAM_ID,
 
     CTL_SRC_STREAM_ID, /* ctlshare source stream */
 
@@ -492,7 +480,6 @@ enum {
     T1W_LIB_ID,
     SFR_LIB_ID,
     SFW_LIB_ID,
-    BZR_LIB_ID,
     SVR_LIB_ID,
     SVW_LIB_ID,
     UFR_LIB_ID,

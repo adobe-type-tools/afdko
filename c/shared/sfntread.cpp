@@ -47,6 +47,7 @@ struct sfrCtx_ {  // Context
     struct {  // Error handling
         _Exc_Buf env;
     } err;
+    std::shared_ptr<slogger> logger;
 };
 
 /* ----------------------------- Error Handling ---------------------------- */
@@ -75,7 +76,7 @@ static void memFree(sfrCtx h, void *ptr) {
 
 /* Validate client and create context. */
 sfrCtx sfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL) {
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger) {
     sfrCtx h;
 
     /* Check client/library compatibility */
@@ -96,6 +97,11 @@ sfrCtx sfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 
     h->flags = 0;
 
+    if (logger == nullptr)
+        h->logger = slogger::getLogger("sfntread");
+    else
+        h->logger = logger;
+
     return h;
 }
 
@@ -104,6 +110,7 @@ void sfrFree(sfrCtx h) {
     if (h == NULL)
         return;
 
+    h->logger = nullptr;
     memFree(h, h->sfnt.directory);
     memFree(h, h->TTC.TableDirectory);
     memFree(h, h);
@@ -185,8 +192,7 @@ static void readTTCDirectory(sfrCtx h, long origin) {
            chosen to avoid massive memory allocations when dir_count is ridiculously
            large. Ideally we'd check the stream's size, but that's not possible for
            the stdin input case. */
-        fprintf(stderr, "tx: TTC directory count %ld > limit %i\n", dir_count, MAX_NUM_TTC_TABLES);
-        fprintf(stderr, "tx: fatal error\n");
+        h->logger->log(sFATAL, "TTC directory count %ld > limit %i\n", dir_count, MAX_NUM_TTC_TABLES);
         fatal(h, sfrErrTables);
     }
 

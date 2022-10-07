@@ -1,14 +1,14 @@
 mergefonts: --- cidfont.ps
-mergefonts: (cfw) unused hints <cid-13340>
-mergefonts: (cfw) unused hints <cid-16961>
-mergefonts: (cfw) unused hints <cid-16963>
-Adding font dict 0 from cidfont.ps.
-Adding font dict 1 from cidfont.ps.
+WARNING: unused hints <cid-13340>
+WARNING: unused hints <cid-16961>
+WARNING: unused hints <cid-16963>
+   INFO: Adding font dict 0 from /home/skef/src/a/afdko2/tests/mergefonts_data/input/bug635/cidfont.ps.
+   INFO: Adding font dict 1 from /home/skef/src/a/afdko2/tests/mergefonts_data/input/bug635/cidfont.ps.
 mergefonts: --- rotated.ps
-mergefonts: (cfw) glyph skipped - same name, different charstring as glyph in font <cid-0>
-mergefonts: (cfw) all hintsubs removed (fixupmap enabled) <cid-48957>
-mergefonts: (cfw) all hintsubs removed (fixupmap enabled) <cid-48968>
-Adding font dict 2 from rotated.ps.
-Adding font dict 3 from rotated.ps.
-mergefonts: (cfw) There are 7 additional reports of 'duplicate hintsubs (discarded)'.
+WARNING: glyph skipped - same name, different charstring as glyph in font <cid-0>
+WARNING: all hintsubs removed (fixupmap enabled) <cid-48957>
+WARNING: all hintsubs removed (fixupmap enabled) <cid-48968>
+   INFO: Adding font dict 2 from /home/skef/src/a/afdko2/tests/mergefonts_data/input/bug635/rotated.ps.
+   INFO: Adding font dict 3 from /home/skef/src/a/afdko2/tests/mergefonts_data/input/bug635/rotated.ps.
+WARNING: There are 7 additional reports of 'duplicate hintsubs (discarded)'.
 

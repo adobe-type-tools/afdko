@@ -155,7 +155,6 @@ struct t1rCtx_ {
     } cb;
     struct {  // Streams
         void *tmp; /* Temporary */
-        void *dbg; /* Debug */
         void *src; /* Source (CID-keyed only) */
     } stm;
     long tmpoff; /* Temporary stream offset */
@@ -170,41 +169,23 @@ struct t1rCtx_ {
     struct {              /* Error handling */
         _Exc_Buf env;
     } err;
+    std::shared_ptr<slogger> logger;
 };
 
 static void parseGlyphDirectory(t1rCtx h);
 
 /* ----------------------------- Error Handling ---------------------------- */
 
-/* Write message to debug stream from va_list. */
-static void vmessage(t1rCtx h, const char *fmt, va_list ap) {
-    char text[500];
-
-    if (h->stm.dbg == NULL)
-        return; /* Debug stream not available */
-
-    VSPRINTF_S(text, 500, fmt, ap);
-    (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
-}
-
-/* Write message to debug stream from varargs. */
-static void CTL_CDECL message(t1rCtx h, const char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vmessage(h, fmt, ap);
-    va_end(ap);
-}
-
 /* Handle fatal error. */
 static void CTL_CDECL fatal(t1rCtx h, int err_code, const char *fmt, ...) {
     if (fmt == NULL)
         /* Write standard error message */
-        message(h, "%s", t1rErrStr(err_code));
+        h->logger->msg(sFATAL, t1rErrStr(err_code));
     else {
         /* Write font-specific error message */
         va_list ap;
         va_start(ap, fmt);
-        vmessage(h, fmt, ap);
+        h->logger->vlog(sFATAL, fmt, ap);
         va_end(ap);
     }
     RAISE(&h->err.env, err_code, NULL);
@@ -304,7 +285,7 @@ static STI addString(t1rCtx h, size_t length, const char *value) {
         static const char subs_name[] = "_null_name_substitute_";
         value = subs_name;
         length = sizeof(subs_name) - 1;
-        message(h, "null charstring name");
+        h->logger->msg(sWARNING, "null charstring name");
     }
 
     /* Add new string index */
@@ -468,7 +449,7 @@ static void allocFDInfo(void *ctx, long cnt, FDInfo *fd) {
 
 /* Validate client and create context. */
 t1rCtx t1rNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL) {
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger) {
     t1rCtx h;
 
     /* Check client/library compatibility */
@@ -494,13 +475,17 @@ t1rCtx t1rNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h->pst = NULL;
     h->dna = NULL;
     h->stm.tmp = NULL;
-    h->stm.dbg = NULL;
     h->stm.src = NULL;
     h->encfree = NULL;
 
     /* Copy callbacks */
     h->cb.mem = *mem_cb;
     h->cb.stm = *stm_cb;
+
+    if (logger == nullptr)
+        h->logger = slogger::getLogger("t1read");
+    else
+        h->logger = logger;
 
     /* Set error handler */
     DURING_EX(h->err.env)
@@ -524,9 +509,6 @@ t1rCtx t1rNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h->stm.tmp = h->cb.stm.open(&h->cb.stm, T1R_TMP_STREAM_ID, 0);
     if (h->stm.tmp == NULL)
         RAISE(&h->err.env, t1rErrTmpStream, NULL);
-
-    /* Open debug stream */
-    h->stm.dbg = h->cb.stm.open(&h->cb.stm, T1R_DBG_STREAM_ID, 0);
 
     HANDLER
 
@@ -558,13 +540,12 @@ void t1rFree(t1rCtx h) {
     dnaFree(h->dna);
     pstFree(h->pst);
 
+    // Need this until we're sure the context isn't malloc-ed
+    h->logger = nullptr;
+
     /* Close tmp stream */
     if (h->stm.tmp != NULL)
         (void)h->cb.stm.close(&h->cb.stm, h->stm.tmp);
-
-    /* Close debug stream */
-    if (h->stm.dbg != NULL)
-        (void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
 
     encListFree(h, h->encfree);
 
@@ -576,7 +557,7 @@ void t1rFree(t1rCtx h) {
 
 /* Handle fatal parse error. */
 static void pstFatal(t1rCtx h, int err_code) {
-    message(h, "(pst) %s", pstErrStr(err_code));
+    h->logger->log(sFATAL, "(pst) %s", pstErrStr(err_code));
     fatal(h, t1rErrPostScript, NULL);
 }
 
@@ -619,20 +600,20 @@ static void readEncoding(t1rCtx h) {
             /* Parse encoding value */
             token = getToken(h);
             if (token->type != pstInteger) {
-                message(h, "Invalid token in encoding vector (integer expected)");
+                h->logger->msg(sWARNING, "Invalid token in encoding vector (integer expected)");
                 continue;
             }
 
             code = pstConvInteger(h->pst, token);
             if (code < 0 || code > 255) {
-                message(h, "Invalid codepoint in encoding vector %d", code);
+                h->logger->log(sWARNING, "Invalid codepoint in encoding vector %d", code);
                 continue;
             }
 
             /* Parse glyph name */
             token = getToken(h);
             if (token->type != pstLiteral) {
-                message(h, "Invalid token in encoding vector (literal expected)");
+                h->logger->msg(sWARNING, "Invalid token in encoding vector (literal expected)");
                 continue;
             }
 
@@ -641,7 +622,7 @@ static void readEncoding(t1rCtx h) {
             /* Check for put operator */
             token = getToken(h);
             if (!pstMatch(h->pst, token, "put")) {
-                message(h, "put operator expected in encoding vector");
+                h->logger->msg(sWARNING, "put operator expected in encoding vector");
                 continue;
             }
 
@@ -830,11 +811,11 @@ static long saveSubr(t1rCtx h, long length, char *value, int iFD, long num) {
                 break;
         default:
             if (iFD != 0)
-                message(h,
+                h->logger->log(sWARNING,
                         "unterminated charstring FD[%d].subr[%ld] (invalidating)",
                         iFD, num);
             else
-                message(h,
+                h->logger->log(sWARNING,
                         "unterminated charstring subr[%ld] (invalidating)", num);
 
             /* The subr is invalid but if it's never referenced by a charstring
@@ -938,9 +919,9 @@ static void readSubrs(t1rCtx h) {
             h->fd->subrs.region.end = h->tmpoff;
 
             if (i > cnt)
-                message(h, "duplicate subrs");
+                h->logger->msg(sWARNING, "duplicate subrs");
             else if (i < cnt)
-                message(h, "sparse /Subr array (invalidating unset entries)");
+                h->logger->msg(sWARNING, "sparse /Subr array (invalidating unset entries)");
 
             return;
         }
@@ -1064,7 +1045,7 @@ static void addNotdef(t1rCtx h, unsigned short tag) {
     saveCstr(h, sizeof(cstr), (char *)cstr, chr, 1);
     fd->key.lenIV = save;
 
-    message(h, "missing .notdef glyph (inserted)");
+    h->logger->msg(sWARNING, "missing .notdef glyph (inserted)");
 }
 
 /* Read CharStrings dictionary */
@@ -1103,7 +1084,7 @@ static void readChars(t1rCtx h) {
         /* Save glyph name string */
         gname = addString(h, token->length, token->value);
         if (addChar(h, gname, &chr)) {
-            message(h, "duplicate charstring <%s> (discarded)",
+            h->logger->log(sWARNING, "duplicate charstring <%s> (discarded)",
                     getString(h, gname));
             gname = STI_UNDEF;
         }
@@ -1586,7 +1567,7 @@ static void prepMMData(t1rCtx h) {
     h->fd->fdict->FontName.impl = addString(h, strlen(buf), buf);
 
     if (h->top.XUID.cnt == ABF_EMPTY_ARRAY)
-        message(h, "no XUID in MM font");
+        h->logger->msg(sWARNING, "no XUID in MM font");
     else {
         /* Append instance UDV to XUID */
         int iBase = h->top.XUID.cnt;
@@ -1756,7 +1737,7 @@ static int parseNumArray(t1rCtx h, int kKey,
                         } else
                             array[i++] = value;
                     } else {
-                        message(h, "/%s array too big (truncated)", keys[kKey]);
+                        h->logger->log(sWARNING, "/%s array too big (truncated)", keys[kKey]);
                         return max;
                     }
                 }
@@ -1779,7 +1760,7 @@ static int parseNumArray(t1rCtx h, int kKey,
                         badKeyValue(h, kKey); /* Invalid number */
                     p = q;
                 } else {
-                    message(h, "/%s array too big (truncated)", keys[kKey]);
+                    h->logger->log(sWARNING, "/%s array too big (truncated)", keys[kKey]);
                     return max;
                 }
                 break;
@@ -1789,7 +1770,7 @@ finish:
     if (i < min)
         badKeyValue(h, kKey);
     if (report_empty && i == 0)
-        message(h, "/%s array empty (discarded)", keys[kKey]);
+        h->logger->log(sWARNING, "/%s array empty (discarded)", keys[kKey]);
     return i;
 }
 
@@ -1824,7 +1805,7 @@ static int parseIntArray(t1rCtx h, int kKey, int min, int max, long *array) {
                         badKeyValue(h, kKey); /* Invalid number */
                     p = q;
                 } else {
-                    message(h, "/%s array too big (truncated)", keys[kKey]);
+                    h->logger->log(sWARNING, "/%s array too big (truncated)", keys[kKey]);
                     return max;
                 }
                 break;
@@ -2196,7 +2177,7 @@ static void doLiteral(t1rCtx h, pstToken *literal) {
         case kFamilyBlues:
             if (h->key.seen[kFamilyBlues] && !h->key.seen[kWeightVector])
                 /* Ignore second FamilyBlues in some bad single master fonts */
-                message(h, "duplicate /FamilyBlues (ignored)");
+                h->logger->msg(sWARNING, "duplicate /FamilyBlues (ignored)");
             else
                priv->FamilyBlues.cnt =
                 parseNumArray(h, kFamilyBlues, 0, 14,
@@ -2765,7 +2746,7 @@ static void readCIDMap(t1rCtx h,
 
     if (h->chars.index.array[h->chars.index.cnt - 1].cid + 1 !=
         h->top.cid.CIDCount)
-        message(h, "/CIDCount too big (ignored)");
+        h->logger->msg(sWARNING, "/CIDCount too big (ignored)");
 
     if (h->chars.index.array[0].cid != 0)
         /* CID 0 (notdef) missing. I would have liked to insert the missing
@@ -2888,10 +2869,10 @@ static pstToken *cidRead(t1rCtx h, int binary) {
     if (maxoff != length) {
         long diff = length - maxoff;
         if (diff > 0)
-            message(h,
+            h->logger->log(sWARNING,
                     "StartData length is %ld bytes too long (ignored)", diff);
         else
-            message(h,
+            h->logger->log(sWARNING,
                     "StartData length is %ld bytes too short (ignored)", -diff);
     }
 
@@ -2917,9 +2898,9 @@ static long getStdEncGlyphOffset(void *ctx, int stdcode) {
 static void report_error(abfErrCallbacks *cb, int err_code, int iFD) {
     t1rCtx h = (t1rCtx) cb->ctx;
     if (iFD == -1)
-        message(h, "%s (ignored)", abfErrStr(err_code));
+        h->logger->log(sWARNING, "%s (ignored)", abfErrStr(err_code));
     else
-        message(h, "%s FD[%d] (ignored)", abfErrStr(err_code), iFD);
+        h->logger->log(sWARNING, "%s FD[%d] (ignored)", abfErrStr(err_code), iFD);
 }
 
 /* Prepare font data for client. */
@@ -2989,7 +2970,7 @@ static void prepClientData(t1rCtx h) {
         if (!(h->flags & MM_FONT))
             fd->aux.nMasters = 1;
         if (!(fd->key.BlueValues))
-            message(h, "/BlueValues missing: FD[%ld]", i);
+            h->logger->log(sWARNING, "/BlueValues missing: FD[%ld]", i);
     }
 
     h->top.sup.nGlyphs = h->chars.index.cnt;
@@ -2997,14 +2978,10 @@ static void prepClientData(t1rCtx h) {
     h->top.FDArray.array = h->fdicts.array;
 
     /* Validate dictionaries */
-    if (h->stm.dbg == NULL)
-        abfCheckAllDicts(NULL, &h->top);
-    else {
-        abfErrCallbacks cb;
-        cb.ctx = h;
-        cb.report_error = report_error;
-        abfCheckAllDicts(&cb, &h->top);
-    }
+    abfErrCallbacks cb;
+    cb.ctx = h;
+    cb.report_error = report_error;
+    abfCheckAllDicts(&cb, &h->top);
 
     if (h->flags & CID_FONT) {
         /* CID-keyed font */
@@ -3129,8 +3106,8 @@ int t1rBegFont(t1rCtx h, long flags, long origin, abfTopDict **top, float *UDV) 
 int t1rEndFont(t1rCtx h) {
     int result = pstEndParse(h->pst);
     if (result) {
-        message(h, "(pst) %s", pstErrStr(result));
-        message(h, "%s", t1rErrStr(t1rErrPostScript));
+        h->logger->log(sERROR, "(pst) %s", pstErrStr(result));
+        h->logger->msg(sERROR, t1rErrStr(t1rErrPostScript));
         return t1rErrPostScript;
     }
     encListReuse(h);
@@ -3205,9 +3182,9 @@ static void readGlyph(t1rCtx h,
     result = t1cParse(offset, aux, glyph_cb);
     if (result) {
         if (chr->flags & ABF_GLYPH_CID)
-            message(h, "(t1c) %s <cid-%hu>", t1cErrStr(result), chr->cid);
+            h->logger->log(sFATAL, "(t1c) %s <cid-%hu>", t1cErrStr(result), chr->cid);
         else
-            message(h, "(t1c) %s <%s>", t1cErrStr(result), chr->gname.ptr);
+            h->logger->log(sFATAL, "(t1c) %s <%s>", t1cErrStr(result), chr->gname.ptr);
         fatal(h, t1rErrCstrParse, NULL);
     }
 

@@ -5,15 +5,14 @@
 #ifndef SHARED_INCLUDE_SVGWRITE_H_
 #define SHARED_INCLUDE_SVGWRITE_H_
 
+#include <memory>
+
 #include "ctlshare.h"
+#include "slogger.h"
 
 #define SVW_VERSION CTL_MAKE_VERSION(1, 1, 11)
 
 #include "absfont.h"
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-extern "C" {
-#endif
 
 /* SVG Font Format Generation Library
    =====================================
@@ -46,7 +45,7 @@ extern "C" {
 
 typedef struct svwCtx_ *svwCtx;
 svwCtx svwNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL);
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger = nullptr);
 
 #define SVW_CHECK_ARGS CTL_CHECK_ARGS_CALL(SVW_VERSION)
 
@@ -137,9 +136,5 @@ void svwGetVersion(ctlVersionCallbacks *cb);
 
 /* svwGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-}
-#endif
 
 #endif  // SHARED_INCLUDE_SVGWRITE_H_

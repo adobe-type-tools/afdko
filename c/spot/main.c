@@ -506,8 +506,7 @@ int main__spot(int argc, int8_t *argv[]) {
             filename = argv[argi];
 
             if (files > 1) {
-                fprintf(stderr, "Proofing %s.\n", filename);
-                fflush(stderr);
+                spotInform("Proofing %s.", filename);
             }
 
             if (outputfilebase == NULL)
@@ -595,8 +594,7 @@ int main__spot(int argc, int8_t *argv[]) {
                 fileOpen(filename);
                 if (outputfilebase == NULL)
                     outputfilebase = filename;
-                fprintf(stderr, "Proofing %s.\n", filename);
-                fflush(stderr);
+                spotInform("Proofing %s.", filename);
                 goodFileCount++;
 
                 if (readFile(filename)) {
@@ -622,7 +620,7 @@ int main__spot(int argc, int8_t *argv[]) {
     }
 #endif /* AUTOSCRIPT */
 
-    /* fprintf(stderr, "\nDone.\n"); */
+    /* spotInform("Done."); */
     if (goodFileCount <= 0)
         exit(1);
 

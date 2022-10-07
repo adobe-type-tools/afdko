@@ -57,8 +57,7 @@ char *fileModTimeString(uint8_t which, const char *fname) {
         stat(fname, &file_stat);
         SAFE_LOCALTIME(&(file_stat.st_mtime), &local_time);
         if (strftime(tday, sizeof(tday), dateFormat, &local_time) == 0) {
-            fprintf(stderr, "strftime returned 0");
-            exit(EXIT_FAILURE);
+            sdFatal("strftime returned 0");
         }
         return tday;
     }
@@ -70,13 +69,11 @@ char *ourtime(void) {
     tday[0] = '\0';
     time(&seconds_since_epoch);
     if (LOCALTIME_FAILURE(SAFE_LOCALTIME(&seconds_since_epoch, &local_time))) {
-        perror("localtime failed");
-        exit(EXIT_FAILURE);
+        sdFatal("localtime failed");
     }
 
     if (strftime(tday, sizeof(tday), dateFormat, &local_time) == 0) {
-        fprintf(stderr, "strftime returned 0");
-        exit(EXIT_FAILURE);
+        sdFatal("strftime returned 0");
     }
     return tday;
 }

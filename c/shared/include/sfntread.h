@@ -5,13 +5,12 @@
 #ifndef SHARED_INCLUDE_SFNTREAD_H_
 #define SHARED_INCLUDE_SFNTREAD_H_
 
+#include <memory>
+
 #include "ctlshare.h"
+#include "slogger.h"
 
 #define SFR_VERSION CTL_MAKE_VERSION(1, 0, 7)
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-extern "C" {
-#endif
 
 /* sfnt Format Table Handler
    =========================
@@ -33,7 +32,7 @@ extern "C" {
 
 typedef struct sfrCtx_ *sfrCtx;
 sfrCtx sfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL);
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger = nullptr);
 
 #define SFR_CHECK_ARGS CTL_CHECK_ARGS_CALL(SFR_VERSION)
 
@@ -163,9 +162,5 @@ void sfrGetVersion(ctlVersionCallbacks *cb);
 
 /* sfrGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-}
-#endif
 
 #endif  // SHARED_INCLUDE_SFNTREAD_H_
