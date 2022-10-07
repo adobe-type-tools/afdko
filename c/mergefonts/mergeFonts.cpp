@@ -8,6 +8,8 @@
 
 #include "tx_shared.h"
 
+#include <string>
+
 #define MERGEFONTS_VERSION CTL_MAKE_VERSION(1, 3, 0) /* derived from tx */
 
 typedef long (*CompareFDArrayCall)(void *dest_ctx, abfTopDict *srcTop);
@@ -1014,6 +1016,11 @@ static void mergeFile(txCtx h, char *srcname, bool isFirstFont, sourceCtx *srcCt
             fileError(h, h->src.stm.filename);
     }
 
+    std::string s = TX_PROGNAME(h);
+    s += ": --- ";
+    s += h->src.stm.filename;
+    h->logger->set_context("txfile", sINFO, s.c_str());
+
     h->src.print_file = 1;
 
     /* The font file we are reading may contain multiple fonts, e.g. a TTC or
@@ -1059,6 +1066,8 @@ static void mergeFile(txCtx h, char *srcname, bool isFirstFont, sourceCtx *srcCt
                 break;
         }
     }
+
+    h->logger->clear_context("txfile");
 
     h->arg.i = NULL;
     h->flags |= DONE_FILE;

@@ -49,7 +49,6 @@ typedef struct {  // INDEX
 
 /* Library-wide utility functions */
 void CTL_CDECL cfwFatal(cfwCtx g, int err_code, const char *fmt, ...);
-void CTL_CDECL cfwMessage(cfwCtx g, const char *fmt, ...);
 
 void *cfwMemNew(cfwCtx g, size_t size);
 void cfwMemFree(cfwCtx g, void *ptr);
@@ -120,7 +119,6 @@ struct cfwCtx_ {
     struct {  // Streams
         void *dst;
         void *tmp;
-        void *dbg;
     } stm;
     struct {  // Temporary stream
         long offset;   /* Buffer offset */
@@ -156,6 +154,7 @@ struct cfwCtx_ {
         int16_t right;
         int16_t top;
     } font_bbox;
+    std::shared_ptr<slogger> logger;
 };
 
 #endif  // SHARED_CFFWRITE_CFFWRITE_SHARE_H_

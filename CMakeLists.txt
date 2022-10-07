@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(afdko)
 
 # Change and uncomment to build directly with cmake (outside of pip)
-# set(CMAKE_MODULE_PATH /usr/lib/python3.10/site-packages/skbuild/resources/cmake)
+set(CMAKE_MODULE_PATH /usr/lib/python3.10/site-packages/skbuild/resources/cmake)
 # set(CMAKE_MODULE_PATH /opt/homebrew/lib/python3.9/site-packages/skbuild/resources/cmake)
 # set(CMAKE_FIND_FRAMEWORK_EXTRA_LOCATIONS /opt/homebrew/Cellar/python@3.9/3.9.13_4/Frameworks/Python.framework)
 

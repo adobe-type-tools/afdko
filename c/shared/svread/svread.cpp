@@ -66,7 +66,6 @@ struct svrCtx_ {
     int flags;
 #define SEEN_END 1
     struct {
-        void *dbg;
         void *src;
     } stm;
     struct {
@@ -126,6 +125,7 @@ struct svrCtx_ {
     struct {  // Error handling
         _Exc_Buf env;
     } err;
+    std::shared_ptr<slogger> logger;
 };
 
 typedef abfGlyphInfo Char; /* Character record */
@@ -150,34 +150,15 @@ const char *svrErrStr(int err_code) {
     return (err_code < 0 || err_code >= (int)ARRAY_LEN(errstrs)) ? (char *)"unknown error" : errstrs[err_code];
 }
 
-/* Write message to debug stream from va_list. */
-static void vmessage(svrCtx h, const char *fmt, va_list ap) {
-    char text[BUFSIZ];
-
-    if (h->stm.dbg == NULL)
-        return; /* Debug stream not available */
-
-    VSPRINTF_S(text, BUFSIZ, fmt, ap);
-    (void)h->cb.stm.write(&h->cb.stm, h->stm.dbg, strlen(text), text);
-}
-
-/* Write message to debug stream from varargs. */
-static void CTL_CDECL message(svrCtx h, const char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vmessage(h, fmt, ap);
-    va_end(ap);
-}
-
 static void CTL_CDECL fatal(svrCtx h, int err_code, const char *fmt, ...) {
     if (fmt == NULL)
         /* Write standard error message */
-        message(h, "%s", svrErrStr(err_code));
+        h->logger->msg(sFATAL, svrErrStr(err_code));
     else {
         /* Write font-specific error message */
         va_list ap;
         va_start(ap, fmt);
-        vmessage(h, fmt, ap);
+        h->logger->vlog(sFATAL, fmt, ap);
         va_end(ap);
     }
     RAISE(&h->err.env, err_code, NULL);
@@ -229,9 +210,8 @@ void svrFree(svrCtx h) {
     freeStrings(h);
     dnaFree(h->dna);
 
-    /* Close debug stream */
-    if (h->stm.dbg != NULL)
-        (void)h->cb.stm.close(&h->cb.stm, h->stm.dbg);
+    // Needed while context may still be malloc-ed
+    h->logger = nullptr;
 
     /* Free library context */
     memFree(h, h);
@@ -239,7 +219,7 @@ void svrFree(svrCtx h) {
 
 /* Validate client and create context */
 svrCtx svrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL) {
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger) {
     svrCtx h;
 
     /* Check client/library compatibility */
@@ -253,7 +233,6 @@ svrCtx svrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 
     /* Safety initialization */
     h->flags = 0;
-    h->stm.dbg = NULL;
     h->stm.src = NULL;
     h->tmp.size = 0;
     h->mark = NULL;
@@ -269,6 +248,11 @@ svrCtx svrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h->cb.mem = *mem_cb;
     h->cb.stm = *stm_cb;
 
+    if (logger == nullptr)
+        h->logger = slogger::getLogger("svread");
+    else
+        h->logger = logger;
+
     /* Set error handler */
     DURING_EX(h->err.env)
 
@@ -281,9 +265,6 @@ svrCtx svrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     dnaINIT(h->dna, h->chars.widths, 256, 1000);
     dnaINIT(h->dna, h->data.gnames, 14, 100);
     newStrings(h);
-
-    /* Open debug stream */
-    h->stm.dbg = h->cb.stm.open(&h->cb.stm, SVR_DBG_STREAM_ID, 0);
 
     HANDLER
 
@@ -298,8 +279,7 @@ svrCtx svrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
 
 static void prepClientData(svrCtx h) {
     h->top.sup.nGlyphs = h->chars.index.cnt;
-    if (h->stm.dbg == NULL)
-        abfCheckAllDicts(NULL, &h->top);
+    // XXX wasn't run before  abfCheckAllDicts(NULL, &h->top);
 }
 
 /* ---------------------- Buffer handling ---------------------------- */
@@ -894,7 +874,7 @@ static int parseSVG(svrCtx h) {
                     snprintf(tempName, sizeof(tempName), "greater");
                 } else {
                     STRNCPY_S(tempVal, sizeof(tempVal), tk->val, tk->length);
-                    message(h, "Encountered bad Unicode value: '%s'.", tempVal);
+                    h->logger->log(sWARNING, "Encountered bad Unicode value: '%s'.", tempVal);
                     continue;
                 }
             } else {
@@ -969,7 +949,7 @@ static int parseSVG(svrCtx h) {
             }
 
             if (addChar(h, gnameIndex, &chr)) {
-                message(h, "duplicate charstring <%s> (discarded)",
+                h->logger->log(sWARNING, "duplicate charstring <%s> (discarded)",
                         getString(h, gnameIndex));
             } else {
                 unsigned short tag;
@@ -1130,7 +1110,7 @@ static STI addString(svrCtx h, size_t length, const char *value) {
         static const char subs_name[] = "_null_name_substitute_";
         value = subs_name;
         length = sizeof(subs_name) - 1;
-        message(h, "null charstring name");
+        h->logger->msg(sWARNING, "null charstring name");
     }
 
     /* Add new string index */

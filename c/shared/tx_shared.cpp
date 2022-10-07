@@ -6,6 +6,7 @@
 
 #include "tx_shared.h"
 
+#include <iostream>
 #include <string>
 
 #include "varread.h"
@@ -15,28 +16,16 @@ static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr);
 
 /* ----------------------------- Error Handling ---------------------------- */
 
-/* If first debug message for source file; print filename */
-
-static void printFilename(txCtx h) {
-    fflush(stdout);
-    if (h->src.print_file) {
-        fprintf(stderr, "%s: --- %s\n", TX_PROGNAME(h),
-                strcmp(h->src.stm.filename, "-") == 0 ? "stdin" : h->src.stm.filename);
-        h->src.print_file = 0;
-    }
-}
-
 /* Fatal exception handler. */
 void CTL_CDECL fatal(txCtx h, const char *fmt, ...) {
-    printFilename(h);
     if (fmt != NULL) {
         /* Print error message */
         va_list ap;
         va_start(ap, fmt);
-    h->logger->vlog(sFATAL, fmt, ap);
+        h->logger->vlog(sFATAL, fmt, ap);
         va_end(ap);
     } else {
-    h->logger->msg(sFATAL, "fatal error");
+        h->logger->msg(sFATAL, "fatal error");
     }
     txFree(h);
     exit(EXIT_FAILURE);
@@ -290,39 +279,6 @@ static void *stm_open(ctlStreamCallbacks *cb, int id, size_t size) {
             s = &h->svw.tmp;
             tmp_open(h, s);
             break;
-        case T1R_DBG_STREAM_ID:
-            s = &h->t1r.dbg;
-            break;
-        case SVR_DBG_STREAM_ID:
-            s = &h->svr.dbg;
-            break;
-        case UFO_DBG_STREAM_ID:
-            s = &h->ufr.dbg;
-            break;
-        case UFW_DBG_STREAM_ID:
-            s = &h->ufow.dbg;
-            break;
-        case CFR_DBG_STREAM_ID:
-            s = &h->cfr.dbg;
-            break;
-        case TTR_DBG_STREAM_ID:
-            s = &h->ttr.dbg;
-            break;
-        case CFW_DBG_STREAM_ID:
-            s = &h->cfw.dbg;
-            if (s->fp == NULL)
-                return NULL;
-            break;
-        case T1W_DBG_STREAM_ID:
-            s = &h->t1w.dbg;
-            if (s->fp == NULL)
-                return NULL;
-            break;
-        case SVW_DBG_STREAM_ID:
-            s = &h->svw.dbg;
-            if (s->fp == NULL)
-                return NULL;
-            break;
         default:
             fatal(h, "invalid stream open");
     }
@@ -421,13 +377,6 @@ static size_t stm_write(ctlStreamCallbacks *cb, void *stream,
             return fwrite(ptr, 1, count, s->fp);
         case stm_Tmp:
             return tmp_write(s, count, ptr);
-        case stm_Dbg: {
-            txCtx h = (txCtx) cb->direct_ctx;
-            printFilename(h);
-            fprintf(stderr, "%s: (%s) %.*s\n",
-                    TX_PROGNAME(h), s->filename, (int)count, ptr);
-        }
-            return count;
     }
     return 0; /* Suppress compiler warning */
 }
@@ -481,16 +430,6 @@ static void stmSet(Stream *s, int type, const char *filename, char *buf) {
     s->pos = 0;
 }
 
-/* Initialize debug stream. */
-static void dbgSet(Stream *s, const char *filename) {
-    s->type = stm_Dbg;
-    s->flags = STM_DONT_CLOSE;
-    s->filename = filename;
-    s->fp = stderr;
-    s->buf = NULL;
-    s->pos = 0;
-}
-
 /* Close steam at exit if still open. */
 void stmFree(txCtx h, Stream *s) {
     if (s->fp != NULL)
@@ -523,16 +462,6 @@ void stmInit(txCtx h) {
     tmpSet(&h->t1w.tmp, "(t1w) tmpfile");
     tmpSet(&h->svw.tmp, "(svw) tmpfile");
     tmpSet(&h->svw.tmp, "(ufw) tmpfile");
-
-    dbgSet(&h->t1r.dbg, "t1r");
-    dbgSet(&h->cfr.dbg, "cfr");
-    dbgSet(&h->svr.dbg, "svr");
-    dbgSet(&h->ufr.dbg, "ufr");
-    dbgSet(&h->ufow.dbg, "ufw");
-    dbgSet(&h->ttr.dbg, "ttr");
-    dbgSet(&h->cfw.dbg, "cfw");
-    dbgSet(&h->t1w.dbg, "t1w");
-    dbgSet(&h->svw.dbg, "svw");
 }
 
 /* ----------------------------- File Handling ----------------------------- */
@@ -1115,7 +1044,7 @@ static void cff_SetMode(txCtx h) {
 
     if (h->cfw.ctx == NULL) {
         /* Create library context */
-        h->cfw.ctx = cfwNew(&h->cb.mem, &h->cb.stm, CFW_CHECK_ARGS);
+        h->cfw.ctx = cfwNew(&h->cb.mem, &h->cb.stm, CFW_CHECK_ARGS, h->logger);
         if (h->cfw.ctx == NULL)
             fatal(h, "(cfw) can't init lib");
     }
@@ -2658,7 +2587,7 @@ static void t1_SetMode(txCtx h) {
         sing_cb.stm = 0;
         sing_cb.length = 0;
         sing_cb.get_stream = get_stream;
-        h->t1w.ctx = t1wNew(&h->cb.mem, &h->cb.stm, T1W_CHECK_ARGS);
+        h->t1w.ctx = t1wNew(&h->cb.mem, &h->cb.stm, T1W_CHECK_ARGS, h->logger);
         if (h->t1w.ctx == NULL || t1wSetSINGCallback(h->t1w.ctx, &sing_cb))
             fatal(h, "(t1w) can't init lib");
     }
@@ -2749,7 +2678,7 @@ static void svg_SetMode(txCtx h) {
 
     if (h->svw.ctx == NULL) {
         /* Create library context */
-        h->svw.ctx = svwNew(&h->cb.mem, &h->cb.stm, SVW_CHECK_ARGS);
+        h->svw.ctx = svwNew(&h->cb.mem, &h->cb.stm, SVW_CHECK_ARGS, h->logger);
         if (h->svw.ctx == NULL)
             fatal(h, "(svw) can't init lib");
     }
@@ -2847,7 +2776,8 @@ static void ufo_SetMode(txCtx h) {
 
     if (h->ufow.ctx == NULL) {
         /* Create library context */
-        h->ufow.ctx = ufwNew(&h->cb.mem, &h->cb.stm, UFW_CHECK_ARGS);
+        h->ufow.ctx = ufwNew(&h->cb.mem, &h->cb.stm, UFW_CHECK_ARGS,
+                             h->logger);
         if (h->ufow.ctx == NULL)
             fatal(h, "(ufow) can't init lib");
     }
@@ -4628,7 +4558,7 @@ void callbackSubset(txCtx h) {
 void t1rReadFont(txCtx h, long origin) {
     if (h->t1r.ctx == NULL) {
         /* Initialize library */
-        h->t1r.ctx = t1rNew(&h->cb.mem, &h->cb.stm, T1R_CHECK_ARGS);
+        h->t1r.ctx = t1rNew(&h->cb.mem, &h->cb.stm, T1R_CHECK_ARGS, h->logger);
         if (h->t1r.ctx == NULL)
             fatal(h, "(t1r) can't init lib");
     }
@@ -4665,7 +4595,7 @@ void t1rReadFont(txCtx h, long origin) {
 void svrReadFont(txCtx h, long origin) {
     if (h->svr.ctx == NULL) {
         /* Initialize library */
-        h->svr.ctx = svrNew(&h->cb.mem, &h->cb.stm, SVR_CHECK_ARGS);
+        h->svr.ctx = svrNew(&h->cb.mem, &h->cb.stm, SVR_CHECK_ARGS, h->logger);
         if (h->svr.ctx == NULL)
             fatal(h, "(svr) can't init lib");
     }
@@ -4696,7 +4626,7 @@ void svrReadFont(txCtx h, long origin) {
 void ufoReadFont(txCtx h, long origin) {
     if (h->ufr.ctx == NULL) {
         /* Initialize library */
-        h->ufr.ctx = ufoNew(&h->cb.mem, &h->cb.stm, UFO_CHECK_ARGS);
+        h->ufr.ctx = ufoNew(&h->cb.mem, &h->cb.stm, UFO_CHECK_ARGS, h->logger);
         if (h->ufr.ctx == NULL)
             fatal(h, "(ufr) can't init lib");
     }
@@ -4930,7 +4860,7 @@ void prepOTF(txCtx h) {
 /* Read font with ttread library. */
 void ttrReadFont(txCtx h, long origin, int iTTC) {
     if (h->ttr.ctx == NULL) {
-        h->ttr.ctx = ttrNew(&h->cb.mem, &h->cb.stm, TTR_CHECK_ARGS);
+        h->ttr.ctx = ttrNew(&h->cb.mem, &h->cb.stm, TTR_CHECK_ARGS, h->logger);
         if (h->ttr.ctx == NULL)
             fatal(h, "(ttr) can't init lib");
     }
@@ -5145,7 +5075,7 @@ static void readsfnt(txCtx h, long origin) {
     if (h->ctx.sfr == NULL) {
         /* Initialize library */
         h->ctx.sfr =
-            sfrNew(&h->cb.mem, &h->cb.stm, SFR_CHECK_ARGS);
+            sfrNew(&h->cb.mem, &h->cb.stm, SFR_CHECK_ARGS, h->logger);
         if (h->ctx.sfr == NULL)
             fatal(h, "(sfr) can't init lib");
     }
@@ -5905,7 +5835,7 @@ int txGetOptionIndex(const char *key) {
 static void cfrReadFont(txCtx h, long origin, int ttcIndex) {
     float *uv;
     if (h->cfr.ctx == NULL) {
-        h->cfr.ctx = cfrNew(&h->cb.mem, &h->cb.stm, CFR_CHECK_ARGS);
+        h->cfr.ctx = cfrNew(&h->cb.mem, &h->cb.stm, CFR_CHECK_ARGS, h->logger);
         if (h->cfr.ctx == NULL)
             fatal(h, "(cfr) can't init lib");
     }
@@ -5991,6 +5921,14 @@ static void doFile(txCtx h, const char *srcname) {
 
     if (h->flags & SHOW_NAMES) {
         h->logger->log(sINFO, "--- Filename: %s", h->src.stm.filename);
+    } else {
+        std::string s = TX_PROGNAME(h);
+        s += ": --- ";
+        if (!strcmp(h->src.stm.filename, "-"))
+            s += "stdin";
+        else
+            s += h->src.stm.filename;
+        h->logger->set_context("txfile", sINFO, s.c_str());
     }
 
     /* The font file we are reading may contain multiple fonts, e.g. a TTC or
@@ -6040,6 +5978,7 @@ static void doFile(txCtx h, const char *srcname) {
                 break;
         }
     }
+    h->logger->clear_context("txfile");
 
     h->arg.i = NULL;
     h->flags |= DONE_FILE;
@@ -7074,7 +7013,6 @@ void txNew(txCtx h, txExtCtx ext) {
     dnaINIT(h->ctx.dna, h->cmap.segment, 1, 1);
     dnaINIT(h->ctx.dna, h->dcf.glyph, 256, 768);
 
-    // Might reallocate but that's fine
     h->logger = slogger::getLogger(TX_PROGNAME(h));
 
     setMode(h, mode_dump);
@@ -7136,7 +7074,11 @@ void txFree(txCtx h) {
     stmFree(h, &h->t1r.tmp);
     stmFree(h, &h->cfw.tmp);
     stmFree(h, &h->t1w.tmp);
-    /* Don't close debug streams because they use stderr */
+
+    // Wouldn't normally need this but as long as the struct
+    // might not be allocated with New we have to manage the
+    // shared_ptr semi-manually.
+    h->logger = nullptr;
 
     dnaFree(h->ctx.dna);
 }

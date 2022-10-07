@@ -5,15 +5,14 @@
 #ifndef SHARED_INCLUDE_TTREAD_H_
 #define SHARED_INCLUDE_TTREAD_H_
 
+#include <memory>
+
 #include "ctlshare.h"
+#include "slogger.h"
 
 #define TTR_VERSION CTL_MAKE_VERSION(1, 0, 22)
 
 #include "absfont.h"
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-extern "C" {
-#endif
 
 /* TrueType Font Parsing Library
    =============================
@@ -32,7 +31,7 @@ extern "C" {
 
 typedef struct ttrCtx_ *ttrCtx;
 ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL);
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger = nullptr);
 
 #define TTR_CHECK_ARGS CTL_CHECK_ARGS_CALL(TTR_VERSION)
 
@@ -145,9 +144,5 @@ void ttrGetVersion(ctlVersionCallbacks *cb);
 
 /* ttrGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-}
-#endif
 
 #endif  // SHARED_INCLUDE_TTREAD_H_

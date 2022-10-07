@@ -19,7 +19,7 @@ void MMSDRead(int32_t start, uint32_t length) {
 }
 
 void MMSDDump(int level, int32_t start) {
-    DL(1, (stderr, "### [MMSD] (%08lx)\n", start));
+    DL(1, (OUTPUTBUFF, "### [MMSD] (%08lx)\n", start));
 }
 
 void MMSDFree(void) {

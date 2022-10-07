@@ -5,15 +5,14 @@
 #ifndef SHARED_INCLUDE_T1WRITE_H_
 #define SHARED_INCLUDE_T1WRITE_H_
 
+#include <memory>
+
 #include "ctlshare.h"
+#include "slogger.h"
 
 #define T1W_VERSION CTL_MAKE_VERSION(1, 0, 35)
 
 #include "absfont.h"
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-extern "C" {
-#endif
 
 /* Type 1 Font Format Generation Library
    =====================================
@@ -47,7 +46,7 @@ extern "C" {
 
 typedef struct t1wCtx_ *t1wCtx;
 t1wCtx t1wNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL);
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger = nullptr);
 
 #define T1W_CHECK_ARGS CTL_CHECK_ARGS_CALL(T1W_VERSION)
 
@@ -264,9 +263,5 @@ void t1wGetVersion(ctlVersionCallbacks *cb);
 
 void t1wUpdateGlyphNames(t1wCtx h, char *glyphNames);
 /* Used to update the array of glyph name pointers, when the source data array has changed location because it needed to grow. */
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-}
-#endif
 
 #endif  // SHARED_INCLUDE_T1WRITE_H_

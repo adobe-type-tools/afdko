@@ -676,7 +676,7 @@ static Entry *findEntry(uint32_t tag) {
 
     for (i = 0; i < sfnt.numTables; i++) {
         if (currEntry->tag < prevTag)
-            fprintf(stderr, "OTFproof [WARNING]: sfnt table is out of order.\n");
+            spotWarning("OTFproof: sfnt table is out of order.\n");
         if (tag == currEntry->tag)
             return currEntry;
         prevTag = currEntry->tag;

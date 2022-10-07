@@ -15,17 +15,18 @@
 #include <io.h>
 #endif
 
+#include "slogger.h"
+
 #define streq(s, t) (strcmp(s, t) == 0)
 #define length_of(array) ((sizeof(array)) / (sizeof *(array)))
 
-static const char *panicname = "detype1";
+static const char *panicname = "type1";
 static void panic(const char *fmt, ...) {
     va_list args;
-    fprintf(stderr, "%s: ", panicname);
+    sLog(sFLUSH, "%s: ", panicname);
     va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
+    svLog(sFATAL, fmt, args);
     va_end(args);
-    fprintf(stderr, "\n");
     exit(1);
 }
 
@@ -542,7 +543,7 @@ int getopt(int argc, char **argv, char *opstring) {
 
     /* if no match return question mark */
     if (s == NULL) {
-        fprintf(stderr, "Unknown Option encountered: %s\n", argv[optind]);
+        sLog(sWARNING, "Unknown Option encountered: %s", argv[optind]);
         return '?';
     }
 
@@ -552,7 +553,7 @@ int getopt(int argc, char **argv, char *opstring) {
         if (optind < argc)
             optarg = argv[optind];
         else {
-            fprintf(stderr, "No argument present for %s\n", argv[optind]);
+            sLog(sWARNING, "No argument present for %s", argv[optind]);
             return '?';
         }
     } else

@@ -151,28 +151,22 @@ static void copyBlendArgs(t2cCtx h, abfBlendArg *blendArg, abfOpEntry *opEntry);
 
 /* ------------------------------- Error handling -------------------------- */
 
-/* Write message to debug stream from va_list. */
-static void vmessage(t2cCtx h, const char *fmt, va_list ap) {
-    char text[500];
-
-    if (h->aux->dbg == NULL)
-        return; /* Debug stream not available */
-
-    VSPRINTF_S(text, sizeof(text), fmt, ap);
-    (void)h->aux->stm->write(h->aux->stm, h->aux->dbg, strlen(text), text);
-}
-
 /* Write message to debug stream from varargs. */
 static void CTL_CDECL message(t2cCtx h, const char *fmt, ...) {
     va_list ap;
+
+    if (h->aux->logger == nullptr)
+        return; /* Debug stream not available */
+
     va_start(ap, fmt);
-    vmessage(h, fmt, ap);
+    h->aux->logger->vlog(sWARNING, fmt, ap);
     va_end(ap);
 }
 
 /* Handle fatal error. */
 static void fatal(t2cCtx h, int err_code) {
-    message(h, "%s", t2cErrStr(err_code));
+    if (h->aux->logger != nullptr)
+        h->aux->logger->msg(sFATAL, t2cErrStr(err_code));
     RAISE(&h->err.env, err_code, NULL);
 }
 

@@ -451,23 +451,23 @@ def test_dump_flex_op(fext):
 
 @pytest.mark.parametrize('filename, msg', [
     ('avar_invalid_table_version',
-        b'(cfr) invalid avar table version'),
+        b'invalid avar table version'),
     ('fvar_invalid_table_version',
-        b'(cfr) invalid fvar table version'),
+        b'invalid fvar table version'),
     ('avar_invalid_table_size',
-        b'(cfr) invalid avar table size'),
+        b'invalid avar table size'),
     ('fvar_invalid_table_size',
-        b'(cfr) invalid fvar table size'),
+        b'invalid fvar table size'),
     ('fvar_invalid_table_header',
-        b'(cfr) invalid values in fvar table header'),
+        b'invalid values in fvar table header'),
     ('avar_invalid_axis-instance_count-size',
-        b'(cfr) invalid avar table size or axis/instance count/size'),
+        b'invalid avar table size or axis/instance count/size'),
     ('fvar_invalid_axis-instance_count-size',
-        b'(cfr) invalid fvar table size or axis/instance count/size'),
+        b'invalid fvar table size or axis/instance count/size'),
     ('avar_axis_value_map_out_of_bounds',
-        b'(cfr) avar axis value map out of bounds'),
+        b'avar axis value map out of bounds'),
     ('avar_fvar_axis_mismatch',
-        b'(cfr) mismatching axis counts in fvar and avar'),
+        b'mismatching axis counts in fvar and avar'),
 ])
 def test_varread_errors(filename, msg):
     font_path = get_bad_input_path(f'vf_{filename}.otf')
@@ -591,7 +591,7 @@ def test_long_charstring_warning():
     # expected_path = get_expected_path('CJK-VarTest_warn.txt')
     with open(actual_path, 'rb') as f:
         output = f.read()
-    assert b"(cfr) Warning: CharString of GID 1 is 71057 bytes long" in output
+    assert b"CharString of GID 1 is 71057 bytes long" in output
 
 
 def test_long_charstring_write():
@@ -1249,7 +1249,7 @@ garbage_unitsPerEm = (b"tx: (ufr) In fontinfo.plist: encountered unparseable"
     ("empty-dict", b'', 0),
     ("version-minor-only", b'', 0),
     ("version-major-dup", b'', 0),
-    ("missing-fontinfoplist", b"Warning: Unable to open fontinfo.plist in" +
+    ("missing-fontinfoplist", b"Unable to open fontinfo.plist in" +
                               b" source UFO font. No PostScript FontDict " +
                               b"values are specified.", 5),
     ("missing-width-attr", b"", 0),
@@ -1299,7 +1299,7 @@ def test_unknown_fontinfoplist_key_bug1396():
     assert subprocess.call(arg) == 0
 
 
-libplist_warn = (b"tx: (ufr) Warning: Unable to open "
+libplist_warn = (b"Unable to open "
                  b"lib.plist in source UFO font.")
 
 
@@ -1334,11 +1334,11 @@ def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
     assert subprocess.call([TOOL, '-t1', '-f', input_path]) == ret_code
 
 
-glyphorder_warn = (b'tx: (ufr) Warning: public.glyphOrder key is empty'
+glyphorder_warn = (b'public.glyphOrder key is empty'
                    b' and does not contain glyph name for all 5 glyphs.'
                    b' Consider defining this in lib.plist.')
 
-glyphorder_dup_warn = (b"(ufr) Warning: glyph order contains duplicate" +
+glyphorder_dup_warn = (b"Glyph order contains duplicate" +
                        b" entries for glyphs 'a'.")
 
 missing_cidmap_fail = (b"tx: (t1w) bad font dictionary. Name-keyed UFO has "
@@ -1462,7 +1462,7 @@ def test_ufo_underline_writing_bug1534():
     assert differ([expected_path, output_path])
 
 
-glyph_not_in_dflt_warn = (b"tx: (ufr) Warning: glyph 'foo' is"
+glyph_not_in_dflt_warn = (b"Glyph 'foo' is"
                           b" in the processed layer but not in"
                           b" the default layer.")
 
@@ -1514,10 +1514,10 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("wrong-type-stem-hstem", b'', 0),
     ("overlaps-cidkeyed", b'', 0),
     ("overlaps-namekeyed", b'', 0),
-    ("overlaps-cidkeyed-missing-cid", b"glyph 'cid45107' missing" +
+    ("overlaps-cidkeyed-missing-cid", b"Glyph 'cid45107' missing" +
                                       b" CID number in <lib> dict", 6),
     ("dup-glif", b'', 0),
-    ("missing-cid-value", b"glyph 'cid45107' missing CID" +
+    ("missing-cid-value", b"Glyph 'cid45107' missing CID" +
                           b" number in <lib> dict", 6),
     ("missing-advance", b'', 0),
     ("missing-autohint", b'', 0),

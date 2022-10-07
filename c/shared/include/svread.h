@@ -5,15 +5,14 @@
 #ifndef SHARED_INCLUDE_SVREAD_H_
 #define SHARED_INCLUDE_SVREAD_H_
 
+#include <memory>
+
 #include "ctlshare.h"
+#include "slogger.h"
 
 #define SVR_VERSION CTL_MAKE_VERSION(1, 0, 8)
 
 #include "absfont.h"
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-extern "C" {
-#endif
 
 /*SVG Font Parser Library
    =======================================
@@ -33,7 +32,7 @@ extern "C" {
 
 typedef struct svrCtx_ *svrCtx;
 svrCtx svrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
-              CTL_CHECK_ARGS_DCL);
+              CTL_CHECK_ARGS_DCL, std::shared_ptr<slogger> logger = nullptr);
 
 #define SVR_CHECK_ARGS CTL_CHECK_ARGS_CALL(SVR_VERSION)
 
@@ -145,9 +144,5 @@ void svrGetVersion(ctlVersionCallbacks *cb);
 
 /* svrGetVersion() returns the library version number and name via the client
    callbacks passed with the "cb" parameter (see ctlshare.h). */
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-}
-#endif
 
 #endif  // SHARED_INCLUDE_SVREAD_H_
