@@ -1540,6 +1540,7 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
     }
 
     dnaSET_CNT(h->valueArray, 0);
+    h->parseState.GLIFInfo.glifRec = glifRec;
 
     xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
     int parsingSuccess = parseXMLGlifFile(h, cur, tag, &unicode, NULL, glifRec);
@@ -1683,6 +1684,7 @@ static char* getXmlAttrValue(xmlAttr *attr){
 
 static bool setXMLLib(ufoCtx h, xmlNodePtr cur, char* keyName) {
     char* keyValue;
+    bool result = false;
 
     if (h->parseState.UFOFile == preParsingGLIF) {     /* when called from preParseGLIF */
         keyValue = parseXMLKeyValue(h, cur);
@@ -1693,19 +1695,23 @@ static bool setXMLLib(ufoCtx h, xmlNodePtr cur, char* keyName) {
                 h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
             } else if (strEqual(keyName, "com.adobe.type.cid.iFD"))
                 h->parseState.GLIFInfo.currentiFD = atoi(keyValue);
-        }
+            result = true;
+        } else
+            result = false;
     } else if (h->parseState.UFOFile == parsingGLIF) {  /* when called from parseGLIF */
         if (strEqual(keyName, "com.adobe.type.autohint.v2")) {
-            h->parseState.type1HintDataV2 = true;
-            if (cur != NULL)
-                parseType1HintDataV2(h, cur->children);
+            if (cur != NULL) {
+                h->parseState.type1HintDataV2 = true;
+                result = parseType1HintDataV2(h, cur->children);
+                h->parseState.type1HintDataV2 = false;
+            }
         }
     }
+    return result;
 }
 
 static void parseXMLLib(ufoCtx h, xmlNodePtr cur) {
     char* keyName;
-
     cur = cur->xmlChildrenNode;
     if (xmlKeyEqual(cur, "dict") && xmlKeyEqual(cur->children, "key")) {
         cur = cur->children;
@@ -2409,7 +2415,7 @@ static int parseStem3V2(ufoCtx h, HintMask* curHintMask, int stemFlags, char* st
     return result;
 }
 
-static void setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
+static bool setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
     StemHint* stem;
     float pos = 0;
     float width = 0;
@@ -2420,7 +2426,7 @@ static void setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
         stemFlags |= ABF_NEW_HINTS;
     int i = 0;
     if (h->valueArray.cnt == 0)
-        return;
+        return false;
     while ((i < h->valueArray.cnt)) {
         char* stemValues;
         char* stemType = strtok_r(h->valueArray.array[i], " ", &stemValues);
@@ -2441,14 +2447,18 @@ static void setStemsArrayValue(ufoCtx h, HintMask* curHintMask) {
         i++;
     }
     freeValueArray(h);
+    return true;
 }
 
-static int parseHintSetListV2(ufoCtx h, xmlNodePtr cur) {
-    int result = ufoSuccess;
+static bool parseHintSetListV2(ufoCtx h, xmlNodePtr cur) {
+    int result = false;
     char* pointName = NULL;
 
     h->parseState.hintSetListArray = true;
-    parseXMLKeyValue(h, cur);
+    if (parseXMLKeyValue(h, cur) == NULL && !h->parseState.parsingValueArray)
+        result = false;
+    else
+        result = true;
     h->parseState.hintSetListArray = false;
 
     return result;
@@ -2469,25 +2479,28 @@ static int parseFlexListV2(ufoCtx h, xmlNodePtr cur) {
     return result;
 }
 
-static void setFlexListArrayValue(ufoCtx h) {
+static bool setFlexListArrayValue(ufoCtx h) {
     int i = 0;
     if (h->valueArray.cnt == 0)
-        return;
+        return false;
     while ((i < h->valueArray.cnt)) {
         char* pointName = copyStr(h, h->valueArray.array[i]);
         *dnaNEXT(h->hints.flexOpList) = pointName;
         i++;
     }
     freeValueArray(h);
+    return true;
 }
 
 static bool setType1HintDataV2(ufoCtx h, char* keyName, HintMask* curHintMask, xmlNodePtr cur) {
+    if (cur == NULL)
+        return false;
     char* keyValue;
     if (strEqual(keyName, "hintSetList")) {
-        parseHintSetListV2(h, cur);
+        return parseHintSetListV2(h, cur);
     } else if (strEqual(keyName, "flexList")) {
         parseXMLKeyValue(h, cur);
-        setFlexListArrayValue(h);
+        return setFlexListArrayValue(h);
     } else if (strEqual(keyName, "pointTag")) {
         keyValue = parseXMLKeyValue(h, cur);
         if (keyValueValid(h, cur, keyValue, keyName))
@@ -2496,10 +2509,9 @@ static bool setType1HintDataV2(ufoCtx h, char* keyName, HintMask* curHintMask, x
             return false;
     } else if (strEqual(keyName, "stems")) {
         parseXMLKeyValue(h, cur);
-        setStemsArrayValue(h, curHintMask);
-    } else {
+        return setStemsArrayValue(h, curHintMask);
+    } else
         return false;
-    }
     return true;
 }
 
@@ -2623,6 +2635,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
 
     STI sti = (STI)gi->tag;
     GLIF_Rec* glifRec = &h->data.glifRecs.array[sti];
+    h->parseState.GLIFInfo.glifRec = glifRec;
 
     /* open the file */
     h->src.next = h->mark = NULL;
