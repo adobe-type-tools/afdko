@@ -2,7 +2,9 @@
 <glyph name="test" format="2">
   <advance width="450"/>
   <outline>
-    <contour>
+     <contour>
+      <point/>
+      <point x="134" y="0" type="line"/>
     </contour>
   </outline>
 </glyph>
