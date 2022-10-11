@@ -2,8 +2,6 @@
 <glyph name="exclam" format="2">
   <advance width="450"/>
   <outline>
-     <contour>
-    </contour>
     <contour>
       <point x="100" y="0" type="line"/>
       <point x="139" y="3"/>
@@ -37,6 +35,6 @@
       <point x="178" y="94"/>
       <point x="175" y="55" type="curve"/>
       <point x="100" y="55" type="line"/>
-  </contour>
+    </contour>
   </outline>
 </glyph>

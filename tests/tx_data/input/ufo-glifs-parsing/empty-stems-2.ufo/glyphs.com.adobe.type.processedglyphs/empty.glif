@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph name="exclam" format="2">
+<glyph name="empty" format="2">
   <advance width="450"/>
   <outline>
     <contour>
@@ -49,9 +49,12 @@
         <key>hintSetList</key>
         <array>
           <dict>
-            <key>stems</key>
             <key>pointTag</key>
             <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string></string>
+            </array>
           </dict>
         </array>
         <key>id</key>

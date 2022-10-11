@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<glyph name="exclam" format="2">
+<glyph name="empty" format="2">
   <advance width="450"/>
   <outline>
     <contour>
@@ -42,16 +42,17 @@
       <key>com.adobe.type.autohint.v2</key>
       <dict>
         <key>flexList</key>
-        <array>
-          <string>flexCurve0001</string>
-          <string>flexCurve0009</string>
-        </array>
         <key>hintSetList</key>
         <array>
           <dict>
-            <key>stems</key>
             <key>pointTag</key>
             <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem3 0 55 66 77 88 99</string>
+              <string>hstem3 305 51 41 31 21 11</string>
+              <string>vstem3 180 90 100 110 120 130</string>
+            </array>
           </dict>
         </array>
         <key>id</key>
