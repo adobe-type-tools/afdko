@@ -8,7 +8,7 @@
 #include "ctlshare.h"
 #include <stdbool.h>
 
-#define UFO_VERSION CTL_MAKE_VERSION(1, 2, 0)
+#define UFO_VERSION CTL_MAKE_VERSION(1, 3, 0)
 
 #include "absfont.h"
 
