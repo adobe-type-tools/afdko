@@ -316,12 +316,14 @@ static int addChar(ufoCtx h, STI sti, Char** chr);
 static int CTL_CDECL postMatchChar(const void* key, const void* value,
                                    void* ctx);
 static bool strEqual(const char* string1, const char* string2);
-static void addGLIFRec(ufoCtx h, char* keyName, char* keyValue);
-static void updateGLIFRec(ufoCtx h, char* glyphName, char* fileName);
+static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);
+static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);
 static xmlNodePtr parseXMLFile(ufoCtx h, char* filename, const char* filetype);
 static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
 static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
+static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur);
+static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static int parseXMLPlistFile(ufoCtx h, xmlNodePtr cur);
 static int parseXMLGlifFile(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicode, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec);
 static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, int tag, abfGlyphCallbacks* glyph_cb);
@@ -1060,168 +1062,21 @@ static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     abfPrivateDict* pd = &fd->Private;
     BluesArray* bluesArray;
     abfFontMatrix* fontMatrix;
+    char* keyValue;
+    bool result = true;
 
-    if (keyName == NULL){
+    if (keyName == NULL)
         return false;
-    }
-    if (!strcmp(keyName, "postscriptFDArray")) {
-        h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
-        if (h->top.version.ptr != NULL)
-            h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
-        abfInitFontDict(h->top.FDArray.array);
-
-        h->parseState.FDArray = true;
-        h->parseState.GLIFInfo.currentiFD = -1;
-        parseXMLKeyValue(h, cur);
-        h->parseState.FDArray = false;
-    } else if (!strcmp(keyName, "PrivateDict")) {
-        h->parseState.FDArray = false;  // this is only set when parsing root of FDArray, not sub-dicts within a dict
-        parseXMLKeyValue(h, cur);
-        h->parseState.FDArray = true;
-    } else {
-        char* keyValue = parseXMLKeyValue(h, cur);
-        if (!keyValueValid(h, cur, keyValue, keyName))
-            return false;
-
-        if (h->parseState.UFOFile == parsingContentsDflt) {
-            addGLIFRec(h, keyName, keyValue);
-        } else if (h->parseState.UFOFile == parsingContentsAlt) {
-            updateGLIFRec(h, keyName, keyValue);
-        } else if (!strcmp(keyName, "copyright")) {
-            top->Copyright.ptr = keyValue;
-        } else if (!strcmp(keyName, "trademark")) {
-            char* copySymbol;
-            top->Notice.ptr = keyValue;
-            /* look for the (c) symbol U+00A9, which is 0xC2, 0xA9 in UTF-8 */
-            copySymbol = strstr(keyValue, "\xC2\xA9");
-            if (copySymbol != NULL) {
-                /* if there is a copyright symbol (U+00A9),
-                   replace it with the word "Copyright" */
-                char* cpy = "Copyright";
-                char* newString = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
-                /* set the 0xC2 to NULL to terminate the left side of the string */
-                *copySymbol = '\0';
-                /* use copySymbol + 2 to skip the NULL and the 0xA9
-                   to get the right side of the string */
-                sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 2);
-                top->Notice.ptr = newString;
-            }
-        } else if (!strcmp(keyName, "versionMajor")) {
-            if (top->version.ptr == NULL)
-                top->version.ptr = keyValue;
-            else {
-                char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
-                sprintf(newString, "%s.%s", keyValue, top->version.ptr);
-                memFree(h, top->version.ptr);
-                top->version.ptr = newString;
-            }
-        } else if (!strcmp(keyName, "versionMinor")) {
-            if (top->version.ptr == NULL)
-                top->version.ptr = keyValue;
-            else {
-                char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
-                sprintf(newString, "%s.%s", top->version.ptr, keyValue);
-                memFree(h, top->version.ptr);
-                top->version.ptr = newString;
-            }
-        } else if (!strcmp(keyName, "postscriptFontName")) {
-            fd->FontName.ptr = keyValue;
-        } else if (!strcmp(keyName, "openTypeNamePreferredFamilyName")) {
-            top->FamilyName.ptr = keyValue;
-        } else if (!strcmp(keyName, "familyName")) {
-            if (top->FamilyName.ptr == NULL)  // we don't re-set this if it was set by "openTypeNamePreferredFamilyName"
-                top->FamilyName.ptr = keyValue;
-        } else if (!strcmp(keyName, "postscriptFullName")) {
-            top->FullName.ptr = keyValue;
-        } else if (!strcmp(keyName, "postscriptWeightName")) {
-            top->Weight.ptr = keyValue;
-        } else if (!strcmp(keyName, "postscriptIsFixedPitch")) {
-            top->isFixedPitch = atol(keyValue);
-        } else if (!strcmp(keyName, "FSType")) {
-            top->FSType = atoi(keyValue);
-        } else if (!strcmp(keyName, "italicAngle")) {
-            top->ItalicAngle = (float)strtod(keyValue, NULL);
-        } else if (!strcmp(keyName, "postscriptUnderlinePosition")) {
-            top->UnderlinePosition = (float)strtod(keyValue, NULL);
-        } else if (!strcmp(keyName, "postscriptUnderlineThickness")) {
-            top->UnderlineThickness = (float)strtod(keyValue, NULL);
-        } else if (!strcmp(keyName, "unitsPerEm")) {
-            double ppem = strtod(keyValue, NULL);
-            top->sup.UnitsPerEm = (int)ppem;
-            fd->FontMatrix.cnt = 6;
-            fd->FontMatrix.array[0] = (float)(1.0 / ppem);
-            fd->FontMatrix.array[1] = 0;
-            fd->FontMatrix.array[2] = 0;
-            fd->FontMatrix.array[3] = (float)(1.0 / ppem);
-            fd->FontMatrix.array[4] = 0;
-            fd->FontMatrix.array[5] = 0;
-        } else if (!strcmp(keyName, "FontName")) {
-            fd->FontName.ptr = keyValue;
-        } else if (!strcmp(keyName, "PaintType")) {
-            fd->PaintType = atoi(keyValue);
-        } else if (!strcmp(keyName, "FontMatrix")) {
-            fontMatrix = &fd->FontMatrix;
-            setFontMatrix(h, fontMatrix, 6);
-        } else if (!strcmp(keyName, "postscriptBlueFuzz")) {
-            pd->BlueFuzz = (float)strtod(keyValue, NULL);
-        } else if (!strcmp(keyName, "postscriptBlueShift")) {
-            pd->BlueShift = (float)strtod(keyValue, NULL);
-        } else if (!strcmp(keyName, "postscriptBlueScale")) {
-            pd->BlueScale = (float)strtod(keyValue, NULL);
-        } else if (!strcmp(keyName, "postscriptForceBold")) {
-            pd->ForceBold = atol(keyValue);
-        } else if (!strcmp(keyName, "postscriptBlueValues")) {
-            bluesArray = (BluesArray*)&pd->BlueValues;
-            setBluesArrayValue(h, bluesArray, 14, keyName);
-        } else if (!strcmp(keyName, "postscriptOtherBlues")) {
-            bluesArray = (BluesArray*)&pd->OtherBlues;
-            setBluesArrayValue(h, bluesArray, 10, keyName);
-        } else if (!strcmp(keyName, "postscriptFamilyBlues")) {
-            bluesArray = (BluesArray*)&pd->FamilyBlues;
-            setBluesArrayValue(h, bluesArray, 14, keyName);
-        } else if (!strcmp(keyName, "postscriptFamilyOtherBlues")) {
-            bluesArray = (BluesArray*)&pd->FamilyOtherBlues;
-            setBluesArrayValue(h, bluesArray, 10, keyName);
-        } else if (!strcmp(keyName, "postscriptStdHW")) {
-            if (keyValue != NULL) {
-                pd->StdHW = (float)strtod(keyValue, NULL);
-            } else {
-                pd->StdHW = (float)strtod(h->valueArray.array[0], NULL);
-                freeValueArray(h);
-            }
-        } else if (!strcmp(keyName, "postscriptStdVW")) {
-            if (keyValue != NULL) {
-                pd->StdVW = (float)strtod(keyValue, NULL);
-            } else {
-                pd->StdVW = (float)strtod(h->valueArray.array[0], NULL);
-                freeValueArray(h);
-            }
-        } else if (!strcmp(keyName, "postscriptStemSnapH")) {
-            bluesArray = (BluesArray*)&pd->StemSnapH;
-            setBluesArrayValue(h, bluesArray, 12, keyName);
-        } else if (!strcmp(keyName, "postscriptStemSnapV")) {
-            bluesArray = (BluesArray*)&pd->StemSnapV;
-            setBluesArrayValue(h, bluesArray, 12, keyName);
-        } else if (!strcmp(keyName, "LanguageGroup")) {
-            pd->LanguageGroup = (float)strtod(keyValue, NULL);
-            h->parseKeyName = NULL;
-        } else if (!strcmp(keyName, "ExpansionFactor")) {
-            pd->ExpansionFactor = (float)strtod(keyValue, NULL);
-            h->parseKeyName = NULL;
-        } else if (!strcmp(keyName, "public.glyphOrder")) {
-            setGlifOrderArray(h, keyName);
-        } else if (!strcmp(keyName, "com.adobe.type.cid.CIDFontName")) {
-            top->cid.CIDFontName.ptr = copyStr(h, keyValue);
-        } else if (!strcmp(keyName, "com.adobe.type.cid.Registry")) {
-            top->cid.Registry.ptr = copyStr(h, keyValue);
-        } else if (!strcmp(keyName, "com.adobe.type.cid.Ordering")) {
-            top->cid.Ordering.ptr = copyStr(h, keyValue);
-        } else if (!strcmp(keyName, "com.adobe.type.cid.Supplement")) {
-            top->cid.Supplement = atol(copyStr(h, keyValue));
-        }
-        freeValueArray(h);
-    }
-    return true;
+    if (h->parseState.UFOFile == parsingFontInfo)
+        result = setFontInfoKey(h, keyName, cur);
+    else if (h->parseState.UFOFile == parsingLib)
+        result = setLibKey(h, keyName, cur);
+    else if (h->parseState.UFOFile == parsingContentsDflt)
+        addGLIFRec(h, keyName, cur);
+    else if (h->parseState.UFOFile == parsingContentsAlt)
+        updateGLIFRec(h, keyName, cur);
+    freeValueArray(h);
+    return result;
 }
 
 static int CTL_CDECL cmpOrderRecs(const void* first, const void* second, void* ctx) {
@@ -1270,9 +1125,12 @@ static long getGlyphOrderIndex(ufoCtx h, char* glyphName) {
     return orderIndex;
 }
 
-static void addGLIFRec(ufoCtx h, char* glyphName, char* fileName) {
+static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     GLIF_Rec* newGLIFRec;
     long int glyphOrder = ABF_UNSET_INT;
+    char* fileName = parseXMLKeyValue(h, cur);
+    if (!keyValueValid(h, cur, fileName, glyphName))
+        return;
 
     if (h->data.glifOrder.cnt != 0)  /* only try to get glyphOrderIndex if cnt > 0 */
         glyphOrder = getGlyphOrderIndex(h, glyphName);
@@ -1301,8 +1159,11 @@ static int findGLIFRecByName(ufoCtx h, char *glyphName)
     return -1;
 }
 
-static void updateGLIFRec(ufoCtx h, char* glyphName, char* fileName) {
+static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     int index;
+    char* fileName = parseXMLKeyValue(h, cur);
+    if (!keyValueValid(h, cur, fileName, glyphName))
+        return;
 
     index = findGLIFRecByName(h, glyphName);
     if (index == -1) {
@@ -1887,6 +1748,25 @@ static int parseXMLGlifFile(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *un
     return ufoSuccess;
 }
 
+static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
+    abfTopDict* top = &h->top;
+    char* keyValue = parseXMLKeyValue(h, cur);
+    if (!keyValueValid(h, cur, keyValue, keyName))
+        return false;
+
+    if (!strcmp(keyName, "public.glyphOrder"))
+       setGlifOrderArray(h, keyName);
+    else if (!strcmp(keyName, "com.adobe.type.cid.CIDFontName"))
+        top->cid.CIDFontName.ptr = copyStr(h, keyValue);
+    else if (!strcmp(keyName, "com.adobe.type.cid.Registry"))
+        top->cid.Registry.ptr = copyStr(h, keyValue);
+    else if (!strcmp(keyName, "com.adobe.type.cid.Ordering"))
+        top->cid.Ordering.ptr = copyStr(h, keyValue);
+    else if (!strcmp(keyName, "com.adobe.type.cid.Supplement"))
+        top->cid.Supplement = atol(copyStr(h, keyValue));
+    return true;
+}
+
 static int parseFontInfo(ufoCtx h) {
     const char* filetype = "plist";
     h->parseState.GLIFInfo.currentiFD = 0;
@@ -1910,6 +1790,239 @@ static int parseFontInfo(ufoCtx h) {
     h->cb.stm.close(&h->cb.stm, h->stm.src);
     h->stm.src = NULL;
     return parsingSuccess;
+}
+
+static bool parseFontInfoFDArray(ufoCtx h, xmlNodePtr cur) {
+    h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
+    if (h->top.version.ptr != NULL)
+        h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
+    abfInitFontDict(h->top.FDArray.array);
+    h->parseState.FDArray = true;
+    h->parseState.GLIFInfo.currentiFD = -1;
+    parseXMLKeyValue(h, cur);
+    h->parseState.FDArray = false;
+    return true;
+}
+
+static bool parseFontInfoPrivateDict(ufoCtx h, xmlNodePtr cur) {
+    h->parseState.FDArray = false;  // this is only set when parsing root of FDArray, not sub-dicts within a dict
+    parseXMLKeyValue(h, cur);
+    h->parseState.FDArray = true;
+    return true;
+}
+
+static void setFontInfoTrademark(ufoCtx h, char* keyValue) {
+    abfTopDict* top = &h->top;
+    char* copySymbol;
+    top->Notice.ptr = keyValue;
+    /* look for the (c) symbol U+00A9, which is 0xC2, 0xA9 in UTF-8 */
+    copySymbol = strstr(keyValue, "\xC2\xA9");
+    if (copySymbol != NULL) {
+        /* if there is a copyright symbol (U+00A9),
+           replace it with the word "Copyright" */
+        char* cpy = "Copyright";
+        char* newString = memNew(h, strlen(cpy) + strlen(keyValue) + 2);
+        /* set the 0xC2 to NULL to terminate the left side of the string */
+        *copySymbol = '\0';
+        /* use copySymbol + 2 to skip the NULL and the 0xA9
+           to get the right side of the string */
+        sprintf(newString, "%s%s%s", keyValue, "Copyright", copySymbol + 2);
+        top->Notice.ptr = newString;
+    }
+}
+
+static void setFontInfoVersionMajor(ufoCtx h, char* keyValue) {
+    abfTopDict* top = &h->top;
+
+    if (top->version.ptr == NULL)
+        top->version.ptr = keyValue;
+    else {
+        char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
+        sprintf(newString, "%s.%s", keyValue, top->version.ptr);
+        memFree(h, top->version.ptr);
+        top->version.ptr = newString;
+    }
+}
+
+static void setFontIndoVersionMinor(ufoCtx h, char* keyValue) {
+    abfTopDict* top = &h->top;
+
+    if (top->version.ptr == NULL)
+        top->version.ptr = keyValue;
+    else {
+        char* newString = memNew(h, strlen(top->version.ptr) + strlen(keyValue) + 2);
+        sprintf(newString, "%s.%s", top->version.ptr, keyValue);
+        memFree(h, top->version.ptr);
+        top->version.ptr = newString;
+    }
+}
+
+static void setFontInfoUnitsPerEm(ufoCtx h, char* keyValue) {
+    double ppem = strtod(keyValue, NULL);
+    abfTopDict* top = &h->top;
+    abfFontDict* fd = h->top.FDArray.array + h->parseState.GLIFInfo.currentiFD;
+
+    top->sup.UnitsPerEm = (int)ppem;
+    fd->FontMatrix.cnt = 6;
+    fd->FontMatrix.array[0] = (float)(1.0 / ppem);
+    fd->FontMatrix.array[1] = 0;
+    fd->FontMatrix.array[2] = 0;
+    fd->FontMatrix.array[3] = (float)(1.0 / ppem);
+    fd->FontMatrix.array[4] = 0;
+    fd->FontMatrix.array[5] = 0;
+}
+
+static void setFontInfoStdHW(ufoCtx h, char* keyName, char* keyValue) {
+    abfFontDict* fd = h->top.FDArray.array + h->parseState.GLIFInfo.currentiFD;
+    abfPrivateDict* pd = &fd->Private;
+
+    if (keyValue != NULL) {
+       pd->StdHW = (float)strtod(keyValue, NULL);
+    } else {
+       pd->StdHW = (float)strtod(h->valueArray.array[0], NULL);
+       freeValueArray(h);
+    }
+}
+
+static void setFontInfoStdVW(ufoCtx h, char* keyName, char* keyValue) {
+    abfFontDict* fd = h->top.FDArray.array + h->parseState.GLIFInfo.currentiFD;
+    abfPrivateDict* pd = &fd->Private;
+
+    if (keyValue != NULL) {
+        pd->StdVW = (float)strtod(keyValue, NULL);
+    } else {
+        pd->StdVW = (float)strtod(h->valueArray.array[0], NULL);
+        freeValueArray(h);
+    }
+}
+
+static bool setFontInfoFD(ufoCtx h, char* keyName, char* keyValue) {
+    abfTopDict* top = &h->top;
+    abfFontDict* fd = h->top.FDArray.array + h->parseState.GLIFInfo.currentiFD;
+    abfFontMatrix* fontMatrix;
+
+    if (!strcmp(keyName, "FontName")) {
+       fd->FontName.ptr = keyValue;
+    } else if (!strcmp(keyName, "unitsPerEm")) {
+       setFontInfoUnitsPerEm(h, keyValue);
+    } else if (!strcmp(keyName, "postscriptFontName")) {
+       fd->FontName.ptr = keyValue;
+    } else if (!strcmp(keyName, "PaintType")) {
+       fd->PaintType = atoi(keyValue);
+    } else if (!strcmp(keyName, "FontMatrix")) {
+       fontMatrix = &fd->FontMatrix;
+       setFontMatrix(h, fontMatrix, 6);
+    } else
+       return false;
+    return true;
+}
+
+static bool setFontInfoPD(ufoCtx h, char* keyName, char* keyValue) {
+    abfFontDict* fd = h->top.FDArray.array + h->parseState.GLIFInfo.currentiFD;
+    abfPrivateDict* pd = &fd->Private;
+    BluesArray* bluesArray;
+
+    if (!strcmp(keyName, "postscriptBlueFuzz")) {
+        pd->BlueFuzz = (float)strtod(keyValue, NULL);
+    } else if (!strcmp(keyName, "postscriptBlueShift")) {
+        pd->BlueShift = (float)strtod(keyValue, NULL);
+    } else if (!strcmp(keyName, "postscriptBlueScale")) {
+        pd->BlueScale = (float)strtod(keyValue, NULL);
+    } else if (!strcmp(keyName, "postscriptForceBold")) {
+        pd->ForceBold = atol(keyValue);
+    } else if (!strcmp(keyName, "postscriptBlueValues")) {
+        bluesArray = (BluesArray*)&pd->BlueValues;
+        setBluesArrayValue(h, bluesArray, 14, keyName);
+    } else if (!strcmp(keyName, "postscriptOtherBlues")) {
+        bluesArray = (BluesArray*)&pd->OtherBlues;
+        setBluesArrayValue(h, bluesArray, 10, keyName);
+    } else if (!strcmp(keyName, "postscriptFamilyBlues")) {
+        bluesArray = (BluesArray*)&pd->FamilyBlues;
+        setBluesArrayValue(h, bluesArray, 14, keyName);
+    } else if (!strcmp(keyName, "postscriptFamilyOtherBlues")) {
+        bluesArray = (BluesArray*)&pd->FamilyOtherBlues;
+        setBluesArrayValue(h, bluesArray, 10, keyName);
+    } else if (!strcmp(keyName, "postscriptStdHW")) {
+        setFontInfoStdHW(h, keyName, keyValue);
+    } else if (!strcmp(keyName, "postscriptStdVW")) {
+        setFontInfoStdVW(h, keyName, keyValue);
+    } else if (!strcmp(keyName, "postscriptStemSnapH")) {
+        bluesArray = (BluesArray*)&pd->StemSnapH;
+        setBluesArrayValue(h, bluesArray, 12, keyName);
+    } else if (!strcmp(keyName, "postscriptStemSnapV")) {
+        bluesArray = (BluesArray*)&pd->StemSnapV;
+        setBluesArrayValue(h, bluesArray, 12, keyName);
+    } else if (!strcmp(keyName, "LanguageGroup")) {
+        pd->LanguageGroup = (float)strtod(keyValue, NULL);
+        h->parseKeyName = NULL;
+    } else if (!strcmp(keyName, "ExpansionFactor")) {
+        pd->ExpansionFactor = (float)strtod(keyValue, NULL);
+        h->parseKeyName = NULL;
+    } else
+        return false;
+    return true;
+}
+
+static bool setFontInfoTopKey(ufoCtx h, char* keyName, char* keyValue) {
+    abfTopDict* top = &h->top;
+
+    if (!strcmp(keyName, "familyName")) {
+        if (top->FamilyName.ptr == NULL)  // we don't re-set this if it was set by "openTypeNamePreferredFamilyName"
+            top->FamilyName.ptr = keyValue;
+    } else if (!strcmp(keyName, "versionMajor"))
+        setFontInfoVersionMajor(h, keyValue);
+     else if (!strcmp(keyName, "versionMinor"))
+        setFontIndoVersionMinor(h, keyValue);
+     else if (!strcmp(keyName, "copyright"))
+         top->Copyright.ptr = keyValue;
+     else if (!strcmp(keyName, "trademark"))
+         setFontInfoTrademark(h, keyValue);
+     else if (!strcmp(keyName, "italicAngle"))
+         top->ItalicAngle = (float)strtod(keyValue, NULL);
+     else if (!strcmp(keyName, "openTypeNamePreferredFamilyName"))
+         top->FamilyName.ptr = keyValue;
+     else if (!strcmp(keyName, "postscriptFullName"))
+         top->FullName.ptr = keyValue;
+     else if (!strcmp(keyName, "postscriptWeightName"))
+         top->Weight.ptr = keyValue;
+     else if (!strcmp(keyName, "postscriptIsFixedPitch"))
+         top->isFixedPitch = atol(keyValue);
+     else if (!strcmp(keyName, "FSType"))
+         top->FSType = atoi(keyValue);
+     else if (!strcmp(keyName, "postscriptUnderlinePosition"))
+         top->UnderlinePosition = (float)strtod(keyValue, NULL);
+     else if (!strcmp(keyName, "postscriptUnderlineThickness"))
+         top->UnderlineThickness = (float)strtod(keyValue, NULL);
+     else
+         return false;
+    return true;
+}
+
+static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
+    /* returns false when current key is NULL/ not parseable,
+    otherwise returns true */
+    bool result;
+    if (keyName == NULL){
+     return false;
+    }
+    /* parse dictionaries */
+    if (!strcmp(keyName, "postscriptFDArray"))
+     return parseFontInfoFDArray(h, cur);
+    else if (!strcmp(keyName, "PrivateDict"))
+     return parseFontInfoPrivateDict(h, cur);
+
+    char* keyValue = parseXMLKeyValue(h, cur);
+    if (!keyValueValid(h, cur, keyValue, keyName))
+     result = false;
+    else if (setFontInfoFD(h, keyName, keyValue))
+     result = true;
+    else if (setFontInfoPD(h, keyName, keyValue))
+     result = true;
+    else if (setFontInfoTopKey(h, keyName, keyValue))
+     result = true;
+
+    freeValueArray(h);
+    return result;
 }
 
 static int parseUFO(ufoCtx h) {
