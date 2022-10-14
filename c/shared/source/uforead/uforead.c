@@ -316,16 +316,13 @@ static int addChar(ufoCtx h, STI sti, Char** chr);
 static int CTL_CDECL postMatchChar(const void* key, const void* value,
                                    void* ctx);
 static bool strEqual(const char* string1, const char* string2);
-static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);
-static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);
+
+/* XML File Parsing Functions */
 static xmlNodePtr parseXMLFile(ufoCtx h, char* filename, const char* filetype);
-static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
-static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
-static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur);
-static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur);
-static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static int parseXMLPlistFile(ufoCtx h, xmlNodePtr cur);
 static int parseXMLGlifFile(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *unicode, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec);
+static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur);
+static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur);
 static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, int tag, abfGlyphCallbacks* glyph_cb);
 static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, int state);
 static int parseXMLComponent(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb);
@@ -333,6 +330,13 @@ static int parseXMLAnchor(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec);
 static int parseXMLContour(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb);
 static int parseXMLGuideline(ufoCtx h, xmlNodePtr cur, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec);
 static int parseType1HintDataV2(ufoCtx h, xmlNodePtr cur);
+
+/* XML File Setting Functions */
+static bool setXMLFileKey(ufoCtx h, char* keyName, xmlNodePtr cur);
+static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur);
+static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur);
+static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);
+static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);
 
 /* -------------------------- Error Support ------------------------ */
 
@@ -1054,7 +1058,7 @@ static bool keyValueValid(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyNam
     return valid;
 }
 
-static bool setFontDictKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
+static bool setXMLFileKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     /* returns false when current key is NULL/ not parseable,
        otherwise returns true */
     abfTopDict* top = &h->top;
@@ -1682,7 +1686,7 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     while (cur != NULL) {
         keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
-        if (setFontDictKey(h, keyName, cur) && cur != NULL)
+        if (setXMLFileKey(h, keyName, cur) && cur != NULL)
             cur = cur->next;
     }
 }
@@ -1727,7 +1731,7 @@ static int parseXMLPlistFile(ufoCtx h, xmlNodePtr cur) {
     while (cur != NULL) {
         keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
-        if (setFontDictKey(h, keyName, cur) && cur != NULL)
+        if (setXMLFileKey(h, keyName, cur) && cur != NULL)
            cur = cur->next;
     }
     return ufoSuccess;
