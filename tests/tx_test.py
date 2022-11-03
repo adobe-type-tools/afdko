@@ -1455,3 +1455,11 @@ def test_ufo_glifs_parsing(file, msg, ret_code):
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
         assert subprocess.call(arg) == ret_code
+
+
+def test_fontmatrix_unitsperem():
+    input_path = get_input_path("fontmatrix-unitsperem.ufo")
+    expected_path = get_expected_path("fontmatrix-unitsperem.pfa")
+    output_path = get_temp_file_path()
+    subprocess.call([TOOL, '-t1', '-o', output_path, input_path])
+    assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
