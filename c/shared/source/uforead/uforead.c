@@ -1872,13 +1872,15 @@ static void setFontInfoUnitsPerEm(ufoCtx h, char* keyValue) {
     abfFontDict* fd = h->top.FDArray.array + h->parseState.GLIFInfo.currentiFD;
 
     top->sup.UnitsPerEm = (int)ppem;
-    fd->FontMatrix.cnt = 6;
-    fd->FontMatrix.array[0] = (float)(1.0 / ppem);
-    fd->FontMatrix.array[1] = 0;
-    fd->FontMatrix.array[2] = 0;
-    fd->FontMatrix.array[3] = (float)(1.0 / ppem);
-    fd->FontMatrix.array[4] = 0;
-    fd->FontMatrix.array[5] = 0;
+    if (fd->FontMatrix.cnt == 0) {
+        fd->FontMatrix.cnt = 6;
+        fd->FontMatrix.array[0] = (float)(1.0 / ppem);
+        fd->FontMatrix.array[1] = 0;
+        fd->FontMatrix.array[2] = 0;
+        fd->FontMatrix.array[3] = (float)(1.0 / ppem);
+        fd->FontMatrix.array[4] = 0;
+        fd->FontMatrix.array[5] = 0;
+    }
 }
 
 static void setFontInfoStdHW(ufoCtx h, char* keyName, char* keyValue) {

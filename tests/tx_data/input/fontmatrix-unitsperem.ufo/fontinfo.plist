@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>postscriptFontName</key>
+		<string>SourceHanSansVF-Heavy</string>
+		<key>FontMatrix</key>
+		<array>
+			<real>12</real>
+			<integer>3</integer>
+			<integer>4</integer>
+			<real>6</real>
+			<integer>9</integer>
+			<integer>10</integer>
+		</array>
+		<key>unitsPerEm</key>
+		<integer>1000</integer>
+	</dict>
+</plist>
