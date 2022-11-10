@@ -28,6 +28,8 @@ typedef struct /* Glyph data */
 {
     char glyphName[FILENAME_MAX];
     char glifFileName[FILENAME_MAX];
+    int cid;
+    int iFD;
 } Glyph;
 
 typedef enum {
@@ -384,105 +386,6 @@ static void writeContents(ufwCtx h) {
     return;
 }
 
-static void writeGlyphOrder(ufwCtx h) {
-    char buffer[FILENAME_MAX];
-    int i;
-
-    /* Set error handler */
-    DURING_EX(h->err.env)
-
-    h->state = 1; /* Indicates writing to dst stream */
-
-    /* Open lib.plist file as dst stream */
-
-    sprintf(buffer, "%s", "lib.plist");
-    h->cb.stm.clientFileName = buffer;
-    h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
-    if (h->stm.dst == NULL)
-        fatal(h, ufwErrDstStream);
-
-    writeLine(h, XML_HEADER);
-    writeLine(h, PLIST_DTD_HEADER);
-    writeLine(h, "<plist version=\"1.0\">");
-    writeLine(h, "<dict>");
-    writeLine(h, "\t<key>public.glyphOrder</key>");
-    writeLine(h, "\t<array>");
-    for (i = 0; i < h->glyphs.cnt; i++) {
-        Glyph *glyphRec;
-        glyphRec = &h->glyphs.array[i];
-        sprintf(buffer, "\t\t<string>%s</string>", glyphRec->glyphName);
-        writeLine(h, buffer);
-    }
-
-    writeLine(h, "\t</array>");
-
-    if (h->top->sup.flags & ABF_CID_FONT) {
-        if (h->top->cid.CIDFontName.ptr != NULL) {
-            writeLine(h, "\t<key>com.adobe.type.cid.CIDFontName</key>");
-            sprintf(buffer, "\t<string>%s</string>", h->top->cid.CIDFontName.ptr);
-            writeLine(h, buffer);
-            writeLine(h, "\t<key>com.adobe.type.cid.Registry</key>");
-            sprintf(buffer, "\t<string>%s</string>", h->top->cid.Registry.ptr);
-            writeLine(h, buffer);
-            writeLine(h, "\t<key>com.adobe.type.cid.Ordering</key>");
-            sprintf(buffer, "\t<string>%s</string>", h->top->cid.Ordering.ptr);
-            writeLine(h, buffer);
-            writeLine(h, "\t<key>com.adobe.type.cid.Supplement</key>");
-            sprintf(buffer, "\t<integer>%ld</integer>", h->top->cid.Supplement);
-            writeLine(h, buffer);
-        }
-    }
-
-    writeLine(h, "</dict>");
-    writeLine(h, "</plist>");
-
-    /* Close dst stream */
-    flushBuf(h);
-    h->cb.stm.close(&h->cb.stm, h->stm.dst);
-
-    HANDLER
-    if (h->stm.dst)
-        h->cb.stm.close(&h->cb.stm, h->stm.dst);
-
-    END_HANDLER
-}
-static void writeMetaInfo(ufwCtx h) {
-    char buffer[FILENAME_MAX];
-
-    /* Set error handler */
-    DURING_EX(h->err.env)
-
-    h->state = 1; /* Indicates writing to dst stream */
-
-    /* Open metainfo.plist file as dst stream */
-
-    sprintf(buffer, "%s", "metainfo.plist");
-    h->cb.stm.clientFileName = buffer;
-    h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
-    if (h->stm.dst == NULL)
-        fatal(h, ufwErrDstStream);
-
-    writeLine(h, XML_HEADER);
-    writeLine(h, PLIST_DTD_HEADER);
-    writeLine(h, "<plist version=\"1.0\">");
-    writeLine(h, "<dict>");
-    writeLine(h, "\t<key>creator</key>");
-    writeLine(h, "\t<string>com.adobe.type.tx</string>");
-    writeLine(h, "\t<key>formatVersion</key>");
-    writeLine(h, "\t<integer>2</integer>");
-    writeLine(h, "</dict>");
-    writeLine(h, "</plist>");
-
-    /* Close dst stream */
-    flushBuf(h);
-    h->cb.stm.close(&h->cb.stm, h->stm.dst);
-
-    HANDLER
-    if (h->stm.dst)
-        h->cb.stm.close(&h->cb.stm, h->stm.dst);
-    END_HANDLER
-}
-
 static void writeBlueValues(ufwCtx h, abfPrivateDict *privateDict){
     char buffer[FILENAME_MAX];
     int i;
@@ -650,6 +553,175 @@ static void writeBlueValues(ufwCtx h, abfPrivateDict *privateDict){
     }
 }
 
+static void writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
+    abfPrivateDict *privateDict;
+    int i;
+    int j;
+    writeLine(h, "\t<key>com.adobe.type.FSType</key>");
+    sprintf(buffer, "\t<integer>%d</integer>", (int)h->top->FSType);
+    writeLine(h, buffer);
+    writeLine(h, "\t<key>com.adobe.type.postscriptFDArray</key>");
+    writeLine(h, "\t<array>");
+    for (j = 0; j < top->FDArray.cnt; j++) {
+        writeLine(h, "\t<dict>");
+        abfFontDict *fd = &h->top->FDArray.array[j];
+        writeLine(h, "\t<key>FontName</key>");
+        sprintf(buffer, "\t<string>%s</string>", fd->FontName.ptr);
+        writeLine(h, buffer);
+        writeLine(h, "\t<key>PaintType</key>");
+        sprintf(buffer, "\t<integer>%ld</integer>", fd->PaintType);
+        writeLine(h, buffer);
+        if (fd->FontMatrix.cnt == ABF_EMPTY_ARRAY) {
+            fd->FontMatrix.cnt = 6;
+            fd->FontMatrix.array[0] = 0.001;
+            fd->FontMatrix.array[1] = 0.0;
+            fd->FontMatrix.array[2] = 0.0;
+            fd->FontMatrix.array[3] = 0.001;
+            fd->FontMatrix.array[4] = 0.0;
+            fd->FontMatrix.array[5] = 0.0;
+        }
+        writeLine(h, "\t<key>FontMatrix</key>");
+        writeLine(h, "\t<array>");
+        for (i = 0; i < fd->FontMatrix.cnt; i++) {
+            float stem = fd->FontMatrix.array[i];
+            if (stem == ((int)stem))
+                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+            else
+                sprintf(buffer, "\t\t<real>%.3f</real>", stem);
+            writeLine(h, buffer);
+        }
+        writeLine(h, "\t</array>");
+
+        privateDict = &(fd->Private);
+        writeLine(h, "\t<key>PrivateDict</key>");
+        writeLine(h, "\t<dict>");
+        writeBlueValues(h, privateDict);
+        writeLine(h, "\t</dict>");
+        writeLine(h, "\t</dict>");
+    }
+    writeLine(h, "\t</array>");
+}
+
+static void writeCIDMap(ufwCtx h, abfTopDict *top, char *buffer) {
+    int i;
+    writeLine(h, "\t<key>com.adobe.type.postscriptCIDMap</key>");
+    writeLine(h, "\t<dict>");
+    for (i = 0; i < h->glyphs.cnt; i++) {
+        sprintf(buffer, "\t<key>%s</key>", h->glyphs.array[i].glyphName);
+        writeLine(h, buffer);
+        writeLine(h, "\t<dict>");
+        writeLine(h, "\t<key>com.adobe.type.cid</key>");
+        sprintf(buffer, "\t<integer>%d</integer>", h->glyphs.array[i].cid);
+        writeLine(h, buffer);
+        writeLine(h, "\t<key>com.adobe.type.iFD</key>");
+        sprintf(buffer, "\t<integer>%d</integer>", h->glyphs.array[i].iFD);
+        writeLine(h, buffer);
+        writeLine(h, "\t</dict>");
+    }
+    writeLine(h, "\t</dict>");
+}
+
+static void writeGlyphOrder(ufwCtx h) {
+    char buffer[FILENAME_MAX];
+    int i;
+
+    /* Set error handler */
+    DURING_EX(h->err.env)
+
+    h->state = 1; /* Indicates writing to dst stream */
+
+    /* Open lib.plist file as dst stream */
+
+    sprintf(buffer, "%s", "lib.plist");
+    h->cb.stm.clientFileName = buffer;
+    h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
+    if (h->stm.dst == NULL)
+        fatal(h, ufwErrDstStream);
+
+    writeLine(h, XML_HEADER);
+    writeLine(h, PLIST_DTD_HEADER);
+    writeLine(h, "<plist version=\"1.0\">");
+    writeLine(h, "<dict>");
+    writeLine(h, "\t<key>public.glyphOrder</key>");
+    writeLine(h, "\t<array>");
+    for (i = 0; i < h->glyphs.cnt; i++) {
+        Glyph *glyphRec;
+        glyphRec = &h->glyphs.array[i];
+        sprintf(buffer, "\t\t<string>%s</string>", glyphRec->glyphName);
+        writeLine(h, buffer);
+    }
+
+    writeLine(h, "\t</array>");
+
+    if (h->top->sup.flags & ABF_CID_FONT) {
+        if (h->top->cid.CIDFontName.ptr != NULL) {
+            writeLine(h, "\t<key>com.adobe.type.cid.CIDFontName</key>");
+            sprintf(buffer, "\t<string>%s</string>", h->top->cid.CIDFontName.ptr);
+            writeLine(h, buffer);
+            writeLine(h, "\t<key>com.adobe.type.cid.Registry</key>");
+            sprintf(buffer, "\t<string>%s</string>", h->top->cid.Registry.ptr);
+            writeLine(h, buffer);
+            writeLine(h, "\t<key>com.adobe.type.cid.Ordering</key>");
+            sprintf(buffer, "\t<string>%s</string>", h->top->cid.Ordering.ptr);
+            writeLine(h, buffer);
+            writeLine(h, "\t<key>com.adobe.type.cid.Supplement</key>");
+            sprintf(buffer, "\t<integer>%ld</integer>", h->top->cid.Supplement);
+            writeLine(h, buffer);
+        }
+        writeFDArray(h, h->top, buffer);
+        writeCIDMap(h, h->top, buffer);
+    }
+    writeLine(h, "</dict>");
+    writeLine(h, "</plist>");
+
+    /* Close dst stream */
+    flushBuf(h);
+    h->cb.stm.close(&h->cb.stm, h->stm.dst);
+
+    HANDLER
+    if (h->stm.dst)
+        h->cb.stm.close(&h->cb.stm, h->stm.dst);
+
+    END_HANDLER
+}
+
+static void writeMetaInfo(ufwCtx h) {
+    char buffer[FILENAME_MAX];
+
+    /* Set error handler */
+    DURING_EX(h->err.env)
+
+    h->state = 1; /* Indicates writing to dst stream */
+
+    /* Open metainfo.plist file as dst stream */
+
+    sprintf(buffer, "%s", "metainfo.plist");
+    h->cb.stm.clientFileName = buffer;
+    h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
+    if (h->stm.dst == NULL)
+        fatal(h, ufwErrDstStream);
+
+    writeLine(h, XML_HEADER);
+    writeLine(h, PLIST_DTD_HEADER);
+    writeLine(h, "<plist version=\"1.0\">");
+    writeLine(h, "<dict>");
+    writeLine(h, "\t<key>creator</key>");
+    writeLine(h, "\t<string>com.adobe.type.tx</string>");
+    writeLine(h, "\t<key>formatVersion</key>");
+    writeLine(h, "\t<integer>2</integer>");
+    writeLine(h, "</dict>");
+    writeLine(h, "</plist>");
+
+    /* Close dst stream */
+    flushBuf(h);
+    h->cb.stm.close(&h->cb.stm, h->stm.dst);
+
+    HANDLER
+    if (h->stm.dst)
+        h->cb.stm.close(&h->cb.stm, h->stm.dst);
+    END_HANDLER
+}
+
 static void setStyleName(char *dst, char *postScriptName) {
     /* Copy text after '-'; if none, return empty string.*/
     char *p = &postScriptName[0];
@@ -710,8 +782,6 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
     char buffer2[FILENAME_MAX];
     abfFontDict *fontDict0;
     abfPrivateDict *privateDict;
-    int i;
-    int j;
 
     if (h->lastiFD != ABF_UNSET_INT)
         fontDict0 = &(top->FDArray.array[h->lastiFD]);
@@ -847,52 +917,8 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
         writeLine(h, "\t<key>postscriptIsFixedPitch</key>");
         writeLine(h, "\t<true/>");
     }
-
-    if (top->sup.flags & ABF_CID_FONT) {
-        writeLine(h, "\t<key>FSType</key>");
-        sprintf(buffer, "\t<integer>%d</integer>", (int)h->top->FSType);
-        writeLine(h, buffer);
-        writeLine(h, "\t<key>postscriptFDArray</key>");
-        writeLine(h, "\t<array>");
-        for (j = 0; j < top->FDArray.cnt; j++) {
-            writeLine(h, "\t<dict>");
-            abfFontDict *fd = &h->top->FDArray.array[j];
-            writeLine(h, "\t<key>FontName</key>");
-            sprintf(buffer, "\t<string>%s</string>", fd->FontName.ptr);
-            writeLine(h, buffer);
-            writeLine(h, "\t<key>PaintType</key>");
-            sprintf(buffer, "\t<integer>%ld</integer>", fd->PaintType);
-            writeLine(h, buffer);
-            if (fd->FontMatrix.cnt == ABF_EMPTY_ARRAY) {
-                fd->FontMatrix.cnt = 6;
-                fd->FontMatrix.array[0] = 0.001;
-                fd->FontMatrix.array[1] = 0.0;
-                fd->FontMatrix.array[2] = 0.0;
-                fd->FontMatrix.array[3] = 0.001;
-                fd->FontMatrix.array[4] = 0.0;
-                fd->FontMatrix.array[5] = 0.0;
-            }
-            writeLine(h, "\t<key>FontMatrix</key>");
-            writeLine(h, "\t<array>");
-            for (i = 0; i < fd->FontMatrix.cnt; i++) {
-                float stem = fd->FontMatrix.array[i];
-                if (stem == ((int)stem))
-                    sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
-                else
-                    sprintf(buffer, "\t\t<real>%.3f</real>", stem);
-                writeLine(h, buffer);
-            }
-            writeLine(h, "\t</array>");
-
-            privateDict = &(fd->Private);
-            writeLine(h, "\t<key>PrivateDict</key>");
-            writeLine(h, "\t<dict>");
-            writeBlueValues(h, privateDict);
-            writeLine(h, "\t</dict>");
-            writeLine(h, "\t</dict>");
-        }
-        writeLine(h, "\t</array>");
-    }else{
+    
+    if (top->sup.flags != ABF_CID_FONT) {
         privateDict = &(fontDict0->Private);
         writeBlueValues(h, privateDict);
     }
@@ -1080,23 +1106,11 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
         writeStr(h, buf);
         writeLine(h, "\"/>");
     }
-    if (info->flags & ABF_GLYPH_CID) {
-        writeLine(h, "\t<lib>");
-        writeLine(h, "\t\t<dict>");
-        writeLine(h, "\t\t\t<key>com.adobe.type.cid.CID</key>");
-        writeStr(h, "\t\t\t<integer>");
-        writeInt(h, (long)info->cid);
-        writeLine(h, "</integer>");
-        writeLine(h, "\t\t\t<key>com.adobe.type.cid.iFD</key>");
-        writeStr(h, "\t\t\t<integer>");
-        writeInt(h, (long)info->iFD);
-        writeLine(h, "</integer>");
-        writeLine(h, "\t\t</dict>");
-        writeLine(h, "\t</lib>");
-    }
     glyphRec = dnaNEXT(h->glyphs);
     strcpy(glyphRec->glyphName, glyphName);
     strcpy(glyphRec->glifFileName, glifName);
+    glyphRec->cid = info->cid;
+    glyphRec->iFD = info->iFD;
 
     HANDLER
 
