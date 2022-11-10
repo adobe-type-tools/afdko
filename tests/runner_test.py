@@ -31,16 +31,16 @@ def test_check_tool_error_cli():
 
 
 @pytest.mark.parametrize('tool_name', [
-    'detype1', 'type1', 'sfntedit', 'sfntdiff', 'makeotfexe'])
+    'detype1', 'type1', 'sfntedit', 'sfntdiff', 'addfeatures'])
 def test_check_tool_unhacked(tool_name):
     assert _check_tool(tool_name) == tool_name
 
 
 def test_capture_error_message():
-    output_path = runner(['-t', 'makeotfexe', '-s', '-e'])
+    output_path = runner(['-t', 'addfeatures', '-s', '-e'])
     with open(output_path, 'rb') as f:
         output = f.read()
-    assert b"Source font file not found: font.ps" in output
+    assert b"Source font file not found: font.otf" in output
 
 
 @pytest.mark.parametrize('v_arg', ['', 'v', 'vv', 'vvv'])

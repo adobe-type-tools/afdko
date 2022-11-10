@@ -67,6 +67,8 @@ def get_font_format(font_file_path):
                 return 'TTC'
             elif shorthead == b'\x01\x00':
                 return 'CFF'
+            elif shorthead == b'\x02\x00':
+                return 'CFF2'
             elif shorthead == b'\x80\x01':
                 return 'PFB'
             elif head in (b'%!PS', b'%!Fo'):

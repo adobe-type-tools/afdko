@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="3.43">
+<ttFont sfntVersion="OTTO" ttLibVersion="4.38">
 
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
@@ -33,12 +33,12 @@
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="1.0"/>
     <fontRevision value="1.0"/>
-    <checkSumAdjustment value="0x38dee069"/>
+    <checkSumAdjustment value="0x2edf4ce5"/>
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00000011"/>
     <unitsPerEm value="1000"/>
-    <created value="Thu Jun 20 14:38:08 2019"/>
-    <modified value="Thu Jun 20 14:38:08 2019"/>
+    <created value="Mon Dec 12 05:27:41 2022"/>
+    <modified value="Mon Dec 12 05:27:41 2022"/>
     <xMin value="8"/>
     <yMin value="-120"/>
     <xMax value="736"/>
@@ -145,7 +145,7 @@
       CJKVarCond
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
-      Version 1.000;hotconv 1.0.111;makeotfexe 2.5.65597
+      Version 1.000;hotconv 1.1.0;addfeatures 2.6.0
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
       MasterSet_Kanji_75-w600.00

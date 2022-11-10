@@ -99,8 +99,8 @@ def build_masters(opts):
         master_path = os.path.join(dsDir, master_path)
         otf_path = f"{os.path.splitext(master_path)[0]}.otf"
 
-        result = makeotf(['-nshw', '-f', master_path, '-o', otf_path,
-                          '-r', '-nS'] + opts.mkot)
+        result = makeotf(['-shw', '-f', master_path, '-o', otf_path,
+                          '-r', '-V', '-nS'] + opts.mkot)
 
         if result:
             raise Exception(f'makeotf return value: {result}')

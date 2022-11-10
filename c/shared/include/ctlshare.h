@@ -272,6 +272,9 @@ enum {
     UFW_DST_STREAM_ID, /* ufowrite */
     UFW_TMP_STREAM_ID,
 
+    OTF_DST_STREAM_ID, /* addfeatures */
+    OTF_TMP_STREAM_ID,
+
     CTL_SRC_STREAM_ID, /* ctlshare source stream */
 
     CTL_STREAM_CNT

@@ -32,7 +32,6 @@
     <key>public.glyphOrder</key>
     <array>
       <string>.notdef</string>
-      <string>space</string>
       <string>a</string>
     </array>
   </dict>

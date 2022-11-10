@@ -1424,9 +1424,12 @@ int cfwBegSet(cfwCtx g, long flags) {
 }
 
 /* Begin new font. */
-int cfwBegFont(cfwCtx g, cfwMapCallback *map, uint32_t maxNumSubrs) {
+int cfwBegFont(cfwCtx g, cfwMapCallback *map, uint32_t maxNumSubrs,
+               std::shared_ptr<GOADB> goadb) {
     controlCtx h = g->ctx.control;
     long index;
+
+    g->goadb = goadb;
 
     /* set tmp buffer buffers safely */
     g->tmp.offset = 0;
@@ -1472,6 +1475,7 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
     cfwCtx g = h->g;
     long i;
     long nGlyphs = h->_new->glyphs.cnt;
+    bool has_notdef = true;
     Glyph *glyphs = h->_new->glyphs.array;
     dnaDCL(uint16_t, fdmap);
 
@@ -1480,7 +1484,9 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
     memset(fdmap.array, 0, sizeof(uint16_t) * h->_new->FDArray.cnt);
 
     if (glyphs[0].info == NULL) {
-        cfwFatal(h->g, cfwErrNoCID0, NULL);
+        if (!(g->flags & CFW_NO_NOTDEF_OK))
+            cfwFatal(h->g, cfwErrNoCID0, NULL);
+        has_notdef = false;
     }
 
     if (!(g->flags & CFW_PRESERVE_GLYPH_ORDER)) {
@@ -1500,6 +1506,8 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
 
     /* Mark used FDs */
     for (i = 0; i < nGlyphs; i++) {
+        if (i == 0 && !has_notdef)
+            continue;
         fdmap.array[glyphs[i].iFD] = 1;
     }
 
@@ -1521,6 +1529,8 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
         if (i != j) {
             /* Unused FDs; remap glyphs to new FDArray */
             for (i = 0; i < nGlyphs; i++) {
+                if (i == 0 && !has_notdef)
+                    continue;
                 glyphs[i].iFD = fdmap.array[glyphs[i].iFD];
             }
             h->_new->FDArray.cnt = j;
@@ -1532,7 +1542,8 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
     cfwCharsetBeg(g, 1);
     cfwFdselectBeg(g);
 
-    cfwFdselectAddIndex(g, glyphs[0].iFD);
+    if (has_notdef)
+        cfwFdselectAddIndex(g, glyphs[0].iFD);
     for (i = 1; i < nGlyphs; i++) {
         Glyph *glyph = &glyphs[i];
         cfwCharsetAddGlyph(g, glyph->info->cid);
@@ -1546,6 +1557,48 @@ static void orderCIDKeyedGlyphs(controlCtx h) {
     h->_new->top.cid.CIDCount = glyphs[nGlyphs - 1].info->cid + 1;
 }
 
+static bool glyphLT(cfwCtx g, abfGlyphInfo *a, abfGlyphInfo *b) {
+    if (g->flags & CFW_ORDER_BY_GOADB) {
+        const char *_;
+        uint32_t oa = g->goadb->getFinalAndOrder(a->gname.ptr, &_);
+        uint32_t ob = g->goadb->getFinalAndOrder(b->gname.ptr, &_);
+        if (oa != ob)
+            return oa < ob;
+        if (a->gname.ptr == NULL && b->gname.ptr == NULL)
+            return false;
+        if (a->gname.ptr == NULL && b->gname.ptr != NULL)
+            return false;
+        if (a->gname.ptr != NULL && b->gname.ptr == NULL)
+            return true;
+        return strcmp(a->gname.ptr, b->gname.ptr) < 0;
+    } else if (a->encoding.code != ABF_GLYPH_UNENC ||
+               b->encoding.code != ABF_GLYPH_UNENC) {
+        if (a->encoding.code != ABF_GLYPH_UNENC &&
+            b->encoding.code != ABF_GLYPH_UNENC) {
+            return a->encoding.code < b->encoding.code;
+        } else if (a->encoding.code != ABF_GLYPH_UNENC &&
+                   b->encoding.code == ABF_GLYPH_UNENC) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        SRI sri_a = cfwIsStdString(g, a->gname.ptr);
+        SRI sri_b = cfwIsStdString(g, b->gname.ptr);
+        if (sri_a != SRI_UNDEF || sri_b != SRI_UNDEF) {
+            if (sri_a != SRI_UNDEF && sri_b != SRI_UNDEF) {
+                return sri_a < sri_b;
+            } else if (sri_a != SRI_UNDEF && sri_b == SRI_UNDEF) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return strcmp(a->gname.ptr, b->gname.ptr) < 0;
+        }
+    }
+}
+
 /* Order glyphs in name-keyed font. */
 static void orderNameKeyedGlyphs(controlCtx h) {
     cfwCtx g = h->g;
@@ -1554,23 +1607,23 @@ static void orderNameKeyedGlyphs(controlCtx h) {
     long i;
     long j;
     long k;
+    bool has_notdef = true;
     Glyph tmp;
     long nGlyphs = h->_new->glyphs.cnt;
     Glyph *glyphs = h->_new->glyphs.array;
 
     if (glyphs[0].info == NULL) {
-        cfwFatal(h->g, cfwErrNoNotdef, NULL);
+        if (!(g->flags & CFW_NO_NOTDEF_OK))
+            cfwFatal(h->g, cfwErrNoNotdef, NULL);
+        has_notdef = false;
     }
 
     if (!(g->flags & CFW_PRESERVE_GLYPH_ORDER)) {
-        /* Set sentinel for insertion sort */
-        glyphs[0].info->encoding.code = 0;
-
         /* Sort glyphs by encoding order using insertion sort */
         for (i = 2; i < nGlyphs; i++) {
             j = i;
             tmp = glyphs[i];
-            while (tmp.info->encoding.code < glyphs[j - 1].info->encoding.code) {
+            while (j > 1 && glyphLT(g, tmp.info, glyphs[j - 1].info)) {
                 glyphs[j] = glyphs[j - 1];
                 j--;
             }
@@ -1578,7 +1631,6 @@ static void orderNameKeyedGlyphs(controlCtx h) {
                 glyphs[j] = tmp;
             }
         }
-        glyphs[0].info->encoding.code = ABF_GLYPH_UNENC;
     }
 
     /* Assign SIDs and remember last encoded glyph */
@@ -1591,35 +1643,6 @@ static void orderNameKeyedGlyphs(controlCtx h) {
 
         if (info->encoding.code != ABF_GLYPH_UNENC) {
             j = i;
-        }
-    }
-
-    if (!(g->flags & CFW_PRESERVE_GLYPH_ORDER)) {
-        if (++j < nGlyphs) {
-            /* Font has unencoded glyphs; set sentinel for insertion sort */
-            k = j;
-            for (i = j + 1; i < nGlyphs; i++) {
-                if (glyphs[i].info->gname.impl < glyphs[k].info->gname.impl) {
-                    k = i;
-                }
-            }
-            if (k != j) {
-                tmp = glyphs[j];
-                glyphs[j] = glyphs[k];
-                glyphs[k] = tmp;
-            }
-            /* Sort unencoded glyphs by SID order using insertion sort */
-            for (i = j + 2; i < nGlyphs; i++) {
-                j = i;
-                tmp = glyphs[i];
-                while (tmp.info->gname.impl < glyphs[j - 1].info->gname.impl) {
-                    glyphs[j] = glyphs[j - 1];
-                    j--;
-                }
-                if (j != i) {
-                    glyphs[j] = tmp;
-                }
-            }
         }
     }
 
@@ -1638,6 +1661,8 @@ static void orderNameKeyedGlyphs(controlCtx h) {
 
             /* Check compatibility against predef encoding */
             for (i = 0; i < nGlyphs; i++) {
+                if (i == 0 && !has_notdef)
+                    continue;
                 abfGlyphInfo *info = glyphs[i].info;
                 SID sid = (SID)info->gname.impl;
                 int16_t font_enc = (info->encoding.code == ABF_GLYPH_UNENC) ? -1 : (int16_t)info->encoding.code;
@@ -1718,6 +1743,9 @@ static int assignWidths(controlCtx h, FDInfo *fd) {
                 nonoptsize += numsize(rec->width) * rec->count;
             }
         }
+
+        if (h->g->flags & CFW_NO_WIDTH_OPT)
+            return nonoptsize;
 
         /* Find best combination of nominal and default widths */
         minsize = nonoptsize;
@@ -1931,6 +1959,13 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
         orderCIDKeyedGlyphs(h);
     } else {
         orderNameKeyedGlyphs(h);
+    }
+
+    // No .notdef but we didn't error out above so move the whole array back 1
+    if (h->_new->glyphs.array[0].info == NULL) {
+        h->_new->glyphs.cnt--;
+        memmove(h->_new->glyphs.array, h->_new->glyphs.array + 1,
+                DNA_ELEM_SIZE_(h->_new->glyphs) * h->_new->glyphs.cnt);
     }
 
     analyzeWidths(h);

@@ -1,11 +1,8 @@
 set -ex
 
+cpplint --exclude c/addfeatures/pstoken --recursive --quiet c/addfeatures
 cpplint --recursive --quiet c/detype1
-cpplint --recursive --quiet c/makeotf/include
-cpplint --recursive --quiet c/makeotf/resource
 # Skip pstoken and typecomp for now
-cpplint --recursive --quiet c/makeotf/lib/hotconv
-cpplint --recursive --quiet c/makeotf/source
 cpplint --recursive --quiet c/mergefonts
 cpplint --recursive --quiet c/shared
 cpplint --recursive --quiet c/rotatefont

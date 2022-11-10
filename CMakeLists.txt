@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(afdko)
 
 # Change and uncomment to build directly with cmake (outside of pip)
-set(CMAKE_MODULE_PATH /usr/lib/python3.10/site-packages/skbuild/resources/cmake)
+# set(CMAKE_MODULE_PATH /usr/lib/python3.10/site-packages/skbuild/resources/cmake)
 # set(CMAKE_MODULE_PATH /opt/homebrew/lib/python3.9/site-packages/skbuild/resources/cmake)
 # set(CMAKE_FIND_FRAMEWORK_EXTRA_LOCATIONS /opt/homebrew/Cellar/python@3.9/3.9.13_4/Frameworks/Python.framework)
 
@@ -24,6 +24,8 @@ find_package(PythonLibs REQUIRED)
 find_package(PythonExtensions REQUIRED)
 find_package(Cython REQUIRED)
 set(SKBUILD_LINK_LIBRARIES_KEYWORD PRIVATE)
+
+# add_compile_definitions(HOT_DEBUG)
 
 add_compile_definitions(STRIP_EXTERN_C)
 
@@ -123,8 +125,8 @@ add_subdirectory(c/sfntdiff)
 add_subdirectory(c/sfntedit)
 add_subdirectory(c/spot)
 add_subdirectory(c/type1)
-add_subdirectory(c/makeotf)
+add_subdirectory(c/addfeatures)
 
-target_link_libraries(_internal PRIVATE adapter detype1 type1 makeotf spot sfntedit sfntdiff mergefonts rotatefont shared antlr4_static)
+target_link_libraries(_internal PRIVATE adapter detype1 type1 addfeatures spot sfntedit sfntdiff mergefonts rotatefont shared antlr4_static)
 
 install(TARGETS _internal LIBRARY DESTINATION python/afdko)

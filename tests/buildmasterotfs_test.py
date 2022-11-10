@@ -32,7 +32,7 @@ def _compare_results(otf_path):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
 
 
 # -----

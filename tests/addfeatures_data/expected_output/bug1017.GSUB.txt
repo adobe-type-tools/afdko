@@ -1,0 +1,118 @@
+### [GSUB] (00000504)
+Version    =1.0 (00010000)
+ScriptList =000a
+FeatureList=0042
+LookupList =006c
+--- ScriptList (000a)
+ScriptCount=3
+--- ScriptRecord[index]={ScriptTag,Script}
+[0]={DFLT,0014} [1]={grek,0020} [2]={latn,002c} 
+--- Script [0] (0014)
+DefaultLangSys=0004
+LangSysCount  =0
+
+--- LangSys [-1] (0004)
+LookupOrder    =0000
+ReqFeatureIndex=65535
+FeatureCount   =1
+--- FeatureIndex[index]=value
+[0]=0 
+--- Script [1] (0020)
+DefaultLangSys=0004
+LangSysCount  =0
+
+--- LangSys [-1] (0004)
+LookupOrder    =0000
+ReqFeatureIndex=65535
+FeatureCount   =1
+--- FeatureIndex[index]=value
+[0]=1 
+--- Script [2] (002c)
+DefaultLangSys=0004
+LangSysCount  =0
+
+--- LangSys [-1] (0004)
+LookupOrder    =0000
+ReqFeatureIndex=65535
+FeatureCount   =1
+--- FeatureIndex[index]=value
+[0]=2 
+
+--- FeatureList (0042)
+FeatureCount=3
+--- FeatureRecord[index]={FeatureTag,Feature}
+[0]={'ss05',0014} [1]={'ss05',001a} [2]={'ss05',0020} 
+--- FeatureTable (0014)
+FeatureParam=0012
+   Stylistic Alternate name parameter version: 0
+   Stylistic Alternate name parameter name table name ID: 256
+LookupCount =1
+--- LookupListIndex[index]=value
+[0]=0 
+--- FeatureTable (001a)
+FeatureParam=000c
+
+# Skipping stylistic alternate parameter block in feature 'ss05' offset 001a. It was previously reported for feature 'ss05' offset 0014.
+LookupCount =1
+--- LookupListIndex[index]=value
+[0]=0 
+--- FeatureTable (0020)
+FeatureParam=0006
+
+# Skipping stylistic alternate parameter block in feature 'ss05' offset 0020. It was previously reported for feature 'ss05' offset 0014.
+LookupCount =1
+--- LookupListIndex[index]=value
+[0]=0 
+--- LookupList (006c)
+LookupCount=2
+--- Lookup[index]=offset
+[0]=0006 [1]=000e 
+--- Lookup [0] (0006)
+LookupType   =0006
+LookupFlag   =0000
+SubTableCount=1
+--- SubTable[index]=offset
+[0]=0010 
+--- Subtable [0] (00000010)
+--- ChainingContextSubst
+SubstFormat   =3
+BacktrackGlyphCount =1
+--- BacktrackCoverageArray[index]=offset
+[0]=0018 
+--- Coverage (0018)
+CoverageFormat=1
+GlyphCount    =1
+--- GlyphArray[index]=glyphId glyphName/CID
+[0]=3 (b) 
+InputGlyphCount =1
+--- InputCoverageArray[index]=offset
+[0]=001e 
+--- Coverage (001e)
+CoverageFormat=1
+GlyphCount    =1
+--- GlyphArray[index]=glyphId glyphName/CID
+[0]=2 (a) 
+LookaheadGlyphCount =0
+--- LookaheadCoverageArray[index]=offset
+
+SubstCount =1
+--- SubstLookupRecord[index]=(SequenceIndex,LookupListIndex)
+[0]=(0,1) 
+ 
+--- Lookup [1] (000e)
+LookupType   =0001
+LookupFlag   =0000
+SubTableCount=1
+--- SubTable[index]=offset
+[0]=001a 
+--- Subtable [0] (0000001a)
+--- SingleSubst
+SubstFormat =1
+Coverage    =000c
+DeltaGlyphId=1
+--- Coverage (000c)
+CoverageFormat=1
+GlyphCount    =1
+--- GlyphArray[index]=glyphId glyphName/CID
+[0]=2 (a) 
+ 
