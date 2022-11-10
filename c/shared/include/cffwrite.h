@@ -10,10 +10,11 @@
 
 #include "ctlshare.h"
 #include "slogger.h"
+#include "absfont.h"
+#include "goadb.h"
 
 #define CFW_VERSION CTL_MAKE_VERSION(1, 0, 56)
 
-#include "absfont.h"
 
 /* Compact Font Format (CFF) Generation Library
    ============================================
@@ -82,12 +83,19 @@ enum {
        sources that will be used for OpenType/CFF fonts */
     CFW_NO_OPTIMIZATION =        1 << 12, /* Suppress charstring optimizations, e.g.: */
                                           /* x 0 rmoveto => x hmoveto */
-    CFW_WRITE_CFF2 =             1 << 13
+    CFW_WRITE_CFF2 =             1 << 13,
+    CFW_NO_WIDTH_OPT =           1 << 14,
+    CFW_NO_HINT_WARNINGS =       1 << 15,
+    CFW_ORDER_BY_GOADB =         1 << 16,
+    CFW_NO_NOTDEF_OK =           1 << 17
 };
 
 /* If the CFW_PRESERVE_GLYPH_ORDER bit is not set, glyphs are accumulated and
-   then sorted during cfwEndFont(), into an order that reduces the internal CFF
-   charset and encoding data structure sizes.
+   then sorted during cfwEndFont(). If CFW_ORDER_BY_GOADB is set and goadb is
+   not NULL then the order is determined by that object (which is presumably
+   initialized from a GlyphOrderAndAliasDB file). Otherwise the glyphs are 
+   given an order that reduces the internal CFF charset and encoding data
+   structure sizes.
 
    Conversely, if the CFW_PRESERVE_GLYPH_ORDER bit is set, the order in which
    glyphs are added to the font via the glyph callbacks is preserved. However,
@@ -113,7 +121,8 @@ struct cfwMapCallback_ {
                      unsigned short gid, abfGlyphInfo *info);
 };
 
-int cfwBegFont(cfwCtx h, cfwMapCallback *map, uint32_t maxNumSubrs);
+int cfwBegFont(cfwCtx h, cfwMapCallback *map, uint32_t maxNumSubrs,
+               std::shared_ptr<GOADB> goadb = nullptr);
 
 /* cfwBegFont() is called to begin a new member font definition.
 
@@ -131,6 +140,10 @@ int cfwBegFont(cfwCtx h, cfwMapCallback *map, uint32_t maxNumSubrs);
    glyphmap() callback function is called during cfwEndFont() after the glyphs
    have been sorted into order. Each glyph is called back, in order, beginning
    with the first at GID 0.
+
+   If "goadb" is non-NULL and the CFW_PRESERVE_GLYPH_ORDER bit is NOT set the
+   order of glyphs in the output will be determined by the order of entries in
+   the GlyphOrderAndAliasDB file.
 
    The glyphmap() "gid" parameter specifies the glyph's index and the
    "info" parameter identifies the glyph. */

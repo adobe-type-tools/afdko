@@ -1,4 +1,4 @@
 makeotf [Warning] Could not find default features file. Font will be built without any layout features.
-makeotfexe processing font <Exercise1-Regular>
+addfeatures processing font <Exercise1-Regular>
 WARNING: Negative internal leading: win.ascent + win.descent < unitsPerEm
-Built development mode font 'Exercise1-Regular.otf'.
+Built development mode font '/tmp/tmph1ulepg4'.

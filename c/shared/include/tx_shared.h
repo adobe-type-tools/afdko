@@ -49,6 +49,7 @@
 #include "cffwrite.h"
 #include "ctutil.h"
 #include "dynarr.h"
+#include "goadb.h"
 #include "pdfwrite.h"
 #include "sfntread.h"
 #include "slogger.h"
@@ -94,10 +95,6 @@
 #define sig_UFO CTL_TAG('<', '?', 'x', 'm')
 /* Generate n-bit mask */
 #define N_BIT_MASK(n) (~(~0UL << (n)))
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-extern "C" {
-#endif
 
 enum {  // Option enumeration
     txopt_None, /* Not an option */
@@ -285,6 +282,9 @@ struct txCtx_ {
 #define SUBSET_HAS_NOTDEF   (1 << 13) /* Indicates that notdef has been added, no need to force it in.*/
 #define PATH_REMOVE_OVERLAP (1 << 14) /* Do not remove path overlaps */
 #define PATH_SUPRESS_HINTS  (1 << 15) /* XXX */
+#define HAS_GOADB           (1 << 16)
+#define SUBSET_BY_GOADB_OPT (1 << 17)
+#define SUBSET_RENAME_OPT   (1 << 18)
     int mode;                         /* Current mode */
     const char *modename;             /* Name of current mode */
     txExtCtx ext;                     /* Extension context (if any) */
@@ -335,7 +335,9 @@ struct txCtx_ {
         char *dd; /* Destination directory path */
         char src[FILENAME_MAX];
         char dst[FILENAME_MAX];
+        char goadbname[FILENAME_MAX];
     } file;
+    std::shared_ptr<GOADB> goadb;
     struct {  // Random subset data
         dnaDCL(unsigned short, glyphs); /* Tag list */
         dnaDCL(char, args);             /* Simulated -g args */
@@ -517,6 +519,7 @@ struct txCtx_ {
         ctlStreamCallbacks stm;
         abfGlyphCallbacks glyph;
         abfGlyphBegCallback saveGlyphBeg;
+        abfGlyphBegCallback renameSaveGlyphBeg;
         abfGlyphCallbacks save;
         int selected;
     } cb;
@@ -603,9 +606,5 @@ void svrReadFont(txCtx h, long origin);
 void t1rReadFont(txCtx h, long origin);
 void ttrReadFont(txCtx h, long origin, int iTTC);
 void ufoReadFont(txCtx h, long origin);
-
-#if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
-}
-#endif
 
 #endif  // SHARED_INCLUDE_TX_SHARED_H_

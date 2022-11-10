@@ -6,6 +6,8 @@
 "[-ufo options: default none]\n"
 "-altLayer NAME   Select a layer other than\n"
 "                 'com.adobe.type.processedglyphs'\n"
+"-go              Output preferred glyph order according\n"
+"                 to GOADB file\n"
 "\n"
 "UFO mode converts an abstract font to a UFO 2 font.\n"
 "\n"

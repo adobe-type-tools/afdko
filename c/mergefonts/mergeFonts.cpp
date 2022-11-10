@@ -6,9 +6,9 @@
  * mergeFonts. A minor modification of the tx code base.
  */
 
-#include "tx_shared.h"
-
 #include <string>
+
+#include "tx_shared.h"
 
 #define MERGEFONTS_VERSION CTL_MAKE_VERSION(1, 3, 0) /* derived from tx */
 

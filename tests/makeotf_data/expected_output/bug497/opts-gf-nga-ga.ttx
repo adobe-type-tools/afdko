@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="3.28">
+<ttFont sfntVersion="OTTO" ttLibVersion="4.38">
 
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
@@ -12,12 +12,12 @@
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="1.0"/>
     <fontRevision value="1.01099"/>
-    <checkSumAdjustment value="0x26287b3e"/>
+    <checkSumAdjustment value="0x475f3025"/>
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00000011"/>
     <unitsPerEm value="1000"/>
-    <created value="Wed Jul 25 18:42:18 2018"/>
-    <modified value="Wed Jul 25 18:42:18 2018"/>
+    <created value="Mon Dec  5 08:29:50 2022"/>
+    <modified value="Mon Dec  5 08:29:50 2022"/>
     <xMin value="52"/>
     <yMin value="-12"/>
     <xMax value="565"/>
@@ -92,7 +92,7 @@
     <achVendID value="ADBE"/>
     <fsSelection value="00000000 01000000"/>
     <usFirstCharIndex value="97"/>
-    <usLastCharIndex value="97"/>
+    <usLastCharIndex value="8203"/>
     <sTypoAscender value="660"/>
     <sTypoDescender value="-340"/>
     <sTypoLineGap value="200"/>
@@ -121,7 +121,7 @@
       Bug 497
     </namerecord>
     <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Version 1.011;hotconv 1.0.108;makeotfexe 2.5.65593 DEVELOPMENT
+      Version 1.011;hotconv 1.1.0;addfeatures 2.6.0
     </namerecord>
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
       SourceSans-Test
@@ -142,7 +142,7 @@
       Bug 497
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
-      Version 1.011;hotconv 1.0.108;makeotfexe 2.5.65593 DEVELOPMENT
+      Version 1.011;hotconv 1.1.0;addfeatures 2.6.0
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
       SourceSans-Test
@@ -156,12 +156,14 @@
     <tableVersion version="0"/>
     <cmap_format_4 platformID="0" platEncID="3" language="0">
       <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
+      <map code="0x200b" name="negative"/><!-- ZERO WIDTH SPACE -->
     </cmap_format_4>
     <cmap_format_6 platformID="1" platEncID="0" language="0">
       <map code="0x61" name="a"/>
     </cmap_format_6>
     <cmap_format_4 platformID="3" platEncID="1" language="0">
       <map code="0x61" name="a"/><!-- LATIN SMALL LETTER A -->
+      <map code="0x200b" name="negative"/><!-- ZERO WIDTH SPACE -->
     </cmap_format_4>
   </cmap>
 
@@ -253,7 +255,7 @@
           endchar
         </CharString>
         <CharString name="negative">
-          0 endchar
+          endchar
         </CharString>
       </CharStrings>
     </CFFFont>

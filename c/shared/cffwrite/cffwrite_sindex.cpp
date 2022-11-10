@@ -96,22 +96,33 @@ int cfwSindexInvalidString(const char *str) {
     return (str == NULL || *str == '\0');
 }
 
+SRI cfwIsStdString(cfwCtx g, const char *str) {
+    StdRec *std;
+
+    std = (StdRec *)bsearch(str, std2sid, STD_STR_CNT,
+                            sizeof(StdRec), matchStdStr);
+    if (std != NULL) {
+        /* Standard string; return its SID */
+        return std->sid;
+    }
+    return SRI_UNDEF;
+}
+
 /* Add string. If standard string return its SID, otherwise if in table return
    existing record index, else add to table and return new record index. If
    string is empty return SRI_UNDEF. */
 SRI cfwSindexAddString(cfwCtx g, const char *str) {
     sindexCtx h = g->ctx.sindex;
     size_t index;
-    StdRec *std;
 
     if (cfwSindexInvalidString(str)) {
         return SRI_UNDEF; /* Reject invalid strings */
     }
-    std = (StdRec *)bsearch(str, std2sid, STD_STR_CNT,
-                            sizeof(StdRec), matchStdStr);
-    if (std != NULL) {
-        /* Standard string; return its SID */
-        return std->sid;
+
+    SRI r = cfwIsStdString(g, str);
+
+    if (r != SRI_UNDEF) {
+        return r;
     }
 
     /* Search custom strings */

@@ -26,7 +26,7 @@ if needed.
 """
 
 __version__ = """\
-makeotf.py v2.9.0 June 1 2021
+makeotf.py v3.0.0 Dec 1 2022
 """
 
 __methods__ = """
@@ -103,10 +103,8 @@ __usage__ = __version__ + """
                     assignments from the third column of the GOADB
                     file without renaming the glyphs.
 
--r                  Set release mode. This turns on subroutinization,
-                    applies the GlyphOrderAndAliasDB file, and
-                    removes the word "Development" from the name
-                    table Version (name.ID=5) string.
+-r                  Set release mode. This turns on subroutinization
+                    and applies the GlyphOrderAndAliasDB file
 
 -nr                 Set the option option -r off, if it has been
                     previously set.
@@ -129,7 +127,13 @@ __usage__ = __version__ + """
 
 -gs                 Omit from the font any glyphs not mentioned in the
                     GlyphOrderAndAliasDB file.
-                    Only works if -ga or -r is set.
+
+-dr                 Use supplied CFF table. Only valid when the input
+                    font a bare CFF table or an OTF containing a CFF
+                    or CFF2 table.
+
+-amnd               Produce a CFF table without a .notdef glyph if
+                    it is missing from the source font
 
 -rev [version]      Without the optional version number, increments the
                     version number by 5. With an integer argument,
@@ -138,17 +142,6 @@ __usage__ = __version__ + """
                     the version to the fractional argument; the
                     number must then be decimal with three decimal
                     places, e.g. '1.045', not '1.45'.
-
--oldNameID4         Set Windows name.ID=4 to the PS name, and Mac
-                    name.ID=4 to Preferred Family + space +
-                    Preferred Style name, as in all releases of
-                    makeotf before Dec 2010.
-
--newNameID4         Set Windows and Mac name.ID=4 to Preferred
-                    Family + space + Preferred Style name, as in
-                    the current OpenType spec. This is the default
-                    behavior, and is needed only to override a
-                    fontinfo or project file setting.
 
 -osbOn <number>     Set a bit to 'on' in the OS/2 table
                     fsSelection field at the specified bit index.
@@ -165,28 +158,6 @@ __usage__ = __version__ + """
                     are specified for the OS/2 table fsSelection
                     field, then the default version number is 3;
                     else the default is 4.
-
--addn               Replace the .notdef glyph in the source data
-                    (if any) with a standard notdef glyph,
-                    matching font weight and width.
-
--naddn              Turn off the -addn option, if it has previously
-                    been turned on.
-
--adds               If the font is missing any of the Apple Mac
-                    Symbol glyphs, create them, matching the font
-                    weight and width.
-                    Will be disabled for fonts without both a zero
-                    and a lowercase 'x'.
-
--nadds              Turn off the -adds option, if it has previously
-                    been turned on.
-
--serif              Specify that any added glyph use the serif
-                    built-in multiple master glyph data.
-
--sans               Specify that any added glyphs will use the
-                    sans-serif built-in multiple master glyph data.
 
 -cs                 Override the heuristics, and specify the
                     ScriptID for the Macintosh 'cmap' subtable.
@@ -224,12 +195,6 @@ __usage__ = __version__ + """
                     space (U+0020, U+00A00)
                     tcommaaccent (U+0163, U+021B)
 
--dcs                Set OS/2.DefaultChar to the Unicode value for
-                    'space' rather than '.notdef'. The latter is
-                    correct by the OT spec, but QuarkXPress 6.5
-                    requires the former in order to print OTF/CFF
-                    fonts.
-
 -fi [<path>]        Path to the fontinfo file. If no path is given,
                     the default is to look for first 'fontinfo', then
                     'cidfontinfo', in the current directory. Used
@@ -263,7 +228,7 @@ __usage__ = __version__ + """
                     CFF that specifies the Adobe-Identity-0 ROS;
                     otherwise has no effect.
 
--shw/-nshw          Show/Hide warnings about unhinted glyphs.
+-shw/-nshw          Suppress/Show warnings about unhinted glyphs.
                     This is useful when processing unhinted fonts.
 
 -swo/-nswo          Suppress CFF width optimization (use of defaultWidthX
@@ -317,28 +282,6 @@ format and contents of the fontinfo and project files.
 
 __help__ = __usage__ + """
 
-makeotf parts.
-
-makeotf now comes in two parts. One is the C program 'makeotfexe',
-which requires that all input files be specified as command-line
-parameters. This is the program that reads in all the data, and build
-the final OpenType font. You can build OpenType fonts using only this
-program.
-
-The other part is the 'makeotf.py' Python script, which is invoked
-indirectly by the command-shell script 'makeotf'. The script is a
-wrapper for the 'makeotfexe', and does several useful things for you:
-
-- Uses the 'tx' tool to convert the input font into the Unix Type 1
-  format that is required by 'makeotfexe'.
-- Saves the parameters used for makeotfexe in a project file. This can
-  later be referenced by the single option '-fp', which saves a lot of
-  typing. It also allows saving standard settings for release end
-  development builds.
-- verifies that the input files exist. This avoids crashes in
-  makeotfexe.
-
-
 Project files.
 
 Every makeotf is run, it saves the options used to build the font
@@ -372,9 +315,12 @@ kFMB = "FontMenuDBPath"
 # path to DB file for glyph order and alias DB file.
 # Example: "../../GlyphOrderAndAliasDB"
 kGOADB = "GlyphAliasDBPath"
+kNoNotdefOK = "AllowMissingNotdef"
 # Boolean: turns on subroutinization and aliasing,
 # and omits "Development" from name table Version string
 kRelease = "ReleaseMode"
+# Boolean: Use the supplied CFF table
+kUseSuppliedCFF = "UseSuppliedCFF"
 # Boolean: whether or not to subroutinize font.
 # Overrides the effect of "ReleaseMode"
 kDoSubr = "DoSubroutinization"
@@ -398,17 +344,6 @@ kSetfsSelectionBitsOff = "kSetfsSelectionBitsOff"
 # Integer. Takes a numeric value. If 0, does nothing;
 # else sets the OS/2 table version to the value.
 kSetOS2Version = "kSetOS2Version"
-# Boolean: if true, will replace the original notdef
-# with the Adobe standard notdef.
-kNotdef = "OverrideNotdef"
-# Integer. if not None, will add any missing glyphs from the
-# set of Apple symbol glyphs in the MacRoman std glyph set.
-# If not zero, it will use the value as the design weight for
-# the synthetic glyphs. overriding the built-in heuristics.
-kAddSymbol = "AddAppleSymbolGlyphs"
-# if true, any added glyphs will be serif.
-# Else, they will be sans-serif.
-kSerif = "AddedGlyphsAreSerif"
 # Integer. Sets the XUID value in the font.
 # Default is to provide no XUID value.
 kXUID = "XUID"
@@ -440,10 +375,6 @@ kUVSPath = "UVSPath"
 # contextual lookups to be the reverse of what is no spec'd to be.
 kWriteWrongBacktrack = "WriteWrongBackTrack"
 kDoubleMapGlyphs = "DoulbeMapGlyphs"
-kDefaultCharAsSpace = "DefaultCharAsSpace"
-# Use old logic for name ID 4, i.e. what was done
-# for name ID 4 for all FDK fonts before 11/2010.
-kUseOldNameID4 = "UseOldNameID4"
 # omit all Mac platform names from the name table
 kOmitMacNames = "OmitMacNames"
 kOverrideMenuNames = "OverrideMenuNames"
@@ -473,25 +404,22 @@ kMOTFOptions = {
     kFMB: [kOptionNotSeen, "-mf", None],
     kGOADB: [kOptionNotSeen, "-gf", None],
     kRelease: [kOptionNotSeen, "-r", "-nr"],
+    kUseSuppliedCFF: [kOptionNotSeen, "-dr", None],
     kDoSubr: [kOptionNotSeen, "-S", "-nS"],
     kMaxSubrs: [kOptionNotSeen, "-maxs", None],
     kDoAlias: [kOptionNotSeen, "-ga", "-nga"],
     kDoSubset: [kOptionNotSeen, "-gs", "-ngs"],
     kRenumber: [kOptionNotSeen, "-rev", None],
-    kNotdef: [kOptionNotSeen, "-addn", "-naddn"],
+    kNoNotdefOK: [kOptionNotSeen, "-amnd", None],
     kSetfsSelectionBitsOn: [kOptionNotSeen, "-osbOn", None],
     kSetfsSelectionBitsOff: [kOptionNotSeen, "-osbOff", None],
     kSetOS2Version: [kOptionNotSeen, "-osv", None],
-    kAddSymbol: [kOptionNotSeen, "-adds", "-nadds"],
-    kSerif: [kOptionNotSeen, "-serif", "-sans"],
     kMacScript: [kOptionNotSeen, "-cs", None],
     kMacLang: [kOptionNotSeen, "-cl", None],
     kMacCMAPPath: [kOptionNotSeen, "-cm", None],
     kHUniCMAPPath: [kOptionNotSeen, "-ch", None],
     kUVSPath: [kOptionNotSeen, "-ci", None],
     kDoubleMapGlyphs: [kOptionNotSeen, "-dbl", None],
-    kDefaultCharAsSpace: [kOptionNotSeen, "-dcs", None],
-    kUseOldNameID4: [kOptionNotSeen, "-oldNameID4", "-newNameID4"],
     kOmitMacNames: [kOptionNotSeen, "-omitMacNames", "-useMacNames"],
     kOverrideMenuNames: [kOptionNotSeen, "-overrideMenuNames",
                          "-donotOverrideMenuNames"],
@@ -507,12 +435,24 @@ kMOTFOptions = {
     kVerboseWarnings: [kOptionNotSeen, "-V", "-nV"],
 }
 
+# The options which should ONLY be passed to tx
+kTXOptions = {
+    kDoSubr: None,
+    kMaxSubrs: None,
+    kDoSubset: None,
+    kNoNotdefOK: None,
+    kSuppressHintWarnings: None,
+    kSuppressWidthOptimization: None,
+}
+
 # The options which should NOT be passed to
 # makeotfexe, as they are for local use only.
 kSkipOptions = {
     "": None,
     kRenumber: None,
     kConvertToCID: None,
+    kUseSuppliedCFF: None,
+    kRelease: None,
 }
 
 # The paths in this list of keys need to be 'fixed' when written
@@ -556,14 +496,13 @@ class MakeOTFParams(object):
         self.saveOptions = 'false'
         # default assumption: font home dir is current working directory.
         self.fontDirPath = "."
-        # temp T1 font file, made when source is UFO, OTF, TTF, or txt
+        # temp CFF font file, made when source is UFO, PS, TTF, or txt
         self.tempFontPath = None
-        # CID Registry, Order, Supplement.
-        self.ROS = None
         # for bits 7, 8, 9.
         self.seenOS2v4Bits = [0, 0, 0]
-        self.srcIsTTF = 0
-        self.srcIsUFO = 0
+        self.isTextPS = False
+        self.srcIsTTF = False
+        self.srcIsUFO = False
         self.ufoFMNDBPath = None
         self.ufoGAODBPath = None
         self.verbose = False
@@ -764,11 +703,6 @@ def setOptionsFromFontInfo(makeOTFParams):
             setattr(makeOTFParams, kFileOptPrefix + kConvertToCID, 'true')
             print("makeotf [Note] setting output to be CID-keyed from "
                   "fontinfo keyword.")
-
-    if kMOTFOptions[kUseOldNameID4][0] == kOptionNotSeen:
-        if re.search(r"UseOldNameID4\s+([Tt]rue|1)", data):
-            setattr(makeOTFParams, kFileOptPrefix + kUseOldNameID4, 'true')
-            print("makeotf [Note] using old name ID 4 logic.")
 
     if kMOTFOptions[kOmitMacNames][0] == kOptionNotSeen:
         if re.search(r"OmitMacNames+([Tt]rue|1)", data):
@@ -1165,8 +1099,9 @@ def getOptions(makeOTFParams, args):
             # If the -r option is specified, we don't want
             # the -q and -S options showing up unless the
             # user specified them later.
-            setattr(makeOTFParams, kFileOptPrefix + kDoSubr, None)
-            setattr(makeOTFParams, kFileOptPrefix + kDoAlias, None)
+            setattr(makeOTFParams, kFileOptPrefix + kDoSubr, 'true')
+            setattr(makeOTFParams, kFileOptPrefix + kDoAlias, 'true')
+            setattr(makeOTFParams, kFileOptPrefix + kAddStubDSIG, 'true')
 
         # -nr
         # makeotfexe does not have a not-release option;
@@ -1180,8 +1115,13 @@ def getOptions(makeOTFParams, args):
             setattr(makeOTFParams, kFileOptPrefix + kDoSubr, None)
             kMOTFOptions[kDoAlias][0] = i + optionIndex
             setattr(makeOTFParams, kFileOptPrefix + kDoAlias, None)
-            kMOTFOptions[kGOADB][0] = i + optionIndex
-            setattr(makeOTFParams, kFileOptPrefix + kGOADB, None)
+            kMOTFOptions[kAddStubDSIG][0] = i + optionIndex
+            setattr(makeOTFParams, kFileOptPrefix + kAddStubDSIG, None)
+
+        # -dr
+        elif arg == kMOTFOptions[kUseSuppliedCFF][1]:
+            kMOTFOptions[kUseSuppliedCFF][0] = i + optionIndex
+            setattr(makeOTFParams, kFileOptPrefix + kUseSuppliedCFF, 'true')
 
         elif arg == kMOTFOptions[kDoSubr][1]:
             kMOTFOptions[kDoSubr][0] = i + optionIndex
@@ -1189,7 +1129,7 @@ def getOptions(makeOTFParams, args):
 
         elif arg == kMOTFOptions[kDoSubr][2]:
             kMOTFOptions[kDoSubr][0] = i + optionIndex
-            setattr(makeOTFParams, kFileOptPrefix + kDoSubr, 'false')
+            setattr(makeOTFParams, kFileOptPrefix + kDoSubr, None)
 
         elif arg == kMOTFOptions[kMaxSubrs][1]:
             try:
@@ -1211,9 +1151,7 @@ def getOptions(makeOTFParams, args):
         elif arg == kMOTFOptions[kDoAlias][2]:
             if kMOTFOptions[kDoAlias][0] == kOptionNotSeen:
                 kMOTFOptions[kDoAlias][0] = i + optionIndex
-                setattr(makeOTFParams, kFileOptPrefix + kDoAlias, 'false')
-                kMOTFOptions[kGOADB][0] = i + optionIndex
-                setattr(makeOTFParams, kFileOptPrefix + kGOADB, None)
+                setattr(makeOTFParams, kFileOptPrefix + kDoAlias, None)
 
         # -gs
         elif arg == kMOTFOptions[kDoSubset][1]:
@@ -1222,7 +1160,12 @@ def getOptions(makeOTFParams, args):
 
         # -ngs
         elif arg == kMOTFOptions[kDoSubset][2]:
-            setattr(makeOTFParams, kFileOptPrefix + kDoSubset, 'false')
+            setattr(makeOTFParams, kFileOptPrefix + kDoSubset, None)
+
+        # -amnd
+        elif arg == kMOTFOptions[kNoNotdefOK][1]:
+            kMOTFOptions[kNoNotdefOK][0] = i + optionIndex
+            setattr(makeOTFParams, kFileOptPrefix + kNoNotdefOK, 'true')
 
         elif arg == kMOTFOptions[kRenumber][1]:
             try:
@@ -1254,16 +1197,6 @@ def getOptions(makeOTFParams, args):
             setattr(makeOTFParams,
                     kFileOptPrefix + kRenumber,
                     fontRevisionString)
-
-        elif arg == kMOTFOptions[kNotdef][1]:
-            kMOTFOptions[kNotdef][0] = i + optionIndex
-            setattr(makeOTFParams, kFileOptPrefix + kNotdef, 'true')
-
-        # makeotfexe does not have a "don't make notdef"
-        # option; we need to just suppress it.
-        elif arg == kMOTFOptions[kNotdef][2]:
-            kMOTFOptions[kNotdef][0] = i + optionIndex
-            setattr(makeOTFParams, kFileOptPrefix + kNotdef, None)
 
         elif arg == kMOTFOptions[kSetfsSelectionBitsOn][1]:
             kMOTFOptions[kSetfsSelectionBitsOn][0] = i + optionIndex
@@ -1319,32 +1252,6 @@ def getOptions(makeOTFParams, args):
                 error = 1
                 val = 0
             setattr(makeOTFParams, kFileOptPrefix + kSetOS2Version, str(val))
-
-        elif arg == kMOTFOptions[kAddSymbol][1]:
-            # If the next argument is a valid integer, use it as
-            # the override for the design weight of the synthetic glyphs.
-            kMOTFOptions[kAddSymbol][0] = i + optionIndex
-            try:
-                val = int(args[i])
-                i += 1
-            except (IndexError, ValueError):
-                val = 'true'
-            setattr(makeOTFParams, kFileOptPrefix + kAddSymbol, str(val))
-
-        elif arg == kMOTFOptions[kAddSymbol][2]:
-            kMOTFOptions[kAddSymbol][0] = i + optionIndex
-            setattr(makeOTFParams, kFileOptPrefix + kAddSymbol, 'false')
-
-        # For -serif and -sans, the meaning is to override the heuristics;
-        # makeOTFParams..kSerif ==== None is different than false; the latter
-        # means make it sans, the former means 'depend on the heuristics.
-        elif arg == kMOTFOptions[kSerif][1]:
-            kMOTFOptions[kSerif][0] = i + optionIndex
-            setattr(makeOTFParams, kFileOptPrefix + kSerif, 'true')
-
-        elif arg == kMOTFOptions[kSerif][2]:
-            kMOTFOptions[kSerif][0] = i + optionIndex
-            setattr(makeOTFParams, kFileOptPrefix + kSerif, 'false')
 
         elif arg == kMOTFOptions[kMacScript][1]:
             # The next arg needs to a valid integer
@@ -1439,20 +1346,6 @@ def getOptions(makeOTFParams, args):
             kMOTFOptions[kDoubleMapGlyphs][0] = i + optionIndex
             setattr(makeOTFParams, kFileOptPrefix + kDoubleMapGlyphs, 'true')
 
-        elif arg == kMOTFOptions[kDefaultCharAsSpace][1]:
-            kMOTFOptions[kDefaultCharAsSpace][0] = i + optionIndex
-            setattr(makeOTFParams,
-                    kFileOptPrefix + kDefaultCharAsSpace,
-                    'true')
-
-        elif arg == kMOTFOptions[kUseOldNameID4][1]:
-            kMOTFOptions[kUseOldNameID4][0] = i + optionIndex
-            setattr(makeOTFParams, kFileOptPrefix + kUseOldNameID4, 'true')
-
-        elif arg == kMOTFOptions[kUseOldNameID4][2]:
-            kMOTFOptions[kUseOldNameID4][0] = i + optionIndex
-            setattr(makeOTFParams, kFileOptPrefix + kUseOldNameID4, None)
-
         elif arg == kMOTFOptions[kOmitMacNames][1]:
             kMOTFOptions[kOmitMacNames][0] = i + optionIndex
             setattr(makeOTFParams, kFileOptPrefix + kOmitMacNames, 'true')
@@ -1504,12 +1397,12 @@ def getOptions(makeOTFParams, args):
         elif arg == kMOTFOptions[kSuppressHintWarnings][1]:
             kMOTFOptions[kSuppressHintWarnings][0] = i + optionIndex
             setattr(makeOTFParams, kFileOptPrefix + kSuppressHintWarnings,
-                    None)
+                    'true')
         # -nshw
         elif arg == kMOTFOptions[kSuppressHintWarnings][2]:
             kMOTFOptions[kSuppressHintWarnings][0] = i + optionIndex
             setattr(makeOTFParams, kFileOptPrefix + kSuppressHintWarnings,
-                    'true')
+                    None)
 
         elif arg == kMOTFOptions[kSuppressWidthOptimization][1]:
             kMOTFOptions[kSuppressWidthOptimization][0] = i + optionIndex
@@ -1556,32 +1449,85 @@ def getOptions(makeOTFParams, args):
     if error:
         raise MakeOTFOptionsError
 
-    checkInputFile(makeOTFParams)
-
 
 def checkInputFile(makeOTFParams):
     # The path to the original src font file
-    inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
+    inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont, None)
+
+    # check for input font file.
     # path to font file was not specified.
     if not inputFilePath:
-        return
+        for fileName in kDefaultFontPathList:
+            if os.path.exists(fileName):
+                inputFilePath = fileName
+                break
+        if not inputFilePath:
+            print("makeotf [Error] Could not find any of the default input "
+                  "font files %s." % kDefaultFontPathList)
+            raise MakeOTFOptionsError
 
-    file_path = inputFilePath
-    newFontDirPath = os.path.dirname(file_path)
+        setattr(makeOTFParams, kFileOptPrefix + kInputFont, inputFilePath)
+
+    newFontDirPath = os.path.dirname(inputFilePath)
     if newFontDirPath:
         makeOTFParams.fontDirPath = newFontDirPath
-    setattr(makeOTFParams, kFileOptPrefix + kInputFont, file_path)
 
-    convertFontIfNeeded(makeOTFParams)
+    input_font_format = fdkutils.get_font_format(inputFilePath)
 
+    if not input_font_format:
+        print("makeotf [Error] Unknown input font format '%s'" % inputFilePath)
+        raise MakeOTFRunError
+
+    useSupplied = getattr(makeOTFParams, kFileOptPrefix + kUseSuppliedCFF,
+                          False)
+
+    if useSupplied and input_font_format not in ('CFF', 'OTF'):
+        print("makeotf [Error] -dr only compatible with CFF or CFF2 input")
+        raise MakeOTFRunError
+
+    if input_font_format == 'UFO':
+        makeOTFParams.srcIsUFO = True
+
+        allMatch, msgList = ufotools.checkHashMaps(inputFilePath, False)
+        if not allMatch:
+            for msg in msgList:
+                print(msg)
+            raise MakeOTFShellError
+
+    elif input_font_format in ('CFF', 'OTF'):
+        pass
+
+    elif input_font_format == 'TTF':
+        makeOTFParams.srcIsTTF = True
+
+    # it's a PostScript font
+    else:
+        try:
+            with open(inputFilePath, "rb") as fp:
+                data = fp.read(1024)
+            if (b"%" not in data[:4]) and (b'/FontName' not in data):
+                pass
+            else:
+                if b"/Private" in data:
+                    makeOTFParams.isTextPS = True
+        except (OSError):
+            print("makeotf [Error] Could not read font file at '%s'." %
+                  inputFilePath)
+            raise MakeOTFShellError
+
+    makeOTFParams.psName = get_font_psname(inputFilePath,
+                                           makeOTFParams.srcIsUFO)
+
+
+def checkROS(makeOTFParams):
     # If we need to convert the original source,
     # makeOTFParams.tempFontPath = fontPath = the path to the converted data,
     # while file_path = "makeOTFParams.%s%s = file_path" % (kFileOptPrefix,
     # kInputFont)) = path to original source.
     if makeOTFParams.tempFontPath:
-        fontPath = makeOTFParams.tempFontPath
+        inputFontPath = makeOTFParams.tempFontPath
     else:
-        fontPath = file_path
+        inputFontPath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
 
     # For non CID fonts, you can refer to the font.pfa file by a path,
     # and all other files will be found relative to the font's parent
@@ -1589,9 +1535,20 @@ def checkInputFile(makeOTFParams):
     # is usually kept a level or two down from the face source data
     # and we can only assume that the current directory is the starting
     # point for all relative paths.
-    Reg, Ord, Sup = getROS(fontPath)
+    Reg, Ord, Sup = getROS(inputFontPath)
     if Reg:
         makeOTFParams.ROS = (Reg, Ord, Sup)
+        featPath = getattr(makeOTFParams, kFileOptPrefix + kFeature)
+        foundVert = checkIfVertInFeature(featPath)
+        if featPath and os.path.exists(featPath) and not foundVert:
+            print("makeotf [Warning] the feature file does not contain a "
+                  "'vert' feature %s." % featPath)
+
+        if not (getattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath) and
+                getattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath) and
+                getattr(makeOTFParams, kFileOptPrefix + kUVSPath)):
+            setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup)
+
         # Since we have the ROS, let's set default Mac Script value.
         script = getattr(makeOTFParams, kFileOptPrefix + kMacScript)
         if not script:
@@ -1634,29 +1591,28 @@ def getROS(fontPath):
     """
     Check to see if font is a CID-keyed font by
     looking for the keys Registry, Ordering, Supplement.
-    We are looking for the text:
-      /Registry (Adobe)  def
-      /Ordering (Japan1) def
-      /Supplement 3 def
-
     """
     Reg = Ord = Sup = None
-    with open(fontPath, "r", encoding='macroman') as fp:
-        data = fp.read(5000)
-    match = re.search(r"/Registry\s+\((\S+)\)", data)
+    # Figure out PS name in order to derive default output path.
+    success, data = fdkutils.get_shell_command_output([
+        'tx', '-dump', '-0', fontPath], std_error=True)
+    if not success:
+        raise MakeOTFShellError
+
+    match = re.search(r"cid\.Registry\s+\"(\S+)\"", data)
     if not match:
         return Reg, Ord, Sup
     Reg = match.group(1)
     data = data[match.end():match.end() + 200]
 
-    match = re.search(r"/Ordering\s+\((\S+)\)", data)
+    match = re.search(r"cid\.Ordering\s+\"(\S+)\"", data)
     if not match:
         print("makeotf [Error] found /Registry but not /Ordering in CID font.")
         Reg = None
         return Reg, Ord, Sup
     Ord = match.group(1)
 
-    match = re.search(r"/Supplement\s+(\d+)", data)
+    match = re.search(r"cid.Supplement\s+(\d+)", data)
     if not match:
         print("makeotf [Error] found /Registry but not /Supplement in CID "
               "font.")
@@ -1797,28 +1753,6 @@ def setMissingParams(makeOTFParams):
     error = False
     # The path to the original src font file
     inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
-    srcFontPath = inputFilePath
-
-    # check for input font file.
-    # path to font file was not specified.
-    if not inputFilePath:
-        for fileName in kDefaultFontPathList:
-            if os.path.exists(fileName):
-                srcFontPath = inputFilePath = fileName
-                break
-        if not inputFilePath:
-            print("makeotf [Error] Could not find any of the default input "
-                  "font files %s." % kDefaultFontPathList)
-            # stop here already, otherwise getROS() will generate an IOError.
-            raise MakeOTFOptionsError
-
-        setattr(makeOTFParams, kFileOptPrefix + kInputFont, inputFilePath)
-        checkInputFile(makeOTFParams)
-
-    if makeOTFParams.tempFontPath:
-        inputFontPath = makeOTFParams.tempFontPath
-    else:
-        inputFontPath = inputFilePath
 
     # features path.
     fea_path = getattr(makeOTFParams, kFileOptPrefix + kFeature)
@@ -1831,7 +1765,7 @@ def setMissingParams(makeOTFParams):
                 break
         # If FEA file hasn't been found yet, look for it inside UFO
         if not fea_path and makeOTFParams.srcIsUFO:
-            path1 = os.path.join(srcFontPath, 'features.fea')
+            path1 = os.path.join(inputFilePath, 'features.fea')
             if os.path.exists(path1):
                 fea_path = path1
 
@@ -1867,7 +1801,7 @@ def setMissingParams(makeOTFParams):
                 setattr(makeOTFParams, kFileOptPrefix + kFMB, new_fmndb_path)
         else:
             if makeOTFParams.srcIsUFO:
-                ufo_fmndb_path = ufotools.makeUFOFMNDB(srcFontPath)
+                ufo_fmndb_path = ufotools.makeUFOFMNDB(inputFilePath)
                 if ufo_fmndb_path:
                     makeOTFParams.ufoFMNDBPath = ufo_fmndb_path
                     setattr(
@@ -1892,42 +1826,20 @@ def setMissingParams(makeOTFParams):
             setattr(makeOTFParams, kFileOptPrefix + kFMB, None)
 
     # GOADB path.
-    # Figure out if GOABD is required. It is required when (release mode
+    # Strictly speaking a GOADB file is required when (release mode
     # is set or aliasing is requested), and the font is not a CID font.
-    if makeOTFParams.ROS is None:
-        # Need to know if it has an ROS, e.g. is a CID font.
-        # We don't use GOADB file with CID fonts; Unicode values
-        # come from Uni-H CMAP file, and names can't be changed.
-        makeOTFParams.ROS = getROS(inputFontPath)
-
-    required = not makeOTFParams.ROS[0] and (
-        ('true' == getattr(makeOTFParams, kFileOptPrefix + kDoAlias)) or
-        ('true' == getattr(makeOTFParams, kFileOptPrefix + kRelease)))
-
-    goadb_path = getattr(makeOTFParams, kFileOptPrefix + kGOADB)
+    # However, here we just look for the file in standard places when
+    # the former is true and let the CID question get resolved downstream
+    doalias = ('true' == getattr(makeOTFParams, kFileOptPrefix + kDoAlias))
+    goadb_path = getattr(makeOTFParams, kFileOptPrefix + kGOADB, None)
 
     # GOADB path was not specified.
-    if not goadb_path and required:
+    if not goadb_path and doalias:
         newpath = os.path.join(makeOTFParams.fontDirPath, GOADB_NAME)
         for path in [newpath, lookUpDirTree(newpath)]:
             if path and os.path.exists(path):
                 setattr(makeOTFParams, kFileOptPrefix + kGOADB, path)
                 break
-
-    # If font is CID, look in the SharedData folder.
-    if os.path.exists(inputFontPath):
-        Reg, Ord, Sup = makeOTFParams.ROS
-        if Reg:
-            featPath = getattr(makeOTFParams, kFileOptPrefix + kFeature)
-            foundVert = checkIfVertInFeature(featPath)
-            if featPath and os.path.exists(featPath) and not foundVert:
-                print("makeotf [Warning] the feature file does not contain a "
-                      "'vert' feature %s." % featPath)
-
-            if not (getattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath) and
-               getattr(makeOTFParams, kFileOptPrefix + kHUniCMAPPath) and
-               getattr(makeOTFParams, kFileOptPrefix + kUVSPath)):
-                error = setCIDCMAPPaths(makeOTFParams, Reg, Ord, Sup)
 
     # output file path.
     path = getattr(makeOTFParams, kFileOptPrefix + kOutputFont)
@@ -1938,7 +1850,7 @@ def setMissingParams(makeOTFParams):
         output_dir = path
         path = None
     if not path:
-        if makeOTFParams.srcIsTTF or inputFontPath.lower().endswith(".ttf"):
+        if makeOTFParams.srcIsTTF or inputFilePath.lower().endswith(".ttf"):
             font_filename = f"{makeOTFParams.psName}.ttf"
         else:
             font_filename = f"{makeOTFParams.psName}.otf"
@@ -1955,109 +1867,69 @@ def setMissingParams(makeOTFParams):
         raise MakeOTFOptionsError
 
 
+# Convert the font with 'tx' unless it looks like a bare CFF 1 or an
+# sfnt with a CFF or CFF2 table and kUseSuppliedCFF is specified
 def convertFontIfNeeded(makeOTFParams):
-    # we've already done this.
-    if makeOTFParams.tempFontPath is not None:
+    inputFilePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
+    foundOpt = False
+
+    params = ['tx', '-cff', '-std', '-F']
+    GOADBF = getattr(makeOTFParams, kFileOptPrefix + kGOADB, None)
+    if GOADBF is not None:
+        params.extend([kMOTFOptions[kGOADB][1], GOADBF])
+        rename = getattr(makeOTFParams, kFileOptPrefix + kDoAlias, None)
+        if rename is None:
+            params.append('-gr')
+        else:
+            foundOpt = True
+            params.append('-go')
+
+    for k in kTXOptions.keys():
+        v = getattr(makeOTFParams, kFileOptPrefix + k, None)
+        if v is None:
+            continue
+        optionEntry = kMOTFOptions[k]
+        foundOpt = True
+        if k == kDoSubr:
+            params.append('+S')
+        elif k == kSuppressWidthOptimization:
+            params.append('-W')
+        elif k == kSuppressHintWarnings:
+            params.append('-H')
+        else:
+            params.append(optionEntry[1])
+        if v != 'true':
+            params.append(v)
+
+    useSupplied = getattr(makeOTFParams, kFileOptPrefix + kUseSuppliedCFF,
+                          False)
+    if useSupplied:
+        if foundOpt:
+            print("makeotf [Error] -dr not compatible with -r, -S, " +
+                  "-maxs, -ga, -gs, or -swo")
+            raise MakeOTFRunError
         return
 
-    # If the font doesn't look like a Unix ASCII
-    # Type 1 font file, convert it with 'tx'
-    filePath = getattr(makeOTFParams, kFileOptPrefix + kInputFont)
+    tmpPath = fdkutils.get_temp_file_path()
 
-    needsConversion = False
-    needsSEACRemoval = False
-    isTextPS = False
+    if makeOTFParams.isTextPS:
+        tempTxtPath = fdkutils.get_temp_file_path()
 
-    input_font_format = fdkutils.get_font_format(filePath)
-
-    if not input_font_format:
-        print("makeotf [Error] Unknown input font format '%s'" % filePath)
-        raise MakeOTFRunError
-
-    if input_font_format == 'UFO':
-        needsConversion = True
-        makeOTFParams.srcIsUFO = 1
-
-        allMatch, msgList = ufotools.checkHashMaps(filePath, False)
-        if not allMatch:
-            for msg in msgList:
-                print(msg)
+        # convert PS decrypted to PS encrypted with 'type1'
+        if not fdkutils.run_shell_command([
+                'type1', inputFilePath, tempTxtPath]):
             raise MakeOTFShellError
+        inputFilePath = tempTxtPath
 
-    elif input_font_format == 'OTF':
-        needsConversion = True
+    # Now convert to CFF
+    params.extend(['-o', tmpPath, '-f', inputFilePath])
+    if makeOTFParams.verbose:
+        print("makeotf [Note] Running tx with commands:")
+        print(f"   {params}")
+    if not fdkutils.run_shell_command(params):
+        raise MakeOTFShellError
 
-    elif input_font_format == 'TTF':
-        needsConversion = True
-        makeOTFParams.srcIsTTF = 1
-
-    # it's a PostScript font
-    else:
-        try:
-            with open(filePath, "rb") as fp:
-                data = fp.read(1024)
-            if (b"%" not in data[:4]) and (b'/FontName' not in data):
-                needsConversion = True
-            else:
-                if b"/Private" in data:
-                    isTextPS = True
-                    needsConversion = True
-        except (OSError):
-            print("makeotf [Error] Could not read font file at '%s'." %
-                  filePath)
-            raise MakeOTFShellError
-
-    # Warn if there are any seac operators in the input file.
-    if not (makeOTFParams.srcIsTTF or isTextPS or makeOTFParams.srcIsUFO):
-        success, output = fdkutils.get_shell_command_output([
-            'tx', '-dump', '-5', '-n', filePath])
-        if not success:
-            raise MakeOTFShellError
-
-        glyphList = re.findall(r"glyph[^{]+?{([^,]+),[^[\]]+\sseac\s",
-                               output)
-        if glyphList:
-            glyphList = ", ".join(glyphList)
-            print("makeotf [Warning] Font at '%s' contains deprecated "
-                  "SEAC operator. These composite glyphs will be "
-                  "decomposed by makeOTF:\n%s" % (filePath, glyphList))
-            needsConversion = True
-            needsSEACRemoval = True
-
-    if needsConversion:
-        fontPath = fdkutils.get_temp_file_path()
-
-        if isTextPS:
-            tempTxtPath = fdkutils.get_temp_file_path()
-
-            # convert PS decrypted to PS encrypted with 'type1'
-            if not fdkutils.run_shell_command([
-                    'type1', filePath, tempTxtPath]):
-                raise MakeOTFShellError
-            filePath = tempTxtPath
-
-        if needsSEACRemoval:
-            tempSeacPath = fdkutils.get_temp_file_path()
-
-            # convert to CFF using 'tx'
-            if not fdkutils.run_shell_command([
-                    'tx', '-cff', '-Z', '+b', filePath, tempSeacPath]):
-                raise MakeOTFShellError
-            filePath = tempSeacPath
-
-        psName = get_font_psname(filePath, makeOTFParams.srcIsUFO)
-
-        # Now convert to Type 1
-        # (it's the only font format that makeotfexe can consume)
-        if not fdkutils.run_shell_command(['tx', '-t1', filePath, fontPath]):
-            raise MakeOTFShellError
-
-        makeOTFParams.tempFontPath = fontPath
-
-    else:  # convertion is not needed
-        psName = get_font_psname(filePath)
-
-    makeOTFParams.psName = psName
+    makeOTFParams.tempFontPath = os.path.abspath(tmpPath)
 
 
 def get_font_psname(font_path, is_ufo=False):
@@ -2424,10 +2296,6 @@ def adjustPaths(makeOTFParams):
         uvsFilePath = os.path.abspath(uvsFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kUVSPath, uvsFilePath)
 
-    if makeOTFParams.tempFontPath:
-        makeOTFParams.tempFontPath = os.path.abspath(
-            makeOTFParams.tempFontPath)
-
     return fontDir
 
 
@@ -2488,8 +2356,7 @@ def runMakeOTF(makeOTFParams):
 
         # if the user has asked to use an existing GOADB file, we need
         # to make sure that it will preserve the src glyph order.
-        use_alias = getattr(makeOTFParams, kFileOptPrefix + kDoAlias) \
-            or getattr(makeOTFParams, kFileOptPrefix + kRelease)
+        use_alias = getattr(makeOTFParams, kFileOptPrefix + kDoAlias)
         if use_alias:
             goadbPath = getattr(makeOTFParams, kFileOptPrefix + kGOADB)
             if not goadbPath:
@@ -2516,27 +2383,6 @@ def runMakeOTF(makeOTFParams):
             tempGOADBPath = writeTempGOADB(srcGOADBList)
             setattr(makeOTFParams, kFileOptPrefix + kGOADB, tempGOADBPath)
             setattr(makeOTFParams, kFileOptPrefix + kDoAlias, 'true')
-
-        # if the source is TTF, then the name table must
-        # be built without the -useOldNameID4 option.
-        useOldNameID4 = getattr(makeOTFParams,
-                                kFileOptPrefix + kUseOldNameID4,
-                                False)
-
-        if useOldNameID4:
-            print("Because font is TTF, forcing use of new name table id 4 "
-                  "format")
-            setattr(makeOTFParams, kFileOptPrefix + kUseOldNameID4, None)
-
-        # We also need to suppress the warnings about
-        # no hints: all glyphs will be un-hinted.
-        setattr(makeOTFParams, kFileOptPrefix + kSuppressHintWarnings, 'true')
-
-    # Suppress hint warnings if not in release mode, but
-    # only if the option was NOT used on the command line
-    if (getattr(makeOTFParams, kFileOptPrefix + kRelease) != 'true' and
-            kMOTFOptions[kSuppressHintWarnings][0] == kOptionNotSeen):
-        setattr(makeOTFParams, kFileOptPrefix + kSuppressHintWarnings, 'true')
 
     # check if the OS/2 version table needs to be set to 4
     # because the new fsSelection bits are being used.
@@ -2609,7 +2455,7 @@ def runMakeOTF(makeOTFParams):
             doConvertToCID = None
 
     params = [
-        'makeotfexe',
+        'addfeatures',
         f'{kMOTFOptions[kInputFont][1]}',
         inputFontPath,
         f'{kMOTFOptions[kOutputFont][1]}',
@@ -2620,12 +2466,16 @@ def runMakeOTF(makeOTFParams):
     optionKeys.sort(key=byEntryOrder)
     for optionKey in optionKeys:
         # Skip the options that should not be passed to makeotfexe.
-        if optionKey in kSkipOptions:
+        if optionKey in kSkipOptions or optionKey in kTXOptions:
             continue
 
         val = getattr(makeOTFParams, kFileOptPrefix + optionKey, None)
 
         if val is None:
+            continue
+
+        if optionKey == kDoAlias:
+            params.append('-lookupFinal')
             continue
 
         optionEntry = kMOTFOptions[optionKey]
@@ -2657,7 +2507,7 @@ def runMakeOTF(makeOTFParams):
 
     if makeOTFParams.verbose:
         print("makeotf [Note] Running %s with commands:" %
-              os.path.basename('makeotfexe'))
+              os.path.basename('addfeatures'))
         print(f'   cd "{fontDir}"')
         print(f"   {params}")
 
@@ -2690,9 +2540,6 @@ def runMakeOTF(makeOTFParams):
         try:
             doSubr = 'true' == getattr(makeOTFParams, kFileOptPrefix + kDoSubr)
 
-            if kMOTFOptions[kDoSubr][0] == kOptionNotSeen:
-                doSubr = 'true' == getattr(makeOTFParams,
-                                           kFileOptPrefix + kRelease)
             # Send the font.pfa file to convertfonttocid.py
             # rather than the OTF because the GlyphSet
             # definitions in the 'fontinfo' files use production
@@ -2743,7 +2590,7 @@ def runMakeOTF(makeOTFParams):
 
 def CheckEnvironment():
     missingTools = []
-    for name in ['tx', 'makeotfexe', 'spot']:
+    for name in ['tx', 'addfeatures', 'spot']:
         if not fdkutils.get_shell_command_output([name, '-h'])[0]:
             missingTools.append(name)
 
@@ -2766,8 +2613,11 @@ def main(args=None):
 
     try:
         getOptions(makeOTFParams, args)
+        checkInputFile(makeOTFParams)
         setMissingParams(makeOTFParams)
         setOptionsFromFontInfo(makeOTFParams)
+        convertFontIfNeeded(makeOTFParams)
+        checkROS(makeOTFParams)
         if makeOTFParams.saveOptions == 'true':
             # this always saves options to kDefaultOptionsFile;
             # may also save to user-specified option file.

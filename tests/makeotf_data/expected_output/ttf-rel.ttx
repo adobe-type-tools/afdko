@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="\x00\x01\x00\x00" ttLibVersion="3.29">
+<ttFont sfntVersion="\x00\x01\x00\x00" ttLibVersion="4.38">
 
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
@@ -12,12 +12,12 @@
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="1.0"/>
     <fontRevision value="1.0"/>
-    <checkSumAdjustment value="0xce11c5da"/>
+    <checkSumAdjustment value="0xf9a9f667"/>
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00000011"/>
     <unitsPerEm value="1000"/>
-    <created value="Thu Aug 23 17:55:01 2018"/>
-    <modified value="Fri Aug 24 00:55:01 2018"/>
+    <created value="Sat Dec  3 04:15:17 2022"/>
+    <modified value="Sat Dec  3 12:15:17 2022"/>
     <xMin value="52"/>
     <yMin value="-12"/>
     <xMax value="565"/>
@@ -248,7 +248,7 @@
       SourceSans
     </namerecord>
     <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Version 1.000;hotconv 1.0.109;makeotfexe 2.5.65593
+      Version 1.000;hotconv 1.1.0;addfeatures 2.6.0
     </namerecord>
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
       SourceSans-Test
@@ -269,7 +269,7 @@
       SourceSans
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
-      Version 1.000;hotconv 1.0.109;makeotfexe 2.5.65593
+      Version 1.000;hotconv 1.1.0;addfeatures 2.6.0
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
       SourceSans-Test

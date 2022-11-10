@@ -171,8 +171,9 @@ def test_gone_options_bc(arg):
     ('-u', b'tx {[mode][mode options][shared options][files]}*'),
     ('-afm', b'[-afm options: default none]'),
     ('-cef', b'[-cef options: default none]'),
-    ('-cff', b'[-cff options: defaults -E, -F, -O, -S, +T, -V, -Z, -b, -d]'),
-    ('-cff2', b'[-cff2 options: defaults -S, -b]'),
+    ('-cff', b'[-cff options: defaults ' +
+             b'-E, +F, -O, -S, +T, -V, -Z, -b, +W, -d, +H]'),
+    ('-cff2', b'[-cff2 options: defaults -S, -b, +H]'),
     ('-dcf', b'[-dcf options: defaults -T all, -5]'),
     ('-dump', b'[-dump options: default -1]'),
     ('-mtx', b'[-mtx options: default -0]'),

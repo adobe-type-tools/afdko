@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="3.29">
+<ttFont sfntVersion="OTTO" ttLibVersion="4.38">
 
   <CFF>
     <major value="1"/>
@@ -55,7 +55,7 @@
             <LanguageGroup value="0"/>
             <ExpansionFactor value="0.06"/>
             <initialRandomSeed value="0"/>
-            <defaultWidthX value="0"/>
+            <defaultWidthX value="-5"/>
             <nominalWidthX value="0"/>
           </Private>
         </FontDict>

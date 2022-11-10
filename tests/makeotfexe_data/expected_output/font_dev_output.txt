@@ -1,6 +1,0 @@
-WARNING: unhinted <.notdef>
-WARNING: unhinted <a>
-WARNING: unhinted <b>
-makeotfexe processing font <SourceSerifPro-Regular>
-WARNING: FontMenuNameDB file was not specified or not found. [SourceSerifPro-Regular]
-WARNING: Negative internal leading: win.ascent + win.descent < unitsPerEm

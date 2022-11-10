@@ -3,7 +3,7 @@
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 // NOLINT(build/header_guard)
-"[-cff options: defaults -E, -F, -O, -S, +T, -V, -Z, -b, -d]\n"
+"[-cff options: defaults -E, +F, -O, -S, +T, -V, -Z, -b, +W, -d, +H]\n"
 "+/-E    do/don't optimize for embedding\n"
 "+/-F    do/don't optimize Family zones\n"
 "+/-O    do/don't optimize for ROM\n"
@@ -12,11 +12,15 @@
 "+/-V    do/don't remove path overlaps\n"
 "+/-Z    don't/do decompose SEAC and dotsection operators\n",
 "+/-b    do/don't preserve glyph order\n"
+"+/-W    do/don't optimize widths\n"
 "+/-d    do/don't print duplicate hintsubs warnings to stderr\n"
+"+/-H    do/don't print missing stem hint warnings to stderr\n"
 "-n      remove hints\n"
 "-std    force the output font to have StandardEncoding\n"
 "-no_opt disable charstring optimizations (e.g.: x 0 rmoveto => x hmoveto)\n"
+"-go     order according to GOADB file (rather than default optimizations)\n"
 "-maxs N set the maximum number of subroutines (0 means 32765)\n"
+"-amnd   write output even when .notdef is missing\n"
 "\n"
 "CFF mode writes a CFF conversion of an abstract font. The precise form of the\n"
 "CFF font that is written can be controlled to a limited extent by the options\n",
