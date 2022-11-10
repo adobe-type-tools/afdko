@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="4.11">
+<ttFont sfntVersion="OTTO" ttLibVersion="4.38">
 
   <name>
     <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
@@ -15,7 +15,7 @@
       abc
     </namerecord>
     <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Version 1.000;hotconv 1.0.114;makeotfexe 2.5.65599
+      Version 1.000;hotconv 1.1.0;addfeatures 2.6.0
     </namerecord>
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
       abc-def
@@ -36,7 +36,7 @@
       abc
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
-      Version 1.000;hotconv 1.0.114;makeotfexe 2.5.65599
+      Version 1.000;hotconv 1.1.0;addfeatures 2.6.0
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
       abc-def

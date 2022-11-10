@@ -5,9 +5,9 @@
 #ifndef SHARED_INCLUDE_UFOREAD_H_
 #define SHARED_INCLUDE_UFOREAD_H_
 
-#include <memory>
-
 #include <stdbool.h>
+
+#include <memory>
 
 #include "ctlshare.h"
 #include "slogger.h"

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="3.29">
+<ttFont sfntVersion="OTTO" ttLibVersion="4.38">
 
   <CFF>
     <major value="1"/>
@@ -83,7 +83,7 @@
           endchar
         </CharString>
         <CharString name="cid00002" fdSelectIndex="0">
-          endchar
+          -5 endchar
         </CharString>
       </CharStrings>
     </CFFFont>

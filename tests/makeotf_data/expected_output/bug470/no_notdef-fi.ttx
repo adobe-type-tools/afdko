@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="3.29">
+<ttFont sfntVersion="OTTO" ttLibVersion="4.38">
 
   <CFF>
     <major value="1"/>
@@ -16,7 +16,7 @@
       <PaintType value="0"/>
       <CharstringType value="2"/>
       <FontMatrix value="0.001 0 0 0.001 0 0"/>
-      <FontBBox value="0 -12 500 700"/>
+      <FontBBox value="52 -12 433 498"/>
       <StrokeWidth value="0"/>
       <CIDFontVersion value="2.20000005"/>
       <CIDFontRevision value="0"/>
@@ -28,7 +28,7 @@
         <FontDict index="0">
           <FontName value="SourceSans-Test_No"/>
           <Private>
-            <BlueValues value="-112 -112 800 800"/>
+            <BlueValues value="-112 -112 598 598"/>
             <BlueScale value="0.0625"/>
             <BlueShift value="7"/>
             <BlueFuzz value="0"/>
@@ -38,7 +38,7 @@
             <LanguageGroup value="0"/>
             <ExpansionFactor value="0.06"/>
             <initialRandomSeed value="0"/>
-            <defaultWidthX value="500"/>
+            <defaultWidthX value="250"/>
             <nominalWidthX value="0"/>
           </Private>
         </FontDict>
@@ -55,7 +55,7 @@
             <LanguageGroup value="0"/>
             <ExpansionFactor value="0.06"/>
             <initialRandomSeed value="0"/>
-            <defaultWidthX value="0"/>
+            <defaultWidthX value="-5"/>
             <nominalWidthX value="0"/>
           </Private>
         </FontDict>
@@ -80,20 +80,6 @@
       </FDArray>
       <CharStrings>
         <CharString name=".notdef" fdSelectIndex="0">
-          0 50 600 50 hstem
-          0 50 400 50 vstem
-          0 vmoveto
-          500 700 -500 hlineto
-          250 -305 rmoveto
-          -170 255 rlineto
-          340 hlineto
-          -140 -300 rmoveto
-          170 255 rlineto
-          -510 vlineto
-          -370 -45 rmoveto
-          170 255 170 -255 rlineto
-          -370 555 rmoveto
-          170 -255 -170 -255 rlineto
           endchar
         </CharString>
         <CharString name="cid00001" fdSelectIndex="2">

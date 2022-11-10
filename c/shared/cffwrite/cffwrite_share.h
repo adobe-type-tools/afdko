@@ -5,6 +5,8 @@
 #ifndef SHARED_CFFWRITE_CFFWRITE_SHARE_H_
 #define SHARED_CFFWRITE_CFFWRITE_SHARE_H_
 
+#include <memory>
+
 #include "cffwrite.h"
 #include "dynarr.h"
 #include "ctutil.h"
@@ -65,6 +67,9 @@ long cfwSeenGlyph(cfwCtx g, abfGlyphInfo *info, int *result,
                   long startNew, long endNew);
 void cfwAddGlyph(cfwCtx g, abfGlyphInfo *info, float hAdv, long length,
                  long offset, long seen_index);
+
+SRI cfwIsStdString(cfwCtx g, const char *str);
+
 
 /* -------------------------------- Contexts -------------------------------
 
@@ -154,6 +159,7 @@ struct cfwCtx_ {
         int16_t right;
         int16_t top;
     } font_bbox;
+    std::shared_ptr<GOADB> goadb;
     std::shared_ptr<slogger> logger;
 };
 

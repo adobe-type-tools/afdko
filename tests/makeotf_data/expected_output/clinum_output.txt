@@ -3,6 +3,6 @@ makeotf [Warning] Could not find FontMenuNameDB file. Font will be built with me
 makeotf [Note] setting the USE_TYPO_METRICS OS/2 fsSelection bit 7 from fontinfo keyword.
 makeotf [Note] setting the WEIGHT_WIDTH_SLOPE_ONLY OS/2 fsSelection bit 8 from fontinfo keyword.
 makeotf [Note] setting the OBLIQUE OS/2 fsSelection bit 9 from fontinfo keyword.
-makeotfexe processing font <SourceCodePro-Black>
+addfeatures processing font <SourceCodePro-Black>
 WARNING: FontMenuNameDB file was not specified or not found. [SourceCodePro-Black]
-Built development mode font 'out.otf'.
+Built development mode font '/tmp/tmp0ag_aqh1'.

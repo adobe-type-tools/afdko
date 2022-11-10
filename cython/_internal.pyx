@@ -7,7 +7,7 @@ from libc.string cimport strcpy
 ctypedef int (*mainesque_t)(int argc, char *argv[])
 
 cdef extern int main__detype1(int argc, char *argv[])
-cdef extern int main__makeotfexe(int argc, char *argv[])
+cdef extern int main__addfeatures(int argc, char *argv[])
 cdef extern int main__mergefonts(int argc, char *argv[])
 cdef extern int main__rotatefont(int argc, char *argv[])
 cdef extern int main__sfntdiff(int argc, char *argv[])
@@ -43,8 +43,8 @@ def detype1(args = None, noexit = False):
         sys.exit(ec)
     return ec
 
-def makeotfexe(args = None, noexit = False):
-    ec = call_mainesque(&main__makeotfexe, args)
+def addfeatures(args = None, noexit = False):
+    ec = call_mainesque(&main__addfeatures, args)
     if not noexit:
         sys.exit(ec)
     return ec

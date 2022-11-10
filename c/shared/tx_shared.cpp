@@ -960,7 +960,7 @@ static void cff_BegFont(txCtx h, abfTopDict *top) {
                 h->cb.glyph.stemVF = NULL;
             }
 
-            if (cfwBegFont(h->cfw.ctx, NULL, h->cfw.maxNumSubrs))
+            if (cfwBegFont(h->cfw.ctx, NULL, h->cfw.maxNumSubrs, h->goadb))
                 fatal(h, NULL);
         }
         if (h->flags & PATH_SUPRESS_HINTS) {
@@ -972,16 +972,17 @@ static void cff_BegFont(txCtx h, abfTopDict *top) {
             (*h->ext->cff_BegFontCB)(h->ext);
         /* By default do not support subroutinization in extensions
            so we can pass the default maxSubr value. */
-        else if (cfwBegFont(h->cfw.ctx, NULL, 0))
+        else if (cfwBegFont(h->cfw.ctx, NULL, 0, h->goadb))
             fatal(h, NULL);
     }
 }
 
 /* End font. */
 static void cff_EndFont(txCtx h) {
+    int efErr = 0;
     if (h->ext == NULL) {
         if (h->flags & PATH_REMOVE_OVERLAP) {
-            if (cfwBegFont(h->cfw.ctx, NULL, h->cfw.maxNumSubrs))
+            if (cfwBegFont(h->cfw.ctx, NULL, h->cfw.maxNumSubrs, h->goadb))
                 fatal(h, NULL);
 
             resetGlyphs(h);
@@ -1002,19 +1003,16 @@ static void cff_EndFont(txCtx h) {
             }
             if (abfEndFont(h->abf.ctx, ABF_PATH_REMOVE_OVERLAP, &h->cb.glyph))
                 fatal(h, NULL);
-
-            if (cfwEndFont(h->cfw.ctx, h->top))
-                fatal(h, NULL);
-        } else {
-            if (cfwEndFont(h->cfw.ctx, h->top))
-                fatal(h, NULL);
         }
+        efErr = cfwEndFont(h->cfw.ctx, h->top);
     } else {
         if (h->ext->cff_EndFontCB != NULL)
             (*h->ext->cff_EndFontCB)(h->ext);
-        else if (cfwEndFont(h->cfw.ctx, h->top))
-            fatal(h, NULL);
+        else
+            efErr = cfwEndFont(h->cfw.ctx, h->top);
     }
+    if (efErr)
+        fatal(h, cfwErrStr(efErr));
 }
 
 /* End font set. */
@@ -4301,6 +4299,37 @@ static void makeFDSubset(txCtx h) {
         fatal(h, "no glyphs selected by -fd argument");
 }
 
+/* Begin new glyph definition when renaming glyphs. */
+static int renameGlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
+    int r;
+    txCtx h = (txCtx) cb->indirect_ctx;
+    const char *fin = NULL;
+    h->goadb->getFinalAndOrder(info->gname.ptr, &fin);
+    if (fin != NULL)
+        info->gname.ptr = fin;
+    r = h->cb.renameSaveGlyphBeg(cb, info);
+    return r;
+}
+
+static void makeGOADBSubset(txCtx h) {
+    if (h->top->sup.flags & ABF_CID_FONT)
+        fatal(h, "-gs specified for CID font");
+
+    getGlyphList(h);
+
+    for (int i = 0; i < h->src.glyphs.cnt; i++) {
+        abfGlyphInfo *info = h->src.glyphs.array[i];
+        const char *fin = NULL;
+        h->goadb->getFinalAndOrder(info->gname.ptr, &fin);
+        if (fin != NULL) {
+            *dnaNEXT(h->subset.glyphs) = info->tag;
+        }
+    }
+
+    if (h->subset.glyphs.cnt == 0)
+        fatal(h, "no glyphs selected by -gs argument");
+}
+
 /* Begin new glyph definition for gathering glyph info. */
 static int getExcludeGlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     txCtx h = (txCtx) cb->indirect_ctx;
@@ -4398,6 +4427,7 @@ void prepSubset(txCtx h) {
                            h->top->FDArray.array[0].FontName.ptr);
     }
 
+    h->cb.renameSaveGlyphBeg = NULL;
     h->flags &= ~SUBSET_HAS_NOTDEF;
     h->src.glyphs.cnt = 0;
     h->src.exclude.cnt = 0;
@@ -4410,6 +4440,8 @@ void prepSubset(txCtx h) {
         makeRandSubset(h, "-P", h->arg.P);
     else if (h->fd.fdIndices.cnt > 0)
         makeFDSubset(h);
+    else if (h->flags & SUBSET_BY_GOADB_OPT)
+        makeGOADBSubset(h);
     else if (h->flags & SUBSET__EXCLUDE_OPT)
         invertSubset(h);
     else {
@@ -4452,6 +4484,14 @@ void prepSubset(txCtx h) {
             q += strlen(q) + 1;
         }
     h->logger->msg(sINDENT, smsg.c_str());
+    }
+}
+
+static void jiggerGlyphBeg(txCtx h) {
+    if (h->flags & SUBSET_RENAME_OPT) {
+        h->cb.glyph.indirect_ctx = h;
+        h->cb.renameSaveGlyphBeg = h->cb.glyph.beg;
+        h->cb.glyph.beg = renameGlyphBeg;
     }
 }
 
@@ -4576,6 +4616,8 @@ void t1rReadFont(txCtx h, long origin) {
 
     h->dst.begfont(h, h->top);
 
+    jiggerGlyphBeg(h);
+
     if (h->mode != mode_cef) {
         if (h->arg.g.cnt != 0)
             callbackSubset(h);
@@ -4606,6 +4648,8 @@ void svrReadFont(txCtx h, long origin) {
     prepSubset(h);
 
     h->dst.begfont(h, h->top);
+
+    jiggerGlyphBeg(h);
 
     if (h->mode != mode_cef) {
         if (h->arg.g.cnt != 0)
@@ -4638,10 +4682,12 @@ void ufoReadFont(txCtx h, long origin) {
 
     h->dst.begfont(h, h->top);
 
+    jiggerGlyphBeg(h);
+
     if (h->mode != mode_cef) {
-        if (h->arg.g.cnt != 0)
+        if (h->arg.g.cnt != 0) {
             callbackSubset(h);
-        else if (ufoIterateGlyphs(h->ufr.ctx, &h->cb.glyph))
+        } else if (ufoIterateGlyphs(h->ufr.ctx, &h->cb.glyph))
             fatal(h, NULL);
     }
 
@@ -4871,6 +4917,8 @@ void ttrReadFont(txCtx h, long origin, int iTTC) {
     prepSubset(h);
 
     h->dst.begfont(h, h->top);
+
+    jiggerGlyphBeg(h);
 
     if (h->mode != mode_cef) {
         if (h->arg.g.cnt != 0)
@@ -5853,6 +5901,8 @@ static void cfrReadFont(txCtx h, long origin, int ttcIndex) {
 
     h->dst.begfont(h, h->top);
 
+    jiggerGlyphBeg(h);
+
     if (h->mode != mode_cef && h->mode != mode_dcf) {
         if (h->cfr.flags & CFR_NO_ENCODING)
             /* OTF font */
@@ -6347,6 +6397,24 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                     goto wrongmode;
                 h->cfw.flags &= ~CFW_NO_FAMILY_OPT;
                 break;
+            case txopt_H:
+                switch (h->mode) {
+                    case mode_cff:
+                        h->cfw.flags |= CFW_NO_HINT_WARNINGS;
+                        break;
+                    default:
+                        goto wrongmode;
+                }
+                break;
+            case txopt__H:
+                switch (h->mode) {
+                    case mode_cff:
+                        h->cfw.flags &= ~CFW_NO_HINT_WARNINGS;
+                        break;
+                    default:
+                        goto wrongmode;
+                }
+                break;
             case txopt__O:
                 if (h->mode != mode_cff)
                     goto wrongmode;
@@ -6410,6 +6478,24 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                     case mode_cff:
                     case mode_t1:
                         h->flags |= PATH_REMOVE_OVERLAP;
+                        break;
+                    default:
+                        goto wrongmode;
+                }
+                break;
+            case txopt_W:
+                switch (h->mode) {
+                    case mode_cff:
+                        h->cfw.flags |= CFW_NO_WIDTH_OPT;
+                        break;
+                    default:
+                        goto wrongmode;
+                }
+                break;
+            case txopt__W:
+                switch (h->mode) {
+                    case mode_cff:
+                        h->cfw.flags &= ~CFW_NO_WIDTH_OPT;
                         break;
                     default:
                         goto wrongmode;
@@ -6666,8 +6752,15 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                         goto wrongmode;
                 }
                 break;
+            case txopt_amnd:
+                if (h->mode == mode_cff)
+                    h->cfw.flags |= CFW_NO_NOTDEF_OK;
+                else
+                    goto wrongmode;
+                break;
             case txopt_gx:
-                if ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT))
+                if ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT) ||
+                    (h->flags & SUBSET_BY_GOADB_OPT))
                     goto subsetclash;
                 h->flags |= SUBSET__EXCLUDE_OPT;
             case txopt_g:
@@ -6676,7 +6769,9 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 else {
                     char *p;
 
-                    if ((h->arg.g.cnt > 0) && ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT)))
+                    if ((h->arg.g.cnt > 0) && ((h->flags & SUBSET_OPT) ||
+                                               (h->flags & SUBSET__EXCLUDE_OPT) ||
+                                               (h->flags & SUBSET_BY_GOADB_OPT)))
                         goto subsetclash;
 
                     /* Convert comma-terminated substrings to null-terminated*/
@@ -6690,6 +6785,32 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                     }
                 }
                 h->flags |= SUBSET_OPT;
+                break;
+            case txopt_gf:
+                if (!argsleft)
+                    goto noarg;
+                STRCPY_S(h->file.goadbname, sizeof(h->file.goadbname), argv[++i]);
+                if (!h->goadb->read(h->file.goadbname))
+                    goto badgoadb;
+                h->flags |= (SUBSET_RENAME_OPT | HAS_GOADB);
+                break;
+            case txopt_gr:
+                if (!(h->flags & HAS_GOADB))
+                    goto nogoadb;
+                h->flags &= ~SUBSET_RENAME_OPT;
+                break;
+            case txopt_gs:
+                if ((h->flags & SUBSET_OPT) || (h->flags & SUBSET__EXCLUDE_OPT))
+                    goto subsetclash;
+                if (!(h->flags & HAS_GOADB))
+                    goto nogoadb;
+                h->flags |= SUBSET_BY_GOADB_OPT;
+                break;
+            case txopt_go:
+                if (h->mode == mode_cff)
+                    h->cfw.flags |= CFW_ORDER_BY_GOADB;
+                else
+                    goto wrongmode;
                 break;
             case txopt_gn0:
                 if ((h->mode == mode_svg) ||
@@ -6920,10 +7041,14 @@ wrongmode:
     fatal(h, "wrong mode (%s) for option (%s)", h->modename, arg);
 noarg:
     fatal(h, "no argument for option (%s)", arg);
+nogoadb:
+    fatal(h, "option (%s) requires -gf", arg);
+badgoadb:
+    fatal(h, "GlyphOrderAndAliasDB file %s has unrecoverable errors", h->file.goadbname);
 badarg:
     fatal(h, "bad arg (%s)", arg);
 subsetclash:
-    fatal(h, "options -g, -gx, -p, -P, or -fd are mutually exclusive");
+    fatal(h, "options -g, -gx, -gs, -p, -P, or -fd are mutually exclusive");
 t1clash:
     fatal(h, "options -pfb or -LWFN may not be used with other options");
 bc_gone:
@@ -7014,6 +7139,7 @@ void txNew(txCtx h, txExtCtx ext) {
     dnaINIT(h->ctx.dna, h->dcf.glyph, 256, 768);
 
     h->logger = slogger::getLogger(TX_PROGNAME(h));
+    h->goadb = std::make_shared<GOADB>(h->logger);
 
     setMode(h, mode_dump);
 
@@ -7078,6 +7204,7 @@ void txFree(txCtx h) {
     // Wouldn't normally need this but as long as the struct
     // might not be allocated with New we have to manage the
     // shared_ptr semi-manually.
+    h->goadb = nullptr;
     h->logger = nullptr;
 
     dnaFree(h->ctx.dna);

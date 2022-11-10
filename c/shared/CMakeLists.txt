@@ -31,6 +31,7 @@ add_library(shared OBJECT
     ctutil.c
     da.c
     dynarr.c
+    goadb.cpp
     support/except.c
     support/fixed.c
     nameread.cpp
@@ -76,12 +77,12 @@ add_library(shared OBJECT
     include/ctutil.h
     include/da.h
     include/dynarr.h
+    include/goadb.h
     include/nameread.h
     include/pdfwrite.h
     include/pdwerr.h
     include/psterr.h
     include/pstoken.h
-    include/readme.txt
     include/safetime.h
     include/sfile.h
     include/sfntread.h

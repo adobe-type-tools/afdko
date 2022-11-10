@@ -132,18 +132,16 @@ def test_input_formats(arg, input_filename, ttx_filename):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
 
 
 @pytest.mark.parametrize('args, ttx_fname', [
     ([], 'font_dev'),
-    (['r'], 'font_rel'),
 ])
-def test_build_font_and_check_messages(args, ttx_fname):
+def test_build_font(args, ttx_fname):
     actual_path = get_temp_file_path()
-    expected_msg_path = get_expected_path(f'{ttx_fname}_output.txt')
     ttx_filename = f'{ttx_fname}.ttx'
-    stderr_path = runner(CMD + [
+    runner(CMD + [
         '-s', '-e', '-o', 'f', f'_{get_input_path("font.pfa")}',
                           'o', f'_{actual_path}'] + args)
     actual_ttx = generate_ttx_dump(actual_path)
@@ -155,9 +153,7 @@ def test_build_font_and_check_messages(args, ttx_fname):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
-    assert differ([expected_msg_path, stderr_path,
-                   '-r', r'^Built (development|release) mode font'])
+                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
 
 
 def test_getSourceGOADBData():
@@ -264,14 +260,14 @@ def test_find_vert_feature_bug148(fea_filename, result):
     # options 'ReleaseMode' and 'SuppressHintWarnings'
     ([], (None, None)),
     (['-r'], ('true', None)),
-    (['-shw'], (None, None)),
-    (['-nshw'], (None, 'true')),
-    (['-r', '-shw'], ('true', None)),
-    (['-r', '-nshw'], ('true', 'true')),
+    (['-shw'], (None, 'true')),
+    (['-nshw'], (None, None)),
+    (['-r', '-shw'], ('true', 'true')),
+    (['-r', '-nshw'], ('true', None)),
     # makeotf option parsing has no mechanism for mutual exclusivity,
     # so the last option typed on the command line wins
-    (['-shw', '-nshw'], (None, 'true')),
-    (['-nshw', '-shw'], (None, None)),
+    (['-shw', '-nshw'], (None, None)),
+    (['-nshw', '-shw'], (None, 'true')),
 ])
 def test_options_shw_nshw_bug457(args, result):
     params = MakeOTFParams()
@@ -333,7 +329,6 @@ def test_readOptionFile():
     assert params.opt_kSetfsSelectionBitsOff == '[8, 9]'
     assert params.opt_kSetfsSelectionBitsOn == '[7]'
     assert params.seenOS2v4Bits == [1, 1, 1]
-    assert params.opt_UseOldNameID4 is None
 
     params.currentDir = os.getcwd()
     font_dir_path = os.path.relpath(abs_font_dir_path, params.currentDir)
@@ -509,7 +504,7 @@ def test_GOADB_options_bug497(opts):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
 
 
 @pytest.mark.parametrize('feat_name, has_warn', [('v0005', False),
@@ -583,7 +578,7 @@ def test_ttf_input_font_bug680():
     feat_filename = 'bug680/features.fea'
     ttf_path = get_temp_file_path()
 
-    runner(CMD + ['-o', 'r',
+    runner(CMD + ['-o', 'V', 'r',
                   'f', f'_{get_input_path(input_filename)}',
                   'ff', f'_{get_input_path(feat_filename)}',
                   'o', f'_{ttf_path}'])
@@ -606,7 +601,7 @@ def test_outline_from_processed_layer_bug703():
     input_filename = 'bug703.ufo'
     ttx_filename = 'bug703.ttx'
     actual_path = get_temp_file_path()
-    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+    runner(CMD + ['-o', 'amnd', 'f', f'_{get_input_path(input_filename)}',
                         'o', f'_{actual_path}'])
     actual_ttx = generate_ttx_dump(actual_path, ['CFF '])
     expected_ttx = get_expected_path(ttx_filename)
@@ -654,7 +649,7 @@ def test_duplicate_warning_messages_bug751():
     otf_path = get_temp_file_path()
 
     stderr_path = runner(
-        CMD + ['-s', '-e', '-o',
+        CMD + ['-s', '-e', '-o', 'swo', 'shw',
                'f', f'_{get_input_path(input_filename)}',
                'o', f'_{otf_path}'])
 
@@ -709,7 +704,7 @@ def test_check_psname_in_fmndb_bug1171(explicit_fmndb):
     actual_ttx = generate_ttx_dump(actual_path, ['name'])
     assert differ([expected_ttx, actual_ttx,
                    '-s', '<ttFont sfntVersion',
-                   '-r', r'^\s+Version.*;hotconv.*;makeotfexe'])
+                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
 
 
 libplist_warn = (b"Unable to open "
@@ -733,7 +728,7 @@ def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
     folder = "ufo-libplist-parsing/"
     input_path = get_input_path(folder + file + ".ufo")
     out_font_path = get_temp_file_path()
-    args = CMD + ['-s', '-e', '-o',
+    args = CMD + ['-s', '-e', '-o', 'shw',
                   'f', f'_{input_path}',
                   'o', f'_{out_font_path}']
     stdout_path = runner(args)
@@ -747,5 +742,5 @@ def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
             msg = expected_msg.read()
     assert msg in output
 
-    assert subprocess.call([TOOL, '-f', input_path,
+    assert subprocess.call([TOOL, '-amnd', '-f', input_path,
                             '-o', out_font_path]) == ret_code

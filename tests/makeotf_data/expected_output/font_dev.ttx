@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont sfntVersion="OTTO" ttLibVersion="3.43">
+<ttFont sfntVersion="OTTO" ttLibVersion="4.38">
 
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
@@ -12,12 +12,12 @@
     <!-- Most of this table will be recalculated by the compiler -->
     <tableVersion value="1.0"/>
     <fontRevision value="1.0"/>
-    <checkSumAdjustment value="0x3782c3a1"/>
+    <checkSumAdjustment value="0x9b62dc79"/>
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00000011"/>
     <unitsPerEm value="1000"/>
-    <created value="Thu Aug  1 22:15:56 2019"/>
-    <modified value="Thu Aug  1 22:15:56 2019"/>
+    <created value="Sat Dec  3 04:15:44 2022"/>
+    <modified value="Sat Dec  3 04:15:44 2022"/>
     <xMin value="25"/>
     <yMin value="-13"/>
     <xMax value="560"/>
@@ -121,7 +121,7 @@
       SourceSerifPro
     </namerecord>
     <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      Version 1.000;hotconv 1.0.111;makeotfexe 2.5.65597 DEVELOPMENT
+      Version 1.000;hotconv 1.1.0;addfeatures 2.6.0
     </namerecord>
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
       SourceSerifPro-Regular
@@ -139,7 +139,7 @@
       SourceSerifPro
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
-      Version 1.000;hotconv 1.0.111;makeotfexe 2.5.65597 DEVELOPMENT
+      Version 1.000;hotconv 1.1.0;addfeatures 2.6.0
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
       SourceSerifPro-Regular
