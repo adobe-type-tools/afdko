@@ -917,7 +917,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
         writeLine(h, "\t<key>postscriptIsFixedPitch</key>");
         writeLine(h, "\t<true/>");
     }
-    
+
     if (top->sup.flags != ABF_CID_FONT) {
         privateDict = &(fontDict0->Private);
         writeBlueValues(h, privateDict);
