@@ -330,13 +330,23 @@ static int parseXMLAnchor(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec);
 static int parseXMLContour(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb);
 static int parseXMLGuideline(ufoCtx h, xmlNodePtr cur, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec);
 static int parseType1HintDataV2(ufoCtx h, xmlNodePtr cur);
+static bool parseFontInfoFDArray(ufoCtx h, xmlNodePtr cur);
+static bool setFontInfoFD(ufoCtx h, char* keyName, char* keyValue);
+static bool setFontInfoPD(ufoCtx h, char* keyName, char* keyValue);
+static bool setFontInfoTopKey(ufoCtx h, char* keyName, char* keyValue);
+static bool parseFontInfoPrivateDict(ufoCtx h, xmlNodePtr cur);
+static bool parseCIDMap(ufoCtx h, xmlNodePtr cur);
 
 /* XML File Setting Functions */
 static bool setXMLFileKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur);
-static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);
+
+/* GLIF Rec Handling */
+static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);  /* checks for existing rec*/
+static void addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);  /* directly adds new GLIF rec */
 static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);
+static GLIF_Rec* findGLIFRecByName(ufoCtx h, char *glyphName);
 
 /* -------------------------- Error Support ------------------------ */
 
@@ -1132,7 +1142,7 @@ static long getGlyphOrderIndex(ufoCtx h, char* glyphName) {
     return orderIndex;
 }
 
-static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
+static void addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     GLIF_Rec* newGLIFRec;
     long int glyphOrder = ABF_UNSET_INT;
     char* fileName = parseXMLKeyValue(h, cur);
@@ -1810,6 +1820,47 @@ static bool parseFontInfoFDArray(ufoCtx h, xmlNodePtr cur) {
     h->parseState.GLIFInfo.currentiFD = -1;
     parseXMLKeyValue(h, cur);
     h->parseState.FDArray = false;
+    return true;
+}
+
+static void parseCIDMapDict(ufoCtx h, xmlNodePtr cur) {
+    int index = h->data.glifRecs.cnt - 1;
+    GLIF_Rec *g = &h->data.glifRecs.array[index];
+
+    while (cur != NULL) {
+        char* keyName = parseXMLKeyName(h, cur);
+        cur = cur->next;
+        if (strEqual(keyName, "com.adobe.type.cid")) {
+            g->cid = atoi(parseXMLKeyValue(h, cur));
+            h->parseState.GLIFInfo.currentCID = g->cid;
+            h->top.sup.flags |= ABF_CID_FONT;
+            h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
+            if (g->cid > h->top.cid.CIDCount) {
+                h->top.cid.CIDCount = g->cid;
+            }
+        } else if (strEqual(keyName, "com.adobe.type.iFD")) {
+            g->iFD = atoi(parseXMLKeyValue(h, cur));
+            h->parseState.GLIFInfo.currentiFD = g->iFD;
+        }
+        cur = cur->next;
+    }
+}
+
+static bool parseCIDMap(ufoCtx h, xmlNodePtr cur) {
+    h->parseState.CIDMap = true;
+    if (!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))
+        return false;
+    cur = cur->xmlChildrenNode;
+
+    while (cur != NULL) {
+        char* keyName = parseXMLKeyName(h, cur);
+        if (xmlStrEqual(cur->name, (const xmlChar *) "dict")) {
+            parseCIDMapDict(h, cur->xmlChildrenNode);
+        } else if (keyName != NULL)
+            addNewGLIFRec(h, keyName, NULL);
+        cur = cur->next;
+    }
+    h->parseState.CIDMap = false;
     return true;
 }
 
