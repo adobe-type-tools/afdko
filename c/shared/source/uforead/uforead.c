@@ -1157,42 +1157,65 @@ static void addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     newGLIFRec = dnaNEXT(h->data.glifRecs);
     newGLIFRec->glyphName = glyphName;
     newGLIFRec->glyphOrder = glyphOrder;
+    if (!h->parseState.CIDMap) {  /* do not proceed if currently parsing CIDMap in lib.plist. This information will be filled in later. */
+        if (fileName == NULL) {
+            fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
+        }
+        newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
+        sprintf(newGLIFRec->glifFileName, "%s", fileName);
+        newGLIFRec->altLayerGlifFileName = NULL;
+        newGLIFRec->cid = -1;
+        newGLIFRec->iFD = -1;
+    }
+}
+
+static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
+    char* fileName = parseXMLKeyValue(h, cur);
     if (fileName == NULL) {
         fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
     }
-    newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
-    sprintf(newGLIFRec->glifFileName, "%s", fileName);
-    newGLIFRec->altLayerGlifFileName = NULL;
+    int nameLength = strlen(fileName) - 5;
+    char *subbuff = memNew(h, (sizeof(char*) * nameLength));
+    memcpy(subbuff, &fileName[0], nameLength);
+    subbuff[nameLength] = '\0';
+    GLIF_Rec* foundGlyph = findGLIFRecByName(h, subbuff);
+    memFree(h, subbuff);
+    if (foundGlyph == NULL){
+        addNewGLIFRec(h, glyphName, cur);
+    } else {
+        foundGlyph->glifFileName = fileName;
+        if (foundGlyph->glyphOrder == -1)
+            foundGlyph->glyphOrder = getGlyphOrderIndex(h, h->parseKeyName);
+    }
 }
 
-static int findGLIFRecByName(ufoCtx h, char *glyphName)
+int glifRecNameComparator(const void *a, const void *b) {
+    const GLIF_Rec *p1 = (GLIF_Rec *) a;
+    const GLIF_Rec *p2 = (GLIF_Rec *) b;
+    return strcmp((*p1).glyphName, (*p2).glyphName);
+}
+
+static GLIF_Rec* findGLIFRecByName(ufoCtx h, char *glyphName)
 {
-    int i = 0;
-    while (i < h->data.glifRecs.cnt) {
-        GLIF_Rec* glifRec;
-        glifRec = &h->data.glifRecs.array[i];
-        if (strEqual(glifRec->glyphName, glyphName)) {
-            return i;
-        }
-        i++;
-    }
-    return -1;
+    GLIF_Rec *glifKey = memNew(h, sizeof(GLIF_Rec*));
+    glifKey->glyphName = glyphName;
+
+    GLIF_Rec* glif = bsearch(glifKey, h->data.glifRecs.array, h->data.glifRecs.cnt, sizeof(GLIF_Rec), glifRecNameComparator);
+    memFree(h, glifKey);
+    return glif;
 }
 
 static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
-    int index;
-    char* fileName = parseXMLKeyValue(h, cur);
+    GLIF_Rec* glifRec;
+    char* fileName;
     if (!keyValueParseable(h, cur, fileName, glyphName))
         return;
 
-    index = findGLIFRecByName(h, glyphName);
-    if (index == -1) {
+    glifRec = findGLIFRecByName(h, glyphName);
+    if (glifRec == NULL) {
         message(h, "Warning: glyph '%s' is in the processed layer but not in the default layer.", glyphName);
     } else {
-        GLIF_Rec* glifRec;
-
-        glifRec = &h->data.glifRecs.array[index];
-
+        fileName = parseXMLKeyValue(h, cur);
         if (fileName == NULL) {
             fatal(h, ufoErrParse, "Encountered glyph reference in alternate layer's contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
         }
@@ -1281,7 +1304,7 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
             return ufoErrSrcStream;
         }
     }
-
+    qsort(h->data.glifRecs.array, h->data.glifRecs.cnt, sizeof(GLIF_Rec), glifRecNameComparator);
     dnaSET_CNT(h->valueArray, 0);
 
     xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
@@ -1335,7 +1358,7 @@ static int preParseGLIFS(ufoCtx h) {
     return retVal;
 }
 
-static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin, long char_end, unsigned long unicode) {
+static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec, char* glyphName, long char_begin, long char_end, unsigned long unicode) {
     abfGlyphInfo* chr;
 
     if (addChar(h, tag, &chr)) {
@@ -1345,14 +1368,14 @@ static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin,
         chr->flags = 0;
         chr->tag = tag;
         chr->iFD = 0;
-        if (h->parseState.GLIFInfo.currentCID >= 0) {
-            chr->cid = h->parseState.GLIFInfo.currentCID;
-            if (h->parseState.GLIFInfo.currentiFD < 0){
+        if (glifRec->cid >= 0) {
+            chr->cid = glifRec->cid;
+            if (glifRec->iFD < 0){
                     fatal(h, ufoErrParse, "Warning: glyph '%s' missing FDArray index within <lib> dict", glyphName);
             }
-            chr->iFD = h->parseState.GLIFInfo.currentiFD;
-            if (h->parseState.GLIFInfo.currentCID > h->parseState.GLIFInfo.CIDCount) {
-                h->parseState.GLIFInfo.CIDCount = (long)h->parseState.GLIFInfo.currentCID + 1;
+            chr->iFD = glifRec->iFD;
+            if (glifRec->cid > h->parseState.GLIFInfo.CIDCount) {
+                h->parseState.GLIFInfo.CIDCount = (long)glifRec->cid + 1;
             }
         } else if (h->top.sup.flags & ABF_CID_FONT){
             fatal(h, ufoErrParse, "Warning: glyph '%s' missing CID number within <lib> dict", glyphName);
@@ -1760,7 +1783,7 @@ static int parseXMLGlifFile(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *un
         cur = cur->next;
     }
     if (h->parseState.UFOFile == preParsingGLIF) {
-        addCharFromGLIF(h, tag, glifRec->glyphName, 0, 0, *unicode);
+        addCharFromGLIF(h, tag, glifRec, glifRec->glyphName, 0, 0, *unicode);
         h->parseState.GLIFInfo.currentCID = -1;
         h->parseState.GLIFInfo.currentiFD = -1;
     }
@@ -1770,6 +1793,14 @@ static int parseXMLGlifFile(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *un
 
 static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
     abfTopDict* top = &h->top;
+
+    if (strEqual(keyName, "com.adobe.type.postscriptFDArray"))
+     return parseFontInfoFDArray(h, cur);
+    else if (strEqual(keyName, "PrivateDict"))
+     return parseFontInfoPrivateDict(h, cur);
+    else if (strEqual(keyName, "com.adobe.type.postscriptCIDMap"))
+     return parseCIDMap(h, cur);
+
     char* keyValue = parseXMLKeyValue(h, cur);
     if (!keyValueParseable(h, cur, keyValue, keyName))
         return false;
@@ -1784,6 +1815,12 @@ static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
         top->cid.Ordering.ptr = copyStr(h, keyValue);
     else if (strEqual(keyName, "com.adobe.type.cid.Supplement"))
         top->cid.Supplement = atol(keyValue);
+    else if (setFontInfoFD(h, keyName, keyValue))
+        return true;
+    else if (setFontInfoPD(h, keyName, keyValue))
+        return true;
+    else if (setFontInfoTopKey(h, keyName, keyValue))
+        return true;
     else
         return false;
     return true;
@@ -2052,7 +2089,7 @@ static bool setFontInfoTopKey(ufoCtx h, char* keyName, char* keyValue) {
          top->Weight.ptr = keyValue;
      else if (strEqual(keyName, "postscriptIsFixedPitch"))
          top->isFixedPitch = atol(keyValue);
-     else if (strEqual(keyName, "FSType"))
+     else if (strEqual(keyName, "com.adobe.type.FSType"))
          top->FSType = atoi(keyValue);
      else if (strEqual(keyName, "postscriptUnderlinePosition"))
          top->UnderlinePosition = (float)strtod(keyValue, NULL);
@@ -2071,7 +2108,7 @@ static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
      return false;
     }
     /* parse dictionaries */
-    if (strEqual(keyName, "postscriptFDArray"))
+    if (strEqual(keyName, "com.adobe.type.postscriptFDArray"))
      return parseFontInfoFDArray(h, cur);
     else if (strEqual(keyName, "PrivateDict"))
      return parseFontInfoPrivateDict(h, cur);
