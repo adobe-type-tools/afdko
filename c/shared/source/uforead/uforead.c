@@ -127,6 +127,8 @@ typedef struct
     char* glifFilePath;
     char* altLayerGlifFileName;
     long int glyphOrder;  // used to sort the glifRecs by glyph order from lib.plist.
+    int cid;
+    int iFD;
 } GLIF_Rec;
 
 typedef struct
@@ -284,9 +286,10 @@ struct ufoCtx_ {
     dnaCtx dna;
     struct {
        bool FDArray;
+       bool CIDMap;
        bool hintSetListArray;
        bool type1HintDataV2;
-       bool parsingValueArray;
+       bool valueArray;
        enum ufoFileState UFOFile;
        glifInfo GLIFInfo;
     } parseState;
@@ -996,7 +999,7 @@ static void freeValueArray(ufoCtx h){
         }
         dnaSET_CNT(h->valueArray, 0);
     }
-    h->parseState.parsingValueArray = false;
+    h->parseState.valueArray = false;
 }
 
 /* ToDo: add extra warnings for verbose-output */
@@ -1053,10 +1056,10 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
 static bool keyValueParseable(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyName) {
     bool valid = true;
     if (keyValue == NULL) {
-        if (!h->parseState.parsingValueArray)
+        if (!h->parseState.valueArray && !h->parseState.CIDMap)
             valid = false;
 //            message(h, "Warning: Encountered missing value for fontinfo key %s. Skipping", keyName);
-        else if (h->parseState.parsingValueArray && h->valueArray.cnt == 0)
+        else if (h->parseState.valueArray && h->valueArray.cnt == 0)
             valid = false;
 //            message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
     } else {
@@ -1666,7 +1669,7 @@ static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur){
 
 static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
     dnaSET_CNT(h->valueArray, 0);
-    h->parseState.parsingValueArray = true;
+    h->parseState.valueArray = true;
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
         char* valueString = parseXMLKeyValue(h, cur);
@@ -2632,7 +2635,7 @@ static bool parseHintSetListV2(ufoCtx h, xmlNodePtr cur) {
     char* pointName = NULL;
 
     h->parseState.hintSetListArray = true;
-    if (parseXMLKeyValue(h, cur) == NULL && !h->parseState.parsingValueArray)
+    if (parseXMLKeyValue(h, cur) == NULL && !h->parseState.valueArray)
         result = false;
     else
         result = true;
@@ -3041,7 +3044,8 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
     h->parseState.FDArray = false;
     h->parseState.hintSetListArray = false;
     h->parseState.type1HintDataV2 = false;
-    h->parseState.parsingValueArray = false;
+    h->parseState.valueArray = false;
+    h->parseState.CIDMap = false;
     h->parseState.UFOFile = None;
     h->parseState.GLIFInfo.currentCID = -1;
     h->parseState.GLIFInfo.CIDCount = 0;
