@@ -201,7 +201,7 @@ def test_extrapolate(capfd, use_varlib):
     captured = capfd.readouterr()
 
     tool = "fontTools.varlib" if use_varlib else "MutatorMath"
-    assert f"Building 2 instances with {tool}..." in captured.err
+    assert f"Building 2 instances with {tool} ..." in captured.err
 
     for ufo_filename in ("Dummy-ExtraPlus.ufo", "Dummy-ExtraMinus.ufo"):
         expected_path = _get_output_path(ufo_filename, 'expected_output')
