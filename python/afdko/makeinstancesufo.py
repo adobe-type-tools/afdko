@@ -304,6 +304,11 @@ def run(options):
     # instances, sources non-existent, other conditions
     validateDesignspaceDoc(ds_doc, options)
 
+    if options.instance_info:
+        for index, instance in enumerate(ds_doc.instances):
+            print(f'{index:3d} {instance.postScriptFontName}')
+        sys.exit()
+
     copy_features = any(src.copyFeatures for src in ds_doc.sources)
     features_store = {}
     if not copy_features:
@@ -329,7 +334,7 @@ def run(options):
 
     icnt_str = f'instance{"" if newInstancesCount == 1 else "s"}'
     tool_str = "fontTools.varlib" if options.useVarlib else "MutatorMath"
-    info_str = f"Building {newInstancesCount} {icnt_str} with {tool_str}..."
+    info_str = f"Building {newInstancesCount} {icnt_str} with {tool_str} ..."
     logger.info(info_str)
     ufoProcessorBuild(documentPath=dsPath,
                       outputUFOFormatVersion=options.ufo_version,
@@ -340,7 +345,7 @@ def run(options):
     if (dsPath != options.dsPath) and os.path.exists(dsPath):
         os.remove(dsPath)
 
-    logger.info("Built %s instances." % newInstancesCount)
+    logger.info(f"Built {newInstancesCount} {icnt_str}.")
     # Remove glyph.lib and font.lib (except for "public.glyphOrder")
     pool = multiprocessing.Pool(os.cpu_count())
     pool.starmap(postProcessInstance, [(instancePath, options)
@@ -483,6 +488,11 @@ def get_options(args):
         type=int,
         help='specify the format version number of the generated UFOs\n'
              'Default: %(default)s'
+    )
+    parser.add_argument(
+        '--instance_info',
+        action='store_true',
+        help='list instance indexes'
     )
     options = parser.parse_args(args)
 
