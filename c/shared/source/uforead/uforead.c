@@ -1295,7 +1295,7 @@ static int parseGroups(ufoCtx h) {
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
         if (h->top.sup.flags == ABF_CID_FONT)
-            message(h, "Warning: FDArraySelect not defined for cid-keyed font — glyphs may not be assigned a font dictionary, will be mapped to the first font dictionary.");
+            message(h, "Warning: FDArraySelect not defined for cid-keyed font");
         return ufoSuccess;
     }
 
