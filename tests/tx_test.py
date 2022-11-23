@@ -1416,11 +1416,11 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("wrong-type-stem-hstem", b'', 0),
     ("overlaps-cidkeyed", b'', 0),
     ("overlaps-namekeyed", b'', 0),
-    ("overlaps-cidkeyed-missing-cid", b"Warning: glyph 'cid45107' missing" +
+    ("overlaps-cidkeyed-missing-cid", b"glyph 'cid45107' missing" +
                                       b" CID number within <lib> dict", 6),
     ("dup-glif", b"Warning: duplicate charstring" +
                  b" <exclam> (discarded)", 0),
-    ("missing-cid-value", b"Warning: glyph 'cid45107' missing CID" +
+    ("missing-cid-value", b"glyph 'cid45107' missing CID" +
                           b" number within <lib> dict", 6),
     ("missing-advance", b'', 0),
     ("missing-autohint", b'', 0),
