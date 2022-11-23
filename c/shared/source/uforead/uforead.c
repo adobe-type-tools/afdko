@@ -1178,15 +1178,16 @@ static GLIF_Rec* addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
 }
 
 static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
+    GLIF_Rec* foundGlyph = NULL;
     char* fileName = parseXMLKeyValue(h, cur);
     if (fileName == NULL) {
         fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
     }
     int nameLength = strlen(fileName) - 5;  /* '.glif' removed */
-    char *subbuff = memNew(h, (sizeof(char*) * nameLength + 1));
+    char *subbuff = memNew(h, (sizeof(char) * (nameLength + 1)));
     memcpy(subbuff, &fileName[0], nameLength);
     subbuff[nameLength] = '\0';
-    GLIF_Rec* foundGlyph = findGLIFRecByName(h, subbuff);
+    foundGlyph = findGLIFRecByName(h, subbuff);
     memFree(h, subbuff);
     if (foundGlyph == NULL){
         addNewGLIFRec(h, glyphName, cur);
@@ -1856,12 +1857,11 @@ static bool setGroupsKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     if (!keyValueParseable(h, cur, keyValue, keyName))
         return false;
 
-    char* substr = memNew(h, sizeof(char)* 15);
+    char* substr = memNew(h, sizeof(char) * 15);
     memcpy(substr, keyName, 14);
-    substr[sizeof(char)*14] = '\0';
+    substr[14] = '\0';
     if (strEqual(substr, "FDArraySelect."))
         parseFDArraySelectGroup(h, keyName, cur);
-
     memFree(h, substr);
     return true;
 }
