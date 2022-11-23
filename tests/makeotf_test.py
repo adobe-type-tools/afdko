@@ -718,8 +718,7 @@ libplist_warn = (b"tx: (ufr) Warning: Unable to open "
 
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("missing-libplist-namekeyed", libplist_warn, 0),
-    ("missing-libplist-cidkeyed", libplist_warn, 0),
-    ("missing-libplist-cidkeyed-cid-identifiers", None, 2)
+    ("missing-libplist-cidkeyed", libplist_warn, 0)
 ])
 def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
     """
