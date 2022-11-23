@@ -1464,10 +1464,11 @@ def test_fontmatrix_unitsperem():
 
 
 missing_iFD = (b"tx: (ufr) glyph 'cid17899' missing "
-                          b"FDArray index within <lib> dict")
+               b"FDArray index within <lib> dict")
 
 missing_FDArraySelect = (b"Warning: FDArraySelect not defined for "
                          b"cid-keyed font")
+
 
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("groups-fdselect-doesnt-exist", b'', 0),
