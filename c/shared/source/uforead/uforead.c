@@ -1912,7 +1912,7 @@ static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNod
     char* FDIndex = memNew(h, sizeof(char) * 2);
     strncpy(FDIndex, FDArraySelectKeyName + 14, 2);
     if (strEqual(FDIndex+1, "."))
-        FDIndex[1] = "\n";
+        FDIndex[1] = '\n';
 
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
