@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>FDArraySelect.0.SourceHanSans-Heavy-Generic</key>
+	<array>
+		<string>cid00000</string>
+	</array>
+	<key>FDArraySelect.1.SourceHanSans-Heavy-Ideographs</key>
+	<array>
+		<string>cid17899</string>
+		<string>cid17900</string>
+		<string>cid17901</string>
+	</array>
+</dict>
+</plist>

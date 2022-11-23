@@ -1140,8 +1140,7 @@ def test_cidkeyed_read_write(arg, input, output, expected):
 
 
 @pytest.mark.parametrize("file", [
-    "missing_CID.ufo",
-    "missing_iFD.ufo",
+    "missing_CID.ufo"
 ])
 def test_cidkeyed_lib_missing(file):
     folder = folder = "cidkeyed_missing_lib/"
@@ -1288,7 +1287,6 @@ libplist_warn = (b"tx: (ufr) Warning: Unable to open "
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("missing-libplist-namekeyed", libplist_warn, 0),
     ("missing-libplist-cidkeyed", libplist_warn, 0),
-    ("missing-libplist-cidkeyed-cid-identifiers", None, 6)
 ])
 def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
     """

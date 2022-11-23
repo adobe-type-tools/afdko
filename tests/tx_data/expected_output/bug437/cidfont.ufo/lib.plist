@@ -184,34 +184,14 @@
 	</array>
 	<key>com.adobe.type.postscriptCIDMap</key>
 	<dict>
-	<key>cid00000</key>
-	<dict>
-	<key>com.adobe.type.cid</key>
-	<integer>0</integer>
-	<key>com.adobe.type.iFD</key>
-	<integer>0</integer>
-	</dict>
-	<key>cid00001</key>
-	<dict>
-	<key>com.adobe.type.cid</key>
-	<integer>1</integer>
-	<key>com.adobe.type.iFD</key>
-	<integer>2</integer>
-	</dict>
-	<key>cid01125</key>
-	<dict>
-	<key>com.adobe.type.cid</key>
-	<integer>1125</integer>
-	<key>com.adobe.type.iFD</key>
-	<integer>1</integer>
-	</dict>
-	<key>cid01143</key>
-	<dict>
-	<key>com.adobe.type.cid</key>
-	<integer>1143</integer>
-	<key>com.adobe.type.iFD</key>
-	<integer>1</integer>
-	</dict>
+		<key>cid00000</key>
+		<integer>0</integer>
+		<key>cid00001</key>
+		<integer>1</integer>
+		<key>cid01125</key>
+		<integer>1125</integer>
+		<key>cid01143</key>
+		<integer>1143</integer>
 	</dict>
 </dict>
 </plist>

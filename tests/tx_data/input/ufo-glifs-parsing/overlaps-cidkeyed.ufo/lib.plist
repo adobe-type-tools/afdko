@@ -19,5 +19,12 @@
       <string>cid00000</string>
       <string>cid45107</string>
     </array>
+    <key>com.adobe.type.postscriptCIDMap</key>
+    <dict>
+      <key>cid00000</key>
+      <integer>0</integer>
+      <key>cid45107</key>
+      <integer>45107</integer>
+    </dict>
   </dict>
 </plist>
