@@ -1590,23 +1590,7 @@ static char* getXmlAttrValue(xmlAttr *attr){
 static bool setXMLLib(ufoCtx h, xmlNodePtr cur, char* keyName) {
     char* keyValue;
     bool result = false;
-
-    if (h->parseState.UFOFile == preParsingGLIF) {     /* when called from preParseGLIF */
-        keyValue = parseXMLKeyValue(h, cur);
-        if (keyValueParseable(h, cur, keyValue, keyName)) {
-            if (strEqual(keyName, "com.adobe.type.cid.CID")) {
-                h->parseState.GLIFInfo.currentCID = atoi(keyValue);
-                h->parseState.GLIFInfo.glifRec->cid = h->parseState.GLIFInfo.currentCID;
-                h->top.sup.flags |= ABF_CID_FONT;
-                h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
-            } else if (strEqual(keyName, "com.adobe.type.cid.iFD")) {
-                h->parseState.GLIFInfo.currentiFD = atoi(keyValue);
-                h->parseState.GLIFInfo.glifRec->iFD = h->parseState.GLIFInfo.currentiFD;
-            }
-            result = true;
-        } else
-            result = false;
-    } else if (h->parseState.UFOFile == parsingGLIF) {  /* when called from parseGLIF */
+    if (h->parseState.UFOFile == parsingGLIF) {  /* when called from parseGLIF */
         if (strEqual(keyName, "com.adobe.type.autohint.v2")) {
             if (cur != NULL) {
                 h->parseState.type1HintDataV2 = true;
@@ -2112,9 +2096,7 @@ static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
      return false;
     }
     /* parse dictionaries */
-    if (strEqual(keyName, "com.adobe.type.postscriptFDArray") || strEqual(keyName, "postscriptFDArray"))
-     return parseFontInfoFDArray(h, cur);
-    else if (strEqual(keyName, "PrivateDict"))
+    if (strEqual(keyName, "PrivateDict"))
      return parseFontInfoPrivateDict(h, cur);
 
     char* keyValue = parseXMLKeyValue(h, cur);
