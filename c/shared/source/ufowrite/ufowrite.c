@@ -607,16 +607,10 @@ static void writeCIDMap(ufwCtx h, abfTopDict *top, char *buffer) {
     writeLine(h, "\t<key>com.adobe.type.postscriptCIDMap</key>");
     writeLine(h, "\t<dict>");
     for (i = 0; i < h->glyphs.cnt; i++) {
-        sprintf(buffer, "\t<key>%s</key>", h->glyphs.array[i].glyphName);
+        sprintf(buffer, "\t\t<key>%s</key>", h->glyphs.array[i].glyphName);
         writeLine(h, buffer);
-        writeLine(h, "\t<dict>");
-        writeLine(h, "\t<key>com.adobe.type.cid</key>");
-        sprintf(buffer, "\t<integer>%d</integer>", h->glyphs.array[i].cid);
+        sprintf(buffer, "\t\t<integer>%d</integer>", h->glyphs.array[i].cid);
         writeLine(h, buffer);
-        writeLine(h, "\t<key>com.adobe.type.iFD</key>");
-        sprintf(buffer, "\t<integer>%d</integer>", h->glyphs.array[i].iFD);
-        writeLine(h, buffer);
-        writeLine(h, "\t</dict>");
     }
     writeLine(h, "\t</dict>");
 }
