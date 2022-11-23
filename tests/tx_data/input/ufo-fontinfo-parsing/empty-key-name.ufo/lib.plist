@@ -9,6 +9,17 @@
 		<string>cid17900</string>
 		<string>cid17901</string>
 	</array>
+	<key>com.adobe.type.postscriptCIDMap</key>
+		<dict>
+		<key>cid00000</key>
+		<integer>0</integer>
+		<key>cid17899</key>
+		<integer>17899</integer>
+		<key>cid17900</key>
+		<integer>17900</integer>
+		<key>cid17901</key>
+		<integer>17901</integer>
+	</dict>
 	<key>com.adobe.type.cid.CIDFontName</key>
 	<string>Minimal-UFO</string>
 	<key>com.adobe.type.cid.Registry</key>

@@ -62,27 +62,12 @@
 	</array>
 	<key>com.adobe.type.postscriptCIDMap</key>
 	<dict>
-	<key>cid00000</key>
-	<dict>
-	<key>com.adobe.type.cid</key>
-	<integer>0</integer>
-	<key>com.adobe.type.iFD</key>
-	<integer>0</integer>
-	</dict>
-	<key>cid00001</key>
-	<dict>
-	<key>com.adobe.type.cid</key>
-	<integer>1</integer>
-	<key>com.adobe.type.iFD</key>
-	<integer>0</integer>
-	</dict>
-	<key>cid00002</key>
-	<dict>
-	<key>com.adobe.type.cid</key>
-	<integer>2</integer>
-	<key>com.adobe.type.iFD</key>
-	<integer>0</integer>
-	</dict>
+		<key>cid00000</key>
+		<integer>0</integer>
+		<key>cid00001</key>
+		<integer>1</integer>
+		<key>cid00002</key>
+		<integer>2</integer>
 	</dict>
 </dict>
 </plist>
