@@ -347,7 +347,7 @@ static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 
 /* GLIF Rec Handling */
 static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);  /* checks for existing rec*/
-static void addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);  /* directly adds new GLIF rec */
+static GLIF_Rec* addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);  /* directly adds new GLIF rec */
 static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);
 static GLIF_Rec* findGLIFRecByName(ufoCtx h, char *glyphName);
 
@@ -1146,12 +1146,12 @@ static long getGlyphOrderIndex(ufoCtx h, char* glyphName) {
     return orderIndex;
 }
 
-static void addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
+static GLIF_Rec* addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     GLIF_Rec* newGLIFRec;
     long int glyphOrder = ABF_UNSET_INT;
     char* fileName = parseXMLKeyValue(h, cur);
     if (!keyValueParseable(h, cur, fileName, glyphName))
-        return;
+        return NULL;
 
     if (h->data.glifOrder.cnt != 0)  /* only try to get glyphOrderIndex if cnt > 0 */
         glyphOrder = getGlyphOrderIndex(h, glyphName);
@@ -1165,9 +1165,10 @@ static void addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
         newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
         sprintf(newGLIFRec->glifFileName, "%s", fileName);
         newGLIFRec->altLayerGlifFileName = NULL;
-        newGLIFRec->cid = -1;
-        newGLIFRec->iFD = -1;
     }
+    newGLIFRec->cid = -1;
+    newGLIFRec->iFD = -1;
+    return newGLIFRec;
 }
 
 static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
@@ -1428,6 +1429,9 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
         /* Didn't work. Try the glyph layer directory */
         if (glifRec->glifFilePath) {
             memFree(h, glifRec->glifFilePath);
+        }
+        if (glifRec->glifFileName == NULL) {
+            fatal(h, ufoErrParse, "Warning: glyph '%s' missing filename.", glifRec->glyphName);
         }
         glifRec->glifFilePath = memNew(h, 2 + strlen(h->defaultLayerDir) + strlen(glifRec->glifFileName));
         sprintf(glifRec->glifFilePath, "%s/%s", h->defaultLayerDir, glifRec->glifFileName);
@@ -1695,7 +1699,7 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     char* keyName;
     cur = cur->xmlChildrenNode;
 
-    if (h->parseState.FDArray){
+    if (h->parseState.FDArray) {
         h->parseState.GLIFInfo.currentiFD = h->parseState.GLIFInfo.currentiFD + 1;
         h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
         if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
@@ -1851,9 +1855,6 @@ static bool parseFontInfoFDArray(ufoCtx h, xmlNodePtr cur) {
     return true;
 }
 
-static void parseCIDMapDict(ufoCtx h, xmlNodePtr cur) {
-    int index = h->data.glifRecs.cnt - 1;
-    GLIF_Rec *g = &h->data.glifRecs.array[index];
 
     while (cur != NULL) {
         char* keyName = parseXMLKeyName(h, cur);
@@ -1876,16 +1877,27 @@ static void parseCIDMapDict(ufoCtx h, xmlNodePtr cur) {
 
 static bool parseCIDMap(ufoCtx h, xmlNodePtr cur) {
     h->parseState.CIDMap = true;
+    h->top.sup.flags |= ABF_CID_FONT;
+    h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
+    GLIF_Rec *g;
+
     if (!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))
         return false;
-    cur = cur->xmlChildrenNode;
 
+    cur = cur->xmlChildrenNode;
     while (cur != NULL) {
         char* keyName = parseXMLKeyName(h, cur);
-        if (xmlStrEqual(cur->name, (const xmlChar *) "dict")) {
-            parseCIDMapDict(h, cur->xmlChildrenNode);
-        } else if (keyName != NULL)
-            addNewGLIFRec(h, keyName, NULL);
+        if (keyName != NULL) {
+            g = addNewGLIFRec(h, keyName, NULL);
+            if (g == NULL)
+                continue;
+            cur = cur->next;
+            if (cur == NULL)
+                continue;
+            char* cid = parseXMLKeyValue(h, cur);
+            if (cid != NULL)
+                g->cid = atoi(cid);
+        }
         cur = cur->next;
     }
     h->parseState.CIDMap = false;
@@ -1893,9 +1905,10 @@ static bool parseCIDMap(ufoCtx h, xmlNodePtr cur) {
 }
 
 static bool parseFontInfoPrivateDict(ufoCtx h, xmlNodePtr cur) {
+    bool prevFDArrayState = h->parseState.FDArray;
     h->parseState.FDArray = false;  // this is only set when parsing root of FDArray, not sub-dicts within a dict
     parseXMLKeyValue(h, cur);
-    h->parseState.FDArray = true;
+    h->parseState.FDArray = prevFDArrayState;
     return true;
 }
 
