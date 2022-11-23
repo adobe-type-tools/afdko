@@ -1404,14 +1404,14 @@ static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec, char* glyphNam
         if (glifRec->cid >= 0) {
             chr->cid = glifRec->cid;
             if (glifRec->iFD < 0){
-                    fatal(h, ufoErrParse, "Warning: glyph '%s' missing FDArray index within <lib> dict", glyphName);
+                    fatal(h, ufoErrParse, "glyph '%s' missing FDArray index within <lib> dict", glyphName);
             }
             chr->iFD = glifRec->iFD;
             if (glifRec->cid > h->parseState.GLIFInfo.CIDCount) {
                 h->parseState.GLIFInfo.CIDCount = (long)glifRec->cid + 1;
             }
         } else if (h->top.sup.flags & ABF_CID_FONT) {
-            fatal(h, ufoErrParse, "Warning: glyph '%s' missing CID number within <lib> dict", glyphName);
+            fatal(h, ufoErrParse, "glyph '%s' missing CID number within <lib> dict", glyphName);
         }
         chr->gname.ptr = glyphName;
         chr->gname.impl = tag;
@@ -1856,8 +1856,9 @@ static bool setGroupsKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     if (!keyValueParseable(h, cur, keyValue, keyName))
         return false;
 
-    char* substr = memNew(h, sizeof(char)*14);
-    strncpy(substr, keyName, 14);
+    char* substr = memNew(h, sizeof(char)* 15);
+    memcpy(substr, keyName, 14);
+    substr[sizeof(char)*14] = '\0';
     if (strEqual(substr, "FDArraySelect."))
         parseFDArraySelectGroup(h, keyName, cur);
 
@@ -1911,7 +1912,7 @@ static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNod
 
     char* FDIndex = memNew(h, sizeof(char) * 2);
     strncpy(FDIndex, FDArraySelectKeyName + 14, 2);
-    if (strEqual(FDIndex+1, "."))
+    if (FDIndex[1] == '.')
         FDIndex[1] = '\n';
 
     cur = cur->xmlChildrenNode;
