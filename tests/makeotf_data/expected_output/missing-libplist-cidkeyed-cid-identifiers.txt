@@ -1,4 +1,0 @@
-tx: (ufr) Warning: No version specified in source UFO font.
-tx: (ufr) Warning: Unable to open lib.plist in source UFO font.
-tx: (ufr) Warning: public.glyphOrder key is empty and does not contain glyph name for all 4 glyphs. Consider defining this in lib.plist.
-tx: (t1w) bad font dictionary. Missing either the CID font name, or the Registry-Order-Supplement names.
