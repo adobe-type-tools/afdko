@@ -1182,8 +1182,8 @@ static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     if (fileName == NULL) {
         fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
     }
-    int nameLength = strlen(fileName) - 4;  /* '.glif' removed, leave 1 byte for null char */
-    char *subbuff = memNew(h, (sizeof(char*) * nameLength));
+    int nameLength = strlen(fileName) - 5;  /* '.glif' removed */
+    char *subbuff = memNew(h, (sizeof(char*) * nameLength + 1));
     memcpy(subbuff, &fileName[0], nameLength);
     subbuff[nameLength] = '\0';
     GLIF_Rec* foundGlyph = findGLIFRecByName(h, subbuff);
