@@ -679,6 +679,62 @@ static void writeGlyphOrder(ufwCtx h) {
     END_HANDLER
 }
 
+static void writeFDArraySelect(ufwCtx h, abfTopDict *top, char *buffer) {
+    int fdIndex;
+    int glyphArrIndex;
+
+    for (fdIndex = 0; fdIndex < top->FDArray.cnt; fdIndex++) {
+        abfFontDict *fd = &h->top->FDArray.array[fdIndex];
+        if (fd->FontName.ptr != NULL)
+            sprintf(buffer, "\t<key>FDArraySelect.%d.%s</key>", fdIndex, fd->FontName.ptr);
+        else
+            sprintf(buffer, "\t<key>FDArraySelect.%d</key>", fdIndex);
+        writeLine(h, buffer);
+        writeLine(h, "\t<array>");
+        for (glyphArrIndex = 0; glyphArrIndex < h->glyphs.cnt; glyphArrIndex++) {
+            if (h->glyphs.array[glyphArrIndex].iFD == fdIndex) {
+                sprintf(buffer, "\t\t<string>%s</string>", h->glyphs.array[glyphArrIndex].glyphName);
+                writeLine(h, buffer);
+            }
+        }
+        writeLine(h, "\t</array>");
+    }
+}
+
+static void writeGroups(ufwCtx h, abfTopDict *top) {
+    char buffer[FILENAME_MAX];
+
+    /* Set error handler */
+    DURING_EX(h->err.env)
+
+    h->state = 1; /* Indicates writing to dst stream */
+
+    /* Open groups.plist file as dst stream */
+
+    sprintf(buffer, "%s", "groups.plist");
+    h->cb.stm.clientFileName = buffer;
+    h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
+    if (h->stm.dst == NULL)
+        fatal(h, ufwErrDstStream);
+
+    writeLine(h, XML_HEADER);
+    writeLine(h, PLIST_DTD_HEADER);
+    writeLine(h, "<plist version=\"1.0\">");
+    writeLine(h, "<dict>");
+    writeFDArraySelect(h, top, buffer);
+    writeLine(h, "</dict>");
+    writeLine(h, "</plist>");
+
+    /* Close dst stream */
+    flushBuf(h);
+    h->cb.stm.close(&h->cb.stm, h->stm.dst);
+
+    HANDLER
+    if (h->stm.dst)
+        h->cb.stm.close(&h->cb.stm, h->stm.dst);
+    END_HANDLER
+}
+
 static void writeMetaInfo(ufwCtx h) {
     char buffer[FILENAME_MAX];
 
@@ -951,6 +1007,8 @@ int ufwEndFont(ufwCtx h, abfTopDict *top) {
 
     writeContents(h);
     writeGlyphOrder(h);
+    if (top->FDArray.cnt > 1)  // only write if > 1 FDDict
+        writeGroups(h, top);
     writeMetaInfo(h);
     h->state = 0; /* Indicates writing to temp stream */
     return ufwSuccess;
