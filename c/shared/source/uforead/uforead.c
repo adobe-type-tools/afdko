@@ -1919,8 +1919,14 @@ static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNod
     while (cur != NULL) {
         char* glyphName = parseXMLKeyValue(h, cur);
         g = findGLIFRecByName(h, glyphName);
-        if (g != NULL)
-            g->iFD = atoi(FDIndex);
+        int FDIndexInt = atoi(FDIndex);
+        if (g != NULL) {
+            if (FDIndexInt >= h->top.FDArray.cnt - 1) {  /* one cnt reserved for default FDArray at this point */
+//                message(h, "Glyph %s is assigned to font dict index %d which is not defined. Will be assigned to default font dict at index 0 instead.\n", glyphName, FDIndexInt);
+                FDIndexInt  = 0;
+            }
+            g->iFD = FDIndexInt;
+        }
         cur = cur->next;
     }
     memFree(h, FDIndex);
