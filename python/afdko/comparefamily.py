@@ -5010,7 +5010,7 @@ def main():
 	from afdko import agd
 	resources_dir = fdkutils.get_resources_dir()
 	kAGD_TXTPath = os.path.join(resources_dir, "AGD.txt")
-	fp = open(kAGD_TXTPath, "rU")
+	fp = open(kAGD_TXTPath, "r")
 	agdTextPath = fp.read()
 	fp.close()
 	gAGDDict = agd.dictionary(agdTextPath)
