@@ -334,7 +334,8 @@ static void callbackOp(t2cCtx h, int op) {
 }
 
 static void callBackStem(t2cCtx h, Stem *stem, int cntr, int flags) {
-    if ((h->glyph->stemVF != NULL) && (h->flags & IS_CFF2)) {
+    if ((h->glyph->stemVF != NULL) && (h->flags & IS_CFF2) &&
+        !(h->flags & FLATTEN_BLEND)) {
         if (cntr)
             flags |= ABF_CNTR_STEM;
         h->glyph->stemVF(h->glyph, flags, &stem->edge0v, &stem->edge1v);
@@ -475,7 +476,8 @@ static void callbackMove(t2cCtx h, float dx, float dy) {
     h->x = x;
     h->y = y;
 
-    if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL)) {
+    if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL) &&
+        !(h->flags & FLATTEN_BLEND)) {
         abfBlendArg *blendArgs = &(h->stack.blendArgs[0]);
         convertToAbsolute(h, x, y, blendArgs, 2);
         h->glyph->moveVF(h->glyph, blendArgs, blendArgs + 1);
@@ -496,7 +498,8 @@ static void callbackLine(t2cCtx h, float dx, float dy) {
     h->x = roundf(h->x * 100) / 100;
     h->y = roundf(h->y * 100) / 100;
 
-    if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL)) {
+    if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL) &&
+        !(h->flags & FLATTEN_BLEND)) {
         abfBlendArg *blendArgs = &(h->stack.blendArgs[0]);
         convertToAbsolute(h, h->x, h->y, blendArgs, 2);
         h->glyph->lineVF(h->glyph, blendArgs, blendArgs + 1);
@@ -529,9 +532,8 @@ static void callbackCurve(t2cCtx h,
     h->x = x3;
     h->y = y3;
 
-    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
-
-    {
+    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+        !(h->flags & FLATTEN_BLEND)) {
         abfBlendArg *blendArgs = &(h->stack.blendArgs[0]);
         convertToAbsolute(h, x1, y1, blendArgs, 6);
         h->glyph->curveVF(h->glyph, blendArgs, blendArgs + 1,
@@ -638,7 +640,8 @@ static int addStems(t2cCtx h, int vert) {
         return 1;
 
     /* The "i = h->stack.cnt & 1" clause lets it skip the width value, if there is one. */
-    if ((h->flags & IS_CFF2) && (h->glyph->stemVF != NULL)) {
+    if ((h->flags & IS_CFF2) && (h->glyph->stemVF != NULL) &&
+        !(h->flags & FLATTEN_BLEND)) {
         for (i = h->stack.cnt & 1; i < h->stack.cnt - 1; i += 2) {
             abfBlendArg *blendArgs = &h->stack.blendArgs[i];
             abfOpEntry *opEntry = &h->stack.blendArray[i];
@@ -1010,7 +1013,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                 {
                     float y = POP();
                     float x = POP();
-                    if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL))
+                    if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL) &&
+                        !(h->flags & FLATTEN_BLEND))
                         popBlendArgs2(h, &INDEX_BLEND(0), &INDEX_BLEND(1));
                     callbackMove(h, x, y);
                 }
@@ -1018,7 +1022,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
             case tx_hmoveto:
                 if (callbackWidth(h, 0))
                     return t2cSuccess;
-                if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL))
+                if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL) &&
+                    !(h->flags & FLATTEN_BLEND))
                     popBlendArgs2(h, &INDEX_BLEND(0), NULL);
                 CHKUFLOW(h, 1);
                 callbackMove(h, POP(), 0);
@@ -1026,7 +1031,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
             case tx_vmoveto:
                 if (callbackWidth(h, 0))
                     return t2cSuccess;
-                if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL))
+                if ((h->flags & IS_CFF2) && (h->glyph->moveVF != NULL) &&
+                    !(h->flags & FLATTEN_BLEND))
                     popBlendArgs2(h, NULL, &INDEX_BLEND(0));
                 CHKUFLOW(h, 1);
                 callbackMove(h, 0, POP());
@@ -1034,7 +1040,9 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
             case tx_rlineto:
                 CHKUFLOW(h, 2);
                 for (i = 0; i < h->stack.cnt - 1; i += 2) {
-                    if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL)) popBlendArgs2(h, &INDEX_BLEND(i), &INDEX_BLEND(i + 1));
+                    if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL) &&
+                        !(h->flags & FLATTEN_BLEND))
+                        popBlendArgs2(h, &INDEX_BLEND(i), &INDEX_BLEND(i + 1));
                     callbackLine(h, INDEX(i + 0), INDEX(i + 1));
                 }
                 break;
@@ -1045,11 +1053,13 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                     int horz = byte0 == tx_hlineto;
                     for (i = 0; i < h->stack.cnt; i++)
                         if (horz++ & 1) {
-                            if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL))
+                            if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL) &&
+                                !(h->flags & FLATTEN_BLEND))
                                 popBlendArgs2(h, &INDEX_BLEND(i), NULL);
                             callbackLine(h, INDEX(i), 0);
                         } else {
-                            if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL))
+                            if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL) &&
+                                !(h->flags & FLATTEN_BLEND))
                                 popBlendArgs2(h, NULL, &INDEX_BLEND(i));
                             callbackLine(h, 0, INDEX(i));
                         }
@@ -1058,7 +1068,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
             case tx_rrcurveto:
                 CHKUFLOW(h, 6);
                 for (i = 0; i < h->stack.cnt - 5; i += 6) {
-                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+                        !(h->flags & FLATTEN_BLEND))
                         popBlendArgs6(h,
                                       &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                       &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
@@ -1491,7 +1502,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
             case t2_rcurveline:
                 CHKUFLOW(h, 8);
                 for (i = 0; i < h->stack.cnt - 5; i += 6) {
-                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+                        !(h->flags & FLATTEN_BLEND))
                         popBlendArgs6(h,
                                       &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                       &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
@@ -1502,7 +1514,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                                   INDEX(i + 4), INDEX(i + 5));
                 }
                 if (i < h->stack.cnt - 1) {
-                    if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL))
+                    if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL) &&
+                        !(h->flags & FLATTEN_BLEND))
                         popBlendArgs2(h, &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1));
                     callbackLine(h, INDEX(i + 0), INDEX(i + 1));
                 }
@@ -1510,11 +1523,13 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
             case t2_rlinecurve:
                 CHKUFLOW(h, 8);
                 for (i = 0; i < h->stack.cnt - 6; i += 2) {
-                    if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL))
+                    if ((h->flags & IS_CFF2) && (h->glyph->lineVF != NULL) &&
+                        !(h->flags & FLATTEN_BLEND))
                         popBlendArgs2(h, &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1));
                     callbackLine(h, INDEX(i + 0), INDEX(i + 1));
                 }
-                if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
+                if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+                    !(h->flags & FLATTEN_BLEND))
                     popBlendArgs6(h,
                                   &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                   &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
@@ -1529,7 +1544,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                 if ((h->stack.cnt) & 1) {
                     CHKUFLOW(h, 5);
                     i = 0;
-                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+                        !(h->flags & FLATTEN_BLEND))
                         popBlendArgs6(h,
                                       &INDEX_BLEND(i + 0), &INDEX_BLEND(i + 1),
                                       &INDEX_BLEND(i + 2), &INDEX_BLEND(i + 3),
@@ -1546,7 +1562,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
 
                 /* Add remaining curve(s) */
                 for (; i < h->stack.cnt - 3; i += 4) {
-                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+                        !(h->flags & FLATTEN_BLEND))
                         popBlendArgs6(h,
                                       NULL, &INDEX_BLEND(i + 0),
                                       &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
@@ -1561,7 +1578,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                 if ((h->stack.cnt) & 1) {
                     /* Add initial curve */
                     CHKUFLOW(h, 5);
-                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+                        !(h->flags & FLATTEN_BLEND))
                         popBlendArgs6(h,
                                       &INDEX_BLEND(1), &INDEX_BLEND(0),
                                       &INDEX_BLEND(2), &INDEX_BLEND(3),
@@ -1578,7 +1596,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
 
                 /* Add remaining curve(s) */
                 for (; i < h->stack.cnt - 3; i += 4) {
-                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
+                    if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+                        !(h->flags & FLATTEN_BLEND))
                         popBlendArgs6(h,
                                       &INDEX_BLEND(i + 0), NULL,
                                       &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
@@ -1631,7 +1650,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                     /* Add initial curve(s) */
                     for (i = 0; i < h->stack.cnt - adjust - 3; i += 4)
                         if (horz++ & 1) {
-                            if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
+                            if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+                                !(h->flags & FLATTEN_BLEND))
                                 popBlendArgs6(h,
                                               &INDEX_BLEND(i + 0), NULL,
                                               &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
@@ -1641,7 +1661,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                                           INDEX(i + 1), INDEX(i + 2),
                                           0, INDEX(i + 3));
                         } else {
-                            if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
+                            if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+                                !(h->flags & FLATTEN_BLEND))
                                 popBlendArgs6(h,
                                               NULL, &INDEX_BLEND(i + 0),
                                               &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
@@ -1655,7 +1676,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                     if (adjust) {
                         /* Add last curve */
                         if (horz & 1) {
-                            if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
+                            if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+                                !(h->flags & FLATTEN_BLEND))
                                 popBlendArgs6(h,
                                               &INDEX_BLEND(i + 0), NULL,
                                               &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
@@ -1665,7 +1687,8 @@ static int t2Decode(t2cCtx h, long offset, int depth) {
                                           INDEX(i + 1), INDEX(i + 2),
                                           INDEX(i + 4), INDEX(i + 3));
                         } else {
-                            if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL))
+                            if ((h->flags & IS_CFF2) && (h->glyph->curveVF != NULL) &&
+                                !(h->flags & FLATTEN_BLEND))
                                 popBlendArgs6(h,
                                               NULL, &INDEX_BLEND(i + 0),
                                               &INDEX_BLEND(i + 1), &INDEX_BLEND(i + 2),
