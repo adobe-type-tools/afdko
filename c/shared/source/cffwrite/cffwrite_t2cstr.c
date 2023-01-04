@@ -29,14 +29,8 @@
 
 typedef struct /* Stem hint */
 {
-    union {
-        float edge0;
-        abfBlendArg edge0v;
-    };
-    union {
-        float edge1;
-        abfBlendArg edge1v;
-    };
+    abfBlendArg edge0v;
+    abfBlendArg edge1v;
     unsigned char id; /* Unique identifier */
     char flags;
 #define STEM_VERT (1 << 0) /* Flags vertical stem */
@@ -1607,20 +1601,23 @@ static void newCntr(cstrCtx h) {
     }
 }
 
-/* Match stems. */
+/* Match stems.
+   XXX For now this will work even with blends because the default
+   master can't have duplicate stem values, but going forward
+   this may need to be enhanced to match blends. */
 static int CTL_CDECL matchStems(const void *key, const void *value, void *ctx) {
     Stem *a = (Stem *)key;
     Stem *b = (Stem *)value;
     int cmp = (a->flags & STEM_VERT) - (b->flags & STEM_VERT);
     if (cmp != 0) {
         return cmp;
-    } else if (a->edge0 < b->edge0) {
+    } else if (a->edge0v.value < b->edge0v.value) {
         return -1;
-    } else if (a->edge0 > b->edge0) {
+    } else if (a->edge0v.value > b->edge0v.value) {
         return 1;
-    } else if (a->edge1 < b->edge1) {
+    } else if (a->edge1v.value < b->edge1v.value) {
         return -1;
-    } else if (a->edge1 > b->edge1) {
+    } else if (a->edge1v.value > b->edge1v.value) {
         return 1;
     } else {
         return 0;
@@ -1629,8 +1626,8 @@ static int CTL_CDECL matchStems(const void *key, const void *value, void *ctx) {
 
 /* Match stems if both edges are within 2 units. */
 static int approxMatch(Stem *_new, Stem *old) {
-    float delta0 = _new->edge0 - old->edge0;
-    float delta1 = _new->edge1 - old->edge1;
+    float delta0 = _new->edge0v.value - old->edge0v.value;
+    float delta1 = _new->edge1v.value - old->edge1v.value;
     return ((old->flags & STEM_CNTR) &&
             (_new->flags & STEM_VERT) == (old->flags & STEM_VERT) &&
             -2.0f < delta0 && delta0 < 2.0f &&
@@ -1657,12 +1654,14 @@ static unsigned char addStem(cstrCtx h, int flags, float edge0, float edge1) {
     delta = edge1 - edge0;
     if (delta < 0 && delta != ABF_EDGE_HINT_LO && delta != ABF_EDGE_HINT_HI) {
         addWarn(h, warn_hint0);
-        _new.edge0 = edge1;
-        _new.edge1 = edge0;
+        _new.edge0v.value = edge1;
+        _new.edge1v.value = edge0;
     } else {
-        _new.edge0 = edge0;
-        _new.edge1 = edge1;
+        _new.edge0v.value = edge0;
+        _new.edge1v.value = edge1;
     }
+    _new.edge0v.hasBlend = 0;
+    _new.edge1v.hasBlend = 0;
     _new.flags = (flags & ABF_VERT_STEM) ? STEM_VERT : 0;
     if (flags & ABF_CNTR_STEM) {
         _new.flags |= STEM_CNTR;
@@ -2065,8 +2064,8 @@ static void saveStemOp(cstrCtx h, int iBeg, int iEnd, int op, int optimize) {
             Fixed last = 0;
             while (stems--) {
                 Stem *stem = &h->stems.array[i++];
-                Fixed edge0 = float2Fixed(stem->edge0);
-                Fixed edge1 = float2Fixed(stem->edge1);
+                Fixed edge0 = float2Fixed(stem->edge0v.value);
+                Fixed edge1 = float2Fixed(stem->edge1v.value);
                 tmp_savefixed(g, edge0 - last);
                 tmp_savefixed(g, edge1 - edge0);
                 last = edge1;
@@ -2085,10 +2084,10 @@ static void saveStemOp(cstrCtx h, int iBeg, int iEnd, int op, int optimize) {
                 while (stems--) {
                     Stem *stem = &h->stems.array[i++];
                     pushStemBlends(h, &stem->edge0v);
-                    tmp_savefixed(g, float2Fixed(stem->edge0 - lastf));
+                    tmp_savefixed(g, float2Fixed(stem->edge0v.value - lastf));
                     pushStemBlends(h, &stem->edge1v);
-                    tmp_savefixed(g, float2Fixed(stem->edge1 - stem->edge0));
-                    lastf = stem->edge1;
+                    tmp_savefixed(g, float2Fixed(stem->edge1v.value - stem->edge0v.value));
+                    lastf = stem->edge1v.value;
                 }
                 if (h->numBlends > 0)
                     flushStemBlends(h);
@@ -2096,9 +2095,9 @@ static void saveStemOp(cstrCtx h, int iBeg, int iEnd, int op, int optimize) {
                 float last = 0;
                 while (stems--) {
                     Stem *stem = &h->stems.array[i++];
-                    tmp_savefixed(g, float2Fixed(stem->edge0 - last));
-                    tmp_savefixed(g, float2Fixed(stem->edge1 - stem->edge0));
-                    last = stem->edge1;
+                    tmp_savefixed(g, float2Fixed(stem->edge0v.value - last));
+                    tmp_savefixed(g, float2Fixed(stem->edge1v.value - stem->edge0v.value));
+                    last = stem->edge1v.value;
                 }
             }
             if (ops > 0 || !optimize) {
@@ -2127,7 +2126,7 @@ static void checkOverlap(cstrCtx h, HintMask hintmask) {
                 Stem *curr = &h->stems.array[j];
                 if (last != NULL &&
                     ((last->flags ^ curr->flags) & STEM_VERT) == 0 &&
-                    last->edge1 >= curr->edge0) {
+                    last->edge1v.value >= curr->edge0v.value) {
                     addWarn(h, warn_hint4);
                 }
                 last = curr;
@@ -2620,7 +2619,7 @@ static void dbhints(cstrCtx h) {
         for (i = 0; i < h->stems.cnt; i++) {
             Stem *stem = &h->stems.array[i];
             printf("[%ld]={%g,%g,%u,%c}\n", i,
-                   stem->edge0, stem->edge1, stem->id,
+                   stem->edge0v.value, stem->edge1v.value, stem->id,
                    (stem->flags & STEM_VERT) ? 'v' : 'h');
         }
     }
