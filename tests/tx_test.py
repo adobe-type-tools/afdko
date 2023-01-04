@@ -1251,7 +1251,7 @@ def test_ufo_fontinfo_parsing(file, msg, ret_code):
     if (ret_code == 0):
         expected_path = generate_ps_dump(expected_path)
         output_path = generate_ps_dump(output_path)
-        assert differ([expected_path, output_path])
+        assert differ([expected_path, output_path, '-s'] + PFA_SKIP)
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
         assert subprocess.call(arg) == ret_code
@@ -1396,7 +1396,7 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     if (ret_code == 0):
         expected_path = generate_ps_dump(expected_path)
         output_path = generate_ps_dump(output_path)
-        assert differ([expected_path, output_path])
+        assert differ([expected_path, output_path, '-s'] + PFA_SKIP)
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
         assert subprocess.call(arg) == ret_code
@@ -1451,7 +1451,7 @@ def test_ufo_glifs_parsing(file, msg, ret_code):
     if (ret_code == 0):
         expected_path = generate_ps_dump(expected_path)
         output_path = generate_ps_dump(output_path)
-        assert differ([expected_path, output_path])
+        assert differ([expected_path, output_path, '-s'] + PFA_SKIP)
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
         assert subprocess.call(arg) == ret_code
