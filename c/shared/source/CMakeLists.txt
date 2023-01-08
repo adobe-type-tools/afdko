@@ -49,6 +49,10 @@ target_compile_definitions(tx_shared PRIVATE $<$<CONFIG:Debug>:CFW_DEBUG=1>)
 
 target_link_libraries(tx_shared PUBLIC ${CHOSEN_LIBXML2_LIBRARY})
 
+if (${NEED_LIBXML2_DEPEND})
+    target_compile_definitions(tx_shared PUBLIC -DLIBXML_STATIC)
+endif()
+
 # These libraries are partially ordered
 
 target_link_libraries(tx_shared PUBLIC
