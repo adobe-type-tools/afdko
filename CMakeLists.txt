@@ -49,9 +49,9 @@ IF ((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux")
    set(LIBXML2_TAG tags/v2.9.13)
    include(ExternalLibXML2)
    include_directories(${LIBXML2_STATIC_INCLUDE_DIR})
-ELSE ((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux")
+ELSE ((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux" OR "${CMAKE_SYSTEM}" MATCHES "Windows")
    include_directories(${LIBXML2_INCLUDE_DIR})
-ENDIF((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux")
+ENDIF((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux" OR "${CMAKE_SYSTEM}" MATCHES "Windows")
 
 # sanitizer support
 # work around https://github.com/pypa/setuptools/issues/1928 with environment
