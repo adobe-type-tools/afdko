@@ -94,9 +94,9 @@ jobs:
         python -m pip install .
         python -m pip freeze --all
 
-    - name: Print environment (Windows)
+    - name: Print tx location (Windows)
       if: matrix.os == 'windows-latest'
-      run: env
+      run: where tx
 
 #    - name: Upload tx (Windows)
 #      if: matrix.os == 'windows-latest'
