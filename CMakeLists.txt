@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(afdko)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+# set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # This matches the MSVC_RUNTIME_LIBRARY property in
 # c/makeotf/source/CMakeLists.txt, which can theoretically be used to
