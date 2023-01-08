@@ -72,6 +72,7 @@ jobs:
       run: |
         echo "CMAKE_GENERATOR=Visual Studio 17 2022" >> $GITHUB_ENV
         echo "CMAKE_GENERATOR_PLATFORM=x64" >> $GITHUB_ENV
+        echo "FORCE_BUILD_LIBXML2=ON" >> $GITHUB_ENV
       shell: bash
 
     - name: Install dependencies
