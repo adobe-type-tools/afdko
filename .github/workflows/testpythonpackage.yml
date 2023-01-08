@@ -96,14 +96,7 @@ jobs:
 
     - name: Find tx location (Windows)
       if: matrix.os == 'windows-latest'
-      uses: Amadevus/pwsh-script@v2
-      id: print-tx
-      with:
-        script: Get-Command tx
-
-    - name: Print tx location (Windows)
-      if: matrix.os == 'windows-latest'
-      run: echo '${{ steps.print-tx.outputs.result }}'
+      run: set PATH
 
 #    - name: Upload tx (Windows)
 #      if: matrix.os == 'windows-latest'
