@@ -94,6 +94,15 @@ jobs:
         python -m pip install .
         python -m pip freeze --all
 
+    - name: Upload tx (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: wintx
+        path: C:\hostedtoolcache\windows\Python\3.10.8\x64\tx.exe
+        if-no-files-found: error
+        retention-days: 30
+
     - name: Test with pytest
       run: |
         python -m pytest -n auto --dist loadfile --no-cov tests --color=yes
