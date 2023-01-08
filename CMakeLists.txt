@@ -44,14 +44,22 @@ include(ExternalAntlr4Cpp)
 
 
 FIND_PACKAGE(LibXml2)
-IF ((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux")
+if ((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux" OR "${CMAKE_SYSTEM}" MATCHES "Windows")
    MESSAGE(STATUS "Could not locate LibXml2 or system is Linux, will install externally & statically link")
    set(LIBXML2_TAG tags/v2.9.13)
    include(ExternalLibXML2)
    include_directories(${LIBXML2_STATIC_INCLUDE_DIR})
-ELSE ((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux" OR "${CMAKE_SYSTEM}" MATCHES "Windows")
+   set(NEED_LIBXML2_DEPEND TRUE)
+   if (WIN32)
+       set(CHOSEN_LIBXML2_LIBRARY ${LIBXML2_WIN_LIBRARIES})
+   else()
+       set(CHOSEN_LIBXML2_LIBRARY ${LIBXML2_NONWIN_LIBRARIES})
+   endif()
+else ()
    include_directories(${LIBXML2_INCLUDE_DIR})
-ENDIF((NOT ${LibXml2_FOUND}) OR "${CMAKE_SYSTEM}" MATCHES "Linux" OR "${CMAKE_SYSTEM}" MATCHES "Windows")
+   set(NEED_LIBXML2_DEPEND FALSE)
+   set(CHOSEN_LIBXML2_LIBRARY ${LIBXML2_LIBRARY})
+endif()
 
 # sanitizer support
 # work around https://github.com/pypa/setuptools/issues/1928 with environment

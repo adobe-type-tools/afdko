@@ -27,15 +27,7 @@ if (HAVE_M_LIB)
     target_link_libraries(makeotfexe PRIVATE m)
 endif ()
 
-if ((${LibXml2_FOUND}) AND (NOT "${CMAKE_SYSTEM}" MATCHES "Linux"))
-    target_link_libraries(makeotfexe PUBLIC ${LIBXML2_LIBRARY})
-else ()
-    if (WIN32)
-       target_link_libraries(makeotfexe PUBLIC ${LIBXML2_WIN_LIBRARIES})
-    else ()
-       target_link_libraries(makeotfexe PUBLIC ${LIBXML2_NONWIN_LIBRARIES})
-    endif()
-endif()
+target_link_libraries(makeotfexe PUBLIC ${CHOSEN_LIBXML2_LIBRARY})
 
 target_compile_definitions(makeotfexe PRIVATE MAKEOTFLIB_EXPORTS=1)
 
