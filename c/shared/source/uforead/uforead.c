@@ -813,7 +813,7 @@ static void matMult(float* result, float* a, float* b) {
 static void setTransformValue(Transform* transform, float val, int valIndex) {
     transform->mtx[valIndex] = val;
     if ((valIndex == 0) || (valIndex == 3)) {
-        if (valIndex != 1.0) {
+        if (val != 1.0) {
             transform->isDefault = 0;
             transform->isOffsetOnly = 0;
         }
@@ -2900,9 +2900,11 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
      We need to convert it to the initial move-to, but we also need to
      re-issue it as the original point type at the end of the path.
      */
+    Transform *currentTransform;
 
     const char* filetype = "glyph";
     h->parseState.UFOFile = parsingGLIF;
+    currentTransform = h->parseState.GLIFInfo.transform;
     h->parseState.GLIFInfo.transform = transform;
     int result = ufoSuccess;
     int state = outlineStart;
@@ -2935,6 +2937,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
 
     /* An odd exit - didn't see  "</glyph>"  */
     h->cb.stm.close(&h->cb.stm, h->stm.src);
+    h->parseState.GLIFInfo.transform = currentTransform;
     return result;
 }
 
