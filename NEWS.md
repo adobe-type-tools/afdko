@@ -14,8 +14,8 @@ Changelog
 - [agd.py] [comparefamily.py] Fixing the two instances of "rU" (thanks @colinmford !) ([#1584](https://github.com/adobe-type-tools/afdko/pull/1584))
 - [makeinstancesufo] Add --instance_info option to makeinstancesufo  ([#1577](https://github.com/adobe-type-tools/afdko/pull/1577))
 - [makeinstancesufo] Boost number of makeinstancesufo pool processors by one ([#1561](https://github.com/adobe-type-tools/afdko/pull/1561))
-- [otf3ttf] Ensure poolCapacity is at least 1 (thanks @Heptazhou !) ([#1530](https://github.com/adobe-type-tools/afdko/pull/1530))
-- [otf3ttf] Force maxPoolCapacity to be at least 1 (thanks @Heptazhou !)([#1529](https://github.com/adobe-type-tools/afdko/pull/1529))
+- [otf2ttf] Ensure poolCapacity is at least 1 (thanks @Heptazhou !) ([#1530](https://github.com/adobe-type-tools/afdko/pull/1530))
+- [otf2ttf] Force maxPoolCapacity to be at least 1 (thanks @Heptazhou !)([#1529](https://github.com/adobe-type-tools/afdko/pull/1529))
 
 3.9.1 (released 2022-07-01)
 ---------------------------
