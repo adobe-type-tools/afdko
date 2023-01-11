@@ -1,6 +1,22 @@
 Changelog
 =========
 
+3.9.2 (released 2023-01-10)
+---------------------------
+- tx:
+  - [tx] Always use blend for stem storage in cffwrite_t2cstr.c ([#1591](https://github.com/adobe-type-tools/afdko/pull/1591))
+  - [tx] [t2cstr] Use non-xxxVF paths in t2cstr when flattening and outputting CFF2 ([#1588](https://github.com/adobe-type-tools/afdko/pull/1588))
+  - UFO parsing:
+    - [tx] Replace UFO .glif file parsing with libxml2 ([#1556](https://github.com/adobe-type-tools/afdko/pull/1556))
+    - [tx] Replace UFO content.plist/glyphList parsing with libxml2 ([#1543](https://github.com/adobe-type-tools/afdko/pull/1543))
+    - [tx] Other related uforead & ufowrite parsing updates ([#1595](https://github.com/adobe-type-tools/afdko/pull/1595), [#1590](https://github.com/adobe-type-tools/afdko/pull/1590), [#1568](https://github.com/adobe-type-tools/afdko/pull/1568), [#1566](https://github.com/adobe-type-tools/afdko/pull/1566), [#1541](https://github.com/adobe-type-tools/afdko/pull/1541), [#1537](https://github.com/adobe-type-tools/afdko/pull/1537), [#1536](https://github.com/adobe-type-tools/afdko/pull/1536))
+- [dependencies] add renovate.json ([#1545](https://github.com/adobe-type-tools/afdko/pull/1545))
+- [agd.py] [comparefamily.py] Fixing the two instances of "rU" (thanks @colinmford !) ([#1584](https://github.com/adobe-type-tools/afdko/pull/1584))
+- [makeinstancesufo] Add --instance_info option to makeinstancesufo  ([#1577](https://github.com/adobe-type-tools/afdko/pull/1577))
+- [makeinstancesufo] Boost number of makeinstancesufo pool processors by one ([#1561](https://github.com/adobe-type-tools/afdko/pull/1561))
+- [otf2ttf] Ensure poolCapacity is at least 1 (thanks @Heptazhou !) ([#1530](https://github.com/adobe-type-tools/afdko/pull/1530))
+- [otf2ttf] Force maxPoolCapacity to be at least 1 (thanks @Heptazhou !)([#1529](https://github.com/adobe-type-tools/afdko/pull/1529))
+
 3.9.1 (released 2022-07-01)
 ---------------------------
 - [CMake] Link LibXML2 statically for Linux for bug fix ([#1527](https://github.com/adobe-type-tools/afdko/pull/1527))
