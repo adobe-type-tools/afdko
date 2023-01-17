@@ -4098,27 +4098,31 @@ def doFamilyTest18():
 				print("	Error: font BlueValues has '%s' zones, but is allowed to hold at most 7. %s" % (len(tempBlues)/2, font.PostScriptName1))
 			if (len(tempBlues) % 2) != 0:
 				print("	Error: font BlueValues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font.PostScriptName1))
-			tempBlues.sort()
-			#if tempBlues != font.BlueValues: # this turns out to be OK.
-			#	print("	Error: font BlueValues '%s' are not sorted in ascending order. %s." % (font.BlueValues, font.PostScriptName1))
-			if tempBlues[1] < font.fontBBox[1]:
-				print("	Error: font BlueValues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font.fontBBox[1], font.PostScriptName1))
-			if tempBlues[-2] > font.fontBBox[3]:
-				print("	Error: font BlueValues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2], tempBlues[-1], font.fontBBox[3], font.PostScriptName1))
+			
+			if len(tempBlues) > 0:
+				tempBlues.sort()
+				#if tempBlues != font.BlueValues: # this turns out to be OK.
+				#	print("	Error: font BlueValues '%s' are not sorted in ascending order. %s." % (font.BlueValues, font.PostScriptName1))
+				if tempBlues[1] < font.fontBBox[1]:
+					print("	Error: font BlueValues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font.fontBBox[1], font.PostScriptName1))
+				if tempBlues[-2] > font.fontBBox[3]:
+					print("	Error: font BlueValues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2], tempBlues[-1], font.fontBBox[3], font.PostScriptName1))
 
 			if font.OtherBlues and (len(tempBlues) < 2):
-				tempBlues = copy.copy(font.OtherBlues)
-				if len(tempBlues) > 10:
-					print("	Error: font OtherBlues has '%s' zones, but is allowed to hold at most 5. %s" % (len(tempBlues)/2, font.PostScriptName1))
-				if (len(tempBlues) % 2) != 0:
-					print("	Error: font OtherBlues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font.PostScriptName1))
-				tempBlues.sort()
-				#if tempBlues != font.OtherBlues: # this turns out to be OK.
-				#	print("	Error: font OtherBlues '%s' are not sorted in ascending order. %s." % (font.OtherBlues, font.PostScriptName1))
-				if tempBlues[1] < font.fontBBox[1]:
-					print("	Error: font OtherBlues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font.fontBBox[1], font.PostScriptName1))
-				if tempBlues[-2] > font.fontBBox[3]:
-					print("	Error: font OtherBlues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2], tempBlues[-1], font.fontBBox[3], font.PostScriptName1))
+				tempOtherBlues = copy.copy(font.OtherBlues)
+				if len(tempOtherBlues) > 10:
+					print("	Error: font OtherBlues has '%s' zones, but is allowed to hold at most 5. %s" % (len(tempOtherBlues)/2, font.PostScriptName1))
+				if (len(tempOtherBlues) % 2) != 0:
+					print("	Error: font OtherBlues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempOtherBlues), font.PostScriptName1))
+				
+				if len(tempOtherBlues) > 0:
+					tempOtherBlues.sort()
+					#if tempOtherBlues != font.OtherBlues: # this turns out to be OK.
+					#	print("	Error: font OtherBlues '%s' are not sorted in ascending order. %s." % (font.OtherBlues, font.PostScriptName1))
+					if tempOtherBlues[1] < font.fontBBox[1]:
+						print("	Error: font OtherBlues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempOtherBlues[0], tempOtherBlues[1], font.fontBBox[1], font.PostScriptName1))
+					if tempOtherBlues[-2] > font.fontBBox[3]:
+						print("	Error: font OtherBlues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempOtherBlues[-2], tempOtherBlues[-1], font.fontBBox[3], font.PostScriptName1))
 
 			for font1 in subgroup[1:]:
 				try:
@@ -4138,18 +4142,20 @@ def doFamilyTest18():
 					print("\tBlueValues:", font1.BlueValues)
 
 				# check vs bbox, and check order
-				tempBlues = copy.copy(font1.BlueValues )
+				tempBlues = copy.copy(font1.BlueValues)
 				if len(tempBlues) > 14:
 					print("	Error: font BlueValues has '%s' zones, but is allowed to hold at most 7. %s" % (len(tempBlues)/2, font1.PostScriptName1))
 				if (len(tempBlues) % 2) != 0:
 					print("	Error: font BlueValues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font1.PostScriptName1))
-				tempBlues.sort()
-				#if tempBlues != font1.BlueValues: # this turns out to be OK.
-				#	print("	Error: font BlueValues '%s' are not sorted in ascending order. %s." % (font1.BlueValues, font1.PostScriptName1))
-				if tempBlues[1] < font1.fontBBox[1]:
-					print("	Error: font BlueValues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font1.fontBBox[1], font1.PostScriptName1))
-				if tempBlues[-2] > font1.fontBBox[3]:
-					print("	Error: font BlueValues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2], tempBlues[-1], font1.fontBBox[3], font1.PostScriptName1))
+
+				if len(tempBlues) > 0:
+					tempBlues.sort()
+					#if tempBlues != font1.BlueValues: # this turns out to be OK.
+					#	print("	Error: font BlueValues '%s' are not sorted in ascending order. %s." % (font1.BlueValues, font1.PostScriptName1))
+					if tempBlues[1] < font1.fontBBox[1]:
+						print("	Error: font BlueValues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font1.fontBBox[1], font1.PostScriptName1))
+					if tempBlues[-2] > font1.fontBBox[3]:
+						print("	Error: font BlueValues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2], tempBlues[-1], font1.fontBBox[3], font1.PostScriptName1))
 
 				if len(font.OtherBlues) != len(font1.OtherBlues):
 					print("\nError: These two fonts do not have the same array size of OtherBlues for", name)
@@ -4159,18 +4165,20 @@ def doFamilyTest18():
 					print("\tOtherBlues:", font1.OtherBlues)
 
 				if font1.OtherBlues:
-					tempBlues = copy.copy(font1.OtherBlues)
-					if len(tempBlues) > 10:
-						print("	Error: font OtherBlues has '%s' zones, but is allowed to hold at most 5. %s" % (len(tempBlues)/2, font1.PostScriptName1))
-					if (len(tempBlues) % 2) != 0:
-						print("	Error: font OtherBlues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempBlues), font1.PostScriptName1))
-					tempBlues.sort()
-					#if tempBlues != font1.OtherBlues: # this turns out to be OK.
-					#	print("	Error: font OtherBlues '%s' are not sorted in ascending order. %s." % (font1.OtherBlues, font1.PostScriptName1))
-					if tempBlues[1] < font1.fontBBox[1]:
-						print("	Error: font OtherBlues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempBlues[0], tempBlues[1], font1.fontBBox[1], font1.PostScriptName1))
-					if tempBlues[-2] > font1.fontBBox[3]:
-						print("	Error: font OtherBlues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempBlues[-2],tempBlues[-1], font1.fontBBox[3], font1.PostScriptName1))
+					tempOtherBlues = copy.copy(font1.OtherBlues)
+					if len(tempOtherBlues) > 10:
+						print("	Error: font OtherBlues has '%s' zones, but is allowed to hold at most 5. %s" % (len(tempOtherBlues)/2, font1.PostScriptName1))
+					if (len(tempOtherBlues) % 2) != 0:
+						print("	Error: font OtherBlues has '%s' integer values, List of values must be even as it takes a pair to describe an alignment zone. %s" % (len(tempOtherBlues), font1.PostScriptName1))
+
+					if len(tempOtherBlues) > 0:
+						tempOtherBlues.sort()
+						#if tempOtherBlues != font1.OtherBlues: # this turns out to be OK.
+						#	print("	Error: font OtherBlues '%s' are not sorted in ascending order. %s." % (font1.OtherBlues, font1.PostScriptName1))
+						if tempOtherBlues[1] < font1.fontBBox[1]:
+							print("	Error: font OtherBlues has lowest zone (%s,%s) outside of minimum y of font bounding box '%s'. %s" % (tempOtherBlues[0], tempOtherBlues[1], font1.fontBBox[1], font1.PostScriptName1))
+						if tempOtherBlues[-2] > font1.fontBBox[3]:
+							print("	Error: font OtherBlues has highest zone (%s,%s) outside of maximum y of font bounding box '%s'. %s" % (tempOtherBlues[-2],tempOtherBlues[-1], font1.fontBBox[3], font1.PostScriptName1))
 
 def doFamilyTest19():
 	global compatibleFamilyList3
