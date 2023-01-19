@@ -11,3 +11,4 @@
 ---
 ##### • [FDK Build Notes](./FDK_Build_Notes.md)
 ##### • [MakeOTFEXE Feature File Parser Notes](./Feature_Parser_Notes.md)
+##### • [Support of CFF2 in AFDKO](./CFF2_Support.md)
