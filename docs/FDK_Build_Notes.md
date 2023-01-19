@@ -48,8 +48,13 @@ Note that unless you are using macOS or Windows you must have `libuuid` and its 
 
 If the build is successful each program (e.g. makeotfexe) will be built as `build/bin/[program]`.  If you would like to install them in `/usr/local/bin` you can then run `cmake --build build -- install`.
 
-AFDKO uses libxml2 for parsing in tx. If libxml2 is not found in the system, it will be installed through CMake externally in `ExternalLibXML2.cmake` and statically linked. This is usually the case for Windows. 
-Currently, libxml2 will also be statically linked in Linux due to a [bug found in the linux python wheels when dynamically linked](https://github.com/adobe-type-tools/afdko/issues/1525).
+### LibXML2
+
+AFDKO uses libxml2 for parsing in tx. If libxml2 is not found in the system, it will be installed through CMake externally in `ExternalLibXML2.cmake` and statically linked. This is usually the case for Windows.
+
+If you want to force static linking even if there is a version of LibXML2 installed on the system, set the environment variable `FORCE_BUILD_LIBXML2` to some value before building.  If you want to force the use of an already-installed LibXML2 shared library, set `FORCE_SYSTEM_LIBXML2`.
+
+We no longer force static linking for Linux generally, but if you are attempting to build a portable wheel you should consider linking LibXML2 statically unless you can be confident that the environment where the wheel will be installed will always have a compatible version of the LibXML2 shared library installed.
 
 ### Noted CMake options
 
