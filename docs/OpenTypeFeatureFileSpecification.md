@@ -2644,7 +2644,7 @@ For all three forms of the mark attachment rules - Mark-To-Base,
 Mark-To-Ligature, and Mark-To-Mark - the contextual form of the positioning
 rules consist of inserting glyph sequences in one or more of three places in the
 rule:
-   1. before the initial 'base | ligature | mark' keyword
+   1. before the initial `base`, `ligature`, or `mark` keyword
    2. after the base glyph or glyph class
    3. after all the anchor-mark class clauses
 
