@@ -106,3 +106,8 @@ int hmtxGetNLongHorMetrics(hotCtx g) {
     hmtxCtx h = g->ctx.hmtx;
     return h->tbl.hMetrics.cnt;
 }
+
+void hmtxSetNLongHorMetrics(hotCtx g, int n) {
+    hmtxCtx h = g->ctx.hmtx;
+    h->tbl.hMetrics.cnt = n;
+}

@@ -254,6 +254,11 @@ void nameNew(hotCtx g) {
     g->ctx.name = h;
 }
 
+/* XXX Eventually this will copy additional names from the source name table. 
+ */
+void nameRead(hotCtx g, int offset, int length) {
+}
+
 /* Add standard Windows and Macintosh default names. */
 static void addStdNames(nameCtx h, int win, int mac) {
     hotCtx g = h->g;
