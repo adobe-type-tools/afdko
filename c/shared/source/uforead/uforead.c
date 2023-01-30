@@ -1194,7 +1194,7 @@ static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     } else {
         foundGlyph->glifFileName = fileName;
         if (foundGlyph->glyphOrder == -1)
-            foundGlyph->glyphOrder = getGlyphOrderIndex(h, h->parseKeyName);
+            foundGlyph->glyphOrder = getGlyphOrderIndex(h, glyphName);
     }
 }
 
