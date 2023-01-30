@@ -8,6 +8,8 @@
 
 #include "post.h"
 
+#include <string.h>
+
 /* ---------------------------- Table Definition --------------------------- */
 typedef struct {
     Fixed version;
@@ -19,6 +21,8 @@ typedef struct {
     unsigned long maxMemType42;
     unsigned long minMemType1;
     unsigned long maxMemType1;
+    int namelength;
+    char *nameblock;
 } postTbl;
 
 /* --------------------------- Context Definition -------------------------- */
@@ -35,12 +39,54 @@ void postNew(hotCtx g) {
     /* Link contexts */
     h->g = g;
     g->ctx.post = h;
+    h->tbl.namelength = 0;
+    h->tbl.nameblock = NULL;
+    h->tbl.version = VERSION(3, 0);
+}
+
+void postRead(hotCtx g, int offset, int length) {
+    postCtx h = g->ctx.post;
+
+    g->cb.stm.seek(&g->cb.stm, g->in_stream, offset);
+    g->bufleft = 0;
+    h->tbl.version = hotIn4(g);
+    /*
+    h->tbl.italicAngle = hotIn4(g);
+    h->tbl.underlinePosition = hotIn2(g);
+    h->tbl.underlineThickness = hotIn2(g);
+    h->tbl.isFixedPitch = hotIn4(g);
+    h->tbl.minMemType42 = hotIn4(g);
+    h->tbl.maxMemType42 = hotIn4(g);
+    h->tbl.minMemType1 = hotIn4(g);
+    h->tbl.maxMemType1 = hotIn4(g);
+    */
+    if (h->tbl.version != VERSION(2, 0) || length <= 32) {
+        hotMsg(g, hotWARNING, "here1");
+        return;
+    }
+    g->cb.stm.seek(&g->cb.stm, g->in_stream, offset + 32);
+    char *buf, *p;
+    length -= 32;
+    h->tbl.namelength = length;
+    p = h->tbl.nameblock = (char *)MEM_NEW(g, length);
+    while (length > 0) {
+        int l = g->cb.stm.read(&g->cb.stm, g->in_stream, &buf);
+        if (l <= 0) {
+            hotMsg(g, hotFATAL, "Input name table unexpectedly short");
+        } else if (l < length) {
+            memcpy(p, buf, l);
+            p += l;
+            length -= l;
+        } else {
+            memcpy(p, buf, length);
+            length = 0;
+        }
+    }
 }
 
 int postFill(hotCtx g) {
     postCtx h = g->ctx.post;
 
-    h->tbl.version = VERSION(3, 0);
     h->tbl.italicAngle = g->font.ItalicAngle;
     h->tbl.underlinePosition = g->font.UnderlinePosition +
                                g->font.UnderlineThickness / 2;
@@ -66,11 +112,18 @@ void postWrite(hotCtx g) {
     OUT4(h->tbl.maxMemType42);
     OUT4(h->tbl.minMemType1);
     OUT4(h->tbl.maxMemType1);
+    if (h->tbl.namelength > 0)
+        OUTN(h->tbl.namelength, h->tbl.nameblock);
 }
 
 void postReuse(hotCtx g) {
+    postCtx h = g->ctx.post;
+    MEM_FREE(g, h->tbl.nameblock);
+    h->tbl.namelength = 0;
+    h->tbl.nameblock = NULL;
 }
 
 void postFree(hotCtx g) {
+    MEM_FREE(g, g->ctx.post->tbl.nameblock);
     MEM_FREE(g, g->ctx.post);
 }

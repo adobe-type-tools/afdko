@@ -16,6 +16,8 @@ void headWrite(hotCtx g);
 void headReuse(hotCtx g);
 void headFree(hotCtx g);
 
+void headRead(hotCtx g, int offset, int length);
+
 #define HEAD_ADJUST_OFFSET (2 * int32) /* Checksum adjustment offset */
 
 #endif  // ADDFEATURES_HOTCONV_HEAD_H_

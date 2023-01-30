@@ -16,4 +16,6 @@ void postWrite(hotCtx g);
 void postReuse(hotCtx g);
 void postFree(hotCtx g);
 
+void postRead(hotCtx g, int offset, int length);
+
 #endif  // ADDFEATURES_HOTCONV_POST_H_

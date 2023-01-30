@@ -17,6 +17,7 @@ void hheaReuse(hotCtx g);
 void hheaFree(hotCtx g);
 
 /* Supplementary functions */
+void hheaRead(hotCtx g, int offset, int length);
 void hheaSetCaretOffset(hotCtx g, short caretOffset);
 
 #endif  // ADDFEATURES_HOTCONV_HHEA_H_

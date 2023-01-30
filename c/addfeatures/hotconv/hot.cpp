@@ -14,7 +14,10 @@
 
 #include <limits>
 
+#include "head.h"
+#include "hhea.h"
 #include "hmtx.h"
+#include "post.h"
 #include "sfnt.h"
 #include "sfntread.h"
 #include "supportfp.h"
@@ -148,6 +151,8 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     dnaINIT(g->DnaCTX, g->font.kern.values, 1500, 8500);
     dnaINIT(g->DnaCTX, g->font.unenc, 30, 70);
     g->font.unenc.func = initCharName;
+    g->bufnext = NULL;
+    g->bufleft = 0;
 
     initOverrides(g);
 
@@ -245,10 +250,7 @@ static void hotGlyphEnd(abfGlyphCallbacks *cb) {
     }
 }
 
-/* Convert PostScript font to CFF and read result */
-const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
-    abfTopDict *top;
-
+static void hotReadTables(hotCtx g) {
     g->in_stream = g->cb.stm.open(&g->cb.stm, CFR_SRC_STREAM_ID, 0);
 
     sfrCtx sfr = sfrNew(&hot_memcb, &g->cb.stm, SFR_CHECK_ARGS);
@@ -264,30 +266,57 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
                 table = sfrGetTableByTag(sfr, CFF2_);
                 if (table != NULL) {
                     sfntOverrideTable(g, CFF2_, table->offset, table->length);
+                    table = sfrGetTableByTag(sfr, head_);
+                    if (table == NULL)
+                        hotMsg(g, hotFATAL, "CFF2 sfnt must contain head table");
+                    headRead(g, table->offset, table->length);
+                    table = sfrGetTableByTag(sfr, hhea_);
+                    if (table == NULL)
+                        hotMsg(g, hotFATAL, "CFF2 sfnt must contain hhea table");
+                    hheaRead(g, table->offset, table->length);
                     table = sfrGetTableByTag(sfr, hmtx_);
                     if (table == NULL)
                         hotMsg(g, hotFATAL, "CFF2 sfnt must contain hmtx table");
                     sfntOverrideTable(g, hmtx_, table->offset, table->length);
+                    table = sfrGetTableByTag(sfr, name_);
+                    if (table == NULL)
+                        hotMsg(g, hotFATAL, "CFF2 sfnt must contain name table");
+                    nameRead(g, table->offset, table->length);
+                    table = sfrGetTableByTag(sfr, post_);
+                    if (table != NULL) {
+                        postRead(g, table->offset, table->length);
+                    } else {
+                        hotMsg(g, hotWARNING, "CFF2 sfnt does not include post table");
+                    }
+                    // check for fvar, if there add variable tables as anon
+                    // except for MVAR, which we read in and write back out
                 }
             }
+            // call name function to read in extra labels
         } else {
             hotMsg(g, hotFATAL, "sfnt file must have CFF or CFF2 table");
         }
     } else {
         g->cb.stm.seek(&g->cb.stm, g->in_stream, 0);
-        char *buf;
-        int l = g->cb.stm.read(&g->cb.stm, g->in_stream, &buf);
-        if (l < 4)
+        char first = hotFillBuf(g);
+        if (g->bufleft < 3)
             hotMsg(g, hotFATAL, "Bad font file");
-        else if (buf[0] == 2)
+        else if (first == 2)
             hotMsg(g, hotFATAL, "Bad font file (or bare CFF2 table)");
-        else if (buf[0] != 1)
+        else if (first != 1)
             hotMsg(g, hotFATAL, "Bad font file");
         else
             sfntOverrideTable(g, CFF__, 0, -1);
     }
     g->cb.stm.seek(&g->cb.stm, g->in_stream, 0);
     sfrFree(sfr);
+}
+
+/* Convert PostScript font to CFF and read result */
+const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
+    abfTopDict *top;
+
+    hotReadTables(g);
 
     /* Copy conversion flags */
     g->font.flags = 0;
@@ -1204,6 +1233,33 @@ void CTL_CDECL hotMsg(hotCtx g, int level, const char *fmt, ...) {
     } else if (level == hotERROR && !g->hadError) {
         g->hadError = 1;
     }
+}
+
+/* Replenish input buffer using refill function */
+char hotFillBuf(hotCtx g) {
+    g->bufleft = g->cb.stm.read(&g->cb.stm, g->in_stream, &g->bufnext);
+    if (g->bufleft-- == 0) {
+        hotMsg(g, hotFATAL, "premature end of input");
+    }
+    return *g->bufnext++;
+}
+
+/* Input OTF data as 2-byte number in big-endian order */
+short hotIn2(hotCtx g) {
+    unsigned short result;
+    result = (unsigned short)hin1(g) << 8;
+    result |= (unsigned short)hin1(g);
+    return (short) result;
+}
+
+/* Input OTF data as 4-byte number in big-endian order */
+int32_t hotIn4(hotCtx g) {
+    unsigned long result;
+    result = (unsigned long)hin1(g) << 24;
+    result |= (unsigned long)hin1(g) << 16;
+    result |= (unsigned long)hin1(g) << 8;
+    result |= (unsigned long)hin1(g);
+    return (int32_t)result;
 }
 
 /* Output OTF data as 2-byte number in big-endian order */
