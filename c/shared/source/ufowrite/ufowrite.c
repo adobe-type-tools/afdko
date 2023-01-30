@@ -649,16 +649,16 @@ static void writeGlyphOrder(ufwCtx h) {
 
     if (h->top->sup.flags & ABF_CID_FONT) {
         if (h->top->cid.CIDFontName.ptr != NULL) {
-            writeLine(h, "\t<key>com.adobe.type.cid.CIDFontName</key>");
+            writeLine(h, "\t<key>com.adobe.type.CIDFontName</key>");
             sprintf(buffer, "\t<string>%s</string>", h->top->cid.CIDFontName.ptr);
             writeLine(h, buffer);
-            writeLine(h, "\t<key>com.adobe.type.cid.Registry</key>");
+            writeLine(h, "\t<key>com.adobe.type.Registry</key>");
             sprintf(buffer, "\t<string>%s</string>", h->top->cid.Registry.ptr);
             writeLine(h, buffer);
-            writeLine(h, "\t<key>com.adobe.type.cid.Ordering</key>");
+            writeLine(h, "\t<key>com.adobe.type.Ordering</key>");
             sprintf(buffer, "\t<string>%s</string>", h->top->cid.Ordering.ptr);
             writeLine(h, buffer);
-            writeLine(h, "\t<key>com.adobe.type.cid.Supplement</key>");
+            writeLine(h, "\t<key>com.adobe.type.Supplement</key>");
             sprintf(buffer, "\t<integer>%ld</integer>", h->top->cid.Supplement);
             writeLine(h, buffer);
         }
