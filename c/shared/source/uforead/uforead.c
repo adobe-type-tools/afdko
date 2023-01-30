@@ -1831,13 +1831,13 @@ static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
 
     if (strEqual(keyName, "public.glyphOrder"))
        setGlifOrderArray(h, keyName);
-    else if (strEqual(keyName, "com.adobe.type.cid.CIDFontName"))
+    else if (strEqual(keyName, "com.adobe.type.CIDFontName"))
         top->cid.CIDFontName.ptr = copyStr(h, keyValue);
-    else if (strEqual(keyName, "com.adobe.type.cid.Registry"))
+    else if (strEqual(keyName, "com.adobe.type.Registry"))
         top->cid.Registry.ptr = copyStr(h, keyValue);
-    else if (strEqual(keyName, "com.adobe.type.cid.Ordering"))
+    else if (strEqual(keyName, "com.adobe.type.Ordering"))
         top->cid.Ordering.ptr = copyStr(h, keyValue);
-    else if (strEqual(keyName, "com.adobe.type.cid.Supplement"))
+    else if (strEqual(keyName, "com.adobe.type.Supplement"))
         top->cid.Supplement = atol(keyValue);
     else if (setFontInfoFD(h, keyName, keyValue))
         return true;

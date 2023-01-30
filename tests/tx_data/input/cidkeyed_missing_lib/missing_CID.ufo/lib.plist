@@ -245,19 +245,19 @@
 	<dict>
 	<key>cid00000</key>
 		<dict>
-			<key>com.adobe.type.cid</key>
+			<key>com.adobe.type</key>
 			<integer>0</integer>
 			<key>com.adobe.type.iFD</key>
 			<integer>0</integer>
 		</dict>
 	</dict>
-	<key>com.adobe.type.cid.CIDFontName</key>
+	<key>com.adobe.type.CIDFontName</key>
 	<string>SourceHanSansVF-Heavy</string>
-	<key>com.adobe.type.cid.Registry</key>
+	<key>com.adobe.type.Registry</key>
 	<string>Adobe</string>
-	<key>com.adobe.type.cid.Ordering</key>
+	<key>com.adobe.type.Ordering</key>
 	<string>Identity</string>
-	<key>com.adobe.type.cid.Supplement</key>
+	<key>com.adobe.type.Supplement</key>
 	<integer>0</integer>
 </dict>
 </plist>

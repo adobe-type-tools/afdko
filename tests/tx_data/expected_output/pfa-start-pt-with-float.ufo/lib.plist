@@ -8,13 +8,13 @@
 		<string>cid00001</string>
 		<string>cid00002</string>
 	</array>
-	<key>com.adobe.type.cid.CIDFontName</key>
+	<key>com.adobe.type.CIDFontName</key>
 	<string>TestFont-Regular</string>
-	<key>com.adobe.type.cid.Registry</key>
+	<key>com.adobe.type.Registry</key>
 	<string>Adobe</string>
-	<key>com.adobe.type.cid.Ordering</key>
+	<key>com.adobe.type.Ordering</key>
 	<string>Identity</string>
-	<key>com.adobe.type.cid.Supplement</key>
+	<key>com.adobe.type.Supplement</key>
 	<integer>0</integer>
 	<key>com.adobe.type.FSType</key>
 	<integer>4</integer>
