@@ -387,6 +387,9 @@ struct hotCtx_ {
     char error_id_text[ID_TEXT_SIZE]; /* buffer for text identifying class and feature of error */
     short hadError;        /* Flags if error occurred */
     uint32_t convertFlags; /* flags for building final OTF. */
+    char *bufnext;         /* Next byte available in input buffer */
+    long bufleft;          /* Number of bytes available in input buffer */
+
     std::shared_ptr<slogger> logger;
     std::shared_ptr<GOADB> goadb;
 };
@@ -395,11 +398,22 @@ struct hotCtx_ {
 void CTL_CDECL hotMsg(hotCtx g, int level, const char *fmt, ...);
 void hotQuitOnError(hotCtx g);
 
-inline void hout1(hotCtx g, char c) { g->cb.stm.write(&g->cb.stm, g->out_stream, 1, &c); }
+inline void hout1(hotCtx g, char c) {
+    g->cb.stm.write(&g->cb.stm, g->out_stream, 1, &c);
+}
 
 void hotOut2(hotCtx g, short value);
 void hotOut3(hotCtx g, int32_t value);
 void hotOut4(hotCtx g, int32_t value);
+
+/* Read from OTF data */
+char hotFillBuf(hotCtx g);
+inline char hin1(hotCtx g) {
+    return (g->bufleft-- == 0) ? hotFillBuf(g) : *g->bufnext++;
+}
+short hotIn2(hotCtx g);
+int32_t hotIn4(hotCtx g);
+
 
 void hotCalcSearchParams(unsigned unitSize, long nUnits,
                          unsigned short *searchRange,

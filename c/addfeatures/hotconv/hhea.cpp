@@ -67,6 +67,34 @@ void hheaNew(hotCtx g) {
     g->ctx.hhea = h;
 }
 
+void hheaRead(hotCtx g, int offset, int length) {
+    hheaCtx h = g->ctx.hhea;
+    g->cb.stm.seek(&g->cb.stm, g->in_stream, offset);
+    g->bufleft = 0;
+    Fixed version = hotIn4(g);
+    if (version != VERSION(1, 0)) {
+        hotMsg(g, hotWARNING, "Unrecognized version of input hhea table, will not read");
+        return;
+    }
+    h->tbl.ascender = hotIn2(g);
+    h->tbl.descender = hotIn2(g);
+    h->tbl.lineGap = hotIn2(g);
+    h->tbl.advanceWidthMax = hotIn2(g);
+    h->tbl.minLeftSideBearing = hotIn2(g);
+    h->tbl.minRightSideBearing = hotIn2(g);
+    h->tbl.xMaxExtent = hotIn2(g);
+    h->tbl.caretSlopeRise = hotIn2(g);
+    h->tbl.caretSlopeRun = hotIn2(g);
+    h->tbl.caretOffset = hotIn2(g);
+    uint16_t t = hotIn2(g);  // reserved0
+    t = hotIn2(g);  // reserved1
+    t = hotIn2(g);  // reserved2
+    t = hotIn2(g);  // reserved3
+    t = hotIn2(g);  // metricDataFormat
+    t = hotIn2(g);  // numberOfHMetrics
+    hmtxSetNLongHorMetrics(g, t);
+}
+
 int hheaFill(hotCtx g) {
     hheaCtx h = g->ctx.hhea;
 

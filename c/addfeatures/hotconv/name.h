@@ -20,6 +20,7 @@ void nameReuse(hotCtx g);
 void nameFree(hotCtx g);
 
 /* Supplementary functions */
+void nameRead(hotCtx g, int offset, int length);
 void nameAddReg(hotCtx g,
                 unsigned short platformId,
                 unsigned short platspecId,

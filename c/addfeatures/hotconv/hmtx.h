@@ -18,5 +18,6 @@ void hmtxFree(hotCtx g);
 
 /* Supplementary Functions */
 int hmtxGetNLongHorMetrics(hotCtx g);
+void hmtxSetNLongHorMetrics(hotCtx g, int n);
 
 #endif  // ADDFEATURES_HOTCONV_HMTX_H_
