@@ -1335,7 +1335,7 @@ glyphorder_dup_warn = (b"(ufr) Warning: glyph order contains duplicate" +
 def test_ufo_libplist_parsing(file, msg, ret_code):
     folder = "ufo-libplist-parsing/"
     ufo_input_path = get_input_path(folder + file + ".ufo")
-    expected_path = get_expected_path(folder + file + ".pfa")
+    expected_path = get_expected_path(folder + file + ".pfb")
     output_path = get_temp_file_path()
     arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
                  ufo_input_path, output_path]
