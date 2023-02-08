@@ -1366,8 +1366,8 @@ def test_ufo_mismatch_fdarray_fdselect(file, msg, ret_code):
     ufo_input_path = get_input_path(folder + file + ".ufo")
     expected_path = get_expected_path(folder + file + ".txt")
     output_path = get_temp_file_path()
-    arg = CMD + ['-s', '-e', '-a', '-o', '-f',
-                 ufo_input_path, output_path]
+    arg = CMD + ['-s', '-e', '-a', '-f',
+                 ufo_input_path]
     stderr_path = runner(arg)
     with open(stderr_path, 'rb') as f:
         output = f.read()
@@ -1375,7 +1375,7 @@ def test_ufo_mismatch_fdarray_fdselect(file, msg, ret_code):
     if (ret_code == 0):
         assert differ([expected_path, output_path])
     else:
-        arg = [TOOL, '-t1', '-f', ufo_input_path]
+        arg = [TOOL, '-f', ufo_input_path]
         assert subprocess.call(arg) == ret_code
 
 
