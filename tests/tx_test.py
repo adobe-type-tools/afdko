@@ -1353,6 +1353,32 @@ def test_ufo_libplist_parsing(file, msg, ret_code):
         assert subprocess.call(arg) == ret_code
 
 
+mismatched_fdarray_fdselect_msg = (b"tx: (ufr) Number of FDArrays defined in "
+                                   b"lib.plist not equal to number of "
+                                   b"FDSelect Groups in groups.plist.")
+
+
+@pytest.mark.parametrize('file, msg, ret_code', [
+    ("num_fdarrays_fdselect_mismatch", mismatched_fdarray_fdselect_msg, 8),
+])
+def test_ufo_mismatch_fdarray_fdselect(file, msg, ret_code):
+    folder = "ufo-libplist-parsing/"
+    ufo_input_path = get_input_path(folder + file + ".ufo")
+    expected_path = get_expected_path(folder + file + ".txt")
+    output_path = get_temp_file_path()
+    arg = CMD + ['-s', '-e', '-a', '-o', '-f',
+                 ufo_input_path, output_path]
+    stderr_path = runner(arg)
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (msg) in output
+    if (ret_code == 0):
+        assert differ([expected_path, output_path])
+    else:
+        arg = [TOOL, '-t1', '-f', ufo_input_path]
+        assert subprocess.call(arg) == ret_code
+
+
 def test_ufo_underline_writing_bug1534():
     """
     Tests that ufowrite writes correct values (with new rounding)
