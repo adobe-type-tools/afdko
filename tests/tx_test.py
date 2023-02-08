@@ -1324,7 +1324,8 @@ glyphorder_dup_warn = (b"(ufr) Warning: glyph order contains duplicate" +
 
 
 @pytest.mark.parametrize('file, msg, ret_code', [
-    ("normal", b'', 0),
+    ("normal-namekeyed", b'', 0),
+    ("normal-cidkeyed", b'', 0),
     ("glyphorder-after-cid", b'', 0),
     ("empty-dict", glyphorder_warn, 0),
     ("empty-key-name", glyphorder_warn, 0),
