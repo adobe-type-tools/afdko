@@ -1914,12 +1914,16 @@ static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNod
     strncpy(FDIndex, FDArraySelectKeyName + 14, 2);
     if (FDIndex[1] == '.')
         FDIndex[1] = '\n';
+    int FDIndexInt = atoi(FDIndex);
+    
+    /* check if FDArray is defined */
+    if (h->top.FDArray.cnt - 1 <= FDIndexInt)
+        fatal(h, ufoErrParseFail, "Number of FDArrays defined in lib.plist not equal to number of FDSelect Groups in groups.plist.");
 
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
         char* glyphName = parseXMLKeyValue(h, cur);
         g = findGLIFRecByName(h, glyphName);
-        int FDIndexInt = atoi(FDIndex);
         if (g != NULL) {
             if (FDIndexInt >= h->top.FDArray.cnt - 1) {  /* one cnt reserved for default FDArray at this point */
 //                message(h, "Glyph %s is assigned to font dict index %d which is not defined. Will be assigned to default font dict at index 0 instead.\n", glyphName, FDIndexInt);
