@@ -1915,7 +1915,7 @@ static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNod
     if (FDIndex[1] == '.')
         FDIndex[1] = '\n';
     int FDIndexInt = atoi(FDIndex);
-    
+
     /* check if FDArray is defined */
     if (h->top.FDArray.cnt - 1 <= FDIndexInt)
         fatal(h, ufoErrParseFail, "Number of FDArrays defined in lib.plist not equal to number of FDSelect Groups in groups.plist.");

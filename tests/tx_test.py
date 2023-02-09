@@ -1498,8 +1498,13 @@ missing_FDArraySelect = (b"Warning: FDArraySelect not defined for "
                          b"cid-keyed font")
 
 
+fdselect_doesnt_exist_fail = (b"tx: (ufr) Number of FDArrays defined in "
+                              b"lib.plist not equal to number of FDSelect "
+                              b"Groups in groups.plist")
+
+
 @pytest.mark.parametrize('file, msg, ret_code', [
-    ("groups-fdselect-doesnt-exist", b'', 0),
+    ("groups-fdselect-doesnt-exist", fdselect_doesnt_exist_fail, 8),
     ("groups-keyname-missing", missing_iFD, 6),
     ("groups-keyvalue-missing", missing_iFD, 6),
     ("groups-missing-cidkeyed", missing_FDArraySelect, 6)
