@@ -294,15 +294,15 @@ struct ufoCtx_ {
        enum ufoFileState UFOFile;
        glifInfo GLIFInfo;
     } parseState;
-    struct
-    {
-        bool CIDFontName;
-        bool Registry;
-        bool Ordering;
-        bool Supplement;
-        bool postscriptFDArray;
-        bool postscriptCIDMap;
-    } requiredCIDKeys;
+
+    uint8_t requiredCIDKeyFlag;
+#define CIDKEY_CIDMAP      (1 << 1)
+#define CIDKEY_FDARRAY     (1 << 2)
+#define CIDKEY_SUPPLEMENT  (1 << 3)
+#define CIDKEY_ORDERING    (1 << 4)
+#define CIDKEY_REGISTRY    (1 << 5)
+#define CIDKEY_CIDFONTNAME (1 << 6)
+
     struct
     {
         _Exc_Buf env;
@@ -1839,37 +1839,27 @@ static bool validCIDKeyedFont(ufoCtx h, xmlNodePtr cur){
     while (cur != NULL) {
         char* keyName = parseXMLKeyName(h, cur);
         if (strEqual(keyName, "com.adobe.type.CIDFontName"))
-            h->requiredCIDKeys.CIDFontName = true;
+            h->requiredCIDKeyFlag |= CIDKEY_CIDFONTNAME;
         else if (strEqual(keyName, "com.adobe.type.Registry"))
-            h->requiredCIDKeys.Registry = true;
+            h->requiredCIDKeyFlag |= CIDKEY_REGISTRY;
         else if (strEqual(keyName, "com.adobe.type.Ordering"))
-            h->requiredCIDKeys.Ordering = true;
+            h->requiredCIDKeyFlag |= CIDKEY_ORDERING;
         else if (strEqual(keyName, "com.adobe.type.Supplement"))
-            h->requiredCIDKeys.Supplement = true;
+            h->requiredCIDKeyFlag |= CIDKEY_SUPPLEMENT;
         else if (strEqual(keyName, "com.adobe.type.postscriptFDArray"))
-            h->requiredCIDKeys.postscriptFDArray = true;
+            h->requiredCIDKeyFlag |= CIDKEY_FDARRAY;
         else if (strEqual(keyName, "postscriptFDArray"))
-            h->requiredCIDKeys.postscriptFDArray = true;
+            h->requiredCIDKeyFlag |= CIDKEY_FDARRAY;
         else if (strEqual(keyName, "com.adobe.type.postscriptCIDMap"))
-            h->requiredCIDKeys.postscriptCIDMap = true;
+            h->requiredCIDKeyFlag |= CIDKEY_CIDMAP;
         cur = cur->next;
     }
 
     /* now check all required keys */
-    if (h->requiredCIDKeys.CIDFontName == false)
-        return false;
-    else if (h->requiredCIDKeys.Registry == false)
-        return false;
-    else if (h->requiredCIDKeys.Ordering == false)
-        return false;
-    else if (h->requiredCIDKeys.Supplement == false)
-        return false;
-    else if (h->requiredCIDKeys.postscriptFDArray == false)
-        return false;
-    else if (h->requiredCIDKeys.postscriptCIDMap == false)
-        return false;
-    else
+    if (h->requiredCIDKeyFlag == 126)
         return true;
+    else
+        return false;
 }
 
 static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
@@ -3206,12 +3196,7 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
     h->parseState.GLIFInfo.CIDCount = 0;
     h->parseState.GLIFInfo.currentiFD = 0;
 
-    h->requiredCIDKeys.CIDFontName = false;
-    h->requiredCIDKeys.Registry = false;
-    h->requiredCIDKeys.Ordering = false;
-    h->requiredCIDKeys.Supplement = false;
-    h->requiredCIDKeys.postscriptFDArray = false;
-    h->requiredCIDKeys.postscriptCIDMap = false;
+    h->requiredCIDKeyFlag = 0;
 
     /* init glyph data structures used */
     h->valueArray.cnt = 0;
