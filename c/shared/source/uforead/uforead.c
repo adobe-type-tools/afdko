@@ -296,6 +296,15 @@ struct ufoCtx_ {
     } parseState;
     struct
     {
+        bool CIDFontName;
+        bool Registry;
+        bool Ordering;
+        bool Supplement;
+        bool postscriptFDArray;
+        bool postscriptCIDMap;
+    } requiredCIDKeys;
+    struct
+    {
         _Exc_Buf env;
         int code;
     } err;
@@ -342,6 +351,7 @@ static bool parseFontInfoPrivateDict(ufoCtx h, xmlNodePtr cur);
 static bool parseCIDMap(ufoCtx h, xmlNodePtr cur);
 static int parseGroups(ufoCtx h);
 static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNodePtr cur);
+static bool validCIDKeyedFont(ufoCtx h, xmlNodePtr cur);
 
 /* XML File Setting Functions */
 static bool setXMLFileKey(ufoCtx h, char* keyName, xmlNodePtr cur);
@@ -1791,6 +1801,15 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
 static int parseXMLPlistFile(ufoCtx h, xmlNodePtr cur) {
     char* keyName;
     cur = cur->xmlChildrenNode;
+
+    /* lib.plist: preparse set CID Font flags if has CID-keyed UFO required keys */
+    if (h->parseState.UFOFile == parsingLib) {
+        if (validCIDKeyedFont(h, cur)) {
+            h->top.sup.flags |= ABF_CID_FONT;
+            h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
+        }
+    }
+
     while (cur != NULL) {
         keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
@@ -1813,6 +1832,44 @@ static int parseXMLGlifFile(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *un
     }
     h->flags |= SEEN_END;
     return ufoSuccess;
+}
+
+static bool validCIDKeyedFont(ufoCtx h, xmlNodePtr cur){
+    /* if required key found, set as true*/
+    while (cur != NULL) {
+        char* keyName = parseXMLKeyName(h, cur);
+        if (strEqual(keyName, "com.adobe.type.CIDFontName"))
+            h->requiredCIDKeys.CIDFontName = true;
+        else if (strEqual(keyName, "com.adobe.type.Registry"))
+            h->requiredCIDKeys.Registry = true;
+        else if (strEqual(keyName, "com.adobe.type.Ordering"))
+            h->requiredCIDKeys.Ordering = true;
+        else if (strEqual(keyName, "com.adobe.type.Supplement"))
+            h->requiredCIDKeys.Supplement = true;
+        else if (strEqual(keyName, "com.adobe.type.postscriptFDArray"))
+            h->requiredCIDKeys.postscriptFDArray = true;
+        else if (strEqual(keyName, "postscriptFDArray"))
+            h->requiredCIDKeys.postscriptFDArray = true;
+        else if (strEqual(keyName, "com.adobe.type.postscriptCIDMap"))
+            h->requiredCIDKeys.postscriptCIDMap = true;
+        cur = cur->next;
+    }
+
+    /* now check all required keys */
+    if (h->requiredCIDKeys.CIDFontName == false)
+        return false;
+    else if (h->requiredCIDKeys.Registry == false)
+        return false;
+    else if (h->requiredCIDKeys.Ordering == false)
+        return false;
+    else if (h->requiredCIDKeys.Supplement == false)
+        return false;
+    else if (h->requiredCIDKeys.postscriptFDArray == false)
+        return false;
+    else if (h->requiredCIDKeys.postscriptCIDMap == false)
+        return false;
+    else
+        return true;
 }
 
 static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
@@ -1939,8 +1996,6 @@ static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNod
 
 static bool parseCIDMap(ufoCtx h, xmlNodePtr cur) {
     h->parseState.CIDMap = true;
-    h->top.sup.flags |= ABF_CID_FONT;
-    h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
     GLIF_Rec *g;
 
     if (!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))
@@ -3150,6 +3205,13 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
     h->parseState.GLIFInfo.currentCID = -1;
     h->parseState.GLIFInfo.CIDCount = 0;
     h->parseState.GLIFInfo.currentiFD = 0;
+
+    h->requiredCIDKeys.CIDFontName = false;
+    h->requiredCIDKeys.Registry = false;
+    h->requiredCIDKeys.Ordering = false;
+    h->requiredCIDKeys.Supplement = false;
+    h->requiredCIDKeys.postscriptFDArray = false;
+    h->requiredCIDKeys.postscriptCIDMap = false;
 
     /* init glyph data structures used */
     h->valueArray.cnt = 0;
