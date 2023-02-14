@@ -1840,13 +1840,11 @@ static bool validCIDKeyedFont(ufoCtx h, xmlNodePtr cur){
         char* keyName = parseXMLKeyName(h, cur);
         if (strEqual(keyName, "com.adobe.type.CIDFontName"))
             h->requiredCIDKeyFlag |= CIDKEY_CIDFONTNAME;
-        else if (strEqual(keyName, "com.adobe.type.Registry"))
+        else if (strEqual(keyName, "com.adobe.type.ROS")) {
             h->requiredCIDKeyFlag |= CIDKEY_REGISTRY;
-        else if (strEqual(keyName, "com.adobe.type.Ordering"))
             h->requiredCIDKeyFlag |= CIDKEY_ORDERING;
-        else if (strEqual(keyName, "com.adobe.type.Supplement"))
             h->requiredCIDKeyFlag |= CIDKEY_SUPPLEMENT;
-        else if (strEqual(keyName, "com.adobe.type.postscriptFDArray"))
+        } else if (strEqual(keyName, "com.adobe.type.postscriptFDArray"))
             h->requiredCIDKeyFlag |= CIDKEY_FDARRAY;
         else if (strEqual(keyName, "postscriptFDArray"))
             h->requiredCIDKeyFlag |= CIDKEY_FDARRAY;
@@ -1864,6 +1862,8 @@ static bool validCIDKeyedFont(ufoCtx h, xmlNodePtr cur){
 
 static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
     abfTopDict* top = &h->top;
+    char* ROSValues;  /* Registry, Ordering, Supplement */
+    char* value;
 
     if (strEqual(keyName, "com.adobe.type.postscriptFDArray") || strEqual(keyName, "postscriptFDArray"))
      return parseFontInfoFDArray(h, cur);
@@ -1880,13 +1880,14 @@ static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
        setGlifOrderArray(h, keyName);
     else if (strEqual(keyName, "com.adobe.type.CIDFontName"))
         top->cid.CIDFontName.ptr = copyStr(h, keyValue);
-    else if (strEqual(keyName, "com.adobe.type.Registry"))
-        top->cid.Registry.ptr = copyStr(h, keyValue);
-    else if (strEqual(keyName, "com.adobe.type.Ordering"))
-        top->cid.Ordering.ptr = copyStr(h, keyValue);
-    else if (strEqual(keyName, "com.adobe.type.Supplement"))
-        top->cid.Supplement = atol(keyValue);
-    else if (setFontInfoFD(h, keyName, keyValue))
+    else if (strEqual(keyName, "com.adobe.type.ROS")) {
+        value = strtok_r(keyValue, "-", &ROSValues);
+        top->cid.Registry.ptr = copyStr(h, value);
+        value = strtok_r(ROSValues, "-", &ROSValues);
+        top->cid.Ordering.ptr = copyStr(h, value);
+        value = strtok_r(ROSValues, "-", &ROSValues);
+        top->cid.Supplement = atol(value);
+    } else if (setFontInfoFD(h, keyName, keyValue))
         return true;
     else if (setFontInfoPD(h, keyName, keyValue))
         return true;
