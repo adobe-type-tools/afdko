@@ -652,14 +652,8 @@ static void writeGlyphOrder(ufwCtx h) {
             writeLine(h, "\t<key>com.adobe.type.CIDFontName</key>");
             sprintf(buffer, "\t<string>%s</string>", h->top->cid.CIDFontName.ptr);
             writeLine(h, buffer);
-            writeLine(h, "\t<key>com.adobe.type.Registry</key>");
-            sprintf(buffer, "\t<string>%s</string>", h->top->cid.Registry.ptr);
-            writeLine(h, buffer);
-            writeLine(h, "\t<key>com.adobe.type.Ordering</key>");
-            sprintf(buffer, "\t<string>%s</string>", h->top->cid.Ordering.ptr);
-            writeLine(h, buffer);
-            writeLine(h, "\t<key>com.adobe.type.Supplement</key>");
-            sprintf(buffer, "\t<integer>%ld</integer>", h->top->cid.Supplement);
+            writeLine(h, "\t<key>com.adobe.type.ROS</key>");
+            sprintf(buffer, "\t<string>%s-%s-%ld</string>", h->top->cid.Registry.ptr, h->top->cid.Ordering.ptr, h->top->cid.Supplement);
             writeLine(h, buffer);
         }
         writeFDArray(h, h->top, buffer);
