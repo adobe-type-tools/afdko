@@ -114,7 +114,7 @@ class FontFile(object):
             if self.ufo_format <= UFOFormatVersion.FORMAT_2_0:
                 # Up-convert the UFO to format 3
                 warnings.warn("The UFO was up-converted to format 3.",
-                              UserWarning)
+                              UserWarning, stacklevel=2)
                 self.ufo_format = UFOFormatVersion.FORMAT_3_0
 
                 with UFOWriter(self.defcon_font.path,
