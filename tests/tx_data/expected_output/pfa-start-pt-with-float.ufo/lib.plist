@@ -10,12 +10,8 @@
 	</array>
 	<key>com.adobe.type.CIDFontName</key>
 	<string>TestFont-Regular</string>
-	<key>com.adobe.type.Registry</key>
-	<string>Adobe</string>
-	<key>com.adobe.type.Ordering</key>
-	<string>Identity</string>
-	<key>com.adobe.type.Supplement</key>
-	<integer>0</integer>
+	<key>com.adobe.type.ROS</key>
+	<string>Adobe-Identity-0</string>
 	<key>com.adobe.type.FSType</key>
 	<integer>4</integer>
 	<key>com.adobe.type.postscriptFDArray</key>
