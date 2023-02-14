@@ -36,12 +36,8 @@
 	</dict>
 	<key>com.adobe.type.CIDFontName</key>
 	<string>Minimal-UFO</string>
-	<key>com.adobe.type.Registry</key>
-	<string>Adobe</string>
-	<key>com.adobe.type.Ordering</key>
-	<string>Identity</string>
-	<key>com.adobe.type.Supplement</key>
-	<integer>0</integer>
+	<key>com.adobe.type.ROS</key>
+	<string>Adobe-Identity-0</string>
 	<key>postscriptFDArray</key>
 	<array>
 	<dict>
