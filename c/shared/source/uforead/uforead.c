@@ -3227,10 +3227,11 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
     prepClientData(h);
     *top = &h->top;
 
-    if ((h->top.cid.CIDFontName.ptr != NULL) &&
-        (h->top.cid.Registry.ptr != NULL) &&
-        (h->top.cid.Ordering.ptr != NULL) &&
-        (h->top.cid.Supplement >= 0)) {
+    if ((h->top.cid.CIDFontName.ptr != NULL) &&     /* should've been set at this point */
+        (h->top.cid.Registry.ptr != NULL) &&        /* required com.adobe.type.ROS key */
+        (h->top.cid.Ordering.ptr != NULL) &&        /* required com.adobe.type.ROS key */
+        (h->top.cid.Supplement >= 0) &&             /* required com.adobe.type.ROS key */
+        (h->requiredCIDKeyFlag & CIDKEY_CIDMAP)) {  /* required com.adobe.type.postscriptCIDMap key */
         if (!(h->top.sup.flags & ABF_CID_FONT)) {
             h->top.sup.flags |= ABF_CID_FONT;
             h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
