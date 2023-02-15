@@ -1160,8 +1160,19 @@ def test_cff2_windows_line_endings_bug1355():
 
 
 def test_lib_removes_outlines_bug1366():
+    """
+    This tests a UFO with a <lib> key within the .glif files.
+    This is an outdated use case — we now map glyphs to cids via the
+    com.adobe.type.postscriptCIDMap key in lib.plist
+    (the UFO has since been updated).
+
+    However, the UFO still contains the <lib> key as a test, and diffs
+    against a pfb outputted from almost the same UFO, except without
+    the <lib> keys. This output should be identical, therefore this
+    tests if lib causes the removal of outlines in the future.
+    """
     input_path = get_input_path("bug1366.ufo")
-    expected_path = get_expected_path("bug1366.pfa")
+    expected_path = get_expected_path("bug1366.pfb")
     output_path = get_temp_file_path()
     subprocess.call([TOOL, '-t1', '-o', output_path, input_path])
     expected_path = generate_ps_dump(expected_path)
