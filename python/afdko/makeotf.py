@@ -341,7 +341,7 @@ wrapper for the 'makeotfexe', and does several useful things for you:
 
 Project files.
 
-Every makeotf is run, it saves the options used to build the font
+Every time makeotf is run, it saves the options used to build the font
 in a project file named "current.fpr". The font can be rebuilt with
 exactly the same options by using the option -fp, or use most of
 the options by following '-fp' with additional options to set
@@ -2211,10 +2211,10 @@ def getSourceGOADBData(inputFilePath):
         else:
             gDict[gid] = uni
 
-    # Now get the font glyph name list, so as to get the glyphs with
-    # no unicode mapping. We'll also use this to set the glyph order.
-    # I use tx so as to get the same names as tx for the TTF glyphs;
-    # this can differ from spot. I don't use tx for Unicode values.
+    # Now get the font glyph name list to get glyphs with
+    # no unicode mapping. We also use this to set the glyph order.
+    # We use tx to get the same names as tx for the TTF glyphs;
+    # this can differ from spot. We don't use tx for Unicode values
     # as tx doesn't check 32 bit UV's, and doesn't report double-encodings.
     success, output = fdkutils.get_shell_command_output([
         'tx', '-mtx', inputFilePath])

@@ -6,10 +6,10 @@ How to build a feature-file format.
 
 These are all expected to be in alphabetic order in the font.
 
-Add each  feature entry as FeatDict[tag][lang_sys].append(index]), and as
+Add each feature entry as FeatDict[tag][lang_sys].append(index]), and as
 FeatDict[index] .append(lang_sys)
 
-If there is no DFLT script, then step through all entries of  FeatDict[index].
+If there is no DFLT script, then step through all entries of FeatDict[index].
 Add FeatDict[tag]["DFLT_dflt"].append(index) for all FeatDict[index] where the
 number of lang_sys entries is the same as the number of lang_sys values.
 
@@ -21,7 +21,7 @@ For each lookup in lookup list: for each class def in the lookup:
         subtable_index, class index)
 
 Get list of keys for ClassesByNameDict. Sort. MakeClassNameDict.
-For each  keys for ClassesByNameDict:
+For each keys for ClassesByNameDict:
     make class name from <firstglyph_lastglyph>.
     while class name is in ClassesByNameDict:
         find glyph in current class that is not in previous class, and
@@ -2231,7 +2231,7 @@ def ttnDump(input_file, output, options, showExtensionFlag, supressHints=False,
         When entries are removed from the cmap dict of the first subtable,
         that is the same as removing them from the cmap dict of the second.
         However, when later an attempt is made to reference the 'nGroups'
-        field - which doesn't exist  in format 4 - the second table gets
+        field - which doesn't exist in format 4 - the second table gets
         fully decompiled, and its cmap dict is rebuilt from the original data.
         """
         for cmapSubtable in cmapTable.tables:

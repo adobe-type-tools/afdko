@@ -262,10 +262,10 @@ class CompatibilityPen(CFF2CharStringMergePen):
             [source 1 arglist for op],
             ...
             [source n arglist for op],
-        I am not optimizing this there, as that will be done when
+        We are not optimizing this there, as that will be done when
         the CFF2 Charstring is created in fontTools.varLib.build().
 
-        If I did, I would have to rearrange the arguments to:
+        If we did, we would have to rearrange the arguments to:
         [
         [arg 0 for source 0 ... arg 0 for source n]
         [arg 1 for source 0 ... arg 1 for source n]

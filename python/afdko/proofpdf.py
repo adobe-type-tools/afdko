@@ -33,8 +33,8 @@ __usage__ = """
 proofpdf v1.21 Aug 28 2018
 proofpdf [-h] [-u]
 proofpdf -help_params
-proofpdf [-g <glyph list>] [-gf <filename>] [-gpp <number>] [-pt <number>] [-dno] [-baseline <number>] [-black] [-lf <filename>] [-select_hints <0,1,2..> ]  \
-[-o <PDF file path> ] -hintplot ] [-charplot] [-digiplot] [-fontplot]  [-waterfallplot] [-wfr <point size list>] font-path1  fontpath2 ...
+proofpdf [-g <glyph list>] [-gf <filename>] [-gpp <number>] [-pt <number>] [-dno] [-baseline <number>] [-black] [-lf <filename>] [-select_hints <0,1,2..> ] \
+[-o <PDF file path> ] -hintplot ] [-charplot] [-digiplot] [-fontplot] [-waterfallplot] [-wfr <point size list>] font-path1 fontpath2 ...
 
 Glyph Proofing program for OpenType fonts
 """
@@ -47,13 +47,13 @@ glyphs, and prints a PDF file for the specified font, showing the glyphs
 as specified by options.
 
 The five main options, "-charplot", "-digiplot", "-fontplot","-hintplot"
-and "waterfallplot", each set a bunch of lower level parameters in order
+and "-waterfallplot", each set a number of lower level parameters in order
 to produce a particular page layout. All these low-level parameters can
 be set by command-line options.
 
 Options:
 
--u Shows usage
+-u Show usage
 
 -h Print help
 
@@ -61,12 +61,12 @@ Options:
 
 -q Quiet mode
 
--charplot Sets parameters to show the glyph outline with most labels;
+-charplot Set parameters to show the glyph outline with most labels;
 the point labels show only the point position. No hints or alignment
 zones are shown; all glyph metric info is shown. Default is one glyph
 per page.
 
--digiplot Sets parameters to show 2 copies of each glyph. The first is
+-digiplot Set parameters to show 2 copies of each glyph. The first is
 shown with the em-box and the meta data block is filled with text from
 an error log file, if one exists. The second shows the outline with some
 labels; the point labels show only the point type. Default is one glyph
@@ -75,23 +75,22 @@ per page.
 -repeatIndex <index>. Used in conjunction with the digiplot command. By default,
 options after the 'digiplot' option will affect only the left-side copy of the
 glyph. The 'repeatIndex' option can be used to specify that another copy of in
-the set  of repeated glyph blocks will be affected by subsequent arguments.
+the set of repeated glyph blocks will be affected by subsequent arguments.
 Use '-repeatIndex 0" to specify the left-side glyph block, and '-repeatIndex 1'
-to specify the right-side glyph glyph block, as the target for following
+to specify the right-side glyph block, as the target for the following 
 arguments.
 
-
--fontplot Sets parameters to show the filled glyph outline with no
+-fontplot Set parameters to show the filled glyph outline with no
 labels, and some glyph metrics. Default is 156 glyphs per page.
 
--fontplot2 Sets parameters to show the filled glyph outline with no
+-fontplot2 Set parameters to show the filled glyph outline with no
 labels, and a box showing em-box and height and width, with center
 registration marks. Default is 156 glyphs per page.
 
--fontsetplot. Sets parameters to compare glyphs between different fonts. This
+-fontsetplot. Set parameters to compare glyphs between different fonts. This
 options figures out how many glyphs will fit across a page using a fixed spacing
-of em size. It then divides the list of glyphs into groups of of this size. for
-each group, the glyphs are shown in  a single line with fixed spacing for each
+of em size. It then divides the list of glyphs into groups of this size. For
+each group the glyphs are shown in a single line with fixed spacing for each
 font in turn. This plot is useful for quickly seeing that the glyphs have the
 same GID order between fonts, and that the glyph shape is correct by visually
 comparing it to the nominally equivalent glyphs in the same column. Glyphs are
@@ -99,28 +98,28 @@ shown in glyph ID order. The font list is shown in a sorted order. The sorting
 is first by the length of the charset, then by the charset lists, then by the
 font PS name.
 
--alpha   Sorts the glyphs in alphabetic order by glyph name. Useful when
+-alpha   Sort the glyphs in alphabetic order by glyph name. Useful when
 comparing proofs of fonts with the same charset, but different glyph order.
 
--hintplot Sets parameters to show the glyph outline with no labels, with
+-hintplot Set parameters to show the glyph outline with no labels, with
 all hints and alignment zones, and with just the name and BBox info.
 Default is one glyph per page.
 
--waterfallplot Sets parameters to show all the glyphs in a font in a series  of
+-waterfallplot Set parameters to show all the glyphs in a font in a series of
 waterfalls of decreasing point size. This options figures out how many glyphs
 will fit across a page at the maximum point size, using the average character
-width. It then divides the list of glyphs into groups of of this size, and shows
+width. It then divides the list of glyphs into groups of this size, and shows
 a waterfall for each group. The default list of point sizes for the waterfall
 is: (36,24,20,18,16,14,12,10,9,8,7,6)
 
-Note that this option  works very differently form the other proofs, in that the
+Note that this option works very differently from the other proofs, in that the
 font data is embedded, and the glyphs are requested by character code. In all
 the other modes, the glyph outlines are drawn and filled with PDF drawing
-operators, and the font is not embedded. This because the purpose is to check
+operators, and the font is not embedded. This is because the purpose is to check
 hint quality at different point sizes, and this can be done only when the font
 data is embedded and the glyphs are rasterized by the system or application.
 
-Warning: this option does not yet work with Truetype or CID-keyed fonts.
+Warning: this option does not yet work with TrueType or CID-keyed fonts.
 
 -wfr <point size list> Overrides the default list of point sizes for the
 waterfall mode. Has no effect if '-waterfallplot' is not specified. Example:
@@ -128,22 +127,21 @@ waterfall mode. Has no effect if '-waterfallplot' is not specified. Example:
 Note that the point sizes are separated by commas, with no white space allowed
 in the list.
 
-
 -g <glyphID1>,<glyphID2>,...,<glyphIDn>   Show only the specified list
 of glyphs. The list must be comma-delimited, with no white space. The
-glyph ID's may be glyph indices, glyph names, or glyph CID's. If the latter,
+glyph IDs may be glyph indices, glyph names, or glyph CIDs. If the latter,
 the CID value must be prefixed with the string "cid". There must be no
-white-space in the glyph list. Examples: proofpdf -g A,B,C,69 myFont
+whitespace in the glyph list. Examples: proofpdf -g A,B,C,69 myFont
 proofpdf -g cid01030,cid00034,cid03455,69 myCIDFont.otf
 
 A range of glyphs may be specified by providing two names separated only
 by a hyphen:
 fontplot -g zero-nine,onehalf myFont
 Note that the range will be resolved by filling in the list of glyph
-indices (GI) between the GI's of the two glyphs of the range, not by
+indices (GI) between the GIs of the two glyphs of the range, not by
 alphabetic name order.
 
--gf <file name>   Hint only the list of glyphs contained in the
+-gf <filename>   Hint only the list of glyphs contained in the
 specified file, The file must contain a comma-delimited list of glyph
 identifiers. Any number of space, tab, and new-line characters are
 permitted between glyphnames and commas.
@@ -158,34 +156,33 @@ ignored.
 omitted, the default file name is <font name> + ".pdf"
 
 -dno  Do not open the PDF file when done; default is to do so, except for
-digiplot. Note: On Mac OS, if the  a PDF reader is already open and showing the
+digiplot. Note: On Mac OS, if the PDF reader is already open and showing the
 file, you will need to close the file window and re-open in order to see the new
 contents. Also, The script does not choose the program to open the PDF; that is
 handled by the computer operating system.
 
--do  Do  open the PDF file when done. Useful for digiplot, where the default is
+-do  Do open the PDF file when done. Useful for digiplot, where the default is
 to not open the pdf file.
 
--baseline Set baseline font font. This is is otherwise set
-to the vale in the parent font BASE table. If the BASE table
-is not present, it is set to -120 for CID keyed fonts, else
-0.
+-baseline Set baseline value. If not specified it is set
+to the value in the parent font BASE table. If the BASE table
+is not present, it is set to -120 for CID keyed fonts or 0 for non CID keyed.
 
 -black Will set all colors to black; useful when planning to print the PDF.
 
 -lf <filename> Path name to CID layout file. If supplied, and proofing a
 CID-keyed font, glyphs will be shown in layout file order, and the
-hint dir and row font dir name will be shown in the descriptive meta-data.
+hint dir and row font dir name will be shown in the descriptive metadata.
 
 -select_hints <list of int replacement block indices> When showing
 hints, will show only the specified hint replacement blocks. Example:
       -select_hints 3  will show only the 4th hint replacement block
-      -select_hints 0,3  will show only the first and 4th hint replacement block.
+      -select_hints 0,3  will show only the first and 4th hint replacement blocks.
 Note that the index list must be comma-delimited with no white-space.
 
--v	Show the vertical metrics, but not horizontal metrics.
+-v	Show vertical metrics, but not horizontal metrics.
 
--vh Show both the vertical and horizontal metrics.
+-vh Show both vertical and horizontal metrics.
 
 --<name> <value> If prepended with two hyphens, then this is interpreted
 as a name of a low level parameter, which is set to the following value.
@@ -195,14 +192,14 @@ level parameters. Use "-help_params" to see the documentation for the
 low level parameters. All sizes are expressed in points, where 72 points
 = 1 inch. Fonts must be PostScript.
 Examples:
---pageTitleFont "MinionPro-Bold"  #Change the page title font.
---pointLabelFont "Times-Bold"  #Change the font for point labels
---pointLabelColorRGB "(1.0, 0, 0)" #Change the color of the point labels
-to red. The value is a triplet of (R G, B) values, where 0 is dark and 1.0 is
+--pageTitleFont "MinionPro-Bold"  # Change the page title font.
+--pointLabelFont "Times-Bold"  # Change the font for point labels
+--pointLabelColorRGB "(1.0, 0, 0)" # Change the color of the point labels
+to red. The value is a triplet of (R, G, B) values, where 0 is dark and 1.0 is
 light. Note that the RGB values must be enclosed in quotes and
-parentheses, and commas separated, as shown. "(0,0,0)" is black,
+parentheses, and comma-separated, as shown. "(0,0,0)" is black,
 "(1.0, 1.0, 1.0)" is page white, "(1.0, 0, 0)" is red.
---pointLabelSize 12  #Change the size of the point label text.
+--pointLabelSize 12  # Change the size of the point label text.
 """
 
 
@@ -337,7 +334,7 @@ def getOptions(params):
 	while i < numOptions:
 		arg = sys.argv[i]
 		if params.rt_fileList and arg[0] == "-":
-			raise OptionParseError("Option Error: All file names must follow all other params <%s>." % arg)
+			raise OptionParseError(f"Option Error: All file names must follow all other params <{arg}>.")
 
 		if arg == "-h":
 			print(__help__)
@@ -383,23 +380,23 @@ def getOptions(params):
 					except ValueError:
 						print("Error: value for parameter %s must be a number." % name)
 						raise OptionParseError
-				if value != None:
-					exec("params.%s = value" % (name))
+				if value is not None:
+					exec(f"params.{name} = value")
 
 		elif arg == "-hintplot":
-			exec("params." + kDrawTag + "EMBox = 1")
-			exec("params." + kDrawTag + "Baseline = 0")
-			exec("params." + kDrawTag + "ContourLabels = 0")
-			exec("params." + kDrawPointTag + "PointLabels = 0")
-			exec("params." + kShowMetaTag + "Outline = 0")
-			exec("params." + kShowMetaTag + "Parts = 0")
-			exec("params." + kShowMetaTag + "Paths = 0")
-			exec("params." + kShowMetaTag + "Name = 1")
-			exec("params." + kShowMetaTag + "BBox = 0")
-			exec("params." + kShowMetaTag + "SideBearings = 1")
-			exec("params." + kShowMetaTag + "V_SideBearings = 0")
-			exec("params." + kShowMetaTag + "Parts = 0")
-			exec("params." + kShowMetaTag + "Paths = 0")
+			exec(f"params.{kDrawTag}EMBox = 1")
+			exec(f"params.{kDrawTag}Baseline = 0")
+			exec(f"params.{kDrawTag}ContourLabels = 0")
+			exec(f"params.{kDrawPointTag}PointLabels = 0")
+			exec(f"params.{kShowMetaTag}Outline = 0")
+			exec(f"params.{kShowMetaTag}Parts = 0")
+			exec(f"params.{kShowMetaTag}Paths = 0")
+			exec(f"params.{kShowMetaTag}Name = 1")
+			exec(f"params.{kShowMetaTag}BBox = 0")
+			exec(f"params.{kShowMetaTag}SideBearings = 1")
+			exec(f"params.{kShowMetaTag}V_SideBearings = 0")
+			exec(f"params.{kShowMetaTag}Parts = 0")
+			exec(f"params.{kShowMetaTag}Paths = 0")
 			params.glyphsPerPage = 4
 			params.pointLabelSize = 32
 		elif arg == "-charplot":
@@ -408,9 +405,9 @@ def getOptions(params):
 			exec("params." + kDrawTag + "BlueZones = 0")
 			exec("params." + kDrawTag + "Baseline = 0")
 			exec("params." + kDrawTag + "EMBox = 0")
-			params.pointLabel_doPointType  = 0 # add point type to point label .
-			params.pointLabel_doPosition  = 1 # add point position to point label .
-			params.pointLabel_doPointIndex  = 0 # add index to point label .
+			params.pointLabel_doPointType = 0  # add point type to point label.
+			params.pointLabel_doPosition = 1  # add point position to point label.
+			params.pointLabel_doPointIndex = 0  # add index to point label.
 		elif arg == "-digiplot":
 			params.rt_repeats = 2
 			makeRepeatParams = 1
@@ -432,14 +429,14 @@ def getOptions(params):
 			params.userBaseLine = -120
 			# params.errorLogFilePath = "Error_file.log"
 			params.errorLogColumnHeight = 250
-			params.metaDataAboveGlyph = 0 # write meta data below glyph square.
+			params.metaDataAboveGlyph = 0  # write meta data below glyph square.
 			params.userPtSize = 255
-			params.pageTopMargin  = 0
+			params.pageTopMargin = 0
 			params.pageBottomMargin = 0
 			params.pageLeftMargin = 20
-			params.pageRightMargin  = 20
-			params.glyphVPadding  = 0
-			params.glyphHPadding   = 0
+			params.pageRightMargin = 20
+			params.glyphVPadding = 0
+			params.glyphHPadding = 0
 
 			rightGlyphParams = copy.copy(params)
 			setDefaultDigiplotRightSideOptions(rightGlyphParams)
@@ -452,7 +449,7 @@ def getOptions(params):
 				if (index < 0) or (index >= len(params.rt_repeatParamList)):
 					raise IndexError
 			except:
-				logMsg( "\tError. Option '%s' must be followed by an index number value, 0 or 1." % (arg))
+				logMsg(f"\tError. Option '{arg}' must be followed by an index number value, 0 or 1.")
 			params = params.rt_repeatParamList[index]
 
 
@@ -571,7 +568,7 @@ def getOptions(params):
 				glyphString = gf.read()
 				gf.close()
 			except (IOError,OSError):
-				raise OptionParseError("Option Error: could not open glyph list file <%s>." %  rt_filePath)
+				raise OptionParseError(f"Option Error: could not open glyph list file <{rt_filePath}>.")
 			params.rt_optionGlyphList += parseGlyphListArg(glyphString)
 		elif arg == "-o":
 			i = i +1
@@ -591,7 +588,7 @@ def getOptions(params):
 			if rt_filePath[0] == "-":
 				raise OptionParseError("Option Error: it looks like the the layout file following '-gf' is another option.")
 			if not os.path.exists(rt_filePath):
-				raise OptionParseError("Option Error: The layout file %s does not exist." % (rt_filePath))
+				raise OptionParseError(f"Option Error: The layout file {rt_filePath} does not exist.")
 			params.rt_optionLayoutDict = parseLayoutFile(rt_filePath)
 			exec("params." + kShowMetaTag + "WidthOnly = 1")
 			exec("params." + kShowMetaTag + "HintDir = 1")
@@ -601,14 +598,14 @@ def getOptions(params):
 			exec("params." + kShowMetaTag + "V_SideBearings = 0")
 
 		elif arg == "-select_hints":
-			i = i +1
+			i = i + 1
 			indexList = sys.argv[i]
 			indexList = re.findall(r"([^,]+)", indexList)
 			try:
 				indexList = map(int, indexList)
 				params.rt_hintTableList = indexList
 			except ValueError:
-				raise OptionParseError("Option Error: in \" -select_hints %s\,  one of the indices in the argument list is not an integer." %   sys.argv[i])
+				raise OptionParseError(f'Option Error: in " -select_hints {sys.argv[i]}, One of the indices in the argument list is not an integer.')
 
 		elif arg == "-baseline":
 			i = i +1
@@ -623,10 +620,10 @@ def getOptions(params):
 			exec("params." + kShowMetaTag + "SideBearings = 1")
 			exec("params." + kShowMetaTag + "V_SideBearings = 1")
 		elif arg[0] == "-":
-			raise OptionParseError("Option Error: Unknown option <%s>." %  arg)
+			raise OptionParseError(f"Option Error: Unknown option <{arg}>.")
 		else:
 			params.rt_fileList += [arg]
-		i  += 1
+		i += 1
 	if not params.rt_fileList:
 		raise OptionParseError("Option Error: You must provide at least one font file path.")
 
@@ -655,9 +652,9 @@ def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
 	prevGID = getGlyphID(rangeList[0], fontGlyphList)
 	if prevGID is None:
 		if len(rangeList) > 1:
-			logMsg( "\tWarning: glyph ID <%s> in range %s from glyph selection list option is not in font. <%s>." % (rangeList[0], glyphTag, fontFileName))
+			logMsg(f"\tWarning: glyph ID <{rangeList[0]}> in range {glyphTag} from glyph selection list option is not in font. <{fontFileName}>.")
 		else:
-			logMsg( "\tWarning: glyph ID <%s> from glyph selection list option is not in font. <%s>." % (rangeList[0], fontFileName))
+			logMsg(f"\tWarning: glyph ID <{rangeList[0]}> from glyph selection list option is not in font. <{fontFileName}>.")
 		return None
 	glyphNameList.append(fontGlyphList[prevGID])
 
@@ -666,13 +663,14 @@ def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
 		#pdb.set_trace()
 		gid = getGlyphID(glyphTag2, fontGlyphList)
 		if gid is None:
-			logMsg( "\tWarning: glyph ID <%s> in range %s from glyph selection list option is not in font. <%s>." % (glyphTag2, glyphTag, fontFileName))
+			logMsg(f"\tWarning: glyph ID <{glyphTag2}> in range {glyphTag} from glyph selection list option is not in font. <{fontFileName}>.")
 			return None
 		for i in range(prevGID+1, gid+1):
 			glyphNameList.append(fontGlyphList[i])
 		prevGID = gid
 
 	return glyphNameList
+
 
 def filterGlyphList(params, fontGlyphList, fontFileName):
 	# Return the list of glyphs which are in the intersection of the argument list and the glyphs in the font
@@ -690,18 +688,19 @@ def filterGlyphList(params, fontGlyphList, fontFileName):
 
 
 def openFile(path, txPath):
-	# If input font is  CFF or PS, build a dummy ttFont.
+	# If input font is CFF or PS, build a dummy ttFont.
 	tempPathCFF = None
 	cffPath = None
 
-	# If it is CID-keyed font, we need to convert it to a name-keyed font. This is a hack, but I really don't want to add CID support to
+	# If it is CID-keyed font, we need to convert it to a name-keyed font.
+	# This is a hack, but we really don't want to add CID support to
 	# the very simple-minded PDF library.
-	command="%s   -dump -0  \"%s\" 2>&1" % (txPath, path)
+	command="%s -dump -0 \"%s\" 2>&1" % (txPath, path)
 	report = fdkutils.runShellCmd(command)
 	if "CIDFontName" in report:
 		tfd,tempPath1 = tempfile.mkstemp()
 		os.close(tfd)
-		command="%s   -t1 -decid -usefd 0  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPath1)
+		command="%s -t1 -decid -usefd 0 \"%s\" \"%s\" 2>&1" % (txPath, path, tempPath1)
 		report = fdkutils.runShellCmd(command)
 		if "fatal" in report:
 			logMsg(report)
@@ -709,7 +708,7 @@ def openFile(path, txPath):
 
 		tfd,tempPathCFF = tempfile.mkstemp()
 		os.close(tfd)
-		command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, tempPath1, tempPathCFF)
+		command="%s -cff +b \"%s\" \"%s\" 2>&1" % (txPath, tempPath1, tempPathCFF)
 		report = fdkutils.runShellCmd(command)
 		if "fatal" in report:
 			logMsg(report)
@@ -719,7 +718,7 @@ def openFile(path, txPath):
 
 	elif os.path.isdir(path):
 		# See if it is a UFO font by truing to dump it.
-		command="%s   -dump -0  \"%s\" 2>&1" % (txPath, path)
+		command="%s -dump -0 \"%s\" 2>&1" % (txPath, path)
 		report = fdkutils.runShellCmd(command)
 		if not "sup.srcFontType" in report:
 			logMsg(report)
@@ -727,7 +726,7 @@ def openFile(path, txPath):
 
 		tfd,tempPathCFF = tempfile.mkstemp()
 		os.close(tfd)
-		command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPathCFF)
+		command="%s -cff +b \"%s\" \"%s\" 2>&1" % (txPath, path, tempPathCFF)
 		report = fdkutils.runShellCmd(command)
 		if "fatal" in report:
 			logMsg(report)
@@ -765,17 +764,17 @@ def openFile(path, txPath):
 
 		elif b"%" not in head:
 			# not a PS file either
-			logMsg("Font file must be a PS, CFF or OTF  fontfile: %s." % path)
+			logMsg("Font file must be a PS, CFF or OTF fontfile: %s." % path)
 			raise FontError("Font file must be PS, CFF or OTF file: %s." % path)
 
 		else:  # It is a PS file. Convert to CFF.
 			tfd,tempPathCFF = tempfile.mkstemp()
 			os.close(tfd)
 			cffPath = tempPathCFF
-			command="%s   -cff +b  \"%s\" \"%s\" 2>&1" % (txPath, path, tempPathCFF)
+			command="%s -cff +b \"%s\" \"%s\" 2>&1" % (txPath, path, tempPathCFF)
 			report = fdkutils.runShellCmd(command)
 			if "fatal" in report:
-				logMsg("Attempted to convert font %s  from PS to a temporary CFF data file." % path)
+				logMsg("Attempted to convert font %s from PS to a temporary CFF data file." % path)
 				logMsg(report)
 				raise FontError("Failed to convert PS font %s to a temp CFF font." % path)
 
@@ -790,7 +789,7 @@ def openFile(path, txPath):
 		cffTable.decompile(data, ttFont)
 	except:
 		traceback.print_exc()
-		logMsg("Attempted to read font %s  as CFF." % path)
+		logMsg("Attempted to read font %s as CFF." % path)
 		raise FontError("Error parsing font file <%s>." % path)
 	return ttFont, tempPathCFF
 
@@ -819,7 +818,7 @@ def proofMakePDF(pathList, params, txPath):
 				return
 
 
-			#   filter specified list, if any, with font list.
+			# filter specified list, if any, with font list.
 			glyphList = filterGlyphList(params, fontGlyphList, fontFileName)
 			if not glyphList:
 				raise FontError("Error: selected glyph list is empty for font <%s>." % fontFileName)
@@ -839,7 +838,7 @@ def proofMakePDF(pathList, params, txPath):
 		doProgressBar = not params.quietMode
 		pdfFilePath = makeFontSetPDF(pdfFontList, params, doProgressBar)
 		for entry in pdfFontList:
-			tempPathCFF =  entry[2]
+			tempPathCFF = entry[2]
 			pdfFont = entry[1]
 			pdfFont.clientFont.close()
 			if tempPathCFF:
@@ -872,7 +871,7 @@ def proofMakePDF(pathList, params, txPath):
 				print(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
 				return
 
-			#   filter specified list, if any, with font list.
+			# filter specified list, if any, with font list.
 			params.rt_glyphList = filterGlyphList(params, fontGlyphList, fontFileName)
 			if not params.rt_glyphList:
 				raise FontError("Error: selected glyph list is empty for font <%s>." % fontFileName)

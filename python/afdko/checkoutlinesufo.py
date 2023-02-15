@@ -237,7 +237,7 @@ class InlineHelpFormatter(argparse.RawDescriptionHelpFormatter):
                          enumerate(textwrap.wrap(text_line, width))]
                 arg_rows[line_index] = lines
 
-        # The  [''] adds an empty line between arguments.
+        # The [''] adds an empty line between arguments.
         return [item for sublist in arg_rows for item in sublist] + ['']
 
 
@@ -582,7 +582,7 @@ def remove_tiny_sub_paths(bool_glyph, min_area, msg):
 
 
 def is_colinear_line(b3, b2, b1, tolerance=0):
-    # b1-b3 are three points  [x, y] to test.
+    # b1-b3 are three points [x, y] to test.
     # b1 = start point of first line,
     # b2 is start point of second,
     # b3 is end point of second line.
@@ -699,7 +699,7 @@ def remove_colinear_lines(new_glyph, changed, msg, options):
             # Check for co-linear line.
             if contour_type == "line":
                 p1 = contour._points[i - 1]
-                # if p1 is a curve  point, no need to do colinear check!
+                # if p1 is a curve point, no need to do colinear check!
                 if p1[0] == "line":
                     p2 = contour._points[i - 2]
                     if is_colinear_line(
@@ -749,7 +749,7 @@ def split_touching_paths(new_glyph):
                     (coords0 == coords1):
                 # If the contour has two non-contiguous points that are
                 # coincident, and are not the start and end points, then we
-                # have  contour that can be pinched off. I don't bother to
+                # have contour that can be pinched off. We don't bother to
                 # test that j0 is the start point, as UFO paths are always
                 # closed.
                 new_contour_pts = contour._points[j0:j1 + 1]
@@ -787,7 +787,7 @@ def do_overlap_removal(bool_glyph, changed, msg, options):
     changed, msg = remove_flat_curves(bool_glyph, changed, msg, options)
     changed, msg = remove_colinear_lines(bool_glyph, changed, msg, options)
     options.remove_flat_curves_done = True
-    # I need to fix these in the source, or the old vs new digests will differ,
+    # We need to fix these in the source, or the old vs new digests will differ,
     # as BooleanOperations removes these even if it does not do overlap
     # removal.
     old_digest = sorted(get_digest(bool_glyph))
@@ -799,15 +799,14 @@ def do_overlap_removal(bool_glyph, changed, msg, options):
     while new_digest != prev_digest:
         # This is a hack to get around a bug in booleanGlyph. Consider an M
         # sitting on a separate rectangular crossbar contour, the bottom of
-        # the M legs being co-linear with the top of the cross bar. pyClipper
+        # the M legs being co-linear with the top of the crossbar. pyClipper
         # will merge only one of the co-linear lines with each call to
-        # removeOverlap(). I suspect that this bug is in pyClipper, but
-        # haven't yet looked.
+        # removeOverlap(). This may be a bug in pyClipper.
         prev_digest = new_digest
         new_glyph = new_glyph.removeOverlap()
         new_digest = sorted(get_digest(new_glyph))
         # The new path points sometimes come back with very small
-        # fractional parts to to rounding issues.
+        # fractional parts to rounding issues.
         new_digest = [round_point(pt) for pt in new_digest]
 
     # Can't use change in path number to see if something has changed
@@ -834,7 +833,7 @@ def do_cleanup(new_glyph, changed, msg, options):
         options.remove_coincident_points_done = True
     if not options.remove_flat_curves_done:
         changed, msg = remove_flat_curves(new_glyph, changed, msg, options)
-    # I call remove_colinear_lines even when do_overlap_removal is called,
+    # We call remove_colinear_lines even when do_overlap_removal is called,
     # as the latter can introduce new co-linear points.
     changed, msg = remove_colinear_lines(new_glyph, changed, msg, options)
 
@@ -884,11 +883,11 @@ def sort_contours(c1, c2):
 
 def restore_contour_order(fixed_glyph, original_contours):
     """ The pyClipper library first sorts all the outlines by x position,
-    then y position. I try to undo that, so that un-touched contours will end
+    then y position. We try to undo that, so that un-touched contours will end
     up in the same order as the in the original, and any combined contours
-    will end up in a similar order. The reason I try to match new contours
+    will end up in a similar order. The reason we try to match new contours
     to the old is to reduce arbitrariness in the new contour order between
-    similar fonts. I can't completely avoid this, but I can reduce how often
+    similar fonts. This can't be completely avoided, but we can reduce how often
     it happens.
     """
     if len(fixed_glyph) == 0:
@@ -1055,7 +1054,7 @@ def run(args=None):
                 continue
 
             # font_file.check_skip_glyph updates the hash map for the glyph,
-            # so we call it even when the  '-all' option is used.
+            # so we call it even when the '-all' option is used.
             skip = font_file.check_skip_glyph(glyph_name, options.check_all)
             # Note: this will delete glyphs from the processed layer,
             #       if the glyph hash has changed.
