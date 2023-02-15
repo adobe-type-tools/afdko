@@ -1331,7 +1331,8 @@ glyphorder_dup_warn = (b"(ufr) Warning: glyph order contains duplicate" +
     ("empty-key-name", glyphorder_warn, 0),
     ("empty-key-value", glyphorder_warn, 0),
     ("duplicate-gliforder", glyphorder_dup_warn, 0),
-    ("dict_error", b"Error reading outermost <dict> in lib.plist.", 3)
+    ("dict_error", b"Error reading outermost <dict> in lib.plist.", 3),
+    ("missing-cidmap", b"", 0)
 ])
 def test_ufo_libplist_parsing(file, msg, ret_code):
     folder = "ufo-libplist-parsing/"
