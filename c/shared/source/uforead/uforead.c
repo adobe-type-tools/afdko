@@ -301,7 +301,6 @@ struct ufoCtx_ {
 #define CIDKEY_SUPPLEMENT  (1 << 3)
 #define CIDKEY_ORDERING    (1 << 4)
 #define CIDKEY_REGISTRY    (1 << 5)
-#define CIDKEY_CIDFONTNAME (1 << 6)
 
     struct
     {
@@ -1838,9 +1837,7 @@ static bool validCIDKeyedFont(ufoCtx h, xmlNodePtr cur){
     /* if required key found, set as true*/
     while (cur != NULL) {
         char* keyName = parseXMLKeyName(h, cur);
-        if (strEqual(keyName, "com.adobe.type.CIDFontName"))
-            h->requiredCIDKeyFlag |= CIDKEY_CIDFONTNAME;
-        else if (strEqual(keyName, "com.adobe.type.ROS")) {
+        if (strEqual(keyName, "com.adobe.type.ROS")) {
             h->requiredCIDKeyFlag |= CIDKEY_REGISTRY;
             h->requiredCIDKeyFlag |= CIDKEY_ORDERING;
             h->requiredCIDKeyFlag |= CIDKEY_SUPPLEMENT;
@@ -1854,7 +1851,7 @@ static bool validCIDKeyedFont(ufoCtx h, xmlNodePtr cur){
     }
 
     /* now check all required keys */
-    if (h->requiredCIDKeyFlag == 126)
+    if (h->requiredCIDKeyFlag == 62)
         return true;
     else
         return false;
@@ -1895,6 +1892,13 @@ static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
         return true;
     else
         return false;
+
+    if ((h->top.sup.flags & ABF_CID_FONT) &&
+        top->cid.CIDFontName.ptr == NULL &&
+        h->top.FDArray.array[0].FontName.ptr != NULL) {
+        /* derive name from fontinfo.plist familyName-styleName */
+        top->cid.CIDFontName.ptr = copyStr(h, h->top.FDArray.array[0].FontName.ptr);
+    }
     return true;
 }
 

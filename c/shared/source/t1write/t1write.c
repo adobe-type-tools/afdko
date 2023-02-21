@@ -1433,7 +1433,7 @@ static void writeNameKeyedFont(t1wCtx h) {
     /* Validate name-keyed data */
     if (h->top->FDArray.array[0].FontName.ptr == ABF_UNSET_PTR)
         fatal(h, t1wErrBadDict);
-    
+
     if (h->top->FDArray.cnt != 1)
         fatal(h, t1wErrBadNameKeyedDict);
 
