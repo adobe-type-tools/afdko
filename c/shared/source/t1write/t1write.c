@@ -1431,9 +1431,11 @@ static void writeNameKeyedFont(t1wCtx h) {
         fatal(h, t1wErrGlyphTypeCIDt1);
 
     /* Validate name-keyed data */
-    if (h->top->FDArray.cnt != 1 ||
-        h->top->FDArray.array[0].FontName.ptr == ABF_UNSET_PTR)
+    if (h->top->FDArray.array[0].FontName.ptr == ABF_UNSET_PTR)
         fatal(h, t1wErrBadDict);
+    
+    if (h->top->FDArray.cnt != 1)
+        fatal(h, t1wErrBadNameKeyedDict);
 
     switch (h->arg.flags & T1W_TYPE_MASK) {
         case T1W_TYPE_HOST:
