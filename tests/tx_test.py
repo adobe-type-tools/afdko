@@ -1333,22 +1333,29 @@ glyphorder_warn = (b'tx: (ufr) Warning: public.glyphOrder key is empty'
 glyphorder_dup_warn = (b"(ufr) Warning: glyph order contains duplicate" +
                        b" entries for glyphs 'a'.")
 
+missing_cidmap_fail = (b"tx: (t1w) bad font dictionary. Name-keyed UFO has "
+                       b"more than 1 defined FDArray.")
 
-@pytest.mark.parametrize('file, msg, ret_code', [
-    ("normal-namekeyed", b'', 0),
-    ("normal-cidkeyed", b'', 0),
-    ("glyphorder-after-cid", b'', 0),
-    ("empty-dict", glyphorder_warn, 0),
-    ("empty-key-name", glyphorder_warn, 0),
-    ("empty-key-value", glyphorder_warn, 0),
-    ("duplicate-gliforder", glyphorder_dup_warn, 0),
-    ("dict_error", b"Error reading outermost <dict> in lib.plist.", 3),
-    ("missing-cidmap", b"", 0)
+
+@pytest.mark.parametrize('file, msg, ret_code, exp_file', [
+    ("normal-namekeyed", b'', 0, None),
+    ("normal-cidkeyed", b'', 0, None),
+    ("glyphorder-after-cid", b'', 0, None),
+    ("empty-dict", glyphorder_warn, 0, None),
+    ("empty-key-name", glyphorder_warn, 0, None),
+    ("empty-key-value", glyphorder_warn, 0, None),
+    ("duplicate-gliforder", glyphorder_dup_warn, 0, None),
+    ("dict_error", b"Error reading outermost <dict> in lib.plist.", 3, None),
+    ("missing-cidmap", missing_cidmap_fail, 7, None),
+    ("missing-cidfontname", b'', 0, "normal-cidkeyed")
 ])
-def test_ufo_libplist_parsing(file, msg, ret_code):
+def test_ufo_libplist_parsing(file, msg, ret_code, exp_file):
     folder = "ufo-libplist-parsing/"
     ufo_input_path = get_input_path(folder + file + ".ufo")
-    expected_path = get_expected_path(folder + file + ".pfb")
+    if exp_file:
+        expected_path = get_expected_path(folder + exp_file + ".pfb")
+    else:
+        expected_path = get_expected_path(folder + file + ".pfb")
     output_path = get_temp_file_path()
     arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
                  ufo_input_path, output_path]
