@@ -1071,14 +1071,14 @@ static bool keyValueParseable(ufoCtx h, xmlNodePtr cur, char* keyValue, char* ke
     if (keyValue == NULL) {
         if (!h->parseState.valueArray && !h->parseState.CIDMap) {
             valid = false;
-//            message(h, "Warning: Encountered missing value for fontinfo key %s. Skipping", keyName);
+//            message(h, "Warning: Encountered missing value for key %s. Skipping", keyName);
         } else if (h->parseState.valueArray && h->valueArray.cnt == 0) {
             valid = false;
-//            message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
+//            message(h, "Warning: Encountered empty <%s> for key %s. Skipping", cur->name, keyName);
         }
     } else {
         if (strEqual(keyValue, "")){
-//        message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
+//        message(h, "Warning: Encountered empty <%s> for key %s. Skipping", cur->name, keyName);
         valid = false;
         }
     }
@@ -1231,7 +1231,8 @@ static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     if (fileName == NULL) {
         /* this is basically muted for now, as the previous check will return and skip if not parseable.
            We'll add this back once we add verbosity flag */
-        fatal(h, ufoErrParse, "Encountered glyph reference %s in alternate layer's contents.plist with an empty file path. ", glyphName);
+        message(h, ufoErrParse, "Encountered glyph reference %s in alternate layer's contents.plist with an empty file path. ", glyphName);
+        return;
     }
 
     glifRec = findGLIFRecByName(h, glyphName);
