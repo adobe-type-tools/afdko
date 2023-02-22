@@ -1372,6 +1372,43 @@ def test_ufo_libplist_parsing(file, msg, ret_code, exp_file):
         assert subprocess.call(arg) == ret_code
 
 
+ros_reg_fail = (b"tx: (ufr) Empty Registry value for com.adobe.type.ROS key"
+                b". ROS value format should be: registry-ordering-supplement")
+
+
+ros_ord_fail = (b"tx: (ufr) Empty Ordering value for com.adobe.type.ROS key"
+                b". ROS value format should be: registry-ordering-supplement")
+
+
+ros_supp_fail = (b"tx: (ufr) Empty Supplement value for com.adobe.type.ROS key"
+                 b". ROS value format should be: registry-ordering-supplement")
+
+
+ros_fail = (b"tx: (t1w) bad font dictionary. Missing either the CID font name,"
+            b" or the Registry-Order-Supplement names.")
+
+
+@pytest.mark.parametrize('file, msg, ret_code', [
+    ("missing-registry-value", ros_reg_fail, 9),
+    ("missing-ordering-value", ros_ord_fail, 9),
+    ("missing-supplement-value", ros_supp_fail, 9),
+    ("missing-ros-value", ros_fail, 6),
+])
+def test_ufo_ROS_parsing(file, msg, ret_code):
+    """testing com.adobe.type.ROS key cases in lib.plist"""
+    folder = "ufo-libplist-parsing/ros-key/"
+    ufo_input_path = get_input_path(folder + file + ".ufo")
+    output_path = get_temp_file_path()
+    arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
+                 ufo_input_path, output_path]
+    stderr_path = runner(arg)
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (msg) in output
+    arg = [TOOL, '-t1', '-f', ufo_input_path]
+    assert subprocess.call(arg) == ret_code
+
+
 mismatched_fdarray_fdselect_msg = (b"tx: (ufr) Number of FDArrays defined in "
                                    b"lib.plist not equal to number of "
                                    b"FDSelect Groups in groups.plist.")
