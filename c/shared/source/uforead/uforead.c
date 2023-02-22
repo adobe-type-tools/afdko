@@ -357,6 +357,7 @@ static bool setXMLFileKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static bool setGroupsKey(ufoCtx h, char* keyName, xmlNodePtr cur);
+static void setROSKeyValue(ufoCtx h, abfTopDict* top, char* keyValue);
 
 /* GLIF Rec Handling */
 static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);  /* checks for existing rec*/
@@ -1860,8 +1861,6 @@ static bool validCIDKeyedFont(ufoCtx h, xmlNodePtr cur){
 
 static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
     abfTopDict* top = &h->top;
-    char* ROSValues;  /* Registry, Ordering, Supplement */
-    char* value;
 
     if (strEqual(keyName, "com.adobe.type.postscriptFDArray") || strEqual(keyName, "postscriptFDArray"))
      return parseFontInfoFDArray(h, cur);
@@ -1879,12 +1878,7 @@ static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
     else if (strEqual(keyName, "com.adobe.type.CIDFontName"))
         top->cid.CIDFontName.ptr = copyStr(h, keyValue);
     else if (strEqual(keyName, "com.adobe.type.ROS")) {
-        value = strtok_r(keyValue, "-", &ROSValues);
-        top->cid.Registry.ptr = copyStr(h, value);
-        value = strtok_r(ROSValues, "-", &ROSValues);
-        top->cid.Ordering.ptr = copyStr(h, value);
-        value = strtok_r(ROSValues, "-", &ROSValues);
-        top->cid.Supplement = atol(value);
+        setROSKeyValue(h, top, keyValue);
     } else if (setFontInfoFD(h, keyName, keyValue))
         return true;
     else if (setFontInfoPD(h, keyName, keyValue))
@@ -2239,6 +2233,29 @@ static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
 
     freeValueArray(h);
     return result;
+}
+
+static void setROSKeyValue(ufoCtx h, abfTopDict* top, char* keyValue) {
+    char* ROSValues;  /* Registry, Ordering, Supplement */
+    char* parsedValue;
+
+    if (keyValue[0] == '-')
+        fatal(h, ufoErrKeyValueNULL, "Empty Registry value for com.adobe.type.ROS key. ROS value format should be: registry-ordering-supplement");
+    else {
+        parsedValue = strtok_r(keyValue, "-", &ROSValues);
+        top->cid.Registry.ptr = copyStr(h, parsedValue);
+    }
+    if (parsedValue == NULL || ROSValues[0] == '-')
+        fatal(h, ufoErrKeyValueNULL, "Empty Ordering value for com.adobe.type.ROS key. ROS value format should be: registry-ordering-supplement");
+    else {
+        parsedValue = strtok_r(ROSValues, "-", &ROSValues);
+        top->cid.Ordering.ptr = copyStr(h, parsedValue);
+    }
+    parsedValue = strtok_r(ROSValues, "-", &ROSValues);
+    if (parsedValue != NULL)
+        top->cid.Supplement = atol(parsedValue);
+    else
+        fatal(h, ufoErrKeyValueNULL, "Empty Supplement value for com.adobe.type.ROS key. ROS value format should be: registry-ordering-supplement");
 }
 
 static int parseUFO(ufoCtx h) {
