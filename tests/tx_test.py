@@ -1336,6 +1336,10 @@ glyphorder_dup_warn = (b"(ufr) Warning: glyph order contains duplicate" +
 missing_cidmap_fail = (b"tx: (t1w) bad font dictionary. Name-keyed UFO has "
                        b"more than 1 defined FDArray.")
 
+unparseable_cid_digit = (b"tx: (ufr) In lib.plist postscriptCIDMap, expected "
+                         b"cid number for glyph cid00000 but could not find "
+                         b"parseable number.")
+
 
 @pytest.mark.parametrize('file, msg, ret_code, exp_file', [
     ("normal-namekeyed", b'', 0, None),
@@ -1347,7 +1351,8 @@ missing_cidmap_fail = (b"tx: (t1w) bad font dictionary. Name-keyed UFO has "
     ("duplicate-gliforder", glyphorder_dup_warn, 0, None),
     ("dict_error", b"Error reading outermost <dict> in lib.plist.", 3, None),
     ("missing-cidmap", missing_cidmap_fail, 7, None),
-    ("missing-cidfontname", b'', 0, "normal-cidkeyed")
+    ("missing-cidfontname", b'', 0, "normal-cidkeyed"),
+    ("unparseable-cid-cidmap", unparseable_cid_digit, 6, None)
 ])
 def test_ufo_libplist_parsing(file, msg, ret_code, exp_file):
     folder = "ufo-libplist-parsing/"
