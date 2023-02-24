@@ -39,6 +39,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
+#include <errno.h>
 
 #if defined(WIN32) || defined(WIN64)
 # define strtok_r strtok_s
@@ -1953,15 +1954,15 @@ static bool parseFontInfoFDArray(ufoCtx h, xmlNodePtr cur) {
 /* set each GLIF_REC's iFD based on the FDArraySelect groups*/
 static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNodePtr cur) {
     GLIF_Rec *g;
+    char* ptr;
+    errno = 0;
 
     if (!xmlStrEqual((cur)->name, (const xmlChar *) "array"))
         return false;
 
-    char* FDIndex = memNew(h, sizeof(char) * 2);
-    strncpy(FDIndex, FDArraySelectKeyName + 14, 2);
-    if (FDIndex[1] == '.')
-        FDIndex[1] = '\n';
-    int FDIndexInt = atoi(FDIndex);
+    int FDIndexInt = strtol(FDArraySelectKeyName + 14, &ptr, 10);
+    if (FDArraySelectKeyName == ptr || errno != 0)
+        fatal(h, ufoErrParse, "In groups.plist FDArraySelect group %s, expected FDArray index numberbut could not find parseable number.", FDArraySelectKeyName);
 
     /* check if FDArray is defined */
     if (h->top.FDArray.cnt - 1 <= FDIndexInt)
@@ -1980,7 +1981,6 @@ static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNod
         }
         cur = cur->next;
     }
-    memFree(h, FDIndex);
     return true;
 }
 
