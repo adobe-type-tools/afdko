@@ -119,7 +119,6 @@ static Format3 *read3(Card32 offset, Card32 length) {
     fmt->kernValue = (FWord *)memNew(sizeof(FWord) * fmt->kernValueCount);
     fmt->leftClass = (Card8 *)memNew(sizeof(Card8) * fmt->glyphCount);
     fmt->rightClass = (Card8 *)memNew(sizeof(Card8) * fmt->glyphCount);
-    fmt->rightClass = (Card8 *)memNew(sizeof(Card8) * fmt->glyphCount);
     fmt->kernIndex = (Card8 *)memNew(sizeof(Card8) * kernIndexSize);
 
     /* Read value arrays */
