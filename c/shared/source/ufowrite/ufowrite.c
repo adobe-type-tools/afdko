@@ -615,7 +615,7 @@ static void writeCIDMap(ufwCtx h, abfTopDict *top, char *buffer) {
     writeLine(h, "\t</dict>");
 }
 
-static void writeGlyphOrder(ufwCtx h) {
+static void writeLibPlist(ufwCtx h) {
     char buffer[FILENAME_MAX];
     int i;
 
@@ -1000,7 +1000,7 @@ int ufwEndFont(ufwCtx h, abfTopDict *top) {
         return errCode;
 
     writeContents(h);
-    writeGlyphOrder(h);
+    writeLibPlist(h);
     if (top->FDArray.cnt > 1)  // only write if > 1 FDDict
         writeGroups(h, top);
     writeMetaInfo(h);
