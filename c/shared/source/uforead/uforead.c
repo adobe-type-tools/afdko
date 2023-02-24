@@ -1255,7 +1255,7 @@ static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
 #define SUPPLEMENT 1261
 #define CIDNAME 1255
 
-static int parseGlyphOrder(ufoCtx h) {
+static int parseLibPlist(ufoCtx h) {
     const char* filetype = "plist";
     h->parseState.UFOFile = parsingLib;
 
@@ -2267,7 +2267,7 @@ static int parseUFO(ufoCtx h) {
 
     int retVal = parseFontInfo(h);
     if (retVal == ufoSuccess)
-        retVal = parseGlyphOrder(h); /* return value was being ignored prior to 15 June 2018, not sure why -- CJC */
+        retVal = parseLibPlist(h); /* return value was being ignored prior to 15 June 2018, not sure why -- CJC */
     if (retVal == ufoSuccess)
         retVal = parseGroups(h);
     if (retVal == ufoSuccess)
