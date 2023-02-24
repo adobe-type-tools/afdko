@@ -1108,6 +1108,8 @@ def test_cffread_bug1343():
     ('t1', 'testCID.ufo', 'cidfont_subset.ufo', 'cidfont.subset'),
     (('ufo', 't1'), 'cidfont.subset', 'cidfont_subset.ufo', 'cidfont.subset'),
     (('t1', 'ufo'), 'testCID.ufo', 'cidfont_subset.ufo', 'testCID.ufo'),
+    (('t1', 'ufo'), 'groups-100-fdselect.ufo', 'groups-100-fdselect.ufo',
+     'groups-100-fdselect.ufo'),
 ])
 def test_cidkeyed_read_write(arg, input, output, expected):
     """
@@ -1116,6 +1118,7 @@ def test_cidkeyed_read_write(arg, input, output, expected):
     UFO -> CID (one-way test)
     CID -> UFO -> CID (round-trip test)
     UFO -> CID -> UFO (round-trip test)
+    UFO -> CID -> UFO (round-trip test with 100 FDArrays)
     """
     folder = "cid_roundtrip/"
     input_path = get_input_path(folder + input)
