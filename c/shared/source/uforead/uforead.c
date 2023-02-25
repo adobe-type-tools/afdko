@@ -1987,12 +1987,15 @@ static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNod
 static bool parseCIDMap(ufoCtx h, xmlNodePtr cur) {
     h->parseState.CIDMap = true;
     GLIF_Rec *g;
+    char* ptr;
+    int cidInt;
 
     if (!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))
         return false;
 
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
+        errno = 0;
         char* keyName = parseXMLKeyName(h, cur);
         if (keyName != NULL) {
             g = addNewGLIFRec(h, keyName, NULL);
@@ -2002,8 +2005,13 @@ static bool parseCIDMap(ufoCtx h, xmlNodePtr cur) {
             if (cur == NULL)
                 continue;
             char* cid = parseXMLKeyValue(h, cur);
-            if (cid != NULL)
-                g->cid = atoi(cid);
+            if (cid != NULL) {
+                cidInt = strtol(cid, &ptr, 10);
+                if (cid == ptr || errno != 0)
+                    fatal(h, ufoErrParse, "In lib.plist postscriptCIDMap, expected cid number for glyph %s but could not find parseable number.", keyName);
+                else
+                    g->cid = cidInt;
+            }
         }
         cur = cur->next;
     }
