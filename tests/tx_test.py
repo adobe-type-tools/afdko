@@ -1230,6 +1230,10 @@ def test_non_FDArray_dict_parse():
     assert subprocess.call(arg) == 0
 
 
+garbage_unitsPerEm = (b"tx: (ufr) In fontinfo.plist: encountered unparseable"
+                      b" number for UnitsPerEmgarbage")
+
+
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("empty-key-name", b'', 0),
     ("empty-key-name-fdarray", b'', 0),
@@ -1248,7 +1252,8 @@ def test_non_FDArray_dict_parse():
     ("missing-fontinfoplist", b"Warning: Unable to open fontinfo.plist in" +
                               b" source UFO font. No PostScript FontDict " +
                               b"values are specified.", 5),
-    ("missing-width-attr", b"", 0)
+    ("missing-width-attr", b"", 0),
+    ("garbage-unitsPerEm", garbage_unitsPerEm, 6)
 ])
 def test_ufo_fontinfo_parsing(file, msg, ret_code):
     folder = "ufo-fontinfo-parsing/"
@@ -1340,8 +1345,8 @@ missing_cidmap_fail = (b"tx: (t1w) bad font dictionary. Name-keyed UFO has "
                        b"more than 1 defined FDArray.")
 
 unparseable_cid_digit = (b"tx: (ufr) In lib.plist postscriptCIDMap, expected "
-                         b"cid number for glyph cid00000 but could not find "
-                         b"parseable number.")
+                         b"cid number but could not find parseable number for "
+                         b"glyph: cid00000")
 
 
 @pytest.mark.parametrize('file, msg, ret_code, exp_file', [
@@ -1417,9 +1422,10 @@ def test_ufo_ROS_parsing(file, msg, ret_code):
     assert subprocess.call(arg) == ret_code
 
 
-mismatched_fdarray_fdselect_msg = (b"tx: (ufr) Number of FDArrays defined in "
-                                   b"lib.plist not equal to number of "
-                                   b"FDSelect Groups in groups.plist.")
+mismatched_fdarray_fdselect_msg = (b"tx: (ufr) In groups.plist: FDict "
+                                   b"referenced in FDSelect Group FDArraySel"
+                                   b"ect.1.SourceHanSans-Heavy-Ideographs is "
+                                   b"not defined at expected FDArray index 1.")
 
 
 @pytest.mark.parametrize('file, msg, ret_code', [
@@ -1562,16 +1568,22 @@ missing_FDArraySelect = (b"Warning: FDArraySelect not defined for "
                          b"cid-keyed font")
 
 
-fdselect_doesnt_exist_fail = (b"tx: (ufr) Number of FDArrays defined in "
-                              b"lib.plist not equal to number of FDSelect "
-                              b"Groups in groups.plist")
+fdselect_doesnt_exist_fail = (b"tx: (ufr) In groups.plist: FDict referenced in"
+                              b" FDSelect Group FDArraySelect.2.DoesNotExist "
+                              b"is not defined at expected FDArray index 2")
+
+unparseable_index = (b"tx: (ufr) In groups.plist: expected FDArray index "
+                     b"number but could not find parseable number in "
+                     b"FDArraySelect group: FDArraySelect.not-parseable."
+                     b"SourceHanSans-Heavy-Generic")
 
 
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("groups-fdselect-doesnt-exist", fdselect_doesnt_exist_fail, 8),
     ("groups-keyname-missing", missing_iFD, 6),
     ("groups-keyvalue-missing", missing_iFD, 6),
-    ("groups-missing-cidkeyed", missing_FDArraySelect, 6)
+    ("groups-missing-cidkeyed", missing_FDArraySelect, 6),
+    ("groups-fdselect-not-parseable-index", unparseable_index, 6)
 ])
 def test_ufo_groups_parsing(file, msg, ret_code):
     folder = "ufo-groups-parsing/"
