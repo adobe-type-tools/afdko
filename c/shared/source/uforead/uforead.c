@@ -329,6 +329,9 @@ static int addChar(ufoCtx h, STI sti, Char** chr);
 static int CTL_CDECL postMatchChar(const void* key, const void* value,
                                    void* ctx);
 static bool strEqual(const char* string1, const char* string2);
+static long strtolCheck(ufoCtx h, char* keyValue, bool fail, char* msg, int base);
+static double strtodCheck(ufoCtx h, char* keyValue, bool fail, char* msg);
+static unsigned long strtoulCheck(ufoCtx h, char* keyValue, bool fail, char* msg, int base);
 
 /* XML File Parsing Functions */
 static xmlNodePtr parseXMLFile(ufoCtx h, char* filename, const char* filetype);
@@ -1982,6 +1985,51 @@ static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNod
         cur = cur->next;
     }
     return true;
+}
+
+static long strtolCheck(ufoCtx h, char* keyValue, bool fail, char* msg, int base) {
+    char* checkPtr;
+    errno = 0;
+    long val = strtol(keyValue, &checkPtr, base);
+    if (keyValue != checkPtr && errno == 0)
+        return val;
+    else {
+        if (fail)
+            fatal(h, ufoErrParse, msg);
+        else if (msg)
+            message(h, msg);
+        return NULL;
+    }
+}
+
+static unsigned long strtoulCheck(ufoCtx h, char* keyValue, bool fail, char* msg, int base) {
+    char* checkPtr;
+    errno = 0;
+    unsigned long val = strtoul(keyValue, &checkPtr, base);
+    if (keyValue != checkPtr && errno == 0)
+        return val;
+    else {
+        if (fail)
+            fatal(h, ufoErrParse, msg);
+        else if (msg)
+            message(h, msg);
+        return NULL;
+    }
+}
+
+static double strtodCheck(ufoCtx h, char* keyValue, bool fail, char* msg) {
+    char* checkPtr;
+    errno = 0;
+    double val = strtod(keyValue, &checkPtr);
+    if (keyValue != checkPtr && errno == 0)
+        return val;
+    else {
+        if (fail)
+            fatal(h, ufoErrParse, msg);
+        else if (msg)
+            message(h, msg);
+        return 0;
+    }
 }
 
 static bool parseCIDMap(ufoCtx h, xmlNodePtr cur) {
