@@ -990,6 +990,14 @@ static char* copyStr(ufoCtx h, char* oldString) {
     return value;
 }
 
+static char* concatStrs(ufoCtx h, char* string1, char* string2) {
+    char* catStr;
+    catStr = memNew(h, strlen(string1) + strlen(string2) + 1);
+    strcpy(catStr, string1);
+    strcat(catStr, string2);
+    return catStr;
+}
+
 static char* getKeyValue(ufoCtx h, char* endName, int state) {
     char* value = NULL;
     token* tk;
@@ -1686,10 +1694,10 @@ static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, in
     if (h->parseState.UFOFile == preParsingGLIF) {      /* called from preParseGLIF */
         if (xmlKeyEqual(cur, "advance")) {
             if (xmlAttrEqual(attr, "width") || xmlAttrEqual(attr, "advance"))
-                setWidth(h, tag, atoi(getXmlAttrValue(attr)));
+                setWidth(h, tag, strtolCheck(h, getXmlAttrValue(attr), false, NULL, 10));
         } else if (xmlKeyEqual(cur, "unicode")) {
             if (xmlAttrEqual(attr, "hex"))
-                *unicode = strtol(getXmlAttrValue(attr), NULL, 16);
+                *unicode = strtoulCheck(h, getXmlAttrValue(attr), false, NULL, 16);
         }
     } else if (h->parseState.UFOFile == parsingGLIF) {  /* called from parseGLIF */
         if (xmlKeyEqual(cur, "outline"))
@@ -1943,9 +1951,16 @@ static int parseFontInfo(ufoCtx h) {
 }
 
 static bool parseFontInfoFDArray(ufoCtx h, xmlNodePtr cur) {
+    int version;
+    float subVersion;
+
+    char* warnMsg = "In lib.plist: Could not find parseable CIDFontVersion number.";
     h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
-    if (h->top.version.ptr != NULL)
-        h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
+    if (h->top.version.ptr != NULL) {
+        version = strtodCheck(h, h->top.version.ptr, true, warnMsg);
+        subVersion = strtodCheck(h, &h->top.version.ptr[2], true, warnMsg);
+        h->top.cid.CIDFontVersion = (version % 10) + ((float) subVersion/1000);
+    }
     abfInitFontDict(h->top.FDArray.array);
     h->parseState.FDArray = true;
     h->parseState.GLIFInfo.currentiFD = -1;
@@ -1957,19 +1972,18 @@ static bool parseFontInfoFDArray(ufoCtx h, xmlNodePtr cur) {
 /* set each GLIF_REC's iFD based on the FDArraySelect groups*/
 static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNodePtr cur) {
     GLIF_Rec *g;
-    char* ptr;
-    errno = 0;
+    char* errMsg;
 
     if (!xmlStrEqual((cur)->name, (const xmlChar *) "array"))
         return false;
 
-    int FDIndexInt = strtol(FDArraySelectKeyName + 14, &ptr, 10);
-    if (FDArraySelectKeyName == ptr || errno != 0)
-        fatal(h, ufoErrParse, "In groups.plist FDArraySelect group %s, expected FDArray index numberbut could not find parseable number.", FDArraySelectKeyName);
+    errMsg = concatStrs(h, "In groups.plist: expected FDArray index number but could not find parseable number in FDArraySelect group: ", FDArraySelectKeyName);
+    int FDIndexInt = strtolCheck(h, FDArraySelectKeyName + 14, true, errMsg, 10);
+    memFree(h, errMsg);
 
     /* check if FDArray is defined */
     if (h->top.FDArray.cnt - 1 <= FDIndexInt)
-        fatal(h, ufoErrParseFail, "Number of FDArrays defined in lib.plist not equal to number of FDSelect Groups in groups.plist.");
+        fatal(h, ufoErrParseFail, "In groups.plist: FDict referenced in FDSelect Group %s is not defined at expected FDArray index %i.", FDArraySelectKeyName, FDIndexInt);
 
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
@@ -2037,13 +2051,13 @@ static bool parseCIDMap(ufoCtx h, xmlNodePtr cur) {
     GLIF_Rec *g;
     char* ptr;
     int cidInt;
+    char* errMsg;
 
     if (!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))
         return false;
 
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
-        errno = 0;
         char* keyName = parseXMLKeyName(h, cur);
         if (keyName != NULL) {
             g = addNewGLIFRec(h, keyName, NULL);
@@ -2054,11 +2068,9 @@ static bool parseCIDMap(ufoCtx h, xmlNodePtr cur) {
                 continue;
             char* cid = parseXMLKeyValue(h, cur);
             if (cid != NULL) {
-                cidInt = strtol(cid, &ptr, 10);
-                if (cid == ptr || errno != 0)
-                    fatal(h, ufoErrParse, "In lib.plist postscriptCIDMap, expected cid number for glyph %s but could not find parseable number.", keyName);
-                else
-                    g->cid = cidInt;
+                errMsg = concatStrs(h, "In lib.plist postscriptCIDMap, expected cid number but could not find parseable number for glyph: ", keyName);
+                g->cid = strtolCheck(h, cid, true, errMsg, 10);
+                memFree(h, errMsg);
             }
         }
         cur = cur->next;
@@ -2122,7 +2134,9 @@ static void setFontIndoVersionMinor(ufoCtx h, char* keyValue) {
 }
 
 static void setFontInfoUnitsPerEm(ufoCtx h, char* keyValue) {
-    double ppem = strtod(keyValue, NULL);
+    char* errMsg;
+    errMsg = concatStrs(h, "In fontinfo.plist: encountered unparseable number for UnitsPerEm", keyValue);
+    double ppem = strtodCheck(h, keyValue, true, errMsg);
     abfTopDict* top = &h->top;
     abfFontDict* fd = h->top.FDArray.array + h->parseState.GLIFInfo.currentiFD;
 
@@ -2143,9 +2157,9 @@ static void setFontInfoStdHW(ufoCtx h, char* keyName, char* keyValue) {
     abfPrivateDict* pd = &fd->Private;
 
     if (keyValue != NULL) {
-       pd->StdHW = (float)strtod(keyValue, NULL);
+       pd->StdHW = (float)strtodCheck(h, keyValue, false, NULL);
     } else {
-       pd->StdHW = (float)strtod(h->valueArray.array[0], NULL);
+       pd->StdHW = (float)strtodCheck(h, h->valueArray.array[0], false, NULL);
        freeValueArray(h);
     }
 }
@@ -2155,9 +2169,9 @@ static void setFontInfoStdVW(ufoCtx h, char* keyName, char* keyValue) {
     abfPrivateDict* pd = &fd->Private;
 
     if (keyValue != NULL) {
-        pd->StdVW = (float)strtod(keyValue, NULL);
+        pd->StdVW = (float)strtodCheck(h, keyValue, false, NULL);
     } else {
-        pd->StdVW = (float)strtod(h->valueArray.array[0], NULL);
+        pd->StdVW = (float)strtodCheck(h, h->valueArray.array[0], false, NULL);
         freeValueArray(h);
     }
 }
@@ -2174,7 +2188,7 @@ static bool setFontInfoFD(ufoCtx h, char* keyName, char* keyValue) {
     } else if (strEqual(keyName, "postscriptFontName")) {
        fd->FontName.ptr = keyValue;
     } else if (strEqual(keyName, "PaintType")) {
-       fd->PaintType = atoi(keyValue);
+       fd->PaintType = strtolCheck(h, keyValue, false, NULL, 10);
     } else if (strEqual(keyName, "FontMatrix")) {
        fontMatrix = &fd->FontMatrix;
        setFontMatrix(h, fontMatrix, 6);
@@ -2189,13 +2203,13 @@ static bool setFontInfoPD(ufoCtx h, char* keyName, char* keyValue) {
     BluesArray* bluesArray;
 
     if (strEqual(keyName, "postscriptBlueFuzz")) {
-        pd->BlueFuzz = (float)strtod(keyValue, NULL);
+        pd->BlueFuzz = (float)strtodCheck(h, keyValue, false, NULL);
     } else if (strEqual(keyName, "postscriptBlueShift")) {
-        pd->BlueShift = (float)strtod(keyValue, NULL);
+        pd->BlueShift = (float)strtodCheck(h, keyValue, false, NULL);
     } else if (strEqual(keyName, "postscriptBlueScale")) {
-        pd->BlueScale = (float)strtod(keyValue, NULL);
+        pd->BlueScale = (float)strtodCheck(h, keyValue, false, NULL);
     } else if (strEqual(keyName, "postscriptForceBold")) {
-        pd->ForceBold = atol(keyValue);
+        pd->ForceBold = strtolCheck(h, keyValue, false, NULL, 10);
     } else if (strEqual(keyName, "postscriptBlueValues")) {
         bluesArray = (BluesArray*)&pd->BlueValues;
         setBluesArrayValue(h, bluesArray, 14, keyName);
@@ -2219,10 +2233,10 @@ static bool setFontInfoPD(ufoCtx h, char* keyName, char* keyValue) {
         bluesArray = (BluesArray*)&pd->StemSnapV;
         setBluesArrayValue(h, bluesArray, 12, keyName);
     } else if (strEqual(keyName, "LanguageGroup")) {
-        pd->LanguageGroup = (float)strtod(keyValue, NULL);
+        pd->LanguageGroup = (float)strtodCheck(h, keyValue, false, NULL);
         h->parseKeyName = NULL;
     } else if (strEqual(keyName, "ExpansionFactor")) {
-        pd->ExpansionFactor = (float)strtod(keyValue, NULL);
+        pd->ExpansionFactor = (float)strtodCheck(h, keyValue, false, NULL);
         h->parseKeyName = NULL;
     } else
         return false;
@@ -2244,7 +2258,7 @@ static bool setFontInfoTopKey(ufoCtx h, char* keyName, char* keyValue) {
      else if (strEqual(keyName, "trademark"))
          setFontInfoTrademark(h, keyValue);
      else if (strEqual(keyName, "italicAngle"))
-         top->ItalicAngle = (float)strtod(keyValue, NULL);
+         top->ItalicAngle = (float)strtodCheck(h, keyValue, false, NULL);
      else if (strEqual(keyName, "openTypeNamePreferredFamilyName"))
          top->FamilyName.ptr = keyValue;
      else if (strEqual(keyName, "postscriptFullName"))
@@ -2252,13 +2266,13 @@ static bool setFontInfoTopKey(ufoCtx h, char* keyName, char* keyValue) {
      else if (strEqual(keyName, "postscriptWeightName"))
          top->Weight.ptr = keyValue;
      else if (strEqual(keyName, "postscriptIsFixedPitch"))
-         top->isFixedPitch = atol(keyValue);
+         top->isFixedPitch = strtolCheck(h, keyValue, false, NULL, 10);
      else if (strEqual(keyName, "com.adobe.type.FSType") || strEqual(keyName, "FSType"))
-         top->FSType = atoi(keyValue);
+         top->FSType = strtolCheck(h, keyValue, false, NULL, 10);
      else if (strEqual(keyName, "postscriptUnderlinePosition"))
-         top->UnderlinePosition = (float)strtod(keyValue, NULL);
+         top->UnderlinePosition = (float)strtodCheck(h, keyValue, false, NULL);
      else if (strEqual(keyName, "postscriptUnderlineThickness"))
-         top->UnderlineThickness = (float)strtod(keyValue, NULL);
+         top->UnderlineThickness = (float)strtodCheck(h, keyValue, false, NULL);
      else
          return false;
     return true;
@@ -2308,10 +2322,11 @@ static void setROSKeyValue(ufoCtx h, abfTopDict* top, char* keyValue) {
         top->cid.Ordering.ptr = copyStr(h, parsedValue);
     }
     parsedValue = strtok_r(ROSValues, "-", &ROSValues);
+    char* errSupplementMsg = "Empty Supplement value for com.adobe.type.ROS key. ROS value format should be: registry-ordering-supplement";
     if (parsedValue != NULL)
-        top->cid.Supplement = atol(parsedValue);
+        top->cid.Supplement = strtolCheck(h, parsedValue, true, errSupplementMsg, 10);
     else
-        fatal(h, ufoErrKeyValueNULL, "Empty Supplement value for com.adobe.type.ROS key. ROS value format should be: registry-ordering-supplement");
+        fatal(h, ufoErrKeyValueNULL, errSupplementMsg);
 }
 
 static int parseUFO(ufoCtx h) {
@@ -2348,11 +2363,11 @@ static int parseXMLGuideline(ufoCtx h, xmlNodePtr cur, int tag, abfGlyphCallback
     xmlAttr *attr = cur->properties;
     while (attr != NULL) {
         if (xmlAttrEqual(attr, "x"))
-            guideline->x = (float)strtod(getXmlAttrValue(attr), NULL);
+            guideline->x = (float)strtodCheck(h, getXmlAttrValue(attr), false, NULL);
         else if (xmlAttrEqual(attr, "y"))
-            guideline->y = (float)strtod(getXmlAttrValue(attr), NULL);
+            guideline->y = (float)strtodCheck(h, getXmlAttrValue(attr), false, NULL);
         else if (xmlAttrEqual(attr, "angle"))
-            guideline->angle = (float)strtod(getXmlAttrValue(attr), NULL);
+            guideline->angle = (float)strtodCheck(h, getXmlAttrValue(attr), false, NULL);
         else if (xmlAttrEqual(attr, "name")) {
             char* temp = getXmlAttrValue(attr);
             guideline->name = copyStr(h, temp);
@@ -2475,9 +2490,9 @@ static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, 
     xmlAttr *attr = cur->properties;
     while (attr != NULL) {
         if (xmlAttrEqual(attr, "x"))
-            x = (float)strtod(getXmlAttrValue(attr), NULL);
+            x = (float)strtodCheck(h, getXmlAttrValue(attr), false, NULL);
         else if (xmlAttrEqual(attr, "y"))
-            y = (float)strtod(getXmlAttrValue(attr), NULL);
+            y = (float)strtodCheck(h, getXmlAttrValue(attr), false, NULL);
         else if (xmlAttrEqual(attr, "name")) {  // needs testing
             char* temp = getXmlAttrValue(attr);
             pointName = copyStr(h, temp);
