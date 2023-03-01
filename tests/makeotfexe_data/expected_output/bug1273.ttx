@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.38">
+
+  <cmap>
+    <tableVersion version="0"/>
+    <cmap_format_4 platformID="0" platEncID="3" language="0">
+      <map code="0x20" name="space"/><!-- SPACE -->
+      <map code="0xa0" name="space"/><!-- NO-BREAK SPACE -->
+      <map code="0x2f00" name="uni4E00"/><!-- KANGXI RADICAL ONE -->
+      <map code="0x2f01" name="uni4E28"/><!-- KANGXI RADICAL LINE -->
+      <map code="0x2f02" name="uni4E36"/><!-- KANGXI RADICAL DOT -->
+      <map code="0x2f03" name="uni4E3F"/><!-- KANGXI RADICAL SLASH -->
+      <map code="0x2f04" name="uni4E59"/><!-- KANGXI RADICAL SECOND -->
+      <map code="0x2f05" name="uni4E85"/><!-- KANGXI RADICAL HOOK -->
+      <map code="0x2f06" name="uni4E8C"/><!-- KANGXI RADICAL TWO -->
+      <map code="0x2f07" name="uni4EA0"/><!-- KANGXI RADICAL LID -->
+      <map code="0x2f08" name="uni4EBA"/><!-- KANGXI RADICAL MAN -->
+      <map code="0x2f09" name="uni513F"/><!-- KANGXI RADICAL LEGS -->
+      <map code="0x2f0a" name="uni5165"/><!-- KANGXI RADICAL ENTER -->
+      <map code="0x2f0b" name="uni516B"/><!-- KANGXI RADICAL EIGHT -->
+      <map code="0x2f0c" name="uni5182"/><!-- KANGXI RADICAL DOWN BOX -->
+      <map code="0x2f0d" name="uni5196"/><!-- KANGXI RADICAL COVER -->
+      <map code="0x2f0e" name="uni51AB"/><!-- KANGXI RADICAL ICE -->
+      <map code="0x2f0f" name="uni51E0"/><!-- KANGXI RADICAL TABLE -->
+      <map code="0x4e00" name="uni4E00"/><!-- CJK UNIFIED IDEOGRAPH-4E00 -->
+      <map code="0x4e28" name="uni4E28"/><!-- CJK UNIFIED IDEOGRAPH-4E28 -->
+      <map code="0x4e36" name="uni4E36"/><!-- CJK UNIFIED IDEOGRAPH-4E36 -->
+      <map code="0x4e3f" name="uni4E3F"/><!-- CJK UNIFIED IDEOGRAPH-4E3F -->
+      <map code="0x4e59" name="uni4E59"/><!-- CJK UNIFIED IDEOGRAPH-4E59 -->
+      <map code="0x4e85" name="uni4E85"/><!-- CJK UNIFIED IDEOGRAPH-4E85 -->
+      <map code="0x4e8c" name="uni4E8C"/><!-- CJK UNIFIED IDEOGRAPH-4E8C -->
+      <map code="0x4ea0" name="uni4EA0"/><!-- CJK UNIFIED IDEOGRAPH-4EA0 -->
+      <map code="0x4eba" name="uni4EBA"/><!-- CJK UNIFIED IDEOGRAPH-4EBA -->
+      <map code="0x513f" name="uni513F"/><!-- CJK UNIFIED IDEOGRAPH-513F -->
+      <map code="0x5165" name="uni5165"/><!-- CJK UNIFIED IDEOGRAPH-5165 -->
+      <map code="0x516b" name="uni516B"/><!-- CJK UNIFIED IDEOGRAPH-516B -->
+      <map code="0x5182" name="uni5182"/><!-- CJK UNIFIED IDEOGRAPH-5182 -->
+      <map code="0x5196" name="uni5196"/><!-- CJK UNIFIED IDEOGRAPH-5196 -->
+      <map code="0x51ab" name="uni51AB"/><!-- CJK UNIFIED IDEOGRAPH-51AB -->
+      <map code="0x51e0" name="uni51E0"/><!-- CJK UNIFIED IDEOGRAPH-51E0 -->
+      <map code="0x9844" name="uni9844"/><!-- CJK UNIFIED IDEOGRAPH-9844 -->
+    </cmap_format_4>
+    <cmap_format_0 platformID="1" platEncID="0" language="0">
+      <map code="0x9" name="space"/>
+      <map code="0xd" name="space"/>
+      <map code="0x20" name="space"/>
+      <map code="0xca" name="space"/>
+    </cmap_format_0>
+    <cmap_format_4 platformID="3" platEncID="1" language="0">
+      <map code="0x20" name="space"/><!-- SPACE -->
+      <map code="0xa0" name="space"/><!-- NO-BREAK SPACE -->
+      <map code="0x2f00" name="uni4E00"/><!-- KANGXI RADICAL ONE -->
+      <map code="0x2f01" name="uni4E28"/><!-- KANGXI RADICAL LINE -->
+      <map code="0x2f02" name="uni4E36"/><!-- KANGXI RADICAL DOT -->
+      <map code="0x2f03" name="uni4E3F"/><!-- KANGXI RADICAL SLASH -->
+      <map code="0x2f04" name="uni4E59"/><!-- KANGXI RADICAL SECOND -->
+      <map code="0x2f05" name="uni4E85"/><!-- KANGXI RADICAL HOOK -->
+      <map code="0x2f06" name="uni4E8C"/><!-- KANGXI RADICAL TWO -->
+      <map code="0x2f07" name="uni4EA0"/><!-- KANGXI RADICAL LID -->
+      <map code="0x2f08" name="uni4EBA"/><!-- KANGXI RADICAL MAN -->
+      <map code="0x2f09" name="uni513F"/><!-- KANGXI RADICAL LEGS -->
+      <map code="0x2f0a" name="uni5165"/><!-- KANGXI RADICAL ENTER -->
+      <map code="0x2f0b" name="uni516B"/><!-- KANGXI RADICAL EIGHT -->
+      <map code="0x2f0c" name="uni5182"/><!-- KANGXI RADICAL DOWN BOX -->
+      <map code="0x2f0d" name="uni5196"/><!-- KANGXI RADICAL COVER -->
+      <map code="0x2f0e" name="uni51AB"/><!-- KANGXI RADICAL ICE -->
+      <map code="0x2f0f" name="uni51E0"/><!-- KANGXI RADICAL TABLE -->
+      <map code="0x4e00" name="uni4E00"/><!-- CJK UNIFIED IDEOGRAPH-4E00 -->
+      <map code="0x4e28" name="uni4E28"/><!-- CJK UNIFIED IDEOGRAPH-4E28 -->
+      <map code="0x4e36" name="uni4E36"/><!-- CJK UNIFIED IDEOGRAPH-4E36 -->
+      <map code="0x4e3f" name="uni4E3F"/><!-- CJK UNIFIED IDEOGRAPH-4E3F -->
+      <map code="0x4e59" name="uni4E59"/><!-- CJK UNIFIED IDEOGRAPH-4E59 -->
+      <map code="0x4e85" name="uni4E85"/><!-- CJK UNIFIED IDEOGRAPH-4E85 -->
+      <map code="0x4e8c" name="uni4E8C"/><!-- CJK UNIFIED IDEOGRAPH-4E8C -->
+      <map code="0x4ea0" name="uni4EA0"/><!-- CJK UNIFIED IDEOGRAPH-4EA0 -->
+      <map code="0x4eba" name="uni4EBA"/><!-- CJK UNIFIED IDEOGRAPH-4EBA -->
+      <map code="0x513f" name="uni513F"/><!-- CJK UNIFIED IDEOGRAPH-513F -->
+      <map code="0x5165" name="uni5165"/><!-- CJK UNIFIED IDEOGRAPH-5165 -->
+      <map code="0x516b" name="uni516B"/><!-- CJK UNIFIED IDEOGRAPH-516B -->
+      <map code="0x5182" name="uni5182"/><!-- CJK UNIFIED IDEOGRAPH-5182 -->
+      <map code="0x5196" name="uni5196"/><!-- CJK UNIFIED IDEOGRAPH-5196 -->
+      <map code="0x51ab" name="uni51AB"/><!-- CJK UNIFIED IDEOGRAPH-51AB -->
+      <map code="0x51e0" name="uni51E0"/><!-- CJK UNIFIED IDEOGRAPH-51E0 -->
+      <map code="0x9844" name="uni9844"/><!-- CJK UNIFIED IDEOGRAPH-9844 -->
+    </cmap_format_4>
+  </cmap>
+
+</ttFont>

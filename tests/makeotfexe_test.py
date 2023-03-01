@@ -707,6 +707,19 @@ def test_negative_internal_leading_bug1227():
             b'win.ascent + win.descent < unitsPerEm') in output
 
 
+def test_goadb_multiple_unicodes_bug1273():
+    input_filename = "bug1273/font.pfa"
+    ttx_filename = "bug1273.ttx"
+    goadb_filename = 'bug1273/GLyphOrderAndAliasDB'
+    actual_path = get_temp_file_path()
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'gf', f'_{get_input_path(goadb_filename)}',
+                        'o', f'_{actual_path}', 'r'])
+    actual_ttx = generate_ttx_dump(actual_path, ['cmap'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion='])
+
+
 @pytest.mark.parametrize(
     'goadb_filename, expected',
     [('bug1310/longUVGOADB.txt', False),
