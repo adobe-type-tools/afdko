@@ -1001,7 +1001,7 @@ int ufwEndFont(ufwCtx h, abfTopDict *top) {
 
     writeContents(h);
     writeLibPlist(h);
-    if (top->FDArray.cnt > 1)  // only write if > 1 FDDict
+    if (h->top->sup.flags & ABF_CID_FONT || top->FDArray.cnt > 1)  // for now, only write if CID font. Revisit in next PR adding multi-fddict support to non-cidkeyed fonts.
         writeGroups(h, top);
     writeMetaInfo(h);
     h->state = 0; /* Indicates writing to temp stream */
