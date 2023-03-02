@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>FDArraySelect.0.TestFont-Regular</key>
+	<array>
+		<string>cid00000</string>
+		<string>cid00001</string>
+		<string>cid00002</string>
+	</array>
+</dict>
+</plist>
