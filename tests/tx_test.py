@@ -1603,3 +1603,15 @@ def test_ufo_groups_parsing(file, msg, ret_code):
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
         assert subprocess.call(arg) == ret_code
+
+
+def test_ufo_languagegroup():
+    """
+    Test to make sure that the language group is accurately displayed
+    when running tx on a UFO.
+    """
+    folder = "cid_roundtrip/"
+    input_file = get_input_path(folder + "testCID.ufo")
+    expected_path = get_expected_path(folder + "testCID.txt")
+    stdout_path = runner(CMD + ['-s', '-e', '-f', input_file])
+    assert differ([expected_path, stdout_path, '-l', '1'])
