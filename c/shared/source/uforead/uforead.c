@@ -3100,6 +3100,8 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks* glyph_cb) 
     if (h->top.sup.flags & ABF_CID_FONT) {
         gi->gname.ptr = NULL;
         gi->flags |= ABF_GLYPH_CID;
+        if (h->top.FDArray.array[gi->iFD].Private.LanguageGroup == 1)
+            gi->flags |= ABF_GLYPH_LANG_1;
     }
     result = glyph_cb->beg(glyph_cb, gi);
     gi->flags |= ABF_GLYPH_SEEN;
