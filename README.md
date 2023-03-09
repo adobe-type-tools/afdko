@@ -35,7 +35,7 @@ Installation
 ------------
 
 The AFDKO requires [Python](http://www.python.org/download) 3.7
-or later.
+or later. **⚠️ Starting April 3, 2023, the AFDKO will require Python 3.8 or later.** Due to our dependencies already dropping support and requiring Python 3.8 in their latest versions, we will also be dropping Python 3.7 support on April 3, 2023.
 
 Releases are available on the [Python Package
 Index](https://pypi.python.org/pypi/afdko) (PyPI) and can be installed
