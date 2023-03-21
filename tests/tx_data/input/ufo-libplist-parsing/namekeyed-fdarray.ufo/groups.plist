@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>FDArraySelect.0.NameKeyed-Heavy-Generic</key>
+	<array>
+		<string>.notdef</string>
+		<string>a</string>
+	</array>
+	<key>FDArraySelect.1.NameKeyed-Heavy-Other</key>
+	<array>
+		<string>space</string>
+		<string>zerowidth</string>
+		<string>negative</string>
+	</array>
+</dict>
+</plist>
