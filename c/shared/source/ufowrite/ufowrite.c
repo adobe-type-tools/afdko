@@ -1110,7 +1110,12 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 
     if (info->flags & ABF_GLYPH_CID) {
         h->lastiFD = info->iFD;
-        sprintf(glyphName, "cid%05hu", info->cid);
+        if (info->gname.ptr == NULL) {
+            sprintf(glyphName, "cid%05hu", info->cid);
+        }
+        else {
+            sprintf(glyphName, "%s", info->gname.ptr);
+        }
     } else {
         sprintf(glyphName, "%s", info->gname.ptr);
         sprintf(glifName, "%s", info->gname.ptr);
