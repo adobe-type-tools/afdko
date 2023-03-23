@@ -27,7 +27,8 @@ extern "C" {
 
    Each font parse is begun by calling ufoBegFont() and completed by calling
    ufoEndFont(). Between these calls one or more glyphs may be parsed with the
-   ufoIterateGlyphs(), ufoGetGlyphByTag(), and ufoGetGlyphByName() functions. 
+   ufoIterateGlyphs(), ufoGetGlyphByTag(), ufoGetGlyphByName(), or ufoGetGlyphByCID()
+   functions. 
 
    Memory management and source data functions are provided by two sets of
    client-supplied callbacks described in ctlshare.h. */
@@ -91,10 +92,12 @@ int ufoGetGlyphByTag(ufoCtx h,
                      unsigned short tag, abfGlyphCallbacks *glyph_cb);
 int ufoGetGlyphByName(ufoCtx h,
                       char *gname, abfGlyphCallbacks *glyph_cb);
+int ufoGetGlyphByCID(ufoCtx h,
+                     unsigned short cid, abfGlyphCallbacks *glyph_cb);
 
-/* ufoGetGlyphByTag(), ufoGetGlyphByName() are called
+/* ufoGetGlyphByTag(), ufoGetGlyphByName() and ufoGetGlyphByCID() are called to
    obtain glyph data from a glyph selected by its tag (described above) or its
-   name respectively. The glyph name is specified by as a
+   name respectively. The glyph name is specified as a
    null-terminated string via the "gname" parameter. 
 
    These functions return ufoErrNoGlyph if the requested glyph is not present

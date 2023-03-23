@@ -3411,6 +3411,56 @@ int ufoGetGlyphByName(ufoCtx h, char* gname, abfGlyphCallbacks* glyph_cb) {
     return result;
 }
 
+/* Match CID value. */
+static int CTL_CDECL matchCID(const void *key, const void *value) {
+    unsigned short a = *(unsigned short *)key;
+    unsigned short b = ((Char *)value)->cid;
+    if (a < b)
+        return -1;
+    else if (a > b)
+        return 1;
+    else
+        return 0;
+}
+
+/* Get glyph from font by its CID. */
+int ufoGetGlyphByCID(ufoCtx h, unsigned short cid, abfGlyphCallbacks *glyph_cb) {
+    volatile unsigned short tag; /* volatile suppresses optimizer warning */
+
+    if (!(h->flags & ABF_CID_FONT))
+        return ufoErrNoGlyph;
+
+    if (h->chars.index.array[h->chars.index.cnt - 1].cid ==
+        h->chars.index.cnt - 1) {
+        /* Non-subset font; index by CID */
+        if (cid >= h->chars.index.cnt)
+            return ufoErrNoGlyph;
+        else
+            tag = cid;
+    } else {
+        /* Subset font; search for matching CID */
+        Char *chr =
+            (Char *)bsearch(&cid, h->chars.index.array,
+                            h->chars.index.cnt, sizeof(Char), matchCID);
+        if (chr == NULL)
+            return ufoErrNoGlyph;
+        else
+            /* 64-bit warning fixed by cast here HO */
+            tag = (unsigned short)(chr - h->chars.index.array);
+    }
+
+    /* Set error handler */
+    DURING_EX(h->err.env)
+
+    readGlyph(h, tag, glyph_cb);
+
+    HANDLER
+    return Exception.Code;
+    END_HANDLER
+
+    return ufoSuccess;
+}
+
 int ufoResetGlyphs(ufoCtx h) {
     long i;
 
