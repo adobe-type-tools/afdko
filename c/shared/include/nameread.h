@@ -7,7 +7,7 @@
 
 #include "ctlshare.h"
 #include "sfntread.h"
-#include "varread.h"
+#include "varsupport.h"
 
 #if defined(__cplusplus) && !defined(STRIP_EXTERN_C)
 extern "C" {
@@ -169,7 +169,7 @@ long nam_getFamilyNamePrefix(nam_name nameTbl,
     bufferLen-1. */
 
 long nam_getNamedInstancePSName(nam_name nameTbl,
-                                var_axes axesTbl,
+                                var_axes *axesTbl,
                                 ctlSharedStmCallbacks *sscb,
                                 float *coords,
                                 unsigned short axisCount,
@@ -203,7 +203,7 @@ long nam_getNamedInstancePSName(nam_name nameTbl,
     instanceNameLen-1. */
 
 long nam_generateArbitraryInstancePSName(nam_name nameTbl,
-                                         var_axes axesTbl,
+                                         var_axes *axesTbl,
                                          ctlSharedStmCallbacks *sscb,
                                          float *coords,
                                          unsigned short axisCount,
@@ -232,7 +232,7 @@ long nam_generateArbitraryInstancePSName(nam_name nameTbl,
     instanceNameLen-1. */
 
 long nam_generateLastResortInstancePSName(nam_name nameTbl,
-                                          var_axes axesTbl,
+                                          var_axes *axesTbl,
                                           ctlSharedStmCallbacks *sscb,
                                           float *coords,
                                           unsigned short axisCount,

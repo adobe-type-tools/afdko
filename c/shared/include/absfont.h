@@ -102,8 +102,7 @@ enum {  // OrigFontType field values
 };
 
 /* item variation store  */
-struct var_itemVariationStore_;
-typedef struct var_itemVariationStore_ *var_itemVariationStore;
+struct itemVariationStore;
 
 /* Top dictionary data. Comments indicate default/initial values. */
 typedef struct {
@@ -151,7 +150,7 @@ typedef struct {
     } FDArray;
     abfSupplement sup;       /* Supplementary data */
     unsigned short maxstack; /* Supplementary data */
-    var_itemVariationStore varStore;
+    itemVariationStore *varStore;
 } abfTopDict;
 
 /* Private dictionary data. Comments indicate default/initial values. */

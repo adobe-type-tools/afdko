@@ -9,7 +9,7 @@
 #include <iostream>
 #include <string>
 
-#include "varread.h"
+#include "varsupport.h"
 
 
 static void dumpCstr(txCtx h, const ctlRegion *region, int inSubr);
@@ -5857,7 +5857,7 @@ static void printVersions(txCtx h) {
     svwGetVersion(&cb);
     ufoGetVersion(&cb);
     ufwGetVersion(&cb);
-    varreadGetVersion(&cb);
+    varsupportGetVersion(&cb);
 
     exit(0);
 }

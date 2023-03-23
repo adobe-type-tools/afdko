@@ -642,7 +642,7 @@ static void writeBlueValues(ufwCtx h, abfPrivateDict *privateDict) {
     }
 }
 
-static void writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
+static void writeFDArray(ufwCtx h, abfTopDict *top, char *buffer, int buflen) {
     abfPrivateDict *privateDict;
     int i;
     int j;
@@ -652,10 +652,10 @@ static void writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
         writeLine(h, "\t<dict>");
         abfFontDict *fd = &h->top->FDArray.array[j];
         writeLine(h, "\t<key>FontName</key>");
-        sprintf(buffer, "\t<string>%s</string>", fd->FontName.ptr);
+        snprintf(buffer, buflen, "\t<string>%s</string>", fd->FontName.ptr);
         writeLine(h, buffer);
         writeLine(h, "\t<key>PaintType</key>");
-        sprintf(buffer, "\t<integer>%ld</integer>", fd->PaintType);
+        snprintf(buffer, buflen, "\t<integer>%ld</integer>", fd->PaintType);
         writeLine(h, buffer);
         if (fd->FontMatrix.cnt == ABF_EMPTY_ARRAY) {
             fd->FontMatrix.cnt = 6;
@@ -671,9 +671,9 @@ static void writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
         for (i = 0; i < fd->FontMatrix.cnt; i++) {
             float stem = fd->FontMatrix.array[i];
             if (stem == ((int)stem))
-                sprintf(buffer, "\t\t<integer>%d</integer>", (int)stem);
+                snprintf(buffer, buflen, "\t\t<integer>%d</integer>", (int)stem);
             else
-                sprintf(buffer, "\t\t<real>%.3f</real>", stem);
+                snprintf(buffer, buflen, "\t\t<real>%.3f</real>", stem);
             writeLine(h, buffer);
         }
         writeLine(h, "\t</array>");
@@ -688,14 +688,14 @@ static void writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
     writeLine(h, "\t</array>");
 }
 
-static void writeCIDMap(ufwCtx h, abfTopDict *top, char *buffer) {
+static void writeCIDMap(ufwCtx h, abfTopDict *top, char *buffer, int buflen) {
     int i;
     writeLine(h, "\t<key>com.adobe.type.postscriptCIDMap</key>");
     writeLine(h, "\t<dict>");
     for (i = 0; i < h->glyphs.cnt; i++) {
-        sprintf(buffer, "\t\t<key>%s</key>", h->glyphs.array[i].glyphName);
+        snprintf(buffer, buflen, "\t\t<key>%s</key>", h->glyphs.array[i].glyphName);
         writeLine(h, buffer);
-        sprintf(buffer, "\t\t<integer>%d</integer>", h->glyphs.array[i].cid);
+        snprintf(buffer, buflen, "\t\t<integer>%d</integer>", h->glyphs.array[i].cid);
         writeLine(h, buffer);
     }
     writeLine(h, "\t</dict>");
@@ -703,6 +703,7 @@ static void writeCIDMap(ufwCtx h, abfTopDict *top, char *buffer) {
 
 static void writeLibPlist(ufwCtx h) {
     char buffer[FILENAME_MAX];
+    int buflen = sizeof(buffer);
     int i;
 
     /* Set error handler */
@@ -710,7 +711,7 @@ static void writeLibPlist(ufwCtx h) {
 
     h->state = 1; /* Indicates writing to dst stream */
 
-    sprintf(buffer, "%s", "lib.plist");
+    snprintf(buffer, buflen, "%s", "lib.plist");
     h->cb.stm.clientFileName = buffer;
     h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
     if (h->stm.dst == NULL)
@@ -746,7 +747,7 @@ static void writeLibPlist(ufwCtx h) {
     for (i = 0; i < h->glyphs.cnt; i++) {
         Glyph *glyphRec;
         glyphRec = &h->glyphs.array[i];
-        sprintf(buffer, "\t\t<string>%s</string>", glyphRec->glyphName);
+        snprintf(buffer, buflen, "\t\t<string>%s</string>", glyphRec->glyphName);
         writeLine(h, buffer);
     }
     writeLine(h, "\t</array>");
@@ -765,21 +766,22 @@ static void writeLibPlist(ufwCtx h) {
     END_HANDLER
 }
 
-static void writeFDArraySelect(ufwCtx h, abfTopDict *top, char *buffer) {
+static void writeFDArraySelect(ufwCtx h, abfTopDict *top, char *buffer,
+                               int buflen) {
     int fdIndex;
     int glyphArrIndex;
 
     for (fdIndex = 0; fdIndex < top->FDArray.cnt; fdIndex++) {
         abfFontDict *fd = &h->top->FDArray.array[fdIndex];
         if (fd->FontName.ptr != NULL)
-            sprintf(buffer, "\t<key>FDArraySelect.%d.%s</key>", fdIndex, fd->FontName.ptr);
+            snprintf(buffer, buflen, "\t<key>FDArraySelect.%d.%s</key>", fdIndex, fd->FontName.ptr);
         else
-            sprintf(buffer, "\t<key>FDArraySelect.%d</key>", fdIndex);
+            snprintf(buffer, buflen, "\t<key>FDArraySelect.%d</key>", fdIndex);
         writeLine(h, buffer);
         writeLine(h, "\t<array>");
         for (glyphArrIndex = 0; glyphArrIndex < h->glyphs.cnt; glyphArrIndex++) {
             if (h->glyphs.array[glyphArrIndex].iFD == fdIndex) {
-                sprintf(buffer, "\t\t<string>%s</string>", h->glyphs.array[glyphArrIndex].glyphName);
+                snprintf(buffer, buflen, "\t\t<string>%s</string>", h->glyphs.array[glyphArrIndex].glyphName);
                 writeLine(h, buffer);
             }
         }
@@ -789,6 +791,7 @@ static void writeFDArraySelect(ufwCtx h, abfTopDict *top, char *buffer) {
 
 static void writeGroups(ufwCtx h, abfTopDict *top) {
     char buffer[FILENAME_MAX];
+    int buflen = sizeof(buffer);
 
     /* Set error handler */
     DURING_EX(h->err.env)
@@ -797,7 +800,7 @@ static void writeGroups(ufwCtx h, abfTopDict *top) {
 
     /* Open groups.plist file as dst stream */
 
-    sprintf(buffer, "%s", "groups.plist");
+    snprintf(buffer, buflen, "%s", "groups.plist");
     h->cb.stm.clientFileName = buffer;
     h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
     if (h->stm.dst == NULL)
@@ -807,7 +810,7 @@ static void writeGroups(ufwCtx h, abfTopDict *top) {
     writeLine(h, PLIST_DTD_HEADER);
     writeLine(h, "<plist version=\"1.0\">");
     writeLine(h, "<dict>");
-    writeFDArraySelect(h, top, buffer);
+    writeFDArraySelect(h, top, buffer, sizeof(buffer));
     writeLine(h, "</dict>");
     writeLine(h, "</plist>");
 
@@ -823,6 +826,7 @@ static void writeGroups(ufwCtx h, abfTopDict *top) {
 
 static void writeMetaInfo(ufwCtx h) {
     char buffer[FILENAME_MAX];
+    int buflen = sizeof(buffer);
 
     /* Set error handler */
     DURING_EX(h->err.env)
@@ -831,7 +835,7 @@ static void writeMetaInfo(ufwCtx h) {
 
     /* Open metainfo.plist file as dst stream */
 
-    sprintf(buffer, "%s", "metainfo.plist");
+    snprintf(buffer, buflen, "%s", "metainfo.plist");
     h->cb.stm.clientFileName = buffer;
     h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
     if (h->stm.dst == NULL)

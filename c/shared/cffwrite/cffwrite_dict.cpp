@@ -17,7 +17,6 @@
 #include "dictops.h"
 #include "txops.h"
 #include "ctutil.h"
-#include "varread.h"
 
 /* ----------------------------- Module Context ---------------------------- */
 
