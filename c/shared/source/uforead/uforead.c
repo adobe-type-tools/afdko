@@ -3093,7 +3093,6 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks* glyph_cb) 
     /* note that gname.ptr is not stable: it is a pointer into the h->string->buf array, which moves when it gets resized. */
     gi->gname.ptr = getString(h, (STI)gi->tag);
     if (h->top.sup.flags & ABF_CID_FONT) {
-        gi->gname.ptr = NULL;
         gi->flags |= ABF_GLYPH_CID;
         if (h->top.FDArray.array[gi->iFD].Private.LanguageGroup == 1)
             gi->flags |= ABF_GLYPH_LANG_1;
