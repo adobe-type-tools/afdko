@@ -61,7 +61,7 @@ add_library(shared OBJECT
     ufo_ops.h
     uforead.cpp
     ufowrite.cpp
-    varread.cpp
+    varsupport.cpp
     # include 
     include/abfdesc.h
     include/abferr.h
@@ -116,7 +116,7 @@ add_library(shared OBJECT
     include/uforead.h
     include/ufowerr.h
     include/ufowrite.h
-    include/varread.h
+    include/varsupport.h
 )
 
 set_property(TARGET shared PROPERTY CXX_STANDARD 17)

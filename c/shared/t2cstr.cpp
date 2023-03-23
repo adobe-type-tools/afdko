@@ -21,7 +21,7 @@
 
 #include "txops.h"
 #include "ctutil.h"
-#include "varread.h"
+#include "varsupport.h"
 #include "supportexcept.h"
 #include "smem.h"
 
@@ -936,9 +936,14 @@ static void convertToAbsolute(t2cCtx h, float x1, float y1, abfBlendArg *blendAr
 
 static void setNumMasters(t2cCtx h) {
     unsigned short vsindex = h->glyph->info->blendInfo.vsindex;
-    h->stack.numRegions = var_getIVDRegionCountForIndex(h->aux->varStore, vsindex);
+    if (h->aux->varStore)
+        h->stack.numRegions = h->aux->varStore->getDRegionCountForIndex(vsindex);
+    else
+        h->stack.numRegions = 0;
     h->glyph->info->blendInfo.numRegions = h->stack.numRegions;
-    if (h->aux->varStore && !var_getIVSRegionIndices(h->aux->varStore, vsindex, h->regionIndices, h->aux->varStore->regionList.regionCount)) {
+    if (h->aux->varStore && !h->aux->varStore->getRegionIndices(vsindex,
+                                                                h->regionIndices,
+                                                                h->aux->varStore->regions.size())) {
         message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
         h->stack.numRegions = 0;
     }

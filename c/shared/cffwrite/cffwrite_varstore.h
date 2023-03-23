@@ -7,7 +7,7 @@
 
 #include "cffwrite.h"
 #include "cffwrite_dict.h"
-#include "varread.h"
+#include "varsupport.h"
 
 void cfwDictFillVarStore(cfwCtx g, DICT *dst, abfTopDict *top);
 

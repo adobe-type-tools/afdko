@@ -1231,7 +1231,7 @@ def test_non_FDArray_dict_parse():
     assert subprocess.call(arg) == 0
 
 
-garbage_unitsPerEm = (b"tx: (ufr) In fontinfo.plist: encountered unparseable"
+garbage_unitsPerEm = (b"In fontinfo.plist: encountered unparseable"
                       b" number for UnitsPerEmgarbage")
 
 
@@ -1342,10 +1342,10 @@ glyphorder_warn = (b'public.glyphOrder key is empty'
 glyphorder_dup_warn = (b"Glyph order contains duplicate" +
                        b" entries for glyphs 'a'.")
 
-missing_cidmap_fail = (b"tx: (t1w) bad font dictionary. Name-keyed UFO has "
+missing_cidmap_fail = (b" bad font dictionary. Name-keyed UFO has "
                        b"more than 1 defined FDArray.")
 
-unparseable_cid_digit = (b"tx: (ufr) In lib.plist postscriptCIDMap, expected "
+unparseable_cid_digit = (b"In lib.plist postscriptCIDMap, expected "
                          b"cid number but could not find parseable number for "
                          b"glyph: cid00000")
 
@@ -1386,19 +1386,19 @@ def test_ufo_libplist_parsing(file, msg, ret_code, exp_file):
         assert subprocess.call(arg) == ret_code
 
 
-ros_reg_fail = (b"tx: (ufr) Empty Registry value for com.adobe.type.ROS key"
+ros_reg_fail = (b"Empty Registry value for com.adobe.type.ROS key"
                 b". ROS value format should be: registry-ordering-supplement")
 
 
-ros_ord_fail = (b"tx: (ufr) Empty Ordering value for com.adobe.type.ROS key"
+ros_ord_fail = (b"Empty Ordering value for com.adobe.type.ROS key"
                 b". ROS value format should be: registry-ordering-supplement")
 
 
-ros_supp_fail = (b"tx: (ufr) Empty Supplement value for com.adobe.type.ROS key"
+ros_supp_fail = (b"Empty Supplement value for com.adobe.type.ROS key"
                  b". ROS value format should be: registry-ordering-supplement")
 
 
-ros_fail = (b"tx: (t1w) bad font dictionary. Missing either the CID font name,"
+ros_fail = (b"bad font dictionary. Missing either the CID font name,"
             b" or the Registry-Order-Supplement names.")
 
 
@@ -1423,7 +1423,7 @@ def test_ufo_ROS_parsing(file, msg, ret_code):
     assert subprocess.call(arg) == ret_code
 
 
-mismatched_fdarray_fdselect_msg = (b"tx: (ufr) In groups.plist: FDict "
+mismatched_fdarray_fdselect_msg = (b"In groups.plist: FDict "
                                    b"referenced in FDSelect Group FDArraySel"
                                    b"ect.1.SourceHanSans-Heavy-Ideographs is "
                                    b"not defined at expected FDArray index 1.")
@@ -1573,18 +1573,18 @@ def test_fontmatrix_unitsperem():
     assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
 
 
-missing_iFD = (b"tx: (ufr) glyph 'cid17899' missing "
+missing_iFD = (b"Glyph 'cid17899' missing "
                b"FDArray index in <lib> dict")
 
-missing_FDArraySelect = (b"Warning: FDArraySelect not defined for "
+missing_FDArraySelect = (b"FDArraySelect not defined for "
                          b"cid-keyed font")
 
 
-fdselect_doesnt_exist_fail = (b"tx: (ufr) In groups.plist: FDict referenced in"
+fdselect_doesnt_exist_fail = (b"In groups.plist: FDict referenced in"
                               b" FDSelect Group FDArraySelect.2.DoesNotExist "
                               b"is not defined at expected FDArray index 2")
 
-unparseable_index = (b"tx: (ufr) In groups.plist: expected FDArray index "
+unparseable_index = (b"In groups.plist: expected FDArray index "
                      b"number but could not find parseable number in "
                      b"FDArraySelect group: FDArraySelect.not-parseable."
                      b"SourceHanSans-Heavy-Generic")

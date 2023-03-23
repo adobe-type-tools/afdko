@@ -10,7 +10,7 @@
 #include <math.h>
 
 #include "ctlshare.h"
-#include "varread.h"
+#include "varsupport.h"
 #include "dynarr.h"
 #include "sha1.h"
 #include "supportexcept.h"
@@ -267,7 +267,7 @@ static char *allocNameBuffer(ctlSharedStmCallbacks *sscb, long axisCount, unsign
 }
 
 long nam_getNamedInstancePSName(nam_name nameTbl,
-                                var_axes axesTbl,
+                                var_axes *axesTbl,
                                 ctlSharedStmCallbacks *sscb,
                                 float *coords,
                                 unsigned short axisCount,
@@ -286,7 +286,7 @@ long nam_getNamedInstancePSName(nam_name nameTbl,
 
     /* find a matching named instance in the fvar table */
     if (instanceIndex < 0)
-        instanceIndex = var_findInstance(axesTbl, coords, axisCount, &subfamilyID, &postscriptID);
+        instanceIndex = axesTbl->findInstance(coords, axisCount, subfamilyID, postscriptID);
     if ((instanceIndex >= 0) && (postscriptID == 6 || ((postscriptID > 255) && (postscriptID < 32768)))) {
         nameLen = nam_getASCIIName(nameTbl, sscb, instanceName, instanceNameLen, postscriptID, 1);
         if (nameLen > 0)
@@ -399,7 +399,7 @@ static unsigned long stringizeNum(char *buffer, unsigned long bufferLen, float v
 }
 
 long nam_generateArbitraryInstancePSName(nam_name nameTbl,
-                                         var_axes axesTbl,
+                                         var_axes *axesTbl,
                                          ctlSharedStmCallbacks *sscb,
                                          float *coords,
                                          unsigned short axisCount,
@@ -431,7 +431,7 @@ long nam_generateArbitraryInstancePSName(nam_name nameTbl,
     for (axis = 0; axis < axisCount; axis++) {
         unsigned long coordStrLen;
         int i;
-        unsigned long tag;
+        ctlTag tag;
 
         /* value range check */
         if (fabs(coords[axis]) > 32768.0f) {
@@ -446,7 +446,7 @@ long nam_generateArbitraryInstancePSName(nam_name nameTbl,
         nameLen += coordStrLen;
 
         /* append a axis name */
-        if (var_getAxis(axesTbl, axis, &tag, NULL, NULL, NULL, NULL)) {
+        if (!axesTbl->getAxis(axis, &tag, NULL, NULL, NULL, NULL)) {
             sscb->message(sscb, "failed to get axis information");
             nameLen = 0;
             goto cleanup;
@@ -486,7 +486,7 @@ static void nam_sha1_free(sha1_pctx ctx, void *hook) {
 }
 
 long nam_generateLastResortInstancePSName(nam_name nameTbl,
-                                          var_axes axesTbl,
+                                          var_axes *axesTbl,
                                           ctlSharedStmCallbacks *sscb,
                                           float *coords,
                                           unsigned short axisCount,

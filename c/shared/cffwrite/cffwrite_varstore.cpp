@@ -9,6 +9,7 @@
 #include "cffwrite_varstore.h"
 
 #include <stdio.h>
+#include <vector>
 
 #include "ctutil.h"
 #include "cffwrite_dict.h"
@@ -35,48 +36,34 @@ void cfwDictSaveLongInt(DICT *dict, long i) {
     arg[3] = (unsigned char)i;
 }
 
-unsigned long getRegionListSize(variationRegionList *regionList) {
-    unsigned int size = 4 + regionList->regionCount * regionList->axisCount * 6;
+void writeRegionList(DICT *dst, uint16_t axisCount,
+                     std::vector<itemVariationStore::variationRegion> &regions) {
+    uint16_t i;
+    cfwDictSaveShortInt(dst, axisCount);
+    cfwDictSaveShortInt(dst, (int16_t) (regions.size() / axisCount));
 
-    return size;
-}
-
-unsigned long getDataItemSize(itemVariationDataSubtable *ds) {
-    unsigned int size = 6 + ds->regionCount * 2 + ds->itemCount * 2;
-    return size;
-}
-
-void writeRegionList(DICT *dst, variationRegionList *regionList) {
-    unsigned short i, j;
-    variationRegion *vr = &(regionList->regions.array[0]);
-    cfwDictSaveShortInt(dst, regionList->axisCount);
-    cfwDictSaveShortInt(dst, regionList->regionCount);
-
-    for (i = 0; i < regionList->regionCount; i++) {
-        for (j = 0; j < regionList->axisCount; j++) {
-            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr->startCoord));
-            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr->peakCoord));
-            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr->endCoord));
-            vr++;
-        }
+    for (i = 0; i < regions.size(); i++) {
+        itemVariationStore::variationRegion &vr = regions[i];
+        cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr.startCoord));
+        cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr.peakCoord));
+        cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr.endCoord));
     }
 }
 
-void writeDataItemList(DICT *dst, itemVariationDataSubtable *ivd) {
-    unsigned short i, cnt;
-    cfwDictSaveShortInt(dst, ivd->itemCount);
+void writeDataItemList(DICT *dst,
+                       itemVariationStore::itemVariationDataSubtable &ivd) {
+    uint16_t i, cnt = (uint16_t) ivd.regionIndices.size();
+    cfwDictSaveShortInt(dst, ivd.itemCount);
     cfwDictSaveShortInt(dst, 0);
-    cfwDictSaveShortInt(dst, ivd->regionCount);
+    cfwDictSaveShortInt(dst, cnt);
 
-    cnt = ivd->regionCount;
-    for (i = 0; i < cnt; i++) {
-        cfwDictSaveShortInt(dst, ivd->regionIndices.array[i]);
-    }
+    for (i = 0; i < cnt; i++)
+        cfwDictSaveShortInt(dst, ivd.regionIndices[i]);
 }
 
 void cfwDictFillVarStore(cfwCtx g, DICT *dst, abfTopDict *top) {
     int i;
-    var_itemVariationStore ivs = top->varStore;
+    itemVariationStore *ivs = top->varStore;
     unsigned long offset;
 
     // Write place holder for length.
@@ -87,24 +74,24 @@ void cfwDictFillVarStore(cfwCtx g, DICT *dst, abfTopDict *top) {
 
     // write offset to RegionList.
     // The Region list immediately follows the IVS header and offset to the dataItems.
-    offset = 8 + ivs->dataList.ivdSubtables.cnt * 4;
+    offset = 8 + ivs->subtables.size() * 4;
     cfwDictSaveLongInt(dst, offset);
 
     // write ItemVariationData count
-    cfwDictSaveShortInt(dst, ivs->dataList.ivdSubtables.cnt);
+    cfwDictSaveShortInt(dst, ivs->subtables.size());
 
     // write the offsets to the ItemVariationData items.
-    offset += getRegionListSize(&(ivs->regionList));
-    for (i = 0; i < ivs->dataList.ivdSubtables.cnt; i++) {
+    offset += ivs->getRegionListSize();
+    for (i = 0; i < ivs->subtables.size(); i++) {
         cfwDictSaveLongInt(dst, offset);
-        offset += getDataItemSize(&(ivs->dataList.ivdSubtables.array[i]));
+        offset += ivs->getDataItemSize(i);
     }
 
-    writeRegionList(dst, &(ivs->regionList));
+    writeRegionList(dst, ivs->axisCount, ivs->regions);
 
     // write the ItemVariationData subtables
-    for (i = 0; i < ivs->dataList.ivdSubtables.cnt; i++) {
-        writeDataItemList(dst, &(ivs->dataList.ivdSubtables.array[i]));
+    for (i = 0; i < ivs->subtables.size(); i++) {
+        writeDataItemList(dst, ivs->subtables[i]);
     }
 
     // Write length
