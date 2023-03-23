@@ -1167,9 +1167,10 @@ static long getGlyphOrderIndex(ufoCtx h, char* glyphName) {
     if (ctuLookup(glyphName, h->data.glifOrder.array, h->data.glifOrder.cnt,
                   sizeof(h->data.glifOrder.array[0]), matchGLIFOrderRec, &recIndex, h)) {
         orderIndex = h->data.glifOrder.array[recIndex].order;
-    } else {
-        message(h, "Warning: glyph order does not contain glyph name '%s'.", glyphName);
     }
+//    } else {
+//        message(h, "Warning: glyph order does not contain glyph name '%s'.", glyphName);
+//    }
 
     return orderIndex;
 }
