@@ -97,7 +97,7 @@ static void saveDate(longDateTime ldt,
 void headRead(hotCtx g, int offset, int length) {
     headCtx h = g->ctx.head;
 
-    g->cb.stm.seek(&g->cb.stm, g->in_stream, offset + 18); // Offset to UPM
+    g->cb.stm.seek(&g->cb.stm, g->in_stream, offset + 18);  // Offset to UPM
     g->bufleft = 0;
     h->tbl.unitsPerEm = hotIn2(g);
     g->cb.stm.seek(&g->cb.stm, g->in_stream, offset + 20 + 2*DATE_TIME_SIZE);

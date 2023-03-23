@@ -8,6 +8,7 @@
 
 #include "cffread_abs.h"
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -23,7 +24,7 @@
 #include "ctutil.h"
 #include "sfntread.h"
 #include "nameread.h"
-#include "varread.h"
+#include "varsupport.h"
 #include "supportfp.h"
 #include "supportexcept.h"
 
@@ -172,11 +173,11 @@ struct cfrCtx_ {  // Context
         unsigned short regionIndices[CFF2_MAX_MASTERS]; /* region indices for the current vsindex */
 
         unsigned short axisCount;
-        var_axes axes;
-        var_hmtx hmtx;
-        var_MVAR mvar;
+        var_axes *axes;
+        var_hmtx *hmtx;
+        var_MVAR *mvar;
         nam_name name;
-        var_itemVariationStore varStore;
+        itemVariationStore *varStore;
         void *lastResortInstanceNameClientCtx;
         cfrlastResortInstanceNameCallback lastResortInstanceNameCallback;
     } cff2;
@@ -378,12 +379,7 @@ void cfrFree(cfrCtx h) {
     dnaFREE(h->string.ptrs);
     dnaFREE(h->string.buf);
 
-    if (h->cff2.varStore != NULL) {
-        /* Call this here rather than end cfrEndFont, so that
-        the allocated memory will be available to any client modules
-         */
-        var_freeItemVariationStore(&h->cb.shstm, h->cff2.varStore);
-    }
+    delete h->cff2.varStore;
 
     encListFree(h, h->encfree);
 
@@ -965,9 +961,12 @@ static void saveIntArray(cfrCtx h, size_t max, long *cnt, long *array,
 }
 
 static int setNumMasters(cfrCtx h, unsigned short vsindex) {
-    int numMasters = h->stack.numRegions = var_getIVDRegionCountForIndex(h->cff2.varStore, vsindex);
+    if (h->cff2.varStore == nullptr)
+        return 0;
 
-    if (!var_getIVSRegionIndices(h->cff2.varStore, vsindex, h->cff2.regionIndices, h->cff2.regionListCount)) {
+    int numMasters = h->stack.numRegions = h->cff2.varStore->getDRegionCountForIndex(vsindex);
+
+    if (!h->cff2.varStore->getRegionIndices(vsindex, h->cff2.regionIndices, h->cff2.regionListCount)) {
         h->logger->log(sWARNING, "inconsistent region indices detected in item variation store subtable %d", vsindex);
         numMasters = 0;
     }
@@ -983,23 +982,19 @@ static void readVarStore(cfrCtx h) {
     if (h->region.VarStore.begin == -1)
         fatal(h, cfrErrNoFDSelect);
 
-    if (h->cff2.varStore) {
-        var_freeItemVariationStore(&h->cb.shstm, h->cff2.varStore);
-        h->cff2.varStore = 0;
-    }
+    delete h->cff2.varStore;
+    h->cff2.varStore = nullptr;
 
     srcSeek(h, h->region.VarStore.begin);
     length = (unsigned long)read2(h);
     h->region.VarStore.end = vstoreStart + length;
-    h->cff2.varStore = var_loadItemVariationStore(&h->cb.shstm, (unsigned long)vstoreStart, length, 0);
-    if (!h->cff2.varStore)
-        return;
-    h->cff2.regionListCount = var_getIVSRegionCount(h->cff2.varStore);
+    h->cff2.varStore = new itemVariationStore(&h->cb.shstm, (uint32_t)vstoreStart, length, 0);
+    h->cff2.regionListCount = h->cff2.varStore->getRegionCount();
     if (h->cff2.regionListCount > CFF2_MAX_MASTERS)
         fatal(h, cfrErrGeometry);
     h->top.varStore = h->cff2.varStore;
     /* pre-calculate scalars for all regions for the current weight vector */
-    var_calcRegionScalars(&h->cb.shstm, h->cff2.varStore, &h->cff2.axisCount, h->cff2.ndv, h->cff2.scalars);
+    h->cff2.varStore->calcRegionScalars(&h->cb.shstm, h->cff2.axisCount, h->cff2.ndv, h->cff2.scalars);
 }
 
 /* Save PostScript operator string. */
@@ -1086,9 +1081,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
     h->stack.numRegions = priv->numRegions = 0;
     priv->vsindex = 0;
 
-    if (h->cff2.varStore != NULL) {
-        h->stack.numRegions = priv->numRegions = setNumMasters(h, priv->vsindex);
-    }
+    h->stack.numRegions = priv->numRegions = setNumMasters(h, priv->vsindex);
     while (srcTell(h) < region->end) {
         int byte0;
         CHECK_DICT_BYTES_LEFT(1);
@@ -1663,7 +1656,7 @@ static void initFDInfo(cfrCtx h, int iFD) {
     fd->aux.nominalWidthX = cff_DFLT_nominalWidthX;
     fd->aux.ctx = h;
     fd->aux.getStdEncGlyphOffset = getStdEncGlyphOffset;
-    fd->aux.varStore = 0;
+    fd->aux.varStore = nullptr;
     fd->fdict = fdict;
     abfInitFontDict(fdict);
 }
@@ -2022,11 +2015,12 @@ static void MVARread(cfrCtx h) {
     abfTopDict *top = &h->top;
     float thickness, position;
 
-    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.ndv, MVAR_unds_tag, &thickness)) {
+    assert(h->cff2.mvar != NULL);
+    if (h->cff2.mvar->lookup(&h->cb.shstm, h->cff2.axisCount, h->cff2.ndv, MVAR_unds_tag, thickness)) {
         top->UnderlineThickness += thickness;
         top->UnderlinePosition -= thickness / 2;
     }
-    if (!var_lookupMVAR(&h->cb.shstm, h->cff2.mvar, h->cff2.axisCount, h->cff2.ndv, MVAR_undo_tag, &position)) {
+    if (h->cff2.mvar->lookup(&h->cb.shstm, h->cff2.axisCount, h->cff2.ndv, MVAR_undo_tag, position)) {
         top->UnderlinePosition += position;
     }
 }
@@ -2391,7 +2385,8 @@ static float cff2GetWidth(cff2GlyphCallbacks *cb, unsigned short gid) {
     cfrCtx h = (cfrCtx)cb->direct_ctx;
     var_glyphMetrics metrics;
 
-    if (!var_lookuphmtx(&h->cb.shstm, h->cff2.hmtx, h->cff2.axisCount, h->cff2.ndv, gid, &metrics)) {
+    assert(h->cff2.hmtx != NULL);
+    if (h->cff2.hmtx->lookup(&h->cb.shstm, h->cff2.axisCount, h->cff2.ndv, gid, metrics)) {
         return metrics.width;
     }
 
@@ -2698,10 +2693,10 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
         if (!(flags & CFR_SHALLOW_READ)) {
             unsigned short axis;
 
-            h->cff2.axes = var_loadaxes(h->ctx.sfr, &h->cb.shstm);
-            h->cff2.hmtx = var_loadhmtx(h->ctx.sfr, &h->cb.shstm);
-            h->cff2.mvar = var_loadMVAR(h->ctx.sfr, &h->cb.shstm);
-            h->cff2.axisCount = var_getAxisCount(h->cff2.axes);
+            h->cff2.axes = new var_axes(h->ctx.sfr, &h->cb.shstm);
+            h->cff2.hmtx = new var_hmtx(h->ctx.sfr, &h->cb.shstm);
+            h->cff2.mvar = new var_MVAR(h->ctx.sfr, &h->cb.shstm);
+            h->cff2.axisCount = h->cff2.axes->getAxisCount();
             if (h->cff2.axisCount > CFF2_MAX_AXES)
                 fatal(h, cfrErrGeometry);
 
@@ -2718,7 +2713,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
                     userCoords[axis] = pflttofix(&h->cff2.UDV[axis]);
                 }
 
-                if (var_normalizeCoords(&h->cb.shstm, h->cff2.axes, userCoords, h->cff2.ndv)) {
+                if (!h->cff2.axes->normalizeCoords(&h->cb.shstm, userCoords, h->cff2.ndv)) {
                     fatal(h, cfrErrGeometry);
                 }
             }
@@ -3110,9 +3105,9 @@ int cfrEndFont(cfrCtx h) {
     encListReuse(h);
 
     if (h->header.major != 1) {
-        var_freeaxes(&h->cb.shstm, h->cff2.axes);
-        var_freehmtx(&h->cb.shstm, h->cff2.hmtx);
-        var_freeMVAR(&h->cb.shstm, h->cff2.mvar);
+        delete h->cff2.axes;
+        delete h->cff2.hmtx;
+        delete h->cff2.mvar;
         nam_freename(&h->cb.shstm, h->cff2.name);
     }
 

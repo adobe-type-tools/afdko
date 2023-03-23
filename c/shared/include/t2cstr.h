@@ -9,6 +9,7 @@
 
 #include "ctlshare.h"
 #include "slogger.h"
+#include "varsupport.h"
 
 #define T2C_VERSION CTL_MAKE_VERSION(1, 0, 23)
 
@@ -37,7 +38,7 @@ typedef struct {
     float matrix[6];
     float WV[4];
     unsigned short default_vsIndex; /* this is the vsindex set in the private dict. */
-    struct var_itemVariationStore_ *varStore;
+    itemVariationStore *varStore;
     float *scalars;
     std::shared_ptr<slogger> logger;
 } t2cAuxData;

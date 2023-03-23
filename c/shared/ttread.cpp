@@ -15,7 +15,7 @@
 #include "dynarr.h"
 #include "ctutil.h"
 #include "sfntread.h"
-#include "varread.h"
+#include "varsupport.h"
 #include "supportexcept.h"
 
 typedef unsigned short UV;  /* Unicode value */
@@ -395,10 +395,10 @@ struct ttrCtx_ {
         float           *UDV;   /* From client */
         Fixed           ndv[VF_MAX_AXES];               /* normalized weight vector */
         uint16_t        axisCount;
-        var_axes        axes;
-        var_hmtx        hmtx;
-        var_MVAR        mvar;
-        var_itemVariationStore  varStore;
+        var_axes        *axes;
+        var_hmtx        *hmtx;
+        var_MVAR        *mvar;
+        itemVariationStore  *varStore;
     } vf;
     struct {  // Client callbacks
         ctlMemoryCallbacks mem;
@@ -503,10 +503,10 @@ ttrCtx ttrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
     h->ctx.sfr = NULL;
     h->vf.axisCount = 0;
     h->vf.flags = 0;
-    h->vf.axes = 0;
-    h->vf.hmtx = 0;
-    h->vf.mvar = 0;
-    h->vf.varStore = 0;
+    h->vf.axes = NULL;
+    h->vf.hmtx = NULL;
+    h->vf.mvar = NULL;
+    h->vf.varStore = NULL;
 
     /* Copy callbacks */
     h->cb.mem = *mem_cb;
@@ -2531,10 +2531,10 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top, fl
     /* Load variable font tables */
     if (h->vf.UDV) {
         gvarRead(h);
-        h->vf.axes = var_loadaxes(h->ctx.sfr, &h->cb.shstm);
-        h->vf.hmtx = var_loadhmtx(h->ctx.sfr, &h->cb.shstm);
-        h->vf.mvar = var_loadMVAR(h->ctx.sfr, &h->cb.shstm);
-        h->vf.axisCount = var_getAxisCount(h->vf.axes);
+        h->vf.axes = new var_axes(h->ctx.sfr, &h->cb.shstm);
+        h->vf.hmtx = new var_hmtx(h->ctx.sfr, &h->cb.shstm);
+        h->vf.mvar = new var_MVAR(h->ctx.sfr, &h->cb.shstm);
+        h->vf.axisCount = h->vf.axes->getAxisCount();
 
         if (h->vf.axisCount > 0) {
             Fixed   userCoords[VF_MAX_AXES];
@@ -2552,7 +2552,7 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top, fl
             for (axis = 0; axis < h->vf.axisCount; axis++)
                 userCoords[axis] = pflttofix(&h->vf.UDV[axis]);
 
-            if (var_normalizeCoords(&h->cb.shstm, h->vf.axes, userCoords, h->vf.ndv))
+            if (!h->vf.axes->normalizeCoords(&h->cb.shstm, userCoords, h->vf.ndv))
                 fatal(h, ttrErrGeometry, "failed to normalize design vector");
 
             /* check HVAR table's availability */
@@ -2571,7 +2571,7 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top, fl
         info->tag = (unsigned short)i;
         if (h->vf.UDV && h->vf.axisCount > 0 && !(h->vf.flags & VF_FLAG_HMETRICS)) {
             var_glyphMetrics    metrics;
-            if (!var_lookuphmtx(&h->cb.shstm, h->vf.hmtx, h->vf.axisCount, h->vf.ndv, (unsigned short)i, &metrics)) {
+            if (h->vf.hmtx->lookup(&h->cb.shstm, h->vf.axisCount, h->vf.ndv, (uint16_t)i, metrics)) {
                 glyph->flags |= GLYPH_MTX_SET;
                 glyph->hAdv = (uFWord)round(metrics.width);
                 glyph->lsb = (FWord)round(metrics.sideBearing);
@@ -3332,9 +3332,9 @@ int ttrEndFont(ttrCtx h) {
     }
 
     if (h->vf.UDV) {
-        var_freeaxes(&h->cb.shstm, h->vf.axes);
-        var_freehmtx(&h->cb.shstm, h->vf.hmtx);
-        var_freeMVAR(&h->cb.shstm, h->vf.mvar);
+        delete h->vf.axes;
+        delete h->vf.hmtx;
+        delete h->vf.mvar;
     }
 
     /* Close source stream */
