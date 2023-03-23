@@ -2549,6 +2549,9 @@ static void t1_EndFont(txCtx h) {
         else if (h->src.type == src_CFF)
             (void)cfrGetGlyphByCID(h->cfr.ctx, 0, &h->cb.glyph);
 
+        else if (h->src.type == src_UFO)
+            (void)ufoGetGlyphByCID(h->ufr.ctx, 0, &h->cb.glyph);
+
         /* Convert to name-keyed font */
         h->top->sup.flags &= ~ABF_CID_FONT;
         h->top->FDArray.cnt = 1;
@@ -4582,7 +4585,7 @@ void callbackGlyph(txCtx h, int type, unsigned short id, char *name) {
                     (void)ufoGetGlyphByTag(h->ufr.ctx, id, &h->cb.glyph);
                     break;
                 case sel_by_cid:
-                    fatal(h, "Cannot read glyphs from UFO fonts by CID ");
+                    (void)ufoGetGlyphByCID(h->ufr.ctx, id, &h->cb.glyph);
                     break;
                 case sel_by_name:
                     (void)ufoGetGlyphByName(h->ufr.ctx, name, &h->cb.glyph);
