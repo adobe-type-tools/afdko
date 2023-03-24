@@ -2,32 +2,32 @@
 <glyph name="tildecmb.cap" format="2">
 	<outline>
 		<contour>
-			<point name="hintSet0000" x="-180.08" y="734.14" type="curve"/>
-			<point x="-150.34" y="724.68" type="line"/>
-			<point x="-134.51" y="773.9"/>
-			<point x="-114.47" y="804.41"/>
-			<point x="-81.67" y="804.41" type="curve"/>
-			<point x="-51.88" y="804.41"/>
-			<point x="-30.88" y="776.98"/>
-			<point x="-6.16" y="756.4" type="curve"/>
-			<point name="hintSet0004" x="15.79" y="738.64"/>
-			<point x="39.04" y="722.81"/>
-			<point x="75.63" y="722.81" type="curve"/>
-			<point x="137.38" y="722.81"/>
-			<point x="167.21" y="773.85"/>
-			<point x="180.12" y="851.47" type="curve"/>
-			<point x="150.38" y="860.92" type="line"/>
-			<point x="134.55" y="811.66"/>
-			<point x="115.42" y="781.15"/>
-			<point x="81.67" y="781.15" type="curve"/>
-			<point x="51.92" y="781.15"/>
-			<point x="30.88" y="808.58"/>
-			<point x="6.16" y="829.16" type="curve"/>
-			<point name="hintSet0009" x="-16.75" y="846.92"/>
-			<point x="-38.79" y="862.75"/>
-			<point x="-75.47" y="862.75" type="curve"/>
-			<point x="-136.38" y="862.75"/>
-			<point x="-168.12" y="811.79"/>
+			<point name="hintRef0000" x="-180.082278481" y="734.1360759494" type="curve"/>
+			<point x="-150.3417721519" y="724.6835443038" type="line"/>
+			<point x="-134.5063291139" y="773.9018987342"/>
+			<point x="-114.4651898734" y="804.4082278481"/>
+			<point x="-81.6708860759" y="804.4082278481" type="curve"/>
+			<point x="-51.8765822785" y="804.4082278481"/>
+			<point x="-30.8765822785" y="776.9841772152"/>
+			<point x="-6.164556962" y="756.3955696203" type="curve"/>
+			<point name="hintRef0001" x="15.7943037975" y="738.6424050633"/>
+			<point x="39.0411392405" y="722.8069620253"/>
+			<point x="75.6297468354" y="722.8069620253" type="curve"/>
+			<point x="137.3829113924" y="722.8069620253"/>
+			<point x="167.2056962025" y="773.8481012658"/>
+			<point x="180.1234177215" y="851.4651898734" type="curve"/>
+			<point x="150.3829113924" y="860.917721519" type="line"/>
+			<point x="134.5474683544" y="811.6582278481"/>
+			<point x="115.4240506329" y="781.1518987342"/>
+			<point x="81.6708860759" y="781.1518987342" type="curve"/>
+			<point x="51.917721519" y="781.1518987342"/>
+			<point x="30.8765822785" y="808.5759493671"/>
+			<point x="6.164556962" y="829.164556962" type="curve"/>
+			<point name="hintRef0002" x="-16.753164557" y="846.917721519"/>
+			<point x="-38.7943037975" y="862.753164557"/>
+			<point x="-75.4651898734" y="862.753164557" type="curve"/>
+			<point x="-136.3829113924" y="862.753164557"/>
+			<point x="-168.1234177215" y="811.7943037975"/>
 		</contour>
 	</outline>
 	<anchor name="_aboveUC" x="0" y="690.6297468354"/>
@@ -39,37 +39,36 @@
 				<array>
 					<dict>
 						<key>pointTag</key>
-						<string>hintSet0000</string>
+						<string>hintRef0000</string>
 						<key>stems</key>
 						<array>
-							<string>hstem 734.14 -20</string>
-							<string>hstem 804.41 58.34</string>
-							<string>vstem -180 360</string>
+							<string>hstem 734.1361 -20</string>
+							<string>hstem 804.4082 58.3449</string>
+							<string>vstem -180.0823 360.2057</string>
 						</array>
 					</dict>
 					<dict>
 						<key>pointTag</key>
-						<string>hintSet0004</string>
+						<string>hintRef0001</string>
 						<key>stems</key>
 						<array>
-							<string>hstem 722.81 58.34</string>
-							<string>hstem 804.41 58.34</string>
-							<string>vstem -180 360</string>
+							<string>hstem 722.807 58.3449</string>
+							<string>vstem -180.0823 360.2057</string>
 						</array>
 					</dict>
 					<dict>
 						<key>pointTag</key>
-						<string>hintSet0009</string>
+						<string>hintRef0002</string>
 						<key>stems</key>
 						<array>
-							<string>hstem 734.14 -20</string>
-							<string>hstem 804.41 58.34</string>
-							<string>vstem -180 360</string>
+							<string>hstem 734.1361 -20</string>
+							<string>hstem 804.4082 58.3449</string>
+							<string>vstem -180.0823 360.2057</string>
 						</array>
 					</dict>
 				</array>
 				<key>id</key>
-				<string>ad38104a7c257a571b25ab4846a8017528dbcb42d3a63f5f567c4ac2d47b460e62f2d24bfefeabdbf9985153f675398baf9eb425ae871b1613800ef546d7abb4</string>
+				<string>b34cfff9a9d2ce2ae071b9a36d182694b3efc6ecc6c2863b76aadbb57ecff206a3388b4f8fbff28cfbf3a18d0e539c89a957e620f727dd7ee27ef42b5fd7eda7</string>
 			</dict>
 		</dict>
 	</lib>

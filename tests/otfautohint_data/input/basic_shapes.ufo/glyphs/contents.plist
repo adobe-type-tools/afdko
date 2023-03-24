@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>.notdef</key>
+    <string>_notdef.glif</string>
+    <key>circle</key>
+    <string>circle.glif</string>
+    <key>circle2</key>
+    <string>circle2.glif</string>
+    <key>square</key>
+    <string>square.glif</string>
+    <key>square2</key>
+    <string>square2.glif</string>
+    <key>triangle</key>
+    <string>triangle.glif</string>
+  </dict>
+</plist>

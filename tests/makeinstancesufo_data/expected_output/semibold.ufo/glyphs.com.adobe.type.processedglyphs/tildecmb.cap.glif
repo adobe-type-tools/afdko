@@ -2,7 +2,7 @@
 <glyph name="tildecmb.cap" format="2">
 	<outline>
 		<contour>
-			<point name="hintSet0000" x="-181" y="727" type="curve"/>
+			<point name="hintRef0000" x="-181" y="727" type="curve"/>
 			<point x="-145" y="714" type="line"/>
 			<point x="-131" y="757"/>
 			<point x="-110" y="784"/>
@@ -10,7 +10,7 @@
 			<point x="-51" y="784"/>
 			<point x="-30" y="761"/>
 			<point x="-7" y="744" type="curve"/>
-			<point name="hintSet0004" x="14" y="728"/>
+			<point name="hintRef0001" x="14" y="728"/>
 			<point x="39" y="713"/>
 			<point x="73" y="713" type="curve"/>
 			<point x="132" y="713"/>
@@ -23,7 +23,7 @@
 			<point x="51" y="790"/>
 			<point x="30" y="813"/>
 			<point x="7" y="830" type="curve"/>
-			<point name="hintSet0009" x="-15" y="846"/>
+			<point name="hintRef0002" x="-15" y="846"/>
 			<point x="-37" y="861"/>
 			<point x="-71" y="861" type="curve"/>
 			<point x="-131" y="861"/>
@@ -39,7 +39,7 @@
 				<array>
 					<dict>
 						<key>pointTag</key>
-						<string>hintSet0000</string>
+						<string>hintRef0000</string>
 						<key>stems</key>
 						<array>
 							<string>hstem 727 -20</string>
@@ -49,7 +49,7 @@
 					</dict>
 					<dict>
 						<key>pointTag</key>
-						<string>hintSet0004</string>
+						<string>hintRef0001</string>
 						<key>stems</key>
 						<array>
 							<string>hstem 713 77</string>
@@ -58,7 +58,7 @@
 					</dict>
 					<dict>
 						<key>pointTag</key>
-						<string>hintSet0009</string>
+						<string>hintRef0002</string>
 						<key>stems</key>
 						<array>
 							<string>hstem 727 -20</string>

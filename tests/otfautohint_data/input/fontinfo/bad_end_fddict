@@ -1,0 +1,15 @@
+IsItalicStyle	false
+IsBoldStyle	false
+IsOS/2OBLIQUE	false
+UseOldNameID4	false
+LicenseCode	ADOBE
+
+begin FDDict UPPERCASE
+	BaselineYCoord 0
+	BaselineOvershoot -12
+	CapHeight 656
+	CapOvershoot 12
+	DominantV [86]
+	DominantH [68]
+	FlexOK false
+end FDDict LOWERCASE

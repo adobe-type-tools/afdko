@@ -3,7 +3,7 @@
   <anchor x="0" y="685" name="_aboveUC"/>
   <outline>
     <contour>
-      <point x="-90" y="734" type="curve" name="hintSet0000"/>
+      <point x="-90" y="734" type="curve" name="hintRef0000"/>
       <point x="-62" y="695" type="line"/>
       <point x="-11" y="718"/>
       <point x="41" y="740"/>
@@ -29,7 +29,7 @@
         <array>
           <dict>
             <key>pointTag</key>
-            <string>hintSet0000</string>
+            <string>hintRef0000</string>
             <key>stems</key>
             <array>
               <string>hstem 734 -20</string>

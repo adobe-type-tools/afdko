@@ -5,7 +5,7 @@
 select = E,F,W,B,B901,B902,B903
 
 # ignore W504 line break before binary operator
-ignore = W504,B017
+ignore = W504,B017,E731,E741
 
 # explicitly set line length limitation
 max-line-length = 79
@@ -13,7 +13,6 @@ max-line-length = 79
 # exclude files that haven't had linting fixes applied yet
 exclude = 
     agd.py,
-    beztools.py,
     comparefamily.py,
     otf2otc.py,
     proofpdf.py,
