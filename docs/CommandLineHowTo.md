@@ -90,7 +90,7 @@ Commands which operate on files require that you specify the directory path of t
 ```
 open /Users/rroberts/.bash_profile # Mac
 start C:\adobe\FDK\FDKReleaseNotes.txt # Windows
-psautohint -a MyFont.pfa # any system
+otfautohint -a MyFont.pfa # any system
 ```
 
 The easiest way to get a file path into the command line is to drag its icon from a *Finder/Explorer* window onto the *Terminal/Command Prompt* window. When you do this, the absolute path — the complete path from the computer’s root directory — is copied. However, a command window always has a “current” directory. If the file is in the current directory, then you only need to type the file’s name, as in the third example above. To see the absolute path of the current directory, type the following command:
@@ -107,13 +107,13 @@ If you leave off the initial slash (/), then the path is assumed to be relative 
 
 Some commands produce a lot of text output, so much that it would be more convenient to look at the output in a text editor with good search functions. To send the output of a command to a file, add a greater-than sign (`>`) followed by a file path, to the command line. For example:
 ```
-psautohint -a MyFont.pfa
+otfautohint -a MyFont.pfa
 ```
 is likely to produce several hundred lines of output. To browse this more easily, enter:
 ```
-psautohint -a MyFont.pfa > MyFont_autohint.txt
+otfautohint -a MyFont.pfa > MyFont_autohint.txt
 ```
-This will “re-direct” the output of the psautohint command into the file `MyFont_autohint.txt`. You
+This will “re-direct” the output of the otfautohint command into the file `MyFont_autohint.txt`. You
 can then open this file in your favorite text editor, and search for interesting notes.
 
 ## **Favorite AFDKO (Adobe® Font Development Kit for OpenType®) commands**
@@ -131,13 +131,13 @@ Run `checkOutlines` QA tool on the font MinionPro-Bold.otf present in the Bold s
 ```
 checkOutlines Bold/MinionPro-Bold.otf
 ```
-Autohint only unhinted glyphs in a font: (This allows you to manually hint some glyphs in FontLab without overwriting that work when using the psautohint program)
+Autohint only unhinted glyphs in a font: (This allows you to manually hint some glyphs in FontLab without overwriting that work when using the otfautohint program)
 ```
-psautohint font.pfa
+otfautohint font.pfa
 ```
 Autohint all glyphs in a font: (This will remove any hints that existed before)
 ```
-psautohint -a font.pfa
+otfautohint -a font.pfa
 ```
 Build and OpenType CFF font in release mode, assuming that all the input files (font.pfa, features, fontinfo, FontMenuNameDB and GlyphOrderAndAliasDB) have default names, and default locations relative to the current directory: (The resulting OpenType font file, will be named according to the font’s PostScript® name)
 ```
