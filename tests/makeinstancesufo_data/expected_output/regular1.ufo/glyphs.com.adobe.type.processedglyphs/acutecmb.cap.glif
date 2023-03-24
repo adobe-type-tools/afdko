@@ -3,22 +3,22 @@
   <anchor x="0.0" y="690.629746835443" name="_aboveUC"/>
   <outline>
     <contour>
-      <point x="-67.36" y="745.3" type="curve" name="hintSet0000"/>
-      <point x="-48.82" y="720.44" type="line"/>
-      <point x="-7.21" y="741.56"/>
-      <point x="35.33" y="764.52"/>
-      <point x="76.99" y="787.56" type="curve"/>
-      <point x="114.56" y="808.56"/>
-      <point x="127.36" y="825.09"/>
-      <point x="127.36" y="843.14" type="curve"/>
-      <point x="127.36" y="863.47"/>
-      <point x="110.03" y="877.16"/>
-      <point x="89.37" y="877.16" type="curve"/>
-      <point x="72" y="877.16"/>
-      <point x="54.88" y="867.21"/>
-      <point x="26.63" y="839.04" type="curve"/>
-      <point x="-4.62" y="808.84"/>
-      <point x="-36.03" y="777.55"/>
+      <point x="-67.35759493670886" y="745.3006329113924" type="curve" name="hintRef0000"/>
+      <point x="-48.822784810126585" y="720.4367088607595" type="line"/>
+      <point x="-7.205696202531645" y="741.5601265822785"/>
+      <point x="35.32911392405063" y="764.5189873417721"/>
+      <point x="76.9873417721519" y="787.5601265822785" type="curve"/>
+      <point x="114.5632911392405" y="808.5601265822785"/>
+      <point x="127.35759493670886" y="825.0949367088608"/>
+      <point x="127.35759493670886" y="843.1360759493671" type="curve"/>
+      <point x="127.35759493670886" y="863.4651898734177"/>
+      <point x="110.02848101265823" y="877.1645569620254"/>
+      <point x="89.37025316455696" y="877.1645569620254" type="curve"/>
+      <point x="72.0" y="877.1645569620254"/>
+      <point x="54.87658227848101" y="867.2056962025316"/>
+      <point x="26.629746835443036" y="839.0411392405064" type="curve"/>
+      <point x="-4.617088607594937" y="808.8354430379746"/>
+      <point x="-36.028481012658226" y="777.5474683544304"/>
     </contour>
   </outline>
   <lib>
@@ -29,16 +29,16 @@
         <array>
           <dict>
             <key>pointTag</key>
-            <string>hintSet0000</string>
+            <string>hintRef0000</string>
             <key>stems</key>
             <array>
-              <string>hstem 745.3 -20</string>
-              <string>vstem -67 194</string>
+              <string>hstem 745.3006 -20</string>
+              <string>vstem -67.3576 194.7152</string>
             </array>
           </dict>
         </array>
         <key>id</key>
-        <string>94e23d802b136bf9f30e6340aeab47dbaf8d99057c03096578d7998a7e7449c8392be7f53aeb206e6f4e0f594909edfb4a02a22167641962f44cf889f59f82d6</string>
+        <string>0f5c9d8282699b65ec41c50ccb23eac2a9f09c1dad765bf0fe19402aa4c6b3bfd3a21370bf2fd873e015031f0c66940147bc4aec6b0af9e1b3e2329545b37f7b</string>
       </dict>
     </dict>
   </lib>

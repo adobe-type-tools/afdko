@@ -20,7 +20,7 @@ from fontTools.designspaceLib import (
 )
 
 from defcon import Font
-from psautohint.__main__ import main as psautohint
+from .otfautohint.__main__ import main as otfautohint
 from ufonormalizer import normalizeUFO
 from ufoProcessor import build as ufoProcessorBuild
 
@@ -86,7 +86,7 @@ def filterDesignspaceInstances(dsDoc, options):
 
 def updateInstance(fontInstancePath, options):
     """
-    Run checkoutlinesufo and psautohint, unless explicitly suppressed.
+    Run checkoutlinesufo and otfautohint, unless explicitly suppressed.
     """
     if options.doOverlapRemoval:
         logger.info("Doing overlap removal with checkoutlinesufo on %s ..." %
@@ -100,12 +100,12 @@ def updateInstance(fontInstancePath, options):
             raise
 
     if options.doAutoHint:
-        logger.info("Running psautohint on %s ..." % fontInstancePath)
+        logger.info("Running otfautohint on %s ..." % fontInstancePath)
         ah_args = ['--no-zones-stems', fontInstancePath]
         if options.no_round:
             ah_args.insert(0, '-d')
         try:
-            psautohint(ah_args)
+            otfautohint(ah_args)
         except (Exception, SystemExit):
             raise
 

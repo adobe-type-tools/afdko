@@ -81,7 +81,7 @@
     <key>openTypeOS2WinDescent</key>
     <integer>335</integer>
     <key>postscriptBlueFuzz</key>
-    <integer>5</integer>
+    <integer>3</integer>
     <key>postscriptBlueScale</key>
     <real>0.0675</real>
     <key>postscriptBlueValues</key>

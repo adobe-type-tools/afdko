@@ -3,32 +3,32 @@
 	<unicode hex="0308"/>
 	<outline>
 		<contour>
-			<point name="hintSet0000" x="104.91" y="595.77" type="curve"/>
-			<point x="137.44" y="595.77"/>
-			<point x="163.97" y="619.93"/>
-			<point x="163.97" y="652.71" type="curve"/>
-			<point x="163.97" y="685.45"/>
-			<point x="137.44" y="709.66"/>
-			<point x="104.91" y="709.66" type="curve"/>
-			<point x="72.45" y="709.66"/>
-			<point x="44.88" y="685.45"/>
-			<point x="44.88" y="652.71" type="curve"/>
-			<point x="44.88" y="619.93"/>
-			<point x="72.45" y="595.77"/>
+			<point name="hintRef0000" x="104.9050632911" y="595.7658227848" type="curve"/>
+			<point x="137.4398734177" y="595.7658227848"/>
+			<point x="163.9746835443" y="619.9303797468"/>
+			<point x="163.9746835443" y="652.7120253165" type="curve"/>
+			<point x="163.9746835443" y="685.4525316456"/>
+			<point x="137.4398734177" y="709.6582278481"/>
+			<point x="104.9050632911" y="709.6582278481" type="curve"/>
+			<point x="72.4525316456" y="709.6582278481"/>
+			<point x="44.8765822785" y="685.4525316456"/>
+			<point x="44.8765822785" y="652.7120253165" type="curve"/>
+			<point x="44.8765822785" y="619.9303797468"/>
+			<point x="72.4525316456" y="595.7658227848"/>
 		</contour>
 		<contour>
-			<point x="-104.91" y="595.77" type="curve"/>
-			<point x="-72.37" y="595.77"/>
-			<point x="-44.88" y="619.93"/>
-			<point x="-44.88" y="652.71" type="curve"/>
-			<point x="-44.88" y="685.45"/>
-			<point x="-72.37" y="709.66"/>
-			<point x="-104.91" y="709.66" type="curve"/>
-			<point x="-137.36" y="709.66"/>
-			<point x="-163.97" y="685.45"/>
-			<point x="-163.97" y="652.71" type="curve"/>
-			<point x="-163.97" y="619.93"/>
-			<point x="-137.36" y="595.77"/>
+			<point x="-104.9050632911" y="595.7658227848" type="curve"/>
+			<point x="-72.3702531646" y="595.7658227848"/>
+			<point x="-44.8765822785" y="619.9303797468"/>
+			<point x="-44.8765822785" y="652.7120253165" type="curve"/>
+			<point x="-44.8765822785" y="685.4525316456"/>
+			<point x="-72.3702531646" y="709.6582278481"/>
+			<point x="-104.9050632911" y="709.6582278481" type="curve"/>
+			<point x="-137.3575949367" y="709.6582278481"/>
+			<point x="-163.9746835443" y="685.4525316456"/>
+			<point x="-163.9746835443" y="652.7120253165" type="curve"/>
+			<point x="-163.9746835443" y="619.9303797468"/>
+			<point x="-137.3575949367" y="595.7658227848"/>
 		</contour>
 	</outline>
 	<anchor name="_aboveLC" x="0" y="506.5759493671"/>
@@ -41,17 +41,17 @@
 				<array>
 					<dict>
 						<key>pointTag</key>
-						<string>hintSet0000</string>
+						<string>hintRef0000</string>
 						<key>stems</key>
 						<array>
-							<string>hstem 595.77 113.89</string>
-							<string>vstem -163.97 119.09</string>
-							<string>vstem 44.88 119.09</string>
+							<string>hstem 595.7658 113.8924</string>
+							<string>vstem -163.9747 119.0981</string>
+							<string>vstem 44.8766 119.0981</string>
 						</array>
 					</dict>
 				</array>
 				<key>id</key>
-				<string>8348b2699028dce324cf8d53e6ee5e07b273000662f6c97e156701e6a4ed992e46555d8536a5f1a2e63abfc0c546aaa6f3795e7f87cc0197c0a1e155bf024983</string>
+				<string>3c0723c734feee053cef6d7e46d5a28ce8d39ed056d6a9705a3a9f2445084fdd9fee517a926513b1d348696f9e89d2334f12ee60f7ffcb22cb7b1e243ecbfdcb</string>
 			</dict>
 		</dict>
 	</lib>

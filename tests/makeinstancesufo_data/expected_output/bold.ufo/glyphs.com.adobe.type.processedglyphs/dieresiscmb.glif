@@ -5,7 +5,7 @@
   <anchor x="0" y="716" name="aboveLC"/>
   <outline>
     <contour>
-      <point x="120" y="575" type="curve" name="hintSet0000"/>
+      <point x="120" y="575" type="curve" name="hintRef0000"/>
       <point x="161" y="575"/>
       <point x="197" y="602"/>
       <point x="197" y="648" type="curve"/>
@@ -41,7 +41,7 @@
         <array>
           <dict>
             <key>pointTag</key>
-            <string>hintSet0000</string>
+            <string>hintRef0000</string>
             <key>stems</key>
             <array>
               <string>hstem 575 146</string>

@@ -3,32 +3,32 @@
   <anchor x="0.0" y="690.629746835443" name="_aboveUC"/>
   <outline>
     <contour>
-      <point x="-180.08" y="734.14" type="curve" name="hintSet0000"/>
-      <point x="-150.34" y="724.68" type="line"/>
-      <point x="-134.51" y="773.9"/>
-      <point x="-114.47" y="804.41"/>
-      <point x="-81.67" y="804.41" type="curve"/>
-      <point x="-51.88" y="804.41"/>
-      <point x="-30.88" y="776.98"/>
-      <point x="-6.16" y="756.4" type="curve"/>
-      <point x="15.79" y="738.64" name="hintSet0004"/>
-      <point x="39.04" y="722.81"/>
-      <point x="75.63" y="722.81" type="curve"/>
-      <point x="137.38" y="722.81"/>
-      <point x="167.21" y="773.85"/>
-      <point x="180.12" y="851.47" type="curve"/>
-      <point x="150.38" y="860.92" type="line"/>
-      <point x="134.55" y="811.66"/>
-      <point x="115.42" y="781.15"/>
-      <point x="81.67" y="781.15" type="curve"/>
-      <point x="51.92" y="781.15"/>
-      <point x="30.88" y="808.58"/>
-      <point x="6.16" y="829.16" type="curve"/>
-      <point x="-16.75" y="846.92" name="hintSet0009"/>
-      <point x="-38.79" y="862.75"/>
-      <point x="-75.47" y="862.75" type="curve"/>
-      <point x="-136.38" y="862.75"/>
-      <point x="-168.12" y="811.79"/>
+      <point x="-180.08227848101265" y="734.1360759493671" type="curve" name="hintRef0000"/>
+      <point x="-150.34177215189874" y="724.6835443037975" type="line"/>
+      <point x="-134.50632911392404" y="773.9018987341772"/>
+      <point x="-114.46518987341773" y="804.4082278481013"/>
+      <point x="-81.67088607594937" y="804.4082278481013" type="curve"/>
+      <point x="-51.87658227848101" y="804.4082278481013"/>
+      <point x="-30.876582278481013" y="776.9841772151899"/>
+      <point x="-6.1645569620253164" y="756.3955696202531" type="curve"/>
+      <point x="15.794303797468354" y="738.6424050632911" name="hintRef0001"/>
+      <point x="39.04113924050633" y="722.8069620253165"/>
+      <point x="75.62974683544304" y="722.8069620253165" type="curve"/>
+      <point x="137.38291139240508" y="722.8069620253165"/>
+      <point x="167.20569620253164" y="773.8481012658228"/>
+      <point x="180.123417721519" y="851.4651898734177" type="curve"/>
+      <point x="150.38291139240508" y="860.9177215189874" type="line"/>
+      <point x="134.54746835443038" y="811.6582278481013"/>
+      <point x="115.42405063291139" y="781.1518987341772"/>
+      <point x="81.67088607594937" y="781.1518987341772" type="curve"/>
+      <point x="51.91772151898734" y="781.1518987341772"/>
+      <point x="30.876582278481013" y="808.5759493670886"/>
+      <point x="6.1645569620253164" y="829.1645569620254" type="curve"/>
+      <point x="-16.753164556962027" y="846.9177215189874" name="hintRef0002"/>
+      <point x="-38.79430379746835" y="862.753164556962"/>
+      <point x="-75.46518987341773" y="862.753164556962" type="curve"/>
+      <point x="-136.38291139240508" y="862.753164556962"/>
+      <point x="-168.123417721519" y="811.7943037974684"/>
     </contour>
   </outline>
   <lib>
@@ -39,37 +39,36 @@
         <array>
           <dict>
             <key>pointTag</key>
-            <string>hintSet0000</string>
+            <string>hintRef0000</string>
             <key>stems</key>
             <array>
-              <string>hstem 734.14 -20</string>
-              <string>hstem 804.41 58.34</string>
-              <string>vstem -180 360</string>
+              <string>hstem 734.1361 -20</string>
+              <string>hstem 804.4082 58.3449</string>
+              <string>vstem -180.0823 360.2057</string>
             </array>
           </dict>
           <dict>
             <key>pointTag</key>
-            <string>hintSet0004</string>
+            <string>hintRef0001</string>
             <key>stems</key>
             <array>
-              <string>hstem 722.81 58.34</string>
-              <string>hstem 804.41 58.34</string>
-              <string>vstem -180 360</string>
+              <string>hstem 722.807 58.3449</string>
+              <string>vstem -180.0823 360.2057</string>
             </array>
           </dict>
           <dict>
             <key>pointTag</key>
-            <string>hintSet0009</string>
+            <string>hintRef0002</string>
             <key>stems</key>
             <array>
-              <string>hstem 734.14 -20</string>
-              <string>hstem 804.41 58.34</string>
-              <string>vstem -180 360</string>
+              <string>hstem 734.1361 -20</string>
+              <string>hstem 804.4082 58.3449</string>
+              <string>vstem -180.0823 360.2057</string>
             </array>
           </dict>
         </array>
         <key>id</key>
-        <string>ad38104a7c257a571b25ab4846a8017528dbcb42d3a63f5f567c4ac2d47b460e62f2d24bfefeabdbf9985153f675398baf9eb425ae871b1613800ef546d7abb4</string>
+        <string>b34cfff9a9d2ce2ae071b9a36d182694b3efc6ecc6c2863b76aadbb57ecff206a3388b4f8fbff28cfbf3a18d0e539c89a957e620f727dd7ee27ef42b5fd7eda7</string>
       </dict>
     </dict>
   </lib>
