@@ -32,8 +32,8 @@ typedef struct
     Card16 length;
     Card16 offset;
 } LangTagRecord;
-#define LANG_TAG_REC_SIZE (SIZEOF(NameRecord, length) + \
-                           SIZEOF(NameRecord, offset))
+#define LANG_TAG_REC_SIZE (SIZEOF(LangTagRecord, length) + \
+                           SIZEOF(LangTagRecord, offset))
 
 typedef struct
 {
