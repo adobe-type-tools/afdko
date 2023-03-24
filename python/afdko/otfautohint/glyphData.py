@@ -48,7 +48,7 @@ class pt(tuple):
     tl.align = None
 
     @classmethod
-    def setAlign(_cls, vertical=False):
+    def setAlign(cls, vertical=False):
         """
         Class-level method to control the value of properties a and o
 
@@ -62,19 +62,19 @@ class pt(tuple):
         Note that the internal align variable is thread-specific
         """
         if vertical:
-            _cls.tl.align = 2
+            cls.tl.align = 2
         else:
-            _cls.tl.align = 1
+            cls.tl.align = 1
 
     @classmethod
-    def clearAlign(_cls):
+    def clearAlign(cls):
         """
         Class-level method to unset the internal align variable
         so that accessing properties a or o will result in an error
         """
-        _cls.tl.align = None
+        cls.tl.align = None
 
-    def __new__(_cls, x=0, y=0, roundCoords=False):
+    def __new__(cls, x=0, y=0, roundCoords=False):
         """
         Creates a new pt object initialied with x and y.
 
@@ -86,7 +86,7 @@ class pt(tuple):
         if roundCoords:
             x = round(x)
             y = round(y)
-        return _tuple.__new__(_cls, (x, y))
+        return _tuple.__new__(cls, (x, y))
 
     @property
     def x(self):
@@ -254,10 +254,10 @@ class stem(tuple):
     BandMargin = 30
     __slots__ = ()
 
-    def __new__(_cls, lb=0, rt=0):
+    def __new__(cls, lb=0, rt=0):
         if isinstance(lb, tuple):
-            return _tuple.__new__(_cls, lb)
-        return _tuple.__new__(_cls, (lb, rt))
+            return _tuple.__new__(cls, lb)
+        return _tuple.__new__(cls, (lb, rt))
 
     @property
     def lb(self):
@@ -289,13 +289,13 @@ class stem(tuple):
             return "low" if not doBool else True
         return False
 
-    def ghostCompat(a, b):
-        if a.isGhost(True) == b.isGhost(True):
+    def ghostCompat(self, other):
+        if self.isGhost(True) == other.isGhost(True):
             return False
-        if a.isGhost() == 'high' or b.isGhost() == 'high':
-            return a.lb == b.rt
+        if self.isGhost() == 'high' or other.isGhost() == 'high':
+            return self.lb == other.rt
         else:
-            return a.lb == b.lb
+            return self.lb == other.lb
 
     def isBad(self):
         """Returns True if the stem is malformed"""
@@ -625,19 +625,19 @@ class pathElement:
             l = approximateCubicArcLength(self.s, self.cs, self.ce, self.e)
         return l / self.assocMatchFactor
 
-    def containsPoint(s, p, factor, returnT=False):
-        if s.is_line:
+    def containsPoint(self, p, factor, returnT=False):
+        if self.is_line:
             # We sometimes want t anyway, so why not?
-            ds = sqrt(s.s.distsq(s.e))
-            d1 = sqrt(s.s.distsq(p))
-            d2 = sqrt(s.e.distsq(p))
+            ds = sqrt(self.s.distsq(s.e))
+            d1 = sqrt(self.s.distsq(p))
+            d2 = sqrt(self.e.distsq(p))
             iseq = feq(ds, d1 + d2, factor)
             if not returnT:
                 return iseq
             else:
                 return iseq, d1 / ds
-        a, b, c, d = s.cubicParameters()
-        if abs(s.s.x - s.e.x) > abs(s.s.y - s.e.y):
+        a, b, c, d = self.cubicParameters()
+        if abs(self.s.x - s.e.x) > abs(self.s.y - self.e.y):
             i, j = 0, 1
         else:
             i, j = 1, 0

@@ -1,9 +1,9 @@
 import glob
 import pytest
 
-from runner import main as runner
-from differ import main as differ
-from test_utils import get_input_path, get_expected_path, get_temp_file_path
+# from runner import main as runner
+# from differ import main as differ
+from test_utils import get_input_path  # get_expected_path, get_temp_file_path
 from afdko.otfautohint.fdTools import (mergeFDDicts, parseFontInfoFile,
                                        FDDict, FontInfoParseError)
 
@@ -43,8 +43,8 @@ def test_no_dominant_h_or_v():
     _, font_dicts, _ = parse(path)
     assert len(font_dicts) > 0
     # msgs = [r.getMessage() for r in caplog.records]
-    # assert "The FDDict 'UPPERCASE' in fontinfo has no DominantH value" in msgs
-    # assert "The FDDict 'UPPERCASE' in fontinfo has no DominantV value" in msgs
+    # assert "The FDDict UPPERCASE in fontinfo has no DominantH value" in msgs
+    # assert "The FDDict UPPERCASE in fontinfo has no DominantV value" in msgs
 
 
 def test_bluefuzz_and_fontname():

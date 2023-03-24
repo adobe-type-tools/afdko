@@ -416,7 +416,7 @@ def _check_save_path(path_str):
         open(check_path, 'a').close()
         if del_test_file:
             os.remove(check_path)
-    except (IOError, OSError):
+    except (OSError):
         raise argparse.ArgumentTypeError(
             f"{test_path} is not a valid path to write to.")
     return test_path
