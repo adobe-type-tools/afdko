@@ -17,9 +17,9 @@ The tools fall into several different functional groups.
 
 ## 2.1 Making/editing fonts
 
-### `psautohint`
+### `otfautohint`
 
-This program is the Adobe auto-hinter and lives in [its own project repo](https://github.com/adobe-type-tools/psautohint). It is used by several AFDKO tools and is installed automatically via AFDKO's project requirements.
+This program is the Adobe auto-hinter. It is used by several AFDKO tools.
 
 It can be applied to both OpenType/CFF and Type 1 fonts. Works with Type 1 and OpenType/CFF fonts only.
 
@@ -63,14 +63,14 @@ This tool will rotate and translate glyphs in a font, including the hints. Howev
 
 This allows you to cut and paste the entire binary block of a font table from one font to another. You do this by first using it on a source font with the `-x` option to copy a table from the source font to a separate file, and then using it with the `-a` option to add that table to a target font. It can also be used to simply delete a table, and to fix the font table checksums.
 
-### `psstemhist`
+### `otfstemhist`
 
-This program is actually the same tool as `psautohint` but with a different
-face. It provides reports which help in selecting the global hint data and
-alignment zones for Type 1 hinting. You should look at the reports from this
+This program is actually the same tool as `otfautohint` but with a different
+"face". It provides reports which help in selecting the global hint data and
+alignment zones for CFF hinting. You should look at the reports from this
 tool in order to select the most common stem widths, and then use a program such
 as FontLab or RoboFont to set the values in the font. This should be done before
-hinting the font. Works with Type 1 and OpenType/CFF fonts only.
+hinting the font.
 
 ### `ttfcomponentizer`
 
@@ -130,7 +130,7 @@ Note that the tools ending in “plot” are all simply small command-file scrip
 
 ## 2.3 Validation
 
-### `psautohint`
+### `otfautohint`
 
 The auto-hinting program will report at length about hinting issues. Some of these you can ignore, such as reports about near misses when a stem could be controlled by a hint-zone but is just a little too wide or too narrow. By adjusting either the stem widths or the hint-zones according to these reports, you can include more stems in the set that are controlled by hints, but you can also reasonably decide that is not worth the effort. However, many complaints do need fixing, such not having nodes at vertical or horizontal extremes of a curve.
 
