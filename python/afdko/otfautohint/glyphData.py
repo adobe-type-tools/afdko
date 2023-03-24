@@ -628,7 +628,7 @@ class pathElement:
     def containsPoint(self, p, factor, returnT=False):
         if self.is_line:
             # We sometimes want t anyway, so why not?
-            ds = sqrt(self.s.distsq(s.e))
+            ds = sqrt(self.s.distsq(self.e))
             d1 = sqrt(self.s.distsq(p))
             d2 = sqrt(self.e.distsq(p))
             iseq = feq(ds, d1 + d2, factor)
@@ -637,7 +637,7 @@ class pathElement:
             else:
                 return iseq, d1 / ds
         a, b, c, d = self.cubicParameters()
-        if abs(self.s.x - s.e.x) > abs(self.s.y - self.e.y):
+        if abs(self.s.x - self.e.x) > abs(self.s.y - self.e.y):
             i, j = 0, 1
         else:
             i, j = 1, 0
