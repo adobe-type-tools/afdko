@@ -120,7 +120,7 @@ def remapDicts(fpath, dictmap):
     j = 0
     indexMap = []
     newdictmap = []
-    for i, dictspec in enumerate(dictmap):
+    for dictspec in dictmap:
         if dictspec.foundGlyph:
             newdictmap.append(dictspec)
             indexMap.append(j)

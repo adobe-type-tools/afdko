@@ -1279,7 +1279,7 @@ class dimensionHinter:
         # subpath and are connected by a route that stays within CloseMerge
         # So we trace around the s1.pe's subpath looking for pe2 in each
         # direction and give up once we've iterated the length of the subpath.
-        for cnt in range(len(self.glyph.subpaths[n.position[0]])):
+        for _cnt in range(len(self.glyph.subpaths[n.position[0]])):
             if not ngood and not pgood:
                 return False
             assert n and p
@@ -1896,7 +1896,6 @@ class dimensionHinter:
                 loc = iSSl[seg.hintval.idx][ul].bestLocation(ul == 0)
                 if loc is not None:
                     return loc
-        assert False
         log.warning("No data for %s location of stem %d" %
                     ('lower' if ul == 0 else 'upper', sidx))
         return hs0.stems[0][sidx][ul]
@@ -2258,19 +2257,19 @@ class glyphHinter:
     impl = None
 
     @classmethod
-    def initialize(_cls, options, dictRecord, logQueue=None):
-        _cls.impl = _cls(options, dictRecord)
+    def initialize(cls, options, dictRecord, logQueue=None):
+        cls.impl = cls(options, dictRecord)
         if logQueue is not None:
             logging_reconfig(logQueue, options.verbose)
 
     @classmethod
-    def hint(_cls, name, glyphTuple=None, fdKey=None):
-        if _cls.impl is None:
+    def hint(cls, name, glyphTuple=None, fdKey=None):
+        if cls.impl is None:
             raise RuntimeError("glyphHinter implementation not initialized")
         if isinstance(name, tuple):
-            return _cls.impl._hint(*name)
+            return cls.impl._hint(*name)
         else:
-            return _cls.impl._hint(name, glyphTuple, fdKey)
+            return cls.impl._hint(name, glyphTuple, fdKey)
 
     def __init__(self, options, dictRecord):
         self.options = options
@@ -2423,7 +2422,7 @@ class glyphHinter:
                     # XXX decide on warning message for these
                     if (gpl == dpl + 1 and gp[-1].isClose() and
                             not dp[-1].isClose()):
-                        for gi in range(i + 1):
+                        for _gi in range(i + 1):
                             gllist[i].addNullClose(si)
                         continue
                     if (dpl == gpl + 1 and dp[-1].isClose() and

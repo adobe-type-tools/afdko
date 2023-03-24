@@ -739,7 +739,7 @@ class FDDictManager:
         if options.printFDDictList or options.printAllFDDict:
             # Print the user defined FontDicts, and exit.
             print("Private Dictionaries:\n")
-            for model, fda in self.dictRecord.items():
+            for _model, fda in self.dictRecord.items():
                 for fdIndex, fdl in fda.items():
                     for fontDict in fdl:
                         if fontDict is None:
