@@ -341,9 +341,14 @@ int ufwBegFont(ufwCtx h, long flags, char *glyphLayerDir) {
 }
 
 static void orderCIDKeyedGlyphs(ufwCtx h) {
+    abfTopDict *top = h->top;
     long i;
     long nGlyphs = h->glyphs.cnt;
     Glyph *glyphs = h->glyphs.array;
+    dnaDCL(uint16_t, fdmap);
+    dnaINIT(h->dna, fdmap, 1, 1);
+    dnaSET_CNT(fdmap, top->FDArray.cnt);
+    memset(fdmap.array, 0, sizeof(uint16_t) * top->FDArray.cnt);
 
     /* Insertion sort glyphs by CID order */
     for (i = 2; i < nGlyphs; i++) {
@@ -357,6 +362,36 @@ static void orderCIDKeyedGlyphs(ufwCtx h) {
             glyphs[j] = tmp;
         }
     }
+
+    /* Mark used FDs */
+    for (i = 0; i < nGlyphs; i++) {
+        fdmap.array[glyphs[i].iFD] = 1;
+    }
+
+    /* Remove unused FDs from FDArray */
+    {
+        long j = 0;
+        for (i = 0; i < top->FDArray.cnt; i++) {
+            if (fdmap.array[i]) {
+                if (i != j) {
+                    /* Swap elements preserving dynamic arrays for later freeing */
+                    abfFontDict tmp = top->FDArray.array[j];
+                    top->FDArray.array[j] = top->FDArray.array[i];
+                    top->FDArray.array[i] = tmp;
+                }
+                fdmap.array[i] = (uint16_t)j++;
+            }
+        }
+
+        if (i != j) {
+            /* Unused FDs; remap glyphs to new FDArray */
+            for (i = 0; i < nGlyphs; i++) {
+                glyphs[i].iFD = fdmap.array[glyphs[i].iFD];
+            }
+            top->FDArray.cnt = j;
+        }
+    }
+    dnaFREE(fdmap);
 }
 
 static void writeContents(ufwCtx h) {
@@ -1133,8 +1168,7 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
         h->lastiFD = info->iFD;
         if (info->gname.ptr == NULL) {
             sprintf(glyphName, "cid%05hu", info->cid);
-        }
-        else {
+        } else {
             sprintf(glyphName, "%s", info->gname.ptr);
         }
     } else {
