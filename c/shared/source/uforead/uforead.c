@@ -1426,9 +1426,6 @@ static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec, char* glyphNam
                     fatal(h, ufoErrParse, "glyph '%s' missing FDArray index within <lib> dict", glyphName);
             }
             chr->iFD = glifRec->iFD;
-            if (glifRec->cid > h->parseState.GLIFInfo.CIDCount) {
-                h->parseState.GLIFInfo.CIDCount = (long)glifRec->cid + 1;
-            }
         } else if (h->top.sup.flags & ABF_CID_FONT) {
             fatal(h, ufoErrParse, "glyph '%s' missing CID number within <lib> dict", glyphName);
         }
@@ -2065,12 +2062,16 @@ static bool parseCIDMap(ufoCtx h, xmlNodePtr cur) {
             if (cid != NULL) {
                 errMsg = concatStrs(h, "In lib.plist postscriptCIDMap, expected cid number but could not find parseable number for glyph: ", keyName);
                 g->cid = strtolCheck(h, cid, true, errMsg, 10);
+                if (g->cid > h->parseState.GLIFInfo.CIDCount) {
+                    h->parseState.GLIFInfo.CIDCount = (long)g->cid + 1;
+                }
                 memFree(h, errMsg);
             }
         }
         cur = cur->next;
     }
     h->parseState.CIDMap = false;
+    h->top.cid.CIDCount = h->parseState.GLIFInfo.CIDCount;
     return true;
 }
 
@@ -3351,9 +3352,6 @@ int ufoIterateGlyphs(ufoCtx h, abfGlyphCallbacks* glyph_cb) {
         res = readGlyph(h, i, glyph_cb);
         if (res != ufoSuccess)
             return res;
-    }
-    if (h->top.sup.flags & ABF_CID_FONT) {
-        h->top.cid.CIDCount = h->parseState.GLIFInfo.CIDCount;
     }
     HANDLER
     return Exception.Code;
