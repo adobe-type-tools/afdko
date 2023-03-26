@@ -2155,10 +2155,14 @@ static int t1_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
             fatal(h, "selected glyphs span multiple FDs");
     }
     /* Create glyph name */
-    if (info->cid == 0)
-        strcpy(gname, ".notdef");
-    else
-        sprintf(gname, "cid%hu", info->cid);
+    if (info->gname.ptr != NULL) {
+        strcpy(gname, info->gname.ptr);
+    } else {
+        if (info->cid == 0)
+            strcpy(gname, ".notdef");
+        else
+            sprintf(gname, "cid%hu", info->cid);
+    }
     nameLen = strlen(gname) + 1;
     if ((h->t1w.gnames.size) < (h->t1w.gnames.cnt + nameLen)) {
         dnaINDEX(h->t1w.gnames, h->t1w.gnames.size + nameLen);
