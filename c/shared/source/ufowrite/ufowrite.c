@@ -340,6 +340,25 @@ int ufwBegFont(ufwCtx h, long flags, char *glyphLayerDir) {
     return ufwSuccess;
 }
 
+static void orderCIDKeyedGlyphs(ufwCtx h) {
+    long i;
+    long nGlyphs = h->glyphs.cnt;
+    Glyph *glyphs = h->glyphs.array;
+
+    /* Insertion sort glyphs by CID order */
+    for (i = 2; i < nGlyphs; i++) {
+        long j = i;
+        Glyph tmp = glyphs[i];
+        while (tmp.cid < glyphs[j - 1].cid) {
+            glyphs[j] = glyphs[j - 1];
+            j--;
+        }
+        if (j != i) {
+            glyphs[j] = tmp;
+        }
+    }
+}
+
 static void writeContents(ufwCtx h) {
     char buffer[FILENAME_MAX];
     int i;
@@ -625,6 +644,8 @@ static void writeLibPlist(ufwCtx h) {
     h->state = 1; /* Indicates writing to dst stream */
 
     /* Open lib.plist file as dst stream */
+    if (h->top->sup.flags & ABF_CID_FONT)
+        orderCIDKeyedGlyphs(h);
 
     sprintf(buffer, "%s", "lib.plist");
     h->cb.stm.clientFileName = buffer;
