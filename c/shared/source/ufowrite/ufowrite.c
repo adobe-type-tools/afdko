@@ -340,15 +340,30 @@ int ufwBegFont(ufwCtx h, long flags, char *glyphLayerDir) {
     return ufwSuccess;
 }
 
-static void orderCIDKeyedGlyphs(ufwCtx h) {
+static void orderNameKeyedGlyphs(ufwCtx h) {
     abfTopDict *top = h->top;
+    long i;
+    long j;
+    long nGlyphs = h->glyphs.cnt;
+    Glyph *glyphs = h->glyphs.array;
+
+    for (i = 0; i < nGlyphs; i++) {
+        for (j = i + 1; j < nGlyphs; j++) {
+        Glyph a = glyphs[i];
+        Glyph b = glyphs[j];
+        if (strcmp(a.glyphName, b.glyphName) > 0) {
+            Glyph temp = a;
+            glyphs[i] = glyphs[j];
+            glyphs[j] = temp;
+            }
+        }
+    }
+}
+
+static void orderCIDKeyedGlyphs(ufwCtx h) {
     long i;
     long nGlyphs = h->glyphs.cnt;
     Glyph *glyphs = h->glyphs.array;
-    dnaDCL(uint16_t, fdmap);
-    dnaINIT(h->dna, fdmap, 1, 1);
-    dnaSET_CNT(fdmap, top->FDArray.cnt);
-    memset(fdmap.array, 0, sizeof(uint16_t) * top->FDArray.cnt);
 
     /* Insertion sort glyphs by CID order */
     for (i = 2; i < nGlyphs; i++) {
@@ -362,6 +377,17 @@ static void orderCIDKeyedGlyphs(ufwCtx h) {
             glyphs[j] = tmp;
         }
     }
+}
+
+static void removeUnusedFDicts(ufwCtx h) {
+    long i;
+    long nGlyphs = h->glyphs.cnt;
+    Glyph *glyphs = h->glyphs.array;
+    abfTopDict *top = h->top;
+    dnaDCL(uint16_t, fdmap);
+    dnaINIT(h->dna, fdmap, 1, 1);
+    dnaSET_CNT(fdmap, top->FDArray.cnt);
+    memset(fdmap.array, 0, sizeof(uint16_t) * top->FDArray.cnt);
 
     /* Mark used FDs */
     for (i = 0; i < nGlyphs; i++) {
@@ -611,9 +637,6 @@ static void writeFDArray(ufwCtx h, abfTopDict *top, char *buffer) {
     abfPrivateDict *privateDict;
     int i;
     int j;
-    writeLine(h, "\t<key>com.adobe.type.FSType</key>");
-    sprintf(buffer, "\t<integer>%d</integer>", (int)h->top->FSType);
-    writeLine(h, buffer);
     writeLine(h, "\t<key>com.adobe.type.postscriptFDArray</key>");
     writeLine(h, "\t<array>");
     for (j = 0; j < top->FDArray.cnt; j++) {
@@ -678,10 +701,6 @@ static void writeLibPlist(ufwCtx h) {
 
     h->state = 1; /* Indicates writing to dst stream */
 
-    /* Open lib.plist file as dst stream */
-    if (h->top->sup.flags & ABF_CID_FONT)
-        orderCIDKeyedGlyphs(h);
-
     sprintf(buffer, "%s", "lib.plist");
     h->cb.stm.clientFileName = buffer;
     h->stm.dst = h->cb.stm.open(&h->cb.stm, UFW_DST_STREAM_ID, 0);
@@ -692,6 +711,27 @@ static void writeLibPlist(ufwCtx h) {
     writeLine(h, PLIST_DTD_HEADER);
     writeLine(h, "<plist version=\"1.0\">");
     writeLine(h, "<dict>");
+
+    if (h->top->sup.flags & ABF_CID_FONT) {
+        if (h->top->cid.CIDFontName.ptr != NULL) {
+            writeLine(h, "\t<key>com.adobe.type.CIDFontName</key>");
+            sprintf(buffer, "\t<string>%s</string>", h->top->cid.CIDFontName.ptr);
+            writeLine(h, buffer);
+            writeLine(h, "\t<key>com.adobe.type.FSType</key>");
+            sprintf(buffer, "\t<integer>%d</integer>", (int)h->top->FSType);
+            writeLine(h, buffer);
+            writeLine(h, "\t<key>com.adobe.type.ROS</key>");
+            sprintf(buffer, "\t<string>%s-%s-%ld</string>", h->top->cid.Registry.ptr, h->top->cid.Ordering.ptr, h->top->cid.Supplement);
+            writeLine(h, buffer);
+        }
+        // CIDMap needs the dict keys in alphabetical order,
+        // but we want the font in CID order
+        orderNameKeyedGlyphs(h);
+        writeCIDMap(h, h->top, buffer);
+        orderCIDKeyedGlyphs(h);
+        removeUnusedFDicts(h);
+        writeFDArray(h, h->top, buffer);
+    }
     writeLine(h, "\t<key>public.glyphOrder</key>");
     writeLine(h, "\t<array>");
     for (i = 0; i < h->glyphs.cnt; i++) {
@@ -700,21 +740,8 @@ static void writeLibPlist(ufwCtx h) {
         sprintf(buffer, "\t\t<string>%s</string>", glyphRec->glyphName);
         writeLine(h, buffer);
     }
-
     writeLine(h, "\t</array>");
 
-    if (h->top->sup.flags & ABF_CID_FONT) {
-        if (h->top->cid.CIDFontName.ptr != NULL) {
-            writeLine(h, "\t<key>com.adobe.type.CIDFontName</key>");
-            sprintf(buffer, "\t<string>%s</string>", h->top->cid.CIDFontName.ptr);
-            writeLine(h, buffer);
-            writeLine(h, "\t<key>com.adobe.type.ROS</key>");
-            sprintf(buffer, "\t<string>%s-%s-%ld</string>", h->top->cid.Registry.ptr, h->top->cid.Ordering.ptr, h->top->cid.Supplement);
-            writeLine(h, buffer);
-        }
-        writeFDArray(h, h->top, buffer);
-        writeCIDMap(h, h->top, buffer);
-    }
     writeLine(h, "</dict>");
     writeLine(h, "</plist>");
 
