@@ -1164,7 +1164,7 @@ def test_cff2_windows_line_endings_bug1355():
 
 def test_lib_removes_outlines_bug1366():
     """
-    This tests a UFO with a <lib> key within the .glif files.
+    This tests a UFO with a <lib> key in the .glif files.
     This is an outdated use case — we now map glyphs to cids via the
     com.adobe.type.postscriptCIDMap key in lib.plist
     (the UFO has since been updated).
@@ -1515,11 +1515,11 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("overlaps-cidkeyed", b'', 0),
     ("overlaps-namekeyed", b'', 0),
     ("overlaps-cidkeyed-missing-cid", b"glyph 'cid45107' missing" +
-                                      b" CID number within <lib> dict", 6),
+                                      b" CID number in <lib> dict", 6),
     ("dup-glif", b"Warning: duplicate charstring" +
                  b" <exclam> (discarded)", 0),
     ("missing-cid-value", b"glyph 'cid45107' missing CID" +
-                          b" number within <lib> dict", 6),
+                          b" number in <lib> dict", 6),
     ("missing-advance", b'', 0),
     ("missing-autohint", b'', 0),
     ("missing-autohint-2", b'', 0),
@@ -1562,7 +1562,7 @@ def test_fontmatrix_unitsperem():
 
 
 missing_iFD = (b"tx: (ufr) glyph 'cid17899' missing "
-               b"FDArray index within <lib> dict")
+               b"FDArray index in <lib> dict")
 
 missing_FDArraySelect = (b"Warning: FDArraySelect not defined for "
                          b"cid-keyed font")

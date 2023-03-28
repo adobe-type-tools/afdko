@@ -2,15 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>public.glyphOrder</key>
-	<array>
-		<string>cid00000</string>
-		<string>cid00001</string>
-		<string>cid01125</string>
-		<string>cid01143</string>
-	</array>
-	<key>com.adobe.type.FSType</key>
-	<integer>0</integer>
+	<key>com.adobe.type.postscriptCIDMap</key>
+	<dict>
+		<key>cid00000</key>
+		<integer>0</integer>
+		<key>cid00001</key>
+		<integer>1</integer>
+		<key>cid01125</key>
+		<integer>1125</integer>
+		<key>cid01143</key>
+		<integer>1143</integer>
+	</dict>
 	<key>com.adobe.type.postscriptFDArray</key>
 	<array>
 	<dict>
@@ -182,16 +184,12 @@
 	</dict>
 	</dict>
 	</array>
-	<key>com.adobe.type.postscriptCIDMap</key>
-	<dict>
-		<key>cid00000</key>
-		<integer>0</integer>
-		<key>cid00001</key>
-		<integer>1</integer>
-		<key>cid01125</key>
-		<integer>1125</integer>
-		<key>cid01143</key>
-		<integer>1143</integer>
-	</dict>
+	<key>public.glyphOrder</key>
+	<array>
+		<string>cid00000</string>
+		<string>cid00001</string>
+		<string>cid01125</string>
+		<string>cid01143</string>
+	</array>
 </dict>
 </plist>

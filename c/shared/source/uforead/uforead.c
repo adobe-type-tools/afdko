@@ -1423,11 +1423,11 @@ static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec, char* glyphNam
         if (glifRec->cid >= 0) {
             chr->cid = glifRec->cid;
             if (glifRec->iFD < 0){
-                    fatal(h, ufoErrParse, "glyph '%s' missing FDArray index within <lib> dict", glyphName);
+                    fatal(h, ufoErrParse, "glyph '%s' missing FDArray index in <lib> dict", glyphName);
             }
             chr->iFD = glifRec->iFD;
         } else if (h->top.sup.flags & ABF_CID_FONT) {
-            fatal(h, ufoErrParse, "glyph '%s' missing CID number within <lib> dict", glyphName);
+            fatal(h, ufoErrParse, "glyph '%s' missing CID number in <lib> dict", glyphName);
         }
         chr->gname.ptr = glyphName;
         chr->gname.impl = tag;
