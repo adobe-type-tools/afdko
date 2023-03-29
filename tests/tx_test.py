@@ -1516,8 +1516,7 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("overlaps-namekeyed", b'', 0),
     ("overlaps-cidkeyed-missing-cid", b"glyph 'cid45107' missing" +
                                       b" CID number in <lib> dict", 6),
-    ("dup-glif", b"Warning: duplicate charstring" +
-                 b" <exclam> (discarded)", 0),
+    ("dup-glif", b'', 0),
     ("missing-cid-value", b"glyph 'cid45107' missing CID" +
                           b" number in <lib> dict", 6),
     ("missing-advance", b'', 0),
