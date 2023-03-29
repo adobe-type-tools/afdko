@@ -346,11 +346,9 @@ void abfDumpBegFont(abfDumpCtx h, abfTopDict *top) {
         /* UFO can store names even when CID-keyed */
         if (top->sup.srcFontType == 7) {
             FPRINTF_S(h->fp, "## glyph[tag] {name,cid,iFD");
-        }
-        else {
+        } else {
             FPRINTF_S(h->fp, "## glyph[tag] {cid,iFD");
-        }
-    else
+        } else
         FPRINTF_S(h->fp, "## glyph[tag] {name,encoding");
     if (h->flags & DUMP_LANG_GROUP)
         FPRINTF_S(h->fp, ",LanguageGroup");
@@ -375,11 +373,9 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
         /* Dump CID-keyed glyph. Check for names first since UFO can store name and CID */
         if (info->gname.ptr != NULL) {
             FPRINTF_S(h->fp, "%s,%hu,%u", info->gname.ptr, info->cid, info->iFD);
-        }
-        else {
+        } else {
             FPRINTF_S(h->fp, "%hu,%u", info->cid, info->iFD);
-        }
-    else {
+        } else {
         /* Dump name-keyed glyph */
         abfEncoding *enc = &info->encoding;
         if (info->gname.ptr == NULL)
