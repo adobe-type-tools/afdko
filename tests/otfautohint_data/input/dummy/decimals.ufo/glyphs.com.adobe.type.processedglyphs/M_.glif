@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="M" format="2">
+  <advance width="727"/>
+  <unicode hex="004D"/>
+  <anchor x="290.40000000000003" y="542.4" name="aboveUC"/>
+  <anchor x="292.0" y="-17.6" name="belowLC"/>
+  <outline>
+    <contour>
+      <point x="72" y="0" type="line" name="hintRef0000"/>
+      <point x="132" y="0" type="line"/>
+      <point x="132" y="288.8" type="line"/>
+      <point x="132" y="335.2"/>
+      <point x="127.2" y="397.6"/>
+      <point x="124" y="444" type="curve"/>
+      <point x="127.2" y="444" type="line"/>
+      <point x="168.8" y="324.8" type="line"/>
+      <point x="268" y="52.8" type="line"/>
+      <point x="312" y="52.8" type="line"/>
+      <point x="411.2" y="324.8" type="line"/>
+      <point x="452.8" y="444" type="line"/>
+      <point x="456" y="444" type="line"/>
+      <point x="452.8" y="397.6"/>
+      <point x="447.2" y="335.2"/>
+      <point x="447.2" y="288.8" type="curve"/>
+      <point x="447.2" y="0" type="line"/>
+      <point x="509.6" y="0" type="line"/>
+      <point x="509.6" y="524.8" type="line"/>
+      <point x="428.8" y="524.8" type="line"/>
+      <point x="329.6" y="244.8" type="line"/>
+      <point x="316.8" y="208.8"/>
+      <point x="306.4" y="171.2"/>
+      <point x="293.6" y="135.2" type="curve"/>
+      <point x="290.4" y="135.2" type="line"/>
+      <point x="277.6" y="171.2"/>
+      <point x="265.6" y="208.8"/>
+      <point x="252.8" y="244.8" type="curve"/>
+      <point x="152" y="524.8" type="line"/>
+      <point x="72" y="524.8" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 21 -21</string>
+              <string>hstem 52.8 82.4</string>
+              <string>hstem 444 80.8</string>
+              <string>vstem 72 60</string>
+              <string>vstem 447.2 62.4</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>4745bc848d4a9fc2de282cfb7f165d8156838f9c597c5edd1385d3d237fd99f436703a9bbcb823d37b2cf6263f5cac7b8ca5b6fee73e5456dd9770954f9e2cf1</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

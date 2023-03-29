@@ -1,0 +1,23 @@
+Showing default FDDict Values:
+	FontName SourceCodePro-Regular
+	OrigEmSqUnits 1000
+	LanguageGroup 0
+	DominantV [86]
+	DominantH [68]
+	FlexOK true
+	VCounterChars ( m M T )
+	BlueFuzz 0
+	BaselineOvershoot -12
+	BaselineYCoord 0
+	CapHeight 486
+	CapOvershoot 12
+	LcHeight 574
+	LcOvershoot 12
+	AscenderHeight 638
+	AscenderOvershoot 12
+	FigHeight 656
+	FigOvershoot 12
+	Height5 712
+	Height5Overshoot 12
+	Baseline5Overshoot -12
+	Baseline5 -205

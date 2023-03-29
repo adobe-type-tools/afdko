@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="U" format="2">
+  <advance width="645"/>
+  <unicode hex="0055"/>
+  <anchor x="257.6" y="542.4" name="aboveUC"/>
+  <anchor x="420.0" y="532.8000000000001" name="hornLC"/>
+  <anchor x="257.6" y="0" name="ogonekUC"/>
+  <anchor x="257.6" y="-17.6" name="belowLC"/>
+  <outline>
+    <contour>
+      <point x="258.4" y="-9.6" type="curve" name="hintRef0000"/>
+      <point x="365.6" y="-9.6"/>
+      <point x="446.4" y="48"/>
+      <point x="446.4" y="216.8" type="curve"/>
+      <point x="446.4" y="524.8" type="line"/>
+      <point x="382.4" y="524.8" type="line"/>
+      <point x="382.4" y="215.2" type="line"/>
+      <point x="382.4" y="88.8"/>
+      <point x="328" y="48.8"/>
+      <point x="258.4" y="48.8" type="curve"/>
+      <point x="189.6" y="48.8"/>
+      <point x="136" y="88.8"/>
+      <point x="136" y="215.2" type="curve"/>
+      <point x="136" y="524.8" type="line"/>
+      <point x="69.6" y="524.8" type="line"/>
+      <point x="69.6" y="216.8" type="line"/>
+      <point x="69.6" y="48"/>
+      <point x="151.2" y="-9.6"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -9.6 58.4</string>
+              <string>vstem 69.6 66.4</string>
+              <string>vstem 382.4 64</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>a35f71a73c3249b9fd9f658a43ad6a5e464297963285db6204b83376e8e4b2b7b9e0a50b7204f255a4f9e3544a77683c8749b941f9ce306b133e1ceec3edd9c4</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

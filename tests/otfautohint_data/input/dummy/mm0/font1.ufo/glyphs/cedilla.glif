@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="cedilla" format="1">
+  <advance width="400"/>
+  <unicode hex="00B8"/>
+  <outline>
+    <contour>
+      <point x="147" y="-86" type="line"/>
+      <point x="196" y="-93"/>
+      <point x="219" y="-107"/>
+      <point x="219" y="-138" type="curve" smooth="yes"/>
+      <point x="219" y="-166"/>
+      <point x="200" y="-184"/>
+      <point x="161" y="-184" type="curve" smooth="yes"/>
+      <point x="143" y="-184"/>
+      <point x="129" y="-183"/>
+      <point x="113" y="-181" type="curve"/>
+      <point x="106" y="-211" type="line"/>
+      <point x="119" y="-215"/>
+      <point x="140" y="-220"/>
+      <point x="168" y="-220" type="curve" smooth="yes"/>
+      <point x="241" y="-220"/>
+      <point x="279" y="-186"/>
+      <point x="279" y="-140" type="curve" smooth="yes"/>
+      <point x="279" y="-85"/>
+      <point x="225" y="-59"/>
+      <point x="166" y="-56" type="curve"/>
+      <point x="186" y="-77" type="line"/>
+      <point x="196" y="3" type="line"/>
+      <point x="160" y="3" type="line"/>
+    </contour>
+    <contour>
+      <point x="172" y="0" type="move" name="_baseLC"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.mark</key>
+      <array>
+        <integer>0</integer>
+        <real>0.5</real>
+        <integer>1</integer>
+        <integer>1</integer>
+      </array>
+    </dict>
+  </lib>
+</glyph>

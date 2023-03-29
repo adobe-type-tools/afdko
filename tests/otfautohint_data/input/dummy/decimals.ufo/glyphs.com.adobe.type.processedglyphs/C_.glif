@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="C" format="2">
+  <advance width="571"/>
+  <unicode hex="0043"/>
+  <anchor x="263.2" y="542.4" name="aboveUC"/>
+  <anchor x="274.40000000000003" y="0" name="baseLC"/>
+  <anchor x="274.40000000000003" y="-17.6" name="belowLC"/>
+  <outline>
+    <contour>
+      <point x="270.4" y="-9.6" type="curve" name="hintRef0000"/>
+      <point x="338.4" y="-9.6"/>
+      <point x="389.6" y="18.4"/>
+      <point x="431.2" y="66.4" type="curve"/>
+      <point x="394.4" y="108" type="line"/>
+      <point x="360.8" y="71.2"/>
+      <point x="323.2" y="48.8"/>
+      <point x="272.8" y="48.8" type="curve"/>
+      <point x="173.6" y="48.8"/>
+      <point x="110.4" y="132"/>
+      <point x="110.4" y="264" type="curve"/>
+      <point x="110.4" y="394.4"/>
+      <point x="176" y="476"/>
+      <point x="275.2" y="476" type="curve"/>
+      <point x="320" y="476"/>
+      <point x="354.4" y="456"/>
+      <point x="382.4" y="426.4" type="curve"/>
+      <point x="418.4" y="469.6" type="line"/>
+      <point x="388" y="504"/>
+      <point x="338.4" y="534.4"/>
+      <point x="274.4" y="534.4" type="curve"/>
+      <point x="140.8" y="534.4"/>
+      <point x="41.6" y="431.2"/>
+      <point x="41.6" y="262.4" type="curve"/>
+      <point x="41.6" y="91.2"/>
+      <point x="139.2" y="-9.6"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -9.6 58.4</string>
+              <string>hstem 476 58.4</string>
+              <string>vstem 41.6 68.8</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>e3327850d4c799784ca062fabd360d216633a4e88692987f7e0ffdfd22672a46797618dca93ce0a0eec6d8696dee0d12e806466661501c9b38accb79a8066638</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>
