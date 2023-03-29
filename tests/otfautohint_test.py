@@ -348,7 +348,7 @@ def test_print_fddict():
                       '--print-dflt-fddict',
                       '--fontinfo-file',
                       fipath])
-            str(wrapped_exc) == expected
+            assert str(wrapped_exc) == expected
 
 
 @pytest.mark.parametrize("option", [
@@ -544,13 +544,13 @@ def test_sparse_mmotf():
 
 
 def test_cff():
-    path = get_input_path("dummy/font.cff")
+    cff = get_input_path("dummy/font.cff")
     out_path = get_temp_file_path()
-    options = OTFOptions(path, out_path)
+    options = OTFOptions(cff, out_path)
     hintFiles(options)
 
     xmlFiles = []
-    for path in (path, out_path):
+    for path in (cff, out_path):
         font = CFFFontSet()
         opath = get_temp_file_path()
         writer = XMLWriter(opath)
