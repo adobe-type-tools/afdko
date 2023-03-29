@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="k" format="2">
+  <advance width="495"/>
+  <unicode hex="006B"/>
+  <anchor x="100.80000000000001" y="584.0" name="aboveLC"/>
+  <anchor x="216.8" y="-17.6" name="belowLC"/>
+  <outline>
+    <contour>
+      <point x="65.6" y="0" type="line" name="hintRef0000"/>
+      <point x="130.4" y="0" type="line"/>
+      <point x="130.4" y="102.4" type="line"/>
+      <point x="203.2" y="187.2" type="line"/>
+      <point x="316.8" y="0" type="line"/>
+      <point x="388.8" y="0" type="line"/>
+      <point x="240.8" y="232.8" type="line"/>
+      <point x="371.2" y="388.8" type="line"/>
+      <point x="298.4" y="388.8" type="line"/>
+      <point x="132.8" y="184" type="line"/>
+      <point x="130.4" y="184" type="line"/>
+      <point x="130.4" y="569.6" type="line"/>
+      <point x="65.6" y="569.6" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 21 -21</string>
+              <string>vstem 65.6 64.8</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w495l65.60l130.40l130.4102.4l203.2187.2l316.80l388.80l240.8232.8l371.2388.8l298.4388.8l132.8184l130.4184l130.4569.6l65.6569.6</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

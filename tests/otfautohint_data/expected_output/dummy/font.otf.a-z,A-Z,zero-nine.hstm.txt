@@ -1,0 +1,17 @@
+Horizontal Stem List for font.otf on Wed Sep 25 12:24:03 2019
+count    width    glyphs
+   12       67    [f g i j l t v z A P R]
+   11       70    [w B E F I J T Z]
+    8       71    [E I L Z two five seven]
+    7       68    [g A D P R one]
+    2      108    [N]
+    2       96    [M]
+    2       85    [V four]
+    1      106    [W]
+    1      100    [one]
+    1       93    [W]
+    1       80    [w]
+    1       72    [H]
+    1       69    [G]
+    1       66    [four]
+    1       64    [e]

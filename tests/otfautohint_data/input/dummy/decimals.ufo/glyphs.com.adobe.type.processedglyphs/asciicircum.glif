@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="asciicircum" format="2">
+  <advance width="497"/>
+  <unicode hex="005E"/>
+  <outline>
+    <contour>
+      <point x="48" y="227.2" type="line" name="hintRef0000"/>
+      <point x="105.6" y="227.2" type="line"/>
+      <point x="157.6" y="368" type="line"/>
+      <point x="197.6" y="474.4" type="line"/>
+      <point x="200.8" y="474.4" type="line"/>
+      <point x="240" y="368" type="line"/>
+      <point x="292" y="227.2" type="line"/>
+      <point x="349.6" y="227.2" type="line"/>
+      <point x="228" y="536" type="line"/>
+      <point x="169.6" y="536" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 474.4 61.6</string>
+              <string>vstem 48 301.6</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w497l48227.2l105.6227.2l157.6368l197.6474.4l200.8474.4l240368l292227.2l349.6227.2l228536l169.6536</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

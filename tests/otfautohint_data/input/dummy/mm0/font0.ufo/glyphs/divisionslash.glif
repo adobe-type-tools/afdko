@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="divisionslash" format="1">
+  <advance width="140"/>
+  <unicode hex="2215"/>
+  <outline>
+    <contour>
+      <point x="-161" y="-22" type="line"/>
+      <point x="316" y="664" type="line"/>
+      <point x="299" y="675" type="line"/>
+      <point x="-178" y="-11" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.mark</key>
+      <array>
+        <integer>0</integer>
+        <real>0.5</real>
+        <integer>1</integer>
+        <integer>1</integer>
+      </array>
+    </dict>
+  </lib>
+</glyph>

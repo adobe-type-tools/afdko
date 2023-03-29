@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="u" format="2">
+  <advance width="544"/>
+  <unicode hex="0075"/>
+  <anchor x="328.8" y="396.8" name="hornLC"/>
+  <anchor x="217.60000000000002" y="407.20000000000005" name="aboveLC"/>
+  <anchor x="342.40000000000003" y="0" name="ogonekLC"/>
+  <anchor x="232.0" y="-17.6" name="belowLC"/>
+  <outline>
+    <contour>
+      <point x="179.2" y="-9.6" type="curve" name="hintRef0000"/>
+      <point x="232.8" y="-9.6"/>
+      <point x="271.2" y="18.4"/>
+      <point x="307.2" y="60.8" type="curve"/>
+      <point x="309.6" y="60.8" type="line"/>
+      <point x="315.2" y="0" type="line" name="hintRef0001"/>
+      <point x="369.6" y="0" type="line" name="hintRef0002"/>
+      <point x="369.6" y="388.8" type="line"/>
+      <point x="304" y="388.8" type="line"/>
+      <point x="304" y="112.8" type="line"/>
+      <point x="267.2" y="67.2" name="hintRef0003"/>
+      <point x="239.2" y="47.2"/>
+      <point x="199.2" y="47.2" type="curve"/>
+      <point x="148" y="47.2"/>
+      <point x="126.4" y="78.4"/>
+      <point x="126.4" y="151.2" type="curve"/>
+      <point x="126.4" y="388.8" type="line"/>
+      <point x="60" y="388.8" type="line"/>
+      <point x="60" y="142.4" type="line"/>
+      <point x="60" y="43.2"/>
+      <point x="96.8" y="-9.6"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -9.6 56.8</string>
+              <string>vstem 60 66.4</string>
+              <string>vstem 312.4 57.2</string>
+            </array>
+          </dict>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0001</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 21 -21</string>
+              <string>vstem 60 66.4</string>
+              <string>vstem 312.4 57.2</string>
+            </array>
+          </dict>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0002</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 21 -21</string>
+              <string>vstem 60 66.4</string>
+              <string>vstem 304 65.6</string>
+            </array>
+          </dict>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0003</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -9.6 56.8</string>
+              <string>vstem 60 66.4</string>
+              <string>vstem 304 65.6</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>1a4882fe7d2895d1637eb3c31d4b885e08807e8fa32eff863a8d1cec1ecad8097f62e82ae94369d6e124017c33eca59c7f015e63cc5d46cba8a2243e174214fc</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>
