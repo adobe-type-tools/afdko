@@ -1,6 +1,16 @@
 Changelog
 =========
 
+3.9.3 (released 2023-02-02)
+---------------------------
+- CMake github workflow updates:
+  - Force static link of libxml2 on both windows and linux ([#1607](https://github.com/adobe-type-tools/afdko/pull/1607))
+- CMake libxml2 updates:
+  - Stop forcing static LibXML2 build on Linux ([#1601](https://github.com/adobe-type-tools/afdko/pull/1601))
+  - Unify cmake libxml build logic ([#1597](https://github.com/adobe-type-tools/afdko/pull/1597))
+- [docs] Formatting fix-up ([#1605](https://github.com/adobe-type-tools/afdko/pull/1605))
+- [tx] Restore stack-like behavior of parseGLIF transform pointer ([#1595](https://github.com/adobe-type-tools/afdko/pull/1595))
+
 3.9.2 (released 2023-01-10)
 ---------------------------
 - tx:

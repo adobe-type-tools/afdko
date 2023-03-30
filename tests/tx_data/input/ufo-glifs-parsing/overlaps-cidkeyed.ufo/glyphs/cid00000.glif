@@ -31,9 +31,9 @@
   </outline>
   <lib>
     <dict>
-      <key>com.adobe.type.cid.CID</key>
+      <key>com.adobe.type.CID</key>
       <integer>0</integer>
-      <key>com.adobe.type.cid.iFD</key>
+      <key>com.adobe.type.iFD</key>
       <integer>0</integer>
     </dict>
   </lib>

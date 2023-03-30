@@ -39,6 +39,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
+#include <errno.h>
 
 #if defined(WIN32) || defined(WIN64)
 # define strtok_r strtok_s
@@ -55,6 +56,7 @@ enum ufoFileState {
     None,
     parsingFontInfo,
     parsingLib,
+    parsingGroups,
     parsingContentsDflt,
     parsingContentsAlt,
     preParsingGLIF,
@@ -127,6 +129,8 @@ typedef struct
     char* glifFilePath;
     char* altLayerGlifFileName;
     long int glyphOrder;  // used to sort the glifRecs by glyph order from lib.plist.
+    int cid;
+    int iFD;
 } GLIF_Rec;
 
 typedef struct
@@ -284,12 +288,21 @@ struct ufoCtx_ {
     dnaCtx dna;
     struct {
        bool FDArray;
+       bool CIDMap;
        bool hintSetListArray;
        bool type1HintDataV2;
-       bool parsingValueArray;
+       bool valueArray;
        enum ufoFileState UFOFile;
        glifInfo GLIFInfo;
     } parseState;
+
+    uint8_t requiredCIDKeyFlag;
+#define CIDKEY_CIDMAP      (1 << 1)
+#define CIDKEY_FDARRAY     (1 << 2)
+#define CIDKEY_SUPPLEMENT  (1 << 3)
+#define CIDKEY_ORDERING    (1 << 4)
+#define CIDKEY_REGISTRY    (1 << 5)
+
     struct
     {
         _Exc_Buf env;
@@ -316,6 +329,9 @@ static int addChar(ufoCtx h, STI sti, Char** chr);
 static int CTL_CDECL postMatchChar(const void* key, const void* value,
                                    void* ctx);
 static bool strEqual(const char* string1, const char* string2);
+static long strtolCheck(ufoCtx h, char* keyValue, bool fail, char* msg, int base);
+static double strtodCheck(ufoCtx h, char* keyValue, bool fail, char* msg);
+static unsigned long strtoulCheck(ufoCtx h, char* keyValue, bool fail, char* msg, int base);
 
 /* XML File Parsing Functions */
 static xmlNodePtr parseXMLFile(ufoCtx h, char* filename, const char* filetype);
@@ -330,13 +346,28 @@ static int parseXMLAnchor(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec);
 static int parseXMLContour(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyphCallbacks* glyph_cb);
 static int parseXMLGuideline(ufoCtx h, xmlNodePtr cur, int tag, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec);
 static int parseType1HintDataV2(ufoCtx h, xmlNodePtr cur);
+static bool parseFontInfoFDArray(ufoCtx h, xmlNodePtr cur);
+static bool setFontInfoFD(ufoCtx h, char* keyName, char* keyValue);
+static bool setFontInfoPD(ufoCtx h, char* keyName, char* keyValue);
+static bool setFontInfoTopKey(ufoCtx h, char* keyName, char* keyValue);
+static bool parseFontInfoPrivateDict(ufoCtx h, xmlNodePtr cur);
+static bool parseCIDMap(ufoCtx h, xmlNodePtr cur);
+static int parseGroups(ufoCtx h);
+static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNodePtr cur);
+static bool validCIDKeyedFont(ufoCtx h, xmlNodePtr cur);
 
 /* XML File Setting Functions */
 static bool setXMLFileKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur);
 static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur);
-static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);
+static bool setGroupsKey(ufoCtx h, char* keyName, xmlNodePtr cur);
+static void setROSKeyValue(ufoCtx h, abfTopDict* top, char* keyValue);
+
+/* GLIF Rec Handling */
+static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);  /* checks for existing rec*/
+static GLIF_Rec* addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);  /* directly adds new GLIF rec */
 static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur);
+static GLIF_Rec* findGLIFRecByName(ufoCtx h, char *glyphName);
 
 /* -------------------------- Error Support ------------------------ */
 
@@ -959,6 +990,14 @@ static char* copyStr(ufoCtx h, char* oldString) {
     return value;
 }
 
+static char* concatStrs(ufoCtx h, char* string1, char* string2) {
+    char* catStr;
+    catStr = memNew(h, strlen(string1) + strlen(string2) + 1);
+    strcpy(catStr, string1);
+    strcat(catStr, string2);
+    return catStr;
+}
+
 static char* getKeyValue(ufoCtx h, char* endName, int state) {
     char* value = NULL;
     token* tk;
@@ -986,7 +1025,7 @@ static void freeValueArray(ufoCtx h){
         }
         dnaSET_CNT(h->valueArray, 0);
     }
-    h->parseState.parsingValueArray = false;
+    h->parseState.valueArray = false;
 }
 
 /* ToDo: add extra warnings for verbose-output */
@@ -1043,15 +1082,16 @@ static void setFontMatrix(ufoCtx h, abfFontMatrix* fontMatrix, int numElements) 
 static bool keyValueParseable(ufoCtx h, xmlNodePtr cur, char* keyValue, char* keyName) {
     bool valid = true;
     if (keyValue == NULL) {
-        if (!h->parseState.parsingValueArray)
+        if (!h->parseState.valueArray && !h->parseState.CIDMap) {
             valid = false;
-//            message(h, "Warning: Encountered missing value for fontinfo key %s. Skipping", keyName);
-        else if (h->parseState.parsingValueArray && h->valueArray.cnt == 0)
+//            message(h, "Warning: Encountered missing value for key %s. Skipping", keyName);
+        } else if (h->parseState.valueArray && h->valueArray.cnt == 0) {
             valid = false;
-//            message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
+//            message(h, "Warning: Encountered empty <%s> for key %s. Skipping", cur->name, keyName);
+        }
     } else {
         if (strEqual(keyValue, "")){
-//        message(h, "Warning: Encountered empty <%s> for fontinfo key %s. Skipping", cur->name, keyName);
+//        message(h, "Warning: Encountered empty <%s> for key %s. Skipping", cur->name, keyName);
         valid = false;
         }
     }
@@ -1078,6 +1118,8 @@ static bool setXMLFileKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         result = setFontInfoKey(h, keyName, cur);
     else if (h->parseState.UFOFile == parsingLib)
         result = setLibKey(h, keyName, cur);
+    else if (h->parseState.UFOFile == parsingGroups)
+        result = setGroupsKey(h, keyName, cur);
     else if (h->parseState.UFOFile == parsingContentsDflt)
         addGLIFRec(h, keyName, cur);
     else if (h->parseState.UFOFile == parsingContentsAlt)
@@ -1132,58 +1174,84 @@ static long getGlyphOrderIndex(ufoCtx h, char* glyphName) {
     return orderIndex;
 }
 
-static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
+static GLIF_Rec* addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     GLIF_Rec* newGLIFRec;
     long int glyphOrder = ABF_UNSET_INT;
     char* fileName = parseXMLKeyValue(h, cur);
     if (!keyValueParseable(h, cur, fileName, glyphName))
-        return;
+        return NULL;
 
     if (h->data.glifOrder.cnt != 0)  /* only try to get glyphOrderIndex if cnt > 0 */
         glyphOrder = getGlyphOrderIndex(h, glyphName);
     newGLIFRec = dnaNEXT(h->data.glifRecs);
     newGLIFRec->glyphName = glyphName;
     newGLIFRec->glyphOrder = glyphOrder;
+    if (!h->parseState.CIDMap) {  /* do not proceed if currently parsing CIDMap in lib.plist. This information will be filled in later. */
+        if (fileName == NULL) {
+            fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
+        }
+        newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
+        sprintf(newGLIFRec->glifFileName, "%s", fileName);
+        newGLIFRec->altLayerGlifFileName = NULL;
+    }
+    newGLIFRec->cid = -1;
+    newGLIFRec->iFD = -1;
+    return newGLIFRec;
+}
+
+static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
+    GLIF_Rec* foundGlyph = NULL;
+    char* fileName = parseXMLKeyValue(h, cur);
     if (fileName == NULL) {
         fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
     }
-    newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
-    sprintf(newGLIFRec->glifFileName, "%s", fileName);
-    newGLIFRec->altLayerGlifFileName = NULL;
+    int nameLength = strlen(fileName) - 5;  /* '.glif' removed */
+    char *subbuff = memNew(h, (sizeof(char) * (nameLength + 1)));
+    memcpy(subbuff, &fileName[0], nameLength);
+    subbuff[nameLength] = '\0';
+    foundGlyph = findGLIFRecByName(h, subbuff);
+    memFree(h, subbuff);
+    if (foundGlyph == NULL){
+        addNewGLIFRec(h, glyphName, cur);
+    } else {
+        foundGlyph->glifFileName = fileName;
+        if (foundGlyph->glyphOrder == -1)
+            foundGlyph->glyphOrder = getGlyphOrderIndex(h, glyphName);
+    }
 }
 
-static int findGLIFRecByName(ufoCtx h, char *glyphName)
+int glifRecNameComparator(const void *a, const void *b) {
+    const GLIF_Rec *p1 = (GLIF_Rec *) a;
+    const GLIF_Rec *p2 = (GLIF_Rec *) b;
+    return strcmp((*p1).glyphName, (*p2).glyphName);
+}
+
+static GLIF_Rec* findGLIFRecByName(ufoCtx h, char *glyphName)
 {
-    int i = 0;
-    while (i < h->data.glifRecs.cnt) {
-        GLIF_Rec* glifRec;
-        glifRec = &h->data.glifRecs.array[i];
-        if (strEqual(glifRec->glyphName, glyphName)) {
-            return i;
-        }
-        i++;
-    }
-    return -1;
+    GLIF_Rec *glifKey = memNew(h, sizeof(GLIF_Rec*));
+    glifKey->glyphName = glyphName;
+
+    GLIF_Rec* glif = bsearch(glifKey, h->data.glifRecs.array, h->data.glifRecs.cnt, sizeof(GLIF_Rec), glifRecNameComparator);
+    memFree(h, glifKey);
+    return glif;
 }
 
 static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
-    int index;
+    GLIF_Rec* glifRec;
     char* fileName = parseXMLKeyValue(h, cur);
     if (!keyValueParseable(h, cur, fileName, glyphName))
         return;
+    if (fileName == NULL) {
+        /* this is basically muted for now, as the previous check will return and skip if not parseable.
+           We'll add this back once we add verbosity flag */
+        message(h, ufoErrParse, "Encountered glyph reference %s in alternate layer's contents.plist with an empty file path. ", glyphName);
+        return;
+    }
 
-    index = findGLIFRecByName(h, glyphName);
-    if (index == -1) {
+    glifRec = findGLIFRecByName(h, glyphName);
+    if (glifRec == NULL) {
         message(h, "Warning: glyph '%s' is in the processed layer but not in the default layer.", glyphName);
     } else {
-        GLIF_Rec* glifRec;
-
-        glifRec = &h->data.glifRecs.array[index];
-
-        if (fileName == NULL) {
-            fatal(h, ufoErrParse, "Encountered glyph reference in alternate layer's contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
-        }
-
         glifRec->altLayerGlifFileName = memNew(h, 1 + strlen(fileName));
         sprintf(glifRec->altLayerGlifFileName, "%s", fileName);
     }
@@ -1198,7 +1266,7 @@ static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
 #define SUPPLEMENT 1261
 #define CIDNAME 1255
 
-static int parseGlyphOrder(ufoCtx h) {
+static int parseLibPlist(ufoCtx h) {
     const char* filetype = "plist";
     h->parseState.UFOFile = parsingLib;
 
@@ -1241,6 +1309,31 @@ static int parseGlyphOrder(ufoCtx h) {
     return parsingSuccess;
 }
 
+static int parseGroups(ufoCtx h) {
+    const char* filetype = "plist";
+    h->parseState.UFOFile = parsingGroups;
+
+    h->src.next = h->mark = NULL;
+    h->cb.stm.clientFileName = "groups.plist";
+    h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
+    if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
+        if (h->top.sup.flags == ABF_CID_FONT)
+            message(h, "Warning: FDArraySelect not defined for cid-keyed font");
+        return ufoSuccess;
+    }
+
+    dnaSET_CNT(h->valueArray, 0);
+
+    xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
+    int parsingSuccess = parseXMLPlistFile(h, cur);
+
+    h->cb.stm.close(&h->cb.stm, h->stm.src);
+    h->stm.src = NULL;
+    h->parseState.UFOFile = None;
+    return parsingSuccess;
+}
+
+
 static int parseGlyphList(ufoCtx h, bool altLayer) {
     const char* filetype = "plist";
     char *clientFilePath;
@@ -1268,7 +1361,7 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
             return ufoErrSrcStream;
         }
     }
-
+    qsort(h->data.glifRecs.array, h->data.glifRecs.cnt, sizeof(GLIF_Rec), glifRecNameComparator);
     dnaSET_CNT(h->valueArray, 0);
 
     xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
@@ -1322,7 +1415,7 @@ static int preParseGLIFS(ufoCtx h) {
     return retVal;
 }
 
-static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin, long char_end, unsigned long unicode) {
+static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec, char* glyphName, long char_begin, long char_end, unsigned long unicode) {
     abfGlyphInfo* chr;
 
     if (addChar(h, tag, &chr)) {
@@ -1332,17 +1425,17 @@ static void addCharFromGLIF(ufoCtx h, int tag, char* glyphName, long char_begin,
         chr->flags = 0;
         chr->tag = tag;
         chr->iFD = 0;
-        if (h->parseState.GLIFInfo.currentCID >= 0) {
-            chr->cid = h->parseState.GLIFInfo.currentCID;
-            if (h->parseState.GLIFInfo.currentiFD < 0){
-                    fatal(h, ufoErrParse, "Warning: glyph '%s' missing FDArray index within <lib> dict", glyphName);
+        if (glifRec->cid >= 0) {
+            chr->cid = glifRec->cid;
+            if (glifRec->iFD < 0){
+                    fatal(h, ufoErrParse, "glyph '%s' missing FDArray index within <lib> dict", glyphName);
             }
-            chr->iFD = h->parseState.GLIFInfo.currentiFD;
-            if (h->parseState.GLIFInfo.currentCID > h->parseState.GLIFInfo.CIDCount) {
-                h->parseState.GLIFInfo.CIDCount = (long)h->parseState.GLIFInfo.currentCID + 1;
+            chr->iFD = glifRec->iFD;
+            if (glifRec->cid > h->parseState.GLIFInfo.CIDCount) {
+                h->parseState.GLIFInfo.CIDCount = (long)glifRec->cid + 1;
             }
-        } else if (h->top.sup.flags & ABF_CID_FONT){
-            fatal(h, ufoErrParse, "Warning: glyph '%s' missing CID number within <lib> dict", glyphName);
+        } else if (h->top.sup.flags & ABF_CID_FONT) {
+            fatal(h, ufoErrParse, "glyph '%s' missing CID number within <lib> dict", glyphName);
         }
         chr->gname.ptr = glyphName;
         chr->gname.impl = tag;
@@ -1391,6 +1484,9 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
         /* Didn't work. Try the glyph layer directory */
         if (glifRec->glifFilePath) {
             memFree(h, glifRec->glifFilePath);
+        }
+        if (glifRec->glifFileName == NULL) {
+            fatal(h, ufoErrParse, "Warning: glyph '%s' missing filename.", glifRec->glyphName);
         }
         glifRec->glifFilePath = memNew(h, 2 + strlen(h->defaultLayerDir) + strlen(glifRec->glifFileName));
         sprintf(glifRec->glifFilePath, "%s/%s", h->defaultLayerDir, glifRec->glifFileName);
@@ -1553,20 +1649,7 @@ static char* getXmlAttrValue(xmlAttr *attr){
 static bool setXMLLib(ufoCtx h, xmlNodePtr cur, char* keyName) {
     char* keyValue;
     bool result = false;
-
-    if (h->parseState.UFOFile == preParsingGLIF) {     /* when called from preParseGLIF */
-        keyValue = parseXMLKeyValue(h, cur);
-        if (keyValueParseable(h, cur, keyValue, keyName)) {
-            if (strEqual(keyName, "com.adobe.type.cid.CID")) {
-                h->parseState.GLIFInfo.currentCID = atoi(keyValue);
-                h->top.sup.flags |= ABF_CID_FONT;
-                h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
-            } else if (strEqual(keyName, "com.adobe.type.cid.iFD"))
-                h->parseState.GLIFInfo.currentiFD = atoi(keyValue);
-            result = true;
-        } else
-            result = false;
-    } else if (h->parseState.UFOFile == parsingGLIF) {  /* when called from parseGLIF */
+    if (h->parseState.UFOFile == parsingGLIF) {  /* when called from parseGLIF */
         if (strEqual(keyName, "com.adobe.type.autohint.v2")) {
             if (cur != NULL) {
                 h->parseState.type1HintDataV2 = true;
@@ -1611,10 +1694,10 @@ static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, in
     if (h->parseState.UFOFile == preParsingGLIF) {      /* called from preParseGLIF */
         if (xmlKeyEqual(cur, "advance")) {
             if (xmlAttrEqual(attr, "width") || xmlAttrEqual(attr, "advance"))
-                setWidth(h, tag, atoi(getXmlAttrValue(attr)));
+                setWidth(h, tag, strtolCheck(h, getXmlAttrValue(attr), false, NULL, 10));
         } else if (xmlKeyEqual(cur, "unicode")) {
             if (xmlAttrEqual(attr, "hex"))
-                *unicode = strtol(getXmlAttrValue(attr), NULL, 16);
+                *unicode = strtoulCheck(h, getXmlAttrValue(attr), false, NULL, 16);
         }
     } else if (h->parseState.UFOFile == parsingGLIF) {  /* called from parseGLIF */
         if (xmlKeyEqual(cur, "outline"))
@@ -1656,7 +1739,7 @@ static char* parseXMLKeyName(ufoCtx h, xmlNodePtr cur){
 
 static void parseXMLArray(ufoCtx h, xmlNodePtr cur){
     dnaSET_CNT(h->valueArray, 0);
-    h->parseState.parsingValueArray = true;
+    h->parseState.valueArray = true;
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
         char* valueString = parseXMLKeyValue(h, cur);
@@ -1671,7 +1754,7 @@ static void parseXMLDict(ufoCtx h, xmlNodePtr cur){
     char* keyName;
     cur = cur->xmlChildrenNode;
 
-    if (h->parseState.FDArray){
+    if (h->parseState.FDArray) {
         h->parseState.GLIFInfo.currentiFD = h->parseState.GLIFInfo.currentiFD + 1;
         h->top.FDArray.cnt = h->top.FDArray.cnt + 1;
         if (h->top.FDArray.cnt > FDArrayInitSize){ /* Memory needs reallocation*/
@@ -1731,6 +1814,15 @@ static char* parseXMLKeyValue(ufoCtx h, xmlNodePtr cur){
 static int parseXMLPlistFile(ufoCtx h, xmlNodePtr cur) {
     char* keyName;
     cur = cur->xmlChildrenNode;
+
+    /* lib.plist: preparse set CID Font flags if has CID-keyed UFO required keys */
+    if (h->parseState.UFOFile == parsingLib) {
+        if (validCIDKeyedFont(h, cur)) {
+            h->top.sup.flags |= ABF_CID_FONT;
+            h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
+        }
+    }
+
     while (cur != NULL) {
         keyName = parseXMLKeyName(h, cur);
         cur = cur->next;
@@ -1747,7 +1839,7 @@ static int parseXMLGlifFile(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *un
         cur = cur->next;
     }
     if (h->parseState.UFOFile == preParsingGLIF) {
-        addCharFromGLIF(h, tag, glifRec->glyphName, 0, 0, *unicode);
+        addCharFromGLIF(h, tag, glifRec, glifRec->glyphName, 0, 0, *unicode);
         h->parseState.GLIFInfo.currentCID = -1;
         h->parseState.GLIFInfo.currentiFD = -1;
     }
@@ -1755,24 +1847,81 @@ static int parseXMLGlifFile(ufoCtx h, xmlNodePtr cur, int tag, unsigned long *un
     return ufoSuccess;
 }
 
+static bool validCIDKeyedFont(ufoCtx h, xmlNodePtr cur){
+    /* if required key found, set as true*/
+    while (cur != NULL) {
+        char* keyName = parseXMLKeyName(h, cur);
+        if (strEqual(keyName, "com.adobe.type.ROS")) {
+            h->requiredCIDKeyFlag |= CIDKEY_REGISTRY;
+            h->requiredCIDKeyFlag |= CIDKEY_ORDERING;
+            h->requiredCIDKeyFlag |= CIDKEY_SUPPLEMENT;
+        } else if (strEqual(keyName, "com.adobe.type.postscriptFDArray"))
+            h->requiredCIDKeyFlag |= CIDKEY_FDARRAY;
+        else if (strEqual(keyName, "postscriptFDArray"))
+            h->requiredCIDKeyFlag |= CIDKEY_FDARRAY;
+        else if (strEqual(keyName, "com.adobe.type.postscriptCIDMap"))
+            h->requiredCIDKeyFlag |= CIDKEY_CIDMAP;
+        cur = cur->next;
+    }
+
+    /* now check all required keys */
+    if (h->requiredCIDKeyFlag == 62)
+        return true;
+    else
+        return false;
+}
+
 static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur){
     abfTopDict* top = &h->top;
+
+    if (strEqual(keyName, "com.adobe.type.postscriptFDArray") || strEqual(keyName, "postscriptFDArray"))
+     return parseFontInfoFDArray(h, cur);
+    else if (strEqual(keyName, "PrivateDict"))
+     return parseFontInfoPrivateDict(h, cur);
+    else if (strEqual(keyName, "com.adobe.type.postscriptCIDMap"))
+     return parseCIDMap(h, cur);
+
     char* keyValue = parseXMLKeyValue(h, cur);
     if (!keyValueParseable(h, cur, keyValue, keyName))
         return false;
 
     if (strEqual(keyName, "public.glyphOrder"))
        setGlifOrderArray(h, keyName);
-    else if (strEqual(keyName, "com.adobe.type.cid.CIDFontName"))
+    else if (strEqual(keyName, "com.adobe.type.CIDFontName"))
         top->cid.CIDFontName.ptr = copyStr(h, keyValue);
-    else if (strEqual(keyName, "com.adobe.type.cid.Registry"))
-        top->cid.Registry.ptr = copyStr(h, keyValue);
-    else if (strEqual(keyName, "com.adobe.type.cid.Ordering"))
-        top->cid.Ordering.ptr = copyStr(h, keyValue);
-    else if (strEqual(keyName, "com.adobe.type.cid.Supplement"))
-        top->cid.Supplement = atol(keyValue);
+    else if (strEqual(keyName, "com.adobe.type.ROS")) {
+        setROSKeyValue(h, top, keyValue);
+    } else if (setFontInfoFD(h, keyName, keyValue))
+        return true;
+    else if (setFontInfoPD(h, keyName, keyValue))
+        return true;
+    else if (setFontInfoTopKey(h, keyName, keyValue))
+        return true;
     else
         return false;
+
+    if ((h->top.sup.flags & ABF_CID_FONT) &&
+        top->cid.CIDFontName.ptr == NULL &&
+        h->top.FDArray.array[0].FontName.ptr != NULL) {
+        /* derive name from fontinfo.plist familyName-styleName */
+        top->cid.CIDFontName.ptr = copyStr(h, h->top.FDArray.array[0].FontName.ptr);
+    }
+    return true;
+}
+
+static bool setGroupsKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
+    abfTopDict* top = &h->top;
+
+    char* keyValue = parseXMLKeyValue(h, cur);
+    if (!keyValueParseable(h, cur, keyValue, keyName))
+        return false;
+
+    char* substr = memNew(h, sizeof(char) * 15);
+    memcpy(substr, keyName, 14);
+    substr[14] = '\0';
+    if (strEqual(substr, "FDArraySelect."))
+        parseFDArraySelectGroup(h, keyName, cur);
+    memFree(h, substr);
     return true;
 }
 
@@ -1802,9 +1951,16 @@ static int parseFontInfo(ufoCtx h) {
 }
 
 static bool parseFontInfoFDArray(ufoCtx h, xmlNodePtr cur) {
+    int version;
+    float subVersion;
+
+    char* warnMsg = "In lib.plist: Could not find parseable CIDFontVersion number.";
     h->top.FDArray.array = memNew(h, FDArrayInitSize *sizeof(abfFontDict));
-    if (h->top.version.ptr != NULL)
-        h->top.cid.CIDFontVersion = atoi(h->top.version.ptr) % 10 + (float) atoi(&h->top.version.ptr[2])/1000;
+    if (h->top.version.ptr != NULL) {
+        version = strtodCheck(h, h->top.version.ptr, true, warnMsg);
+        subVersion = strtodCheck(h, &h->top.version.ptr[2], true, warnMsg);
+        h->top.cid.CIDFontVersion = (version % 10) + ((float) subVersion/1000);
+    }
     abfInitFontDict(h->top.FDArray.array);
     h->parseState.FDArray = true;
     h->parseState.GLIFInfo.currentiFD = -1;
@@ -1813,10 +1969,121 @@ static bool parseFontInfoFDArray(ufoCtx h, xmlNodePtr cur) {
     return true;
 }
 
+/* set each GLIF_REC's iFD based on the FDArraySelect groups*/
+static bool parseFDArraySelectGroup(ufoCtx h, char* FDArraySelectKeyName, xmlNodePtr cur) {
+    GLIF_Rec *g;
+    char* errMsg;
+
+    if (!xmlStrEqual((cur)->name, (const xmlChar *) "array"))
+        return false;
+
+    errMsg = concatStrs(h, "In groups.plist: expected FDArray index number but could not find parseable number in FDArraySelect group: ", FDArraySelectKeyName);
+    int FDIndexInt = strtolCheck(h, FDArraySelectKeyName + 14, true, errMsg, 10);
+    memFree(h, errMsg);
+
+    /* check if FDArray is defined */
+    if (h->top.FDArray.cnt - 1 <= FDIndexInt)
+        fatal(h, ufoErrParseFail, "In groups.plist: FDict referenced in FDSelect Group %s is not defined at expected FDArray index %i.", FDArraySelectKeyName, FDIndexInt);
+
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+        char* glyphName = parseXMLKeyValue(h, cur);
+        g = findGLIFRecByName(h, glyphName);
+        if (g != NULL) {
+            if (FDIndexInt >= h->top.FDArray.cnt - 1) {  /* one cnt reserved for default FDArray at this point */
+//                message(h, "Glyph %s is assigned to font dict index %d which is not defined. Will be assigned to default font dict at index 0 instead.\n", glyphName, FDIndexInt);
+                FDIndexInt  = 0;
+            }
+            g->iFD = FDIndexInt;
+        }
+        cur = cur->next;
+    }
+    return true;
+}
+
+static long strtolCheck(ufoCtx h, char* keyValue, bool fail, char* msg, int base) {
+    char* checkPtr;
+    errno = 0;
+    long val = strtol(keyValue, &checkPtr, base);
+    if (keyValue != checkPtr && errno == 0)
+        return val;
+    else {
+        if (fail)
+            fatal(h, ufoErrParse, msg);
+        else if (msg)
+            message(h, msg);
+        return NULL;
+    }
+}
+
+static unsigned long strtoulCheck(ufoCtx h, char* keyValue, bool fail, char* msg, int base) {
+    char* checkPtr;
+    errno = 0;
+    unsigned long val = strtoul(keyValue, &checkPtr, base);
+    if (keyValue != checkPtr && errno == 0)
+        return val;
+    else {
+        if (fail)
+            fatal(h, ufoErrParse, msg);
+        else if (msg)
+            message(h, msg);
+        return NULL;
+    }
+}
+
+static double strtodCheck(ufoCtx h, char* keyValue, bool fail, char* msg) {
+    char* checkPtr;
+    errno = 0;
+    double val = strtod(keyValue, &checkPtr);
+    if (keyValue != checkPtr && errno == 0)
+        return val;
+    else {
+        if (fail)
+            fatal(h, ufoErrParse, msg);
+        else if (msg)
+            message(h, msg);
+        return 0;
+    }
+}
+
+static bool parseCIDMap(ufoCtx h, xmlNodePtr cur) {
+    h->parseState.CIDMap = true;
+    GLIF_Rec *g;
+    char* ptr;
+    int cidInt;
+    char* errMsg;
+
+    if (!xmlStrEqual((cur)->name, (const xmlChar *) "dict"))
+        return false;
+
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+        char* keyName = parseXMLKeyName(h, cur);
+        if (keyName != NULL) {
+            g = addNewGLIFRec(h, keyName, NULL);
+            if (g == NULL)
+                continue;
+            cur = cur->next;
+            if (cur == NULL)
+                continue;
+            char* cid = parseXMLKeyValue(h, cur);
+            if (cid != NULL) {
+                errMsg = concatStrs(h, "In lib.plist postscriptCIDMap, expected cid number but could not find parseable number for glyph: ", keyName);
+                g->cid = strtolCheck(h, cid, true, errMsg, 10);
+                memFree(h, errMsg);
+            }
+        }
+        cur = cur->next;
+    }
+    h->parseState.CIDMap = false;
+    return true;
+}
+
 static bool parseFontInfoPrivateDict(ufoCtx h, xmlNodePtr cur) {
+    bool prevFDArrayState = h->parseState.FDArray;
     h->parseState.FDArray = false;  // this is only set when parsing root of FDArray, not sub-dicts within a dict
     parseXMLKeyValue(h, cur);
-    h->parseState.FDArray = true;
+    h->parseState.FDArray = prevFDArrayState;
     return true;
 }
 
@@ -1867,7 +2134,9 @@ static void setFontIndoVersionMinor(ufoCtx h, char* keyValue) {
 }
 
 static void setFontInfoUnitsPerEm(ufoCtx h, char* keyValue) {
-    double ppem = strtod(keyValue, NULL);
+    char* errMsg;
+    errMsg = concatStrs(h, "In fontinfo.plist: encountered unparseable number for UnitsPerEm", keyValue);
+    double ppem = strtodCheck(h, keyValue, true, errMsg);
     abfTopDict* top = &h->top;
     abfFontDict* fd = h->top.FDArray.array + h->parseState.GLIFInfo.currentiFD;
 
@@ -1888,9 +2157,9 @@ static void setFontInfoStdHW(ufoCtx h, char* keyName, char* keyValue) {
     abfPrivateDict* pd = &fd->Private;
 
     if (keyValue != NULL) {
-       pd->StdHW = (float)strtod(keyValue, NULL);
+       pd->StdHW = (float)strtodCheck(h, keyValue, false, NULL);
     } else {
-       pd->StdHW = (float)strtod(h->valueArray.array[0], NULL);
+       pd->StdHW = (float)strtodCheck(h, h->valueArray.array[0], false, NULL);
        freeValueArray(h);
     }
 }
@@ -1900,9 +2169,9 @@ static void setFontInfoStdVW(ufoCtx h, char* keyName, char* keyValue) {
     abfPrivateDict* pd = &fd->Private;
 
     if (keyValue != NULL) {
-        pd->StdVW = (float)strtod(keyValue, NULL);
+        pd->StdVW = (float)strtodCheck(h, keyValue, false, NULL);
     } else {
-        pd->StdVW = (float)strtod(h->valueArray.array[0], NULL);
+        pd->StdVW = (float)strtodCheck(h, h->valueArray.array[0], false, NULL);
         freeValueArray(h);
     }
 }
@@ -1919,7 +2188,7 @@ static bool setFontInfoFD(ufoCtx h, char* keyName, char* keyValue) {
     } else if (strEqual(keyName, "postscriptFontName")) {
        fd->FontName.ptr = keyValue;
     } else if (strEqual(keyName, "PaintType")) {
-       fd->PaintType = atoi(keyValue);
+       fd->PaintType = strtolCheck(h, keyValue, false, NULL, 10);
     } else if (strEqual(keyName, "FontMatrix")) {
        fontMatrix = &fd->FontMatrix;
        setFontMatrix(h, fontMatrix, 6);
@@ -1934,13 +2203,13 @@ static bool setFontInfoPD(ufoCtx h, char* keyName, char* keyValue) {
     BluesArray* bluesArray;
 
     if (strEqual(keyName, "postscriptBlueFuzz")) {
-        pd->BlueFuzz = (float)strtod(keyValue, NULL);
+        pd->BlueFuzz = (float)strtodCheck(h, keyValue, false, NULL);
     } else if (strEqual(keyName, "postscriptBlueShift")) {
-        pd->BlueShift = (float)strtod(keyValue, NULL);
+        pd->BlueShift = (float)strtodCheck(h, keyValue, false, NULL);
     } else if (strEqual(keyName, "postscriptBlueScale")) {
-        pd->BlueScale = (float)strtod(keyValue, NULL);
+        pd->BlueScale = (float)strtodCheck(h, keyValue, false, NULL);
     } else if (strEqual(keyName, "postscriptForceBold")) {
-        pd->ForceBold = atol(keyValue);
+        pd->ForceBold = strtolCheck(h, keyValue, false, NULL, 10);
     } else if (strEqual(keyName, "postscriptBlueValues")) {
         bluesArray = (BluesArray*)&pd->BlueValues;
         setBluesArrayValue(h, bluesArray, 14, keyName);
@@ -1964,10 +2233,10 @@ static bool setFontInfoPD(ufoCtx h, char* keyName, char* keyValue) {
         bluesArray = (BluesArray*)&pd->StemSnapV;
         setBluesArrayValue(h, bluesArray, 12, keyName);
     } else if (strEqual(keyName, "LanguageGroup")) {
-        pd->LanguageGroup = (float)strtod(keyValue, NULL);
+        pd->LanguageGroup = (float)strtodCheck(h, keyValue, false, NULL);
         h->parseKeyName = NULL;
     } else if (strEqual(keyName, "ExpansionFactor")) {
-        pd->ExpansionFactor = (float)strtod(keyValue, NULL);
+        pd->ExpansionFactor = (float)strtodCheck(h, keyValue, false, NULL);
         h->parseKeyName = NULL;
     } else
         return false;
@@ -1989,7 +2258,7 @@ static bool setFontInfoTopKey(ufoCtx h, char* keyName, char* keyValue) {
      else if (strEqual(keyName, "trademark"))
          setFontInfoTrademark(h, keyValue);
      else if (strEqual(keyName, "italicAngle"))
-         top->ItalicAngle = (float)strtod(keyValue, NULL);
+         top->ItalicAngle = (float)strtodCheck(h, keyValue, false, NULL);
      else if (strEqual(keyName, "openTypeNamePreferredFamilyName"))
          top->FamilyName.ptr = keyValue;
      else if (strEqual(keyName, "postscriptFullName"))
@@ -1997,13 +2266,13 @@ static bool setFontInfoTopKey(ufoCtx h, char* keyName, char* keyValue) {
      else if (strEqual(keyName, "postscriptWeightName"))
          top->Weight.ptr = keyValue;
      else if (strEqual(keyName, "postscriptIsFixedPitch"))
-         top->isFixedPitch = atol(keyValue);
-     else if (strEqual(keyName, "FSType"))
-         top->FSType = atoi(keyValue);
+         top->isFixedPitch = strtolCheck(h, keyValue, false, NULL, 10);
+     else if (strEqual(keyName, "com.adobe.type.FSType") || strEqual(keyName, "FSType"))
+         top->FSType = strtolCheck(h, keyValue, false, NULL, 10);
      else if (strEqual(keyName, "postscriptUnderlinePosition"))
-         top->UnderlinePosition = (float)strtod(keyValue, NULL);
+         top->UnderlinePosition = (float)strtodCheck(h, keyValue, false, NULL);
      else if (strEqual(keyName, "postscriptUnderlineThickness"))
-         top->UnderlineThickness = (float)strtod(keyValue, NULL);
+         top->UnderlineThickness = (float)strtodCheck(h, keyValue, false, NULL);
      else
          return false;
     return true;
@@ -2017,9 +2286,7 @@ static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
      return false;
     }
     /* parse dictionaries */
-    if (strEqual(keyName, "postscriptFDArray"))
-     return parseFontInfoFDArray(h, cur);
-    else if (strEqual(keyName, "PrivateDict"))
+    if (strEqual(keyName, "PrivateDict"))
      return parseFontInfoPrivateDict(h, cur);
 
     char* keyValue = parseXMLKeyValue(h, cur);
@@ -2038,6 +2305,30 @@ static bool setFontInfoKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
     return result;
 }
 
+static void setROSKeyValue(ufoCtx h, abfTopDict* top, char* keyValue) {
+    char* ROSValues;  /* Registry, Ordering, Supplement */
+    char* parsedValue;
+
+    if (keyValue[0] == '-')
+        fatal(h, ufoErrKeyValueNULL, "Empty Registry value for com.adobe.type.ROS key. ROS value format should be: registry-ordering-supplement");
+    else {
+        parsedValue = strtok_r(keyValue, "-", &ROSValues);
+        top->cid.Registry.ptr = copyStr(h, parsedValue);
+    }
+    if (parsedValue == NULL || ROSValues[0] == '-')
+        fatal(h, ufoErrKeyValueNULL, "Empty Ordering value for com.adobe.type.ROS key. ROS value format should be: registry-ordering-supplement");
+    else {
+        parsedValue = strtok_r(ROSValues, "-", &ROSValues);
+        top->cid.Ordering.ptr = copyStr(h, parsedValue);
+    }
+    parsedValue = strtok_r(ROSValues, "-", &ROSValues);
+    char* errSupplementMsg = "Empty Supplement value for com.adobe.type.ROS key. ROS value format should be: registry-ordering-supplement";
+    if (parsedValue != NULL)
+        top->cid.Supplement = strtolCheck(h, parsedValue, true, errSupplementMsg, 10);
+    else
+        fatal(h, ufoErrKeyValueNULL, errSupplementMsg);
+}
+
 static int parseUFO(ufoCtx h) {
     /* This does a first pass through the font, loading the glyph name/ID and the path to each glyph file.
      Open the UFO fontinfo.plist, and extract the PS info
@@ -2047,7 +2338,9 @@ static int parseUFO(ufoCtx h) {
 
     int retVal = parseFontInfo(h);
     if (retVal == ufoSuccess)
-        retVal = parseGlyphOrder(h); /* return value was being ignored prior to 15 June 2018, not sure why -- CJC */
+        retVal = parseLibPlist(h); /* return value was being ignored prior to 15 June 2018, not sure why -- CJC */
+    if (retVal == ufoSuccess)
+        retVal = parseGroups(h);
     if (retVal == ufoSuccess)
         retVal = parseGlyphList(h, false); /* parse default layer */
     if (retVal == ufoSuccess)
@@ -2070,11 +2363,11 @@ static int parseXMLGuideline(ufoCtx h, xmlNodePtr cur, int tag, abfGlyphCallback
     xmlAttr *attr = cur->properties;
     while (attr != NULL) {
         if (xmlAttrEqual(attr, "x"))
-            guideline->x = (float)strtod(getXmlAttrValue(attr), NULL);
+            guideline->x = (float)strtodCheck(h, getXmlAttrValue(attr), false, NULL);
         else if (xmlAttrEqual(attr, "y"))
-            guideline->y = (float)strtod(getXmlAttrValue(attr), NULL);
+            guideline->y = (float)strtodCheck(h, getXmlAttrValue(attr), false, NULL);
         else if (xmlAttrEqual(attr, "angle"))
-            guideline->angle = (float)strtod(getXmlAttrValue(attr), NULL);
+            guideline->angle = (float)strtodCheck(h, getXmlAttrValue(attr), false, NULL);
         else if (xmlAttrEqual(attr, "name")) {
             char* temp = getXmlAttrValue(attr);
             guideline->name = copyStr(h, temp);
@@ -2197,9 +2490,9 @@ static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, 
     xmlAttr *attr = cur->properties;
     while (attr != NULL) {
         if (xmlAttrEqual(attr, "x"))
-            x = (float)strtod(getXmlAttrValue(attr), NULL);
+            x = (float)strtodCheck(h, getXmlAttrValue(attr), false, NULL);
         else if (xmlAttrEqual(attr, "y"))
-            y = (float)strtod(getXmlAttrValue(attr), NULL);
+            y = (float)strtodCheck(h, getXmlAttrValue(attr), false, NULL);
         else if (xmlAttrEqual(attr, "name")) {  // needs testing
             char* temp = getXmlAttrValue(attr);
             pointName = copyStr(h, temp);
@@ -2581,7 +2874,7 @@ static bool parseHintSetListV2(ufoCtx h, xmlNodePtr cur) {
     char* pointName = NULL;
 
     h->parseState.hintSetListArray = true;
-    if (parseXMLKeyValue(h, cur) == NULL && !h->parseState.parsingValueArray)
+    if (parseXMLKeyValue(h, cur) == NULL && !h->parseState.valueArray)
         result = false;
     else
         result = true;
@@ -2807,6 +3100,8 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks* glyph_cb) 
     if (h->top.sup.flags & ABF_CID_FONT) {
         gi->gname.ptr = NULL;
         gi->flags |= ABF_GLYPH_CID;
+        if (h->top.FDArray.array[gi->iFD].Private.LanguageGroup == 1)
+            gi->flags |= ABF_GLYPH_LANG_1;
     }
     result = glyph_cb->beg(glyph_cb, gi);
     gi->flags |= ABF_GLYPH_SEEN;
@@ -2990,11 +3285,14 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
     h->parseState.FDArray = false;
     h->parseState.hintSetListArray = false;
     h->parseState.type1HintDataV2 = false;
-    h->parseState.parsingValueArray = false;
+    h->parseState.valueArray = false;
+    h->parseState.CIDMap = false;
     h->parseState.UFOFile = None;
     h->parseState.GLIFInfo.currentCID = -1;
     h->parseState.GLIFInfo.CIDCount = 0;
     h->parseState.GLIFInfo.currentiFD = 0;
+
+    h->requiredCIDKeyFlag = 0;
 
     /* init glyph data structures used */
     h->valueArray.cnt = 0;
@@ -3024,10 +3322,11 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
     prepClientData(h);
     *top = &h->top;
 
-    if ((h->top.cid.CIDFontName.ptr != NULL) &&
-        (h->top.cid.Registry.ptr != NULL) &&
-        (h->top.cid.Ordering.ptr != NULL) &&
-        (h->top.cid.Supplement >= 0)) {
+    if ((h->top.cid.CIDFontName.ptr != NULL) &&     /* should've been set at this point */
+        (h->top.cid.Registry.ptr != NULL) &&        /* required com.adobe.type.ROS key */
+        (h->top.cid.Ordering.ptr != NULL) &&        /* required com.adobe.type.ROS key */
+        (h->top.cid.Supplement >= 0) &&             /* required com.adobe.type.ROS key */
+        (h->requiredCIDKeyFlag & CIDKEY_CIDMAP)) {  /* required com.adobe.type.postscriptCIDMap key */
         if (!(h->top.sup.flags & ABF_CID_FONT)) {
             h->top.sup.flags |= ABF_CID_FONT;
             h->top.sup.srcFontType = abfSrcFontTypeUFOCID;

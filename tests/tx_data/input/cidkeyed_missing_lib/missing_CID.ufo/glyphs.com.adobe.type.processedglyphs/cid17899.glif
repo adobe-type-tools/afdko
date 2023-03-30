@@ -1,11 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <glyph name="cid17899" format="2">
-	<lib>
-		<dict>
-			<key>com.adobe.type.cid.iFD</key>
-			<integer>1</integer>
-		</dict>
-	</lib>
   <advance width="1000"/>
   <outline>
     <contour>

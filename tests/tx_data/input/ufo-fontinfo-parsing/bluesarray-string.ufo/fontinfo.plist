@@ -4,20 +4,6 @@
 <dict>
 	<key>postscriptFontName</key>
 	<string>bluesarray-string-val</string>
-	<key>postscriptFDArray</key>
-	<array>
-	<dict>
-	<key>PrivateDict</key>
-	<dict>
-	<key>postscriptBlueValues</key>
-    <string>invalid-string-for-bluesvaluesarray</string>
-	<key>postscriptStdHW</key>
-	<array>
-		<integer>35</integer>
-	</array>
-	</dict>
-	</dict>
-	</array>
 </dict>
 </plist>
 <!-- 

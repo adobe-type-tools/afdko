@@ -1603,11 +1603,7 @@ static void assignUVs(hotCtx g) {
         UV uv;
         char *uvOverrideName;
 
-        if (checkUniGName(g, gi->gname.str, &uv)) {
-            /* --- Valid uni<CODE> or u<CODE> glyph name */
-            addUVToGlyph(g, gi, uv);
-            gi->flags |= GNAME_UNI;
-        } else if (mapName2UVOverrideName(g, gi->gname.str, &uvOverrideName) != 0) {
+        if (mapName2UVOverrideName(g, gi->gname.str, &uvOverrideName) != 0) {
             char *uvName = getNextUVName(&uvOverrideName);
             while (uvName != NULL) {
                 if (checkUniGName(g, uvName, &uv)) {
@@ -1617,6 +1613,10 @@ static void assignUVs(hotCtx g) {
                 }
                 uvName = getNextUVName(&uvOverrideName);
             }
+        } else if (checkUniGName(g, gi->gname.str, &uv)) {
+            /* --- Valid uni<CODE> or u<CODE> glyph name */
+            addUVToGlyph(g, gi, uv);
+            gi->flags |= GNAME_UNI;
         } else {
             UnicodeChar *uc = getUVFromAGL(g, gi->gname.str, 0);
 

@@ -1108,6 +1108,8 @@ def test_cffread_bug1343():
     ('t1', 'testCID.ufo', 'cidfont_subset.ufo', 'cidfont.subset'),
     (('ufo', 't1'), 'cidfont.subset', 'cidfont_subset.ufo', 'cidfont.subset'),
     (('t1', 'ufo'), 'testCID.ufo', 'cidfont_subset.ufo', 'testCID.ufo'),
+    (('t1', 'ufo'), 'groups-100-fdselect.ufo', 'groups-100-fdselect.ufo',
+     'groups-100-fdselect.ufo'),
 ])
 def test_cidkeyed_read_write(arg, input, output, expected):
     """
@@ -1116,6 +1118,7 @@ def test_cidkeyed_read_write(arg, input, output, expected):
     UFO -> CID (one-way test)
     CID -> UFO -> CID (round-trip test)
     UFO -> CID -> UFO (round-trip test)
+    UFO -> CID -> UFO (round-trip test with 100 FDArrays)
     """
     folder = "cid_roundtrip/"
     input_path = get_input_path(folder + input)
@@ -1140,8 +1143,7 @@ def test_cidkeyed_read_write(arg, input, output, expected):
 
 
 @pytest.mark.parametrize("file", [
-    "missing_CID.ufo",
-    "missing_iFD.ufo",
+    "missing_CID.ufo"
 ])
 def test_cidkeyed_lib_missing(file):
     folder = folder = "cidkeyed_missing_lib/"
@@ -1161,8 +1163,19 @@ def test_cff2_windows_line_endings_bug1355():
 
 
 def test_lib_removes_outlines_bug1366():
+    """
+    This tests a UFO with a <lib> key within the .glif files.
+    This is an outdated use case — we now map glyphs to cids via the
+    com.adobe.type.postscriptCIDMap key in lib.plist
+    (the UFO has since been updated).
+
+    However, the UFO still contains the <lib> key as a test, and diffs
+    against a pfb outputted from almost the same UFO, except without
+    the <lib> keys. This output should be identical, therefore this
+    tests if lib causes the removal of outlines in the future.
+    """
     input_path = get_input_path("bug1366.ufo")
-    expected_path = get_expected_path("bug1366.pfa")
+    expected_path = get_expected_path("bug1366.pfb")
     output_path = get_temp_file_path()
     subprocess.call([TOOL, '-t1', '-o', output_path, input_path])
     expected_path = generate_ps_dump(expected_path)
@@ -1217,6 +1230,10 @@ def test_non_FDArray_dict_parse():
     assert subprocess.call(arg) == 0
 
 
+garbage_unitsPerEm = (b"tx: (ufr) In fontinfo.plist: encountered unparseable"
+                      b" number for UnitsPerEmgarbage")
+
+
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("empty-key-name", b'', 0),
     ("empty-key-name-fdarray", b'', 0),
@@ -1235,7 +1252,8 @@ def test_non_FDArray_dict_parse():
     ("missing-fontinfoplist", b"Warning: Unable to open fontinfo.plist in" +
                               b" source UFO font. No PostScript FontDict " +
                               b"values are specified.", 5),
-    ("missing-width-attr", b"", 0)
+    ("missing-width-attr", b"", 0),
+    ("garbage-unitsPerEm", garbage_unitsPerEm, 6)
 ])
 def test_ufo_fontinfo_parsing(file, msg, ret_code):
     folder = "ufo-fontinfo-parsing/"
@@ -1288,7 +1306,6 @@ libplist_warn = (b"tx: (ufr) Warning: Unable to open "
 @pytest.mark.parametrize('file, msg, ret_code', [
     ("missing-libplist-namekeyed", libplist_warn, 0),
     ("missing-libplist-cidkeyed", libplist_warn, 0),
-    ("missing-libplist-cidkeyed-cid-identifiers", None, 6)
 ])
 def test_missing_ufo_libplist_bug1306(file, msg, ret_code):
     """
@@ -1324,19 +1341,34 @@ glyphorder_warn = (b'tx: (ufr) Warning: public.glyphOrder key is empty'
 glyphorder_dup_warn = (b"(ufr) Warning: glyph order contains duplicate" +
                        b" entries for glyphs 'a'.")
 
+missing_cidmap_fail = (b"tx: (t1w) bad font dictionary. Name-keyed UFO has "
+                       b"more than 1 defined FDArray.")
 
-@pytest.mark.parametrize('file, msg, ret_code', [
-    ("normal", b'', 0),
-    ("empty-dict", glyphorder_warn, 0),
-    ("empty-key-name", glyphorder_warn, 0),
-    ("empty-key-value", glyphorder_warn, 0),
-    ("duplicate-gliforder", glyphorder_dup_warn, 0),
-    ("dict_error", b"Error reading outermost <dict> in lib.plist.", 3)
+unparseable_cid_digit = (b"tx: (ufr) In lib.plist postscriptCIDMap, expected "
+                         b"cid number but could not find parseable number for "
+                         b"glyph: cid00000")
+
+
+@pytest.mark.parametrize('file, msg, ret_code, exp_file', [
+    ("normal-namekeyed", b'', 0, None),
+    ("normal-cidkeyed", b'', 0, None),
+    ("glyphorder-after-cid", b'', 0, None),
+    ("empty-dict", glyphorder_warn, 0, None),
+    ("empty-key-name", glyphorder_warn, 0, None),
+    ("empty-key-value", glyphorder_warn, 0, None),
+    ("duplicate-gliforder", glyphorder_dup_warn, 0, None),
+    ("dict_error", b"Error reading outermost <dict> in lib.plist.", 3, None),
+    ("missing-cidmap", missing_cidmap_fail, 7, None),
+    ("missing-cidfontname", b'', 0, "normal-cidkeyed"),
+    ("unparseable-cid-cidmap", unparseable_cid_digit, 6, None)
 ])
-def test_ufo_libplist_parsing(file, msg, ret_code):
+def test_ufo_libplist_parsing(file, msg, ret_code, exp_file):
     folder = "ufo-libplist-parsing/"
     ufo_input_path = get_input_path(folder + file + ".ufo")
-    expected_path = get_expected_path(folder + file + ".pfa")
+    if exp_file:
+        expected_path = get_expected_path(folder + exp_file + ".pfb")
+    else:
+        expected_path = get_expected_path(folder + file + ".pfb")
     output_path = get_temp_file_path()
     arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
                  ufo_input_path, output_path]
@@ -1350,6 +1382,70 @@ def test_ufo_libplist_parsing(file, msg, ret_code):
         assert differ([expected_path, output_path])
     else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
+        assert subprocess.call(arg) == ret_code
+
+
+ros_reg_fail = (b"tx: (ufr) Empty Registry value for com.adobe.type.ROS key"
+                b". ROS value format should be: registry-ordering-supplement")
+
+
+ros_ord_fail = (b"tx: (ufr) Empty Ordering value for com.adobe.type.ROS key"
+                b". ROS value format should be: registry-ordering-supplement")
+
+
+ros_supp_fail = (b"tx: (ufr) Empty Supplement value for com.adobe.type.ROS key"
+                 b". ROS value format should be: registry-ordering-supplement")
+
+
+ros_fail = (b"tx: (t1w) bad font dictionary. Missing either the CID font name,"
+            b" or the Registry-Order-Supplement names.")
+
+
+@pytest.mark.parametrize('file, msg, ret_code', [
+    ("missing-registry-value", ros_reg_fail, 9),
+    ("missing-ordering-value", ros_ord_fail, 9),
+    ("missing-supplement-value", ros_supp_fail, 9),
+    ("missing-ros-value", ros_fail, 6),
+])
+def test_ufo_ROS_parsing(file, msg, ret_code):
+    """testing com.adobe.type.ROS key cases in lib.plist"""
+    folder = "ufo-libplist-parsing/ros-key/"
+    ufo_input_path = get_input_path(folder + file + ".ufo")
+    output_path = get_temp_file_path()
+    arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
+                 ufo_input_path, output_path]
+    stderr_path = runner(arg)
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (msg) in output
+    arg = [TOOL, '-t1', '-f', ufo_input_path]
+    assert subprocess.call(arg) == ret_code
+
+
+mismatched_fdarray_fdselect_msg = (b"tx: (ufr) In groups.plist: FDict "
+                                   b"referenced in FDSelect Group FDArraySel"
+                                   b"ect.1.SourceHanSans-Heavy-Ideographs is "
+                                   b"not defined at expected FDArray index 1.")
+
+
+@pytest.mark.parametrize('file, msg, ret_code', [
+    ("num_fdarrays_fdselect_mismatch", mismatched_fdarray_fdselect_msg, 8),
+])
+def test_ufo_mismatch_fdarray_fdselect(file, msg, ret_code):
+    folder = "ufo-libplist-parsing/"
+    ufo_input_path = get_input_path(folder + file + ".ufo")
+    expected_path = get_expected_path(folder + file + ".txt")
+    output_path = get_temp_file_path()
+    arg = CMD + ['-s', '-e', '-a', '-f',
+                 ufo_input_path]
+    stderr_path = runner(arg)
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (msg) in output
+    if (ret_code == 0):
+        assert differ([expected_path, output_path])
+    else:
+        arg = [TOOL, '-f', ufo_input_path]
         assert subprocess.call(arg) == ret_code
 
 
@@ -1418,11 +1514,11 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("wrong-type-stem-hstem", b'', 0),
     ("overlaps-cidkeyed", b'', 0),
     ("overlaps-namekeyed", b'', 0),
-    ("overlaps-cidkeyed-missing-cid", b"Warning: glyph 'cid45107' missing" +
+    ("overlaps-cidkeyed-missing-cid", b"glyph 'cid45107' missing" +
                                       b" CID number within <lib> dict", 6),
     ("dup-glif", b"Warning: duplicate charstring" +
                  b" <exclam> (discarded)", 0),
-    ("missing-cid-value", b"Warning: glyph 'cid45107' missing CID" +
+    ("missing-cid-value", b"glyph 'cid45107' missing CID" +
                           b" number within <lib> dict", 6),
     ("missing-advance", b'', 0),
     ("missing-autohint", b'', 0),
@@ -1463,3 +1559,59 @@ def test_fontmatrix_unitsperem():
     output_path = get_temp_file_path()
     subprocess.call([TOOL, '-t1', '-o', output_path, input_path])
     assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
+
+
+missing_iFD = (b"tx: (ufr) glyph 'cid17899' missing "
+               b"FDArray index within <lib> dict")
+
+missing_FDArraySelect = (b"Warning: FDArraySelect not defined for "
+                         b"cid-keyed font")
+
+
+fdselect_doesnt_exist_fail = (b"tx: (ufr) In groups.plist: FDict referenced in"
+                              b" FDSelect Group FDArraySelect.2.DoesNotExist "
+                              b"is not defined at expected FDArray index 2")
+
+unparseable_index = (b"tx: (ufr) In groups.plist: expected FDArray index "
+                     b"number but could not find parseable number in "
+                     b"FDArraySelect group: FDArraySelect.not-parseable."
+                     b"SourceHanSans-Heavy-Generic")
+
+
+@pytest.mark.parametrize('file, msg, ret_code', [
+    ("groups-fdselect-doesnt-exist", fdselect_doesnt_exist_fail, 8),
+    ("groups-keyname-missing", missing_iFD, 6),
+    ("groups-keyvalue-missing", missing_iFD, 6),
+    ("groups-missing-cidkeyed", missing_FDArraySelect, 6),
+    ("groups-fdselect-not-parseable-index", unparseable_index, 6)
+])
+def test_ufo_groups_parsing(file, msg, ret_code):
+    folder = "ufo-groups-parsing/"
+    ufo_input_path = get_input_path(folder + file + ".ufo")
+    expected_path = get_expected_path(folder + file + ".pfb")
+    output_path = get_temp_file_path()
+    arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
+                 ufo_input_path, output_path]
+    stderr_path = runner(arg)
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert (msg) in output
+    if (ret_code == 0):
+        expected_path = generate_ps_dump(expected_path)
+        output_path = generate_ps_dump(output_path)
+        assert differ([expected_path, output_path])
+    else:
+        arg = [TOOL, '-t1', '-f', ufo_input_path]
+        assert subprocess.call(arg) == ret_code
+
+
+def test_ufo_languagegroup():
+    """
+    Test to make sure that the language group is accurately displayed
+    when running tx on a UFO.
+    """
+    folder = "cid_roundtrip/"
+    input_file = get_input_path(folder + "testCID.ufo")
+    expected_path = get_expected_path(folder + "testCID.txt")
+    stdout_path = runner(CMD + ['-s', '-e', '-f', input_file])
+    assert differ([expected_path, stdout_path, '-l', '1'])

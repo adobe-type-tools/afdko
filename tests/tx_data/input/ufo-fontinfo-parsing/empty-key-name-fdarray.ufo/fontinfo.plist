@@ -4,24 +4,5 @@
 <dict>
 	<key>postscriptFontName</key>
 	<string>empty-key-name-in-fdarray</string>
-	<key>postscriptFDArray</key>
-	<array>
-	<dict>
-	<key></key>
-	<string>SourceHanSans-Heavy-Generic</string>
-	<key>PaintType</key>
-	<integer>3</integer>
-	<key>PrivateDict</key>
-	<dict>
-	<key>postscriptBlueValues</key>
-	<array>
-		<integer>-250</integer>
-		<integer>-250</integer>
-		<integer>1100</integer>
-		<integer>1100</integer>
-	</array>
-	</dict>
-	</dict>
-	</array>
 </dict>
 </plist>
