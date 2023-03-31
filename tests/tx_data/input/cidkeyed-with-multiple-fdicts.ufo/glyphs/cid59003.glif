@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="cid59003" format="1" >
+	<advance width="1000"/>
+	<outline>
+		<contour>
+			<point x="765" y="715" type="line"/>
+			<point x="872" y="707" type="line"/>
+			<point x="715" y="81" type="line"/>
+			<point x="546" y="707" type="line"/>
+			<point x="648" y="715" type="line"/>
+			<point x="648" y="746" type="line"/>
+			<point x="389" y="746" type="line"/>
+			<point x="389" y="715" type="line"/>
+			<point x="490" y="707" type="line"/>
+			<point x="322" y="85" type="line"/>
+			<point x="161" y="708" type="line"/>
+			<point x="262" y="715" type="line"/>
+			<point x="262" y="746" type="line"/>
+			<point x="4" y="746" type="line"/>
+			<point x="4" y="715" type="line"/>
+			<point x="94" y="708" type="line"/>
+			<point x="286" y="-9" type="line"/>
+			<point x="328" y="-9" type="line"/>
+			<point x="504" y="636" type="line"/>
+			<point x="681" y="-9" type="line"/>
+			<point x="723" y="-9" type="line"/>
+			<point x="910" y="707" type="line"/>
+			<point x="1004" y="715" type="line"/>
+			<point x="1004" y="746" type="line"/>
+			<point x="765" y="746" type="line"/>
+		</contour>
+	</outline>
+</glyph>

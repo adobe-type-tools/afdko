@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="cid01085" format="1" >
+	<advance width="1000"/>
+	<outline>
+		<contour>
+			<point x="480" y="602" type="line"/>
+			<point x="520" y="602" type="line"/>
+			<point x="520" y="824" type="line"/>
+			<point x="480" y="824" type="line"/>
+		</contour>
+		<contour>
+			<point x="480" y="269" type="line"/>
+			<point x="520" y="269" type="line"/>
+			<point x="520" y="491" type="line"/>
+			<point x="480" y="491" type="line"/>
+		</contour>
+		<contour>
+			<point x="480" y="-64" type="line"/>
+			<point x="520" y="-64" type="line"/>
+			<point x="520" y="158" type="line"/>
+			<point x="480" y="158" type="line"/>
+		</contour>
+	</outline>
+</glyph>

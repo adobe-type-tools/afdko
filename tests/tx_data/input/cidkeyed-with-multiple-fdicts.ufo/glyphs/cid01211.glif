@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="cid01211" format="1" >
+	<advance width="1000"/>
+	<outline>
+		<contour>
+			<point x="0" y="-120" type="line"/>
+			<point x="1000" y="-120" type="line"/>
+			<point x="1000" y="380" type="line"/>
+			<point x="0" y="380" type="line"/>
+		</contour>
+	</outline>
+</glyph>
