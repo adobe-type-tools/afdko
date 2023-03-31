@@ -2558,8 +2558,20 @@ static void t1_EndFont(txCtx h) {
 
         /* Convert to name-keyed font */
         h->top->sup.flags &= ~ABF_CID_FONT;
+        abfFontDict* selectedFD = &h->top->FDArray.array[h->t1w.fd];
+
+        abfFontDict* temp = memNew(h, sizeof(abfFontDict));
+        memcpy(temp, selectedFD, sizeof(abfFontDict));
+        temp->FontName.ptr = memNew(h, strlen(selectedFD->FontName.ptr) + 1);
+        strcpy(temp->FontName.ptr, selectedFD->FontName.ptr);
+        for (int i=0; i< h->top->FDArray.cnt; i++) {
+            char* fdFontName = h->top->FDArray.array[i].FontName.ptr;
+            if (fdFontName != NULL)
+                xmlFree(fdFontName);
+        }
+        memFree(h, h->top->FDArray.array);
         h->top->FDArray.cnt = 1;
-        h->top->FDArray.array = &h->top->FDArray.array[h->t1w.fd];
+        h->top->FDArray.array = temp;
         h->t1w.options |= T1W_NO_UID; /* Clear UniqueIDs */
     }
 
