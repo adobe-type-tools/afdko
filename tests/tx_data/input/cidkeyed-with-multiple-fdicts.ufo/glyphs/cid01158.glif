@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="cid01158" format="1" >
+	<advance width="1000"/>
+	<outline>
+		<contour>
+			<point x="440" y="505" type="line"/>
+			<point x="560" y="505" type="line"/>
+			<point x="560" y="755" type="line"/>
+			<point x="440" y="755" type="line"/>
+		</contour>
+		<contour>
+			<point x="440" y="5" type="line"/>
+			<point x="560" y="5" type="line"/>
+			<point x="560" y="255" type="line"/>
+			<point x="440" y="255" type="line"/>
+		</contour>
+	</outline>
+</glyph>

@@ -1614,3 +1614,19 @@ def test_ufo_languagegroup():
     expected_path = get_expected_path(folder + "testCID.txt")
     stdout_path = runner(CMD + ['-s', '-e', '-f', input_file])
     assert differ([expected_path, stdout_path, '-l', '1'])
+
+
+def test_ufo_decid_fdarray_memleak():
+    """
+    There was a memory error caused by decid on an FDArray with
+    multiple FDicts due to not freeing memory when re-assiging
+    the FDArray to the selected FDict."""
+    input_path = get_input_path("cidkeyed-with-multiple-fdicts.ufo")
+    expected_path = get_expected_path("cidkeyed-with-multiple-fdicts.pfa")
+    output_path = get_temp_file_path()
+    retCode = subprocess.call([TOOL, '-t1', '-decid', '-fd', '1', '-o',
+                               output_path, input_path])
+    expected_path = generate_ps_dump(expected_path)
+    output_path = generate_ps_dump(output_path)
+    assert (retCode == 0)
+    assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])

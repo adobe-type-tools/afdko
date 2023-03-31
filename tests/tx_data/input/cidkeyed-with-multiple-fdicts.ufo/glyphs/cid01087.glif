@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="cid01087" format="1" >
+	<advance width="1000"/>
+	<outline>
+		<contour>
+			<point x="781" y="360" type="line"/>
+			<point x="969" y="360" type="line"/>
+			<point x="969" y="400" type="line"/>
+			<point x="781" y="400" type="line"/>
+		</contour>
+		<contour>
+			<point x="531" y="360" type="line"/>
+			<point x="719" y="360" type="line"/>
+			<point x="719" y="400" type="line"/>
+			<point x="531" y="400" type="line"/>
+		</contour>
+		<contour>
+			<point x="281" y="360" type="line"/>
+			<point x="469" y="360" type="line"/>
+			<point x="469" y="400" type="line"/>
+			<point x="281" y="400" type="line"/>
+		</contour>
+		<contour>
+			<point x="31" y="360" type="line"/>
+			<point x="219" y="360" type="line"/>
+			<point x="219" y="400" type="line"/>
+			<point x="31" y="400" type="line"/>
+		</contour>
+	</outline>
+</glyph>

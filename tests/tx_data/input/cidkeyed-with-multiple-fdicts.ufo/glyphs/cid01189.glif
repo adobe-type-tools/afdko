@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="cid01189" format="1" >
+	<advance width="1000"/>
+	<outline>
+		<contour>
+			<point x="480" y="-120" type="curve"/>
+			<point x="520" y="-120" type="line"/>
+			<point x="520" y="167" />
+			<point x="287" y="400" />
+			<point x="0" y="400" type="curve"/>
+			<point x="0" y="360" type="line"/>
+			<point x="265" y="360" />
+			<point x="480" y="145" />
+		</contour>
+	</outline>
+</glyph>

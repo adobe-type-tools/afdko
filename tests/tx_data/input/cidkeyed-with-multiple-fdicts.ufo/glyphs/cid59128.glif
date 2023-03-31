@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="cid59128" format="1" >
+	<advance width="1000"/>
+	<outline>
+		<contour>
+			<point x="329" y="5" type="line"/>
+			<point x="335" y="0" type="line"/>
+			<point x="392" y="0" type="line"/>
+			<point x="684" y="709" type="line"/>
+			<point x="684" y="746" type="line"/>
+			<point x="216" y="746" type="line"/>
+			<point x="216" y="692" type="line"/>
+			<point x="641" y="692" type="line"/>
+		</contour>
+		<contour>
+			<point x="783" y="22" type="curve"/>
+			<point x="784" y="41" />
+			<point x="782" y="55" />
+			<point x="774" y="74" type="curve"/>
+			<point x="756" y="92" />
+			<point x="744" y="95" />
+			<point x="724" y="95" type="curve"/>
+			<point x="690" y="95" />
+			<point x="671" y="71" />
+			<point x="671" y="43" type="curve"/>
+			<point x="671" y="21" />
+			<point x="682" y="-1" />
+			<point x="706" y="-20" type="curve"/>
+			<point x="731" y="-42" type="line"/>
+			<point x="718" y="-83" />
+			<point x="695" y="-119" />
+			<point x="662" y="-152" type="curve"/>
+			<point x="679" y="-175" type="line"/>
+			<point x="737" y="-127" />
+			<point x="781" y="-71" />
+		</contour>
+	</outline>
+</glyph>
