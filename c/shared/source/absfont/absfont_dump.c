@@ -344,7 +344,7 @@ void abfDumpBegFont(abfDumpCtx h, abfTopDict *top) {
     /* Print glyph comment */
     if (top->sup.flags & ABF_CID_FONT)
         /* UFO can store names even when CID-keyed */
-        if (top->sup.srcFontType == 7) {
+        if (top->sup.srcFontType == abfSrcFontTypeUFOCID) {
             FPRINTF_S(h->fp, "## glyph[tag] {name,cid,iFD");
         } else {
             FPRINTF_S(h->fp, "## glyph[tag] {cid,iFD");
