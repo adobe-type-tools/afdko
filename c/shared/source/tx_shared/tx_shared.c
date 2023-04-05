@@ -2156,7 +2156,7 @@ static int t1_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     }
     /* Create glyph name */
     if (info->gname.ptr != NULL) {
-        strcpy(gname, info->gname.ptr);
+        strncpy(gname, info->gname.ptr, sizeof(gname));
     } else {
         if (info->cid == 0)
             strcpy(gname, ".notdef");
