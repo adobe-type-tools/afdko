@@ -1403,7 +1403,7 @@ static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec,
         chr->iFD = 0;
         if (glifRec->cid >= 0) {
             chr->cid = glifRec->cid;
-            if (glifRec->iFD < 0){
+            if (glifRec->iFD < 0) {
                     fatal(h, ufoErrParse, "Glyph '%s' missing FDArray index in <lib> dict", glyphName);
             }
             chr->iFD = glifRec->iFD;

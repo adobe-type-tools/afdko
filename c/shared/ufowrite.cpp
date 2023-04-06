@@ -725,22 +725,22 @@ static void writeLibPlist(ufwCtx h) {
     if (h->top->sup.flags & ABF_CID_FONT) {
         if (h->top->cid.CIDFontName.ptr != NULL) {
             writeLine(h, "\t<key>com.adobe.type.CIDFontName</key>");
-            sprintf(buffer, "\t<string>%s</string>", h->top->cid.CIDFontName.ptr);
+            snprintf(buffer, buflen, "\t<string>%s</string>", h->top->cid.CIDFontName.ptr);
             writeLine(h, buffer);
             writeLine(h, "\t<key>com.adobe.type.FSType</key>");
-            sprintf(buffer, "\t<integer>%d</integer>", (int)h->top->FSType);
+            snprintf(buffer, buflen, "\t<integer>%d</integer>", (int)h->top->FSType);
             writeLine(h, buffer);
             writeLine(h, "\t<key>com.adobe.type.ROS</key>");
-            sprintf(buffer, "\t<string>%s-%s-%ld</string>", h->top->cid.Registry.ptr, h->top->cid.Ordering.ptr, h->top->cid.Supplement);
+            snprintf(buffer, buflen, "\t<string>%s-%s-%ld</string>", h->top->cid.Registry.ptr, h->top->cid.Ordering.ptr, h->top->cid.Supplement);
             writeLine(h, buffer);
         }
         // CIDMap needs the dict keys in alphabetical order,
         // but we want the font in CID order
         orderNameKeyedGlyphs(h);
-        writeCIDMap(h, h->top, buffer);
+        writeCIDMap(h, h->top, buffer, buflen);
         orderCIDKeyedGlyphs(h);
         removeUnusedFDicts(h);
-        writeFDArray(h, h->top, buffer);
+        writeFDArray(h, h->top, buffer, buflen);
     }
     writeLine(h, "\t<key>public.glyphOrder</key>");
     writeLine(h, "\t<array>");

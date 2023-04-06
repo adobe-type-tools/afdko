@@ -1533,16 +1533,16 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("FDArraySelect.17.VKana_subset", b"glyph 'monkey' missing" +
                                       b" CID number in <lib> dict", 6),
     ("qcurve-glyph",
-     b"tx: (ufr) Encountered unsupported point type 'qcurve' in " +
+     b"Encountered unsupported point type 'qcurve' in " +
      b"glyph 'oops'.", 6),
     ("null-filepath-glyph",
-     b"tx: (ufr) Encountered glyph reference 'oops' " +
+     b"Encountered glyph reference 'oops' " +
      b"in contents.plist with an empty file path.", 6),
     ("null-filepath-cid",
-     b"tx: (ufr) Encountered glyph reference 'cid00000' in " +
+     b"Encountered glyph reference 'cid00000' in " +
      b"contents.plist with an empty file path.", 6),
     ("null-component-filepath",
-     b"tx: (ufr) Encountered glyph component reference " +
+     b"Encountered glyph component reference " +
      b"'glyphs/C_acute.glif' with an empty file path.", 1)
 ])
 def test_ufo_glifs_parsing(file, msg, ret_code):
