@@ -1143,8 +1143,8 @@ def test_cidkeyed_read_write(arg, input, output, expected):
 
 
 @pytest.mark.parametrize("file, msg", [
-    ("missing_CID", b"tx: (ufr) glyph 'cid17899' does not " +
-                    b"have a CID number defined in postscriptCIDMap")
+    ("missing_CID", b"tx: (ufr) glyph 'cid17899' missing " +
+                    b"CID number in <lib> dict")
 ])
 def test_cidkeyed_lib_missing(file, msg):
     folder = folder = "cidkeyed_missing_lib/"
@@ -1525,9 +1525,8 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("wrong-type-stem-hstem", b'', 0),
     ("overlaps-cidkeyed", b'', 0),
     ("overlaps-namekeyed", b'', 0),
-    ("overlaps-cidkeyed-missing-cid", b"glyph 'cid45107' does not " +
-                                      b"have a CID number defined " +
-                                      b"in postscriptCIDMap", 0),
+    ("overlaps-cidkeyed-missing-cid", b"glyph 'cid45107' missing" +
+                                      b" CID number in <lib> dict", 0),
     ("dup-glif", b'', 0),
     ("missing-cid-value", b"", 0),
     ("missing-advance", b'', 0),
