@@ -1,4 +1,3 @@
-import sys
 import numbers
 
 from fontTools.ttLib import TTFont, newTable
@@ -6,9 +5,10 @@ from fontTools.varLib.cff import convertCFFtoCFF2
 from fontTools.fontBuilder import FontBuilder
 from fontTools.misc.psCharStrings import T2WidthExtractor
 
-topStrings = { "FullName" : "fullName",
-               "Copyright": "copyright",
-               "FamilyName": "familyName" }
+topStrings = {"FullName": "fullName",
+              "Copyright": "copyright",
+              "FamilyName": "familyName"}
+
 
 class CFFDefWidthDecompiler(T2WidthExtractor):
     """ This class is used to remove the initial width from the CFF
@@ -18,7 +18,9 @@ class CFFDefWidthDecompiler(T2WidthExtractor):
         args = self.popall()
         if not self.gotWidth:
             if evenOdd ^ (len(args) % 2):
-                assert self.defaultWidthX is not None, "CFF2 CharStrings must not have an initial width value"
+                assert self.defaultWidthX is not None, ("CFF2 CharStrings "
+                                                        "must not have an "
+                                                        "initial width value")
                 self.width = self.nominalWidthX + args[0]
                 args = args[1:]
                 self.defWidth = False
@@ -27,6 +29,7 @@ class CFFDefWidthDecompiler(T2WidthExtractor):
                 self.defWidth = True
             self.gotWidth = 1
         return args
+
 
 def toBaseCFF2(cffFile, outname):
     f = TTFont()
@@ -54,7 +57,9 @@ def toBaseCFF2(cffFile, outname):
     for g in top.charset:
         c, _ = cs.getItemAndSelector(g)
         subrs = getattr(c.private, "Subrs", [])
-        decompiler = CFFDefWidthDecompiler(subrs, c.globalSubrs, c.private.nominalWidthX, c.private.defaultWidthX)
+        decompiler = CFFDefWidthDecompiler(subrs, c.globalSubrs,
+                                           c.private.nominalWidthX,
+                                           c.private.defaultWidthX)
         decompiler.execute(c)
         bb = c.calcBounds(None)
         if bb is not None:
