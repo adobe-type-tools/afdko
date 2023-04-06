@@ -244,7 +244,12 @@
 	<key>com.adobe.type.postscriptCIDMap</key>
 	<dict>
 	<key>cid00000</key>
-	<integer>0</integer>
+		<dict>
+			<key>com.adobe.type</key>
+			<integer>0</integer>
+			<key>com.adobe.type.iFD</key>
+			<integer>0</integer>
+		</dict>
 	</dict>
 	<key>com.adobe.type.CIDFontName</key>
 	<string>SourceHanSansVF-Heavy</string>
