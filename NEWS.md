@@ -1,6 +1,17 @@
 Changelog
 =========
 
+3.9.4 (released 2023-04-06)
+---------------------------
+- [tx] FDArray support in CID-Keyed UFOs
+    - [tx][libxml2-improved] Move FDArray from fontinfo.plist to lib.plist ([#1576](https://github.com/adobe-type-tools/afdko/pull/1576))
+    - [tx] fix languagegroup visibility ([#1620](https://github.com/adobe-type-tools/afdko/pull/1620))
+    - [tx] Updates to CID-keyed UFO handling ([#1628](https://github.com/adobe-type-tools/afdko/pull/1628))
+    - [tx] revert missing cid fail to warn ([#1633](https://github.com/adobe-type-tools/afdko/pull/1633))
+- [makeotf] Fix GOADB order of processing multiple unicode assignments ([#1615](https://github.com/adobe-type-tools/afdko/pull/1615))
+- [spot] fix 'kern' subtable Format3 rightClass memory leak (double allocation) (thanks @NSGod!) ([#1627](https://github.com/adobe-type-tools/afdko/pull/1627))
+- Small fixes, updates: ([#1614](https://github.com/adobe-type-tools/afdko/pull/1614), [#1624](https://github.com/adobe-type-tools/afdko/pull/1624))
+
 3.9.3 (released 2023-02-02)
 ---------------------------
 - CMake github workflow updates:
