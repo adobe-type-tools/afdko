@@ -1416,7 +1416,7 @@ static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec, char* glyphNam
     if ((glifRec->cid < 0) && (h->top.sup.flags & ABF_CID_FONT)) {
        message(h, "glyph '%s' missing CID number in <lib> dict", glyphName);
        return;
-   }
+    }
 
     if (addChar(h, tag, &chr)) {
         message(h, "Warning: duplicate charstring <%s> (discarded)",

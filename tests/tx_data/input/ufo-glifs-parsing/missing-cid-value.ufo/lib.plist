@@ -24,7 +24,7 @@
   <key>postscriptFDArray</key>
     <array>
     <dict>
-    <key></key>
+    <key>FontName</key>
     <string>SourceHanSans-Heavy-Generic</string>
     <key>PaintType</key>
     <integer>3</integer>
