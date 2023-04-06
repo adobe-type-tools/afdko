@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="uni30FD-V" format="2">
+  <advance width="1000"/>
+  <outline>
+    <contour>
+      <point x="380" y="533" type="curve"/>
+      <point x="367" y="513" type="line"/>
+      <point x="477" y="439"/>
+      <point x="537" y="361"/>
+      <point x="569" y="245" type="curve"/>
+      <point x="582" y="202"/>
+      <point x="592" y="183"/>
+      <point x="612" y="183" type="curve"/>
+      <point x="627" y="183"/>
+      <point x="640" y="193"/>
+      <point x="640" y="217" type="curve"/>
+      <point x="640" y="255"/>
+      <point x="627" y="297"/>
+      <point x="596" y="346" type="curve"/>
+      <point x="556" y="409"/>
+      <point x="500" y="470"/>
+    </contour>
+  </outline>
+</glyph>
