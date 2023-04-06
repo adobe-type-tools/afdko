@@ -1142,25 +1142,14 @@ def test_cidkeyed_read_write(arg, input, output, expected):
     assert differ([expected_path, output_path])
 
 
-@pytest.mark.parametrize("file, msg", [
-    ("missing_CID", b"tx: (ufr) glyph 'cid17899' missing " +
-                    b"CID number in <lib> dict")
+@pytest.mark.parametrize("file", [
+    "missing_CID.ufo"
 ])
-def test_cidkeyed_lib_missing(file, msg):
+def test_cidkeyed_lib_missing(file):
     folder = folder = "cidkeyed_missing_lib/"
-    ufo_input_path = get_input_path(folder + file + ".ufo")
-    expected_path = get_expected_path(folder + file + ".pfa")
-    output_path = get_temp_file_path()
-    arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
-                 ufo_input_path, output_path]
-    stderr_path = runner(arg)
-    with open(stderr_path, 'rb') as f:
-        output = f.read()
-    assert (msg) in output
-    expected_path = generate_ps_dump(expected_path)
-    output_path = generate_ps_dump(output_path)
-    assert differ([expected_path, output_path])
-    # changed behavior of glyph with missing CID to just warn.
+    ufo_input_path = get_input_path(folder + file)
+    arg = [TOOL, '-t1', '-f', ufo_input_path]
+    assert subprocess.call(arg) == 6
 
 
 def test_cff2_windows_line_endings_bug1355():
@@ -1526,9 +1515,10 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("overlaps-cidkeyed", b'', 0),
     ("overlaps-namekeyed", b'', 0),
     ("overlaps-cidkeyed-missing-cid", b"glyph 'cid45107' missing" +
-                                      b" CID number in <lib> dict", 0),
+                                      b" CID number in <lib> dict", 6),
     ("dup-glif", b'', 0),
-    ("missing-cid-value", b"", 0),
+    ("missing-cid-value", b"glyph 'cid45107' missing CID" +
+                          b" number in <lib> dict", 6),
     ("missing-advance", b'', 0),
     ("missing-autohint", b'', 0),
     ("missing-autohint-2", b'', 0),
@@ -1557,7 +1547,7 @@ def test_ufo_glifs_parsing(file, msg, ret_code):
         expected_path = generate_ps_dump(expected_path)
         output_path = generate_ps_dump(output_path)
         assert differ([expected_path, output_path, '-s'] + PFA_SKIP)
-    if (msg != b''):
+    else:
         arg = [TOOL, '-t1', '-f', ufo_input_path]
         assert subprocess.call(arg) == ret_code
 
