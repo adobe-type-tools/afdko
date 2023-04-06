@@ -1413,11 +1413,6 @@ static int preParseGLIFS(ufoCtx h) {
 static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec, char* glyphName, long char_begin, long char_end, unsigned long unicode) {
     abfGlyphInfo* chr;
 
-    if ((glifRec->cid < 0) && (h->top.sup.flags & ABF_CID_FONT)) {
-       message(h, "glyph '%s' missing CID number in <lib> dict", glyphName);
-       return;
-   }
-
     if (addChar(h, tag, &chr)) {
         message(h, "Warning: duplicate charstring <%s> (discarded)",
                 getString(h, tag));
@@ -1431,6 +1426,9 @@ static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec, char* glyphNam
                     fatal(h, ufoErrParse, "glyph '%s' missing FDArray index in <lib> dict", glyphName);
             }
             chr->iFD = glifRec->iFD;
+        } else if (h->top.sup.flags & ABF_CID_FONT) {
+            message(h, "glyph '%s' missing CID number in <lib> dict", glyphName);
+            return;
         }
         chr->gname.ptr = glyphName;
         chr->gname.impl = tag;
