@@ -1427,8 +1427,7 @@ static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec, char* glyphNam
             }
             chr->iFD = glifRec->iFD;
         } else if (h->top.sup.flags & ABF_CID_FONT) {
-            message(h, "glyph '%s' missing CID number in <lib> dict", glyphName);
-            return;
+            fatal(h, ufoErrParse, "glyph '%s' missing CID number in <lib> dict", glyphName);
         }
         chr->gname.ptr = glyphName;
         chr->gname.impl = tag;
