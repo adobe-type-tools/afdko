@@ -1531,6 +1531,8 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("missing-stems", b'', 0),
     ("missing-width2", b'', 0),
     ("missing-flexlist", b'', 0),
+    ("FDArraySelect.17.VKana_subset", b"glyph 'monkey' missing" +
+                                      b" CID number in <lib> dict", 6)
 ])
 def test_ufo_glifs_parsing(file, msg, ret_code):
     folder = "ufo-glifs-parsing/"

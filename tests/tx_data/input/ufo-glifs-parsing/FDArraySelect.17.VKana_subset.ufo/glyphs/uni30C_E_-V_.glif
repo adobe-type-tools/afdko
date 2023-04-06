@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="uni30CE-V" format="2">
+  <advance width="1000"/>
+  <outline>
+    <contour>
+      <point x="595" y="669" type="line"/>
+      <point x="634" y="655"/>
+      <point x="655" y="642"/>
+      <point x="655" y="621" type="curve"/>
+      <point x="655" y="610"/>
+      <point x="651" y="591"/>
+      <point x="641" y="567" type="curve"/>
+      <point x="578" y="416"/>
+      <point x="436" y="195"/>
+      <point x="178" y="20" type="curve"/>
+      <point x="196" y="-5" type="line"/>
+      <point x="446" y="145"/>
+      <point x="584" y="323"/>
+      <point x="695" y="562" type="curve"/>
+      <point x="711" y="596"/>
+      <point x="727" y="597"/>
+      <point x="727" y="613" type="curve"/>
+      <point x="727" y="637"/>
+      <point x="681" y="677"/>
+      <point x="647" y="683" type="curve"/>
+      <point x="631" y="686"/>
+      <point x="617" y="688"/>
+      <point x="600" y="689" type="curve"/>
+    </contour>
+  </outline>
+</glyph>
