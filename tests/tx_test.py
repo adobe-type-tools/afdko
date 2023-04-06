@@ -1149,7 +1149,7 @@ def test_cidkeyed_read_write(arg, input, output, expected):
 def test_cidkeyed_lib_missing(file, msg):
     folder = folder = "cidkeyed_missing_lib/"
     ufo_input_path = get_input_path(folder + file + ".ufo")
-    expected_path = get_expected_path(folder + file + ".pfa")
+    expected_path = get_expected_path(folder + file + ".pfb")
     output_path = get_temp_file_path()
     arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
                  ufo_input_path, output_path]
