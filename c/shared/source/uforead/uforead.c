@@ -1414,7 +1414,7 @@ static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec, char* glyphNam
     abfGlyphInfo* chr;
 
     if ((glifRec->cid < 0) && (h->top.sup.flags & ABF_CID_FONT)) {
-       message(h, "glyph '%s' missing CID number in <lib> dict", glyphName);
+       message(h, "glyph '%s' does not have a CID number defined in postscriptCIDMap", glyphName);
        return;
     }
 
