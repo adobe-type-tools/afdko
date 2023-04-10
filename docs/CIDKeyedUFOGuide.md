@@ -10,17 +10,19 @@ Some examples:
 
 Convert an existing CID-keyed OTF to CID-keyed UFO
 
-: `tx -ufo -o cid-keyed.ufo cid-keyed.otf`
+`tx -ufo -o cid-keyed.ufo cid-keyed.otf`
 
 Subset a CID-keyed UFO using CID ranges with the `-g` flag
 
-: `tx -g /0,/959-/978,/59120-/59130 -ufo -o cid-keyed-subset.ufo cid-keyed.ufo`
+`tx -g /0,/959-/978,/59120-/59130 -ufo -o cid-keyed-subset.ufo cid-keyed.ufo`
 
 Create a name-keyed source using `-decid`
-: `tx -t1 -o name-keyed.pfa -decid -fd 1 cid-keyed.ufo`
+
+`tx -t1 -o name-keyed.pfa -decid -fd 1 cid-keyed.ufo`
 
 Merge multiple CID-keyed UFOs into a single UFO
-: `mergefonts merged-cid-keyed.ufo part1.map part1.ufo part2.map part2.ufo part3.map part3.ufo`
+
+`mergefonts merged-cid-keyed.ufo part1.map part1.ufo part2.map part2.ufo part3.map part3.ufo`
 
 
 ## **Requirements**
