@@ -3,6 +3,7 @@
 ---
 ##### • [MakeOTF v2.5 User Guide](./MakeOTFUserGuide.md)
 ##### • [Command Line How-To](./CommandLineHowTo.md)
+##### • [CID-keyed UFO Guide](./CIDKeyedUFOGuide.md)
 ---
 ##### • [Issues with OpenType/CFF and TrueType fonts in MS Font Validator](./MSFontValidatorIssues.md)
 ##### • [Practical issues in weight setting and style linking (Windows only)](./WinWeights.md)
