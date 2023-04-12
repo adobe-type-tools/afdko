@@ -1,5 +1,4 @@
 cmake>=3.14
-codecov>=2.0.15
 cpplint>=1.4.3
 cython>=0.29.5
 flake8>=3.7.6
