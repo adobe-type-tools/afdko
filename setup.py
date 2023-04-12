@@ -150,7 +150,7 @@ def main():
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX :: Linux',
@@ -192,7 +192,7 @@ def main():
               ],
           },
           zip_safe=False,
-          python_requires='>=3.7',
+          python_requires='>=3.8',
           setup_requires=[
               'wheel',
               'setuptools_scm',

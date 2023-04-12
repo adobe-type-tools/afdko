@@ -34,8 +34,8 @@ projects.
 Installation
 ------------
 
-The AFDKO requires [Python](http://www.python.org/download) 3.7
-or later. **⚠️ Starting April 3, 2023, the AFDKO will require Python 3.8 or later.** Due to our dependencies already dropping support and requiring Python 3.8 in their latest versions, we will also be dropping Python 3.7 support on April 3, 2023.
+The AFDKO requires [Python](http://www.python.org/download) 3.8
+or later.
 Regarding Python 3.11: while Python 3.11 itself is now relatively stable, we are waiting to let some known tool-chain problems resolve.
 
 Releases are available on the [Python Package
@@ -107,7 +107,7 @@ On the Mac, install these with:
 
 On Linux (Ubuntu 17.10 LTS or later), install these with:
 
-    apt-get -y install python3.7
+    apt-get -y install python3.8
     apt-get -y install python-pip
     apt-get -y install python-dev
     apt-get -y install uuid-dev
