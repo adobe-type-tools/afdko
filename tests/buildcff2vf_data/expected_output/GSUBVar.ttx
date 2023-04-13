@@ -238,7 +238,7 @@
         <FeatureTag value="test"/>
         <Feature>
           <!-- LookupCount=1 -->
-          <LookupListIndex index="0" value="0"/>
+          <LookupListIndex index="0" value="1"/>
         </Feature>
       </FeatureRecord>
     </FeatureList>
@@ -280,7 +280,7 @@
             <FeatureIndex value="0"/>
             <Feature>
               <!-- LookupCount=1 -->
-              <LookupListIndex index="0" value="1"/>
+              <LookupListIndex index="0" value="0"/>
             </Feature>
           </SubstitutionRecord>
         </FeatureTableSubstitution>
@@ -289,6 +289,7 @@
   </GSUB>
 
   <avar>
+    <version major="1" minor="0"/>
     <segment axis="wght">
       <mapping from="-1.0" to="-1.0"/>
       <mapping from="-0.5" to="-0.7283"/>
