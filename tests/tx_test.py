@@ -1632,3 +1632,19 @@ def test_ufo_decid_fdarray_memleak():
     output_path = generate_ps_dump(output_path)
     assert (retCode == 0)
     assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
+
+
+def test_bug1641_wrong_glyphorder():
+    """
+    Issue: https://github.com/adobe-type-tools/afdko/issues/1641
+    FDK v3.9.4 caused glyph order bugs, which turns out to be due to
+    sorting glifRecs array in tx. This is specifically caused when
+    there is an alt glif layer. This is testing that UFO.
+    """
+    input_path = get_input_path("namekeyed-with-alt-layer.ufo")
+    expected_path = get_expected_path("namekeyed-with-alt-layer.pfb")
+    output_path = get_temp_file_path()
+    subprocess.call([TOOL, '-t1', '-o', output_path, input_path])
+    expected_path = generate_ps_dump(expected_path)
+    output_path = generate_ps_dump(output_path)
+    assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
