@@ -1356,7 +1356,7 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
             return ufoErrSrcStream;
         }
     }
-    qsort(h->data.glifRecs.array, h->data.glifRecs.cnt, sizeof(GLIF_Rec), glifRecNameComparator);
+
     dnaSET_CNT(h->valueArray, 0);
 
     xmlNodePtr cur = parseXMLFile(h, h->cb.stm.clientFileName, filetype);
