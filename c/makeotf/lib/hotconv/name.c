@@ -173,19 +173,15 @@ static void addName(nameCtx h,
                     size_t length, char *str) {
     char *dst;
     char *newStr;
-    newStr = MEM_NEW(h->g, length * sizeof(char));
     NameRecord *rec;
     int index;
     int omitMacNames = (h->g->convertFlags & HOT_OMIT_MAC_NAMES); /* omit all Mac platform names. */
 
-    if (platformId == HOT_NAME_MAC_PLATFORM) {
-        if (omitMacNames)
-            return;
-    }
-
     if (omitMacNames && (platformId == HOT_NAME_MAC_PLATFORM)) {
         return;
     }
+
+    newStr = MEM_NEW(h->g, length * sizeof(char));
 
     index = enumNames(h, 0, platformId, platspecId, languageId, nameId);
 
