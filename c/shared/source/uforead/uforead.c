@@ -1228,7 +1228,16 @@ static GLIF_Rec* findGLIFRecByName(ufoCtx h, char *glyphName)
 
     GLIF_Rec* glif = bsearch(glifKey, h->data.glifRecs.array, h->data.glifRecs.cnt, sizeof(GLIF_Rec), glifRecNameComparator);
     memFree(h, glifKey);
-    return glif;
+    int i = 0;
+    while (i < h->data.glifRecs.cnt) {
+        GLIF_Rec* glifRec;
+        glifRec = &h->data.glifRecs.array[i];
+        if (strEqual(glifRec->glyphName, glyphName)) {
+            return glifRec;
+        }
+        i++;
+    }
+    return NULL;
 }
 
 static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
