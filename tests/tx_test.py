@@ -1648,3 +1648,23 @@ def test_bug1641_wrong_glyphorder():
     expected_path = generate_ps_dump(expected_path)
     output_path = generate_ps_dump(output_path)
     assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
+
+
+def test_alt_missing_glyph():
+    """
+    Test case where alt layer has a glyph that default layer doesn't.
+    """
+    msg = (b"tx: (ufr) Warning: glyph 'B' is in the processed layer"
+           b" but not in the default layer.")
+    input_path = get_input_path("alt-missing-glif.ufo")
+    expected_path = get_expected_path("alt-missing-glif.pfb")
+    output_path = get_temp_file_path()
+    arg = CMD + ['-s', '-e', '-a', '-o', 't1', '-f',
+                 input_path, output_path]
+    stderr_path = runner(arg)
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert msg in output
+    expected_path = generate_ps_dump(expected_path)
+    output_path = generate_ps_dump(output_path)
+    assert differ([expected_path, output_path])
