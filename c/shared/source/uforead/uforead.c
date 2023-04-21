@@ -1223,11 +1223,6 @@ int glifRecNameComparator(const void *a, const void *b) {
 
 static GLIF_Rec* findGLIFRecByName(ufoCtx h, char *glyphName)
 {
-    GLIF_Rec *glifKey = memNew(h, sizeof(GLIF_Rec*));
-    glifKey->glyphName = glyphName;
-
-    GLIF_Rec* glif = bsearch(glifKey, h->data.glifRecs.array, h->data.glifRecs.cnt, sizeof(GLIF_Rec), glifRecNameComparator);
-    memFree(h, glifKey);
     int i = 0;
     while (i < h->data.glifRecs.cnt) {
         GLIF_Rec* glifRec;
