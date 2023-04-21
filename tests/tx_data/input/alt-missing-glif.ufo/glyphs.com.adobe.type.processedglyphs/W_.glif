@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="W" format="2">
+	<unicode hex="0057"/>
+	<advance width="786"/>
+	<outline>
+		<contour>
+			<point name="hintSet0000" x="162" y="0" type="line"/>
+			<point x="261" y="0" type="line"/>
+			<point x="358" y="395" type="line"/>
+			<point name="hintSet0003" x="369" y="446"/>
+			<point x="381" y="493"/>
+			<point x="391" y="544" type="curve"/>
+			<point x="395" y="544" type="line"/>
+			<point x="405" y="493"/>
+			<point x="415" y="446"/>
+			<point x="427" y="395" type="curve"/>
+			<point x="526" y="0" type="line"/>
+			<point x="626" y="0" type="line"/>
+			<point x="762" y="656" type="line"/>
+			<point x="682" y="656" type="line"/>
+			<point x="613" y="299" type="line"/>
+			<point x="600" y="229"/>
+			<point x="588" y="158"/>
+			<point x="576" y="87" type="curve"/>
+			<point x="572" y="87" type="line"/>
+			<point x="556" y="158"/>
+			<point x="540" y="230"/>
+			<point x="524" y="299" type="curve"/>
+			<point x="433" y="656" type="line"/>
+			<point x="357" y="656" type="line"/>
+			<point x="266" y="299" type="line"/>
+			<point x="251" y="229"/>
+			<point x="235" y="158"/>
+			<point x="220" y="87" type="curve"/>
+			<point x="216" y="87" type="line"/>
+			<point x="204" y="158"/>
+			<point x="190" y="228"/>
+			<point x="178" y="299" type="curve"/>
+			<point x="109" y="656" type="line"/>
+			<point x="23" y="656" type="line"/>
+		</contour>
+	</outline>
+	<lib>
+		<dict>
+			<key>com.adobe.type.autohint.v2</key>
+			<dict>
+				<key>hintSetList</key>
+				<array>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0000</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 0 87</string>
+							<string>hstem 656 -20</string>
+							<string>vstem 23 739</string>
+						</array>
+					</dict>
+					<dict>
+						<key>pointTag</key>
+						<string>hintSet0003</string>
+						<key>stems</key>
+						<array>
+							<string>hstem 0 87</string>
+							<string>hstem 544 112</string>
+							<string>vstem 23 739</string>
+						</array>
+					</dict>
+				</array>
+				<key>id</key>
+				<string>29c5f20a29e7cc4cdf208439e44a6d7e2f935f6bc370b1c3c725a73f33afb7c06461904917ee051c5aff041b4fd614fbda28d83ff780e634e4a8e0668af95d92</string>
+			</dict>
+		</dict>
+	</lib>
+</glyph>
