@@ -1380,6 +1380,7 @@ static int parseGlyphList(ufoCtx h, bool altLayer) {
     /* process the glyph order layers */
     if (!altLayer) {
         if (h->data.glifOrder.cnt > 0) {
+            /* sort glifRecs by glyphOrder */
             ctuQSort(h->data.glifRecs.array, h->data.glifRecs.cnt,
                      sizeof(h->data.glifRecs.array[0]), cmpGlifRecs, h);
         }
