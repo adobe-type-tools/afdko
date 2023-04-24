@@ -1,6 +1,19 @@
 Changelog
 =========
 
+3.9.5 (released 2023-04-24)
+---------------------------
+- [python] **Drop Python 3.7**
+  ([#1638](https://github.com/adobe-type-tools/afdko/pull/1638))
+- [tx] **tx/makeotf glyphOrder bug fix** 
+  ([#1642](https://github.com/adobe-type-tools/afdko/pull/1642))
+- [spot] fix name table LANG_TAG_REC_SIZE size definition (thanks, @NSGod!)
+  ([#1640](https://github.com/adobe-type-tools/afdko/pull/1640))
+- [docs] CID-keyed UFO guide
+  ([#1634](https://github.com/adobe-type-tools/afdko/pull/1634))
+- [requirements.txt][buildcff2vf_data] Update to fonttools v4.39.3
+  ([#1639](https://github.com/adobe-type-tools/afdko/pull/1639))
+
 3.9.4 (released 2023-04-06)
 ---------------------------
 - [tx] FDArray support in CID-Keyed UFOs
