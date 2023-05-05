@@ -1187,9 +1187,6 @@ static GLIF_Rec* addNewGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     newGLIFRec->glyphName = glyphName;
     newGLIFRec->glyphOrder = glyphOrder;
     if (!h->parseState.CIDMap) {  /* do not proceed if currently parsing CIDMap in lib.plist. This information will be filled in later. */
-        if (fileName == NULL) {
-            fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
-        }
         newGLIFRec->glifFileName = memNew(h, 1 + strlen(fileName));
         sprintf(newGLIFRec->glifFileName, "%s", fileName);
         newGLIFRec->altLayerGlifFileName = NULL;
@@ -1203,7 +1200,7 @@ static void addGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     GLIF_Rec* foundGlyph = NULL;
     char* fileName = parseXMLKeyValue(h, cur);
     if (fileName == NULL) {
-        fatal(h, ufoErrParse, "Encountered glyph reference in contents.plist with an empty file path. Text: '%s'.", getBufferContextPtr(h));
+        fatal(h, ufoErrParse, "Encountered glyph reference '%s' in contents.plist with an empty file path.", glyphName);
     }
     foundGlyph = findGLIFRecByName(h, glyphName);
     if (foundGlyph == NULL){
@@ -2508,7 +2505,7 @@ static int parseXMLPoint(ufoCtx h, xmlNodePtr cur, abfGlyphCallbacks* glyph_cb, 
             else if (strEqual(strType, "offcurve"))
                 continue;  // type is already set to 0. x and y will get pushed on the stack, and no other operation will happen.
             else {
-                fatal(h, ufoErrParse, "Encountered unsupported point type '%s' in glyph '%s'. Context: %s.\n", strType, glifRec->glyphName, getBufferContextPtr(h));
+                fatal(h, ufoErrParse, "Encountered unsupported point type '%s' in glyph '%s'.\n", strType, glifRec->glyphName);
                 result = ufoErrParse;
                 break;
             }
@@ -2524,11 +2521,6 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
 
 static int setParseXMLComponentValue(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, GLIF_Rec* glifRec, Transform* transform, Transform localTransform, Transform *newTransform, int result) {
     Transform concatTransform;
-    if (gi == NULL) {
-        message(h, "Missing component base attribute. Glyph: %s, Context: %s.\n", glifRec->glifFilePath, getBufferContextPtr(h));
-        result = ufoErrNoGlyph;
-        return result;
-    }
 
     /* Figure out transforms */
     if (transform == NULL) {
@@ -2621,9 +2613,7 @@ static int parseXMLComponent(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGly
             char* glyphName = getXmlAttrValue(attr);
             if (!ctuLookup(glyphName, h->chars.byName.array, h->chars.byName.cnt,
                            sizeof(h->chars.byName.array[0]), postMatchChar, &index, h)) {
-                fprintf(stderr, "Could not find component base glyph %s. parent Glyph: %s\n", glyphName, glifRec->glifFilePath);
-                result = ufoErrNoGlyph;
-                break;
+                fatal(h,  ufoErrNoGlyph, "Encountered glyph component reference '%s' with an empty file path.", glifRec->glifFilePath);
             }
             gi = &h->chars.index.array[h->chars.byName.array[index]];
         } else {
