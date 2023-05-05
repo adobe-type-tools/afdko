@@ -1488,13 +1488,8 @@ static int preParseGLIF(ufoCtx h, GLIF_Rec* glifRec, int tag) {
         h->cb.stm.clientFileName = glifRec->glifFilePath;
         h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     }
-    if (h->stm.src == NULL) {
-        fprintf(stderr, "Failed to open glif file in parseGLIF: %s.\n", glifRec->glifFilePath);
-        return ufoErrSrcStream;
-    }
-    if (h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
-        fprintf(stderr, "Failed to open glif file in parseGLIF: %s.\n", glifRec->glifFilePath);
-        return ufoErrSrcStream;
+    if ((h->stm.src == NULL) || (h->cb.stm.seek(&h->cb.stm, h->stm.src, 0))) {
+        fatal(h, ufoErrSrcStream, "Failed to open the %s glif file.\n", glifRec->glifFilePath);
     }
 
     dnaSET_CNT(h->valueArray, 0);
@@ -3057,8 +3052,7 @@ static int parseGLIF(ufoCtx h, abfGlyphInfo* gi, abfGlyphCallbacks* glyph_cb, Tr
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
 
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, gi->sup.begin)) {
-        fprintf(stderr, "Failed to open glif file in parseGLIFOutline. Glyph: %s. Context: %s\n.", glifRec->glyphName, getBufferContextPtr(h));
-        fatal(h, ufoErrSrcStream, 0);
+        fatal(h, ufoErrSrcStream, "Failed to open the %s glif file.\n", glifRec->glyphName);
     }
 
     h->stack.cnt = 0;
