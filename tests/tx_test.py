@@ -1668,3 +1668,31 @@ def test_alt_missing_glyph():
     expected_path = generate_ps_dump(expected_path)
     output_path = generate_ps_dump(output_path)
     assert differ([expected_path, output_path])
+
+
+@pytest.mark.parametrize('file, msg', [
+    ("qcurve-glyph.ufo",
+     b"tx: (ufr) Encountered unsupported point type 'qcurve' in " +
+     b"glyph 'oops'."),
+    ("null-filepath-glyph.ufo",
+     b"tx: (ufr) Encountered glyph reference 'oops' " +
+     b"in contents.plist with an empty file path."),
+    ("null-filepath-cid.ufo", 
+     b"tx: (ufr) Encountered glyph reference 'cid00000' in " +
+     b"contents.plist with an empty file path."),
+    ("null-component-filepath.ufo",
+     b"tx: (ufr) Encountered glyph component reference " +
+     b"'glyphs/C_acute.glif' with an empty file path.")
+])
+def test_glyph_error_crash(file, msg):
+    """
+    Tests some cases that were crashing tx rather than erroring due
+    to the use of getBufferContextPtr(h).
+    """
+    input_path = get_input_path(file)
+    arg = CMD + ['-s', '-e', '-a', 't1', '-f',
+                 input_path]
+    stderr_path = runner(arg)
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert msg in output
