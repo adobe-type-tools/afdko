@@ -4,9 +4,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/afdko.svg)](https://pypi.org/project/afdko)
 
-[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/adobe-type-tools/afdko.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe-type-tools/afdko/context:cpp)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/adobe-type-tools/afdko.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe-type-tools/afdko/context:python)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/adobe-type-tools/afdko.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe-type-tools/afdko/alerts/) [![Join the chat at https://gitter.im/adobe-type-tools/afdko](https://badges.gitter.im/adobe-type-tools/afdko.svg)](https://gitter.im/adobe-type-tools/afdko?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/adobe-type-tools/afdko](https://badges.gitter.im/adobe-type-tools/afdko.svg)](https://gitter.im/adobe-type-tools/afdko?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Adobe Font Development Kit for OpenType (AFDKO)
 ===============================================
