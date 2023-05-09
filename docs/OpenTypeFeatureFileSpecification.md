@@ -1602,18 +1602,37 @@ Omitting the `by` clause is equivalent to adding `by NULL`.
 <a name="5.b"></a>
 ### 5.b. [GSUB LookupType 2] Multiple substitution
 
-A Multiple Sub rule is specified as:
+A Multiple Sub rule is specified in one of the following formats:
 
 ```fea
-substitute <glyph> by <glyph sequence>;
+substitute <glyph> by <glyph sequence>;            # Format A
+substitute <glyphclass> by <glyph sequence>;       # Format B
+substitute <glyphclass> by <glyphclass sequence>;  # Format C
 ```
 
+Format A specifies that target glyph is replaced by the replacement sequence.
 `<glyph sequence>` contains two or more glyphs. It may not contain glyph
 classes. (If it did, the rule would be ambiguous as to which replacement
-sequence were required.) For example:
+sequence were required.)
+
+Format B specifies that any glyph in the target glyph class must be replaced by
+the same replacement glyph sequence.
+
+Format C specifies that any glyph in the target glyph class must be replaced by
+corresponding glyph (in the order of glyphs in the glyph classes) in the
+replacement sequence. `<glyph sequence>` contains two or more glyph classes. If
+the replacement sequence contains single glyphs or singleton glyph classes,
+they will be repeated for each glyph in the target glyph class, otherwise if
+the replacement glyph classes has more than one glyph, then the number of
+elements in the target and replacement glyph classes must be the same.
+
+ For example:
 
 ```fea
-substitute f_f_i by f f i;            # Ligature decomposition
+substitute f_f_i by f f i;                    # Format A
+substitute [f_i fi] by f i;                   # Format B
+substitute [f_i f_l T_h] by [f f T] [i l h];  # Format C
+substitute [f_i f_l] by f [i l];              # Format C
 ```
 
 <a name="5.c"></a>
