@@ -764,7 +764,7 @@ static void prepWinData(hotCtx g) {
     }
 
     /* warn if the line gap is negative. */
-    if (font->TypoAscender < 0) {
+    if (font->TypoLineGap < 0) {
         hotMsg(g, hotWARNING, "The feature file OS/2 override TypoLineGap value is negative!");
     }
 
