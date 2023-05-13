@@ -1506,7 +1506,7 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("empty-flexlist", b'', 0),
     ("empty-stems", b'', 0),
     ("empty-stems-2", b'', 0),
-    ("missing-glif", b'tx: (ufr) Failed to open the ' +
+    ("missing-glif", b'Failed to open the ' +
                      b'glyphs/missing.glif glif file.', 3),
     ("one-stem-hstem", b'', 0),
     ("one-stem-hstem3", b'', 0),
@@ -1530,7 +1530,7 @@ def test_ufo_contentsplist_parsing(file, msg, ret_code):
     ("missing-stems", b'', 0),
     ("missing-width2", b'', 0),
     ("missing-flexlist", b'', 0),
-    ("FDArraySelect.17.VKana_subset", b"glyph 'monkey' missing" +
+    ("FDArraySelect.17.VKana_subset", b"Glyph 'monkey' missing" +
                                       b" CID number in <lib> dict", 6),
     ("qcurve-glyph",
      b"Encountered unsupported point type 'qcurve' in " +
@@ -1665,7 +1665,7 @@ def test_alt_missing_glyph():
     """
     Test case where alt layer has a glyph that default layer doesn't.
     """
-    msg = (b"tx: (ufr) Warning: glyph 'B' is in the processed layer"
+    msg = (b"Glyph 'B' is in the processed layer"
            b" but not in the default layer.")
     input_path = get_input_path("alt-missing-glif.ufo")
     expected_path = get_expected_path("alt-missing-glif.pfb")

@@ -1155,7 +1155,7 @@ static GLIF_Rec* addNewGLIFRec(ufoCtx h, const char* glyphName, xmlNodePtr cur) 
     newGLIFRec->glyphName = glyphName;
     newGLIFRec->glyphOrder = glyphOrder;
     if (!h->parseState.CIDMap) {  /* do not proceed if currently parsing CIDMap in lib.plist. This information will be filled in later. */
-        int l = 1 + strlen(filename);
+        int l = 1 + strlen(fileName);
         newGLIFRec->glifFileName = (char *)memNew(h, l);
         snprintf(newGLIFRec->glifFileName, l, "%s", fileName);
         newGLIFRec->altLayerGlifFileName = NULL;
