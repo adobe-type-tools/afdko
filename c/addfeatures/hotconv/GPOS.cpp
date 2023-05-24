@@ -18,211 +18,6 @@
 #include "feat.h"
 #include "name.h"
 
-/* --------------------------- Context Definition -------------------------- */
-
-typedef struct {
-    unsigned short PosFormat; /* =1 */
-    unsigned short ExtensionLookupType;
-    LOffset ExtensionOffset;
-} ExtensionPosFormat1;
-#define EXTENSION1_SIZE (uint16 * 2 + uint32)
-
-typedef struct { /* Subtable record */
-    Tag script;
-    Tag language;
-    Tag feature;
-    char id_text[ID_TEXT_SIZE];
-    unsigned short lkpType;
-    unsigned short lkpFlag;
-    unsigned short markSetIndex;
-    Label label;
-    LOffset offset;     /* From beginning of first subtable */
-    struct {            /* Extension-related data */
-        short use;      /* Use extension lookupType? If set, then following used: */
-        otlTbl otl;     /* For coverages and classes of this extension subtable */
-        LOffset offset; /* Offset to this extension subtable, from beginning of extension section. Debug only. */
-        ExtensionPosFormat1 *tbl;
-
-        /* Subtable data */
-    } extension;
-    void *tbl; /* Format-specific subtable data */
-} Subtable;
-
-typedef union {           /* Subtable record */
-    short numParams;      /* First two bytes is the length of the parameters */
-    char params[1];       /* A place holder */
-} FeatureParameterFormat; /* Special case format for subtable data. */
-
-enum {
-    kSizeOpticalSize,
-    kSizeSubFamilyID,
-    kSizeMenuNameID,
-    kSizeLowEndRange,
-    kSizeHighEndRange
-};
-
-typedef struct {
-    GNode *targ;
-} PosRule;
-
-typedef struct {
-    unsigned short SequenceIndex;
-    unsigned short LookupListIndex;
-} PosLookupRecord;
-#define POS_LOOKUP_RECORD_SIZE (uint16 * 2)
-
-typedef struct {
-    GID gid;
-    short xPla;
-    short yPla;
-    short xAdv;
-    short yAdv;
-    unsigned short valFmt;
-    struct {
-        short valFmt;
-        short valRec;
-    } span;
-} SingleRec;
-
-typedef struct {
-    GNode *gnode;
-} MarKClassRec; /* used in markClassList, to provide a quick lookup for the currently used mark classes */
-
-typedef struct {
-    GID gid;
-    dnaDCL(AnchorMarkInfo, anchorMarkInfo);
-    long componentIndex; /* order in mark to lig statement that this base glyph reference was encountered.*/
-    char *locDesc;
-} BaseGlyphRec;
-
-typedef union {
-    GID gid;    /* glyph ID */
-    GNode *gcl; /* glyph class */
-} KernGlyph;
-
-typedef struct MetricsRec {
-    short value[4];
-} MetricsRec;
-
-typedef struct { /* Kerning pair */
-    KernGlyph first;
-    KernGlyph second;
-    unsigned long lineIndex; /* used to sort records in order of occurrence. */
-                             /* Needed so keep first of conflicting records. */
-    short metricsCnt1;       /* Allowable values are 1 ( x advance adjustment only) or 4. */
-    short metricsRec1[4];
-    short metricsCnt2; /* Allowable values are 1 ( x advance adjustment only) or 4. */
-    short metricsRec2[4];
-} KernRec;
-
-typedef struct {
-    unsigned cls;
-    GNode *gc;
-} ClassInfo;
-
-typedef struct {
-    dnaDCL(ClassInfo, classInfo);
-    dnaDCL(GID, cov); /* Coverage */
-} ClassDef;
-
-typedef struct { /* New subtable data */
-    Tag script;
-    Tag language;
-    Tag feature;
-    Tag parentFeatTag; /* The parent feature for anonymous lookups made by a chaining contextual feature */
-    short useExtension; /* Use extension lookupType? */
-    unsigned short lkpType;
-    unsigned short parentLkpType;
-    unsigned short lkpFlag;
-    unsigned short markSetIndex;
-    Label label;
-
-    dnaDCL(PosRule, rules);
-    dnaDCL(MarKClassRec, markClassList);
-    dnaDCL(BaseGlyphRec, baseList);
-
-    dnaDCL(SingleRec, single);  /* Single pos accumulator */
-    dnaDCL(KernRec, pairs);     /* Kern pair accumulator */
-    Subtable *sub;              /* Current subtable */
-    short pairFmt;              /* Fmt (1 or 2) of GPOS pair */
-    unsigned short pairValFmt1; /* Fmt (1 or 2) of first value record  of GPOS pair */
-    unsigned short pairValFmt2; /* Fmt (1 or 2) of second value record of GPOS pair */
-} SubtableInfo;
-
-struct GPOSCtx_ {
-    SubtableInfo nw;
-    struct {
-        LOffset featParam;         /* (Cumulative.) Next subtable offset |->  */
-
-        LOffset subtable;         /* (Cumulative.) Next subtable offset |->  */
-                                  /* start of subtable section. LOffset to   */
-                                  /* check for overflow                      */
-        LOffset extension;        /* (Cumulative.) Next extension subtable   */
-                                  /* offset |-> start of extension section.  */
-        LOffset extensionSection; /* Start of extension section |-> start of */
-                                  /* main subtable section                   */
-    } offset;
-    dnaDCL(short, values);       /* Concatenated value record fields */
-    dnaDCL(Subtable, subtables); /* Subtable list */
-    unsigned short featNameID;   /* user name ID for sub-family name for 'size' feature.            */
-                                 /* needed in order to set the FeatureParam subtable on writing it. */
-
-    short startNewPairPosSubtbl;
-    ClassDef classDef[2];
-
-    short hadError; /* Flags if error occurred */
-
-    /* Info for chaining contextual lookups */
-    dnaDCL(SubtableInfo, anonSubtable);   /* Anon subtable accumulator */
-    dnaDCL(PosLookupRecord *, posLookup); /* Pointers to all records that need to be adjusted */
-
-    unsigned short maxContext;
-
-    otlTbl otl; /* OTL table */
-    hotCtx g;   /* Package context */
-};
-
-static void fillSinglePos(hotCtx g, GPOSCtx h);
-static void writeSinglePos(hotCtx g, GPOSCtx h, Subtable *sub);
-static void freeSinglePos(hotCtx g, Subtable *sub);
-
-static void fillPairPos(hotCtx g, GPOSCtx h);
-static void writePairPos(hotCtx g, GPOSCtx h, Subtable *sub);
-static void freePairPos(hotCtx g, Subtable *sub);
-
-static ExtensionPosFormat1 *fillExtensionPos(hotCtx g, GPOSCtx h,
-                                             unsigned ExtensionLookupType);
-static void writeExtension(hotCtx g, GPOSCtx h, Subtable *sub);
-static void freeExtension(hotCtx g, GPOSCtx h, Subtable *sub);
-
-static void fillSizeFeature(hotCtx g, GPOSCtx h, Subtable *sub);
-static void writeFeatParam(GPOSCtx h, Subtable *sub);
-static void freeFeatParam(hotCtx g, Subtable *sub);
-static void fillChain(hotCtx g, GPOSCtx h);
-static void writeChainPos(hotCtx g, GPOSCtx h, Subtable *sub);
-static void freeChain3(hotCtx g, GPOSCtx h, Subtable *sub);
-static void freeChain(hotCtx g, GPOSCtx h, Subtable *sub);
-static void checkBaseAnchorConflict(hotCtx g, BaseGlyphRec *baseGlyphArray, long recCnt, int isMarkToLigature);
-static long findMarkClassIndex(SubtableInfo *si, GNode *markNode);
-static int addMarkClass(hotCtx g, SubtableInfo *si, GNode *markNode);
-static void GPOSAdCursive(hotCtx g, SubtableInfo *si, GNode *targ, int anchorCount, const AnchorMarkInfo *anchorMarkInfo, const char *locDesc);
-static void GPOSAddMark(hotCtx g, SubtableInfo *si, GNode *targ, int anchorCount, const AnchorMarkInfo *anchorMarkInfo, const char *locDesc);
-static void fillMarkToBase(hotCtx g, GPOSCtx h);
-static void writeMarkToBase(hotCtx g, GPOSCtx h, Subtable *sub);
-static void freeMarkToBase(hotCtx g, Subtable *sub);
-static void fillMarkToLigature(hotCtx g, GPOSCtx h);
-static void writeMarkToLigature(hotCtx g, GPOSCtx h, Subtable *sub);
-static void freeMarkToLigature(hotCtx g, Subtable *sub);
-static void fillCursive(hotCtx g, GPOSCtx h);
-static void writeCursive(hotCtx g, GPOSCtx h, Subtable *sub);
-static void freeCursive(hotCtx g, Subtable *sub);
-static void createAnonLookups(hotCtx g, GPOSCtx h);
-static void setAnonLookupIndices(hotCtx g, GPOSCtx h);
-static SubtableInfo *addAnonPosRule(hotCtx g, GPOSCtx h, SubtableInfo *cur_si, unsigned short lkpType, GNode *targ);
-
-static void GPOSAddSingle(hotCtx g, SubtableInfo *si, GNode *targ,
-                          int xPlacement, int yPlacement, int xAdvance, int yAdvance);
-
 static void copyStr(hotCtx g, char **dst, const char *src) {
     if (src == NULL) {
         *dst = NULL;
@@ -236,47 +31,37 @@ static void copyStr(hotCtx g, char **dst, const char *src) {
 #if HOT_DEBUG
 /* Initialize sub. Not needed; just for debug */
 
-static void initSingle(void *ctx, long count, SingleRec *s) {
-    long i;
-    for (i = 0; i < count; i++) {
-        s->span.valFmt = s->span.valRec = 0;
-        s++;
+void SingleRec::dump() {
+    featGlyphDump(g, gid, -1, 1);
+    fprintf(stderr, "\t%4d %4d %4d %4d",
+            xPla, yPla, xAdv, yAdv);
+    fprintf(stderr, " %5x ", valFmt);
+    if (span.valFmt == 0) {
+        fprintf(stderr, "       *");
+    } else {
+        fprintf(stderr, "   %5d", span.valFmt);
     }
-    return;
+    if (span.valRec == 0) {
+        fprintf(stderr, "      *");
+    } else {
+        fprintf(stderr, "  %5d", span.valRec);
+    }
+    fprintf(stderr, "\n");
 }
 
-static void dumpSingles(hotCtx g) {
-    GPOSCtx h = g->ctx.GPOS;
-    int i;
-
+void GPOS::dumpSingles() {
     fprintf(stderr,
             ">GPOS: dumpSingles [%ld]            valFmt span.valFmt  span.valRec\n",
-            h->nw.single.cnt);
-    for (i = 0; i < h->nw.single.cnt; i++) {
-        SingleRec *s = &h->nw.single.array[i];
-
+            nw.single.size());
+    for (int i = 0; i < nw.single.size(); i++) {
         fprintf(stderr, "[%2d] ", i);
-        featGlyphDump(g, s->gid, -1, 1);
-        fprintf(stderr, "\t%4d %4d %4d %4d",
-                s->xPla, s->yPla, s->xAdv, s->yAdv);
-        fprintf(stderr, " %5x ", s->valFmt);
-        if (s->span.valFmt == 0) {
-            fprintf(stderr, "       *");
-        } else {
-            fprintf(stderr, "   %5d", s->span.valFmt);
-        }
-        if (s->span.valRec == 0) {
-            fprintf(stderr, "      *");
-        } else {
-            fprintf(stderr, "  %5d", s->span.valRec);
-        }
-        fprintf(stderr, "\n");
+        h->nw.single[i].dump();
     }
 }
 
-static void kernRecDump(hotCtx g, GID glyph1, GID glyph2, short metricsCnt, short *values,
-                        GNode *gclass1, GNode *gclass2,
-                        unsigned cl1, unsigned cl2) {
+static void kernRecDump(hotCtx g, GID glyph1, GID glyph2, int16_t metricsCnt,
+                        int16_t *values, GNode *gclass1, GNode *gclass2,
+                        int32_t cl1, int32_t cl2) {
     if (gclass1 == NULL) {
         featGlyphDump(g, glyph1, ' ', 1);
         featGlyphDump(g, glyph2, ' ', 1);
@@ -313,73 +98,26 @@ static void check_overflow(hotCtx g, const char* offsetType, long offset,
 
 /* Element initializer */
 
-static void anonSubtableInit(void *ctx, long count, SubtableInfo *si) {
-    hotCtx g = (hotCtx)ctx;
-    long i;
-    for (i = 0; i < count; i++) {
-        dnaINIT(g->DnaCTX, si->rules, 50, 50);
-        dnaINIT(g->DnaCTX, si->single, 500, 1000);
-        dnaINIT(g->DnaCTX, si->markClassList, 8, 8);
-        dnaINIT(g->DnaCTX, si->baseList, 300, 300);
-        dnaINIT(g->DnaCTX, si->pairs, 1000, 500);
-#if HOT_DEBUG
-        si->single.func = initSingle;
-#endif
-        si++;
-    }
-    return;
-}
-
 void GPOSNew(hotCtx g) {
-    GPOSCtx h = (GPOSCtx)MEM_NEW(g, sizeof(struct GPOSCtx_));
-
-    h->nw.script = h->nw.language = h->nw.feature = TAG_UNDEF;
-
-    dnaINIT(g->DnaCTX, h->nw.rules, 50, 200);
-    dnaINIT(g->DnaCTX, h->nw.single, 500, 1000);
-    dnaINIT(g->DnaCTX, h->nw.markClassList, 8, 8);
-    dnaINIT(g->DnaCTX, h->nw.baseList, 300, 300);
-    dnaINIT(g->DnaCTX, h->nw.pairs, 1000, 500);
-#if HOT_DEBUG
-    h->nw.single.func = initSingle;
-#endif
-    h->offset.subtable = h->offset.featParam = 0;
-    h->offset.extension = h->offset.extensionSection = 0;
-    dnaINIT(g->DnaCTX, h->values, 1000, 500);
-    dnaINIT(g->DnaCTX, h->subtables, 10, 10);
-    dnaINIT(g->DnaCTX, h->anonSubtable, 3, 10);
-    h->anonSubtable.func = anonSubtableInit;
-    dnaINIT(g->DnaCTX, h->posLookup, 25, 100);
-
-    h->startNewPairPosSubtbl = 0;
-    dnaINIT(g->DnaCTX, h->classDef[0].classInfo, 200, 500);
-    dnaINIT(g->DnaCTX, h->classDef[0].cov, 50, 100);
-    dnaINIT(g->DnaCTX, h->classDef[1].classInfo, 200, 500);
-    dnaINIT(g->DnaCTX, h->classDef[1].cov, 50, 100);
-
-    h->featNameID = 0;
-    h->maxContext = 0;
-    h->hadError = 0;
-    h->otl = NULL;
-
-    /* Link contexts */
-    h->g = g;
-    g->ctx.GPOS = h;
+    g->ctx.GPOS =  new GPOS(g);
 }
 
 int GPOSFill(hotCtx g) {
-    int i;
-    GPOSCtx h = g->ctx.GPOS;
+    return g->cgx.GPOS->Fill();
+}
 
-    if (h->subtables.cnt == 0) {
+int GPOS::Fill() {
+    int i;
+
+    if (subtables.cnt == 0) {
         return 0;
     }
 
-    if (h->hadError) {
+    if (hadError) {
         hotMsg(g, hotFATAL, "aborting because of errors");
     }
 
-    createAnonLookups(g, h);
+    createAnonLookups();
 
     if (h->otl == NULL) {
         return 0;
@@ -388,47 +126,43 @@ int GPOSFill(hotCtx g) {
     /* Add OTL features */
     /* See GSUB.c::GSUBFill() for an explanation of the subtable order */
 
-    for (i = 0; i < h->subtables.cnt; i++) {
-        Subtable *sub = &h->subtables.array[i];
-        int isExt = sub->extension.use;
+    for (auto &sub: subtables) {
+        int32_t isExt = sub.extension.use;
 
-        otlSubtableAdd(g, h->otl, sub->script, sub->language, sub->feature,
-                       isExt ? GPOSExtension : sub->lkpType,
-                       sub->lkpFlag, sub->markSetIndex,
-                       isExt ? sub->lkpType : 0,
-                       IS_REF_LAB(sub->label) ? 0 : sub->offset,
-                       sub->label,
-                       (unsigned short)(IS_REF_LAB(sub->label) ? 0 : isExt ? sub->extension.tbl->PosFormat : *(unsigned short *)sub->tbl),
-                       (sub->lkpType == GPOSFeatureParam));
+        otlSubtableAdd(g, otl, sub.script, sub.language, sub.feature,
+                       isExt ? GPOSExtension : sub.lkpType,
+                       sub.lkpFlag, sub.markSetIndex,
+                       isExt ? sub.lkpType : 0,
+                       IS_REF_LAB(sub.label) ? 0 : sub.offset,
+                       sub.label,
+                       (uint16_t)(IS_REF_LAB(sub.label) ? 0 : isExt ? sub.extension.tbl.PosFormat :  sub.subformat()),
+                       (sub.lkpType == GPOSFeatureParam));
     }
     DF(1, (stderr, "### GPOS:\n"));
 
-    otlTableFill(g, h->otl, h->offset.featParam);
+    otlTableFill(g, otl, offset.featParam);
 
-    h->offset.extensionSection = h->offset.subtable + otlGetCoverageSize(h->otl) + otlGetClassSize(h->otl);
+    offset.extensionSection = offset.subtable + otlGetCoverageSize(otl) + otlGetClassSize(otl);
 
 #if HOT_DEBUG
-    otlDumpSizes(g, h->otl, h->offset.subtable, h->offset.extension);
+    otlDumpSizes(g, otl, offset.subtable, offset.extension);
 #endif /* HOT_DEBUG */
 
     /* setAnonLookupIndices marks as used not only the anonymous lookups, */
     /* but also all lookups that were referenced from chain pos rules,    */
     /* including the stand-alone lookups. This is why                     */
     /* checkStandAloneTablRefs has to follow setAnonLookupIndices.        */
-    setAnonLookupIndices(g, h);
+    setAnonLookupIndices();
 
-    checkStandAloneTablRefs(g, h->otl);
+    checkStandAloneTablRefs(g, otl);
 
-    OS_2SetMaxContext(g, h->maxContext);
+    OS_2SetMaxContext(g, maxContext);
 
     return 1;
 }
 
-static void featParamsWrite(hotCtx g, GPOSCtx h) {
-    int i;
-
-    for (i = 0; i < h->subtables.cnt; i++) {
-        Subtable *sub = &h->subtables.array[i];
+void GPOS::featParamsWrite() {
+    for (auto &sub: subtables) {
         if (IS_REF_LAB(sub->label)) {
             continue;
         }
@@ -437,7 +171,7 @@ static void featParamsWrite(hotCtx g, GPOSCtx h) {
                 /* I am keep the case switch from GPOS Write in case
                  we ever have  new GPOS feature param. */
                 case GPOSFeatureParam:
-                    writeFeatParam(h, sub);
+                    sub->write(this);
                     break;
         }
     }
@@ -445,17 +179,17 @@ static void featParamsWrite(hotCtx g, GPOSCtx h) {
 
 
 void GPOSWrite(hotCtx g) {
-    int i;
-    GPOSCtx h = g->ctx.GPOS;
+    g->ctx.GPOS->Write();
+}
 
+void GPOS::Write() {
     /* Write OTL features */
-    otlTableWrite(g, h->otl);
-    featParamsWrite(g, h);
-    otlLookupListWrite(g, h->otl);
+    otlTableWrite(g, >otl);
+    featParamsWrite();
+    otlLookupListWrite(g, otl);
 
     /* Write main subtable section */
-    for (i = 0; i < h->subtables.cnt; i++) {
-        Subtable *sub = &h->subtables.array[i];
+    for (auto &sub: subtables) {
         STRCPY_S(g->error_id_text, sizeof(g->error_id_text), sub->id_text);
 
         if (IS_REF_LAB(sub->label)) {
@@ -463,206 +197,66 @@ void GPOSWrite(hotCtx g) {
         }
 
         if (sub->extension.use) {
-            writeExtension(g, h, sub);
+            writeExtension(*sub);
             continue;
         }
 
-        switch (sub->lkpType) {
+        switch (sub.lkpType) {
             case GPOSSingle:
-                writeSinglePos(g, h, sub);
-                break;
-
             case GPOSPair:
-                writePairPos(g, h, sub);
-                break;
-
             case GPOSChain:
-                writeChainPos(g, h, sub);
-                break;
-
             case GPOSCursive:
-                writeCursive(g, h, sub);
-                break;
-
             case GPOSMarkToBase:
-                writeMarkToBase(g, h, sub);
-                break;
-
             case GPOSMarkToLigature:
-                writeMarkToLigature(g, h, sub);
-                break;
-
             case GPOSMarkToMark:
-                writeMarkToBase(g, h, sub);
+                sub->write(this);
                 break;
 
-            case GPOSContext:
-                break;
             /* We do not write the feature param in this loop. That
              happens in featParamsWrite(). */
         }
     }
 
     /* Write main coverage and class tables */
-    otlCoverageWrite(g, h->otl);
-    otlClassWrite(g, h->otl);
+    otlCoverageWrite(g, otl);
+    otlClassWrite(g, otl);
 
     /* Write extension subtables section.                                   */
     /* Each subtable is immediately followed by its coverages and classes. */
-    for (i = 0; i < h->subtables.cnt; i++) {
-        Subtable *sub = &h->subtables.array[i];
-
+    for (auto &sub: subtables) {
         if (IS_REF_LAB(sub->label) || sub->extension.use == 0) {
             continue;
         }
 
-        switch (sub->lkpType) {
+        switch (sub.lkpType) {
             case GPOSSingle:
-                writeSinglePos(g, h, sub);
-                break;
-
             case GPOSPair:
-                writePairPos(g, h, sub);
-                break;
-
             case GPOSChain:
-                writeChainPos(g, h, sub);
-                break;
-
             case GPOSCursive:
-                writeCursive(g, h, sub);
-                break;
-
             case GPOSMarkToBase:
-                writeMarkToBase(g, h, sub);
-                break;
-
             case GPOSMarkToLigature:
-                writeMarkToLigature(g, h, sub);
-                break;
-
             case GPOSMarkToMark:
-                writeMarkToBase(g, h, sub);
-                break;
-
-            case GPOSContext:
+                sub->write(this);
                 break;
         }
     }
 }
 
 void GPOSReuse(hotCtx g) {
-    GPOSCtx h = g->ctx.GPOS;
-    int i;
-
-    h->nw.script = h->nw.language = h->nw.feature = TAG_UNDEF;
-
-    for (i = 0; i < h->subtables.cnt; i++) {
-        Subtable *sub = &h->subtables.array[i];
-
-        if (IS_REF_LAB(sub->label)) {
-            continue;
-        }
-
-        if (sub->extension.use) {
-            freeExtension(g, h, sub); /* In addition to the following frees: */
-        }
-        switch (sub->lkpType) {
-            case GPOSSingle:
-                freeSinglePos(g, sub);
-                break;
-
-            case GPOSPair:
-                freePairPos(g, sub);
-                break;
-
-            case GPOSFeatureParam:
-                freeFeatParam(g, sub);
-                break;
-
-            case GPOSCursive:
-                freeCursive(g, sub);
-                break;
-
-            case GPOSMarkToBase:
-                freeMarkToBase(g, sub);
-                break;
-
-            case GPOSMarkToLigature:
-                freeMarkToLigature(g, sub);
-                break;
-
-            case GPOSMarkToMark:
-                freeMarkToBase(g, sub);
-                break;
-
-            case GPOSContext:
-                break;
-
-            case GPOSChain:
-                freeChain(g, h, sub);
-                break;
-        }
-    }
-
-    h->nw.rules.cnt = 0;
-    h->nw.markClassList.cnt = 0;
-    h->nw.baseList.cnt = 0;
-    h->nw.single.cnt = 0;
-    h->nw.pairs.cnt = 0;
-    h->offset.featParam = h->offset.subtable = 0;
-    h->offset.extension = h->offset.extensionSection = 0;
-
-    h->values.cnt = 0;
-    h->subtables.cnt = 0;
-
-    h->nw.parentLkpType = 0;
-    h->featNameID = 0;
-    h->anonSubtable.cnt = 0;
-    h->posLookup.cnt = 0;
-
-    h->maxContext = 0;
-    h->hadError = 0;
-    otlTableReuse(g, h->otl);
+    delete g->ctx.GPOS;
+    g->ctx.GPOS = new GPOS(g);
 }
 
 void GPOSFree(hotCtx g) {
-    long i;
-    GPOSCtx h = g->ctx.GPOS;
-
-    dnaFREE(h->nw.rules);
-    dnaFREE(h->nw.markClassList);
-    for (i = 0; i < h->nw.baseList.cnt; i++) {
-        dnaFREE(h->nw.baseList.array[i].anchorMarkInfo);
-        MEM_FREE(g, h->nw.baseList.array[i].locDesc);
-    }
-    dnaFREE(h->nw.baseList);
-    dnaFREE(h->nw.single);
-    dnaFREE(h->nw.pairs);
-    dnaFREE(h->values);
-    dnaFREE(h->subtables);
-    /* anonSubtable has an init function, so you need to deallocate size number of rules */
-    for (i = 0; i < h->anonSubtable.size; i++) {
-        dnaFREE(h->anonSubtable.array[i].rules);
-    }
-    dnaFREE(h->anonSubtable);
-    dnaFREE(h->posLookup);
-
-    dnaFREE(h->classDef[0].classInfo);
-    dnaFREE(h->classDef[0].cov);
-    dnaFREE(h->classDef[1].classInfo);
-    dnaFREE(h->classDef[1].cov);
-
-    otlTableFree(g, h->otl);
-    h->otl = NULL;
-    MEM_FREE(g, g->ctx.GPOS);
+    delete g->ctx.GPOS;
+    g->ctx->GPOS = nullptr;
 }
 
 /* ------------------------ Supplementary Functions ------------------------ */
 
 /* Begin new feature (can be called multiple times for same feature) */
 
-void GPOSFeatureBegin(hotCtx g, Tag script, Tag language, Tag feature) {
+void GPOS::FeatureBegin(Tag script, Tag language, Tag feature) {
     GPOSCtx h = g->ctx.GPOS;
 
     DF(2, (stderr, "\n"));
@@ -671,78 +265,64 @@ void GPOSFeatureBegin(hotCtx g, Tag script, Tag language, Tag feature) {
            TAG_ARG(script), TAG_ARG(language), TAG_ARG(feature)));
 #endif
 
-    if (h->nw.script != script) {
-        h->nw.script = script;
+    if (nw.script != script) {
+        nw.script = script;
     }
-    if (h->nw.language != language) {
-        h->nw.language = language;
+    if (nw.language != language) {
+        nw.language = language;
     }
-    if (h->nw.feature != feature) {
-        h->nw.feature = feature;
+    if (nw.feature != feature) {
+        nw.feature = feature;
     }
 }
 
-static void reuseClassDefs(GPOSCtx h) {
-    int i;
-    for (i = 0; i < 2; i++) {
-        int j;
-        ClassDef *cdef = &h->classDef[i];
-        for (j = 0; j < cdef->classInfo.cnt; j++) {
-            featRecycleNodes(h->g, cdef->classInfo.array[j].gc);
-        }
-        cdef->classInfo.cnt = 0;
-        cdef->cov.cnt = 0;
-    }
+void GPOS::reuseClassDefs() {
+    classDef[0].reset(g);
+    classDef[1].reset(g);
 }
 
 /* Start new subtable explicitly. */
 
-static void startNewSubtable(hotCtx g) {
-    GPOSCtx h = g->ctx.GPOS;
-    Subtable *sub;
-    int hasFeatureParam = h->nw.lkpType == GPOSFeatureParam;
+Subtable::Subtable(GPOS &h) {
+    SubtableInfo &si = h.nw;
 
-    sub = h->nw.sub = dnaNEXT(h->subtables);
-    if (hasFeatureParam) {
-        sub->offset = h->offset.featParam;
+    if (si.lkpType == GPOSFeatureParam) {
+        offset = offset.featParam;
     } else {
-        sub->offset = h->offset.subtable;
+        offset = offset.subtable;
     }
 
-    sub->script = h->nw.script;
-    sub->language = h->nw.language;
-    sub->feature = h->nw.feature;
-    STRCPY_S(sub->id_text, sizeof(sub->id_text), g->error_id_text); /* save feature and lookup names for writing phase */
-    sub->lkpType = h->nw.lkpType;
-    sub->lkpFlag = h->nw.lkpFlag;
-    sub->markSetIndex = h->nw.markSetIndex;
-    sub->label = h->nw.label;
+    script = si.script;
+    language = si.language;
+    feature = si.feature;
+    STRCPY_S(id_text, sizeof(sub.id_text), h.g->error_id_text); /* save feature and lookup names for writing phase */
+    lkpType = si.lkpType;
+    lkpFlag = si.lkpFlag;
+    markSetIndex = si.markSetIndex;
+    label = si.label;
 
-    sub->extension.use = h->nw.useExtension;
-    if (h->nw.useExtension && (!IS_REF_LAB(h->nw.label)) && (!hasFeatureParam)) {
-        sub->extension.otl = otlTableNew(g);
-        sub->extension.offset = h->offset.extension; /* Not needed */
-        sub->extension.tbl = fillExtensionPos(g, h, h->nw.lkpType);
-    } else {
-        sub->extension.otl = NULL;
-        sub->extension.offset = 0;
-        sub->extension.tbl = NULL;
+    extension.use = si.useExtension;
+    if (si.useExtension && (!IS_REF_LAB(si.label)) && (si.lkpType != GPOSFeatureParam)) {
+        extension.otl = otlTableNew(h.g);
+        extension.offset = offset.extension; /* Not needed */
+        h.fillExtensionPos(si.lkpType, extension.tbl);
     }
+}
 
-    reuseClassDefs(h);
+void GPOS::AddSubtable(std::unique_ptr<Subtable> s) {
+    reuseClassDefs();
+    subtables.push_back(std::move(s));
 }
 
 #if HOT_DEBUG
 
-static void rulesDump(GPOSCtx h) {
-    long i;
-
-    fprintf(stderr, "# Dump lookupType %d rules:\n", h->nw.lkpType);
-    for (i = 0; i < h->nw.rules.cnt; i++) {
-        PosRule *rule = &h->nw.rules.array[i];
+void GPOS::rulesDump() {
+    fprintf(stderr, "# Dump lookupType %d rules:\n", nw.lkpType);
+    for (int i = 0; i < nw.rules.size(); i++) {
+        PosRule &rule = nw.rules[i];
 
         fprintf(stderr, "  [%ld] ", i);
-        featPatternDump(h->g, rule->targ, ' ', 1);
+        featPatternDump(g, rule.targ, ' ', 1);
     }
 }
 
@@ -750,130 +330,97 @@ static void rulesDump(GPOSCtx h) {
 
 /* Begin new lookup */
 
-void GPOSLookupBegin(hotCtx g, unsigned lkpType, unsigned lkpFlag, Label label,
-                     short useExtension, unsigned short useMarkSetIndex) {
-    GPOSCtx h = g->ctx.GPOS;
-    SubtableInfo *newsi = &h->nw;
-
+void GPOS::LookupBegin(uint32_t lkpType, uint32_t lkpFlag, Label label,
+                       int16_t useExtension, uint16_t useMarkSetIndex) {
     DF(2, (stderr,
            " { GPOS lkpType=%s%d lkpFlag=%d label=%x\n",
            useExtension ? "EXTENSION:" : "", lkpType, lkpFlag, label));
 
-    newsi->useExtension = useExtension;
-    newsi->lkpType = lkpType;
-    newsi->lkpFlag = lkpFlag;
-    newsi->markSetIndex = useMarkSetIndex;
-    newsi->label = label;
-    newsi->parentLkpType = 0;
-
-    /* These are accumulators for all rules in a single lookup; they may in */
-    /* fact be broken up into several subtables within this module          */
-    newsi->single.cnt = 0;
-    newsi->pairs.cnt = 0;
-    newsi->pairFmt = 0;
-    newsi->pairValFmt1 = 0;
-    newsi->pairValFmt2 = 0;
-    newsi->markClassList.cnt = 0;
-    newsi->baseList.cnt = 0;
-    newsi->rules.cnt = 0;
+    nw.reset(lkpType, lkpFlag, label, useExtension, useMarkSetIndex);
 }
 
 /* Recycle class kern pairs */
 
-static void recyclePairs(GPOSCtx h) {
-    long i;
-    for (i = 0; i < h->nw.pairs.cnt; i++) {
-        KernRec *pair = &h->nw.pairs.array[i];
-        featRecycleNodes(h->g, pair->first.gcl);
-        featRecycleNodes(h->g, pair->second.gcl);
+void GPOS::recyclePairs() {
+    for (auto &pair: pairs) {
+        featRecycleNodes(g, pair.first.gcl);
+        featRecycleNodes(g, pair.second.gcl);
     }
 }
 
 /* End lookup */
 
-void GPOSLookupEnd(hotCtx g, Tag feature) {
-    GPOSCtx h = g->ctx.GPOS;
+void GPOS::LookupEnd(Tag feature) {
     DF(2, (stderr, " } GPOS\n"));
 
     /* Return if simply a reference */
-    if (IS_REF_LAB(h->nw.label)) {
-        startNewSubtable(g);
+    if (IS_REF_LAB(nw.label)) {
+        startNewSubtable();
         return;
     }
 
-    if (g->hadError) {
+    if (hadError) {
         return;
     }
 
     /* This function used to check for an empty feature or lookup,           */
     /* but this cannot happen with the current implementation of the parser. */
 
-    if (h->otl == NULL) {
+    if (otl == NULL) {
         /* Allocate table if not done so already */
-        h->otl = otlTableNew(g);
+        otl = otlTableNew(g);
     }
 
-    switch (h->nw.lkpType) {
-        case GPOSSingle:
-            /* No need to test that at least one GPOSSingle rule exists. Can't get here if that is the case */
-            fillSinglePos(g, h);
-            break;
-
-        case GPOSPair:
-            /* No need to test that at least one GPOSPair rule exists. Can't get here if that is the case */
-            fillPairPos(g, h);
-            if (h->nw.pairFmt == 2) {
-                recyclePairs(h);
-                reuseClassDefs(h);
-            }
-            break;
-
+    switch (nw.lkpType) {
         case GPOSFeatureParam:
-            /* No need to test that current feature is 'size', as that is already enforced in feat.c */
-            fillSizeFeature(g, h, h->nw.sub);
+            AddSubtable(FeatureParameters::fill(*this));
+            break;
+
+        case GPOSSingle:
+            AddSubtable(SinglePos::fill(*this));
             break;
 
         case GPOSChain:
-            /* No need to test that at least one GPOSChain rule exists. Can't get here if that is the case */
-            fillChain(g, h);
+            AddSubtable(ChainPos::fill(*this));
             break;
 
         case GPOSCursive:
-            /* No need to test that least one GPOSCursive rule exists. Can't get here if that is the case */
-            fillCursive(g, h);
+            AddSubtable(CursivePos::fill(*this));
             break;
 
         case GPOSMarkToBase:
-            /* No need to test that least one GPOSMarkToBase rule exists. Can't get here if that is the case */
-            fillMarkToBase(g, h);
+            AddSubtable(MarkToBasePos::fill(*this));
             break;
 
         case GPOSMarkToLigature:
-            /* No need to test that at least one GPOSMarkToLigature rule exists. Can't get here if that is the case */
-            fillMarkToLigature(g, h);
+            AddSubtable(MarkToLigPos::fill(*this));
             break;
 
         case GPOSMarkToMark:
-            /* No need to test that at least one GPOSMarkToMark rule exists. Can't get here if that is the case */
-            fillMarkToBase(g, h);
+            AddSubtable(MarkToMarkPos::fill(*this));
             break;
 
-            /* No need to test for case GPOSContext type. Not supported */
+        case GPOSPair:
+            AddSubtable(PairPos::fill(*this));
+            if (nw.pairFmt == 2) {
+                recyclePairs();
+            }
+            break;
 
         default:
             /* Can't get here, but it is a useful check for future development. */
-            hotMsg(g, hotFATAL, "unknown GPOS lkpType <%d> in %s.", h->nw.lkpType, g->error_id_text);
+            hotMsg(g, hotFATAL, "unknown GPOS lkpType <%d> in %s.", nw.lkpType, g->error_id_text);
     }
 
-    check_overflow(g, "lookup subtable", h->offset.subtable, "positioning");
+    check_overflow(g, "lookup subtable", offset.subtable, "positioning");
 
-    if (h->startNewPairPosSubtbl != 0) {
-        h->startNewPairPosSubtbl = 0;
+    if (startNewPairPosSubtbl != 0) {
+        startNewPairPosSubtbl = 0;
     }
 }
 
 /* Performs no action but brackets feature calls */
-void GPOSFeatureEnd(hotCtx g) {
+void GPOS::FeatureEnd() {
     DF(2, (stderr, "} GPOS\n"));
 }
 
@@ -893,53 +440,50 @@ void GPOSFeatureEnd(hotCtx g) {
 typedef int32_t ValueRecord; /* Stores index into h->values, which is read at write time. If -1, then write 0; */
 
 /* --- Anchor Table --- */
-typedef struct {
-    unsigned short AnchorFormat; /* =1 */
-    short XCoordinate;
-    short YCoordinate;
-} AnchorFormat1;
+struct AnchorFormat1 {
+    uint16_t AnchorFormat {0}; /* =1 */
+    int16_t XCoordinate {0};
+    int16_t YCoordinate {0};
+};
 
-typedef struct {
-    unsigned short AnchorFormat; /* =2 */
-    short XCoordinate;
-    short YCoordinate;
-    unsigned short AnchorPoint;
-} AnchorFormat2;
+struct AnchorFormat2 {
+    uint16_t AnchorFormat {0}; /* =2 */
+    int16_t XCoordinate {0};
+    int16_t YCoordinate {0};
+    uint16_t AnchorPoint {0};
+};
 
-typedef struct {
-    unsigned short AnchorFormat; /* =3 */
-    short XCoordinate;
-    short YCoordinate;
-    Offset XDeviceTable;
-    Offset YDeviceTable;
-} AnchorFormat3;
+struct AnchorFormat3 {
+    uint16_t AnchorFormat {0}; /* =3 */
+    int16_t XCoordinate {0};
+    int16_t YCoordinate {0};
+    Offset XDeviceTable {0};
+    Offset YDeviceTable {0};
+};
 
 /* --- Mark Array --- */
-typedef struct {
+struct MarkRecord {
     GID gid;        /* not part of the font data - used to sort recs when building table. */
     LOffset anchor; /* not part of the font data - used while building table. */
-    unsigned short Class;
-} MarkRecord;
+    uint16_t Class;
+};
 
-typedef struct {
-    unsigned short MarkCount;
+struct MarkArray {
+    uint16_t MarkCount;
     MarkRecord *markRecord; /* [MarkCount] */
-} MarkArray;
+};
 
 /* --- ValueFormat and ValueRecord utility functions --- */
 
-static unsigned int isVertFeature(Tag featTag) {
-    int isVert = 0;
-    if ((featTag == vkrn_) || (featTag == vpal_) || (featTag == vhal_) || (featTag == valt_))
-        isVert = 1;
-    return isVert;
+static unsigned bool isVertFeature(Tag featTag) {
+    return (featTag == vkrn_) || (featTag == vpal_) ||
+           (featTag == vhal_) || (featTag == valt_);
 }
 
 /* Calculate value format */
 
-static unsigned makeValueFormat(hotCtx g, int xPla, int yPla, int xAdv, int yAdv) {
+uint32_t GPOS::makeValueFormat(int xPla, int yPla, int xAdv, int yAdv) {
     unsigned val = 0;
-    GPOSCtx h = g->ctx.GPOS;
 
     if (xPla) {
         val |= ValueXPlacement;
@@ -952,7 +496,7 @@ static unsigned makeValueFormat(hotCtx g, int xPla, int yPla, int xAdv, int yAdv
     }
 
     if (xAdv) {
-        if ((val == 0) && (isVertFeature(h->nw.feature)))
+        if ((val == 0) && (isVertFeature(nw.feature)))
             val = ValueYAdvance;
         else
             val |= ValueXAdvance;
@@ -961,27 +505,28 @@ static unsigned makeValueFormat(hotCtx g, int xPla, int yPla, int xAdv, int yAdv
     return val;
 }
 
-static void recordValues(GPOSCtx h, unsigned valFmt, int xPla, int yPla, int xAdv, int yAdv) {
+void GPOS::recordValues(unsigned valFmt, int32_t xPla, int32_t yPla,
+                        int32_t xAdv, int32_t yAdv) {
     if (valFmt == 0) {
         return;
     }
     if (valFmt & ValueXPlacement) {
-        *dnaNEXT(h->values) = xPla;
+        values.push_back(xPla);
     }
     if (valFmt & ValueYPlacement) {
-        *dnaNEXT(h->values) = yPla;
+        values.push_back(yPla);
     }
     if (valFmt & ValueXAdvance) {
-        *dnaNEXT(h->values) = xAdv;
+        values.push_back(xAdv);
     }
     if (valFmt & ValueYAdvance) {
-        *dnaNEXT(h->values) = yAdv;
+        values.push_back(yAdv);
     }
 }
 
 /* Counts bits set in valFmt */
 
-static int numValues(unsigned valFmt) {
+static int numValues(uint32_t valFmt) {
     int i = 0;
     while (valFmt) {
         i++;
@@ -992,32 +537,13 @@ static int numValues(unsigned valFmt) {
 
 /* Write value record */
 
-static void writeValueRecord(GPOSCtx h, unsigned valFmt, ValueRecord i) {
+void GPOS::writeValueRecord(unsigned valFmt, ValueRecord i) {
     while (valFmt) {
         /* Write 1 field per valFmt bit, if index is valid */
-        OUT2((short)((i == VAL_REC_UNDEF) ? 0 : h->values.array[i++]));
+        OUT2((int16_t)((i == VAL_REC_UNDEF) ? 0 : values[i++]));
         valFmt &= valFmt - 1; /* Remove least significant set bit */
     }
 }
-
-/* --------------------------- Single Adjustment --------------------------- */
-
-typedef struct {
-    unsigned short PosFormat; /* =1 */
-    LOffset Coverage;         /* 32-bit for overflow check */
-    unsigned short ValueFormat;
-    ValueRecord Value;
-} SinglePosFormat1;
-#define SINGLE1_SIZE(nVal) (uint16 * 3 + int16 * (nVal))
-
-typedef struct {
-    unsigned short PosFormat; /* =2 */
-    LOffset Coverage;         /* 32-bit for overflow check */
-    unsigned short ValueFormat;
-    unsigned short ValueCount;
-    ValueRecord *Value; /* [ValueCount] */
-} SinglePosFormat2;
-#define SINGLE2_SIZE(valCnt, nVal) (uint16 * 4 + int16 * (valCnt) * (nVal))
 
 /* The input array has either 2 or 4 elements ( 2 if the second is 0, else 4),
  * and the output array has 5 elements. The first 2 are in the same order
@@ -1026,56 +552,129 @@ typedef struct {
  * The kSizeMenuNameID element of the output record
  * is filled in only when fillSizeFeature() is called.
  */
-void GPOSAddSize(hotCtx g, short *params, unsigned short numParams) {
-    GPOSCtx h = g->ctx.GPOS;
-    Subtable *sub;
-    FeatureParameterFormat *feat_param = NULL;
-    unsigned short *outParamPtr;
-
-    int param_offset = sizeof(feat_param->numParams);
-    int outParamSize = (uint16 * 5) + param_offset; /* output record size in bytes */
-
-    if ((params[kSizeSubFamilyID] != 0) && (numParams != 4)) {
+void GPOS::AddSize(std::vector<uint16_t> &params) {
+    int l = params.size();
+    if (l < 2)
+        hotMsg(g, hotFATAL, "'size' feature must have at least two parameters! In %s.", g->error_id_text);
+    else if (params[kSizeSubFamilyID] != 0 && l != 4) {
         hotMsg(g, hotFATAL, "'size' feature must have 4 parameters if sub family ID code is non-zero! In %s.", g->error_id_text);
-    } else if ((params[kSizeSubFamilyID] == 0) && (numParams != 4) && (numParams != 2)) {
+    else if (params[kSizeSubFamilyID] == 0 && l != 4 && l != 2) {
         hotMsg(g, hotFATAL, "'size' feature must have 4 or 2 parameters if sub family code is zero! In %s.", g->error_id_text);
     }
 
-    startNewSubtable(g);
-    sub = h->nw.sub;
-
-    feat_param = (FeatureParameterFormat *)MEM_NEW(g, outParamSize);
-    feat_param->numParams = 5; /* The output record has an additional field. */
-    outParamPtr = (unsigned short *)&(feat_param->params[param_offset]);
-
-    outParamPtr[kSizeOpticalSize] = params[kSizeOpticalSize]; /* decipoint size, in decipoints */
-    outParamPtr[kSizeSubFamilyID] = params[kSizeSubFamilyID]; /* subfamily code. If zero, rest must be zero. */
-    if (params[kSizeSubFamilyID] == 0) {
-        outParamPtr[kSizeMenuNameID] = 0;
-        outParamPtr[kSizeLowEndRange] = 0;
-        outParamPtr[kSizeHighEndRange] = 0;
-    } else {
-        outParamPtr[kSizeMenuNameID] = 0xFFFF;                          /* put a bad value in for the name ID value so we'll know */
-                                                                        /* if it doesn't get overwritten.                         */
-        outParamPtr[kSizeLowEndRange] = params[kSizeLowEndRange - 1];   /* exclusive low end of size range, in decipoints */
-        outParamPtr[kSizeHighEndRange] = params[kSizeHighEndRange - 1]; /* inclusive high end of size range, in decipoints */
+    nw.params[kSizeOpticalSize] = params[kSizeOpticalSize];  /* decipoint size, in decipoints */
+    nw.params[kSizeSubFamilyID] = params[kSizeSubFamilyID];  /* subfamily code. If zero, rest must be zero. */
+    if (params[kSizeSubFamilyID] != 0) {
+        nw.params[kSizeMenuNameID] = 0xFFFF;  /* put a bad value in for the name ID value so we'll know */
+                                               /* if it doesn't get overwritten.                         */
+        nw.params[kSizeLowEndRange] = params[kSizeLowEndRange - 1];
+        nw.params[kSizeHighEndRange] = params[kSizeHighEndRange - 1];
     }
-
-    sub->tbl = feat_param;
-    h->offset.featParam += uint16 * 5; /* When we write it out, we leave off the initial numParams short value.*/
 }
 
-void GPOSSetSizeMenuNameID(hotCtx g, unsigned short nameID) {
-    GPOSCtx h = g->ctx.GPOS;
-    h->featNameID = nameID;
+std::unique_ptr<Subtable> FeatureParameters::fill(GPOS &h) {
+    /* if the kSizeSubFamilyID field is non-zero, then we need to fill in the */
+    /* kSizeMenuNameID field in the parameters array. This value may be zero; */
+    /* if so, then there is no special sub family menu name.                  */
+    auto &p = h.nw.params;
+
+    if ((sub.feature == size_) && (p[kSizeSubFamilyID] != 0)) {
+        uint16_t nameid = h.featNameID;
+
+        p[kSizeMenuNameID] = nameid;
+
+        /* If there is a sub family menu name id,  */
+        /* check if the default names are present, */
+        /* and complain if they are not.           */
+        if (nameid != 0) {
+            uint16_t nameIDPresent = nameVerifyDefaultNames(h.g, nameid);
+            if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
+                hotMsg(h.g, hotFATAL, "Missing Windows default name for 'sizemenuname' nameid %i in 'size' feature.", nameid);
+            }
+        }
+    } else {
+        p[kSizeMenuNameID] = 0;
+    }
+
+    auto r = std::make_unique<FeatureParameters>(p);
+    h.offset.featParam += sizeof(uint16_t) * 5;
+    return r;
+}
+
+/* Write feature parameter table */
+
+void FeatureParameters::write(GPOS *h) {
+    for (auto p: params)
+        OUT2(p);
+}
+
+/* --------------------------- Single Adjustment --------------------------- */
+
+#define SINGLE1_SIZE(nVal) (uint16 * 3 + int16 * (nVal))
+#define SINGLE2_SIZE(valCnt, nVal) (uint16 * 4 + int16 * (valCnt) * (nVal))
+
+LOffset SinglePos::pos1Size(SubtableInfo &si, int iStart, int iEnd) {
+    return SINGLE1_SIZE(numValues(si.single[iStart]));
+}
+
+LOffset SinglePos::pos2Size(SubtableInfo &si, int iStart, int iEnd) {
+    return SINGLE2_SIZE(iEnd - iStart, numValues(si.single[iStart]));
+}
+
+LOffset SinglePos::allPos2Size(SubtableInfo &si, int &nsub) {
+    LOffset r = 0;
+    uint32_t nextSpanValFmt;
+
+    nsub = 0;
+    for (int iFmt = 0; iFmt < si.single.size(); iFmt = nextSpanValFmt) {
+        nextSpanValFmt = nw.single[iFmt].span.valFmt;
+        nsub++;
+        r += pos2Size(si, iFmt, nextSpanValFmt);
+    }
+    return r;
+}
+
+LOffset SinglePos::allPos1Size(SubtableInfo &si, int &nsub) {
+    LOffset r = 0;
+
+    nsub = 0;
+    for (int iFmt = 0; iFmt < si.single.size(); iFmt = si.single[iFmt].span.valFmt) {
+        auto &sFmt = si.single[iFmt];
+        for (int iRec = iFmt; iRec < sFmt.span.valFmt; iRec = sRec.span.valRec) {
+            nsub++;
+            r += pos1Size(si, iRec, si.single[iRec].span.valRec);
+        }
+    }
+    return r;
+}
+
+std::unique_ptr<Subtable> SinglePos::fill(GPOS &h) {
+}
+
+struct SinglePosFormat1 : public SinglePos {
+    uint16_t PosFormat {0}; /* =1 */
+    LOffset Coverage {0};         /* 32-bit for overflow check */
+    uint16_t ValueFormat {0};
+    ValueRecord Value;
+};
+
+struct SinglePosFormat2 : public SinglePos {
+    uint16_t PosFormat {0}; /* =2 */
+    LOffset Coverage {0};         /* 32-bit for overflow check */
+    uint16_t ValueFormat {0};
+    uint16_t ValueCount {0};
+    ValueRecord *Value {0}; /* [ValueCount] */
+};
+
+void GPOS::SetSizeMenuNameID(uint16_t nameID) {
+    featNameID = nameID;
 }
 
 /* Targ may be a class, as a convenience. Input GNodes are recycled. */
 
-static void GPOSAddSingle(hotCtx g, SubtableInfo *si, GNode *targ, int xPla, int yPla, int xAdv, int yAdv) {
+void GPOS::AddSingle(SubtableInfo &si, GNode *targ, int xPla, int yPla, int xAdv, int yAdv) {
     GNode *p;
-    unsigned valFmt;
-    GPOSCtx h = g->ctx.GPOS;
+    uint32_t valFmt;
 
     valFmt = makeValueFormat(g, xPla, yPla, xAdv, yAdv);
 
@@ -1084,23 +683,21 @@ static void GPOSAddSingle(hotCtx g, SubtableInfo *si, GNode *targ, int xPla, int
     }
 
     for (p = targ; p != NULL; p = p->nextCl) {
-        SingleRec *single;
+        SingleRec single;
         if (p->flags & FEAT_MISC) {
             continue; /* skip rules that are duplicates of others that are in this lookup. This is set in addAnonPosRule */
         }
-        single = dnaNEXT(si->single);
-
-        single->gid = p->gid;
-        single->xPla = xPla;
-        single->yPla = yPla;
+        single.gid = p->gid;
+        single.xPla = xPla;
+        single.yPla = yPla;
         if (isVertFeature(h->nw.feature) && (valFmt == ValueYAdvance) && (yAdv == 0)) {
-            single->xAdv = 0;
-            single->yAdv = xAdv;
+            single.xAdv = 0;
+            single.yAdv = xAdv;
         } else {
-            single->xAdv = xAdv;
-            single->yAdv = yAdv;
+            single.xAdv = xAdv;
+            single.yAdv = yAdv;
         }
-        single->valFmt = valFmt;
+        single.valFmt = valFmt;
 #if HOT_DEBUG
         if (DF_LEVEL >= 2) {
             fprintf(stderr, "  * GPOSSingle ");
@@ -1108,88 +705,82 @@ static void GPOSAddSingle(hotCtx g, SubtableInfo *si, GNode *targ, int xPla, int
             fprintf(stderr, " %d %d %d %d\n", xPla, yPla, xAdv, yAdv);
         }
 #endif
+        si.single.push_back(std::move(single));
     }
 }
 
 /* Compare valfmt, then gid */
 
-static int CTL_CDECL cmpSingle(const void *first, const void *second) {
-    SingleRec *a = (SingleRec *)first;
-    SingleRec *b = (SingleRec *)second;
-
-    if (a->yAdv < b->yAdv) {
-        return -1;
-    } else if (a->yAdv > b->yAdv) {
-        return 1;
-    } else if (a->xAdv < b->xAdv) {
-        return -1;
-    } else if (a->xAdv > b->xAdv) {
-        return 1;
-    } else if (a->yPla < b->yPla) {
-        return -1;
-    } else if (a->yPla > b->yPla) {
-        return 1;
-    } else if (a->xPla < b->xPla) {
-        return -1;
-    } else if (a->xPla > b->xPla) {
-        return 1;
-    } else if (a->gid < b->gid) {
-        return -1;
-    } else if (a->gid > b->gid) {
-        return 1;
+static bool cmpSingle(const SingleRec &a, const void &b) {
+    if (a.yAdv < b.yAdv) {
+        return true;
+    } else if (a.yAdv > b.yAdv) {
+        return false;
+    } else if (a.xAdv < b.xAdv) {
+        return true;
+    } else if (a.xAdv > b.xAdv) {
+        return false;
+    } else if (a.yPla < b.yPla) {
+        return true;
+    } else if (a.yPla > b.yPla) {
+        return false;
+    } else if (a.xPla < b.xPla) {
+        return true;
+    } else if (a.xPla > b.xPla) {
+        return false;
+    } else if (a.gid < b.gid) {
+        return true;
+    } else if (a.gid > b.gid) {
+        return false;
     } else {
-        return 0;
+        return false;  // equality
     }
 }
 
 /* Compare gid, then valfmt */
 
-static int CTL_CDECL cmpSingleGID(const void *first, const void *second) {
-    SingleRec *a = (SingleRec *)first;
-    SingleRec *b = (SingleRec *)second;
-
-    if (a->gid < b->gid) {
-        return -1;
-    } else if (a->gid > b->gid) {
-        return 1;
-    } else if (a->yAdv < b->yAdv) {
-        return -1;
-    } else if (a->yAdv > b->yAdv) {
-        return 1;
-    } else if (a->xAdv < b->xAdv) {
-        return -1;
-    } else if (a->xAdv > b->xAdv) {
-        return 1;
-    } else if (a->yPla < b->yPla) {
-        return -1;
-    } else if (a->yPla > b->yPla) {
-        return 1;
-    } else if (a->xPla < b->xPla) {
-        return -1;
-    } else if (a->xPla > b->xPla) {
-        return 1;
+static bool cmpSingleGID(const SingleRec &a, const SingleRec &b) {
+    if (a.gid < b.gid) {
+        return true;
+    } else if (a.gid > b.gid) {
+        return false;
+    } else if (a.yAdv < b.yAdv) {
+        return true;
+    } else if (a.yAdv > b.yAdv) {
+        return false;
+    } else if (a.xAdv < b.xAdv) {
+        return true;
+    } else if (a.xAdv > b.xAdv) {
+        return false;
+    } else if (a.yPla < b.yPla) {
+        return true;
+    } else if (a.yPla > b.yPla) {
+        return false;
+    } else if (a.xPla < b.xPla) {
+        return true;
+    } else if (a.xPla > b.xPla) {
+        return false;
     } else {
-        return 0;
+        return false;
     }
 }
 
 /* Check for duplicate target glyph */
 
-static void checkAndSortSinglePos(hotCtx g, GPOSCtx h) {
+void GPOS::checkAndSortSinglePos() {
     long i;
     int nDuplicates = 0;
 
     /* Sort into increasing target glyph id order */
-    qsort(h->nw.single.array, h->nw.single.cnt, sizeof(SingleRec),
-          cmpSingleGID);
+    std::sort(nw.single.begin(), nw.single.end(), cmpSingleGID);
 
-    for (i = 1; i < h->nw.single.cnt; i++) {
-        SingleRec *curr = &h->nw.single.array[i];
-        SingleRec *prev = curr - 1;
+    for (i = 1; i < h->nw.single.size(); i++) {
+        SingleRec &curr = nw.single.array[i];
+        SingleRec &prev = nw.single.array[i-1];
 
-        if (curr->gid == prev->gid) {
+        if (curr.gid == prev.gid) {
             if (cmpSingle(curr, prev) == 0) {
-                featGlyphDump(g, curr->gid, '\0', 0);
+                featGlyphDump(g, curr.gid, '\0', 0);
                 hotMsg(g, hotNOTE,
                        "Removing duplicate single positioning "
                        "in %s: %s",
@@ -1197,7 +788,7 @@ static void checkAndSortSinglePos(hotCtx g, GPOSCtx h) {
                        g->note.array);
 
                 /* Set prev duplicate to NULL */
-                prev->gid = GID_UNDEF;
+                prev.gid = GID_UNDEF;
                 nDuplicates++;
             } else {
                 featGlyphDump(g, curr->gid, '\0', 0);
@@ -1211,79 +802,48 @@ static void checkAndSortSinglePos(hotCtx g, GPOSCtx h) {
 
     if (nDuplicates > 0) {
         /* Duplicates sink to the bottom */
-        qsort(h->nw.single.array, h->nw.single.cnt, sizeof(SingleRec),
-              cmpSingleGID);
-        h->nw.single.cnt -= nDuplicates;
+        std::sort(nw.single.begin(), nw.single.end(), cmpSingleGID);
+        nw.single.resize(nw.single.size() - nDuplicates);
     }
 
     /* Now sort by valfmt (then gid) */
-    qsort(h->nw.single.array, h->nw.single.cnt, sizeof(SingleRec), cmpSingle);
+    std::sort(nw.single.begin(), nw.single.end(), cmpSingle);
 }
 
-static void prepSinglePos(hotCtx g) {
-    GPOSCtx h = g->ctx.GPOS;
+void GPOS::prepSinglePos() {
     int Fmt;
     int fmt;
 
-    checkAndSortSinglePos(g, h);
+    checkAndSortSinglePos();
 
     /* Calculate value format and value record spans */
-    dnaNEXT(h->nw.single)->valFmt = -1;
-    Fmt = 0;
-    for (fmt = 1; fmt < h->nw.single.cnt; fmt++) {
-        if (h->nw.single.array[fmt].valFmt != h->nw.single.array[Fmt].valFmt) {
+    SingleRec sn;
+    sn.valFmt = -1;
+    nw.single.push_back(std::move(sn));
+    pfmt = 0;
+    for (fmt = 1; fmt < nw.single.size(); fmt++) {
+        if (nw.single[fmt].valFmt != h->nw.single[pfmt].valFmt) {
             /* Value format change. Now calc valRec spans. */
             int rec;
-            int Rec = Fmt;
+            int Rec = pfmt;
 
             for (rec = Rec + 1; rec <= fmt; rec++) {
-                SingleRec *r = &h->nw.single.array[rec];
-                SingleRec *R = &h->nw.single.array[Rec];
+                SingleRec &r = nw.single[rec];
+                SingleRec &R = nw.single[Rec];
 
-                if (rec == fmt || r->xPla != R->xPla || r->xAdv != R->xAdv ||
-                    r->yPla != R->yPla || r->yAdv != R->yAdv) {
+                if (rec == fmt || r.xPla != R.xPla || r.xAdv != R.xAdv ||
+                    r.yPla != R.yPla || r.yAdv != R.yAdv) {
                     /* val rec change */
-                    h->nw.single.array[Rec].span.valRec = rec;
+                    R.span.valRec = rec;
                     Rec = rec;
                 }
             }
-            h->nw.single.array[Fmt].span.valFmt = fmt;
-            Fmt = fmt;
+            nw.single[pfmt].span.valFmt = fmt;
+            pfmt = fmt;
         }
     }
-    h->nw.single.array[Fmt].span.valFmt = fmt;
-    h->nw.single.cnt--;
-}
-
-static void fillSizeFeature(hotCtx g, GPOSCtx h, Subtable *sub) {
-    FeatureParameterFormat *feat_param;
-    unsigned short *params;
-    int paramOffset;
-
-    feat_param = (FeatureParameterFormat *)sub->tbl;
-    paramOffset = sizeof(feat_param->numParams);
-    params = (unsigned short *)&feat_param->params[paramOffset];
-
-    /* if the kSizeSubFamilyID field is non-zero, then we need to fill in the */
-    /* kSizeMenuNameID field in the parameters array. This value may be zero; */
-    /* if so, then there is no special sub family menu name.                  */
-    if ((sub->feature == size_) && (params[kSizeSubFamilyID] != 0)) {
-        unsigned short nameid = h->featNameID;
-
-        params[kSizeMenuNameID] = nameid;
-
-        /* If there is a sub family menu name id,  */
-        /* check if the default names are present, */
-        /* and complain if they are not.           */
-        if (nameid != 0) {
-            unsigned short nameIDPresent = nameVerifyDefaultNames(g, nameid);
-            if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
-                hotMsg(g, hotFATAL, "Missing Windows default name for 'sizemenuname' nameid %i in 'size' feature.", nameid);
-            }
-        }
-    } else {
-        params[kSizeMenuNameID] = 0;
-    }
+    nw.single[pfmt].span.valFmt = fmt;
+    nw.single.pop_back();
 }
 
 static LOffset fillSinglePos1(hotCtx g, int iStart, int iEnd, int simulate) {
@@ -3298,23 +2858,6 @@ static void writePairPos(hotCtx g, GPOSCtx h, Subtable *sub) {
     }
 }
 
-/* Write feature parameter table */
-
-static void writeFeatParam(GPOSCtx h, Subtable *sub) {
-    FeatureParameterFormat *feat_param;
-    unsigned short *params;
-    int paramOffset;
-    int i;
-
-    feat_param = (FeatureParameterFormat *)sub->tbl;
-    paramOffset = sizeof(feat_param->numParams);
-    params = (unsigned short *)&feat_param->params[paramOffset];
-    i = feat_param->numParams;
-    for (i = 0; i < feat_param->numParams; i++) {
-        OUT2(params[i]);
-    }
-}
-
 /* Free format 1 pair positioning subtable */
 
 static void freePairPos1(hotCtx g, Subtable *sub) {
@@ -4489,31 +4032,25 @@ static void freeCursive(hotCtx g, Subtable *sub) {
 
 /* Fill extension positioning subtable */
 
-static ExtensionPosFormat1 *fillExtensionPos(hotCtx g, GPOSCtx h,
-                                             unsigned ExtensionLookupType) {
-    ExtensionPosFormat1 *fmt =
-        (ExtensionPosFormat1 *)MEM_NEW(g, sizeof(ExtensionPosFormat1));
-
-    fmt->PosFormat = 1;
-    fmt->ExtensionLookupType = ExtensionLookupType;
-    fmt->ExtensionOffset = h->offset.extension; /* Adjusted later */
-
-    h->offset.subtable += EXTENSION1_SIZE;
-    return fmt;
+void GPOS::fillExtensionPos(uint32_t ExtensionLookupType, ExtensionPosFormat1 &tbl) {
+    tbl.PosFormat = 1;
+    tbl.ExtensionLookupType = ExtensionLookupType;
+    tbl.ExtensionOffset = offset.extension;
+    offset.subtable += EXTENSION1_SIZE;
 }
 
-static void writeExtension(hotCtx g, GPOSCtx h, Subtable *sub) {
-    ExtensionPosFormat1 *fmt = (ExtensionPosFormat1 *)sub->extension.tbl;
+void GPOS::writeExtension(Subtable &sub) {
+    ExtensionPosFormat1 &fmt = sub.extension.tbl;
 
     /* Adjust offset */
-    fmt->ExtensionOffset += h->offset.extensionSection - sub->offset;
+    fmt.ExtensionOffset += offset.extensionSection - sub.offset;
 
     DF(1, (stderr, "  GPOS Extension: fmt=%1d, lkpType=%2d, offset=%08ux\n",
-           fmt->PosFormat, fmt->ExtensionLookupType, fmt->ExtensionOffset));
+           fmt.PosFormat, fmt.ExtensionLookupType, fmt.ExtensionOffset));
 
-    OUT2(fmt->PosFormat);
-    OUT2(fmt->ExtensionLookupType);
-    OUT4(fmt->ExtensionOffset);
+    OUT2(fmt.PosFormat);
+    OUT2(fmt.ExtensionLookupType);
+    OUT4(fmt.ExtensionOffset);
 }
 
 static void freeExtension(hotCtx g, GPOSCtx h, Subtable *sub) {

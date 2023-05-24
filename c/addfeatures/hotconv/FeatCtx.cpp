@@ -1220,7 +1220,7 @@ void FeatCtx::addFeatureParam(const std::vector<uint16_t> &params) {
         case size_:
             prepRule(GPOS_, GPOSFeatureParam, NULL, NULL);
 
-            GPOSAddSize(g, (short *) params.data(), params.size());
+            GPOSAddSize(g, params);
 
             wrapUpRule();
 
@@ -1848,7 +1848,7 @@ void FeatCtx::prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
         /* Save for possible inclusion later in lang-specific stuff */
         DFLTLkps.push_back(curr);
 
-    /* Store, if applicable, for GPOSContext and aalt creation */
+    /* Store, if applicable, for aalt creation */
     if ((!IS_REF_LAB(curr.label)) && (repl != NULL))
         storeRuleInfo(targ, repl);
 

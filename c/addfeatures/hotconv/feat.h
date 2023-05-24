@@ -58,7 +58,7 @@
 #define IS_ANON_LAB(L) (((L) & ~REF_LAB) >= FEAT_ANON_LKP_BEG && \
                         ((L) & ~REF_LAB) <= FEAT_ANON_LKP_END)
 
-typedef unsigned short Label;
+typedef uint16_t Label;
 
 typedef struct { /* Subtable record */
     unsigned short Format;
