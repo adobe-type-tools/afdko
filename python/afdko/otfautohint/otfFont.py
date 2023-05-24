@@ -529,7 +529,10 @@ class CFFFontData:
         return fdDictArray, gl_vsindex
 
     def getfdIndex(self, name):
-        gid = self.ttFont.getGlyphID(name)
+        try:
+            gid = self.ttFont.getGlyphID(name)
+        except KeyError:
+            return None
         if gid is None:
             return None
         if hasattr(self.topDict, "FDSelect"):
