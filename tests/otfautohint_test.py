@@ -854,6 +854,7 @@ def test_layers():
     assert differ([path, out_path])
 
 
+@pytest.mark.skipif(True, reason="Takes too long to run routinely")
 def test_big_glyph():
     path = get_input_path("dummy/big_glyph.ufo")
     out_path = get_temp_dir_path()

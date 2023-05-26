@@ -13,10 +13,12 @@ import sys
 import textwrap
 
 from . import get_font_format
-from ._version import version as __version__
 from .logging import logging_conf
 from .autohint import ACOptions, hintFiles
 
+__version__ = """\
+otfautohint v3.0.0 May 26 2023
+"""
 
 FONTINFO_FILE_NAME = 'fontinfo'
 
