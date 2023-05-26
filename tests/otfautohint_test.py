@@ -40,7 +40,7 @@ def autohint(args):
 
 
 class OTFOptions(ACOptions):
-    def __init__(self, inpath, outpath, logOnly=False, readHints=True,
+    def __init__(self, inpath, outpath, logOnly=False,
                  zones=None, stems=None, all_stems=None):
         super(OTFOptions, self).__init__()
         self.inputPaths = [inpath]
@@ -64,7 +64,6 @@ class MMOptions(ACOptions):
         self.referenceFont = reference
         self.referenceOutputPath = ref_out
         self.hintAll = True
-        self.verbose = False
         self.verbose = False
 
 
@@ -455,7 +454,7 @@ def test_otf(zones, stems, all_stems):
     path = get_input_path("dummy/font.otf")
     exp_path = get_expected_path("dummy/font.otf")
     out_path = get_temp_dir_path()
-    options = OTFOptions(path, out_path, True, False, zones, stems, all_stems)
+    options = OTFOptions(path, out_path, True, zones, stems, all_stems)
 
     hintFiles(options)
 
