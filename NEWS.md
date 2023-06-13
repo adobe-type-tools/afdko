@@ -1,6 +1,15 @@
 Changelog
 =========
 
+3.9.6 (released 2023-06-13)
+---------------------------
+- [requirements.txt] Update dependencies, unpin specific fonttools version to allow more versions ([#1661](https://github.com/adobe-type-tools/afdko/pull/1661))
+- [tx] fix segfaults due to old function call ([#1649](https://github.com/adobe-type-tools/afdko/pull/1649))
+- [hotconv] Fix warning for negative TypoLineGap ([#1654](https://github.com/adobe-type-tools/afdko/pull/1654)) (thanks, @NSGod!)
+- [hotconv] reset dsigCnt in hotReuse() so subsequent conversions add full stub 'DSIG' table ([#1648](https://github.com/adobe-type-tools/afdko/pull/1648)) (thanks, @NSGod!)
+- [hotconv] 'name': fix memory leak in addName() ([#1646](https://github.com/adobe-type-tools/afdko/pull/1646)) (thanks, @NSGod!)
+- [README] Remove LGTM badges ([#1650](https://github.com/adobe-type-tools/afdko/pull/1650)) (thanks, @miguelsousa!)
+
 3.9.5 (released 2023-04-24)
 ---------------------------
 - [python] **Drop Python 3.7**
