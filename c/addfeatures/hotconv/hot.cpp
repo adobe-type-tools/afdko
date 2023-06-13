@@ -23,7 +23,6 @@
 #include "supportfp.h"
 #include "hotmap.h"
 #include "feat.h"
-#include "otl.h"
 #include "name.h"
 #include "GPOS.h"
 #include "OS_2.h"
@@ -118,11 +117,10 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->DnaCTX = NULL;
     g->ctx.map = NULL;
     g->ctx.feat = NULL;
-    g->ctx.otl = NULL;
     g->ctx.cfr = NULL;
     g->ctx.BASE = NULL;
-    g->ctx.GDEF = NULL;
-    g->ctx.GPOS = NULL;
+    g->ctx.GDEFp = nullptr;
+    g->ctx.GPOSp = nullptr;
     g->ctx.GSUB = NULL;
     g->ctx.OS_2 = NULL;
     g->ctx.cmap = NULL;
@@ -159,7 +157,6 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     /* Initialize modules */
     sfntNew(g);
     mapNew(g);
-    otlNew(g);
     featNew(g);
 
     if (logger)
@@ -754,7 +751,6 @@ void hotFree(hotCtx g) {
 
     sfntFree(g);
     mapFree(g);
-    otlFree(g);
     featFree(g);
 
     dnaFREE(g->note);

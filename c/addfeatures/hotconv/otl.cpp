@@ -7,287 +7,18 @@
 
 #include "otl.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "feat.h"
+#include <algorithm>
+#include <utility>
 
-/* --------------------------- Context Definition -------------------------- */
-
-struct otlCtx_ {
-    hotCtx g; /* Package context */
-};
-
-/* -------------------------- Coverage Definition -------------------------- */
-
-/* --- Format --- */
-
-typedef struct {
-    unsigned short CoverageFormat; /* =1 */
-    unsigned short GlyphCount;
-    GID *GlyphArray; /* [GlyphCount] */
-} CoverageFormat1;
-#define COVERAGE1_SIZE(nGlyphs) (uint16 * 2 + uint16 * (nGlyphs))
-
-typedef struct {
-    GID Start;
-    GID End;
-    unsigned short StartCoverageIndex;
-} RangeRecord;
-#define RANGE_RECORD_SIZE (uint16 * 3)
-
-typedef struct {
-    unsigned short CoverageFormat; /* =2 */
-    unsigned short RangeCount;
-    RangeRecord *rangeRecord; /* [RangeCount] */
-} CoverageFormat2;
-#define COVERAGE2_SIZE(nRanges) (uint16 * 2 + RANGE_RECORD_SIZE * (nRanges))
-
-/* --- Build --- */
-
-typedef struct {
-    dnaDCL(GID, glyph); /* Covered glyph list */
-    Offset offset;      /* Offset to coverage |=> start of coverage section */
-    void *tbl;          /* Formatted table */
-} CoverageRecord;
-
-typedef struct {
-    CoverageRecord *nw;            /* Table under construction */
-    LOffset offset;                 /* Cumulative size of coverages */
-    dnaDCL(CoverageRecord, tables); /* Coverage tables */
-} Coverage;
-
-/* ---------------------------- Class Definition --------------------------- */
-
-/* --- Format --- */
-
-typedef struct {
-    unsigned short ClassFormat; /* =1 */
-    GID StartGlyph;
-    unsigned short GlyphCount;
-    unsigned short *ClassValueArray; /* [GlyphCount] */
-} ClassDefFormat1;
-#define CLASS1_SIZE(nGlyphs) (uint16 * 3 + uint16 * (nGlyphs))
-
-typedef struct {
-    GID Start;
-    GID End;
-    unsigned short Class;
-} ClassRangeRecord;
-#define CLASS_RANGE_RECORD_SIZE (uint16 * 3)
-
-typedef struct {
-    unsigned short ClassFormat; /* =2 */
-    unsigned short ClassRangeCount;
-    ClassRangeRecord *classRangeRecord; /* [ClassRangeCount] */
-} ClassDefFormat2;
-#define CLASS2_SIZE(nRanges) (uint16 * 2 + CLASS_RANGE_RECORD_SIZE * (nRanges))
-
-/* --- Build --- */
-
-typedef struct {
-    GID glyph;
-    unsigned short cls;
-} ClassMap;
-
-typedef struct {
-    dnaDCL(ClassMap, map); /* Class mappings */
-    Offset offset;         /* Offset to class |=> start of class section */
-    void *tbl;             /* Formatted table */
-} ClassRecord;
-
-typedef struct {
-    ClassRecord *nw;            /* Table under construction */
-    LOffset offset;              /* Cumulative size of classes */
-    dnaDCL(ClassRecord, tables); /* Class tables */
-} Class;
-
-/* --------------------------- Device Definition --------------------------- */
-
-typedef struct {
-    unsigned short StartSize;
-    unsigned short EndSize;
-    unsigned short DeltaFormat;
-#define DeltaBits2 1
-#define DeltaBits4 2
-#define DeltaBits8 3
-    unsigned short *DeltaValue; /* [((EndSize-StartSize+1)* (2^DeltaFormat)+15)/16] */
-} DeviceTable;
-
-void otlDeviceBeg(hotCtx g, otlTbl t) {
-    /* Todo */
-}
-
-void otlDeviceAddEntry(hotCtx g, otlTbl t, unsigned short ppem, short delta) {
-    /* Todo */
-}
-
-Offset otlDeviceEnd(hotCtx g, otlTbl t) {
-    /* Todo */
-    return 0;
-}
-
-void otlDeviceWrite(hotCtx g, otlTbl t) {
-    /* Todo */
-}
-
-/* --------------------------------- Table --------------------------------- */
-
-/* --- Format --- */
-
-/* --- ScriptList --- */
-typedef struct {
-    Offset LookupOrder; /* Reserved=NULL */
-    unsigned short ReqFeatureIndex;
-    unsigned short FeatureCount;
-    unsigned short *FeatureIndex; /* [FeatureCount] */
-} LangSys;
-#define LANG_SYS_SIZE(nFeatures) (uint16 * 3 + uint16 * (nFeatures))
-
-typedef struct {
-    Tag LangSysTag;
-    DCL_OFFSET(LangSys, langSys); /* |-> Script */
-} LangSysRecord;
-#define LANG_SYS_RECORD_SIZE (uint32 + uint16)
-
-typedef struct {
-    DCL_OFFSET(LangSys, DefaultLangSys); /* |-> Script */
-    unsigned short LangSysCount;
-    LangSysRecord *langSysRecord; /* [LangSysCount] */
-} Script;
-#define SCRIPT_SIZE(nLanguages) (uint16 * 2 + LANG_SYS_RECORD_SIZE * (nLanguages))
-
-typedef struct {
-    Tag ScriptTag;
-    DCL_OFFSET(Script, script); /* |-> ScriptList */
-} ScriptRecord;
-#define SCRIPT_RECORD_SIZE (uint32 + uint16)
-
-typedef struct {
-    unsigned short ScriptCount;
-    ScriptRecord *scriptRecord; /* [ScriptCount] */
-} ScriptList;
-#define SCRIPT_LIST_SIZE(nScripts) (uint16 + SCRIPT_RECORD_SIZE * (nScripts))
-
-/* --- FeatureList --- */
-typedef struct {
-    LOffset FeatureParams; /* Reserved=NULL */
-    unsigned short LookupCount;
-    unsigned short *LookupListIndex; /* [LookupCount] */
-} Feature;
-#define FEATURE_SIZE(nLookups) (uint16 * 2 + uint16 * (nLookups))
-#define IS_FEAT_PARAM(L) (((L) >> 16) == GPOSFeatureParam) /* test otl SubTable->lookup value. */
-
-typedef struct {
-    Tag FeatureTag;
-    DCL_OFFSET(Feature, feature); /* |-> FeatureList */
-} FeatureRecord;
-#define FEATURE_RECORD_SIZE (uint32 + uint16)
-
-typedef struct {
-    unsigned short FeatureCount;
-    FeatureRecord *featureRecord; /* [FeatureCount] */
-} FeatureList;
-#define FEATURE_LIST_SIZE(nFeatures) (uint16 + FEATURE_RECORD_SIZE * (nFeatures))
-#define FEAT_PARAM_ZERO 1 /* a dummy valued, used to differentiate NULL_OFFSET from a real zero offset for the FeatureParams field.*/
-/* --- LookupList --- */
-typedef struct {
-    unsigned short LookupType;
-    unsigned short LookupFlag;
-    unsigned short SubTableCount;
-    unsigned short UseMarkSetIndex; /* This is not counted in LOOKUP_HDR_SIZE, as it is written only if (LookupFlag & otlUseMarkFilteringSet).*/
-    long *SubTable;                 /* [SubTableCount] |-> Lookup                */
-                                    /* long instead of Offset for temp -ve value */
-} Lookup;
-#define LOOKUP_HDR_SIZE (uint16 * 3)
-#define LOOKUP_SIZE(nSubtables) (LOOKUP_HDR_SIZE + uint16 * (nSubtables))
-
-typedef struct {
-    unsigned short LookupCount;
-    DCL_OFFSET_ARRAY(Lookup, lookup); /* [LookupCount] |-> LookupList */
-} LookupList;
-#define LOOKUP_LIST_SIZE(nLookups) (uint16 + uint16 * (nLookups))
-
-/* --- Header --- */
-typedef struct {
-    Fixed Version;
-    DCL_OFFSET(ScriptList, scriptList);   /* |-> Header */
-    DCL_OFFSET(FeatureList, featureList); /* |-> Header */
-    DCL_OFFSET(LookupList, lookupList);   /* |-> Header */
-} Header;
-#define HEADER_SIZE (uint32 + uint16 * 3)
-
-/* --- Build --- */
-
-typedef struct {
-    Tag script;
-    Tag language;
-    Tag feature;
-    unsigned long lookup; /* Lookup type (31-16), lookup flag (15-0) */
-    unsigned short extensionLookupType;
-    unsigned short offset;
-    unsigned short markSetIndex; /* Used and written only of lookupFlag UseMarkEst is set. */
-    Label label;
-    unsigned short fmt; /* Subtable format (Debug only) */
-    int isFeatParam;
-    int seenInFeature;
-    struct { /* Reference indexes */
-        short feature;
-        short lookup;
-    } index;
-    struct { /* Indexes of next different elements in table */
-        short script;
-        short language;
-        short feature;
-        short lookup;
-    } span;
-} Subtable;
-
-typedef struct {
-    Label label;
-    int lookupInx;
-    int used; /* set to 1 if this label is actually referenced */
-} LabelInfo;
-
-typedef struct {
-    Label baseLabel; /* label of referenced subtable */
-    Label refLabel;  /* label of referencing subtable */
-} RefLabelInfo;
-
-struct otlTbl_ {
-    dnaDCL(Subtable, subtable);     /* Subtable list */
-    dnaDCL(LabelInfo, label);       /* maps: label -> lookup index */
-    dnaDCL(RefLabelInfo, refLabel); /* used to make sure that all stand-alone lookups actually get referenced. */
-    Header tbl;                     /* Formatted table */
-    Offset lookupSize;              /* Size of Lookup List + Lookups */
-    Coverage coverage;
-    Class cls;
-    short nAnonSubtables;
-    short nStandAloneSubtables;
-    short nRefLookups; /* number of otl Subtable 's that are only references to look ups*/
-    short nFeatParams; /* number of otl Subtable 's that hold feature table parameters.*/
-    LOffset params_size; /* size of feature parameter subtable block.*/
-#if HOT_DEBUG
-    int nCoverageReused;
-    int nClassReused;
-#endif
-};
+#define FEAT_PARAM_ZERO 1
 
 #if HOT_DEBUG
 /* Initialize subtable. Not needed except for debug dumps */
-static void initSubtable(void *ctx, long count, Subtable *sub) {
-    long i;
-    for (i = 0; i < count; i++) {
-        sub->seenInFeature = sub->isFeatParam = 0;
-        sub->span.script = sub->span.language = sub->span.feature =
-            sub->span.lookup = 0;
-        sub->index.feature = sub->index.lookup = -1;
-        sub++;
-    }
-    return;
-}
-
-static void valDump(short val, short excep, int isRef) {
+static void valDump(int16_t val, int16_t excep, bool isRef) {
     if (val == excep) {
         fprintf(stderr, "   * ");
     } else if (isRef) {
@@ -308,38 +39,40 @@ static void tagDump(Tag tag, char ch) {
     }
 }
 
-void otlDumpSubtables(hotCtx g, otlTbl t) {
-    long i;
+void otlTbl::Subtable::dump(std::vector<Subtable>::iterator sb) {
+    tagDump(script, ' ');
+    tagDump(language, ' ');
+    tagDump(feature, ' ');
+    fprintf(stderr, "   %2u/%hu|%-3x %4hx ",
+            lookup >> 16,
+            fmt,
+            lookup & 0xffff,
+            offset);
+    fprintf(stderr, "%4x ", label);
 
+    std::vector<Subtable>::iterator uninit;
+    valDump(span.script - sb, uninit - sb, 0);
+    valDump(span.language - sb, uninit - sb, 0);
+    valDump(span.feature - sb, uninit - sb, 0);
+    valDump(span.lookup - sb, uninit - sb, 0);
+    valDump(index.feature, -1, false);
+    valDump(index.lookup, -1, isRef());
+}
+
+void otlTbl::dumpSubtables() {
     fprintf(stderr,
             "# nCov: %ld, nClass: %ld; nCovReused: %d, nClassReused: %d\n"
             "# [offs relative to start of subtable section]\n",
-            t->coverage.tables.cnt, t->cls.tables.cnt,
-            t->nCoverageReused, t->nClassReused);
+            coverage.records.size(), classObj.records.size(),
+            coverage.reused, classObj.reused);
     fprintf(stderr,
             "      -----tag------ --look-----            -------span--------  --index--\n"
             "      scri lang feat typ/fmt|flg offs  lab  scri lang feat look  feat look"
             "\n");
-    for (i = 0; i < t->subtable.cnt; i++) {
-        Subtable *sub = &t->subtable.array[i];
-        fprintf(stderr, "[%3ld] ", i);
-        tagDump(sub->script, ' ');
-        tagDump(sub->language, ' ');
-        tagDump(sub->feature, ' ');
-        fprintf(stderr, "   %2lu/%hu|%-3lx %4hx ",
-                sub->lookup >> 16,
-                sub->fmt,
-                sub->lookup & 0xffff,
-                sub->offset);
-        fprintf(stderr, "%4x ", sub->label);
-
-        valDump(sub->span.script, 0, 0);
-        valDump(sub->span.language, 0, 0);
-        valDump(sub->span.feature, 0, 0);
-        valDump(sub->span.lookup, 0, 0);
-        fprintf(stderr, " ");
-        valDump(sub->index.feature, -1, 0);
-        valDump(sub->index.lookup, -1, IS_REF_LAB(sub->label));
+    uint32_t i = 0;
+    for (auto &sub : subtables) {
+        fprintf(stderr, "[%3d] ", i++);
+        sub.dump(subtables.begin());
         fprintf(stderr, "\n");
     }
 }
@@ -347,15 +80,14 @@ void otlDumpSubtables(hotCtx g, otlTbl t) {
 /* Must call only after otlTableFill(). Returns total length of the Script-,
    Feature-, and Lookup Lists, with all their associated structures (Script,
    LangSys, Feature, Lookup). */
-static LOffset otlGetHeaderSize(otlTbl t) {
-    return t->tbl.lookupList + t->lookupSize;
+LOffset otlTbl::getHeaderSize() {
+    return header.lookupOffset + lookupSize;
 }
 
-void otlDumpSizes(hotCtx g, otlTbl t, LOffset subtableSize,
-                  LOffset extensionSectionSize) {
+void otlTbl::dumpSizes(LOffset subtableSize, LOffset extensionSectionSize) {
     LOffset s, tot = 0;
 
-    s = otlGetHeaderSize(t);
+    s = getHeaderSize();
     tot += s;
     DF(1, (stderr, "  Scr,Fea,Lkp lists:     size %5u, tot %5u\n", s, tot));
 
@@ -363,7 +95,7 @@ void otlDumpSizes(hotCtx g, otlTbl t, LOffset subtableSize,
     tot += s;
     DF(1, (stderr, "  Main subtable section: size %5u, tot %5u\n", s, tot));
 
-    s = otlGetCoverageSize(t);
+    s = getCoverageSize();
     tot += s;
     DF(1, (stderr, "  Main coverage section: size %5u, tot ", s));
     if (s != 0) {
@@ -372,7 +104,7 @@ void otlDumpSizes(hotCtx g, otlTbl t, LOffset subtableSize,
         DF(1, (stderr, "    \"\n"));
     }
 
-    s = otlGetClassSize(t);
+    s = getClassSize();
     tot += s;
     DF(1, (stderr, "  Main class section:    size %5u, tot ", s));
     if (s != 0) {
@@ -395,1098 +127,423 @@ void otlDumpSizes(hotCtx g, otlTbl t, LOffset subtableSize,
 
 /* --------------------------- Standard Functions -------------------------- */
 
-void otlNew(hotCtx g) {
-    otlCtx h = (otlCtx)MEM_NEW(g, sizeof(struct otlCtx_));
+otlTbl::CoverageRecord::CoverageRecord(Offset o, std::set<GID> &gl) : offset(o) {
+    glyphs.swap(gl);
 
-    /* Link contexts */
-    h->g = g;
-    g->ctx.otl = h;
-}
-
-void otlFree(hotCtx g) {
-    MEM_FREE(g, g->ctx.otl);
-}
-
-/* --------------------------- Coverage Functions -------------------------- */
-
-/* Element initializer */
-static void coverageRecordInit(void *ctx, long count, CoverageRecord *rec) {
-    hotCtx g = (hotCtx)ctx;
-    long i;
-    for (i = 0; i < count; i++) {
-        dnaINIT(g->DnaCTX, rec->glyph, 50, 50);
-        rec++;
-    }
-    return;
-}
-
-/* Initialize coverage tables */
-static void coverageNew(hotCtx g, otlTbl t) {
-    t->coverage.offset = 0;
-    dnaINIT(g->DnaCTX, t->coverage.tables, 10, 5);
-    t->coverage.tables.func = coverageRecordInit;
-}
-
-/* Fill format 1 table */
-static CoverageFormat1 *fillCoverage1(hotCtx g, unsigned nGlyphs, GID *glyph) {
-    unsigned int i;
-    unsigned int dstIndex;
-    CoverageFormat1 *fmt = (CoverageFormat1 *)MEM_NEW(g, sizeof(CoverageFormat1)); /* This may be more than we need, because we skip duplicate glyph IDs, but there's no harm in that. */
-
-    fmt->CoverageFormat = 1;
-    fmt->GlyphArray = (GID *)MEM_NEW(g, sizeof(GID) * nGlyphs);
-    // COPY(fmt->GlyphArray, glyph, nGlyphs);
-
-    fmt->GlyphArray[0] = glyph[0];
-    dstIndex = 1;
-    for (i = 1; i < nGlyphs; i++) {
-        if (glyph[i - 1] == glyph[i]) {
-            /* Skip duplicate glyphs */
-
-#if HOT_DEBUG
-            printf("duplicated glyph ['%d']in coverage fmt 1.\n", glyph[i]);
-#endif
-            continue;
+    uint16_t i = 0;
+    RangeRecord range;
+    for (auto gid : glyphs) {
+        if (gid == range.End + 1) {
+            range.End = gid;
+        } else {
+            if (range.Start != GID_UNDEF)
+                ranges.emplace_back(range);
+            range.Start = range.End = gid;
+            range.startCoverageIndex = i;
         }
-        fmt->GlyphArray[dstIndex] = glyph[i];
-        dstIndex++;
+        i++;
     }
-    fmt->GlyphCount = dstIndex;
-    return fmt;
-}
+    if (range.Start != GID_UNDEF)
+        ranges.emplace_back(range);
 
-/* Fill format 2 table */
-static CoverageFormat2 *fillCoverage2(hotCtx g, int nRanges, long nGlyphs,
-                                      GID *glyph) {
-    int i;
-    int iRange;
-    int iStart;
-    unsigned int curNGlyph;
-    CoverageFormat2 *fmt = (CoverageFormat2 *)MEM_NEW(g, sizeof(CoverageFormat2));
-
-    fmt->CoverageFormat = 2;
-    fmt->RangeCount = nRanges;
-    fmt->rangeRecord = (RangeRecord *)MEM_NEW(g, sizeof(RangeRecord) * nRanges);
-
-    iRange = 0;
-    iStart = 0;
-    curNGlyph = 0;
-
-    for (i = 1; i <= nGlyphs; i++) {
-        if (i == nGlyphs || glyph[i - 1] != glyph[i] - 1) {
-            RangeRecord *rec;
-
-            if ((i != nGlyphs) && (glyph[i - 1] == glyph[i])) {
-                /* Skip duplicate glyphs */
-
-#if HOT_DEBUG
-                printf("duplicated glyph ['%d']in coverage fmt 2.\n", glyph[i]);
-#endif
-                continue;
-            }
-            rec = &fmt->rangeRecord[iRange++];
-
-            rec->Start = glyph[iStart];
-            rec->End = glyph[i - 1];
-            iStart = i;
-            rec->StartCoverageIndex = curNGlyph - (rec->End - rec->Start);
-        }
-        curNGlyph++;
-    }
-    return fmt;
-}
-
-/* Fill coverage table */
-static Offset fillCoverage(hotCtx g, otlTbl t) {
-    int i;
-    int nRanges;
-    unsigned size1;
-    unsigned size2;
-    CoverageRecord *nw = t->coverage.nw;
-    long nGlyphs = nw->glyph.cnt;
-    long nFinalGlyphs;
-    GID *glyph = nw->glyph.array;
-
-    nw->offset = (unsigned short)t->coverage.offset;
-
-    /* Count ranges (assumes glyphs sorted by increasing GID) */
-    nRanges = 1;
-    nFinalGlyphs = 1;
-    for (i = 1; i < nGlyphs; i++) {
-        if (glyph[i - 1] == glyph[i]) {
-            /* Skip duplicate glyphs */
-            continue;
-        }
-        nFinalGlyphs++;
-        if (glyph[i - 1] != glyph[i] - 1) {
-            nRanges++;
-        }
-    }
-
-    size1 = COVERAGE1_SIZE(nFinalGlyphs);
-    size2 = COVERAGE2_SIZE(nRanges);
-
-    /* Choose smallest representation */
-
-    if (size1 < size2) {
-        nw->tbl = fillCoverage1(g, nGlyphs, glyph);
-        t->coverage.offset += size1;
-    } else {
-        nw->tbl = fillCoverage2(g, nRanges, nGlyphs, glyph);
-        t->coverage.offset += size2;
-    }
-
-    if (t->coverage.offset > 0xFFFF) {
-        hotMsg(g, hotFATAL, "coverage section too large (%0x)",
-               t->coverage.offset);
-    }
-
-    return nw->offset; /* Return new table's offset */
+    if (cov1size() <= cov2size())  // Decide on format
+        ranges.clear();
 }
 
 /* Write format 1 table */
-static void writeCoverage1(otlCtx h, CoverageFormat1 *fmt) {
-    int i;
-
-    OUT2(fmt->CoverageFormat);
-    OUT2(fmt->GlyphCount);
-    for (i = 0; i < fmt->GlyphCount; i++) {
-        OUT2(fmt->GlyphArray[i]);
+void otlTbl::CoverageRecord::write(otlTbl &t) {
+    if (ranges.size() > 0) {  // format 2
+        t.o2(2);
+        t.o2(ranges.size());
+        for (auto &range : ranges) {
+            t.o2(range.Start);
+            t.o2(range.End);
+            t.o2(range.startCoverageIndex);
+        }
+    } else {  // format 1
+        t.o2(1);
+        t.o2(glyphs.size());
+        for (auto gid : glyphs)
+            t.o2(gid);
     }
 }
 
-/* Write format 2 table */
-static void writeCoverage2(otlCtx h, CoverageFormat2 *fmt) {
-    int i;
+/* Fill coverage table */
+Offset otlTbl::Coverage::fill(otlTbl &t) {
+    records.emplace_back(size, current);
+    size += records.back().size();
 
-    OUT2(fmt->CoverageFormat);
-    OUT2(fmt->RangeCount);
-    for (i = 0; i < fmt->RangeCount; i++) {
-        RangeRecord *rec = &fmt->rangeRecord[i];
-        OUT2(rec->Start);
-        OUT2(rec->End);
-        OUT2(rec->StartCoverageIndex);
-    }
+    if (size > 0xFFFF)
+        hotMsg(t.g, hotFATAL, "coverage section too large (%0x)", size);
+
+    return records.back().offset;
+}
+
+void otlTbl::Coverage::write(otlTbl &t) {
+    for (auto &record : records)
+        record.write(t);
 }
 
 /* Write all coverage tables */
-void otlCoverageWrite(hotCtx g, otlTbl t) {
-    int i;
-    otlCtx h = g->ctx.otl;
-
-    for (i = 0; i < t->coverage.tables.cnt; i++) {
-        void *tbl = t->coverage.tables.array[i].tbl;
-
-        switch (*(unsigned short *)tbl) {
-            case 1:
-                writeCoverage1(h, (CoverageFormat1 *)tbl);
-                break;
-
-            case 2:
-                writeCoverage2(h, (CoverageFormat2 *)tbl);
-                break;
-        }
-    }
-}
-
-/* Free format 1 table */
-static void freeCoverage1(hotCtx g, CoverageFormat1 *fmt) {
-    MEM_FREE(g, fmt->GlyphArray);
-}
-
-/* Free format 2 table */
-static void freeCoverage2(hotCtx g, CoverageFormat2 *fmt) {
-    MEM_FREE(g, fmt->rangeRecord);
-}
-
-/* Free formated table */
-static void freeCoverage(hotCtx g, CoverageRecord *rec) {
-    switch (*(unsigned short *)rec->tbl) {
-        case 1:
-            freeCoverage1(g, (CoverageFormat1 *)rec->tbl);
-            break;
-
-        case 2:
-            freeCoverage2(g, (CoverageFormat2 *)rec->tbl);
-            break;
-    }
-    MEM_FREE(g, rec->tbl);
-}
-
-static void coverageReuse(hotCtx g, otlTbl t) {
-    int i;
-    for (i = 0; i < t->coverage.tables.cnt; i++) {
-        freeCoverage(g, &t->coverage.tables.array[i]);
-    }
-    t->coverage.tables.cnt = 0;
-    t->coverage.offset = 0;
-}
-
-/* Free all coverage tables */
-static void coverageFree(hotCtx g, otlTbl t) {
-    int i;
-    for (i = 0; i < t->coverage.tables.size; i++) {
-        dnaFREE(t->coverage.tables.array[i].glyph);
-    }
-    dnaFREE(t->coverage.tables);
+void otlTbl::coverageWrite() {
+    coverage.write(*this);
 }
 
 /* Begin new coverage table */
-void otlCoverageBegin(hotCtx g, otlTbl t) {
-    t->coverage.nw = dnaNEXT(t->coverage.tables);
-    t->coverage.nw->glyph.cnt = 0;
+void otlTbl::coverageBegin() {
+    coverage.current.clear();
 }
 
 /* Add coverage glyph */
-void otlCoverageAddGlyph(hotCtx g, otlTbl t, GID glyph) {
-    *dnaNEXT(t->coverage.nw->glyph) = glyph;
-}
-
-/* Compare glyph ids */
-static int CTL_CDECL cmpGlyphIds(const void *first, const void *second) {
-    GID a = *(GID *)first;
-    GID b = *(GID *)second;
-    if (a < b) {
-        return -1;
-    } else if (a > b) {
-        return 1;
+void otlTbl::coverageAddGlyph(GID gid, bool warn) {
+    auto [i, b] = coverage.current.insert(gid);
+    if (!b) {
+        if (warn) {
+            featGlyphDump(g, gid, 0, 0);
+            hotMsg(g, hotNOTE, "Removing duplicate glyph <%s>", g->note.array);
+        }
+#if HOT_DEBUG
+        printf("duplicated glyph ['%d'] in coverage.\n", gid);
+#endif
     }
-    return 0;
 }
 
 /* End coverage table; uniqueness of GIDs up to client. Sorting done here. */
-Offset otlCoverageEnd(hotCtx g, otlTbl t) {
-    long i;
-    CoverageRecord *nw = t->coverage.nw;
-
-    /* Sort glyph ids into increasing order */
-    qsort(nw->glyph.array, nw->glyph.cnt, sizeof(GID), cmpGlyphIds);
-
-    /* Check for matching table */
-    for (i = 0; i < t->coverage.tables.cnt - 1; i++) {
-        CoverageRecord *old = &t->coverage.tables.array[i];
-
-        if (nw->glyph.cnt == old->glyph.cnt) {
-            long j;
-            for (j = 0; j < nw->glyph.cnt; j++) {
-                if (nw->glyph.array[j] != old->glyph.array[j]) {
-                    goto next;
-                }
-            }
-
-            /* Found match */
+Offset otlTbl::coverageEnd() {
+    for (auto &record : coverage.records) {
+        if (record.glyphs == coverage.current) {
 #if HOT_DEBUG
-            t->nCoverageReused++;
+            coverage.reused++;
 #if 0
             if (DF_LEVEL >= 2) {
+                auto lasti = coverage.current.rbegin();
                 fprintf(stderr, "# Using coverage already present:");
-                for (j = 0; j < old->glyph.cnt; j++) {
-                    gidDump(g, old->glyph.array[j],
-                            j != old->glyph.cnt - 1 ? ' ' : 0);
-                }
+                for (auto gid : coverage.current)
+                    gidDump(g, gid, (gid != *lasti) ? ' ' : 0);
                 fprintf(stderr, "\n");
             }
 #endif
 #endif
-            t->coverage.tables.cnt--; /* Remove new table */
-            return old->offset;       /* Return matching table's offset */
+            return record.offset;
         }
-    next:
-        {}
     }
 
-    /* No match; fill table and return its offset  */
-    return fillCoverage(g, t);
+    return coverage.fill(*this);
 }
 
 /* Returns total length of the coverage section, for all coverages currently
    defined. */
-LOffset otlGetCoverageSize(otlTbl t) {
-    return t->coverage.offset;
-}
-
-/* Returns total length of the class section, for all classes currently
-   defined. */
-LOffset otlGetClassSize(otlTbl t) {
-    return t->cls.offset;
+LOffset otlTbl::getCoverageSize() {
+    return coverage.size;
 }
 
 /* ---------------------------- Class Functions ---------------------------- */
 
-/* Class record element initializer */
-static void classRecordInit(void *ctx, long count, ClassRecord *rec) {
-    hotCtx g = (hotCtx)ctx;
-    long i;
-    for (i = 0; i < count; i++) {
-        dnaINIT(g->DnaCTX, rec->map, 50, 50);
-        rec++;
-    }
-    return;
-}
+otlTbl::ClassRecord::ClassRecord(Offset o, std::map<GID, uint16_t> &m) : offset(o) {
+    map.swap(m);
 
-static void classNew(hotCtx g, otlTbl t) {
-    t->cls.offset = 0;
-    dnaINIT(g->DnaCTX, t->cls.tables, 10, 5);
-    t->cls.tables.func = classRecordInit;
-}
+    if (map.empty())
+        return;
 
-/* Fill format 1 table */
-static ClassDefFormat1 *fillClass1(hotCtx g,
-                                   int nMaps, ClassMap *maps, int nGlyphs) {
-    int i;
-    ClassDefFormat1 *fmt = (ClassDefFormat1 *)MEM_NEW(g, sizeof(ClassDefFormat1));
+    GID first = map.begin()->first;
+    int32_t nGlyphs = map.rbegin()->first - first + 1;
 
-    fmt->ClassFormat = 1;
-    fmt->StartGlyph = nMaps ? maps[0].glyph : GID_NOTDEF;
-    fmt->GlyphCount = nGlyphs;
-    fmt->ClassValueArray = nMaps ? (unsigned short *)MEM_NEW(g, sizeof(unsigned short) * nGlyphs)
-                                 : NULL;
+    ClassRangeRecord range;
 
-    /* Initialize to class 0 */
-    for (i = 0; i < nGlyphs; i++) {
-        fmt->ClassValueArray[i] = 0;
-    }
-
-    /* Add explicit glyph classes */
-    for (i = 0; i < nMaps; i++) {
-        fmt->ClassValueArray[maps[i].glyph - fmt->StartGlyph] = maps[i].cls;
-    }
-    return fmt;
-}
-
-/* Fill format 2 table */
-static ClassDefFormat2 *fillClass2(hotCtx g,
-                                   int nMaps, ClassMap *maps, int nRanges) {
-    int i;
-    int iRange;
-    int iStart;
-    ClassDefFormat2 *fmt = (ClassDefFormat2 *)MEM_NEW(g, sizeof(ClassDefFormat2));
-
-    fmt->ClassFormat = 2;
-    fmt->ClassRangeCount = nRanges;
-    fmt->classRangeRecord = nRanges ? (ClassRangeRecord *)MEM_NEW(g, sizeof(ClassRangeRecord) * nRanges) : NULL;
-
-    iRange = 0;
-    iStart = 0;
-    for (i = 1; i <= nMaps; i++) {
-        if (i == nMaps ||
-            maps[i - 1].glyph != maps[i].glyph - 1 ||
-            maps[i - 1].cls != maps[i].cls) {
-            ClassRangeRecord *rec = &fmt->classRangeRecord[iRange++];
-
-            rec->Start = maps[iStart].glyph;
-            rec->End = maps[i - 1].glyph;
-            rec->Class = maps[i - 1].cls;
-
-            iStart = i;
+    for (auto i : map) {
+        if (i.first == range.End + 1 && i.second == range.classId) {
+            range.End = i.first;
+        } else {
+            if (range.Start != GID_UNDEF)
+                ranges.emplace_back(range);
+            range.Start = range.End = i.first;
+            range.classId = i.second;
         }
     }
-    return fmt;
+    if (range.Start != GID_UNDEF)
+        ranges.emplace_back(range);
+
+    if (cls1size(nGlyphs) < cls2size()) {
+        startGlyph = first;
+        values.insert(values.begin(), nGlyphs, (uint16_t) 0);
+        for (auto i : map)
+            values[i.first - startGlyph] = i.second;
+        ranges.clear();
+    }
 }
 
-/* Fill class table */
-static Offset fillClass(hotCtx g, otlTbl t) {
-    int i;
-    int nRanges;
-    unsigned size1;
-    unsigned size2;
-    ClassRecord *nw = t->cls.nw;
-    int nMaps = nw->map.cnt;
-    ClassMap *maps = nw->map.array;
-    int nGlyphs = nMaps ? maps[nMaps - 1].glyph - maps[0].glyph + 1
-                        : 0;
-
-    nw->offset = (unsigned short)t->cls.offset;
-
-    /* Count ranges (assumes glyphs sorted by increasing GID) */
-    nRanges = nMaps != 0;
-    for (i = 1; i < nMaps; i++) {
-        if (maps[i - 1].glyph != maps[i].glyph - 1 ||
-            maps[i - 1].cls != maps[i].cls) {
-            /* Start new range when break in GID sequence or new class */
-            nRanges++;
+void otlTbl::ClassRecord::write(otlTbl &t) {
+    if (values.empty()) {  // Format 2
+        t.o2(2);
+        t.o2(ranges.size());
+        for (auto &range : ranges) {
+            t.o2(range.Start);
+            t.o2(range.End);
+            t.o2(range.classId);
         }
-    }
-
-    size1 = CLASS1_SIZE(nGlyphs);
-    size2 = CLASS2_SIZE(nRanges);
-
-    /* Choose smallest representation */
-    if (size1 < size2) {
-        nw->tbl = fillClass1(g, nMaps, maps, nGlyphs);
-        t->cls.offset += size1;
-    } else {
-        nw->tbl = fillClass2(g, nMaps, maps, nRanges);
-        t->cls.offset += size2;
-    }
-    if (t->cls.offset > 0xFFFF) {
-        hotMsg(g, hotFATAL, "class section too large (%0x)", t->cls.offset);
-    }
-
-    return nw->offset; /* Return new table's offset */
-}
-
-/* Write format 1 table */
-static void writeClass1(otlCtx h, ClassDefFormat1 *fmt) {
-    int i;
-
-    OUT2(fmt->ClassFormat);
-    OUT2(fmt->StartGlyph);
-    OUT2(fmt->GlyphCount);
-    for (i = 0; i < fmt->GlyphCount; i++) {
-        OUT2(fmt->ClassValueArray[i]);
+    } else {  // Format 1
+        assert(startGlyph != GID_UNDEF && ranges.size() == 0);
+        t.o2(1);
+        t.o2(startGlyph);
+        t.o2(values.size());
+        for (auto classIndex : values)
+            t.o2(classIndex);
     }
 }
 
-/* Write format 2 table */
-static void writeClass2(otlCtx h, ClassDefFormat2 *fmt) {
-    int i;
+/* Fill coverage table */
+Offset otlTbl::Class::fill(otlTbl &t) {
+    records.emplace_back(size, current);
+    size += records.back().size();
 
-    OUT2(fmt->ClassFormat);
-    OUT2(fmt->ClassRangeCount);
-    for (i = 0; i < fmt->ClassRangeCount; i++) {
-        ClassRangeRecord *rec = &fmt->classRangeRecord[i];
-        OUT2(rec->Start);
-        OUT2(rec->End);
-        OUT2(rec->Class);
+    if (size > 0xFFFF) {
+        hotMsg(t.g, hotFATAL, "class section too large (%0x)", size);
     }
+
+    return records.back().offset;
 }
 
-/* Write all class tables */
-void otlClassWrite(hotCtx g, otlTbl t) {
-    int i;
-    otlCtx h = g->ctx.otl;
-
-    for (i = 0; i < t->cls.tables.cnt; i++) {
-        void *tbl = t->cls.tables.array[i].tbl;
-
-        switch (*(unsigned short *)tbl) {
-            case 1:
-                writeClass1(h, (ClassDefFormat1 *)tbl);
-                break;
-
-            case 2:
-                writeClass2(h, (ClassDefFormat2 *)tbl);
-                break;
-        }
-    }
+void otlTbl::Class::write(otlTbl &t) {
+    for (auto &record : records)
+        record.write(t);
 }
 
-/* Free format 1 table */
-static void freeClass1(hotCtx g, ClassDefFormat1 *fmt) {
-    MEM_FREE(g, fmt->ClassValueArray);
+/* Write all coverage tables */
+void otlTbl::classWrite() {
+    classObj.write(*this);
 }
 
-/* Free format 2 table */
-static void freeClass2(hotCtx g, ClassDefFormat2 *fmt) {
-    MEM_FREE(g, fmt->classRangeRecord);
-}
-
-/* Free formated table */
-static void freeClass(hotCtx g, ClassRecord *rec) {
-    switch (*(unsigned short *)rec->tbl) {
-        case 1:
-            freeClass1(g, (ClassDefFormat1 *)rec->tbl);
-            break;
-
-        case 2:
-            freeClass2(g, (ClassDefFormat2 *)rec->tbl);
-            break;
-    }
-    MEM_FREE(g, rec->tbl);
-}
-
-static void classReuse(hotCtx g, otlTbl t) {
-    int i;
-    for (i = 0; i < t->cls.tables.cnt; i++) {
-        freeClass(g, &t->cls.tables.array[i]);
-    }
-    t->cls.tables.cnt = 0;
-    t->cls.offset = 0;
-}
-
-/* Free all class tables */
-static void classFree(hotCtx g, otlTbl t) {
-    int i;
-    for (i = 0; i < t->cls.tables.size; i++) {
-        dnaFREE(t->cls.tables.array[i].map);
-    }
-    dnaFREE(t->cls.tables);
-}
-
-/* Begin new class table */
-void otlClassBegin(hotCtx g, otlTbl t) {
-    t->cls.nw = dnaNEXT(t->cls.tables);
-    t->cls.nw->map.cnt = 0;
+/* Begin new coverage table */
+void otlTbl::classBegin() {
+    classObj.current.clear();
 }
 
 /* Add class mapping; ignore class 0's */
-void otlClassAddMapping(hotCtx g, otlTbl t, GID glyph, unsigned int cls) {
-    if (cls != 0) {
-        ClassMap *map = dnaNEXT(t->cls.nw->map);
-        map->glyph = glyph;
-        map->cls = cls;
+void otlTbl::classAddMapping(GID gid, uint32_t classId) {
+    if (classId == 0)
+        return;
+    auto [i, b] = classObj.current.insert({gid, classId});
+    if (!b) {
+#if HOT_DEBUG
+        printf("duplicated glyph ['%d'] in class mapping.\n", gid);
+#endif
     }
-}
-
-/* Compare glyph ids */
-static int CTL_CDECL cmpClassMaps(const void *first, const void *second) {
-    unsigned short aClass;
-    unsigned short bClass;
-    GID a = ((ClassMap *)first)->glyph;
-    GID b = ((ClassMap *)second)->glyph;
-    if (a < b) {
-        return -1;
-    } else if (a > b) {
-        return 1;
-    }
-    /* Note that I am sorting the classes in increasing class index. The result is that a higher index */
-    /* will overwrite a lower index, when this is written to a class definition..                      */
-    aClass = ((ClassMap *)first)->cls;
-    bClass = ((ClassMap *)second)->cls;
-    if (aClass < bClass) {
-        return -1;
-    } else if (aClass > bClass) {
-        return 1;
-    }
-    return 0;
 }
 
 /* End class table */
-Offset otlClassEnd(hotCtx g, otlTbl t) {
-    int i;
-    ClassRecord *nw = t->cls.nw;
-
-    /* Sort glyph ids into increasing order */
-    qsort(nw->map.array, nw->map.cnt, sizeof(ClassMap), cmpClassMaps);
-
-    /* Check for matching table */
-    for (i = 0; i < t->cls.tables.cnt - 1; i++) {
-        ClassRecord *old = &t->cls.tables.array[i];
-
-        if (nw->map.cnt == old->map.cnt) {
-            int j;
-            for (j = 0; j < nw->map.cnt; j++) {
-                if (nw->map.array[j].glyph != old->map.array[j].glyph ||
-                    nw->map.array[j].cls != old->map.array[j].cls) {
-                    goto next;
-                }
-            }
-
-            /* Found match */
+Offset otlTbl::classEnd() {
+    for (auto &record : classObj.records) {
+        if (record.map == classObj.current) {
 #if HOT_DEBUG
-            t->nClassReused++;
+            classObj.reused++;
 #if 0
             if (DF_LEVEL >= 2) {
+                auto lasti = classObj.current.rbegin();
                 fprintf(stderr, "# Using class already present:");
-                for (j = 0; j < old->map.cnt; j++) {
-                    fprintf(stderr, " ");
-                    gidDump(g, old->map.array[j].glyph, 0);
-                    fprintf(stderr, ":%u", old->map.array[j].cls);
-                }
+                for (auto i : classObj.current)
+                    gidDump(g, i->first, 0);
+                    fprintf(stderr, ":%u", i->second);
                 fprintf(stderr, "\n");
             }
 #endif
 #endif
-            t->cls.tables.cnt--; /* Remove new table */
-            return old->offset;    /* Return matching table's offset */
+            return record.offset;
         }
-    next:
-        {}
     }
 
-    /* No match; fill table and return its offset  */
-    return fillClass(g, t);
+    return classObj.fill(*this);
 }
 
-/* ---------------------------- Device Functions --------------------------- */
-
-/* I don't know if we'll ever need device tables. If we do it would be
-   implemented here */
+/* Returns total length of the class section, for all classes currently
+   defined. */
+LOffset otlTbl::getClassSize() {
+    return classObj.size;
+}
 
 /* ---------------------------- Table Functions ---------------------------- */
-
-/* Create new table context */
-otlTbl otlTableNew(hotCtx g) {
-    otlTbl t = (otlTbl)MEM_NEW(g, sizeof(struct otlTbl_));
-
-    dnaINIT(g->DnaCTX, t->subtable, 10, 5);
-    dnaINIT(g->DnaCTX, t->label, 50, 100);
-    dnaINIT(g->DnaCTX, t->refLabel, 50, 100);
-
-#if HOT_DEBUG
-    t->subtable.func = initSubtable;
-    t->nCoverageReused = 0;
-    t->nClassReused = 0;
-#endif
-    coverageNew(g, t);
-    classNew(g, t);
-    t->nAnonSubtables = t->nStandAloneSubtables = t->nRefLookups = t->nFeatParams = 0;
-
-    return t;
-}
-
-/* Compare labels */
-static int CTL_CDECL cmpLabels(const void *first, const void *second, void *ctx) {
-    const LabelInfo *a = (const LabelInfo *)first;
-    const LabelInfo *b = (const LabelInfo *)second;
-
-    if (a->label < b->label) {
-        return -1;
-    } else if (a->label > b->label) {
-        return 1;
-    } else if (a != b) {
-        hotCtx g = (hotCtx)ctx;
-        hotMsg(g, hotFATAL, "[internal] duplicate subtable label encountered");
-    }
-    return 0; /* Suppress compiler warning */
-}
-
-static int CTL_CDECL cmpLabelsByLookup(const void *first, const void *second, void *ctx) {
-    const LabelInfo *a = (const LabelInfo *)first;
-    const LabelInfo *b = (const LabelInfo *)second;
-
-    if (a->lookupInx < b->lookupInx) {
-        return -1;
-    } else if (a->lookupInx > b->lookupInx) {
-        return 1;
-    } else if (a->label < b->label) {
-        return -1;
-    } else if (a->label > b->label) {
-        return 1;
-    } else if (a != b) {
-        hotCtx g = (hotCtx)ctx;
-        hotMsg(g, hotFATAL, "[internal] duplicate subtable label encountered");
-    }
-    return 0; /* Suppress compiler warning */
-}
-
-static int CTL_CDECL matchLabel(const void *key, const void *value) {
-    int a = *(int *)key;
-    int b = ((LabelInfo *)value)->label;
-    if (a < b) {
-        return -1;
-    } else if (a > b) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-static int CTL_CDECL matchLabelByLookup(const void *key, const void *value) {
-    int a = *(int *)key;
-    int b = ((LabelInfo *)value)->lookupInx;
-    if (a < b) {
-        return -1;
-    } else if (a > b) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
 
 /* Returns the lookup index associated with baselabel (which should not have
    the reference bit set). May be called from outside this module only after
    otlTableFill() */
-int otlLabel2LookupIndex(hotCtx g, otlTbl t, int baselabel) {
-    LabelInfo *li =
-        (LabelInfo *)bsearch(&baselabel, t->label.array, t->label.cnt,
-                             sizeof(LabelInfo), matchLabel);
-    if (li == NULL) {
-        hotMsg(g, hotFATAL, "(internal) label 0x%x not found", baselabel);
-    } else {
-        li->used = 1;
-    }
-    return li->lookupInx;
-}
+int32_t otlTbl::label2LookupIndex(Label baseLabel) {
+    auto li = labelMap.find(baseLabel);
+    if (li == labelMap.end())
+        hotMsg(g, hotFATAL, "(internal) label 0x%x not found", baseLabel);
+    else
+        li->second.used = true;
 
-/* Looks through the label list for the named lookup index Returns 1 if it has been referenced, else
-   returns -1. May be called from outside this module only after otlTableFill() */
-int findSeenRef(hotCtx g, otlTbl t, int baseLookup) {
-    LabelInfo *li =
-        (LabelInfo *)bsearch(&baseLookup, t->label.array, t->label.cnt,
-                             sizeof(LabelInfo), matchLabelByLookup);
-    if (li == NULL) {
-        hotMsg(g, hotFATAL, "Base lookup %d not found", baseLookup);
-    }
-
-    return li->used;
-}
-
-/* Sort in LookupList order: non-reference subtbls by offset (with aalt sorting
-   first); then Feat Params; last references. */
-static int CTL_CDECL cmpLookupList(const void *first, const void *second,
-                               void *ctx) {
-    const Subtable *a = (const Subtable *)first;
-    const Subtable *b = (const Subtable *)second;
-    Tag aalt_tag = TAG('a', 'a', 'l', 't');
-
-    if (!IS_REF_LAB(a->label) && IS_REF_LAB(b->label)) {
-        return -1;
-    } else if (IS_REF_LAB(a->label) && !IS_REF_LAB(b->label)) {
-        return 1;
-    } else if (IS_REF_LAB(a->label) && IS_REF_LAB(b->label)) {
-        return 0; /* Don't bother sorting references */
-    } else if ((!a->isFeatParam) && b->isFeatParam) {
-        return -1;
-    } else if (a->isFeatParam && (!b->isFeatParam)) {
-        return 1;
-    } else if ((a->feature != b->feature) && (a->feature == aalt_tag)) {
-        return -1;
-    } else if ((a->feature != b->feature) && (b->feature == aalt_tag)) {
-        return 1;
-    } else if (a->offset < b->offset) {
-        return -1;
-    } else if (a->offset > b->offset) {
-        return 1;
-    } else if (a != b) {
-        hotCtx g = (hotCtx)ctx;
-        hotMsg(g, hotFATAL, "[internal] subtables have same offset");
-    }
-    return 0; /* Suppress compiler warning */
-}
-
-void sortLabelList(hotCtx g, otlTbl t) {
-    ctuQSort(t->label.array, t->label.cnt, sizeof(LabelInfo), cmpLabels, &g);
+    return li->second.lookupInx;
 }
 
 /* Calculate LookupList indexes. Granularity of lookups has already been
    determined by the client of this module by labels. Prepare the label ->
    lkpInx mapping */
-static void calcLookupListIndexes(hotCtx g, otlTbl t) {
-    long i;
-    int indexCnt = 0;
-
-    ctuQSort(t->subtable.array, t->subtable.cnt, sizeof(Subtable),
-             cmpLookupList, &g);
+void otlTbl::calcLookupListIndices() {
+    std::stable_sort(subtables.begin(), subtables.end(),
+                     Subtable::ltLookupList);
 
     /* Process all regular subtables and subtables with feature parameters.          */
     /* We want the lookups indices to be ordered in the order that they were created */
     /* by feature file definitions.                                                  */
-    for (i = 0; i < (t->subtable.cnt - t->nRefLookups); i++) {
-        Subtable *sub = &t->subtable.array[i];
-
-        if (i == 0 || sub->label != (sub - 1)->label) {
+    int prevLabel = -1;
+    int indexCnt = 0;
+    auto si = subtables.begin();
+    for (; si != subtables.end() && !si->isRef(); si++) {
+        if (si->label != prevLabel) {
             /* Label i.e. lookup change. Store lab -> lookupInx info in this first subtable of the span of tables with the same label.  */
-            LabelInfo *lab = dnaNEXT(t->label);
-            lab->used = 0; /* new label; hasn't been referenced by anything yet. */
-
-            if (sub->isFeatParam) {
-                sub->index.lookup = -1;
+            if (si->isFeatParam) {
+                si->index.lookup = -1;
             } else {
-                sub->index.lookup = indexCnt++;
+                si->index.lookup = indexCnt++;
             }
-            lab->label = sub->label;
-            lab->lookupInx = sub->index.lookup;
+            auto [li, b] = labelMap.emplace(si->label, si->index.lookup);
+            if (!b) {
+                hotMsg(g, hotFATAL, "[internal] duplicate subtable label encountered");
+            }
         } else {
-            sub->index.lookup = indexCnt - 1;
+            si->index.lookup = indexCnt - 1;
         }
+        prevLabel = si->label;
     }
-
-    ctuQSort(t->label.array, t->label.cnt, sizeof(LabelInfo), cmpLabels, &g);
 
     /* Fill the index of any reference subtables (sorted at end) */
-    for (; i < t->subtable.cnt; i++) {
-        Subtable *sub = &t->subtable.array[i];
-        sub->index.lookup = otlLabel2LookupIndex(g, t, sub->label & ~REF_LAB);
-    }
-}
-
-/* Determine granularity of a Feature */
-static int CTL_CDECL cmpFeatTmp(const void *first, const void *second) {
-    const Subtable *a = (const Subtable *)first;
-    const Subtable *b = (const Subtable *)second;
-
-    if ((a->feature == TAG_STAND_ALONE) && (b->feature != TAG_STAND_ALONE)) {
-        return 1;
-    } else if ((b->feature == TAG_STAND_ALONE) && (a->feature != TAG_STAND_ALONE)) {
-        return -1;
-    } else if (a->script < b->script) {
-        /* Make sure that anonymous lookups sort last (script == TAG_UDEF, aka 0cFFFF) */
-        return -1;
-    } else if (a->script > b->script) {
-        return 1;
-    } else if (a->language < b->language) {
-        /* Test language */
-        return -1;
-    } else if (a->language > b->language) {
-        return 1;
-    } else if (a->feature < b->feature) {
-        /* Test feature */
-        return -1;
-    } else if (a->feature > b->feature) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-/* Sort in FeatureList order */
-static int CTL_CDECL cmpFeatureList(const void *first, const void *second) {
-    const Subtable *a = (const Subtable *)first;
-    const Subtable *b = (const Subtable *)second;
-
-    if ((a->feature == TAG_STAND_ALONE) && (b->feature != TAG_STAND_ALONE)) {
-        return 1;
-    } else if ((b->feature == TAG_STAND_ALONE) && (a->feature != TAG_STAND_ALONE)) {
-        return -1;
-    } else if (a->feature < b->feature) {
-        /* Test feature */
-        return -1;
-    } else if (a->feature > b->feature) {
-        return 1;
-    } else if (a->feature == TAG_UNDEF) {
-        /* Don't bother further checking anon lookups - these are sorted to the end by now. */
-        return 0;
-    } else if (a->index.feature < b->index.feature) {
-        /* Test feature index */
-        return -1;
-    } else if (a->index.feature > b->index.feature) {
-        return 1;
-    } else if (a->index.lookup < b->index.lookup) {
-        /* Test lookup index */
-        return -1;
-    } else if (a->index.lookup > b->index.lookup) {
-        return 1;
-    } else {
-        return 0;
-    }
+    for (; si != subtables.end(); si++)
+        si->index.lookup = label2LookupIndex(si->label & ~REF_LAB);
 }
 
 /* Calculate feature indexes */
-static void calcFeatureListIndexes(hotCtx g, otlTbl t) {
-    long i;
-    int indexCnt;
-    int prevIndex;
-
+void otlTbl::calcFeatureListIndices() {
     /* Determine granularity of features */
-    qsort(t->subtable.array, t->subtable.cnt, sizeof(Subtable), cmpFeatTmp);
+    std::stable_sort(subtables.begin(), subtables.end(),
+                     Subtable::ltScriptList);
 
     /* Assign temporary feature indexes according to feature granularity (i.e. */
     /* same script, language & feature), disregarding whether reference or has */
     /* parameters or not                                                       */
-    indexCnt = 0;
-    for (i = 0; i < t->subtable.cnt - t->nAnonSubtables; i++) {
-        Subtable *sub = &t->subtable.array[i];
-        Subtable *prev = sub - 1; /* xxx */
-
-        sub->index.feature = (i == 0 || !(sub->script == prev->script &&
-                                          sub->language == prev->language &&
-                                          sub->feature == prev->feature))
-                                 ? indexCnt++ /* Feature change */
-                                 : indexCnt - 1;
+    auto previ = subtables.begin();
+    previ->index.feature = 0;
+    for (auto si = previ + 1; si != subtables.end() && !si->isAnon() &&
+                              !si->isStandAlone();
+                              previ = si, si++) {
+        if (si->script != previ->script || si->language != previ->language ||
+              si->feature != previ->feature) {
+            si->index.feature = previ->index.feature + 1;
+        } else {
+            si->index.feature = previ->index.feature;
+        }
     }
 
     /* Sort in final feature order */
-    qsort(t->subtable.array, t->subtable.cnt, sizeof(Subtable), cmpFeatureList);
+    std::stable_sort(subtables.begin(), subtables.end());
 
     /* Assign final feature indexes */
-    prevIndex = -1;
-    indexCnt = 0;
-    for (i = 0; i < t->subtable.cnt - t->nAnonSubtables; i++) {
-        Subtable *sub = &t->subtable.array[i];
-
-        if (sub->index.feature != prevIndex) {
+    int prevIndex = -2;
+    int curIndex = -1;
+    for (auto &s : subtables) {
+        if (s.isAnon() || s.isStandAlone())
+            continue;
+        if (s.index.feature != prevIndex) {
             /* -- Feature change --  */
-            prevIndex = sub->index.feature;
-            sub->index.feature = indexCnt++;
+            prevIndex = s.index.feature;
+            s.index.feature = ++curIndex;
         } else {
-            sub->index.feature = indexCnt - 1;
+            s.index.feature = curIndex;
         }
-    }
-}
-
-/* Sort in ScriptList order */
-static int CTL_CDECL cmpScriptList(const void *first, const void *second) {
-    const Subtable *a = (const Subtable *)first;
-    const Subtable *b = (const Subtable *)second;
-
-    if ((a->feature == TAG_STAND_ALONE) && (b->feature != TAG_STAND_ALONE)) {
-        return 1;
-    } else if ((b->feature == TAG_STAND_ALONE) && (a->feature != TAG_STAND_ALONE)) {
-        return -1;
-    } else if (a->script < b->script) {
-        /* Test script Tag TAG_UNDEF is sorted to the end, as it is 0xFFFF. */
-        return -1;
-    } else if (a->script > b->script) {
-        return 1;
-    } else if (a->script == TAG_UNDEF) {
-        return 0; /* Don't bother checking anon lkps */
-    } else if (a->language < b->language) {
-        /* Test language */
-        return -1;
-    } else if (a->language > b->language) {
-        return 1;
-    } else if (a->feature < b->feature) {
-        /* Test feature index */
-        return -1;
-    } else if (a->feature > b->feature) {
-        return 1;
-    } else {
-        return 0; /* Further testing not needed for ScriptList */
     }
 }
 
 /* Calculate script, language, and index.feature spans */
-static void prepScriptList(hotCtx g, otlTbl t) {
-    int scr;
-    int Scr;
-    int spanLimit = t->subtable.cnt - t->nAnonSubtables;
+void otlTbl::prepScriptList() {
+    std::stable_sort(subtables.begin(), subtables.end(),
+                     Subtable::ltScriptList);
 
-    qsort(t->subtable.array, t->subtable.cnt, sizeof(Subtable), cmpScriptList);
+    auto prevs = subtables.begin();
+    for (auto ss = prevs + 1; ss <= subtables.end(); ss++) {
+        if (ss == subtables.end() || ss->isAnon() || ss->isStandAlone() ||
+            ss->script != prevs->script) {
+            // script change
+            prevs->span.script = ss;
 
-    Scr = 0;
-    for (scr = 1; scr <= spanLimit; scr++) {
-        if (scr == spanLimit || t->subtable.array[scr].script !=
-                                    t->subtable.array[Scr].script) {
-            /* -- Script change -- */
-            int lan;
-            int Lan = Scr;
+            auto prevl = prevs;
+            for (auto sl = prevl + 1; sl <= ss ; sl++) {
+                if (sl == ss || sl->language != prevl->language) {
+                    // language change
+                    prevl->span.language = sl;
 
-            t->subtable.array[Scr].span.script = scr;
-
-            for (lan = Lan + 1; lan <= scr; lan++) {
-                if (lan == scr || t->subtable.array[lan].language !=
-                                      t->subtable.array[Lan].language) {
-                    /* -- Language change -- */
-                    int fea;
-                    int Fea = Lan;
-
-                    t->subtable.array[Lan].span.language = lan;
-
-                    for (fea = Fea + 1; fea <= lan; fea++) {
-                        if (fea == lan ||
-                            t->subtable.array[fea].index.feature !=
-                                t->subtable.array[Fea].index.feature) {
-                            /* -- Feature index change -- */
-                            t->subtable.array[Fea].span.feature = fea;
-                            Fea = fea;
+                    auto prevf = prevl;
+                    for (auto sf = prevf + 1; sf <= sl ; sf++) {
+                        if (sf == sl ||
+                            sf->index.feature != prevf->index.feature) {
+                            // feature index change
+                            prevf->span.feature = sf;
+                            prevf = sf;
                         }
                     }
-                    Lan = lan;
+                    prevl = sl;
                 }
             }
-            Scr = scr;
+            prevs = ss;
         }
+        if (ss->isAnon() || ss->isStandAlone())
+            break;
     }
 }
 
 /* Fill language system record */
-static Offset fillLangSysRecord(hotCtx g, otlTbl t, LangSys *sys,
-                                int iLanguage) {
-    int i;
-    int j;
-    int nFeatures;
-    Subtable *sub;
-    int iNext = t->subtable.array[iLanguage].span.language;
-
-    /* Count features in this language system span: */
-    nFeatures = 0;
-    for (i = iLanguage; i < iNext; i = t->subtable.array[i].span.feature) {
-        nFeatures++;
-    }
-
+Offset otlTbl::LangSys::fill(Offset o, std::vector<Subtable>::iterator sl) {
     /* Fill record */
-    sys->LookupOrder = NULL_OFFSET;
-    sys->ReqFeatureIndex = 0xffff; /* xxx unsupported at present */
-    sys->FeatureCount = nFeatures;
-    sys->FeatureIndex = (unsigned short *)MEM_NEW(g, sizeof(unsigned short) * nFeatures);
+    LookupOrder = NULL_OFFSET;
+    ReqFeatureIndex = 0xffff; /* xxx unsupported at present */
+    offset = o;
+    LangSysTag = sl->language;
 
-    j = 0;
-    for (i = iLanguage; i < iNext; i = sub->span.feature) {
-        sub = &t->subtable.array[i];
-        sys->FeatureIndex[j++] = sub->index.feature;
-    }
+    for (auto sf = sl; sf != sl->span.language; sf = sf->span.feature)
+        featureIndices.push_back(sf->index.feature);
 
-    return LANG_SYS_SIZE(nFeatures);
+    return size(featureIndices.size());
 }
 
 /* Fill ScriptList */
-static Offset fillScriptList(hotCtx g, otlTbl t) {
-    int i;
-    int nScripts;
-    int iScript;
-    Offset oScriptList;
-    /* This works because prepScript has sorted the subtables so that anon subtables are last, preceded by Stand-Alone subtables */
-    int spanLimit = t->subtable.cnt - (t->nAnonSubtables + t->nStandAloneSubtables);
+Offset otlTbl::fillScriptList() {
+    auto spanEnd = subtables.end() - (nAnonSubtables + nStandAloneSubtables);
+    if (subtables.size() == 0 || spanEnd == subtables.begin())
+        return Script::listSize(0);
 
-    /* Count scripts */
-    nScripts = 0;
-    for (i = 0; i < spanLimit; i = t->subtable.array[i].span.script) {
+    int nScripts {0};
+    for (auto ss = subtables.begin(); ss != spanEnd; ss = ss->span.script)
         nScripts++;
-    }
 
-    /* Allocate scripts */
-    t->tbl.scriptList_.ScriptCount = nScripts;
-    t->tbl.scriptList_.scriptRecord = (ScriptRecord *)
-        MEM_NEW(g, sizeof(ScriptRecord) * nScripts);
-
-    oScriptList = SCRIPT_LIST_SIZE(nScripts);
+    Offset oScriptList = Script::listSize(nScripts);
 
     /* Build table */
-    iScript = 0;
-    for (i = 0; i < nScripts; i++) {
-        int j;
-        int iLanguage;
-        int nLanguages;
-        Offset oScript;
-        Subtable *sub = &t->subtable.array[iScript];
-        ScriptRecord *rec = &t->tbl.scriptList_.scriptRecord[i];
-        Script *script = &rec->script_;
+    for (auto ss = subtables.begin(); ss != spanEnd; ss = ss->span.script) {
+        Script script {oScriptList, ss->script};
 
-        /* Fill ScriptRecord */
-        rec->ScriptTag = sub->script;
-        rec->script = oScriptList;
-
-        if (sub->language == dflt_) {
-            /* Fill default language system record */
-            script->DefaultLangSys =
-                fillLangSysRecord(g, t, &script->DefaultLangSys_, iScript);
-            iLanguage = sub->span.language;
-        } else {
-            script->DefaultLangSys = NULL_OFFSET;
-            iLanguage = iScript;
-        }
-
-        /* Count languages for this script */
-        nLanguages = 0;
-        for (j = iLanguage; j < sub->span.script;
-             j = t->subtable.array[j].span.language) {
+        int nLanguages = 0;
+        for (auto sl = ss; sl != ss->span.script; sl = sl->span.language)
             nLanguages++;
-        }
 
-        /* Allocate Languages */
-        script->LangSysCount = nLanguages;
-        script->langSysRecord = (nLanguages == 0) ? NULL : (LangSysRecord *)MEM_NEW(g, sizeof(LangSysRecord) * nLanguages);
-
-        oScript = SCRIPT_SIZE(nLanguages);
-
-        if (script->DefaultLangSys != NULL_OFFSET) {
-            Offset tmp = script->DefaultLangSys;
-            script->DefaultLangSys = oScript;
-            oScript += tmp;
+        Offset oScript {0};
+        auto slb = ss;
+        if (slb->language == dflt_) {
+            nLanguages--;
+            oScript = script.size(nLanguages);
+            /* Fill default language system record */
+            oScript += script.defaultLangSys.fill(oScript, slb);
+            slb = slb->span.language;
+        } else {
+            oScript = script.size(nLanguages);
         }
 
         /* Fill languages system records */
-        for (j = 0; j < nLanguages; j++) {
-            Subtable *sub = &t->subtable.array[iLanguage];
-            LangSysRecord *rec = &script->langSysRecord[j];
-
-            /* Fill langSysRecord */
-            rec->LangSysTag = sub->language;
-            rec->langSys = oScript;
-
-            oScript += fillLangSysRecord(g, t,
-                                         &script->langSysRecord[j].langSys_,
-                                         iLanguage);
-
-            /* Advance to next language */
-            iLanguage = sub->span.language;
+        for (auto sl = slb; sl != ss->span.script; sl = sl->span.language) {
+            LangSys ls;
+            oScript += ls.fill(oScript, sl);
+            script.langSystems.emplace_back(std::move(ls));
         }
-
         /* Advance to next script */
         oScriptList += oScript;
-        iScript = sub->span.script;
+        header.scripts.emplace_back(std::move(script));
     }
 
     return oScriptList;
@@ -1495,15 +552,11 @@ static Offset fillScriptList(hotCtx g, otlTbl t) {
 /* Sort; span by feature index and lookup index. Caution: overwrites
    span.feature from prepScriptList().
  */
-static void prepFeatureList(hotCtx g, otlTbl t) {
-    int fea;
-    int Fea;
-    int spanLimit = t->subtable.cnt - t->nAnonSubtables;
+void otlTbl::prepFeatureList() {
+    std::stable_sort(subtables.begin(), subtables.end());
 
-    qsort(t->subtable.array, t->subtable.cnt, sizeof(Subtable), cmpFeatureList);
-
-    Fea = 0;
-    for (fea = 1; fea <= spanLimit; fea++) {
+    auto prevf = subtables.begin();
+    for (auto sf = prevf + 1; sf <= subtables.end(); sf++) {
         /* This logic steps through the  t->subtable.array.                                                         */
         /* Whenever it encounters a new feature subtable.array[fea].index.feature index,                            */
         /* it stores the current subtable index in the first subtable of the sequence of subtables that             */
@@ -1512,542 +565,323 @@ static void prepFeatureList(hotCtx g, otlTbl t) {
         /* subtable in the next run.                                                                                */
         /* The same is then done for sequences of subtables with the same index.lookup                              */
         /* within the previous sequence of subtables with the same same index.feature.                              */
-        if (fea == spanLimit || t->subtable.array[fea].index.feature !=
-                                    t->subtable.array[Fea].index.feature) {
-            /* Feature index change */
-            int loo;
-            int Loo = Fea;
+        if (sf == subtables.end() || sf->isStandAlone() || sf->isAnon() ||
+            sf->index.feature != prevf->index.feature) {
+            // feature index change
+            prevf->span.feature = sf;
 
-            t->subtable.array[Fea].span.feature = fea;
-
-            for (loo = Loo + 1; loo <= fea; loo++) {
-                if (loo == fea || t->subtable.array[loo].index.lookup !=
-                                      t->subtable.array[Loo].index.lookup) {
-                    /* Lookup index change */
-                    t->subtable.array[Loo].span.lookup = loo;
-                    Loo = loo;
+            auto prevl = prevf;
+            for (auto sl = prevl + 1; sl <= sf; sl++) {
+                if (sl == sf || sl->index.lookup != prevl->index.lookup) {
+                    // lookup index change
+                    prevl->span.lookup = sl;
+                    prevl = sl;
                 }
             }
-            Fea = fea;
+            prevf = sf;
         }
-    }
-}
-
-/* Sort; span by lookup index */
-static void prepLookupList(hotCtx g, otlTbl t) {
-    int loo;
-    int Loo;
-    int spanLimit = t->subtable.cnt - (t->nRefLookups + t->nFeatParams);
-
-    ctuQSort(t->subtable.array, t->subtable.cnt, sizeof(Subtable),
-             cmpLookupList, &g);
-    Loo = 0;
-    for (loo = 1; loo <= spanLimit; loo++) {
-        if (loo == spanLimit || t->subtable.array[loo].index.lookup !=
-                                    t->subtable.array[Loo].index.lookup) {
-            /* Lookup index change */
-            t->subtable.array[Loo].span.lookup = loo;
-            Loo = loo;
-        }
+        if (sf->isStandAlone() || sf->isAnon())
+            break;
     }
 }
 
 /* Fill FeatureList */
-static Offset findFeatParamOffset(Tag featTag, Label featLabel, Subtable *subArray, int numSubtables) {
-    int i;
-    Subtable *sub;
-    Offset value = 0;
-    Label matchlabel = (Label)(featLabel & ~REF_LAB);
+Offset otlTbl::findFeatParamOffset(Tag featTag, Label featLabel) {
+    Label matchLabel = (Label)(featLabel & ~REF_LAB);
 
-    for (i = 0; i < numSubtables; i++) {
-        sub = &subArray[i];
-        if ((sub->feature == featTag) && (sub->label == matchlabel)) {
-            value = sub->offset;
-            break;
-        }
+    for (auto &s : subtables) {
+        if (s.feature == featTag && s.label == matchLabel)
+            return s.offset;
     }
 
-    return value;
+    return 0;
 }
 
-static Offset fillFeatureList(hotCtx g, otlTbl t) {
-    int i;
-    int nFeatures;
-    int iFeature;
-    Offset oFeatureList;
-    /* This works because prepFeature has sorted the subtables so that anon subtables are last, preceded by Stand-Alone subtables */
-    int spanLimit = t->subtable.cnt - (t->nAnonSubtables + t->nStandAloneSubtables);
+Offset otlTbl::fillFeatureList() {
+    // This works because prepFeature has sorted the subtables so that
+    // Anonymous subtables are last, preceded by Stand-Alone subtables
+    auto spanEnd = subtables.end() - (nAnonSubtables + nStandAloneSubtables);
+    if (spanEnd == subtables.begin())
+        return Feature::listSize(0);
 
-    nFeatures = spanLimit ? t->subtable.array[spanLimit - 1].index.feature + 1 : 0;
+    auto last = spanEnd - 1;
+    int nFeatures = last->index.feature + 1;
+
     /* Allocate features */
-    t->tbl.featureList_.FeatureCount = nFeatures;
-    t->tbl.featureList_.featureRecord = (FeatureRecord *)
-        MEM_NEW(g, sizeof(FeatureRecord) * nFeatures);
-
-    oFeatureList = FEATURE_LIST_SIZE(nFeatures);
+    header.features.reserve(nFeatures);
+    Offset oFeatureList = Feature::listSize(nFeatures);
 
     /* Build table */
-    iFeature = 0;
-    for (i = 0; i < nFeatures; i++) {
-        int j;
-        int k;
-        int nLookups;
-        int nParamSubtables;
-        Offset nParamOffset;
-        Subtable *sub = &t->subtable.array[iFeature];
-        FeatureRecord *rec = &t->tbl.featureList_.featureRecord[i];
-        Feature *feature = &rec->feature_;
-        /* if ( sub->feature == TAG_STAND_ALONE) */
-        /*     continue;                              */
+    for (auto sf = subtables.begin(); sf != spanEnd; sf = sf->span.feature) {
+        Feature f {oFeatureList, sf->feature};
 
-        /* Fill FeatureRecord */
-        rec->FeatureTag = sub->feature;
-        rec->feature = oFeatureList;
-
-        /* Count lookups for this feature. These will include references. */
-        nLookups = 0;
-        nParamSubtables = 0;
-        nParamOffset = 0;
         /* sub is is the first subtable in a run of subtables with the same feature table index.                       */
         /* sub->span.feature is the array index for the first subtable with a different feature table index.           */
         /* This field is NOT set in any of the other subtables in the current run.                                     */
         /* Within the current run, the first subtable of a sequence with the same lookup table index                   */
         /* span.lookup set to the first subtable of the next sequence with a different lookup index or feature index.  */
-        for (j = iFeature; j < sub->span.feature; j = t->subtable.array[j].span.lookup) {
-            Subtable *lsub = &t->subtable.array[j];
-
-            if (lsub->isFeatParam) {
-                nParamSubtables++;           /* There ought to be only one of these! */
-                nParamOffset = lsub->offset; /* Note! this is only the offset from the start of the subtable block that follows the lookupList */
-                if (IS_REF_LAB(lsub->label)) {
-                    nParamOffset = findFeatParamOffset(lsub->feature, lsub->label, t->subtable.array, spanLimit);
+        for (auto sl = sf; sl != sf->span.feature; sl = sl->span.lookup) {
+            if (sl->isParam()) {
+                if (f.featureParams != NULL_OFFSET) {
+                    hotMsg(g, hotFATAL, "GPOS feature '%c%c%c%c' has more "
+                                        "than one FeatureParameter subtable! ",
+                                        TAG_ARG(f.FeatureTag));
                 }
+                if (sl->isRef())
+                    f.featureParams = findFeatParamOffset(sl->feature, sl->label);
+                else
+                    f.featureParams = sl->offset; /* Note! this is only the offset from the start of the subtable block that follows the lookupList */
+                if (f.featureParams == 0)
+                    f.featureParams = FEAT_PARAM_ZERO;
             } else {
-                nLookups++;
+                f.lookupIndices.push_back(sl->index.lookup);
             }
         }
 
-        /* Allocate Lookups */
-        feature->LookupCount = nLookups;
-
-        if (nLookups > 0) {
-            feature->LookupListIndex = (unsigned short *)
-                MEM_NEW(g, sizeof(unsigned short) * nLookups);
-
-            /* Fill lookup list */
-            k = 0;
-            for (j = iFeature; j < sub->span.feature;
-                 j = t->subtable.array[j].span.lookup) {
-                if (!t->subtable.array[j].isFeatParam) {
-                    feature->LookupListIndex[k++] = t->subtable.array[j].index.lookup;
-                }
-            }
-        } else {
-            feature->LookupListIndex = (unsigned short *)0xFFFFFFFF;
-        }
-        oFeatureList += FEATURE_SIZE(nLookups);
-
-        /* Add feature parameter */
-        if (nParamSubtables > 0) {
-            if (nParamSubtables > 1) {
-                hotMsg(g, hotFATAL, "GPOS feature '%c%c%c%c' has more than one FeatureParameter subtable! ",
-                       TAG_ARG(rec->FeatureTag));
-            }
-
-            if (nParamOffset == 0) {
-                /* This happens when the 'size' feature is the first GPOS feature in the feature file.*/
-                nParamOffset = FEAT_PARAM_ZERO; /* So we can tell the difference between 'undefined' and a real zero value.*/
-            }
-            feature->FeatureParams = nParamOffset; /* Note! this is only the offset from the start of the featureParam block, which follows the FeatureList and records. */
-        } else {
-            feature->FeatureParams = NULL_OFFSET;
-        }
-
-        /* Advance to next feature */
-        iFeature = sub->span.feature;
+        oFeatureList += f.size(f.lookupIndices.size());
+        header.features.emplace_back(std::move(f));
     }
 
     return oFeatureList;
 }
 
-static void fixFeatureParamOffsets(hotCtx g, otlTbl t, short shortfeatureParamBaseOffset) {
-    int nFeatures = t->tbl.featureList_.FeatureCount;
-    int i;
-
-    for (i = 0; i < nFeatures; i++) {
-        FeatureRecord *rec = &t->tbl.featureList_.featureRecord[i];
-        Feature *feature = &rec->feature_;
-        if (feature->FeatureParams != 0) {
+void otlTbl::fixFeatureParamOffsets(Offset shortfeatureParamBaseOffset) {
+    for (auto &f : header.features) {
+        if (f.featureParams != 0) {
             /* Undo fix so we can tell the diff between feature->FeatureParam==NULL_OFFSET, */
             /* and a real 0 offset from the start of the subtable array.                    */
-            if (feature->FeatureParams == FEAT_PARAM_ZERO) {
-                feature->FeatureParams = 0;
-            }
+            if (f.featureParams == FEAT_PARAM_ZERO)
+                f.featureParams = 0;
+
             /* feature->FeatureParams is now: (offset from start of featureParams block that follows the FeatureList and feature records) */
             /* featureParamBaseOffset is (size of featureList).                     */
-            feature->FeatureParams = feature->FeatureParams + shortfeatureParamBaseOffset - rec->feature;
-            if (feature->FeatureParams > 0xFFFF) {
+            f.featureParams += shortfeatureParamBaseOffset - f.offset;
+            if (f.featureParams > 0xFFFF) {
                 hotMsg(g, hotFATAL, "feature parameter offset too large (%0x)",
-                       feature->FeatureParams);
+                       f.featureParams);
             }
         }
     }
 }
 
-/* Fill LookupList */
-static Offset fillLookupList(hotCtx g, otlTbl t) {
-    int i;
-    Subtable *sub;
-    int nLookups = 0;
-    Offset oLookupList;
-    int lkpInx;
-    int spanLimit = t->subtable.cnt - (t->nRefLookups + t->nFeatParams);
+void otlTbl::prepLookupList() {
+    std::stable_sort(subtables.begin(), subtables.end(),
+                     Subtable::ltLookupList);
 
-    /* Count lookups */
-    if (spanLimit > 0) {
-        /*can  have 0 lookups when there is only a GPOS 'size' feature, and no other features.*/
-        nLookups = t->subtable.array[spanLimit - 1].index.lookup + 1;
+    auto prevl = subtables.begin();
+    for (auto sl = prevl + 1; sl <= subtables.end(); sl++) {
+        if (sl == subtables.end() || sl->isRef() || sl->isParam() ||
+            sl->index.lookup != prevl->index.lookup) {
+            /* Lookup index change */
+            prevl->span.lookup = sl;
+            prevl = sl;
+        }
+        if (sl->isRef() || sl->isParam())
+            break;
+    }
+}
+
+Offset otlTbl::fillLookupList() {
+    int nLookups = 0;
+    auto spanEnd = subtables.end() - (nRefLookups + nFeatParams);
+
+    if (spanEnd != subtables.begin()) {
+        // can  have 0 lookups when there is only a GPOS 'size' feature,
+        // and no other features.
+        auto last = spanEnd - 1;
+        nLookups = last->index.lookup + 1;
     }
 
     DF(2, (stderr, ">OTL: %d lookup%s allocated (%d ref%s skipped)\n",
            nLookups, nLookups == 1 ? "" : "s",
-           t->nRefLookups, t->nRefLookups == 1 ? "" : "s"));
+           nRefLookups, nRefLookups == 1 ? "" : "s"));
 
     /* Allocate lookups */
-    t->tbl.lookupList_.LookupCount = nLookups;
-    t->tbl.lookupList_.lookup = (Offset *)MEM_NEW(g, sizeof(Offset) * nLookups);
-    t->tbl.lookupList_.lookup_ = (Lookup *)MEM_NEW(g, sizeof(Lookup) * nLookups);
-
-    oLookupList = LOOKUP_LIST_SIZE(nLookups);
+    header.lookups.reserve(nLookups);
+    Offset oLookupList = Lookup::listSize(nLookups);
 
     /* Build table */
-    lkpInx = 0;
-    for (i = 0; i < spanLimit; i = sub->span.lookup) {
-        Lookup *lookup;
-        int nSubtables;
-        int j;
+    for (auto sl = subtables.begin(); sl < spanEnd; sl = sl->span.lookup) {
+        Lookup lookup {oLookupList, sl->lookup};
 
-        sub = &t->subtable.array[i];
-        lookup = &t->tbl.lookupList_.lookup_[lkpInx];
-        nSubtables = sub->span.lookup - i;
+        for (auto si = sl; si != sl->span.lookup; si++)
+            lookup.subtableOffsets.push_back(si->offset - oLookupList);
 
-        t->tbl.lookupList_.lookup[lkpInx] = oLookupList;
-
-        lookup->LookupType = (unsigned short)(sub->lookup >> 16);
-        lookup->LookupFlag = (unsigned short)(sub->lookup & 0xffff);
-        /* Allocate subtables */
-        lookup->SubTableCount = nSubtables;
-        lookup->SubTable = (long *)MEM_NEW(g, sizeof(long) * nSubtables);
-
-        /* Fill subtable array. Offsets may be -ve; will be adjusted later. */
-        for (j = 0; j < nSubtables; j++) {
-            lookup->SubTable[j] = (sub + j)->offset - oLookupList;
+        oLookupList += lookup.size(lookup.subtableOffsets.size());
+        if (lookup.Flag & otlUseMarkFilteringSet) {
+            lookup.useMarkSetIndex = sl->markSetIndex;
+            oLookupList += sizeof(lookup.useMarkSetIndex);
         }
-
-        oLookupList += LOOKUP_SIZE(nSubtables);
-        if (lookup->LookupFlag & otlUseMarkFilteringSet) {
-            lookup->UseMarkSetIndex = sub->markSetIndex;
-            oLookupList += sizeof(lookup->UseMarkSetIndex);
-        }
-        lkpInx++;
+        header.lookups.emplace_back(std::move(lookup));
     }
 
     return oLookupList;
 }
 
-void checkStandAloneTablRefs(hotCtx g, otlTbl t) {
-    int i;
-    /* Now go back through all the real subtables, and check that the stand-alone ones have been referenced. */
-    ctuQSort(t->label.array, t->label.cnt, sizeof(LabelInfo), cmpLabelsByLookup, &g);
-    for (i = 0; i < (t->subtable.cnt - (t->nAnonSubtables + t->nRefLookups)); i++) {
-        Subtable *sub = &t->subtable.array[i];
-        if (sub->seenInFeature != 0) {
+void otlTbl::checkStandAloneRefs() {
+    std::map<int32_t, bool> revUsedMap;
+    for (auto li : labelMap)
+        revUsedMap.emplace(li.second.lookupInx, li.second.used);
+
+    // Now go back through all the real subtables, and check that
+    // the stand-alone ones have been referenced.
+    for (auto s : subtables) {
+        if (s.isAnon() || s.isRef())
             continue;
-        }
-        /* This is a stand-alone lookup */
-        sub->seenInFeature = findSeenRef(g, t, sub->index.lookup);
-        if (sub->seenInFeature == 0) {
-            hotMsg(g, hotWARNING, "Stand-alone lookup with Lookup Index %d was not referenced from within any feature, and will never be used.", sub->index.lookup);
-        }
+        if (s.seenInFeature)
+            continue;
+        auto rli = revUsedMap.find(s.index.lookup);
+        if (rli == revUsedMap.end())
+            hotMsg(g, hotFATAL, "Base lookup %d not found", s.index.lookup);
+        s.seenInFeature = rli->second;
+        if (!s.seenInFeature)
+            hotMsg(g, hotWARNING, "Stand-alone lookup with Lookup Index %d "
+                   "was not referenced from within any feature, and will "
+                   "never be used.", s.index.lookup);
     }
 }
 
-void otlTableFill(hotCtx g, otlTbl t, LOffset params_size) {
-    Offset offset = HEADER_SIZE;
-    Offset size;
-    t->params_size = params_size;
+void otlTbl::fill(LOffset params_size) {
+    Offset offset = header.size();
 
-    calcLookupListIndexes(g, t);
-    calcFeatureListIndexes(g, t);
+    calcLookupListIndices();
+    calcFeatureListIndices();
 
-    t->tbl.Version = VERSION(1, 0);
-
-    prepScriptList(g, t);
-    t->tbl.scriptList = offset;
-    offset += fillScriptList(g, t);
-
-#if HOT_DEBUG
-    if (DF_LEVEL >= 1) {
-        otlDumpSubtables(g, t);
-    }
-#endif
-
-    prepFeatureList(g, t);
-    t->tbl.featureList = offset;
-    size = fillFeatureList(g, t);
+    prepScriptList();
+    Offset size = fillScriptList();
+    header.scriptOffset = offset;
     offset += size;
-    if (t->nFeatParams > 0) {
-        /* The feature table FeatureParam offsets are currently from the start of the featureParam
-        block, starting right after the FeatureList.
-        featureParamBaseOffset is the size of the FeatureList and its records..
-         */
-        fixFeatureParamOffsets(g, t, (short)size);
-        offset += t->params_size;
-    }
-
-    prepLookupList(g, t);
-    t->tbl.lookupList = offset;
-    t->lookupSize = fillLookupList(g, t);
-}
-
-void otlTableFillStub(hotCtx g, otlTbl t) {
-    Header *hdr = &t->tbl;
-
-    t->tbl.Version = VERSION(1, 0);
-
-    t->tbl.scriptList = 0;
-    t->tbl.featureList = 0;
-    t->tbl.lookupList = 0;
-
-    hdr->scriptList_.ScriptCount = 0;
-    hdr->featureList_.FeatureCount = 0;
-    hdr->lookupList_.LookupCount = 0;
-}
-
-/* Write language system record */
-static void writeLangSys(otlCtx h, LangSys *rec) {
-    int i;
-
-    OUT2(rec->LookupOrder);
-    OUT2(rec->ReqFeatureIndex);
-    OUT2(rec->FeatureCount);
-
-    for (i = 0; i < rec->FeatureCount; i++) {
-        OUT2(rec->FeatureIndex[i]);
-    }
-}
-
-void otlTableWrite(hotCtx g, otlTbl t) {
-    int i;
-    int j;
-    otlCtx h = g->ctx.otl;
-    Header *hdr = &t->tbl;
-
-    /* Write header */
-    OUT4(hdr->Version);
-    OUT2(hdr->scriptList);
-    OUT2(hdr->featureList);
-    OUT2(hdr->lookupList);
-
-    if (hdr->scriptList == 0) {
-        return;
-    }
-
-    /* Write script list */
-    OUT2(hdr->scriptList_.ScriptCount);
-    for (i = 0; i < hdr->scriptList_.ScriptCount; i++) {
-        ScriptRecord *rec = &hdr->scriptList_.scriptRecord[i];
-
-        OUT4(rec->ScriptTag);
-        OUT2(rec->script);
-    }
-    for (i = 0; i < hdr->scriptList_.ScriptCount; i++) {
-        Script *script = &hdr->scriptList_.scriptRecord[i].script_;
-
-        OUT2(script->DefaultLangSys);
-        OUT2(script->LangSysCount);
-
-        for (j = 0; j < script->LangSysCount; j++) {
-            LangSysRecord *rec = &script->langSysRecord[j];
-
-            OUT4(rec->LangSysTag);
-            OUT2(rec->langSys);
-        }
-
-        if (script->DefaultLangSys != 0) {
-            writeLangSys(h, &script->DefaultLangSys_);
-        }
-
-        for (j = 0; j < script->LangSysCount; j++) {
-            writeLangSys(h, &script->langSysRecord[j].langSys_);
-        }
-    }
-
-    /* Write feature list */
-    OUT2(hdr->featureList_.FeatureCount);
-    for (i = 0; i < hdr->featureList_.FeatureCount; i++) {
-        FeatureRecord *rec = &hdr->featureList_.featureRecord[i];
-
-        OUT4(rec->FeatureTag);
-        OUT2(rec->feature);
-    }
-    for (i = 0; i < hdr->featureList_.FeatureCount; i++) {
-        Feature *feature = &hdr->featureList_.featureRecord[i].feature_;
-
-        OUT2(feature->FeatureParams);
-        OUT2(feature->LookupCount);
-
-        for (j = 0; j < feature->LookupCount; j++) {
-            OUT2(feature->LookupListIndex[j]);
-        }
-    }
-}
-
-void otlLookupListWrite(hotCtx g, otlTbl t) {
-    int i;
-    int j;
-    otlCtx h = g->ctx.otl;
-    Header *hdr = &t->tbl;
-
-    /* Write lookup list */
-    OUT2(hdr->lookupList_.LookupCount);
-    for (i = 0; i < hdr->lookupList_.LookupCount; i++) {
-        OUT2(hdr->lookupList_.lookup[i]);
-    }
-    for (i = 0; i < hdr->lookupList_.LookupCount; i++) {
-        Lookup *lookup = &hdr->lookupList_.lookup_[i];
-
-        OUT2(lookup->LookupType);
-        OUT2(lookup->LookupFlag);
-        OUT2(lookup->SubTableCount);
-        for (j = 0; j < lookup->SubTableCount; j++) {
-            long subTableOffset = lookup->SubTable[j] + t->lookupSize;
-            if (subTableOffset > 0xFFFF) {
-                hotMsg(g, hotFATAL, "subtable offset too large (%0lx) in lookup %i type %i",
-                       subTableOffset, i, lookup->LookupType);
-            }
-            OUT2((short)subTableOffset);
-        }
-        if (lookup->LookupFlag & otlUseMarkFilteringSet) {
-            OUT2(lookup->UseMarkSetIndex);
-        }
-    }
-}
-
-/* Free language system record */
-static void freeLangSys(hotCtx g, LangSys *rec) {
-    MEM_FREE(g, rec->FeatureIndex);
-}
-
-static void freeTable(hotCtx g, otlTbl t) {
-    int i;
-    int j;
-    Header *hdr = &t->tbl;
-
-    /* Free script list */
-    for (i = 0; i < hdr->scriptList_.ScriptCount; i++) {
-        Script *script = &hdr->scriptList_.scriptRecord[i].script_;
-
-        if (script->DefaultLangSys != 0) {
-            freeLangSys(g, &script->DefaultLangSys_);
-        }
-
-        for (j = 0; j < script->LangSysCount; j++) {
-            freeLangSys(g, &script->langSysRecord[j].langSys_);
-        }
-
-        script->LangSysCount = 0;
-        MEM_FREE(g, script->langSysRecord);
-    }
-    MEM_FREE(g, hdr->scriptList_.scriptRecord);
-
-    /* Free feature list */
-    for (i = 0; i < hdr->featureList_.FeatureCount; i++) {
-        Feature *feature = &hdr->featureList_.featureRecord[i].feature_;
-        if (feature->LookupCount > 0) {
-            MEM_FREE(g, feature->LookupListIndex);
-        }
-    }
-    MEM_FREE(g, hdr->featureList_.featureRecord);
-
-    /* Free lookup list */
-    for (i = 0; i < hdr->lookupList_.LookupCount; i++) {
-        Lookup *lookup = &hdr->lookupList_.lookup_[i];
-
-        MEM_FREE(g, lookup->SubTable);
-    }
-    MEM_FREE(g, hdr->lookupList_.lookup);
-    MEM_FREE(g, hdr->lookupList_.lookup_);
-}
-
-void otlTableReuse(hotCtx g, otlTbl t) {
-    if (t->subtable.cnt != 0) {
-        freeTable(g, t);
-    }
-    t->subtable.cnt = 0;
-    t->label.cnt = 0;
-    t->refLabel.cnt = 0;
 
 #if HOT_DEBUG
-    t->subtable.func = initSubtable;
-    t->nCoverageReused = 0;
-    t->nClassReused = 0;
+    if (DF_LEVEL >= 1)
+        dumpSubtables();
 #endif
-    coverageReuse(g, t);
-    classReuse(g, t);
-    t->nStandAloneSubtables = t->nAnonSubtables = t->nRefLookups = t->nFeatParams = 0;
+
+    prepFeatureList();
+    size = fillFeatureList();
+    header.featureOffset = offset;
+    offset += size;
+    if (nFeatParams > 0) {
+        /* The feature table FeatureParam offsets are currently
+         * from the start of the featureParam block, starting right
+         * after the FeatureList. featureParamBaseOffset is the size
+         * of the FeatureList and its records..
+         */
+        fixFeatureParamOffsets(size);
+        offset += params_size;
+    }
+
+    prepLookupList();
+    header.lookupOffset = offset;
+    lookupSize = fillLookupList();
 }
 
-void otlTableFree(hotCtx g, otlTbl t) {
-    if (t == NULL) {
+void otlTbl::LangSys::write(otlTbl &t) {
+    t.o2(LookupOrder);
+    t.o2(ReqFeatureIndex);
+    t.o2(featureIndices.size());
+
+    for (auto fi : featureIndices)
+        t.o2(fi);
+}
+
+void otlTbl::Header::write(otlTbl &t) {
+    t.o4(Version);
+    t.o2(scriptOffset);
+    t.o2(featureOffset);
+    t.o2(lookupOffset);
+
+    if (scriptOffset == 0)
         return;
+
+    // Scripts
+    t.o2(scripts.size());
+    for (auto &s : scripts) {
+        t.o4(s.ScriptTag);
+        t.o2(s.offset);
     }
-    dnaFREE(t->subtable);
-    dnaFREE(t->label);
-    dnaFREE(t->refLabel);
-    coverageFree(g, t);
-    classFree(g, t);
-    MEM_FREE(g, t);
+    for (auto &s : scripts) {
+        t.o2(s.defaultLangSys.offset);
+        t.o2(s.langSystems.size());
+
+        for (auto &ls : s.langSystems) {
+            t.o4(ls.LangSysTag);
+            t.o2(ls.offset);
+        }
+
+        if (s.defaultLangSys.offset != 0)
+            s.defaultLangSys.write(t);
+
+        for (auto &ls : s.langSystems)
+            ls.write(t);
+    }
+
+    // Features
+    t.o2(features.size());
+    for (auto &f : features) {
+        t.o4(f.FeatureTag);
+        t.o2(f.offset);
+    }
+    for (auto &f : features) {
+        t.o2(f.featureParams);
+        t.o2(f.lookupIndices.size());
+
+        for (auto li : f.lookupIndices)
+            t.o2(li);
+    }
+}
+
+void otlTbl::Header::lookupListWrite(otlTbl &t, Offset lookupSize) {
+    t.o2(lookups.size());
+
+    for (auto &l : lookups)
+        t.o2(l.offset);
+
+    int i = 0;
+    for (auto &l : lookups) {
+        t.o2(l.Type);
+        t.o2(l.Flag);
+        t.o2(l.subtableOffsets.size());
+        for (auto so : l.subtableOffsets) {
+            LOffset subTableOffset = so + lookupSize;
+            if (subTableOffset > 0xFFFF) {
+                hotMsg(t.g, hotFATAL, "subtable offset too large (%0lx) "
+                       "in lookup %i type %i",
+                       subTableOffset, i, l.Type);
+            }
+            t.o2(subTableOffset);
+        }
+        if (l.Flag & otlUseMarkFilteringSet)
+            t.o2(l.useMarkSetIndex);
+        i++;
+    }
 }
 
 /* Add subtable to list. Assumes label has been set for intended granularity of
    lookups (i.e. all subtables of the same lookup should have the same
    label). */
-void otlSubtableAdd(hotCtx g, otlTbl t, Tag script, Tag language, Tag feature,
-                    int lkpType, int lkpFlag, unsigned short markSetIndex, unsigned extensionLookupType,
-                    unsigned offset, Label label, unsigned short fmt,
-                    int isFeatParam) {
-    Subtable *sub = dnaNEXT(t->subtable);
+void otlTbl::subtableAdd(Tag script, Tag language, Tag feature,
+                         int32_t lkpType, int32_t lkpFlag,
+                         uint16_t markSetIndex, uint16_t extensionLookupType,
+                         LOffset offset, Label label, uint16_t fmt,
+                         bool isFeatParam) {
+    subtables.emplace_back(script, language, feature, lkpType, lkpFlag,
+                           markSetIndex, extensionLookupType, offset, label,
+                           fmt, isFeatParam);
 
-    sub->script = script;
-    sub->language = language;
-    sub->feature = feature;
-    sub->lookup = (unsigned long)lkpType << 16 | lkpFlag;
-    sub->markSetIndex = markSetIndex;
-    sub->extensionLookupType = extensionLookupType;
-    sub->offset = offset;
-    sub->label = label;
-    sub->fmt = fmt;
-    sub->isFeatParam = isFeatParam;
+    auto &sub = subtables.back();
 
-    if (feature == TAG_STAND_ALONE) {
-        sub->seenInFeature = 0;
-    } else {
-        sub->seenInFeature = 1;
-    }
-
-    if (script == TAG_UNDEF) {
-         t->nAnonSubtables++;
-     }
-     if (feature == TAG_STAND_ALONE) {
-         t->nStandAloneSubtables++;
-     }
+    if (sub.isAnon())
+        nAnonSubtables++;
+    if (sub.isStandAlone())
+        nStandAloneSubtables++;
 
      /* FeatParam subtables may be labeled, but should NOT be added */
      /* to the list of real look ups.                               */
-     if (IS_REF_LAB(label)) {
-         t->nRefLookups++;
-     } else if (isFeatParam) {
-         t->nFeatParams++;
-     }
+    if (sub.isRef())
+        nRefLookups++;
+    else if (sub.isParam()) {
+        // Really counting non-ref isParams here
+        nFeatParams++;
+    }
 }
