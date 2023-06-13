@@ -338,8 +338,7 @@ class FeatCtx {
 
     // Positions
     void addMarkClass(const std::string &markClassName);
-    void addGPOS(int lkpType, GNode *targ, int anchorCount,
-                 const AnchorMarkInfo *ami);
+    void addGPOS(int lkpType, GNode *targ);
     void addBaseClass(GNode *targ, const std::string &defaultClassName);
     void addPos(GNode *targ, int type, bool enumerate);
 

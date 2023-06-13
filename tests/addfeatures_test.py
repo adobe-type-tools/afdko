@@ -310,7 +310,7 @@ def test_version_warning_bug610():
         b"In feature 'tst1', glyph 'glyph2' "
         b"is repeated in the current class definition. Mark class: "
         b"@TOP_MARKS."),
-    ('test_mark_class_glyph_conflict',
+    ('test_mark_class_glyph_conflict_2',
         b"In feature 'tst1', glyph 'glyph1' "
         b"occurs in two different mark classes. Previous mark class: "
         b"@TOP_MARKS. Current mark class: @BOTTOM_MARKS."),

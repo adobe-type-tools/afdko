@@ -426,12 +426,12 @@ antlrcpp::Any FeatVisitor::visitLookupflagAssign(FeatParser::LookupflagAssignCon
             v = fc->setLkpFlagAttribute(v, otlIgnoreMarks, 0);
         else if ( e->USE_MARK_FILTERING_SET() != nullptr ) {
             gc = getGlyphClass(e->glyphClass(), true);
-            uint16_t umfIndex = addMarkSetClassGDEF(fc->g, gc);
+            uint16_t umfIndex = fc->g->ctx.GDEFp->addMarkSetClass(gc);
             v = fc->setLkpFlagAttribute(v, otlUseMarkFilteringSet, umfIndex);
         } else {
             assert(e->MARK_ATTACHMENT_TYPE() != nullptr);
             gc = getGlyphClass(e->glyphClass(), true);
-            uint16_t macIndex = addGlyphMarkClassGDEF(fc->g, gc);
+            uint16_t macIndex = fc->g->ctx.GDEFp->addGlyphMarkClass(gc);
             if ( macIndex > kMaxMarkAttachClasses )
                 fc->featMsg(hotERROR, "No more than 15 different class names can be used with the \"lookupflag MarkAttachmentType\". This would be a 16th.");
             v = fc->setLkpFlagAttribute(v, otlMarkAttachmentType, macIndex);
@@ -903,7 +903,7 @@ antlrcpp::Any FeatVisitor::visitGdefAttach(FeatParser::GdefAttachContext *ctx) {
         int s = getNum<int16_t>(TOK(n)->getText(), 10);
         GNode *next = pat;
         while (next != NULL) {
-            if ( addAttachEntryGDEF(fc->g, next, s) )
+            if ( fc->g->ctx.GDEFp->addAttachEntry(next, s) )
                 fc->featMsg(hotWARNING, "Skipping duplicate contour index %d", s);
             next = next->nextCl;
         }
@@ -1364,7 +1364,7 @@ void FeatVisitor::translateGdefLigCaret(FeatParser::LookupPatternContext *pctx,
 
     GNode *next = pat;
     while ( next != nullptr ) {
-        addLigCaretEntryGDEF(fc->g, next, sv.data(), sv.size(), format);
+        fc->g->ctx.GDEFp->addLigCaretEntry(next, sv, format);
         next = next->nextCl;
     }
 }

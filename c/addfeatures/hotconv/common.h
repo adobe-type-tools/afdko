@@ -325,11 +325,8 @@ struct FontInfo_ { /* Font information */
 /* -------------------------------- Contexts ------------------------------- */
 typedef struct mapCtx_ *mapCtx;
 typedef void *featVCtx;
-typedef struct otlCtx_ *otlCtx;
 typedef struct cfrCtx_ *cfrCtx;
 typedef struct BASECtx_ *BASECtx;
-typedef struct GDEFCtx_ *GDEFCtx;
-typedef struct GPOSCtx_ *GPOSCtx;
 typedef struct GSUBCtx_ *GSUBCtx;
 typedef struct OS_2Ctx_ *OS_2Ctx;
 typedef struct STATCtx_ *STATCtx;
@@ -346,6 +343,9 @@ typedef struct sfntCtx_ *sfntCtx;
 typedef struct vheaCtx_ *vheaCtx;
 typedef struct vmtxCtx_ *vmtxCtx;
 
+class GPOS;
+class GDEF;
+
 #define ID_TEXT_SIZE 1024 /* Size of text buffer used to hold identifying info about the current feature for error messages. */
 
 
@@ -358,11 +358,10 @@ struct hotCtx_ {
     struct {         /* --- Package contexts */
         mapCtx map;
         featVCtx feat;
-        otlCtx otl;
         cfrCtx cfr;
         BASECtx BASE;
-        GDEFCtx GDEF;
-        GPOSCtx GPOS;
+        GDEF *GDEFp;
+        GPOS *GPOSp;
         GSUBCtx GSUB;
         OS_2Ctx OS_2;
         STATCtx STAT;
