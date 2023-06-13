@@ -79,15 +79,37 @@ typedef struct {
 
 #define METRICSINFOEMPTYPP { -1, { 0, 0, 0, 0 } }
 
-typedef struct {
-    short int x;
-    short int y;
-    unsigned short contourpoint;
-    unsigned int format;
-    GNode *markClass;
-    int markClassIndex;
-    int componentIndex;
-} AnchorMarkInfo;
+struct AnchorMarkInfo {
+    bool operator < (const AnchorMarkInfo &rhs) const {
+        if (componentIndex != rhs.componentIndex)
+            return componentIndex < rhs.componentIndex;
+        if (markClassIndex != rhs.markClassIndex)
+            return markClassIndex < rhs.markClassIndex;
+        if (format != rhs.format)
+            return format < rhs.format;
+        if (x != rhs.x)
+            return x < rhs.x;
+        if (y != rhs.y)
+            return y < rhs.y;
+        if (format == 2 && contourpoint != rhs.contourpoint)
+            return contourpoint < rhs.contourpoint;
+        return false;
+    }
+    bool operator == (const AnchorMarkInfo &rhs) const {
+        return componentIndex == rhs.componentIndex &&
+               markClassIndex == rhs.markClassIndex &&
+               format == rhs.format &&
+               x == rhs.x && y == rhs.y &&
+               (format != 2 || contourpoint == rhs.contourpoint);
+    }
+    int16_t x {0};
+    int16_t y {0};
+    uint16_t contourpoint {0};
+    uint32_t format {0};
+    GNode *markClass {nullptr};
+    int32_t markClassIndex {0};
+    int32_t componentIndex {0};
+};
 
 struct GNode_ {
     /* On first node in pattern: */

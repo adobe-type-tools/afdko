@@ -1116,20 +1116,20 @@ void FeatCtx::registerFeatureLangSys() {
             } else {
                 /* lkp->tbl == GPOS_ */
                 if (!seenGPOS) {
-                    GPOSFeatureBegin(g, ls.first.script, ls.first.lang, curr.feature);
+                    g->ctx.GPOSp->FeatureBegin(ls.first.script, ls.first.lang, curr.feature);
                     seenGPOS = true;
                 }
-                GPOSLookupBegin(g, lkp.lkpType, lkp.lkpFlag,
-                                (Label)(lkp.label | REF_LAB),
-                                lkp.useExtension, lkp.markSetIndex);
-                GPOSLookupEnd(g, curr.feature);
+                g->ctx.GPOSp->LookupBegin(lkp.lkpType, lkp.lkpFlag,
+                                          (Label)(lkp.label | REF_LAB),
+                                          lkp.useExtension, lkp.markSetIndex);
+                g->ctx.GPOSp->LookupEnd(curr.feature);
             }
         }
         if (seenGSUB) {
             GSUBFeatureEnd(g);
         }
         if (seenGPOS) {
-            GPOSFeatureEnd(g);
+            g->ctx.GPOSp->FeatureEnd();
         }
     }
 }
@@ -1209,9 +1209,9 @@ void FeatCtx::closeFeatScriptLang(State &st) {
         GSUBFeatureEnd(g);
     } else if ( st.tbl == GPOS_ ) {
         if ( st.lkpType != 0 )
-            GPOSLookupEnd(g, st.feature);
+            g->ctx.GPOSp->LookupEnd(st.feature);
         g->error_id_text[0] = '\0';
-        GPOSFeatureEnd(g);
+        g->ctx.GPOSp->FeatureEnd();
     }
 }
 
@@ -1220,7 +1220,7 @@ void FeatCtx::addFeatureParam(const std::vector<uint16_t> &params) {
         case size_:
             prepRule(GPOS_, GPOSFeatureParam, NULL, NULL);
 
-            GPOSAddSize(g, params);
+            g->ctx.GPOSp->AddParameters(params);
 
             wrapUpRule();
 
@@ -1243,7 +1243,7 @@ void FeatCtx::subtableBreak() {
     if (curr.tbl == GSUB_) {
         retval = GSUBSubtableBreak(g);
     } else if (curr.tbl == GPOS_) {
-        retval = GPOSSubtableBreak(g);
+        retval = g->ctx.GPOSp->SubtableBreak();
     } else {
         featMsg(hotWARNING, "Statement not expected here");
         return;
@@ -1473,7 +1473,7 @@ void FeatCtx::startTable(Tag tag) {
 void FeatCtx::setGDEFGlyphClassDef(GNode *simple, GNode *ligature, GNode *mark,
                                    GNode *component) {
     gFlags |= seenGDEFGC;
-    setGlyphClassGDef(g, simple, ligature, mark, component);
+    g->ctx.GDEFp->setGlyphClass(simple, ligature, mark, component);
 }
 
 void FeatCtx::createDefaultGDEFClasses() {
@@ -1503,7 +1503,7 @@ void FeatCtx::createDefaultGDEFClasses() {
             finishCurrentGC();
         }
 
-        setGlyphClassGDef(g, classes[0], classes[1], classes[2], classes[3]);
+        g->ctx.GDEFp->setGlyphClass(classes[0], classes[1], classes[2], classes[3]);
     }
 }
 
@@ -1587,7 +1587,7 @@ void FeatCtx::addSizeNameString(long platformId, long platspecId,
     /* all subsequent sizemenunames will share the same nameID.        */
     if (featNameID == 0) {
         nameID = nameReserveUserID(g);
-        GPOSSetSizeMenuNameID(g, nameID);
+        g->ctx.GPOSp->SetSizeMenuNameID(nameID);
         featNameID = nameID;
     } else {
         nameID = featNameID;
@@ -1878,8 +1878,8 @@ void FeatCtx::prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
             GSUBLookupBegin(g, curr.lkpType, curr.lkpFlag,
                             curr.label, useExtension, curr.markSetIndex);
         } else if (curr.tbl == GPOS_) {
-            GPOSFeatureBegin(g, curr.script, curr.language, curr.feature);
-            GPOSLookupBegin(g, curr.lkpType, curr.lkpFlag,
+            g->ctx.GPOSp->FeatureBegin(curr.script, curr.language, curr.feature);
+            g->ctx.GPOSp->LookupBegin(curr.lkpType, curr.lkpFlag,
                             curr.label, useExtension, curr.markSetIndex);
         }
 
@@ -2334,11 +2334,11 @@ void FeatCtx::addMarkClass(const std::string &markClassName) {
     finishCurrentGC();
 }
 
-void FeatCtx::addGPOS(int lkpType, GNode *targ, int anchorCount, const AnchorMarkInfo *ami) {
+void FeatCtx::addGPOS(int lkpType, GNode *targ) {
     prepRule(GPOS_, (targ->flags & FEAT_HAS_MARKED) ? GPOSChain : lkpType, targ, NULL);
 
     std::string locDesc = current_visitor->tokenPositionMsg(true);
-    GPOSRuleAdd(g, lkpType, targ, locDesc.c_str(), anchorCount, ami);
+    g->ctx.GPOSp->RuleAdd(lkpType, targ, locDesc, anchorMarkInfo);
 
     wrapUpRule();
 }
@@ -2537,7 +2537,7 @@ void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
     }
 
     if (type == GPOSSingle) {
-        addGPOS(GPOSSingle, targ, anchorMarkInfo.size(), anchorMarkInfo.data());
+        addGPOS(GPOSSingle, targ);
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSPair) {
         next_targ = targ->nextSeq;
@@ -2564,7 +2564,7 @@ void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
             targ->nextSeq = next_targ; /* featGlyphClassSort may change which node in the next_targ class is the head node.  */
         }
         /* addGPOSPair(targ, second, enumerate); */
-        addGPOS(GPOSPair, targ, anchorMarkInfo.size(), anchorMarkInfo.data());
+        addGPOS(GPOSPair, targ);
         /* These nodes are recycled in GPOS.c due to some complicated copying of nodes. */
     } else if (type == GPOSCursive) {
         if (anchorMarkInfo.size() != 2) {
@@ -2572,7 +2572,7 @@ void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
         } else if ((!(targ->flags & FEAT_HAS_MARKED)) && ((!(targ->flags & FEAT_IS_BASE_NODE)) || (targ->nextSeq != NULL))) {
             featMsg(hotERROR, "This statement has contextual glyphs around the cursive statement, but no glyphs are marked as part of the input sequence. Skipping rule.");
         } else {
-            addGPOS(GPOSCursive, targ, anchorMarkInfo.size(), anchorMarkInfo.data());
+            addGPOS(GPOSCursive, targ);
         }
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSMarkToBase) {
@@ -2580,7 +2580,7 @@ void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
         if ((!(targ->flags & FEAT_HAS_MARKED)) && ((!(targ->flags & FEAT_IS_BASE_NODE)) || ((targ->nextSeq != NULL) && (targ->nextSeq->nextSeq != NULL)))) {
             featMsg(hotERROR, "This statement has contextual glyphs around the base-to-mark statement, but no glyphs are marked as part of the input sequence. Skipping rule.");
         }
-        addGPOS(GPOSMarkToBase, targ, anchorMarkInfo.size(), anchorMarkInfo.data());
+        addGPOS(GPOSMarkToBase, targ);
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSMarkToLigature) {
         addBaseClass(targ, kDEFAULT_LIGATURECLASS_NAME);
@@ -2613,14 +2613,14 @@ void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
             }
         }
 
-        addGPOS(GPOSMarkToLigature, targ, anchorMarkInfo.size(), anchorMarkInfo.data());
+        addGPOS(GPOSMarkToLigature, targ);
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSMarkToMark) {
         addBaseClass(targ, kDEFAULT_MARKCLASS_NAME);
         if ((!(targ->flags & FEAT_HAS_MARKED)) && ((!(targ->flags & FEAT_IS_BASE_NODE)) || ((targ->nextSeq != NULL) && (targ->nextSeq->nextSeq != NULL)))) {
             featMsg(hotERROR, "This statement has contextual glyphs around the mark-to-mark statement, but no glyphs are marked as part of the input sequence. Skipping rule.");
         }
-        addGPOS(GPOSMarkToMark, targ, anchorMarkInfo.size(), anchorMarkInfo.data());
+        addGPOS(GPOSMarkToMark, targ);
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSChain) {
         /* is contextual */
@@ -2628,7 +2628,7 @@ void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
             featMsg(hotERROR, "The 'lookup' keyword can be used only in a contextual statement. At least one glyph in the sequence must be marked. Skipping rule.");
         } else {
             validateGPOSChain(targ, type);
-            addGPOS(GPOSChain, targ, anchorMarkInfo.size(), anchorMarkInfo.data());
+            addGPOS(GPOSChain, targ);
         }
         /* These nodes are recycled in GPOS.c, as they are used in the fill phase, some time after this function returns. */
     } else {
