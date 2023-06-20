@@ -32,7 +32,7 @@ kBaseStateTokens = [
     "IsItalicStyle",
     "ConvertToCID",
     "PreferOS/2TypoMetrics",
-    "IsOS/2WidthWeigthSlopeOnly",
+    "IsOS/2WidthWeightSlopeOnly",
     "IsOS/2OBLIQUE",
     "UseOldNameID4",
     "LicenseCode"
@@ -132,7 +132,7 @@ class FDDict:
 
     def __str__(self):
         a = ''
-        for k, v in vars(self).items():
+        for k, v in vars(self).items(): # could we describe k & v more?
             if k not in kFontInfoKeys or v is None:
                 continue
             if k == 'FontName':
@@ -176,6 +176,7 @@ class FDDict:
 
         setattr(self, key, value)
 
+    # I'm thinking if splitting this into sub-functions is a good idea so that the whole thing fits into the screen. The many if/elses can be confusing.
     def buildBlueLists(self):
         log.info("Building BlueValue lists for FDDict %s" % self.DictName)
         if self.BaselineOvershoot is None:
@@ -282,6 +283,7 @@ class FDDict:
             self.__class__.__name__, fddict.get('DictName', 'no name'), fddict)
 
 
+# I think it'll be helpful to split this up into sub-functions where each state is its own function.
 def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
     # fontDictList may or may not already contain a
     # font dict taken from the source font top FontDict.
@@ -328,7 +330,7 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
                     dictName = tokenList[i]
                     i += 1
                     if dictName == kFinalDictName:
-                        # This is dict is NOT used to hint any glyphs; it is
+                        # This dict is NOT used to hint any glyphs; it is
                         # used to supply the merged alignment zones and stem
                         # widths for the final font.
                         if finalFDict is None:
@@ -486,7 +488,7 @@ def mergeFDDicts(prevDictList):
     for prefDDict in prevDictList:
         if prefDDict is None:
             continue
-        for ki in [0, 1]:
+        for ki in [0, 1]: # ki?
             zoneDict = zoneDictList[ki]
             bluePairName = bluePairListNames[ki]
             bluePairList = getattr(prefDDict, bluePairName)
