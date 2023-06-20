@@ -100,7 +100,7 @@ def getGlyphNames(glyphTag, fontGlyphList, fDesc):
         if len(rangeList) > 1:
             log.warning("glyph ID <%s> in range %s from glyph selection "
                         "list option is not in font. <%s>.",
-                        rangeList[0], glyphTag, fDesc)
+                        rangeList[0], glyphTag, fDesc) # maybe we can rename glyphTag to something else since it could have two glyph tags to avoid confusion? I initially thought that rangeList[0] and glyphTag should be swapped because I was confused about glyphTag.
         else:
             log.warning("glyph ID <%s> from glyph selection list option "
                         "is not in font. <%s>.", rangeList[0], fDesc)
@@ -152,7 +152,7 @@ def get_glyph(options, font, name):
                      name)
             return None
         return gl
-    except KeyError:
+    except KeyError: # Curious: when would we run into this? if the font doesn't have the gyph, shouldn't it be caught up above?
         # Source fonts may be sparse, e.g. be a subset of the
         # reference font.
         return None
@@ -173,7 +173,7 @@ def setUniqueDescs(fontInstances):
             prefix = os.path.commonpath(descs)
             descs = [os.path.relpath(p, prefix) for p in descs]
             while True:
-                dn = [os.path.dirname(p) for p in descs]
+                dn = [os.path.dirname(p) for p in descs] # could we give dn a slightly longer name? It's not obvious at first glance what it is
                 if len(set(os.path.basename(p) for p in descs)) == 1:
                     descs = dn
                 else:
@@ -215,7 +215,7 @@ class fontWrapper:
     def numGlyphs(self):
         return len(self.glyphNameList)
 
-    def hintStatus(self, name, hgt):
+    def hintStatus(self, name, hgt): #what does hgt stand for? I'm guessing hint glyph something?
         an = self.options.nameAliases.get(name, name)
         if hgt is None:
             log.warning("%s: Could not hint!", an)
@@ -235,13 +235,13 @@ class fontWrapper:
 
     class glyphiter:
         def __init__(self, parent):
-            self.fw = parent
-            self.gnit = parent.glyphNameList.__iter__()
+            self.fw = parent # fw?
+            self.gnit = parent.glyphNameList.__iter__() #rename to gnIter, maybe?
             self.notFound = 0
 
         def __next__(self):
             # gnit's StopIteration exception stops this iteration
-            vi = 0
+            vi = 0 # I'm guessing this is variable instances, but is it the count? Could we clarify?
             stillLooking = True
             while stillLooking:
                 stillLooking = False
@@ -285,7 +285,7 @@ class fontWrapper:
                             "python process: running as single process")
 
         pool = None
-        lt = None
+        lt = None # lt?
         try:
             dictRecord = self.dictManager.getDictRecord()
             if pcount == 1:
@@ -437,3 +437,5 @@ def hintFiles(options):
                 fw.close()
             log.info("Done hinting font %s. End time: %s.", fi.font.desc,
                      time.asctime())
+
+# reviewed ✅
