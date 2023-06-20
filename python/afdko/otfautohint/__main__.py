@@ -333,7 +333,7 @@ class HintOptions(ACOptions):
         self.allowChanges = pargs.allow_changes
         self.noFlex = pargs.no_flex
         self.noHintSub = pargs.no_hint_sub
-        self.allow_no_blues = pargs.no_zones_stems
+        self.allowNoBlues = pargs.no_zones_stems
         self.ignoreFontinfo = pargs.ignore_fontinfo
         self.logOnly = pargs.report_only
         self.removeConflicts = not pargs.keep_conflicts
