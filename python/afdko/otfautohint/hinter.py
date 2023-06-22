@@ -24,6 +24,14 @@ from .logging import logging_reconfig, set_log_parameters
 
 log = logging.getLogger(__name__)
 
+# This file is where I started having more trouble reading some lines of code
+# due to the condensed naming — it becomes a lot to decipher to read the line
+# before actually putting it all together.
+# I'm thinking more and more if it would be better to have slightly longer names for the
+# one letter attributes. For example, s could be start or segment, and it takes some digging to find out
+
+# even if the var names are shortened, if we could add the longer descriptive names here where they are declared, that would be helpful to reference.
+# otherwise, it's too many names and acronyms to keep track of.
 GlyphPE = namedtuple("GlyphPE", "glyph pe")
 LocDict = namedtuple("LocDict", "l u used")
 
@@ -41,6 +49,8 @@ class dimensionHinter:
     def sameSign(a, b):
         return fne(a, 0) and fne(b, 0) and ((a > 0) == (b > 0))
 
+    # I see some comments in this function below that are referring to
+    # specific fonts — is there a reason for this?
     def __init__(self, options):
         self.StemLimit = 22  # ((kStackLimit) - 2) / 2), kStackLimit == 46
         """Initialize constant values and miscelaneous state"""
@@ -53,6 +63,7 @@ class dimensionHinter:
         self.GhostLength = 4
         self.GhostVal = 20
         self.GhostSpecial = 2
+        self.GhostFactor = 1.0 / 8.0 # move here since all other ghost attrs are here ?
         self.BendLength = 2
         self.BendTangent = 0.55735  # 30 sin 30 cos div abs == .57735
         self.Theta = 0.38  # Must be <= .38 for Ryumin-Light 32
@@ -67,9 +78,9 @@ class dimensionHinter:
         self.PruneFactor = 3.0
         self.PruneFactorLt = 10.0 / 3.0
         self.PruneDistance = 10
-        self.MuchPF = 50
+        self.MuchPF = 50 # can we define when we use MuchPF and VeryMuchPF
         self.VeryMuchPF = 100
-        self.CPfrac = 0.4
+        self.CPfrac = 0.4 # CP? Is it ConflictPrune? I'm not sure since Conflict is written out below, but not here
         self.ConflictValMin = 50.0
         self.ConflictValMult = 20.0
         # BandMargin must be < 46 for Americana-Bold d bowl vs stem hinting
@@ -80,9 +91,9 @@ class dimensionHinter:
         self.AutoLinearCurveFix = True
         self.MaxFlex = 20
         self.FlexLengthRatioCutoff = 0.11  # .33^2 (ratio of 1:3 or better)
-        self.FlexCand = 4
+        self.FlexCand = 4 # Cand?
         self.SCurveTangent = 0.025
-        self.CPfrac = 0.4
+        self.CPfrac = 0.4 #CPfrac is dup from line 74
         self.OppoFlatMax = 4
         self.FlatMin = 50
         self.ExtremaDist = 20
@@ -97,7 +108,6 @@ class dimensionHinter:
         self.SFactor = 20
         self.SpcBonus = 1000
         self.SpecialCharBonus = 200
-        self.GhostFactor = 1.0 / 8.0
         self.DeltaDiffMin = .05
         self.DeltaDiffReport = 3
         self.NoSegScore = 0.1
@@ -120,7 +130,7 @@ class dimensionHinter:
         self.report = report
         self.glyph = gllist[0]
         self.fddict = fddicts[0]
-        self.gllist = gllist
+        self.gllist = gllist #glyph list?
         self.isMulti = (len(gllist) > 1)
         self.name = name
         self.HasFlex = False
@@ -255,12 +265,13 @@ class dimensionHinter:
     def tryFlex(self, gl, c):
         """pathElement-level interface to add flex hints to current glyph"""
         # Not a curve, already flexed, or flex depth would be too large
-        if not c or c.isLine() or c.flex or c.s.a_dist(c.e) > self.MaxFlex:
+        if not c or c.isLine() or c.flex or c.s.a_dist(c.e) > self.MaxFlex: # c.isLine() — more for my knowledge: when could we expect curve to be a line??
             return False
         n = gl.nextInSubpath(c, skipTiny=True)
         if not n or n.isLine() or n.flex:
             return False
 
+        # difference aligned, difference opposite?
         da, do = (c.s - n.e).abs().ao()
         # Difference in "bases" too high to report a near miss or length
         # too short (Reuse of MaxFlex in other dimension is coincidental)
@@ -404,6 +415,7 @@ class dimensionHinter:
         else:
             return self.isMulti
 
+    # This seems like a complex function — could we make the params more descriptive so it's easier to understand?
     def addSegment(self, fr, to, loc, pe1, pe2, typ, desc, mid=False):
         if pe1 is not None and isinstance(pe1.segment_sub, int):
             subpath, offset = pe1.position
@@ -438,7 +450,7 @@ class dimensionHinter:
         self.hs.addSegment(fr, to, loc, pe1, pe2, typ, self.Bonus,
                            self.isV(), mid1, mid2, desc)
 
-    def CPFrom(self, cp2, cp3):
+    def CPFrom(self, cp2, cp3): # Could we add what CP stands for here and the function below?
         """Return point cp3 adjusted relative to cp2 by CPFrac"""
         return (cp3 - cp2) * (1.0 - self.CPfrac) + cp2
 
@@ -498,7 +510,7 @@ class dimensionHinter:
             return False
         return dp * dp / q <= 0.5
 
-    def isCCW(self, p0, p1, p2):
+    def isCCW(self, p0, p1, p2): # CCW?
         d0 = p1 - p0
         d1 = p2 - p1
         return d0.x * d1.y >= d1.x * d0.y
