@@ -21,6 +21,10 @@ import logging
 log = logging.getLogger(__name__)
 
 
+# It was helpful for me to see examples of classmethods!
+# I did struggle to read this file a bit more because of the single-letter /acronym variables & functions.
+# Would it be possible to make these names longer, or maybe in each function's documentation at the top, have a section of acronyms/letters to their full names? That would make reading this much faster & easier
+
 def norm_float(value):
     """Converts a float (whose decimal part is zero) to integer"""
     if isinstance(value, float):
@@ -31,12 +35,12 @@ def norm_float(value):
     return value
 
 
-def feq(a, b, factor=1.52e-5):
+def feq(a, b, factor=1.52e-5): # a slightly longer name may be best
     """Returns True if a and b are close enough to be considered equal"""
     return abs(a - b) < factor
 
 
-def fne(a, b, factor=1.52e-5):
+def fne(a, b, factor=1.52e-5): # a slightly longer name may be best
     """Returns True if a and b are not close enough to be considered equal"""
     return abs(a - b) >= factor
 
@@ -49,6 +53,7 @@ class pt(tuple):
 
     @classmethod
     def setAlign(cls, vertical=False):
+        # You mentioned that a is aligned and o is opposite - could we add that here as well?
         """
         Class-level method to control the value of properties a and o
 
@@ -97,7 +102,7 @@ class pt(tuple):
         return self[1]
 
     @property
-    def a(self):
+    def a(self): # could we add a note to say what this stands for?
         if self.tl.align == 1:
             return self[0]
         elif self.tl.align == 2:
@@ -107,7 +112,7 @@ class pt(tuple):
                                "setting align")
 
     @property
-    def o(self):
+    def o(self): # could we add a note to say what this stands for?
         if self.tl.align == 1:
             return self[1]
         elif self.tl.align == 2:
@@ -116,7 +121,7 @@ class pt(tuple):
             raise RuntimeError("glyphData.pt property o used without " +
                                "setting align")
 
-    def ao(self):
+    def ao(self): # could we add a note to say what this stands for?
         if self.tl.align == 1:
             return (self.x, self.y)
         elif self.tl.align == 2:
@@ -260,11 +265,11 @@ class stem(tuple):
         return _tuple.__new__(cls, (lb, rt))
 
     @property
-    def lb(self):
+    def lb(self): #stands for left bottom?
         return self[0]
 
     @property
-    def rt(self):
+    def rt(self): #stands for right top?
         return self[1]
 
     def __str__(self):
@@ -369,7 +374,7 @@ class boundsState:
         # Start with the bounds of the line betwen the endpoints
         self.lb = self.linearBounds(c)
         if c.is_line:
-            self.b = self.lb
+            self.b = self.lb # b = bounds?
         else:
             # For curves, add the control points into the calcuation.
             # If they exceed the linear bounds calculate the proper
@@ -508,6 +513,9 @@ class pathElement:
     """
     assocMatchFactor = 93
     tSlop = .005
+
+    # some of the single letter attrs below are hard to decipher. Some of them did make more sense once I read through the definiton above.
+    # But for easier readability at quick glance, can we either make the names longer or add definitions for them where they are declared?
 
     def __init__(self, *args, is_close=False, masks=None, flex=False,
                  position=None):
