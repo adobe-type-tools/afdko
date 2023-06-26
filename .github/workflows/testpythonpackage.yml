@@ -21,6 +21,10 @@ on:
         description: 'Reason for running workflow'
         required: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   run_tests:
     runs-on: ${{ matrix.os }}
