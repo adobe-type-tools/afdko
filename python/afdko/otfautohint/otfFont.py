@@ -31,11 +31,11 @@ kStackLimit = 46
 kStemLimit = 96
 
 
-class SEACError(Exception):
+class SEACError(Exception): # what is this error for?
     pass
 
 
-def _add_method(*clazzes):
+def _add_method(*clazzes): # more for my curiousity but also may be helpful for future readers: why 'clazzes'?
     """Returns a decorator function that adds a new method to one or
     more classes."""
     def wrapper(method):
@@ -361,7 +361,7 @@ class CFFFontData:
         self.ttFont.close()
 
     def isCID(self):
-        # XXX wrong for variable font
+        # XXX wrong for variable font -- I was questioning this as well since the plan is to have multiple FDDicts for namekeyed VFs. Is the plan to change this in the future? Is there another CID indicator we should look for here instead?
         return hasattr(self.topDict, "FDSelect")
 
     def getPrivateDictVal(self, pDict, attr, default, vsindex, vsi):
