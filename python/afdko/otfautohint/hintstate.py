@@ -20,10 +20,10 @@ class hintSegment:
         LINE = 1
         BEND = 2
         CURVE = 3
-        LGBBOX = 4
-        UGBBOX = 5
-        LPBBOX = 6
-        UPBBOX = 7
+        LGBBOX = 4 # LG?
+        UGBBOX = 5 # UG?
+        LPBBOX = 6 # LP?
+        UPBBOX = 7 # UP?
         GHOST = 8
 
     def __init__(self, aloc, oMin, oMax, pe, typ, bonus, isV, isInc, desc):
