@@ -85,7 +85,7 @@ def getDictmap(options):
 
     return dictmap
 
-
+# suggestion for below function: I wonder if it would be more helpful to split this into a few functions, or section it with comments — I lost track of my thought process a few times reading here,
 def remapDicts(fpath, dictmap):
     f = TTFont(fpath)
     if 'CFF ' not in f:
@@ -230,3 +230,5 @@ def main(args=None):
 
 if __name__ == "__main__":
     sys.exit(main())
+
+#reviewed
