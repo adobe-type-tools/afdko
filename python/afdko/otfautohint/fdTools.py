@@ -328,7 +328,7 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
                     dictName = tokenList[i]
                     i += 1
                     if dictName == kFinalDictName:
-                        # This is dict is NOT used to hint any glyphs; it is
+                        # This dict is NOT used to hint any glyphs; it is
                         # used to supply the merged alignment zones and stem
                         # widths for the final font.
                         if finalFDict is None:
@@ -486,9 +486,9 @@ def mergeFDDicts(prevDictList):
     for prefDDict in prevDictList:
         if prefDDict is None:
             continue
-        for ki in [0, 1]:
-            zoneDict = zoneDictList[ki]
-            bluePairName = bluePairListNames[ki]
+        for i in (0, 1):
+            zoneDict = zoneDictList[i]
+            bluePairName = bluePairListNames[i]
             bluePairList = getattr(prefDDict, bluePairName)
             if not bluePairList:
                 continue
@@ -498,10 +498,10 @@ def mergeFDDicts(prevDictList):
         # Now for the stem widths.
         stemNameList = ["DominantH", "DominantV"]
         stemDictList = [dominantHDict, dominantVDict]
-        for wi in (0, 1):
-            stemFieldName = stemNameList[wi]
+        for i in (0, 1):
+            stemFieldName = stemNameList[i]
             dList = getattr(prefDDict, stemFieldName)
-            stemDict = stemDictList[wi]
+            stemDict = stemDictList[i]
             if dList is not None:
                 for width in dList:
                     stemDict[width] = prefDDict.DictName
@@ -638,7 +638,7 @@ def getFDInfo(font, desc, options, glyphList, isVF):
     srcFontinfoData, hasDict = fontinfoFileData(options, font)
     if hasDict and not options.ignoreFontinfo:
         # Get the default fontinfo from the font's top dict.
-        fdDict = font.getPrivateFDDict(options.allow_no_blues,
+        fdDict = font.getPrivateFDDict(options.allowNoBlues,
                                        options.noFlex,
                                        options.vCounterGlyphs,
                                        options.hCounterGlyphs, desc)
@@ -662,7 +662,7 @@ def getFDInfo(font, desc, options, glyphList, isVF):
             if fdIndex is None:
                 continue
             if fdIndex not in fdArraySet:
-                fddict, model = font.getPrivateFDDict(options.allow_no_blues,
+                fddict, model = font.getPrivateFDDict(options.allowNoBlues,
                                                       options.noFlex,
                                                       options.vCounterGlyphs,
                                                       options.hCounterGlyphs,
@@ -681,7 +681,7 @@ def getFDInfo(font, desc, options, glyphList, isVF):
             if fdIndex is None:
                 continue
             if fdIndex not in fdArrayMap:
-                fddict = font.getPrivateFDDict(options.allow_no_blues,
+                fddict = font.getPrivateFDDict(options.allowNoBlues,
                                                options.noFlex,
                                                options.vCounterGlyphs,
                                                options.hCounterGlyphs,
@@ -775,7 +775,7 @@ class FDDictManager:
         elif fdIndex in self.auxRecord[vsindex]:
             return self.auxRecord[vsindex][fdIndex]
         f = self.fontInstances[0]
-        fddict, _ = f.font.getPrivateFDDict(self.options.allow_no_blues,
+        fddict, _ = f.font.getPrivateFDDict(self.options.allowNoBlues,
                                             self.options.noFlex,
                                             self.options.vCounterGlyphs,
                                             self.options.hCounterGlyphs,

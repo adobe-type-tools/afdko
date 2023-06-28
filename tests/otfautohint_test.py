@@ -492,7 +492,7 @@ def test_incomplete_glyphorder():
 def test_vfotf(otf):
     out_path = get_temp_file_path()
     options = MMOptions(None, [otf], [out_path])
-    options.allow_no_blues = True
+    options.allowNoBlues = True
     hintFiles(options)
 
     xmlFiles = []
@@ -521,7 +521,7 @@ def test_sparse_mmotf():
                 for p in inpaths]
 
     options = MMOptions(reference, inpaths, outpaths, ref_out)
-    options.allow_no_blues = True
+    options.allowNoBlues = True
     hintFiles(options)
 
     for ref, out in zip(exp_paths, [ref_out] + outpaths):
@@ -671,13 +671,13 @@ def test_bad_privatedict(path):
                          glob.glob(get_input_path("dummy/bad_privatedict_*")))
 def test_bad_privatedict_accept(path):
     """Same as above test, but PrivateDict is accepted because of
-       `allow_no_blues` option."""
+       `allowNoBlues` option."""
     if os.path.isdir(path):
         out_path = get_temp_dir_path()
     else:
         out_path = get_temp_file_path()
     options = OTFOptions(path, out_path)
-    options.allow_no_blues = True
+    options.allowNoBlues = True
 
     hintFiles(options)
 
@@ -846,7 +846,7 @@ def test_layers():
     path = get_input_path("dummy/layers.ufo")
     out_path = get_temp_dir_path()
     options = OTFOptions(path, out_path)
-    options.allow_no_blues = True
+    options.allowNoBlues = True
 
     hintFiles(options)
 

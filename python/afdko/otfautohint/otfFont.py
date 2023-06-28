@@ -32,6 +32,7 @@ kStemLimit = 96
 
 
 class SEACError(Exception):
+    """Raised when a charString has an obsolete 'seac' operator"""
     pass
 
 
@@ -390,7 +391,7 @@ class CFFFontData:
 
         return val
 
-    def getPrivateFDDict(self, allow_no_blues, noFlex, vCounterGlyphs,
+    def getPrivateFDDict(self, allowNoBlues, noFlex, vCounterGlyphs,
                          hCounterGlyphs, desc, fdIndex=0, gl_vsindex=None):
         pTopDict = self.topDict
         if hasattr(pTopDict, "FDArray"):
@@ -452,14 +453,14 @@ class CFFFontData:
                     # BlueValues. Some fonts have bad BBox values, so I
                     # don't let this be smaller than -upm*0.25, upm*1.25.
                     inactiveAlignmentValues = [low, low, high, high]
-                    if allow_no_blues or self.is_vf:
+                    if allowNoBlues or self.is_vf:
                         # XXX adjusted for vf
                         bvs = inactiveAlignmentValues
                         numbvs = len(bvs)
                     else:
                         raise FontParseError("Font must have at least four " +
                                              "values in its %s " % bvattr +
-                                             "array for PSAutoHint to work!")
+                                             "array for otfautohint to work!")
                     bvs.sort()
 
                 # The first pair only is a bottom zone, where the first value
@@ -488,7 +489,7 @@ class CFFFontData:
                     sstems = [self.getPrivateDictVal(privateDict, stdw,
                                                      -1, dict_vsindex, vsi)]
                 else:
-                    if allow_no_blues or self.is_vf:
+                    if allowNoBlues or self.is_vf:
                         # XXX adjusted for vf
                         # dummy value. Needs to be larger than any hint will
                         # likely be, as the autohint program strips out any

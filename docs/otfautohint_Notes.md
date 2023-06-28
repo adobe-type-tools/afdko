@@ -16,17 +16,21 @@ Most of the algorithms are unchanged but not all. Some notable differences are:
 3.  The C code algorithms for vertical and horizontal hinting were mostly
     implemented as separate functions. In the port there is typically one
     function shared by both dimensions. The `glyphData/pt` 2-tuple object has
-    special `a` and `o` value accessors and a class-level switch as part of this
-    unification. Some bug fixes and improvements that were only added to one
-    dimension in the past now work in both.
+    special `a` and `o` value accessors and a class-level switch as part of
+    this unification. (`a` is meant to suggest "aligned" and `o` is meant to
+    suggest "opposite", referring to the relation between the value and the
+    chosen alignment; `a` is `x` and `o` is `y` when horizontal alignment is
+    chosen, and vice-versa when vertical alignment is chosen.) Some bug fixes
+    and improvements that were only added to one dimension in the past now work
+    in both.
 4.  In the C code spline characteristics such as bounding boxes and measures of
     flatness were calculated by approximating spline curves with line segments.
     In the Python code these calculations are closed-form and implemented with
     fontTools' quadratic and cubic root finders.
 5.  The C code had special functions for handling a spline with an inflection
-    point. The new code copies and splits such splines at their inflection points,
-    analyzes the copies, and copies the resulting analysis back to the inflected
-    splines.
+    point. The new code copies and splits such splines at their inflection
+    points, analyzes the copies, and copies the resulting analysis back to the
+    inflected splines.
 6.  The mask distribution algorithm (which is equivalent to what used to be
     called "hint substitution" is implemeneted somewhat differently.
 
@@ -83,12 +87,15 @@ that change order are retained but treated as conflicting with all stems they
 
 As long as a design space is defined by interpolation only (rather than
 extrapolation) the extremes of stem ordering are represented by the (sorted)
-orders in the individual masters. Consider a variable glyph with *n* masters.
-The bottom edge of stem *i* at some point in design space can be represented as
+orders in the individual masters. Consider the bottom edge of stem *i* in a
+variable glyph with *n* masters. It's location at some point in design space
+can be represented as
 
 c<sub>1</sub>\*s<sub>*i*1</sub> + c<sub>2</sub>\*s<sub>*i*2</sub> + ... + c<sub>*n*</sub>\*s<sub>*in*</sub>
 
-where c<sub>1</sub> + c<sub>2</sub> + ... + c<sub>*n*</sub> == 1 and 0 <= c<sub>*k*</sub> <= 1
+where s<sub>*ik*</sub> is the position of the edge in that glyph in master *k*
+and each `c` value is some interpolation coefficient, so that c<sub>1</sub> +
+c<sub>2</sub> + ... + c<sub>*n*</sub> == 1 and 0 <= c<sub>*k*</sub> <= 1
 
 The signed distance between the bottom edges of two stems *i* and *j* is accordingly
 

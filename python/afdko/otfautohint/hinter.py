@@ -27,6 +27,30 @@ log = logging.getLogger(__name__)
 GlyphPE = namedtuple("GlyphPE", "glyph pe")
 LocDict = namedtuple("LocDict", "l u used")
 
+# A few variable conventions not documented elsewhere:
+
+# When used in a path-related context "c" is a variable containing a
+# path element (in the way that "i" is often a variable containing an
+# integer. In loops it will in a sense, be the "current" path element.
+# In lower-level functions it may just be the parameter containing the
+# element to operate on.
+
+# When "n" or "p" are used in a similar contexts they will typically
+# respectively contain the next or previous path elements relative to c.
+
+# "cl" generally refers to a list of (glyph, pathElement) tuples, where
+# each pathElement corresponds to the location of a corresponding line or
+# curve in master or VF location indicated by the glyph.
+
+# In a context with multiple path elements but without a clear relation
+# between them, pe1, pe2, and so forth will be used. p1, p2, etc. will
+# similarly contain points, and cp1, cp2 specifically control points.
+
+# Analogously "gl" is a variable containing a glyphData object.
+
+# "t" is a generic temporary variable, typically used when deciding
+# whether to replace one value with another. It should be short-lived.
+
 
 class dimensionHinter:
     """
@@ -140,7 +164,7 @@ class dimensionHinter:
         else:
             self.hs = self.glyph.hhs = glyphHintState()
 
-    class gliter:
+    class glIter:
         """A pathElement set iterator for the glyphData object list"""
         __slots__ = ('gll', 'il')
 
@@ -160,7 +184,7 @@ class dimensionHinter:
             return self
 
     def __iter__(self, glidx=None):
-        return self.gliter(self.gllist, glidx)
+        return self.glIter(self.gllist, glidx)
 
     # Methods implemented by subclasses
     @abstractmethod
@@ -247,9 +271,9 @@ class dimensionHinter:
             else:
                 log.info("Already has flex hints, skipping addFlex")
                 return
-        for c in self:
-            if all((self.tryFlex(x.glyph, x.pe) for x in c)):
-                self.markFlex(c)
+        for cl in self:
+            if all((self.tryFlex(x.glyph, x.pe) for x in cl)):
+                self.markFlex(cl)
         self.stopFlex()
 
     def tryFlex(self, gl, c):
@@ -499,6 +523,9 @@ class dimensionHinter:
         return dp * dp / q <= 0.5
 
     def isCCW(self, p0, p1, p2):
+        """
+        Returns true if p0 -> p1 -> p2 is counter-clockwise in glyph space.
+        """
         d0 = p1 - p0
         d1 = p2 - p1
         return d0.x * d1.y >= d1.x * d0.y
@@ -1670,8 +1697,8 @@ class dimensionHinter:
         gl = self.glyph
         if doSubpaths:
             paraml = range(len(gl.subpaths))
-            ltype = hintSegment.sType.LPBBOX
-            utype = hintSegment.sType.UPBBOX
+            ltype = hintSegment.sType.LSBBOX
+            utype = hintSegment.sType.USBBOX
         else:
             paraml = [None]
             ltype = hintSegment.sType.LGBBOX
@@ -1680,7 +1707,7 @@ class dimensionHinter:
             pbs = gl.getBounds(param)
             if pbs is None:
                 continue
-            mn_pt, mx_pt = pt(tuple(pbs.b[0])), pt(tuple(pbs.b[1]))
+            mn_pt, mx_pt = pt(tuple(pbs.bounds[0])), pt(tuple(pbs.bounds[1]))
             peidx = 0 if self.isV() else 1
             if any((hv.lloc <= mx_pt.o and mn_pt.o <= hv.uloc
                     for hv in self.hs.mainValues)):
@@ -1827,8 +1854,8 @@ class dimensionHinter:
                         else:
                             pbs = self.glyph.getBounds(peSi.position[0])
                         if pbs is not None:
-                            mn_pt = pt(tuple(pbs.b[0]))
-                            mx_pt = pt(tuple(pbs.b[1]))
+                            mn_pt = pt(tuple(pbs.bounds[0]))
+                            mx_pt = pt(tuple(pbs.bounds[1]))
                             score = mx_pt.a - mn_pt.a
                             loc = mx_pt.o if seg0.isUBBox() else mn_pt.o
                             iSS.addToLoc(loc, score, strong=True, bb=True)

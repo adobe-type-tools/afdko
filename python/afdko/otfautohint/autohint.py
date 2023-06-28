@@ -42,7 +42,7 @@ class ACOptions(object):
         self.allowChanges = False
         self.noFlex = False
         self.noHintSub = False
-        self.allow_no_blues = False
+        self.allowNoBlues = False
         self.fontinfoPath = None
         self.ignoreFontinfo = False
         self.logOnly = False
@@ -91,29 +91,29 @@ class ACOptions(object):
         return self.report_zones or self.report_stems
 
 
-def getGlyphNames(glyphTag, fontGlyphList, fDesc):
+def getGlyphNames(glyphSpec, fontGlyphList, fDesc):
     glyphNameList = []
-    rangeList = glyphTag.split("-")
+    rangeList = glyphSpec.split("-")
     try:
         prevGID = fontGlyphList.index(rangeList[0])
     except ValueError:
         if len(rangeList) > 1:
             log.warning("glyph ID <%s> in range %s from glyph selection "
                         "list option is not in font. <%s>.",
-                        rangeList[0], glyphTag, fDesc)
+                        rangeList[0], glyphSpec, fDesc)
         else:
             log.warning("glyph ID <%s> from glyph selection list option "
                         "is not in font. <%s>.", rangeList[0], fDesc)
         return None
     glyphNameList.append(fontGlyphList[prevGID])
 
-    for glyphTag2 in rangeList[1:]:
+    for glyphName2 in rangeList[1:]:
         try:
-            gid = fontGlyphList.index(glyphTag2)
+            gid = fontGlyphList.index(glyphName2)
         except ValueError:
             log.warning("glyph ID <%s> in range %s from glyph selection "
                         "list option is not in font. <%s>.",
-                        glyphTag2, glyphTag, fDesc)
+                        glyphName2, glyphSpec, fDesc)
             return None
         for i in range(prevGID + 1, gid + 1):
             glyphNameList.append(fontGlyphList[i])
@@ -132,8 +132,8 @@ def filterGlyphList(options, fontGlyphList, fDesc):
     else:
         # expand ranges:
         glyphList = []
-        for glyphTag in options.glyphList:
-            glyphNames = getGlyphNames(glyphTag, fontGlyphList, fDesc)
+        for glyphSpec in options.glyphList:
+            glyphNames = getGlyphNames(glyphSpec, fontGlyphList, fDesc)
             if glyphNames is not None:
                 glyphList.extend(glyphNames)
         if options.excludeGlyphList:
@@ -173,9 +173,9 @@ def setUniqueDescs(fontInstances):
             prefix = os.path.commonpath(descs)
             descs = [os.path.relpath(p, prefix) for p in descs]
             while True:
-                dn = [os.path.dirname(p) for p in descs]
+                dirname = [os.path.dirname(p) for p in descs]
                 if len(set(os.path.basename(p) for p in descs)) == 1:
-                    descs = dn
+                    descs = dirname
                 else:
                     break
         except ValueError:
@@ -215,14 +215,14 @@ class fontWrapper:
     def numGlyphs(self):
         return len(self.glyphNameList)
 
-    def hintStatus(self, name, hgt):
+    def hintStatus(self, name, hintedGlyphTuple):
         an = self.options.nameAliases.get(name, name)
-        if hgt is None:
+        if hintedGlyphTuple is None:
             log.warning("%s: Could not hint!", an)
             return False
-        hs = [g.hasHints(both=True) for g in hgt if g is not None]
+        hs = [g.hasHints(both=True) for g in hintedGlyphTuple if g is not None]
         if False in hs:
-            if len(hgt) == 1:
+            if len(hintedGlyphTuple) == 1:
                 log.info("%s: No hints added!", an)
                 return False
             elif True in hs:
@@ -236,21 +236,23 @@ class fontWrapper:
     class glyphiter:
         def __init__(self, parent):
             self.fw = parent
-            self.gnit = parent.glyphNameList.__iter__()
+            self.gnIter = parent.glyphNameList.__iter__()
             self.notFound = 0
 
         def __next__(self):
-            # gnit's StopIteration exception stops this iteration
-            vi = 0
+            # gnIter's StopIteration exception stops this iteration
+            vsindex = 0
             stillLooking = True
             while stillLooking:
                 stillLooking = False
-                name = self.gnit.__next__()
+                name = self.gnIter.__next__()
                 if self.fw.reportOnly and name == '.notdef':
                     stillLooking = True
                     continue
                 if self.fw.isVF:
-                    gt, vi = self.fw.fontInstances[0].font.get_vf_glyphs(name)
+                    t = self.fw.fontInstances[0].font.get_vf_glyphs(name)
+                    gt, vsindex = t
+
                 else:
                     gt = tuple((get_glyph(self.fw.options, f.font, name)
                                 for f in self.fw.fontInstances))
@@ -258,7 +260,7 @@ class fontWrapper:
                     self.notFound += 1
                     stillLooking = True
             self.fw.notFound = self.notFound
-            return name, gt, self.fw.dictManager.getRecKey(name, vi)
+            return name, gt, self.fw.dictManager.getRecKey(name, vsindex)
 
     def __iter__(self):
         return self.glyphiter(self)
@@ -285,7 +287,7 @@ class fontWrapper:
                             "python process: running as single process")
 
         pool = None
-        lt = None
+        logThread = None
         try:
             dictRecord = self.dictManager.getDictRecord()
             if pcount == 1:
@@ -295,8 +297,8 @@ class fontWrapper:
                 # set_start_method('spawn')
                 manager = Manager()
                 logQueue = manager.Queue(-1)
-                lt = Thread(target=log_receiver, args=(logQueue,))
-                lt.start()
+                logThread = Thread(target=log_receiver, args=(logQueue,))
+                logThread.start()
                 pool = Pool(pcount, initializer=glyphHinter.initialize,
                             initargs=(self.options, dictRecord,
                                       logQueue))
@@ -338,14 +340,14 @@ class fontWrapper:
                 pool.close()
                 pool.join()
                 logQueue.put(None)
-                lt.join()
+                logThread.join()
         finally:
             if pool is not None:
                 pool.terminate()
                 pool.join()
-            if lt is not None:
+            if logThread is not None:
                 logQueue.put(None)
-                lt.join()
+                logThread.join()
 
         return hintedAny
 

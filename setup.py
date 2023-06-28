@@ -133,7 +133,7 @@ def _get_console_scripts():
         ('hintplot', 'proofpdf:hintplot'),
         ('waterfallplot', 'proofpdf:waterfallplot'),
         ('otfautohint', 'otfautohint.__main__:main'),
-        ('otfstemhist', 'otfstemhist.__main__:stemhist'),
+        ('otfstemhist', 'otfautohint.__main__:stemhist'),
     ]
     scripts_path = 'afdko'
     scripts = [f'{name} = {scripts_path}.{entry}'

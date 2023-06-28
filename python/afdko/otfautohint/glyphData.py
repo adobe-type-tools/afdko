@@ -50,7 +50,9 @@ class pt(tuple):
     @classmethod
     def setAlign(cls, vertical=False):
         """
-        Class-level method to control the value of properties a and o
+        Class-level method to control the value of properties a and o.
+        "a" is meant so suggest "aligned" and "o" is meant to suggest
+        "opposite".
 
         When called with vertical==False (the default):
             a will be equivalent to x
@@ -98,6 +100,7 @@ class pt(tuple):
 
     @property
     def a(self):
+        """See note in setAlign"""
         if self.tl.align == 1:
             return self[0]
         elif self.tl.align == 2:
@@ -108,6 +111,7 @@ class pt(tuple):
 
     @property
     def o(self):
+        """See note in setAlign"""
         if self.tl.align == 1:
             return self[1]
         elif self.tl.align == 2:
@@ -117,6 +121,7 @@ class pt(tuple):
                                "setting align")
 
     def ao(self):
+        """See note in setAlign"""
         if self.tl.align == 1:
             return (self.x, self.y)
         elif self.tl.align == 2:
@@ -261,10 +266,12 @@ class stem(tuple):
 
     @property
     def lb(self):
+        """The left or bottom value, depending on stem alignment"""
         return self[0]
 
     @property
     def rt(self):
+        """The right or top value, depending on stem alignment"""
         return self[1]
 
     def __str__(self):
@@ -369,7 +376,7 @@ class boundsState:
         # Start with the bounds of the line betwen the endpoints
         self.lb = self.linearBounds(c)
         if c.is_line:
-            self.b = self.lb
+            self.bounds = self.lb
         else:
             # For curves, add the control points into the calcuation.
             # If they exceed the linear bounds calculate the proper
@@ -380,7 +387,7 @@ class boundsState:
             if self.lb != cpb:
                 self.calcCurveBounds(c)
             else:
-                self.b = self.lb
+                self.bounds = self.lb
 
     def mergePt(self, b, p, t, doExt=True):
         """
@@ -426,7 +433,7 @@ class boundsState:
                    a[1] * t * t * t + b[1] * t * t + c[1] * t + d[1])
             self.mergePt(curveb, p, t)
 
-        self.b = curveb
+        self.bounds = curveb
 
     def farthestExtreme(self, doY=False):
         """
@@ -439,7 +446,7 @@ class boundsState:
         is less than the linear bound and True if it is greater
         """
         idx = 1 if doY else 0
-        d = [abs(self.lb[i][idx] - self.b[i][idx]) for i in range(2)]
+        d = [abs(self.lb[i][idx] - self.bounds[i][idx]) for i in range(2)]
         if d[0] > d[1]:
             return d[0], self.extpts[0][idx], self.tmap[0][idx], False
         elif fne(d[1], 0):
@@ -452,10 +459,10 @@ class boundsState:
         Returns True if the bounds of this object are within those of
         the argument
         """
-        return (self.b[0][0] <= other.b[1][0] + margin and
-                self.b[1][0] + margin >= other.b[0][0] and
-                self.b[0][1] <= other.b[1][1] + margin and
-                self.b[1][1] + margin >= other.b[0][1])
+        return (self.bounds[0][0] <= other.bounds[1][0] + margin and
+                self.bounds[1][0] + margin >= other.bounds[0][0] and
+                self.bounds[0][1] <= other.bounds[1][1] + margin and
+                self.bounds[1][1] + margin >= other.bounds[0][1])
 
 
 class pathBoundsState:
@@ -465,15 +472,15 @@ class pathBoundsState:
     """
     def __init__(self, pe):
         """Initialize the bounds with those of a single pathElement"""
-        self.b = pe.getBounds().b
+        self.bounds = pe.getBounds().bounds
         self.extpes = [[pe, pe], [pe, pe]]
 
     def merge(self, other):
         """Merge this pathBoundsState object with the bounds of another"""
         for i, cmp_o in enumerate([operator.lt, operator.gt]):
             for j in range(2):
-                if cmp_o(other.b[i][j], self.b[i][j]):
-                    self.b[i][j] = other.b[i][j]
+                if cmp_o(other.bounds[i][j], self.bounds[i][j]):
+                    self.bounds[i][j] = other.bounds[i][j]
                     self.extpes[i][j] = other.extpes[i][j]
 
     def within(self, other):
@@ -481,10 +488,10 @@ class pathBoundsState:
         Returns True if the bounds of this object are within those of
         the argument
         """
-        return (self.b[0][0] >= other.b[0][0] and
-                self.b[0][1] >= other.b[0][1] and
-                self.b[1][0] <= other.b[1][0] and
-                self.b[1][1] <= other.b[1][1])
+        return (self.bounds[0][0] >= other.bounds[0][0] and
+                self.bounds[0][1] >= other.bounds[0][1] and
+                self.bounds[1][0] <= other.bounds[1][0] and
+                self.bounds[1][1] <= other.bounds[1][1])
 
 
 class pathElement:

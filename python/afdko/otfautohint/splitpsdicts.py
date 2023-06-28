@@ -101,6 +101,9 @@ def remapDicts(fpath, dictmap):
 
     hasExtra = False
 
+    # Create a new FDSelect object for the font and map the glyphs to
+    # dictionary indexes according to the regular expressions in
+    # dictspec.re
     fdselect = top.FDSelect = FDSelect()
     for gn in cff.getGlyphOrder():
         done = False
@@ -117,6 +120,9 @@ def remapDicts(fpath, dictmap):
             fdselect.append(i + 1)
             hasExtra = True
 
+    # Rebuild the dictionary indices and the dictmap itself to remove
+    # any dictionaries that didn't contain any glyphs, so that we don't
+    # wind up with empty dictionaries later.
     j = 0
     indexMap = []
     newdictmap = []
@@ -136,12 +142,24 @@ def remapDicts(fpath, dictmap):
         assert indexMap[v] != -1
         fdselect[i] = indexMap[v]
 
+    # Create new FDArray and top-level private dictionaries, keeping
+    # a reference to the original private dictionary in origPriv
     fdarray = top.FDArray = FDArrayIndex()
     origPriv = top.Private
     # Make sure info doesn't leak though in non-FDArray private dict
     top.Private = PrivateDict()
 
+    # For each dictionary containing glyphs, make a copy of the original
+    # private dictionary and then modify the Other/Family/Blues, StemSnap,
+    # and Std?W values according to the dictspec. (Note that by assigning
+    # to blah[:] the new values wind up in the lists inside the dictionary
+    # copy.)
+    #
+    # Then add that dictionary to a new FontDict and append the later
+    # to the fdarray.
     for dictspec in newdictmap:
+        # Make a new dictonary starting with the old private dictionary
+        # values
         npr = deepcopy(origPriv)
         for bvals, fvals, indexes in [(getattr(npr, "BlueValues", None),
                                        getattr(npr, "FamilyBlues", None),
@@ -179,7 +197,8 @@ def remapDicts(fpath, dictmap):
         fontDict.Private = npr
         fdarray.append(fontDict)
 
-    # add no-zone dictionary for other glyphs (leave stem sizes)
+    # Add a dictionary for any remaining glyphs with zones far outside of
+    # the bounds of existing glyphs. (Leave the stem values.)
     if hasExtra:
         bbox = top.FontBBox
         font_max = bbox[3]

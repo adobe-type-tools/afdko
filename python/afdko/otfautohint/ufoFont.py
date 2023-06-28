@@ -640,7 +640,7 @@ class UFOFontData:
             self._fontInfo = vars(info)
         return self._fontInfo
 
-    def getPrivateFDDict(self, allow_no_blues, noFlex, vCounterGlyphs,
+    def getPrivateFDDict(self, allowNoBlues, noFlex, vCounterGlyphs,
                          hCounterGlyphs, desc, fdIndex=None):
         if self.fontDict is not None:
             return self.fontDict
@@ -665,13 +665,13 @@ class UFOFontData:
         blueValues = self.fontInfo.get("postscriptBlueValues", [])
         numBlueValues = len(blueValues)
         if numBlueValues < 4:
-            if allow_no_blues:
+            if allowNoBlues:
                 blueValues = inactiveAlignmentValues
                 numBlueValues = len(blueValues)
             else:
                 raise FontParseError(
                     "Font must have at least four values in its "
-                    "BlueValues array for PSAutoHint to work!")
+                    "BlueValues array for otfautohint to work!")
         blueValues.sort()
         # The first pair only is a bottom zone, where the first value is the
         # overshoot position; the rest are top zones, and second value of the
@@ -703,7 +703,7 @@ class UFOFontData:
 
         vstems = self.fontInfo.get("postscriptStemSnapV", [])
         if not vstems:
-            if allow_no_blues:
+            if allowNoBlues:
                 # dummy value. Needs to be larger than any hint will likely be,
                 # as the autohint program strips out any hint wider than twice
                 # the largest global stem width.
@@ -720,7 +720,7 @@ class UFOFontData:
 
         hstems = self.fontInfo.get("postscriptStemSnapH", [])
         if not hstems:
-            if allow_no_blues:
+            if allowNoBlues:
                 # dummy value. Needs to be larger than any hint will likely be,
                 # as the autohint program strips out any hint wider than twice
                 # the largest global stem width.

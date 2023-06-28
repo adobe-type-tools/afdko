@@ -20,10 +20,10 @@ class hintSegment:
         LINE = 1
         BEND = 2
         CURVE = 3
-        LGBBOX = 4
-        UGBBOX = 5
-        LPBBOX = 6
-        UPBBOX = 7
+        LSBBOX = 4  # Calculated from the lower bound of a segment
+        USBBOX = 5  # Calculated from the upper bound of a segment
+        LGBBOX = 6  # Calculated from the lower bound of the whole glyph
+        UGBBOX = 7  # Calcualted from the upper bound of the whole glyph
         GHOST = 8
 
     def __init__(self, aloc, oMin, oMax, pe, typ, bonus, isV, isInc, desc):
@@ -86,14 +86,14 @@ class hintSegment:
         return self.type == self.sType.LINE or self.isBBox()
 
     def isBBox(self):
-        return self.type in (self.sType.LGBBOX, self.sType.UGBBOX,
-                             self.sType.LPBBOX, self.sType.UPBBOX)
+        return self.type in (self.sType.LSBBOX, self.sType.USBBOX,
+                             self.sType.LGBBOX, self.sType.UGBBOX)
 
     def isGBBox(self):
         return self.type in (self.sType.LGBBOX, self.sType.UGBBOX)
 
     def isUBBox(self):
-        return self.type in (self.sType.UPBBOX, self.sType.UGBBOX)
+        return self.type in (self.sType.USBBOX, self.sType.UGBBOX)
 
     def isGhost(self):
         return self.type == self.sType.GHOST
