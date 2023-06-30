@@ -23,7 +23,7 @@ from fontTools.varLib.cff import (CFF2CharStringMergePen,
 
 from afdko.fdkutils import validate_path
 
-__version__ = '2.0.2'
+__version__ = '2.0.3'
 
 STAT_FILENAME = 'override.STAT.ttx'
 
@@ -572,7 +572,7 @@ def main(args=None):
     except VarLibCFFPointTypeMergeError:
         logger.error("The input set requires compatibilization. Please try "
                      "again with the -c (--check-compat) option.")
-        return 0
+        return 1
 
     if not options.keep_glyph_names:
         suppress_glyph_names(varFont)
