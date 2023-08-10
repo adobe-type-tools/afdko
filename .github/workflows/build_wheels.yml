@@ -38,7 +38,7 @@ jobs:
 
     - name: Build wheel (only macosx_universal2)
       if: matrix.os == 'macos-latest'
-      uses: pypa/cibuildwheel@v2.13.0
+      uses: pypa/cibuildwheel@v2.15.0
       with:
         output-dir: dist
       env:
@@ -47,7 +47,7 @@ jobs:
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64 -I/usr/include/libxml2' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'"
 
     - name: Build wheel (except macosx_universal2)
-      uses: pypa/cibuildwheel@v2.13.0
+      uses: pypa/cibuildwheel@v2.15.0
       with:
         output-dir: dist
       env:
