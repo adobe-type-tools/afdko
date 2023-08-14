@@ -156,7 +156,7 @@ class FDDict:
             else:
                 value = 0
         elif key in ('DominantV', 'DominantH'):
-            if type(value) == list:
+            if isinstance(value, list):
                 value = [int(v) for v in value]
             else:
                 value = [int(value)]
@@ -626,7 +626,7 @@ def fontinfoFileData(options, font):
                 fontInfoData, subsMade = re.subn(
                     r"^include (.*)$",
                     lambda m: fontinfoIncludeData(fdir, idir, m),
-                    fontInfoData, 0, re.M)
+                    fontInfoData, count=0, flags=re.M)
             fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
             return fontInfoData, 'FDDict' in fontInfoData
     return None, None
