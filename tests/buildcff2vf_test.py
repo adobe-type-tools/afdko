@@ -97,7 +97,8 @@ def test_bug1003(capfd):
     temp_dir = get_temp_dir_path('bug1003var')
     copytree(input_dir, temp_dir)
     ds_path = os.path.join(temp_dir, 'bug1003.designspace')
-    runner(CMD + ['-o', 'd', f'_{ds_path}'])
+    with pytest.raises(subprocess.CalledProcessError):
+        runner(CMD + ['-o', 'd', f'_{ds_path}'])
     captured = capfd.readouterr()
     assert "The input set requires compatibilization" in captured.err
 
