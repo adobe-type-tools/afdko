@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="macronmod" format="1">
+  <advance width="400"/>
+  <unicode hex="02C9"/>
+  <outline>
+    <contour>
+      <point x="71" y="597" type="line"/>
+      <point x="329" y="597" type="line"/>
+      <point x="329" y="658" type="line"/>
+      <point x="71" y="658" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.mark</key>
+      <array>
+        <integer>0</integer>
+        <real>0.5</real>
+        <integer>1</integer>
+        <integer>1</integer>
+      </array>
+    </dict>
+  </lib>
+</glyph>

@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="horizontalbar" format="1">
+  <advance width="810"/>
+  <unicode hex="2015"/>
+  <outline>
+    <contour>
+      <point x="40" y="219" type="line"/>
+      <point x="770" y="219" type="line"/>
+      <point x="770" y="283" type="line"/>
+      <point x="40" y="283" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.mark</key>
+      <array>
+        <integer>0</integer>
+        <real>0.5</real>
+        <integer>1</integer>
+        <integer>1</integer>
+      </array>
+    </dict>
+  </lib>
+</glyph>

@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="period" format="2">
+  <advance width="249"/>
+  <unicode hex="002E"/>
+  <outline>
+    <contour>
+      <point x="100" y="-9.6" type="curve" name="hintRef0000"/>
+      <point x="125.6" y="-9.6"/>
+      <point x="147.2" y="11.2"/>
+      <point x="147.2" y="40" type="curve"/>
+      <point x="147.2" y="70.4" name="hintRef0001"/>
+      <point x="125.6" y="91.2"/>
+      <point x="100" y="91.2" type="curve"/>
+      <point x="73.6" y="91.2"/>
+      <point x="52" y="70.4"/>
+      <point x="52" y="40" type="curve"/>
+      <point x="52" y="11.2"/>
+      <point x="73.6" y="-9.6"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 11.4 -21</string>
+              <string>vstem 52 95.2</string>
+            </array>
+          </dict>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0001</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -9.6 100.8</string>
+              <string>vstem 52 95.2</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w249c100-9.6125.6-9.6147.211.2c147.240147.270.4125.691.2c10091.273.691.25270.4c52405211.273.6-9.6</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

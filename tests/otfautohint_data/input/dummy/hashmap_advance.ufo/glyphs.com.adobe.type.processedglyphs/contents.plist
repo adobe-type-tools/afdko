@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>no_width-no_height</key>
+    <string>no_width-no_height.glif</string>
+    <key>no_width-some_height</key>
+    <string>no_width-some_height.glif</string>
+    <key>no_width-zero_height</key>
+    <string>no_width-zero_height.glif</string>
+    <key>some_width-no_height</key>
+    <string>some_width-no_height.glif</string>
+    <key>some_width-some_height</key>
+    <string>some_width-some_height.glif</string>
+    <key>some_width-zero_height</key>
+    <string>some_width-zero_height.glif</string>
+    <key>zero_width-no_height</key>
+    <string>zero_width-no_height.glif</string>
+    <key>zero_width-some_height</key>
+    <string>zero_width-some_height.glif</string>
+    <key>zero_width-zero_height</key>
+    <string>zero_width-zero_height.glif</string>
+  </dict>
+</plist>

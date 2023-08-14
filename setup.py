@@ -132,6 +132,8 @@ def _get_console_scripts():
         ('fontsetplot', 'proofpdf:fontsetplot'),
         ('hintplot', 'proofpdf:hintplot'),
         ('waterfallplot', 'proofpdf:waterfallplot'),
+        ('otfautohint', 'otfautohint.__main__:main'),
+        ('otfstemhist', 'otfautohint.__main__:stemhist'),
     ]
     scripts_path = 'afdko'
     scripts = [f'{name} = {scripts_path}.{entry}'
@@ -180,7 +182,7 @@ def main():
           keywords='font development tools',
           platforms=[platform_name],
           package_dir={'': 'python'},
-          packages=['afdko', 'afdko.pdflib'],
+          packages=['afdko', 'afdko.pdflib', 'afdko.otfautohint'],
           include_package_data=True,
           package_data={
               'afdko': [

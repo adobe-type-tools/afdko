@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="s" format="2">
+  <advance width="419"/>
+  <unicode hex="0073"/>
+  <anchor x="175.20000000000002" y="407.20000000000005" name="aboveLC"/>
+  <anchor x="178.4" y="0" name="baseLC"/>
+  <anchor x="178.4" y="-17.6" name="belowLC"/>
+  <outline>
+    <contour>
+      <point x="167.2" y="-9.6" type="curve" name="hintRef0000"/>
+      <point x="259.2" y="-9.6"/>
+      <point x="309.6" y="43.2"/>
+      <point x="309.6" y="106.4" type="curve"/>
+      <point x="309.6" y="180"/>
+      <point x="247.2" y="203.2"/>
+      <point x="191.2" y="224" type="curve"/>
+      <point x="147.2" y="240.8"/>
+      <point x="104.8" y="254.4"/>
+      <point x="104.8" y="291.2" type="curve"/>
+      <point x="104.8" y="320.8"/>
+      <point x="127.2" y="347.2"/>
+      <point x="176" y="347.2" type="curve"/>
+      <point x="210.4" y="347.2"/>
+      <point x="238.4" y="332.8"/>
+      <point x="264.8" y="312.8" type="curve"/>
+      <point x="296" y="354.4" type="line"/>
+      <point x="266.4" y="378.4"/>
+      <point x="224" y="398.4"/>
+      <point x="175.2" y="398.4" type="curve"/>
+      <point x="91.2" y="398.4"/>
+      <point x="41.6" y="350.4"/>
+      <point x="41.6" y="288" type="curve"/>
+      <point x="41.6" y="222.4"/>
+      <point x="102.4" y="196"/>
+      <point x="157.6" y="176" type="curve"/>
+      <point x="200" y="160"/>
+      <point x="246.4" y="142.4"/>
+      <point x="246.4" y="102.4" type="curve"/>
+      <point x="246.4" y="68.8"/>
+      <point x="220.8" y="41.6"/>
+      <point x="169.6" y="41.6" type="curve"/>
+      <point x="123.2" y="41.6"/>
+      <point x="88.8" y="60.8"/>
+      <point x="55.2" y="88" type="curve"/>
+      <point x="22.4" y="44" type="line"/>
+      <point x="59.2" y="13.6"/>
+      <point x="112" y="-9.6"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -9.6 51.2</string>
+              <string>hstem 347.2 51.2</string>
+              <string>vstem 41.6 63.2</string>
+              <string>vstem 246.4 63.2</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>07429097280e6acf87d50ddf8096e1b39fd29333c05d37c8ac6bb1c73ac6fecc5e84dfab8b4ae917a633a73207bc4f38a75521c3fa228c551717b53fd13db0c9</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

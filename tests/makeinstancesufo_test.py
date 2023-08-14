@@ -35,7 +35,7 @@ def teardown_module():
     """
     teardown the temporary UFOs or the directory that holds them
     """
-    rmtree(os.path.join(TEMP_DIR), True)
+#    rmtree(os.path.join(TEMP_DIR), True)
     rmtree(os.path.join(DATA_DIR, 'input', 'same_dir.ufo'), True)
 
 

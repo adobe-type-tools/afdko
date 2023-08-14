@@ -29,6 +29,13 @@ Please see the
 for additional information, such as links to reference materials and related
 projects.
 
+📣 News
+------------
+* **The Python port of psautohint will be (re)integrated into the AFDKO repository as "otfautohint":**
+  * A release will be made on August 28th, 2023
+  * Please feel free to try pre-release v4.0.0a in the meantime
+  * More information can be found in [docs/otfautohint_Notes.md](docs/otfautohint_Notes.md)
+
 Installation
 ------------
 

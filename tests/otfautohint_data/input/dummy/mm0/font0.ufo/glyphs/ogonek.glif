@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="ogonek" format="1">
+  <advance width="400"/>
+  <unicode hex="02DB"/>
+  <outline>
+    <contour>
+      <point x="123" y="-133" type="curve" smooth="yes"/>
+      <point x="123" y="-192"/>
+      <point x="162" y="-223"/>
+      <point x="209" y="-223" type="curve" smooth="yes"/>
+      <point x="247" y="-223"/>
+      <point x="277" y="-207"/>
+      <point x="294" y="-183" type="curve"/>
+      <point x="284" y="-173" type="line"/>
+      <point x="260" y="-193"/>
+      <point x="242" y="-199"/>
+      <point x="218" y="-199" type="curve" smooth="yes"/>
+      <point x="179" y="-199"/>
+      <point x="151" y="-173"/>
+      <point x="151" y="-122" type="curve" smooth="yes"/>
+      <point x="151" y="-81"/>
+      <point x="178" y="-29"/>
+      <point x="217" y="5" type="curve"/>
+      <point x="198" y="5" type="line"/>
+      <point x="162" y="-26"/>
+      <point x="123" y="-77"/>
+    </contour>
+    <contour>
+      <point x="202" y="0" type="move" name="_ogonek"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.mark</key>
+      <array>
+        <integer>0</integer>
+        <real>0.5</real>
+        <integer>1</integer>
+        <integer>1</integer>
+      </array>
+    </dict>
+  </lib>
+</glyph>

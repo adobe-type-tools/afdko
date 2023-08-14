@@ -1,0 +1,21 @@
+IsItalicStyle	false
+IsBoldStyle	false
+IsOS/2OBLIQUE	false
+UseOldNameID4	false
+LicenseCode	ADOBE
+
+begin FDDict UPPERCASE
+	FontName Bar
+	BaselineYCoord 0
+	BaselineOvershoot -12
+	CapHeight 656
+	CapOvershoot 12
+	DominantV [86]
+	DominantH [68]
+	FlexOK false
+	BlueFuzz 10
+end FDDict UPPERCASE
+
+begin GlyphSet UPPERCASE
+		^([A-Z]|AE|OE|Germandbls|Eth|Thorn|Schwa|Eng|IJ)(acute|grave|circumflex|tilde|dieresis|macron|breve|ring|ringacute|caron|ogonek|dotbelow|hoi|stroke|linebelow|cedilla|dotaccent|croat|commaaccent|hook|brevebelow|bar|dotbelowmacron|slash|hungarumlaut|horn|cat|dot)?(acute|grave|hoi|tilde|dotbelow|macron|caron|.a)?$
+end GlyphSet UPPERCASE

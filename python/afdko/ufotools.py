@@ -12,7 +12,7 @@ from fontTools.misc import plistlib
 from fontTools.pens.recordingPen import RecordingPen
 from fontTools.ufoLib import UFOReader
 
-from psautohint.ufoFont import norm_float
+from .otfautohint.ufoFont import norm_float
 
 from afdko import fdkutils
 
@@ -23,7 +23,7 @@ ufotools.py v1.35.2 Jul 30 2020
 
 Originally developed to work with 'bez' files and UFO fonts in support of
 the autohint tool, ufotools.py is now only used in checkoutlinesufo (since
-autohint has been dropped in favor of psautohint). Some references to "bez"
+autohint has been dropped in favor of otfautohint). Some references to "bez"
 and "autohint" remain in the tool its documentation.
 
 Users should *NOT* rely on long-term support of methods or classes within

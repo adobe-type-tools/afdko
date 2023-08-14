@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="before" format="2">
+  <advance width="500"/>
+  <outline>
+    <contour>
+      <point x="0" y="200" type="line" name="hintRef0000"/>
+      <point x="140" y="200" type="line"/>
+      <point x="140" y="340" type="line"/>
+      <point x="0" y="340" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 200 140</string>
+              <string>vstem 0 140</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w500l0200l140200l140340l0340</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

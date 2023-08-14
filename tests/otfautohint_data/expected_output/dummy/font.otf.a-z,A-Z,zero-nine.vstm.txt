@@ -1,0 +1,15 @@
+Vertical Stem List for font.otf on Wed Sep 25 12:24:03 2019
+count    width    glyphs
+   20       82    [a b d h i j k l m n p q r t u L one]
+    9       84    [E F H I K T U Y]
+    6       83    [u B D J P R]
+    4       72    [d n p r]
+    3       80    [M N]
+    3       70    [b m q]
+    2       81    [f U]
+    2       78    [M four]
+    2       71    [a u]
+    1      157    [three]
+    1       77    [G]
+    1       76    [m]
+    1       74    [t]

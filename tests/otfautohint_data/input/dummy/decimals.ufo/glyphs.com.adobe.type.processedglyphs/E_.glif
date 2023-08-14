@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="E" format="2">
+  <advance width="527"/>
+  <unicode hex="0045"/>
+  <anchor x="228.0" y="542.4" name="aboveUC"/>
+  <anchor x="310.40000000000003" y="0" name="ogonekUC"/>
+  <anchor x="238.4" y="-17.6" name="belowLC"/>
+  <outline>
+    <contour>
+      <point x="72" y="0" type="line" name="hintRef0000"/>
+      <point x="382.4" y="0" type="line"/>
+      <point x="382.4" y="56.8" type="line"/>
+      <point x="138.4" y="56.8" type="line"/>
+      <point x="138.4" y="247.2" type="line"/>
+      <point x="337.6" y="247.2" type="line"/>
+      <point x="337.6" y="304" type="line"/>
+      <point x="138.4" y="304" type="line"/>
+      <point x="138.4" y="468.8" type="line"/>
+      <point x="374.4" y="468.8" type="line"/>
+      <point x="374.4" y="524.8" type="line"/>
+      <point x="72" y="524.8" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintRef0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 0 56.8</string>
+              <string>hstem 247.2 56.8</string>
+              <string>hstem 468.8 56</string>
+              <string>vstem 72 66.4</string>
+            </array>
+          </dict>
+        </array>
+        <key>id</key>
+        <string>w527l720l382.40l382.456.8l138.456.8l138.4247.2l337.6247.2l337.6304l138.4304l138.4468.8l374.4468.8l374.4524.8l72524.8</string>
+      </dict>
+    </dict>
+  </lib>
+</glyph>
