@@ -1,6 +1,11 @@
 Changelog
 =========
 
+3.9.7 (released 2023-08-14)
+---------------------------
+- [buildcff2vf] Don't return zero when input requires compatibilization ([#1668](https://github.com/adobe-type-tools/afdko/pull/1668))
+- [requirements.txt, tests, ttxn] Update dependencies ([#1663](https://github.com/adobe-type-tools/afdko/pull/1663), [#1675](https://github.com/adobe-type-tools/afdko/pull/1675))
+
 3.9.6 (released 2023-06-13)
 ---------------------------
 - [requirements.txt] Update dependencies, unpin specific fonttools version to allow more versions ([#1661](https://github.com/adobe-type-tools/afdko/pull/1661))
