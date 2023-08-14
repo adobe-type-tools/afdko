@@ -2075,7 +2075,8 @@ def dumpFont(writer, fontPath, supressHints=False):
     dictTxt = shellcmd([TX_TOOL, "-dump", "-0", fontPath])
     if curSystem == "Windows":
         dictTxt = re.sub(r"[\r\n]+", "\n", dictTxt)
-    dictTxt = re.sub(r"##[^\r\n]*Filename[^\r\n]+", "", dictTxt, 1).strip()
+    dictTxt = re.sub(r"##[^\r\n]*Filename[^\r\n]+", "",
+                     dictTxt, count=1).strip()
     dictLines = dictTxt.splitlines()
     writer.begintag("FontTopDict")
     writer.newline()
