@@ -45,9 +45,9 @@ int fileExists(const char *filename) {
 void fileOpenRead(const char *filename, File *fyl) {
     {
         fyl->fp = sysOpenSearchpath(filename);
+        fyl->name = filename;
         if (fyl->fp == NULL)
             fileError(fyl);
-        fyl->name = filename;
     }
 }
 
