@@ -1,6 +1,22 @@
 Changelog
 =========
 
+4.0.0 (released 2023-09-11)
+---------------------------
+**The Python port of psautohint was (re)integrated into the AFDKO repository as "otfautohint"**
+
+Changes Summary:
+- [Name-Change] The name-change better reflects how hinted input is now published, and lets the new version coexist with the old version when needed.
+- [AFDKO Tools Updated] Other tools in AFDKO have been updated to call oftautohint instead of psautohint, and the dependency on the latter's repository has been removed.
+- [Stopping Psautohint Development] We expect to stop development of psautohint after this v4.0.0 release.
+- [Improvements] The new code fixes a number of bugs and in our judgement produces better results on average. It also uses a slightly different encoding in UFO glif files. Accordingly, users should expect that running the new code results in many differences compared with psautohint, but this should be a one-time change.
+- [Variable CFF Hinting] The new code also supports hinting of variable CFF-based fonts, including directly hinting a built CFF2 font. Glyphs that include overlap will typically be hinted close to how they would have been hinted with overlap removed.
+- [Hinting Time] Because psautohint was partly written in (very old) C code, and otfautohint is written entirely in Python, the new code takes significantly longer to hint an individual glyph. However, we have also enhanced otfautohint to hint different glyphs on multiple CPU cores by default. As a result the tool will be 5-8 times slower when running on a single core but will typically be slightly faster when running on 8 cores.
+
+More information can be found in [docs/otfautohint_Notes.md](https://github.com/adobe-type-tools/afdko/blob/develop/docs/otfautohint_Notes.md)
+
+Other changes in v4.0.0: dependency updates.
+
 3.9.7 (released 2023-08-14)
 ---------------------------
 - [buildcff2vf] Don't return zero when input requires compatibilization ([#1668](https://github.com/adobe-type-tools/afdko/pull/1668))
