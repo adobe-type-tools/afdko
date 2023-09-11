@@ -9,8 +9,7 @@ Changes Summary:
   and lets the new version coexist with the old version when needed.
 * [AFDKO Tools Updated] Other tools in AFDKO have been updated to call oftautohint 
   instead of psautohint, and the dependency on the latter's repository has been removed.
-* [Stopping Psautohint Development] We expect to stop development of psautohint once
-  the 3.9.8 release is made.
+* [Stopping Psautohint Development] We expect to stop development of psautohint after the 4.0.0 release.
 * [Improvements] The new code fixes a number of bugs and in our judgement produces 
   better results on average. It also uses a slightly different encoding in
   UFO glif files. Accordingly, users should expect that running the new code
