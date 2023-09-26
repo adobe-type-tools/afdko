@@ -902,8 +902,10 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
     contentsFilePath = os.path.join(glyphDirPath, kContentsName)
     # maps glyph names to files.
 
-    with open(contentsFilePath, 'r', encoding='utf-8') as fp:
-        contentsDict = plistlib.load(fp)
+    contentsDict = {}
+    if os.path.exists(contentsFilePath):
+        with open(contentsFilePath, 'r', encoding='utf-8') as fp:
+            contentsDict = plistlib.load(fp)
 
     # First, delete glyph files that are not in the contents.plist file in
     # the glyphDirPath. In some UFOfont files, we end up with case errors,
@@ -976,8 +978,10 @@ def cleanupContentsList(glyphDirPath, doWarning=True):
     contentsFilePath = os.path.join(glyphDirPath, kContentsName)
     # maps glyph names to files.
 
-    with open(contentsFilePath, 'r', encoding='utf-8') as fp:
-        contentsDict = plistlib.load(fp)
+    contentsDict = {}
+    if os.path.exists(contentsFilePath):
+        with open(contentsFilePath, 'r', encoding='utf-8') as fp:
+            contentsDict = plistlib.load(fp)
 
     fileDict = {}
     fileList = os.listdir(glyphDirPath)
