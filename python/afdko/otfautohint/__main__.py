@@ -489,7 +489,7 @@ def _parse_fontinfo_file(options, fontinfo_path):
                 options.hCounterGlyphs.update(glyphList)
 
 
-def add_common_options(parser, term):
+def add_common_options(parser, term, name):
     parser_fonts = parser.add_argument(
         'font_paths',
         metavar='FONT',
@@ -516,9 +516,9 @@ def add_common_options(parser, term):
         help='comma-separated sequence of glyphs to %s\n' % term +
              'The glyph identifiers may be glyph indexes, glyph names, or '
              'glyph CIDs. CID values must be prefixed with a forward slash.\n'
-             'Examples:\n'
-             '    otfautohint -g A,B,C,69 MyFont.ufo\n'
-             '    otfautohint -g /103,/434,68 MyCIDFont'
+             'Examples:\n' +
+             "    otf%s -g A,B,C,69 MyFont.ufo\n" % name +
+             "    otf%s -g /103,/434,68 MyCIDFont" % name
     )
     glyphs_parser.add_argument(
         '--glyphs-file',
@@ -622,12 +622,14 @@ def handle_glyph_lists(options, parsed_args):
     elif parsed_args.glyphs_to_hint_file:
         options.explicitGlyphs = True
         options.glyphList = _process_glyph_list_arg(
-            _read_txt_file(parsed_args.glyphs_to_hint_file),
+            _split_comma_sequence(
+                _read_txt_file(parsed_args.glyphs_to_hint_file)),
             options.nameAliases)
     elif parsed_args.glyphs_to_not_hint_file:
         options.excludeGlyphList = True
         options.glyphList = _process_glyph_list_arg(
-            _read_txt_file(parsed_args.glyphs_to_not_hint_file),
+            _split_comma_sequence(
+                _read_txt_file(parsed_args.glyphs_to_not_hint_file)),
             options.nameAliases)
 
     if parsed_args.overlaps_to_hint:
@@ -644,7 +646,7 @@ def get_options(args):
         formatter_class=_CustomHelpFormatter,
         description=__doc__
     )
-    parser_fonts = add_common_options(parser, 'hint')
+    parser_fonts = add_common_options(parser, 'hint', 'autohint')
     parser.add_argument(
         '-o',
         '--output',
@@ -877,7 +879,7 @@ def get_stemhist_options(args):
         description='Stem and Alignment zones report for PostScript, '
                     'OpenType/CFF and UFO fonts.'
     )
-    add_common_options(parser, 'report')
+    parser_fonts = add_common_options(parser, 'report', 'stemhist')
     parser.add_argument(
         '-o',
         '--output',
@@ -914,6 +916,10 @@ def get_stemhist_options(args):
     parsed_args = parser.parse_args(args)
 
     logging_conf(parsed_args.verbose, parsed_args.log_path)
+
+    if not len(parsed_args.font_paths):
+        parser.error(
+            f"the following arguments are required: {parser_fonts.metavar}")
 
     if (parsed_args.output_paths and
             len(parsed_args.font_paths) != len(parsed_args.output_paths)):

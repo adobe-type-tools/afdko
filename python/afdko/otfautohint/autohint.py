@@ -92,32 +92,54 @@ class ACOptions(object):
 
 
 def getGlyphNames(glyphSpec, fontGlyphList, fDesc):
-    glyphNameList = []
-    rangeList = glyphSpec.split("-")
-    try:
-        prevGID = fontGlyphList.index(rangeList[0])
-    except ValueError:
-        if len(rangeList) > 1:
-            log.warning("glyph ID <%s> in range %s from glyph selection "
-                        "list option is not in font. <%s>.",
-                        rangeList[0], glyphSpec, fDesc)
-        else:
+    # If the "range" is actually in the font, just ignore it's apparent
+    # range-ness
+    if glyphSpec.isnumeric():
+        GID = int(glyphSpec)
+        if GID >= len(fontGlyphList):
             log.warning("glyph ID <%s> from glyph selection list option "
-                        "is not in font. <%s>.", rangeList[0], fDesc)
-        return None
-    glyphNameList.append(fontGlyphList[prevGID])
-
-    for glyphName2 in rangeList[1:]:
-        try:
-            gid = fontGlyphList.index(glyphName2)
-        except ValueError:
-            log.warning("glyph ID <%s> in range %s from glyph selection "
-                        "list option is not in font. <%s>.",
-                        glyphName2, glyphSpec, fDesc)
+                        "exceeds number of glyphs in font <%s>.",
+                        glyphSpec, fDesc)
             return None
-        for i in range(prevGID + 1, gid + 1):
-            glyphNameList.append(fontGlyphList[i])
-        prevGID = gid
+        return [fontGlyphList[GID]]
+    elif glyphSpec in fontGlyphList:
+        return [glyphSpec]
+
+    rangeList = glyphSpec.split("-")
+    if len(rangeList) == 1:
+        # Not numeric, not name, not range
+        log.warning("glyph name <%s> from glyph selection list option is "
+                    "not in font <%s>", glyphSpec, fDesc)
+        return None
+    elif len(rangeList) > 2:
+        log.warning("Too many hyphens in glyph selection range <%s>",
+                    glyphSpec)
+        return None
+
+    glyphName1, glyphName2 = rangeList
+    gidList = []
+
+    for r in rangeList:
+        if r.isnumeric():
+            GID = int(r)
+            if GID >= len(fontGlyphList):
+                log.warning("glyph name <%s> in range %s from glyph "
+                            "selection list option is not in font <%s>.",
+                            r, glyphSpec, fDesc)
+                return None
+        else:
+            try:
+                GID = fontGlyphList.index(r)
+            except ValueError:
+                log.warning("glyph name <%s> in range %s from glyph "
+                            "selection list option is not in font <%s>.",
+                            r, glyphSpec, fDesc)
+                return None
+        gidList.append(GID)
+
+    glyphNameList = []
+    for i in range(gidList[0], gidList[1] + 1):
+        glyphNameList.append(fontGlyphList[i])
 
     return glyphNameList
 
