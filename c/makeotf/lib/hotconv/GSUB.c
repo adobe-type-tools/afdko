@@ -217,6 +217,10 @@ int GSUBFill(hotCtx g) {
 
     createAnonLookups(g, h);
 
+    if (h->otl == NULL) {
+        return 0;
+    }
+
     /* Add OTL features */
 
     /* The font tables are in the order:
