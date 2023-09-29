@@ -92,7 +92,7 @@ class ACOptions(object):
 
 
 def getGlyphNames(glyphSpec, fontGlyphList, fDesc):
-    # If the "range" is actually in the font, just ignore it's apparent
+    # If the "range" is actually in the font, just ignore its apparent
     # range-ness
     if glyphSpec.isnumeric():
         GID = int(glyphSpec)
