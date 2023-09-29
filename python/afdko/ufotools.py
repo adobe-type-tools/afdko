@@ -940,7 +940,7 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
                   "file: %s" % (fileName, contentsFilePath))
         changed = 1
 
-    if defaultContentsFilePath == contentsFilePath:
+    if str(defaultContentsFilePath) == str(contentsFilePath):
         return changed
 
     # Now remove glyphs that are not referenced in the defaultContentsFilePath.
