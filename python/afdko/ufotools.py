@@ -902,9 +902,13 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
     contentsFilePath = os.path.join(glyphDirPath, kContentsName)
     # maps glyph names to files.
 
-    contentsDict = {}
     if os.path.exists(contentsFilePath):
+        # contents.plist exists in glyphDirPath
         with open(contentsFilePath, 'r', encoding='utf-8') as fp:
+            contentsDict = plistlib.load(fp)
+    else:
+        # contents.plist does not exist in glyphDirPath, load the default
+        with open(defaultContentsFilePath, 'r', encoding='utf-8') as fp:
             contentsDict = plistlib.load(fp)
 
     # First, delete glyph files that are not in the contents.plist file in
