@@ -937,7 +937,7 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
         os.remove(glyphFilePath)
         if doWarning:
             print("Removing glif file %s that was not in the contents.plist "
-                  "file: %s" % (glyphDirPath, contentsFilePath))
+                  "file: %s" % (fileName, contentsFilePath))
         changed = 1
 
     if defaultContentsFilePath == contentsFilePath:
