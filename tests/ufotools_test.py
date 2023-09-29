@@ -1,4 +1,3 @@
-import pytest
 import plistlib
 from shutil import copytree
 from pathlib import Path
@@ -11,12 +10,7 @@ from afdko.fdkutils import (
 )
 from test_utils import (
     get_input_path,
-    get_expected_path,
-    generate_ttx_dump,
 )
-
-# from runner import main as runner
-# from differ import main as differ
 
 
 TEST_UFO_FILENAME = 'ufotools_basic.ufo'
@@ -80,7 +74,7 @@ def test_cleanupContentsList_no_plist():
     glyph_dir.mkdir()
     # make some glif files but no contents.plist
     for glyph_name in 'xyz':
-        glyph_path = glyph_dir / '{glyph_name}.glif'
+        glyph_path = glyph_dir / f'{glyph_name}.glif'
         glyph_path.touch()
 
     # although there is no contents.plist, this should not fail (#1606)
