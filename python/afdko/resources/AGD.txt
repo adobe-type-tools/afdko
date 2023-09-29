@@ -891,12 +891,6 @@ onedotenleader
 	uni: 2024
 	sub: period+aalt
 	set: AGL1 AGL2 AGLFN
-emdash.alt
-	uni: F6DE
-	fin: uni2014.alt
-	ali: threequartersemdash
-	sub: emdash+salt emdash+aalt emdash+calt
-	set: AGL1 AGL2
 threequartersemdash.cap
 	fin: uni2014.cap
 colonmonetary
@@ -907,11 +901,6 @@ rupiah.cap
 	fin: R_p.cap
 rupiah.sc
 	fin: R_p.sc
-rupiah
-	uni: F6DD
-	fin: R_p
-	sub: rupiah.oldstyle+case
-	set: AGL1 AGL2
 figuredash
 	uni: 2012
 	sub: hyphen+aalt
@@ -1070,52 +1059,11 @@ twelveroman
 	uni: 217B
 	fin: uni217B
 	set: AGL1
-ae.sc
-	uni: F7E6
-	ali: AEsmall
-	sub: ae+smcp
-	set: AGL1 AGL2
-	maj: AE.sc
-aacute.sc
-	uni: F7E1
-	ali: Aacutesmall
-	sub: aacute+smcp aacute.end+smcp
-	set: AGL1 AGL2
-	maj: Aacute.sc
-	cmp: a.sc+acute.sc
 Abreve
 	uni: 0102
 	set: AGL1 AGL2 AGLFN
 	min: abreve
 	cmp: A+breve.cap
-acircumflex.sc
-	uni: F7E2
-	ali: Acircumflexsmall
-	sub: acircumflex+smcp acircumflex.end+smcp
-	set: AGL1 AGL2
-	cmp: a.sc+circumflex.sc
-acute.cap
-	uni: F6C9
-	ali: Acute
-	sub: acute+case
-	set: AGL1 AGL2
-acute.sc
-	uni: F7B4
-	ali: Acutesmall
-	sub: acute+smcp
-	set: AGL1 AGL2
-adieresis.sc
-	uni: F7E4
-	ali: Adieresissmall
-	sub: adieresis+smcp adieresis.end+smcp
-	set: AGL1 AGL2
-	cmp: a.sc+dieresis.sc
-agrave.sc
-	uni: F7E0
-	ali: Agravesmall
-	sub: agrave+smcp agrave.end+smcp
-	set: AGL1 AGL2
-	cmp: a.sc+grave.sc
 Alpha
 	uni: 0391
 	set: AGL1 AGL2 AGLFN
@@ -1139,64 +1087,21 @@ Aringacute
 	uni: 01FA
 	set: AGL1 AGL2 AGLFN
 	min: aringacute
-aring.sc
-	uni: F7E5
-	ali: Aringsmall
-	sub: aring+smcp aring.end+smcp
-	set: AGL1 AGL2
-	cmp: a.sc+ring.sc
-a.sc
-	uni: F761
-	ali: Asmall
-	sub: a+smcp a.end+smcp
-	set: AGL1 AGL2
-	maj: A.sc
-atilde.sc
-	uni: F7E3
-	ali: Atildesmall
-	sub: atilde+smcp atilde.end+smcp
-	set: AGL1 AGL2
-	cmp: a.sc+tilde.sc
 Beta
 	uni: 0392
 	set: AGL1 AGL2 AGLFN
 	min: beta
 	cmp: B
-breve.sc
-	uni: F6F4
-	ali: Brevesmall
-	sub: breve+smcp
-	set: AGL1 AGL2
-b.sc
-	uni: F762
-	sub: b+smcp
-	set: AGL1 AGL2
-	maj: B.sc
 Cacute
 	uni: 0106
 	set: AGL1 AGL2 AGLFN
 	min: cacute
 	cmp: C+acute.cap
-caron.cap
-	uni: F6CA
-	ali: Caron
-	sub: caron+case
-	set: AGL1 AGL2
-caron.sc
-	uni: F6F5
-	ali: Caronsmall
-	sub: caron+smcp
-	set: AGL1 AGL2
 Ccaron
 	uni: 010C
 	set: AGL1 AGL2 AGLFN
 	min: ccaron
 	cmp: C+caron.cap
-ccedilla.sc
-	uni: F7E7
-	ali: Ccedillasmall
-	sub: ccedilla+smcp
-	set: AGL1 AGL2
 Ccircumflex
 	uni: 0108
 	set: AGL1 AGL2 AGLFN
@@ -1208,27 +1113,11 @@ Cdotaccent
 	set: AGL1 AGL2 AGLFN
 	min: cdotaccent
 	cmp: C+dotaccent.cap
-cedilla.sc
-	uni: F7B8
-	ali: Cedillasmall
-	sub: cedilla+smcp
-	set: AGL1 AGL2
 Chi
 	uni: 03A7
 	set: AGL1 AGL2 AGLFN
 	min: chi
 	cmp: X
-circumflex.sc
-	uni: F6F6
-	ali: Circumflexsmall
-	sub: circumflex+smcp
-	set: AGL1 AGL2
-c.sc
-	uni: F763
-	ali: Csmall
-	sub: c+smcp
-	set: AGL1 AGL2
-	maj: C.sc
 Dcaron
 	uni: 010E
 	set: AGL1 AGL2 AGLFN
@@ -1240,48 +1129,10 @@ Dcroat
 	set: AGL1 AGL2 AGLFN
 	min: dcroat
 	cmp: Eth
-dieresis.cap
-	uni: F6CB
-	ali: Dieresis
-	sub: dieresis+case
-	set: AGL1 AGL2
-dieresisacute.cap
-	uni: F6CC
-	fin: uni00A80301.cap
-	ali: DieresisAcute dieresis_acutecomb.cap space_uni0308_uni0301.cap
-	sub: dieresisacute+case
-	set: AGL1 AGL2
-dieresisgrave.cap
-	uni: F6CD
-	fin: uni00A80300.cap
-	ali: DieresisGrave dieresis_gravecomb.cap space_uni0308_uni0300.cap
-	sub: dieresisgrave+case
-	set: AGL1 AGL2
 dieresiscaron.cap
 	fin: uni00A8030C.cap
 dieresismacron.cap
 	fin: uni00A80304.cap
-dieresis.sc
-	uni: F7A8
-	ali: Dieresissmall
-	sub: dieresis+smcp
-	set: AGL1 AGL2
-dotaccent.sc
-	uni: F6F7
-	ali: Dotaccentsmall
-	sub: dotaccent+smcp
-	set: AGL1 AGL2
-d.sc
-	uni: F764
-	sub: d+smcp d.end+smcp
-	set: AGL1 AGL2
-	maj: D.sc
-eacute.sc
-	uni: F7E9
-	ali: Eacutesmall
-	sub: eacute+smcp eacute.end+smcp
-	set: AGL1 AGL2
-	cmp: e.sc+acute.sc
 Ebreve
 	uni: 0114
 	set: AGL1 AGL2 AGLFN
@@ -1292,30 +1143,12 @@ Ecaron
 	set: AGL1 AGL2 AGLFN
 	min: ecaron
 	cmp: E+caron.cap
-ecircumflex.sc
-	uni: F7EA
-	ali: Ecircumflexsmall
-	sub: ecircumflex+smcp ecircumflex.end+smcp
-	set: AGL1 AGL2
-	cmp: e.sc+circumflex.sc
-edieresis.sc
-	uni: F7EB
-	ali: Edieresissmall
-	sub: edieresis+smcp edieresis.end+smcp
-	set: AGL1 AGL2
-	cmp: e.sc+dieresis.sc
 Edotaccent
 	uni: 0116
 	ali: Edot
 	set: AGL1 AGL2 AGLFN
 	min: edotaccent
 	cmp: E+dotaccent.cap
-egrave.sc
-	uni: F7E8
-	ali: Egravesmall
-	sub: egrave+smcp egrave.end+smcp
-	set: AGL1 AGL2
-	cmp: e.sc+grave.sc
 Emacron
 	uni: 0112
 	set: AGL1 AGL2 AGLFN
@@ -1339,12 +1172,6 @@ Epsilontonos
 	set: AGL1 AGL2 AGLFN
 	min: epsilontonos
 	cmp: Epsilon
-e.sc
-	uni: F765
-	ali: Esmall
-	sub: e+smcp e.end+smcp
-	set: AGL1 AGL2
-	maj: E.sc
 Eta
 	uni: 0397
 	set: AGL1 AGL2 AGLFN
@@ -1355,12 +1182,6 @@ Etatonos
 	set: AGL1 AGL2 AGLFN
 	min: etatonos
 	cmp: Eta
-eth.sc
-	uni: F7F0
-	ali: Ethsmall
-	sub: eth+smcp
-	set: AGL1 AGL2
-	maj: Eth.sc
 newsheqel
 	uni: 20AA
 	fin: uni20AA
@@ -1374,12 +1195,6 @@ Euro
 	ali: euro
 	sub: Euro.oldstyle+case
 	set: AGL1 AGL2 AGLFN
-f.sc
-	uni: F766
-	ali: Fsmall
-	sub: f+smcp
-	set: AGL1 AGL2
-	maj: F.sc
 Gamma
 	uni: 0393
 	set: AGL1 AGL2 AGLFN
@@ -1411,21 +1226,6 @@ Gdotaccent
 	set: AGL1 AGL2 AGLFN
 	min: gdotaccent
 	cmp: G+dotaccent.cap
-grave.cap
-	uni: F6CE
-	ali: Grave
-	sub: grave+case
-	set: AGL1 AGL2
-grave.sc
-	uni: F760
-	ali: Gravesmall
-	sub: grave+smcp
-	set: AGL1 AGL2
-g.sc
-	uni: F767
-	sub: g+smcp
-	set: AGL1 AGL2
-	maj: G.sc
 circleblack
 	uni: 25CF
 	fin: uni25CF
@@ -1455,49 +1255,16 @@ Hcircumflex
 	set: AGL1 AGL2 AGLFN
 	min: hcircumflex
 	cmp: H+circumflex.cap
-h.sc
-	uni: F768
-	sub: h+smcp h.end+smcp
-	set: AGL1 AGL2
-	maj: H.sc
-hungarumlaut.cap
-	uni: F6CF
-	ali: Hungarumlaut
-	sub: hungarumlaut+case
-	set: AGL1 AGL2
-hungarumlaut.sc
-	uni: F6F8
-	ali: Hungarumlautsmall
-	sub: hungarumlaut+smcp
-	set: AGL1 AGL2
 IJ
 	uni: 0132
 	set: AGL1 AGL2 AGLFN
 	min: ij
 	cmp: I+J
-iacute.sc
-	uni: F7ED
-	ali: Iacutesmall
-	sub: iacute+smcp
-	set: AGL1 AGL2
-	cmp: i.sc+acute.sc
 Ibreve
 	uni: 012C
 	set: AGL1 AGL2 AGLFN
 	min: ibreve
 	cmp: I+breve.cap
-icircumflex.sc
-	uni: F7EE
-	ali: Icircumflexsmall
-	sub: icircumflex+smcp
-	set: AGL1 AGL2
-	cmp: i.sc+circumflex.sc
-idieresis.sc
-	uni: F7EF
-	ali: Idieresissmall
-	sub: idieresis+smcp
-	set: AGL1 AGL2
-	cmp: i.sc+dieresis.sc
 Idotaccent
 	uni: 0130
 	ali: Idot
@@ -1507,12 +1274,6 @@ Ifraktur
 	uni: 2111
 	fin: uni2111
 	set: AGL1 AGL2 AGLFN
-igrave.sc
-	uni: F7EC
-	ali: Igravesmall
-	sub: igrave+smcp
-	set: AGL1 AGL2
-	cmp: i.sc+grave.sc
 Imacron
 	uni: 012A
 	set: AGL1 AGL2 AGLFN
@@ -1537,11 +1298,6 @@ Iotatonos
 	set: AGL1 AGL2 AGLFN
 	min: iotatonos
 	cmp: Iota
-i.sc
-	uni: F769
-	sub: i+smcp dotlessi+smcp
-	set: AGL1 AGL2
-	maj: I.sc
 Itilde
 	uni: 0128
 	set: AGL1 AGL2 AGLFN
@@ -1551,12 +1307,6 @@ Jcircumflex
 	set: AGL1 AGL2 AGLFN
 	min: jcircumflex
 	cmp: J+circumflex.cap
-j.sc
-	uni: F76A
-	ali: Jsmall
-	sub: j+smcp dotlessj+smcp
-	set: AGL1 AGL2
-	maj: J.sc
 Kappa
 	uni: 039A
 	set: AGL1 AGL2 AGLFN
@@ -1569,16 +1319,6 @@ Kcommaaccent
 	set: AGL1 AGL2 AGLFN
 	min: kcommaaccent
 	cmp: K+commaaccent
-k.sc
-	uni: F76B
-	ali: Ksmall
-	sub: k+smcp k.alt+smcp
-	set: AGL1 AGL2
-	maj: K.sc
-LL
-	uni: F6BF
-	fin: uniF6BF
-	set: AGL1 AGL2
 Lacute
 	uni: 0139
 	set: AGL1 AGL2 AGLFN
@@ -1606,32 +1346,6 @@ Ldot
 	set: AGL1 AGL2 AGLFN
 	min: ldot
 	cmp: L+dotaccent.cap
-lslash.sc
-	uni: F6F9
-	ali: Lslashsmall
-	sub: lslash+smcp
-	set: AGL1 AGL2
-l.sc
-	uni: F76C
-	sub: l+smcp
-	set: AGL1 AGL2
-	maj: L.sc
-macron.cap
-	uni: F6D0
-	ali: Macron
-	sub: macron+case
-	set: AGL1 AGL2
-macron.sc
-	uni: F7AF
-	ali: Macronsmall
-	sub: macron+smcp
-	set: AGL1 AGL2
-m.sc
-	uni: F76D
-	ali: Msmall
-	sub: m+smcp m.end+smcp
-	set: AGL1 AGL2
-	maj: M.sc
 Mu
 	uni: 039C
 	set: AGL1 AGL2 AGLFN
@@ -1654,61 +1368,16 @@ Ncommaaccent
 	set: AGL1 AGL2 AGLFN
 	min: ncommaaccent
 	cmp: N+commaaccent
-n.sc
-	uni: F76E
-	sub: n+smcp n.end+smcp
-	set: AGL1 AGL2
-	maj: N.sc
-ntilde.sc
-	uni: F7F1
-	ali: Ntildesmall
-	sub: ntilde+smcp ntilde.end+smcp
-	set: AGL1 AGL2
-	cmp: n.sc+tilde.sc
 Nu
 	uni: 039D
 	set: AGL1 AGL2 AGLFN
 	min: nu
 	cmp: N
-oe.sc
-	uni: F6FA
-	sub: oe+smcp
-	set: AGL1 AGL2
-	maj: OE.sc
-oacute.sc
-	uni: F7F3
-	ali: Oacutesmall
-	sub: oacute+smcp
-	set: AGL1 AGL2
-	cmp: o.sc+acute.sc
 Obreve
 	uni: 014E
 	set: AGL1 AGL2 AGLFN
 	min: obreve
 	cmp: O+breve.cap
-ocircumflex.sc
-	uni: F7F4
-	ali: Ocircumflexsmall
-	sub: ocircumflex+smcp
-	set: AGL1 AGL2
-	cmp: o.sc+circumflex.sc
-odieresis.sc
-	uni: F7F6
-	ali: Odieresissmall
-	sub: odieresis+smcp
-	set: AGL1 AGL2
-	cmp: o.sc+dieresis.sc
-ogonek.sc
-	uni: F6FB
-	ali: Ogoneksmall
-	sub: ogonek+smcp
-	set: AGL1 AGL2
-ograve.sc
-	uni: F7F2
-	ali: Ogravesmall
-	sub: ograve+smcp
-	set: AGL1 AGL2
-	cmp: o.sc+grave.sc
 Ohorn
 	uni: 01A0
 	set: AGL1 AGL2 AGLFN
@@ -1745,24 +1414,6 @@ Oslashacute
 	set: AGL1 AGL2 AGLFN
 	min: oslashacute
 	cmp: Oslash+acute.cap
-oslash.sc
-	uni: F7F8
-	ali: Oslashsmall
-	sub: oslash+smcp
-	set: AGL1 AGL2
-	maj: Oslash.sc
-o.sc
-	uni: F76F
-	ali: Osmall
-	sub: o+smcp
-	set: AGL1 AGL2
-	maj: O.sc
-otilde.sc
-	uni: F7F5
-	ali: Otildesmall
-	sub: otilde+smcp
-	set: AGL1 AGL2
-	cmp: o.sc+tilde.sc
 Phi
 	uni: 03A6
 	set: AGL1 AGL2 AGLFN
@@ -1775,18 +1426,6 @@ Psi
 	uni: 03A8
 	set: AGL1 AGL2 AGLFN
 	min: psi
-p.sc
-	uni: F770
-	ali: Psmall
-	sub: p+smcp
-	set: AGL1 AGL2
-	maj: P.sc
-q.sc
-	uni: F771
-	ali: Qsmall
-	sub: q+smcp
-	set: AGL1 AGL2
-	maj: Q.sc
 Racute
 	uni: 0154
 	set: AGL1 AGL2 AGLFN
@@ -1813,27 +1452,11 @@ Rho
 	set: AGL1 AGL2 AGLFN
 	min: rho
 	cmp: P
-ring.sc
-	uni: F6FC
-	ali: Ringsmall
-	sub: ring+smcp
-	set: AGL1 AGL2
-r.sc
-	uni: F772
-	sub: r+smcp r.end+smcp
-	set: AGL1 AGL2
-	maj: R.sc
 Sacute
 	uni: 015A
 	set: AGL1 AGL2 AGLFN
 	min: sacute
 	cmp: S+acute.cap
-scaron.sc
-	uni: F6FD
-	ali: Scaronsmall
-	sub: scaron+smcp
-	set: AGL1 AGL2
-	cmp: s.sc+caron.sc
 Scedilla
 	uni: 015E
 	fin: uni015E
@@ -1855,12 +1478,6 @@ Sigma
 	uni: 03A3
 	set: AGL1 AGL2 AGLFN
 	min: sigma
-s.sc
-	uni: F773
-	ali: Ssmall
-	sub: s+smcp
-	set: AGL1 AGL2
-	maj: S.sc
 Tau
 	uni: 03A4
 	set: AGL1 AGL2 AGLFN
@@ -1885,52 +1502,11 @@ Theta
 	uni: 0398
 	set: AGL1 AGL2 AGLFN
 	min: theta
-thorn.sc
-	uni: F7FE
-	ali: Thornsmall
-	sub: thorn+smcp
-	set: AGL1 AGL2
-	maj: Thorn.sc
-tilde.sc
-	uni: F6FE
-	ali: Tildesmall
-	sub: tilde+smcp
-	set: AGL1 AGL2
-t.sc
-	uni: F774
-	ali: Tsmall
-	sub: t+smcp t.end+smcp t.endalt+smcp
-	set: AGL1 AGL2
-	maj: T.sc
-uacute.sc
-	uni: F7FA
-	ali: Uacutesmall
-	sub: uacute+smcp uacute.end+smcp
-	set: AGL1 AGL2
-	cmp: u.sc+acute.sc
 Ubreve
 	uni: 016C
 	set: AGL1 AGL2 AGLFN
 	min: ubreve
 	cmp: U+breve.cap
-ucircumflex.sc
-	uni: F7FB
-	ali: Ucircumflexsmall
-	sub: ucircumflex+smcp ucircumflex.end+smcp
-	set: AGL1 AGL2
-	cmp: u.sc+circumflex.sc
-udieresis.sc
-	uni: F7FC
-	ali: Udieresissmall
-	sub: udieresis+smcp udieresis.end+smcp
-	set: AGL1 AGL2
-	cmp: u.sc+dieresis.sc
-ugrave.sc
-	uni: F7F9
-	ali: Ugravesmall
-	sub: ugrave+smcp ugrave.end+smcp
-	set: AGL1 AGL2
-	cmp: u.sc+grave.sc
 Uhorn
 	uni: 01AF
 	set: AGL1 AGL2 AGLFN
@@ -1973,23 +1549,11 @@ Uring
 	set: AGL1 AGL2 AGLFN
 	min: uring
 	cmp: U+ring.cap
-u.sc
-	uni: F775
-	ali: Usmall
-	sub: u+smcp u.end+smcp
-	set: AGL1 AGL2
-	maj: U.sc
 Utilde
 	uni: 0168
 	set: AGL1 AGL2 AGLFN
 	min: utilde
 	cmp: U+tilde.cap
-v.sc
-	uni: F776
-	ali: Vsmall
-	sub: v+smcp v.alt+smcp v.begin+smcp
-	set: AGL1 AGL2
-	maj: V.sc
 Wacute
 	uni: 1E82
 	set: AGL1 AGL2 AGLFN
@@ -2010,60 +1574,25 @@ Wgrave
 	set: AGL1 AGL2 AGLFN
 	min: wgrave
 	cmp: W+grave.cap
-w.sc
-	uni: F777
-	ali: Wsmall
-	sub: w+smcp w.alt+smcp
-	set: AGL1 AGL2
-	maj: W.sc
 Xi
 	uni: 039E
 	set: AGL1 AGL2 AGLFN
 	min: xi
-x.sc
-	uni: F778
-	ali: Xsmall
-	sub: x+smcp
-	set: AGL1 AGL2
-	maj: X.sc
-yacute.sc
-	uni: F7FD
-	ali: Yacutesmall
-	sub: yacute+smcp
-	set: AGL1 AGL2
-	cmp: y.sc+acute.sc
 Ycircumflex
 	uni: 0176
 	set: AGL1 AGL2 AGLFN
 	min: ycircumflex
 	cmp: Y+circumflex.cap
-ydieresis.sc
-	uni: F7FF
-	ali: Ydieresissmall
-	sub: ydieresis+smcp
-	set: AGL1 AGL2
-	cmp: y.sc+dieresis.sc
 Ygrave
 	uni: 1EF2
 	set: AGL1 AGL2 AGLFN
 	min: ygrave
 	cmp: Y+grave.cap
-y.sc
-	uni: F779
-	sub: y+smcp
-	set: AGL1 AGL2
-	maj: Y.sc
 Zacute
 	uni: 0179
 	set: AGL1 AGL2 AGLFN
 	min: zacute
 	cmp: Z+acute.cap
-zcaron.sc
-	uni: F6FF
-	ali: Zcaronsmall
-	sub: zcaron+smcp
-	set: AGL1 AGL2
-	cmp: z.sc+caron.sc
 Zdotaccent
 	uni: 017B
 	ali: Zdot
@@ -2075,12 +1604,6 @@ Zeta
 	set: AGL1 AGL2 AGLFN
 	min: zeta
 	cmp: Z
-z.sc
-	uni: F77A
-	ali: Zsmall
-	sub: z+smcp
-	set: AGL1 AGL2
-	maj: Z.sc
 abreve
 	uni: 0103
 	set: AGL1 AGL2 AGLFN
@@ -2398,19 +1921,6 @@ Ushort
 	set: AGL1 AGL2 AGLFN
 	min: ushort
 	cmp: Ucyr+breve.cyrcap
-ghe.ital
-	uni: F6C4
-	fin: uni0433.ital
-	ali: afii10063 afii10068.ital
-	sub: ghe+locl ghe+salt
-	set: AGL1 AGL2
-	tag: italic
-be.ital
-	uni: F6C5
-	fin: uni0431.ital
-	ali: afii10064 afii10066.ital be.alt
-	sub: be+salt be+locl
-	set: AGL1 AGL2
 acyr
 	uni: 0430
 	fin: uni0430
@@ -2726,13 +2236,6 @@ Izhitsa
 	ali: Izhitsacyrillic afii10148
 	set: AGL1 AGL2 AGLFN
 	min: izhitsa
-de.ital
-	uni: F6C6
-	fin: uni0434.ital
-	ali: afii10069.ital afii10192
-	sub: de+locl de+salt
-	set: AGL1 AGL2
-	tag: italic
 dzhe
 	uni: 045F
 	fin: uni045F
@@ -2757,20 +2260,6 @@ izhitsa
 	ali: afii10196 izhitsacyrillic
 	set: AGL1 AGL2 AGLFN
 	maj: Izhitsa
-pe.ital
-	uni: F6C7
-	fin: uni043F.ital
-	ali: afii10081.ital afii10831
-	sub: pe+locl pe+salt
-	set: AGL1 AGL2
-	tag: italic
-te.ital
-	uni: F6C8
-	fin: uni0442.ital
-	ali: afii10084.ital afii10832
-	sub: te+locl te+salt
-	set: AGL1 AGL2
-	tag: italic
 schwacyr
 	uni: 04D9
 	fin: uni04D9
@@ -4136,11 +3625,6 @@ amacron
 	set: AGL1 AGL2 AGLFN
 	maj: Amacron
 	cmp: a+macron
-ampersand.sc
-	uni: F726
-	ali: ampersandsmall
-	sub: ampersand+c2sc ampersand.alt1+c2sc ampersand.alt2+c2sc ampersand.alt3+c2sc
-	set: AGL1 AGL2
 angle
 	uni: 2220
 	set: AGL1 AGL2 AGLFN
@@ -4189,10 +3673,6 @@ arrowdblup
 arrowdown
 	uni: 2193
 	set: AGL1 AGL2 AGLFN
-arrowhorizex
-	uni: F8E7
-	fin: uniF8E7
-	set: AGL1 AGL2
 arrowleft
 	uni: 2190
 	fin: uni2190
@@ -4212,18 +3692,9 @@ arrowupdnbse
 	uni: 21A8
 	ali: SM770000 arrowupdownbase
 	set: AGL1 AGL2 AGLFN
-arrowvertex
-	uni: F8E6
-	fin: uniF8E6
-	set: AGL1 AGL2
 asteriskmath
 	uni: 2217
 	set: AGL1 AGL2 AGLFN
-a.superior
-	uni: F6E9
-	ali: asuperior
-	sub: a+sups a+ordn
-	set: AGL1 AGL2
 beta
 	uni: 03B2
 	set: AGL1 AGL2 AGLFN
@@ -4233,63 +3704,6 @@ beta.alt
 	fin: uni03D0
 	ali: betasymbolgreek
 	set: AGL1
-braceex
-	uni: F8F4
-	fin: uniF8F4
-	set: AGL1 AGL2
-braceleftbt
-	uni: F8F3
-	fin: uniF8F3
-	set: AGL1 AGL2
-braceleftmid
-	uni: F8F2
-	fin: uniF8F2
-	set: AGL1 AGL2
-bracelefttp
-	uni: F8F1
-	fin: uniF8F1
-	set: AGL1 AGL2
-bracerightbt
-	uni: F8FE
-	fin: uniF8FE
-	set: AGL1 AGL2
-bracerightmid
-	uni: F8FD
-	fin: uniF8FD
-	set: AGL1 AGL2
-bracerighttp
-	uni: F8FC
-	fin: uniF8FC
-	set: AGL1 AGL2
-bracketleftbt
-	uni: F8F0
-	fin: uniF8F0
-	set: AGL1 AGL2
-bracketleftex
-	uni: F8EF
-	fin: uniF8EF
-	set: AGL1 AGL2
-bracketlefttp
-	uni: F8EE
-	fin: uniF8EE
-	set: AGL1 AGL2
-bracketrightbt
-	uni: F8FB
-	fin: uniF8FB
-	set: AGL1 AGL2
-bracketrightex
-	uni: F8FA
-	fin: uniF8FA
-	set: AGL1 AGL2
-bracketrighttp
-	uni: F8F9
-	fin: uniF8F9
-	set: AGL1 AGL2
-b.superior
-	uni: F6EA
-	ali: bsuperior
-	sub: b+sups
-	set: AGL1 AGL2
 cacute
 	uni: 0107
 	set: AGL1 AGL2 AGLFN
@@ -4314,23 +3728,6 @@ cdotaccent
 	set: AGL1 AGL2 AGLFN
 	maj: Cdotaccent
 	cmp: c+dotaccent
-cent.inferior
-	uni: F6DF
-	ali: centinferior
-	sub: cent+sinf
-	set: AGL1 AGL2
-	cmp: cent.numerator
-cent.oldstyle
-	uni: F7A2
-	ali: centoldstyle
-	sub: cent+onum cent+c2sc
-	set: AGL1 AGL2
-cent.superior
-	uni: F6E0
-	ali: centsuperior
-	sub: cent+sups
-	set: AGL1 AGL2
-	cmp: cent.numerator
 chi
 	uni: 03C7
 	set: AGL1 AGL2 AGLFN
@@ -4352,64 +3749,10 @@ club
 	uni: 2663
 	ali: clubsuitblack
 	set: AGL1 AGL2 AGLFN
-commaaccent
-	uni: F6C3
-	fin: uni00200326
-	ali: space_uni0326
-	set: AGL1 AGL2
-comma.inferior
-	uni: F6E1
-	ali: commainferior
-	sub: comma+sinf
-	set: AGL1 AGL2
-	cmp: comma.numerator
-comma.superior
-	uni: F6E2
-	ali: commasuperior
-	sub: comma+sups
-	set: AGL1 AGL2
-	cmp: comma.numerator
 congruent
 	uni: 2245
 	ali: approximatelyequal
 	set: AGL1 AGL2 AGLFN
-copyrightsans
-	uni: F8E9
-	fin: copyright.sans
-	set: AGL1 AGL2
-copyrightserif
-	uni: F6D9
-	fin: copyright.serif
-	set: AGL1 AGL2
-breve.cyrcap
-	uni: F6D1
-	ali: cyrBreve
-	sub: breve.cyr+case
-	set: AGL1 AGL2
-circumflex.cyrcap
-	uni: F6D2
-	ali: cyrFlex
-	sub: circumflex.cyr+case
-	set: AGL1 AGL2
-breve.cyr
-	uni: F6D4
-	ali: cyrbreve
-	set: AGL1 AGL2
-circumflex.cyr
-	uni: F6D5
-	ali: cyrflex
-	set: AGL1 AGL2
-dblgrave.cap
-	uni: F6D3
-	fin: uni0020030F.cap
-	ali: dblGrave space_uni030F.cap
-	sub: dblgrave+case
-	set: AGL1 AGL2
-dblgrave
-	uni: F6D6
-	fin: uni0020030F
-	ali: space_uni030F
-	set: AGL1 AGL2
 dcaron
 	uni: 010F
 	set: AGL1 AGL2 AGLFN
@@ -4427,16 +3770,6 @@ delta
 diamond
 	uni: 2666
 	set: AGL1 AGL2 AGLFN
-dieresisacute
-	uni: F6D7
-	fin: uni00A80301
-	ali: dieresis_acutecomb space_uni0308_uni0301
-	set: AGL1 AGL2
-dieresisgrave
-	uni: F6D8
-	fin: uni00A80300
-	ali: dieresis_gravecomb space_uni0308_uni0300
-	set: AGL1 AGL2
 dieresistonos
 	uni: 0385
 	ali: dialytikatonos
@@ -4447,23 +3780,6 @@ dieresiscaron
 dieresismacron
 	fin: uni00A80304
 	ali: dieresis_uni0304
-dollar.inferior
-	uni: F6E3
-	ali: dollarinferior
-	sub: dollar+sinf
-	set: AGL1 AGL2
-	cmp: dollar.numerator
-dollar.oldstyle
-	uni: F724
-	ali: dollaroldstyle
-	sub: dollar+onum dollar+c2sc
-	set: AGL1 AGL2
-dollar.superior
-	uni: F6E4
-	ali: dollarsuperior
-	sub: dollar+sups
-	set: AGL1 AGL2
-	cmp: dollar.numerator
 dotbelowcmb
 	uni: 0323
 	fin: uni0323
@@ -4477,11 +3793,6 @@ dotmath
 	uni: 22C5
 	ali: SD630000
 	set: AGL1 AGL2 AGLFN
-d.superior
-	uni: F6EB
-	ali: dsuperior
-	sub: d+sups
-	set: AGL1 AGL2
 ebreve
 	uni: 0115
 	set: AGL1 AGL2 AGLFN
@@ -4504,11 +3815,6 @@ eight.inferior
 	sub: eight+sinf
 	set: AGL1 AGL2
 	cmp: eight.numerator
-eight.oldstyle
-	uni: F738
-	ali: eightoldstyle
-	sub: eight.fitted+onum eight.fitted+c2sc eight.taboldstyle+pnum eight+aalt
-	set: AGL1 AGL2
 eight.superior
 	uni: 2078
 	ali: eightsuperior
@@ -4549,11 +3855,6 @@ equivalence
 estimated
 	uni: 212E
 	set: AGL1 AGL2 AGLFN
-e.superior
-	uni: F6EC
-	ali: esuperior
-	sub: e+sups
-	set: AGL1 AGL2
 eta
 	uni: 03B7
 	set: AGL1 AGL2 AGLFN
@@ -4566,16 +3867,6 @@ etatonos
 exclamdbl
 	uni: 203C
 	set: AGL1 AGL2 AGLFN
-exclamdown.sc
-	uni: F7A1
-	ali: exclamdownsmall
-	sub: exclamdown+c2sc
-	set: AGL1 AGL2
-exclam.sc
-	uni: F721
-	ali: exclamsmall
-	sub: exclam+c2sc
-	set: AGL1 AGL2
 existential
 	uni: 2203
 	ali: thereexists
@@ -4626,11 +3917,6 @@ five.inferior
 	sub: five+sinf
 	set: AGL1 AGL2
 	cmp: five.numerator
-five.oldstyle
-	uni: F735
-	ali: fiveoldstyle
-	sub: five.fitted+onum five.fitted+c2sc five.taboldstyle+pnum five+aalt
-	set: AGL1 AGL2
 five.superior
 	uni: 2075
 	ali: fivesuperior
@@ -4643,11 +3929,6 @@ four.inferior
 	sub: four+sinf
 	set: AGL1 AGL2
 	cmp: four.numerator
-four.oldstyle
-	uni: F734
-	ali: fouroldstyle
-	sub: four.fitted+onum four.fitted+c2sc four.taboldstyle+pnum four+aalt
-	set: AGL1 AGL2
 four.superior
 	uni: 2074
 	ali: foursuperior
@@ -4721,18 +4002,6 @@ house
 	uni: 2302
 	ali: SM790000
 	set: AGL1 AGL2 AGLFN
-hyphen.inferior
-	uni: F6E5
-	ali: hypheninferior
-	sub: hyphen+sinf
-	set: AGL1 AGL2
-	cmp: hyphen.numerator
-hyphen.superior
-	uni: F6E6
-	ali: hyphensuperior
-	sub: hyphen+sups
-	set: AGL1 AGL2
-	cmp: hyphen.numerator
 ibreve
 	uni: 012D
 	set: AGL1 AGL2 AGLFN
@@ -4758,10 +4027,6 @@ integralbt
 	uni: 2321
 	ali: SS270000 integralbottom
 	set: AGL1 AGL2 AGLFN
-integralex
-	uni: F8F5
-	fin: uniF8F5
-	set: AGL1 AGL2
 integraltp
 	uni: 2320
 	ali: SS260000 integraltop
@@ -4803,11 +4068,6 @@ iotatonos
 	set: AGL1 AGL2 AGLFN
 	maj: Iotatonos
 	cmp: iota+tonos
-i.superior
-	uni: F6ED
-	ali: isuperior
-	sub: i+sups
-	set: AGL1 AGL2
 itilde
 	uni: 0129
 	set: AGL1 AGL2 AGLFN
@@ -4866,10 +4126,6 @@ lira
 	ali: afii08941
 	sub: lira.oldstyle+case
 	set: AGL1 AGL2 AGLFN
-ll
-	uni: F6C0
-	fin: uniF6C0
-	set: AGL1 AGL2
 logicaland
 	uni: 2227
 	set: AGL1 AGL2 AGLFN
@@ -4884,11 +4140,6 @@ longs
 lozenge
 	uni: 25CA
 	set: AGL1 AGL2 AGLFN
-l.superior
-	uni: F6EE
-	ali: lsuperior
-	sub: l+sups
-	set: AGL1 AGL2
 male
 	uni: 2642
 	ali: Mars mars
@@ -4898,11 +4149,6 @@ prime
 	fin: uni2032
 	ali: minute
 	set: AGL1 AGL2 AGLFN
-m.superior
-	uni: F6EF
-	ali: msuperior
-	sub: m+sups
-	set: AGL1 AGL2
 musicalnote
 	uni: 266A
 	ali: eighthnote
@@ -4945,11 +4191,6 @@ minus.inferior
 	uni: 208B
 equal.inferior
 	uni: 208C
-nine.oldstyle
-	uni: F739
-	ali: nineoldstyle
-	sub: nine.fitted+onum nine.fitted+c2sc nine.taboldstyle+pnum nine+aalt
-	set: AGL1 AGL2
 nine.superior
 	uni: 2079
 	ali: ninesuperior
@@ -5025,23 +4266,12 @@ omicrontonos
 	set: AGL1 AGL2 AGLFN
 	maj: Omicrontonos
 	cmp: omicron+tonos
-one.fitted
-	uni: F6DC
-	ali: onefitted
-	sub: one+pnum one.oldstyle+case
-	set: AGL1 AGL2
-	cmp: one
 one.inferior
 	uni: 2081
 	ali: oneinferior
 	sub: one+sinf
 	set: AGL1 AGL2
 	cmp: one.numerator
-one.oldstyle
-	uni: F731
-	ali: oneoldstyle
-	sub: one.fitted+onum one.fitted+c2sc one.taboldstyle+pnum one+aalt
-	set: AGL1 AGL2
 onesuperior
 	uni: 00B9
 	set: AGL1 AGL2
@@ -5064,19 +4294,6 @@ oslashacute
 	set: AGL1 AGL2 AGLFN
 	maj: Oslashacute
 	cmp: oslash+acute
-o.superior
-	uni: F6F0
-	ali: osuperior
-	sub: o+sups o+ordn
-	set: AGL1 AGL2
-parenleftbt
-	uni: F8ED
-	fin: uniF8ED
-	set: AGL1 AGL2
-parenleftex
-	uni: F8EC
-	fin: uniF8EC
-	set: AGL1 AGL2
 parenleft.inferior
 	uni: 208D
 	ali: parenleftinferior
@@ -5089,18 +4306,6 @@ parenleft.superior
 	sub: parenleft+sups
 	set: AGL1 AGL2
 	cmp: parenleft.numerator
-parenlefttp
-	uni: F8EB
-	fin: uniF8EB
-	set: AGL1 AGL2
-parenrightbt
-	uni: F8F8
-	fin: uniF8F8
-	set: AGL1 AGL2
-parenrightex
-	uni: F8F7
-	fin: uniF8F7
-	set: AGL1 AGL2
 parenright.inferior
 	uni: 208E
 	ali: parenrightinferior
@@ -5113,25 +4318,9 @@ parenright.superior
 	sub: parenright+sups
 	set: AGL1 AGL2
 	cmp: parenright.numerator
-parenrighttp
-	uni: F8F6
-	fin: uniF8F6
-	set: AGL1 AGL2
 partialdiff
 	uni: 2202
 	set: AGL1 AGL2 AGLFN
-period.inferior
-	uni: F6E7
-	ali: periodinferior
-	sub: period+sinf
-	set: AGL1 AGL2
-	cmp: period.numerator
-period.superior
-	uni: F6E8
-	ali: periodsuperior
-	sub: period+sups
-	set: AGL1 AGL2
-	cmp: period.numerator
 perpendicular
 	uni: 22A5
 	set: AGL1 AGL2 AGLFN
@@ -5173,16 +4362,6 @@ psi
 	uni: 03C8
 	set: AGL1 AGL2 AGLFN
 	maj: Psi
-questiondown.sc
-	uni: F7BF
-	ali: questiondownsmall
-	sub: questiondown+c2sc
-	set: AGL1 AGL2
-question.sc
-	uni: F73F
-	ali: questionsmall
-	sub: question+c2sc
-	set: AGL1 AGL2
 quotereversed
 	uni: 201B
 	ali: apostrophereverse quoteleftreversed
@@ -5195,10 +4374,6 @@ racute
 radical
 	uni: 221A
 	set: AGL1 AGL2 AGLFN
-radicalex
-	uni: F8E5
-	fin: uniF8E5
-	set: AGL1 AGL2
 rcaron
 	uni: 0159
 	set: AGL1 AGL2 AGLFN
@@ -5219,16 +4394,6 @@ reflexsuperset
 	uni: 2287
 	ali: supersetorequal
 	set: AGL1 AGL2 AGLFN
-registersans
-	uni: F8E8
-	fin: registered.sans
-	ali: register.sans
-	set: AGL1 AGL2
-registerserif
-	uni: F6DA
-	fin: registered.serif
-	ali: register.serif
-	set: AGL1 AGL2
 revlogicalnot
 	uni: 2310
 	ali: SM680000 logicalnotreversed
@@ -5237,11 +4402,6 @@ rho
 	uni: 03C1
 	set: AGL1 AGL2 AGLFN
 	maj: Rho
-r.superior
-	uni: F6F1
-	ali: rsuperior
-	sub: r+sups
-	set: AGL1 AGL2
 sacute
 	uni: 015B
 	set: AGL1 AGL2 AGLFN
@@ -5275,11 +4435,6 @@ seven.inferior
 	sub: seven+sinf
 	set: AGL1 AGL2
 	cmp: seven.numerator
-seven.oldstyle
-	uni: F737
-	ali: sevenoldstyle
-	sub: seven.fitted+onum seven.fitted+c2sc seven.taboldstyle+pnum seven+aalt
-	set: AGL1 AGL2
 seven.superior
 	uni: 2077
 	ali: sevensuperior
@@ -5306,11 +4461,6 @@ six.inferior
 	sub: six+sinf
 	set: AGL1 AGL2
 	cmp: six.numerator
-six.oldstyle
-	uni: F736
-	ali: sixoldstyle
-	sub: six.fitted+onum six.fitted+c2sc six.taboldstyle+pnum six+aalt
-	set: AGL1 AGL2
 six.superior
 	uni: 2076
 	ali: sixsuperior
@@ -5325,11 +4475,6 @@ spade
 	uni: 2660
 	ali: spadesuitblack
 	set: AGL1 AGL2 AGLFN
-s.superior
-	uni: F6F2
-	ali: ssuperior
-	sub: s+sups
-	set: AGL1 AGL2
 suchthat
 	uni: 220B
 	set: AGL1 AGL2 AGLFN
@@ -5380,11 +4525,6 @@ three.inferior
 	sub: three+sinf
 	set: AGL1 AGL2
 	cmp: three.numerator
-three.oldstyle
-	uni: F733
-	ali: threeoldstyle
-	sub: three.fitted+onum three.fitted+c2sc three.taboldstyle+pnum three+aalt
-	set: AGL1 AGL2
 threesuperior
 	uni: 00B3
 	set: AGL1 AGL2
@@ -5400,14 +4540,6 @@ tildecmb
 tonos
 	uni: 0384
 	set: AGL1 AGL2 AGLFN
-trademarksans
-	uni: F8EA
-	fin: trademark.sans
-	set: AGL1 AGL2
-trademarkserif
-	uni: F6DB
-	fin: trademark.serif
-	set: AGL1 AGL2
 triangleblackdown
 	uni: 25BC
 	fin: triagdn
@@ -5428,22 +4560,12 @@ triangleblackup
 	fin: triagup
 	ali: SM600000 blackuppointingtriangle
 	set: AGL1 AGL2 AGLFN
-t.superior
-	uni: F6F3
-	ali: tsuperior
-	sub: t+sups
-	set: AGL1 AGL2
 two.inferior
 	uni: 2082
 	ali: twoinferior
 	sub: two+sinf
 	set: AGL1 AGL2
 	cmp: two.numerator
-two.oldstyle
-	uni: F732
-	ali: twooldstyle
-	sub: two.fitted+onum two.fitted+c2sc two.taboldstyle+pnum two+aalt
-	set: AGL1 AGL2
 twosuperior
 	uni: 00B2
 	set: AGL1 AGL2
@@ -5568,11 +4690,6 @@ zero.inferior
 	sub: zero+sinf
 	set: AGL1 AGL2
 	cmp: zero.numerator
-zero.oldstyle
-	uni: F730
-	ali: zerooldstyle
-	sub: zero.fitted+onum zero.slashfitted+onum zero.fitted+c2sc zero.slashfitted+c2sc zero.taboldstyle+pnum zero+aalt
-	set: AGL1 AGL2
 zero.superior
 	uni: 2070
 	ali: zerosuperior
@@ -5583,10 +4700,6 @@ zeta
 	uni: 03B6
 	set: AGL1 AGL2 AGLFN
 	maj: Zeta
-zero.slash
-	uni: F638
-	ali: zeroslash
-	sub: zero+zero zero.fitted+zero
 percent.alt
 	sub: percent+salt
 estimated.alt
@@ -11178,11 +10291,6 @@ Dcroat.sc
 	sub: Dcroat+c2sc
 	min: dcroat.sc
 	cmp: eth.sc
-Hbar.sc
-	uni: F681
-	sub: Hbar+c2sc
-	min: hbar.sc
-	cmp: hbar.sc
 Oslash.sc
 	sub: Oslash+c2sc
 	min: oslash.sc
@@ -11192,16 +10300,6 @@ Obar.sc
 	sub: Obar+c2sc
 	min: obar.sc
 	cmp: fita.sc
-Tbar.sc
-	uni: F69C
-	sub: Tbar+c2sc
-	min: tbar.sc
-	cmp: tbar.sc
-Eng.sc
-	uni: F67B
-	sub: Eng+c2sc
-	min: eng.sc
-	cmp: eng.sc
 Eth.sc
 	sub: Eth+c2sc
 	min: eth.sc
@@ -11375,10 +10473,6 @@ Lcommaaccent.sc
 	fin: uni013B.sc
 	sub: Lcommaaccent+c2sc
 	cmp: lcommaaccent.sc
-Ldot.sc
-	uni: F68D
-	sub: Ldot+c2sc
-	cmp: ldot.sc
 Lslash.sc
 	sub: Lslash+c2sc
 	cmp: lslash.sc
@@ -23223,12 +22317,6 @@ hryvnia
 cedi
 	uni: 20B5
 	fin: uni20B5
-Scedilla.dup
-	uni: F6C1
-	cmp: Scedilla
-scedilla.dup
-	uni: F6C2
-	cmp: scedilla
 Iukran.swash
 	fin: uni0406.swash
 	sub: Iukran+swsh
