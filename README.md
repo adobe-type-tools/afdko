@@ -143,6 +143,12 @@ directory of the afdko, and run:
 
     python -m pip install .
 
+Developing
+-----------------
+If you'd like to develop & debug AFDKO using Xcode, run:
+
+    CMake -G Xcode .
+
 For further information on building from source see
 [docs/FDK\_Build\_Notes.md](docs/FDK_Build_Notes.md).
 
