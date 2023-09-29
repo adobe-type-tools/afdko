@@ -606,11 +606,11 @@ class UFOFontData(object):
 
     def loadGlyphMap(self):
         # Need to both get the list of glyphs from contents.plist, and also
-        # the glyph order. The latter is take from the public.glyphOrder key
+        # the glyph order. The latter is taken from the public.glyphOrder key
         # in lib.plist, if it exists, else it is taken from the contents.plist
         # file. Any glyphs in contents.plist which are not named in the
         # public.glyphOrder are sorted after all glyphs which are named in the
-        # public.glyphOrder,, in the order that they occured in contents.plist.
+        # public.glyphOrder, in the order that they occured in contents.plist.
         contentsPath = os.path.join(self.parentPath, "glyphs", kContentsName)
         self.glyphMap, self.glyphList = parsePList(contentsPath)
         orderPath = os.path.join(self.parentPath, kLibName)
