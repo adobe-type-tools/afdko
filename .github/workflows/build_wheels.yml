@@ -27,7 +27,7 @@ jobs:
         echo "Reason for triggering: ${{ github.event.inputs.reason }}"
 
     - name: Check out
-      uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4
+      uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
       with:
         fetch-depth: 0  # unshallow fetch for setuptools-scm
 
@@ -38,7 +38,7 @@ jobs:
 
     - name: Build wheel (only macosx_universal2)
       if: matrix.os == 'macos-latest'
-      uses: pypa/cibuildwheel@v2.15.0
+      uses: pypa/cibuildwheel@v2.16.1
       with:
         output-dir: dist
       env:
@@ -47,7 +47,7 @@ jobs:
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64 -I/usr/include/libxml2' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'"
 
     - name: Build wheel (except macosx_universal2)
-      uses: pypa/cibuildwheel@v2.15.0
+      uses: pypa/cibuildwheel@v2.16.1
       with:
         output-dir: dist
       env:
