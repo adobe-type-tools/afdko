@@ -39,8 +39,9 @@ Installation
 ------------
 
 The AFDKO requires [Python](http://www.python.org/download) 3.8
-or later.
-Regarding Python 3.11: while Python 3.11 itself is now relatively stable, we are waiting to let some known tool-chain problems resolve.
+or later. It should work with any Python > 3.8, but occasionally
+tool-chain components and dependencies don't keep pace with major
+Python releases, so there might be some lag time while they catch up.
 
 Releases are available on the [Python Package
 Index](https://pypi.python.org/pypi/afdko) (PyPI) and can be installed
