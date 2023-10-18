@@ -286,7 +286,7 @@ class glyphHintState:
     """
 
     def __init__(self) -> None:
-        self.peStates = {}
+        self.peStates: Dict[pathElement, pathElementHintState] = {}
         self.overlapRemoved = None
         self.increasingSegs: List[hintSegment] = []
         self.decreasingSegs: List[hintSegment] = []
