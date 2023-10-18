@@ -45,11 +45,14 @@ def fne(a: float, b: float, factor=1.52e-5) -> bool:
     return abs(a - b) >= factor
 
 
-class pt(tuple):
+class pt:
     """A 2-tuple representing a point in 2D space"""
-    __slots__ = ()
+
     tl = threading.local()
     tl.align = None
+
+    x: Number
+    y: Number
 
     @classmethod
     def setAlign(cls, vertical=False):
@@ -80,27 +83,27 @@ class pt(tuple):
         """
         cls.tl.align = None
 
-    def __new__(cls, x=0, y=0, roundCoords=False):
+    def __init__(self, x: Number = 0, y: Number = 0, roundCoords=False):
         """
         Creates a new pt object initialied with x and y.
 
         If roundCoords is True the values are rounded before storing
         """
         if isinstance(x, tuple):
-            y = x[1]
-            x = x[0]
+            y = float(x[1])
+            x = float(x[0])
         if roundCoords:
             x = round(x)
             y = round(y)
-        return _tuple.__new__(cls, (x, y))
+        self.x = x
+        self.y = y
 
-    @property
-    def x(self):
-        return self[0]
-
-    @property
-    def y(self):
-        return self[1]
+    def __getitem__(self, ix) -> Union[int, float]:
+        if ix == 0:
+            return self.x
+        if ix == 1:
+            return self.y
+        raise IndexError("pt index out of range")
 
     @property
     def a(self):
