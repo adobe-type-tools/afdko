@@ -15,6 +15,7 @@ from fontTools.misc.bezierTools import (solveQuadratic, solveCubic,
                                         calcCubicParameters,
                                         splitCubicAtT, segmentPointAtT,
                                         approximateCubicArcLength)
+from typing import Optional, Tuple, Union
 from fontTools.pens.basePen import BasePen
 
 import logging
