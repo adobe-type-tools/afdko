@@ -97,8 +97,8 @@ class pt:
         If roundCoords is True the values are rounded before storing
         """
         if isinstance(x, tuple):
-            y = float(x[1])
-            x = float(x[0])
+            y = x[1]
+            x = x[0]
         if roundCoords:
             x = round(x)
             y = round(y)
