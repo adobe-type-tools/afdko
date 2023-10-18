@@ -10,7 +10,7 @@ import bisect
 from enum import IntEnum
 
 
-from .glyphData import feq, pathElement, stem
+from .glyphData import Number, feq, pathElement, stem
 from _weakref import ReferenceType
 from typing import Any, Dict, List, Optional, Set, Tuple, Type, Self, Protocol
 
@@ -144,9 +144,16 @@ HintSegListWithType = Tuple[str, list[hintSegment]]
 class stemValue:
     """Represents a potential hint stem"""
 
-    def __init__(self, lloc: Number, uloc: Number, val: Number,
-                 spc, lseg: hintSegment, useg: hintSegment,
-                 isGhost=False) -> None:
+    def __init__(
+        self,
+        lloc: Number,
+        uloc: Number,
+        val: Number,
+        spc,
+        lseg: hintSegment,
+        useg: hintSegment,
+        isGhost=False,
+    ) -> None:
         assert lloc <= uloc
         self.val = val
         self.spc = spc
@@ -159,9 +166,11 @@ class stemValue:
         self.useg = useg
         self.best = None
         self.initialVal = val
-        self.idx = None
+        self.idx: Optional[int] = None
 
-    def __eq__(self, other: Self) -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, stemValue):
+            return False
         slloc, suloc = self.ghosted()
         olloc, ouloc = other.ghosted()
         return slloc == olloc and suloc == ouloc
@@ -173,7 +182,7 @@ class stemValue:
         return (slloc < olloc or (slloc == olloc and suloc < ouloc))
 
     # c.f. page 22 of Adobe TN #5177 "The Type 2 Charstring Format"
-    def ghosted(self) -> Tuple[Any, Any]:
+    def ghosted(self) -> Tuple[Number, Number]:
         """Return the stem range but with ghost stems normalized"""
         lloc, uloc = self.lloc, self.uloc
         if self.isGhost:
