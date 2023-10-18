@@ -11,8 +11,8 @@ from copy import deepcopy
 from math import sqrt
 from collections import defaultdict
 from builtins import tuple as _tuple
-from typing import Any, List, Optional, Tuple, Union, Self
-from fontTools.config import Option
+from typing import Any, List, Optional, Tuple, Union
+from typing_extensions import Self
 
 # pytype: disable=import-error
 from fontTools.misc.bezierTools import (

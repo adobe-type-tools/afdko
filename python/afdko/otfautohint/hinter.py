@@ -11,8 +11,17 @@ import bisect
 import math
 from copy import copy, deepcopy
 from abc import abstractmethod, ABC
-from collections import namedtuple
-from typing import Any, Dict, Iterable, List, NamedTuple, Tuple, Type, TypeVar, Union, Optional, Self
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    NamedTuple,
+    Tuple,
+    Union,
+    Optional,
+)
+from typing_extensions import Self
 
 from fontTools.misc.bezierTools import solveCubic
 

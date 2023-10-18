@@ -13,8 +13,17 @@ from enum import IntEnum
 from . import Number
 from .glyphData import feq, pathElement, stem
 from _weakref import ReferenceType
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Type, Self, Protocol
-
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Protocol,
+)
+from typing_extensions import Self
 
 log: logging.Logger = logging.getLogger(__name__)
 
