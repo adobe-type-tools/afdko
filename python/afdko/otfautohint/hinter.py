@@ -2858,9 +2858,9 @@ class glyphHinter:
                   ("vertical" if self.doV else "horizontal",
                    pe.e.x, pe.e.y, pe2.e.x, pe2.e.y, desc))
 
-    def otherInstanceStems(self, gllist) -> Optional[bool]:
+    def otherInstanceStems(self, gllist) -> None:
         if len(gllist) < 2:
-            return True
+            return
 
         glyph = gllist[0]
 
@@ -2870,9 +2870,9 @@ class glyphHinter:
             g.hstems = glyph.hhs.stems[i]
             g.vstems = glyph.vhs.stems[i]
 
-    def otherInstanceMasks(self, gllist) -> Optional[bool]:
+    def otherInstanceMasks(self, gllist) -> None:
         if len(gllist) < 2:
-            return True
+            return
 
         glyph = gllist[0]
 
