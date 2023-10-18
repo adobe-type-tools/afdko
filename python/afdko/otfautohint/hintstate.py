@@ -106,7 +106,7 @@ class hintSegment:
         if self.replacedBy is None:
             return self
         if self is orig:
-            self.error("Cycle in hint segment replacement")
+            log.error("Cycle in hint segment replacement")
             return self
         if orig is None:
             orig = self
