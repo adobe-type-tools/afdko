@@ -12,6 +12,7 @@ import math
 from copy import copy, deepcopy
 from abc import abstractmethod, ABC
 from collections import namedtuple
+from typing import Any, Dict, Iterable, List, NamedTuple, Tuple, Type, TypeVar, Union, Optional, Self
 
 from fontTools.misc.bezierTools import solveCubic
 
