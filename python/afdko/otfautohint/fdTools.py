@@ -13,7 +13,7 @@ import re
 import numbers
 import sys
 import os
-from typing import Optional, Tuple, List, Dict
+from typing import Any, Optional, Tuple, List, Dict
 
 from . import Number
 
@@ -125,13 +125,15 @@ class FDDict:
     BlueValuesPairs: List[BlueValue]
     OtherBlueValuesPairs: List[BlueValue]
     BlueFuzz: int
-    DominantH: int
-    DominantV: int
+    DominantH: List[int]
+    DominantV: List[int]
     BaselineOvershoot: Number
     BaselineYCoord: Number
     FamilyBaselineYCoord: Number
+    OrigEmSqUnits: Number
+    FontName: Optional[str]
 
-    def __init__(self, fdIndex, dictName=None, fontName=None):
+    def __init__(self, fdIndex, dictName=None, fontName: Optional[str] = None):
         self.fdIndex = fdIndex
         for key in kFDDictKeys:
             setattr(self, key, None)
@@ -453,6 +455,7 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
 
     for dictName, fdIndex in fdIndexDict.items():
         fdDict = fdArrayMap[fdIndex]
+        assert fdDict is not None
         if fdDict.DominantH is None:
             log.warning("The FDDict '%s' in fontinfo has no "
                         "DominantH value", dictName)
@@ -493,13 +496,13 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
     return fdSelectMap, finalFDict
 
 
-def mergeFDDicts(prevDictList):
+def mergeFDDicts(prevDictList: List[FDDict]) -> Dict[str, Any]:
     # Extract the union of the stem widths and zones from the list
     # of FDDicts, and replace the current values in the topDict.
     blueZoneDict: BlueZoneDict = {}
     otherBlueZoneDict: BlueZoneDict = {}
-    dominantHDict = {}
-    dominantVDict = {}
+    dominantHDict: Dict[int, str] = {}
+    dominantVDict: Dict[int, str] = {}
     bluePairListNames = [kFontDictBluePairsName, kFontDictOtherBluePairsName]
     zoneDictList = [blueZoneDict, otherBlueZoneDict]
     for prefDDict in prevDictList:
@@ -519,7 +522,7 @@ def mergeFDDicts(prevDictList):
         stemDictList = [dominantHDict, dominantVDict]
         for i in (0, 1):
             stemFieldName = stemNameList[i]
-            dList = getattr(prefDDict, stemFieldName)
+            dList: List[int] = getattr(prefDDict, stemFieldName)
             stemDict = stemDictList[i]
             if dList is not None:
                 for width in dList:
@@ -527,10 +530,10 @@ def mergeFDDicts(prevDictList):
     assert prefDDict
     # Now we have collected all the stem widths and zones
     # from all the dicts. See if we can merge them.
-    goodBlueZoneList = []
-    goodOtherBlueZoneList = []
-    goodHStemList = []
-    goodVStemList = []
+    goodBlueZoneList: List[int] = []
+    goodOtherBlueZoneList: List[int] = []
+    goodHStemList: List[int] = []
+    goodVStemList: List[int] = []
 
     zoneDictList = [blueZoneDict, otherBlueZoneDict]
     goodZoneLists = [goodBlueZoneList, goodOtherBlueZoneList]
@@ -591,7 +594,7 @@ def mergeFDDicts(prevDictList):
             else:
                 goodStemList.append(stem)
             prevStem = stem
-    privateMap = {}
+    privateMap: Dict[str, Any] = {}
     if goodBlueZoneList:
         privateMap['BlueValues'] = goodBlueZoneList
     if goodOtherBlueZoneList:
@@ -659,7 +662,7 @@ def getFDInfo(font, desc, options, glyphList, isVF):
                                        options.noFlex,
                                        options.vCounterGlyphs,
                                        options.hCounterGlyphs, desc)
-        fdArrayMap = {0: fdDict}
+        fdArrayMap: Dict[int, FDDict] = {0: fdDict}
         minY, maxY = font.get_min_max(fdDict.OrigEmSqUnits)
         fdSelectMap, finalFDict = parseFontInfoFile(
             fdArrayMap, srcFontinfoData, glyphList, maxY, minY, desc)
@@ -672,7 +675,7 @@ def getFDInfo(font, desc, options, glyphList, isVF):
             privateMap = mergeFDDicts([finalFDict])
     elif isVF:
         fdSelectMap = {}
-        dictRecord = {}
+        dictRecord: Dict[int, Dict[int, FDDict]] = {}
         fdArraySet = set()
         for name in glyphList:
             fdIndex = font.getfdIndex(name)
@@ -715,7 +718,7 @@ class FDDictManager:
         self.fontInstances = fontInstances
         self.glyphList = glyphList
         self.isVF = isVF
-        self.fdSelectMap = None
+        self.fdSelectMap: Optional[Dict] = None
         self.auxRecord = {}
         refI = fontInstances[0]
         fdArrayCompat = True
@@ -784,6 +787,7 @@ class FDDictManager:
         return self.dictRecord
 
     def getRecKey(self, gname, vsindex):
+        assert self.fdSelectMap is not None
         fdIndex = self.fdSelectMap[gname]
         if vsindex in self.dictRecord and fdIndex in self.dictRecord[vsindex]:
             return vsindex, fdIndex
@@ -801,7 +805,7 @@ class FDDictManager:
         self.auxRecord[vsindex][fdIndex] = fddict
         return fddict
 
-    def checkGlyphList(self):
+    def checkGlyphList(self) -> None:
         options = self.options
         glyphSet = set(self.glyphList)
         # Check for missing glyphs explicitly added via fontinfo or cmd line
@@ -815,7 +819,7 @@ class FDDictManager:
                 log.warning("%s glyph named in fontinfo is " % label +
                             "not in font: %s" % name)
 
-    def addDict(self, dict1, dict2):
+    def addDict(self, dict1: Dict, dict2: Dict) -> bool:
         # This allows for sparse masters, just verifying that if a glyph name
         # is in both dictionaries it maps to the same index.
         good = True

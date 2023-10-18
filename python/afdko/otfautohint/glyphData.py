@@ -11,7 +11,8 @@ from copy import deepcopy
 from math import sqrt
 from collections import defaultdict
 from builtins import tuple as _tuple
-from typing import Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union, Self
+from fontTools.config import Option
 
 # pytype: disable=import-error
 from fontTools.misc.bezierTools import (
@@ -558,35 +559,35 @@ class pathElement:
                             'pathElement.__init__')
         self.masks = masks
         self.flex = flex
-        self.bounds = None
+        self.bounds: Optional[boundsState] = None
         self.position: Tuple[int, int] = position or (-1, -1)
         self.segment_sub = None
 
-    def getBounds(self):
+    def getBounds(self) -> boundsState:
         """Returns the bounds object for the object, generating it if needed"""
-        if self.bounds:
+        if self.bounds is not None:
             return self.bounds
         self.bounds = boundsState(self)
         return self.bounds
 
-    def clearTempState(self):
+    def clearTempState(self) -> None:
         self.bounds = None
         self.segment_sub = None
 
-    def isLine(self):
+    def isLine(self) -> bool:
         """Returns True if the spline is a line"""
         return self.is_line
 
-    def isClose(self):
+    def isClose(self) -> bool:
         """Returns True if this pathElement implicitly closes a subpath"""
         return self.is_close
 
-    def isStart(self):
+    def isStart(self) -> bool:
         """Returns True if this pathElement starts a subpath"""
         assert self.position is not None
         return self.position[1] == 0
 
-    def isTiny(self):
+    def isTiny(self) -> bool:
         """
         Returns True if the start and end points of the spline are within
         two em-units in both dimensions
@@ -594,7 +595,7 @@ class pathElement:
         d = (self.e - self.s).abs()
         return d.x < 2 and d.y < 2
 
-    def isShort(self):
+    def isShort(self) -> bool:
         """
         Returns True if the start and end points of the spline are within
         about six em-units
@@ -603,7 +604,7 @@ class pathElement:
         mx, mn = sorted(tuple(d))
         return mx + mn * .336 < 6  # head.c IsShort
 
-    def convertToLine(self):
+    def convertToLine(self) -> None:
         """
         If the pathElement is not already a line, make it one with the same
         start and end points
@@ -782,7 +783,7 @@ class pathElement:
             return True
         return False
 
-    def splitAt(self, t):
+    def splitAt(self, t: Number) -> Self:
         if self.is_line:
             pb = self.s + (self.e - self.s) * t
             ret = pathElement(pb, self.e, position=self.position,
@@ -804,14 +805,19 @@ class pathElement:
             self.bounds = None
             return ret
 
-    def atT(self, t):
+    def atT(self, t: Number) -> pt:
         return pt(segmentPointAtT(self.fonttoolsSegment(), t))
 
-    def fonttoolsSegment(self):
+    def fonttoolsSegment(self) -> List[Tuple[Number, Number]]:
         if self.is_line:
-            return [tuple(self.s), tuple(self.e)]
+            return [(self.s[0], self.s[1]),
+                    (self.e[0], self.e[1])]
         else:
-            return [tuple(self.s), tuple(self.cs), tuple(self.ce), tuple(self.e)]
+            return [
+                (self.s[0], self.s[1]),
+                (self.cs[0], self.cs[1]),
+                (self.ce[0], self.ce[1]),
+                (self.e[0], self.e[1])]
 
 
 class glyphData(BasePen):
@@ -1023,7 +1029,7 @@ class glyphData(BasePen):
             self.boundsMap[subpath] = b
             return b
 
-    def T2(self, version=1):
+    def T2(self, version=1) -> List[Any]:
         """Returns an array of T2 operators corresponding to the object"""
         prog = []
 
