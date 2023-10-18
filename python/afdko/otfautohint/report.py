@@ -8,6 +8,9 @@
 import logging
 import time
 from collections import defaultdict
+from typing import Dict
+
+from . import Number
 
 log = logging.getLogger(__name__)
 

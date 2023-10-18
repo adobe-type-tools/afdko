@@ -16,7 +16,8 @@ from typing import Any, Dict, Iterable, List, NamedTuple, Tuple, Type, TypeVar, 
 
 from fontTools.misc.bezierTools import solveCubic
 
-from .glyphData import Number, pathElement, pt, feq, fne, stem, glyphData
+from . import Number
+from .glyphData import pathElement, pt, feq, fne, stem, glyphData
 from .hintstate import (hintSegment, stemValue, glyphHintState, links,
                         instanceStemState)
 from .overlap import removeOverlap
@@ -148,11 +149,7 @@ class dimensionHinter(ABC):
         self.report = None
         self.name = None
         self.isMulti = False
-<<<<<<< HEAD
-        self.hs : Optional[glyphHintState] = None
-=======
         self.hs: glyphHintState = glyphHintState()
->>>>>>> b7cb160d (More type hints)
         self.fddict: Optional[FDDict] = None
         self.Bonus = None
         self.Pruning = None
@@ -1477,9 +1474,11 @@ class dimensionHinter(ABC):
         if not self.options.report_zones:
             return
         svl = self.hs.stemValues
+        sv = None
         for sv in svl:
             sv.merge = False
         while True:
+            assert sv and sv.best
             try:
                 _, bst = max(((sv.best.compVal(self.SFactor), sv) for sv in svl
                               if not sv.merge))
@@ -1799,6 +1798,7 @@ class dimensionHinter(ABC):
         self.hs.stems = tuple(([] for g in self.gllist))
         if self.options.removeConflicts:
             wl = self.hs.weights = []
+        assert self.hs.stems
         dsl = self.hs.stems[0]
         if self.hs.counterHinted:
             self.hs.stemValues = sorted(self.hs.mainValues)
@@ -2008,6 +2008,7 @@ class dimensionHinter(ABC):
                          for x in range(l) if curSet[sidx])), curSet)
         else:
             pinSet[doIdx] = True
+            assert doConflictSet
             for sidx in doConflictSet:
                 curSet[sidx] = False
             r1 = self.unconflict(sc, curSet, pinSet)
@@ -2096,7 +2097,7 @@ class dimensionHinter(ABC):
         # they're not checked in the optimal order it's better to go through
         # them again to remove conflicts
         self.hs.mainMask = mm = [False] * l
-        okl = []
+        okl: List[stemValue] = []
         mv = self.hs.mainValues.copy()
         while mv:
             ok = True
@@ -2203,15 +2204,9 @@ class dimensionHinter(ABC):
 class hhinter(dimensionHinter):
     def __init__(self, options) -> None:
         super().__init__(options)
-<<<<<<< HEAD
-        self.topPairs = []
-        self.bottomPairs = []
-    
-=======
         self.topPairs: List[BlueValue] = []
         self.bottomPairs: List[BlueValue] = []
 
->>>>>>> b7cb160d (More type hints)
     def startFlex(self) -> None:
         """Make pt.a map to x and pt.b map to y"""
         set_log_parameters(dimension='-')
@@ -2560,6 +2555,7 @@ class glyphHinter:
         # If keepHints was true hhs.stems was already set to glyph.hstems in
         # converttoMasks()
         stems[0] = glyph.hstems = glyph.hhs.stems[0]
+        assert stems[0]
         lnstm[0] = len(stems[0])
         if self.hHinter.keepHints:
             if glyph.startmasks and glyph.startmasks[0]:

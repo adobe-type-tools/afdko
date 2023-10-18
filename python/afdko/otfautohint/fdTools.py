@@ -15,7 +15,7 @@ import sys
 import os
 from typing import Optional, Tuple, List, Dict
 
-from .glyphData import Number
+from . import Number
 
 
 log = logging.getLogger(__name__)

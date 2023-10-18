@@ -26,12 +26,10 @@ from fontTools.pens.basePen import BasePen
 
 import logging
 
-from .hintstate import glyphHintState
+# from .hintstate import glyphHintState
+from . import Number
 
 log = logging.getLogger(__name__)
-
-Number = Union[int, float]
-
 
 def norm_float(value: float) -> Number:
     """Converts a float (whose decimal part is zero) to integer"""
@@ -831,8 +829,8 @@ class glyphData(BasePen):
         self.pathEdited = False
         self.boundsMap = {}
 
-        self.hhs: Optional[glyphHintState] = None
-        self.vhs: Optional[glyphHintState] = None
+        self.hhs: Optional[object] = None
+        self.vhs: Optional[object] = None
 
     # pen methods:
 

@@ -10,7 +10,8 @@ import bisect
 from enum import IntEnum
 
 
-from .glyphData import Number, feq, pathElement, stem
+from . import Number
+from .glyphData import feq, pathElement, stem
 from _weakref import ReferenceType
 from typing import Any, Dict, List, Optional, Set, Tuple, Type, Self, Protocol
 
@@ -227,7 +228,7 @@ class pathElementHintState:
         self.s_segs: List[hintSegment] = []
         self.m_segs: List[hintSegment] = []
         self.e_segs: List[hintSegment] = []
-        self.mask = []
+        self.mask: List[bool] = []
 
     def cleanup(self) -> None:
         """Updates and deletes segments according to deleted and replacedBy"""
@@ -624,7 +625,9 @@ class links:
             self.links[lsubp][usubp] = 1
             self.links[usubp][lsubp] = 1
 
-    def moveIdx(self, suborder, subidxs: List[int], outlinks, idx: int) -> None:
+    def moveIdx(
+        self, suborder: List[int], subidxs: List[int], outlinks, idx: int
+    ) -> None:
         """
         Move value idx from subidxs to the end of suborder and update
         outlinks to record all links shared with idx
@@ -648,7 +651,7 @@ class links:
         self.logLinks()
         self.logShort(sumlinks, "Sumlinks")
         subidxs = list(range(self.cnt))
-        suborder = []
+        suborder: List[int] = []
         while subidxs:
             # negate s to preserve all-links-equal subpath ordering
             _, bst = max(((sumlinks[s], -s) for s in subidxs))
