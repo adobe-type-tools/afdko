@@ -505,7 +505,7 @@ def mergeFDDicts(prevDictList):
             if dList is not None:
                 for width in dList:
                     stemDict[width] = prefDDict.DictName
-
+    assert prefDDict
     # Now we have collected all the stem widths and zones
     # from all the dicts. See if we can merge them.
     goodBlueZoneList = []
@@ -736,6 +736,7 @@ class FDDictManager:
                 log.error("Cannot continue")
                 sys.exit()
 
+        assert self.fdSelectMap
         if options.printFDDictList or options.printAllFDDict:
             # Print the user defined FontDicts, and exit.
             print("Private Dictionaries:\n")
