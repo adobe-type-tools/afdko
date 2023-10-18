@@ -13,6 +13,9 @@ import re
 import numbers
 import sys
 import os
+from typing import Optional, Tuple, List, Dict
+
+from .glyphData import Number
 
 
 log = logging.getLogger(__name__)
@@ -110,11 +113,24 @@ kFontInfoKeys = (kOtherFDDictKeys +
                  ["StemSnapH", "StemSnapV"])
 
 
+BlueValue = Tuple[int, int, str, str, int]
+BlueZoneDict = Dict[Tuple[int, int], Tuple[int, str, str]]
+
+
 class FontInfoParseError(ValueError):
     pass
 
 
 class FDDict:
+    BlueValuesPairs: List[BlueValue]
+    OtherBlueValuesPairs: List[BlueValue]
+    BlueFuzz: int
+    DominantH: int
+    DominantV: int
+    BaselineOvershoot: Number
+    BaselineYCoord: Number
+    FamilyBaselineYCoord: Number
+
     def __init__(self, fdIndex, dictName=None, fontName=None):
         self.fdIndex = fdIndex
         for key in kFDDictKeys:
@@ -313,6 +329,7 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
     maxfdIndex = max(fdArrayMap.keys())
     dictValueList = []
     dictKeyWord = ''
+    fdDict: Optional[FDDict] = None
 
     state = baseState
 
@@ -377,6 +394,7 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
         elif state == inDictValue:
             if token[-1] in ["]", ")"]:
                 dictValueList.append(token[:-1])
+                assert fdDict is not None
                 fdDict.setInfo(dictKeyWord, dictValueList)
                 state = dictState  # found the last token in the list value.
             else:
@@ -415,6 +433,7 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
                 dictName = None
                 fdDict = None
             else:
+                assert fdDict is not None
                 if token in kFDDictKeys:
                     value = tokenList[i]
                     i += 1
@@ -477,8 +496,8 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
 def mergeFDDicts(prevDictList):
     # Extract the union of the stem widths and zones from the list
     # of FDDicts, and replace the current values in the topDict.
-    blueZoneDict = {}
-    otherBlueZoneDict = {}
+    blueZoneDict: BlueZoneDict = {}
+    otherBlueZoneDict: BlueZoneDict = {}
     dominantHDict = {}
     dominantVDict = {}
     bluePairListNames = [kFontDictBluePairsName, kFontDictOtherBluePairsName]
@@ -525,10 +544,9 @@ def mergeFDDicts(prevDictList):
         goodStemList = goodStemLists[ki]
 
         # Zones first.
-        zoneList = zoneDict.keys()
+        zoneList = sorted(zoneDict.keys())
         if not zoneList:
             continue
-        zoneList = sorted(zoneList)
         # Now check for conflicts.
         prevZone = zoneList[0]
         goodZoneList.append(prevZone[1])
@@ -558,10 +576,9 @@ def mergeFDDicts(prevDictList):
 
             prevZone = zone
 
-        stemList = stemDict.keys()
+        stemList = sorted(stemDict.keys())
         if not stemList:
             continue
-        stemList = sorted(stemList)
         # Now check for conflicts.
         prevStem = stemList[0]
         goodStemList.append(prevStem)

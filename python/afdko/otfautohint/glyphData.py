@@ -26,6 +26,8 @@ from fontTools.pens.basePen import BasePen
 
 import logging
 
+from .hintstate import glyphHintState
+
 log = logging.getLogger(__name__)
 
 Number = Union[int, float]
@@ -829,7 +831,8 @@ class glyphData(BasePen):
         self.pathEdited = False
         self.boundsMap = {}
 
-        self.hhs = self.vhs = None
+        self.hhs: Optional[glyphHintState] = None
+        self.vhs: Optional[glyphHintState] = None
 
     # pen methods:
 

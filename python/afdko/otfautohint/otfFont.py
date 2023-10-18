@@ -18,6 +18,7 @@ from fontTools.varLib.cff import CFF2CharStringMergePen, MergeOutlineExtractor
 # CFF.desubroutinize: the module adds this class method to the CFF and CFF2
 # classes.
 import fontTools.subset.cff
+from typing import List, Dict
 
 from . import fdTools, FontParseError
 from .glyphData import glyphData
@@ -221,7 +222,7 @@ class CFFFontData:
         self.font_format = font_format
         self.is_cff2 = False
         self.is_vf = False
-        self.vs_data_models = None
+        self.vs_data_models: List[VarDataModel] = []
         self.desc = None
         if font_format == "OTF":
             # It is an OTF font, we can process it directly.
@@ -695,7 +696,7 @@ def merge_hinted_programs(charstring, t2_programs, gname, vs_data_model):
 
 
 @_add_method(VarStoreInstancer)
-def get_scalars(self, vsindex, region_idx):
+def get_scalars(self, vsindex, region_idx) -> Dict[int, float]:
     varData = self._varData
     # The index key needs to be the master value index, which includes
     # the default font value. VarRegionIndex provides the region indices.
@@ -714,7 +715,9 @@ class VarDataModel(object):
         self.var_data = var_data
         self.master_vsi_list = master_vsi_list
         self._num_masters = len(master_vsi_list)
-        self.delta_weights = [{}]  # for default font value
+
+        # for default font value
+        self.delta_weights: List[Dict[int, float]] = [{}]
         for region_idx, vsi in enumerate(master_vsi_list[1:]):
             scalars = vsi.get_scalars(vsindex, region_idx)
             self.delta_weights.append(scalars)
@@ -723,9 +726,9 @@ class VarDataModel(object):
     def num_masters(self):
         return self._num_masters
 
-    def getDeltas(self, master_values, *, round=noRound):
+    def getDeltas(self, master_values, *, round=noRound) -> List[float]:
         assert len(master_values) == len(self.delta_weights)
-        out = []
+        out: List[float] = []
         for i, scalars in enumerate(self.delta_weights):
             delta = master_values[i]
             for j, scalar in scalars.items():

@@ -16,12 +16,12 @@ from typing import Any, Dict, Iterable, List, NamedTuple, Tuple, Type, TypeVar, 
 
 from fontTools.misc.bezierTools import solveCubic
 
-from .glyphData import Number, pathElement, pt, feq, fne, stem
+from .glyphData import Number, pathElement, pt, feq, fne, stem, glyphData
 from .hintstate import (hintSegment, stemValue, glyphHintState, links,
                         instanceStemState)
 from .overlap import removeOverlap
 from .report import GlyphReport
-from .fdTools import FDDict
+from .fdTools import BlueValue, FDDict
 from .logging import logging_reconfig, set_log_parameters
 
 
@@ -143,17 +143,28 @@ class dimensionHinter(ABC):
         self.options = options
 
         self.fddicts: List[FDDict] = []
-        self.gllist = None
-        self.glyph = None
+        self.gllist: List[glyphData] = []
+        self.glyph: glyphData = glyphData(False)
         self.report = None
         self.name = None
         self.isMulti = False
+<<<<<<< HEAD
         self.hs : Optional[glyphHintState] = None
+=======
+        self.hs: glyphHintState = glyphHintState()
+>>>>>>> b7cb160d (More type hints)
         self.fddict: Optional[FDDict] = None
         self.Bonus = None
         self.Pruning = None
 
-    def setGlyph(self, fddicts, report, gllist, name, clearPrev=True) -> None:
+    def setGlyph(
+        self,
+        fddicts: List[FDDict],
+        report: GlyphReport,
+        gllist: List[glyphData],
+        name: str,
+        clearPrev=True,
+    ) -> None:
         """Initialize the state for processing a specific glyph"""
         self.fddicts = fddicts
         self.report = report
@@ -1599,7 +1610,7 @@ class dimensionHinter(ABC):
         mainValues = []
         rejectValues = []
         svl = copy(self.hs.stemValues)
-        prevBV = 0
+        prevBV: Number = 0
         while True:
             try:
                 _, best = max(((sv.compVal(self.SpcBonus), sv) for sv in svl
@@ -1831,6 +1842,7 @@ class dimensionHinter(ABC):
         numStems = len(hs0.stems[0])
         if numStems == 0:
             return
+        assert self.fddict
         set_log_parameters(instance=self.fddict.FontName)
         if self.isV():
             self.hs = self.glyph.vhs = glyphHintState()
@@ -1944,8 +1956,9 @@ class dimensionHinter(ABC):
         set_log_parameters(instance=self.fddict.FontName)
         self.hs = hs0
 
-    def bestLocation(self, sidx, ul, iSSl, hs0) -> Any:
+    def bestLocation(self, sidx, ul, iSSl, hs0: glyphHintState) -> Any:
         loc = iSSl[sidx][ul].bestLocation(ul == 0)
+        assert self.hs
         if loc is not None:
             return loc
         for sv in hs0.stemValues:
@@ -2190,9 +2203,15 @@ class dimensionHinter(ABC):
 class hhinter(dimensionHinter):
     def __init__(self, options) -> None:
         super().__init__(options)
+<<<<<<< HEAD
         self.topPairs = []
         self.bottomPairs = []
     
+=======
+        self.topPairs: List[BlueValue] = []
+        self.bottomPairs: List[BlueValue] = []
+
+>>>>>>> b7cb160d (More type hints)
     def startFlex(self) -> None:
         """Make pt.a map to x and pt.b map to y"""
         set_log_parameters(dimension='-')
@@ -2218,6 +2237,7 @@ class hhinter(dimensionHinter):
     stopHint = stopStemConvert = stopMaskConvert = stopFlex
 
     def dominantStems(self) -> Any:
+        assert self.fddict
         return self.fddict.DominantH  # pytype: disable=attribute-error
 
     def isV(self) -> bool:

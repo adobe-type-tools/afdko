@@ -80,7 +80,7 @@ class hintSegment:
             self.pe = weakref.ref(pe)
         else:
             self.pe = None
-        self.hintval = None
+        self.hintval: Optional[stemValue] = None
         self.replacedBy: Optional[Self] = None
         self.deleted = False
         self.suppressed = False
