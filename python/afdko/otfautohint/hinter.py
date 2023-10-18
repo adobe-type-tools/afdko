@@ -146,12 +146,12 @@ class dimensionHinter(ABC):
         self.fddicts: List[FDDict] = []
         self.gllist: List[glyphData] = []
         self.glyph: glyphData = glyphData(False)
-        self.report = None
+        self.report: Optional[GlyphReport] = None
         self.name = ""
         self.isMulti = False
         self.hs: glyphHintState = glyphHintState()
         self.fddict: Optional[FDDict] = None
-        self.Bonus = None
+        self.Bonus: int = 0
         self.Pruning = False
 
     def setGlyph(
@@ -171,7 +171,7 @@ class dimensionHinter(ABC):
         self.isMulti = (len(gllist) > 1)
         self.name = name
         self.HasFlex = False
-        self.Bonus = None
+        self.Bonus = 0
         self.Pruning = True
         if self.isV():
             self.hs = self.glyph.vhs = glyphHintState()
@@ -180,7 +180,7 @@ class dimensionHinter(ABC):
 
     def resetForHinting(self) -> None:
         """Reset state for rehinting same glyph"""
-        self.Bonus = None
+        self.Bonus = 0
         self.Pruning = True
         if self.isV():
             self.hs = self.glyph.vhs = glyphHintState()
@@ -686,7 +686,9 @@ class dimensionHinter(ABC):
             return False
         return not self.testBend(p0, p1, p2)
 
-    def extremaSegment(self, pe, extp, extt, isMn) -> Tuple[Any, Any]:
+    def extremaSegment(
+        self, pe: pathElement, extp: pt, extt, isMn: bool
+    ) -> Tuple[Any, Any]:
         """
         Given a curved pathElement pe and a point on that spline extp at
         t == extt, calculates a segment intersecting extp where all portions
@@ -1176,6 +1178,7 @@ class dimensionHinter(ABC):
                  (self.aDesc(),
                   "curve" if (ls.isCurve() or us.isCurve()) else "linear",
                   loc_d, nearStem, ls.loc, us.loc))
+        return None
 
     def addStemValue(self, lloc, uloc, val, spc, lseg, useg) -> None:
         """Adapts the stem parameters into a stemValue object and adds it"""
@@ -1480,7 +1483,8 @@ class dimensionHinter(ABC):
             sv.merge = False
         while True:
             try:
-                _, bst = max(((sv.best.compVal(self.SFactor), sv) for sv in svl
+                _, bst = max(((sv.best.compVal(self.SFactor), sv)  # type: ignore
+                              for sv in svl
                               if not sv.merge))
             except ValueError:
                 break
@@ -1608,8 +1612,8 @@ class dimensionHinter(ABC):
 
     def mainVals(self) -> None:
         """Picks set of highest-valued non-overlapping stems"""
-        mainValues = []
-        rejectValues = []
+        mainValues: List[stemValue] = []
+        rejectValues: List[stemValue] = []
         svl = copy(self.hs.stemValues)
         prevBV: Number = 0
         while True:
@@ -1684,7 +1688,7 @@ class dimensionHinter(ABC):
         minloc = midloc = maxloc = 1e40
         mindelta: Number = 0
         middelta: Number = 0
-        maxdelta: Number  = 0
+        maxdelta: Number = 0
         hvl = self.hs.mainValues
         hvll = len(hvl)
         if hvll < 3:
@@ -1727,19 +1731,19 @@ class dimensionHinter(ABC):
         top/bottom or right/left of each subpath
         """
         gl = self.glyph
+        paraml: Iterable = [None]
         if doSubpaths:
             paraml = range(len(gl.subpaths))
             ltype = hintSegment.sType.LSBBOX
             utype = hintSegment.sType.USBBOX
         else:
-            paraml = [None]
             ltype = hintSegment.sType.LGBBOX
             utype = hintSegment.sType.UGBBOX
         for param in paraml:
             pbs = gl.getBounds(param)
             if pbs is None:
                 continue
-            mn_pt, mx_pt = pt(tuple(pbs.bounds[0])), pt(tuple(pbs.bounds[1]))
+            mn_pt, mx_pt = pt(*pbs.bounds[0]), pt(*pbs.bounds[1])
             peidx = 0 if self.isV() else 1
             if any((hv.lloc <= mx_pt.o and mn_pt.o <= hv.uloc
                     for hv in self.hs.mainValues)):
@@ -1794,15 +1798,15 @@ class dimensionHinter(ABC):
                 self.hs.stems = tuple((g.hstems if g.hstems else []
                                        for g in self.gllist))
                 l = self.hs.stems[0]
-            self.stopStemConvert()
-            return all((len(sl) == l for sl in self.hs.stems))
+                self.stopStemConvert()
+                return all((len(sl) == l for sl in self.hs.stems))
 
         # Build up the default stem list
-        valuepairmap = {}
+        valuepairmap: Dict[Tuple[Number, Number], int] = {}
         self.hs.stems = tuple(([] for g in self.gllist))
         if self.options.removeConflicts:
             self.hs.weights = []
-            wl =  self.hs.weights
+            wl = self.hs.weights
         assert self.hs.stems
         dsl = self.hs.stems[0]
         if self.hs.counterHinted:
@@ -1899,8 +1903,8 @@ class dimensionHinter(ABC):
                             raise NotImplementedError
                             pbs = self.glyph.getBounds(peSi.position[0])
                         if pbs is not None:
-                            mn_pt = pt(tuple(pbs.bounds[0]))
-                            mx_pt = pt(tuple(pbs.bounds[1]))
+                            mn_pt = pt(*pbs.bounds[0])
+                            mx_pt = pt(*pbs.bounds[1])
                             score = mx_pt.a - mn_pt.a
                             loc = mx_pt.o if seg0.isUBBox() else mn_pt.o
                             iSS.addToLoc(loc, score, strong=True, bb=True)
@@ -1954,6 +1958,7 @@ class dimensionHinter(ABC):
                     lo = hi + 50
                     log.warning("Stem end is less than start for non-"
                                 "ghost stem, will be removed from set")
+            assert lo is not None and hi is not None
             sl.append(stem((lo, hi)))
 
         self.fddict = self.fddicts[0]
@@ -1977,6 +1982,7 @@ class dimensionHinter(ABC):
                     return loc
         log.warning("No data for %s location of stem %d" %
                     ('lower' if ul == 0 else 'upper', sidx))
+        assert hs0.stems is not None
         return hs0.stems[0][sidx][ul]
 
     def unconflict(self, sc, curSet=None, pinSet=None) -> Any:
@@ -2094,8 +2100,9 @@ class dimensionHinter(ABC):
                     continue
                 if all(sl[sidx].ghostCompat(sl[sjdx]) for sl in self.hs.stems):
                     assert so[sidx][sjdx]
-                    assert gc[sidx] is not None
-                    gc[sidx][sjdx] = True  # pytype: disable=unsupported-operands
+                    target = gc[sidx]
+                    assert target is not None
+                    target[sjdx] = True  # pytype: disable=unsupported-operands
 
         # The stems corresponding to mainValues may conflict now. This isn't
         # a fatal problem because mainMask stems are only added if they don't
@@ -2109,8 +2116,9 @@ class dimensionHinter(ABC):
             ok = True
             c = mv.pop(0)
             assert c.idx is not None
-            for s in okl:
-                if so[c.idx][s.idx]:
+            for sv in okl:
+                assert sv.idx is not None
+                if so[c.idx][sv.idx]:
                     ok = False
                     break
             if ok and self.hs.goodMask[c.idx]:

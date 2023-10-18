@@ -529,6 +529,11 @@ class pathElement:
     assocMatchFactor = 93
     tSlop = .005
 
+    s: pt
+    e: pt
+    cs: pt
+    ce: pt
+
     def __init__(self, *args, is_close=False, masks=None, flex=False,
                  position=None):
         self.is_line = False
@@ -635,7 +640,12 @@ class pathElement:
         elif not doVert and self.masks is not None:
             self.masks = [None, self.masks[1]] if self.masks[1] else None
 
-    def cubicParameters(self):
+    def cubicParameters(self) -> Tuple[
+        Tuple[float, float],
+        Tuple[float, float],
+        Tuple[float, float],
+        Tuple[float, float],
+    ]:
         """Returns the fontTools cubic parameters for this pathElement"""
         return calcCubicParameters(self.s, self.cs, self.ce, self.e)
 

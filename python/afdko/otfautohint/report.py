@@ -8,7 +8,7 @@
 import logging
 import time
 from collections import defaultdict
-from typing import Dict
+from typing import Dict, Tuple
 
 from . import Number
 
@@ -19,21 +19,21 @@ class GlyphReport:
     """Class to store stem and zone data from a particular glyph"""
     def __init__(self, name: str="", all_stems=False):
         self.name = name
-        self.hstems = {}
-        self.vstems = {}
-        self.hstems_pos = set()
-        self.vstems_pos = set()
-        self.char_zones = set()
-        self.stem_zone_stems = set()
+        self.hstems: Dict[float,int] = {}
+        self.vstems: Dict[float,int] = {}
+        self.hstems_pos: set[Tuple[Number,Number]] = set()
+        self.vstems_pos: set[Tuple[Number,Number]] = set()
+        self.char_zones: set[Tuple[Number,Number]] = set()
+        self.stem_zone_stems: set[Tuple[Number, Number]] = set()
         self.all_stems = all_stems
 
-    def charZone(self, l, u):
+    def charZone(self, l: Number, u: Number):
         self.char_zones.add((l, u))
 
-    def stemZone(self, l, u):
+    def stemZone(self, l: Number, u: Number):
         self.stem_zone_stems.add((l, u))
 
-    def stem(self, l, u, isLine: bool, isV=False):
+    def stem(self, l: Number, u: Number, isLine: bool, isV=False):
         if not isLine and not self.all_stems:
             return
         if isV:

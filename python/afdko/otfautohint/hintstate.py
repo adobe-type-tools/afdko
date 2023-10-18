@@ -13,7 +13,7 @@ from enum import IntEnum
 from . import Number
 from .glyphData import feq, pathElement, stem
 from _weakref import ReferenceType
-from typing import Any, Dict, List, Optional, Set, Tuple, Type, Self, Protocol
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Type, Self, Protocol
 
 
 log: logging.Logger = logging.getLogger(__name__)
@@ -294,7 +294,7 @@ class glyphHintState:
         self.mainValues: List[stemValue] = []
         self.rejectValues: List[stemValue] = []
         self.counterHinted = False
-        self.stems: Optional[List[stem]] = None  # in sorted glyphData format
+        self.stems: Optional[Sequence[List[stem]]] = None  # in sorted glyphData format
         self.weights: List[float] = []
         self.keepHints = None
         self.hasOverlaps: bool = False
