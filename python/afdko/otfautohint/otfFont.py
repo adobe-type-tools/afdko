@@ -18,7 +18,7 @@ from fontTools.varLib.cff import CFF2CharStringMergePen, MergeOutlineExtractor
 # CFF.desubroutinize: the module adds this class method to the CFF and CFF2
 # classes.
 import fontTools.subset.cff
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from . import fdTools, FontParseError
 from .glyphData import glyphData
@@ -222,7 +222,7 @@ class CFFFontData:
         self.font_format = font_format
         self.is_cff2 = False
         self.is_vf = False
-        self.vs_data_models: List[VarDataModel] = []
+        self.vs_data_models: Optional[List[VarDataModel]] = None
         self.desc = None
         if font_format == "OTF":
             # It is an OTF font, we can process it directly.
