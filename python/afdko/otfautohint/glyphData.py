@@ -237,14 +237,14 @@ class pt:
         Returns a new pt object with this object's coordinates multiplied by
         a scalar value
         """
-        if not isinstance(other, numbers.Number):
+        if not isinstance(other, (int, float)):
             raise TypeError('One argument to pt.__mul__ must be a scalar ' +
                             'number')
         return pt(self[0] * other, self[1] * other)
 
     def __rmul__(self, other):
         """Same as __mul__ for right-multiplication"""
-        if not isinstance(other, numbers.Number):
+        if not isinstance(other, (int, float)):
             raise TypeError('One argument to pt.__rmul__ must be a scalar ' +
                             'number')
         return pt(self[0] * other, self[1] * other)
