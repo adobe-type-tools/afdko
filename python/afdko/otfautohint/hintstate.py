@@ -165,7 +165,7 @@ class stemValue:
         self.merge = False
         self.lseg = lseg
         self.useg = useg
-        self.best = None
+        self.best: Optional[stemValue] = None
         self.initialVal = val
         self.idx: Optional[int] = None
 

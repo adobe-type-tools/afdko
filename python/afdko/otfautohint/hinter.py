@@ -247,7 +247,7 @@ class dimensionHinter(ABC):
         pass
 
     @abstractmethod
-    def segmentLists(self):
+    def segmentLists(self) -> Tuple[List[hintSegment], List[hintSegment]]:
         pass
 
     @abstractmethod
@@ -1307,7 +1307,7 @@ class dimensionHinter(ABC):
                         break
         self.hs.stemValues = [sv for sv in self.hs.stemValues if not sv.pruned]
 
-    def closeSegs(self, s1, s2) -> bool:
+    def closeSegs(self, s1: hintSegment, s2: hintSegment) -> bool:
         """
         Returns true if the segments (and the path between them)
         are within CloseMerge of one another
@@ -1325,6 +1325,7 @@ class dimensionHinter(ABC):
         loca -= self.CloseMerge
         locb += self.CloseMerge
         n = s1.pe()
+        assert n is not None
         p = self.glyph.prevInSubpath(n)
         pe2 = s2.pe()
         ngood = pgood = True
@@ -1484,6 +1485,7 @@ class dimensionHinter(ABC):
             except ValueError:
                 break
             bst.merge = True
+            assert bst.best is not None
             for sv in svl:
                 replace = False
                 if sv.merge or bst.isGhost != sv.isGhost:
@@ -1968,6 +1970,7 @@ class dimensionHinter(ABC):
             if sv.idx != sidx:
                 continue
             seg = sv.useg if ul == 1 else sv.lseg
+            assert seg.hintval is not None
             if seg.hintval.idx != sidx:
                 loc = iSSl[seg.hintval.idx][ul].bestLocation(ul == 0)
                 if loc is not None:
@@ -2558,7 +2561,7 @@ class glyphHinter:
         # If keepHints was true hhs.stems was already set to glyph.hstems in
         # converttoMasks()
         stems[0] = glyph.hstems = glyph.hhs.stems[0]
-        assert stems[0]
+        assert stems[0] is not None
         lnstm[0] = len(stems[0])
         if self.hHinter.keepHints:
             if glyph.startmasks and glyph.startmasks[0]:

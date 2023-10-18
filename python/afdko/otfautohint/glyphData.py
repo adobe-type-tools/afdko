@@ -272,7 +272,7 @@ class stem(tuple):
     BandMargin = 30
     __slots__ = ()
 
-    def __new__(cls, lb=0, rt=0):
+    def __new__(cls, lb: Number = 0, rt: Number = 0):
         if isinstance(lb, tuple):
             return _tuple.__new__(cls, lb)
         return _tuple.__new__(cls, (lb, rt))
