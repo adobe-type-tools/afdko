@@ -24,14 +24,6 @@ class GlyphReport:
         self.stem_zone_stems = set()
         self.all_stems = all_stems
 
-    def clear(self):
-        self.hstems.clear()
-        self.vstems.clear()
-        self.hstems_pos.clear()
-        self.vstems_pos.clear()
-        self.char_zones.clear()
-        self.stem_zone_stems.clear()
-
     def charZone(self, l, u):
         self.char_zones.add((l, u))
 
