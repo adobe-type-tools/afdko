@@ -11,11 +11,17 @@ from copy import deepcopy
 from math import sqrt
 from collections import defaultdict
 from builtins import tuple as _tuple
-from fontTools.misc.bezierTools import (solveQuadratic, solveCubic,
-                                        calcCubicParameters,
-                                        splitCubicAtT, segmentPointAtT,
-                                        approximateCubicArcLength)
 from typing import Optional, Tuple, Union
+
+# pytype: disable=import-error
+from fontTools.misc.bezierTools import (
+    solveQuadratic,
+    solveCubic,
+    calcCubicParameters,
+    splitCubicAtT,
+    segmentPointAtT,
+    approximateCubicArcLength,
+)
 from fontTools.pens.basePen import BasePen
 
 import logging
@@ -548,7 +554,7 @@ class pathElement:
         self.masks = masks
         self.flex = flex
         self.bounds = None
-        self.position = position
+        self.position: Tuple[int, int] = position or (-1, -1)
         self.segment_sub = None
 
     def getBounds(self):
@@ -572,6 +578,7 @@ class pathElement:
 
     def isStart(self):
         """Returns True if this pathElement starts a subpath"""
+        assert self.position is not None
         return self.position[1] == 0
 
     def isTiny(self):
@@ -1415,7 +1422,7 @@ class glyphData(BasePen):
         for i in range(len(data) // 2):
             low = high + data[i * 2]
             high = low + data[i * 2 + 1]
-            sl.append(stem(low, high))
+            sl.append(stem(low, high))  # pytype: disable=wrong-arg-count
         return sl
 
     def fromStems(self, stems):

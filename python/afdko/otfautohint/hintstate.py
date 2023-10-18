@@ -274,25 +274,26 @@ class glyphHintState:
                  for m (n has the same location on the relevant side)
     mainMask: glyphData hintmask-like representation of mainValues
     """
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.peStates = {}
         self.overlapRemoved = None
-        self.increasingSegs = []
-        self.decreasingSegs = []
-        self.stemValues = []
-        self.mainValues = None
-        self.rejectValues = None
+        self.increasingSegs: List[hintSegment] = []
+        self.decreasingSegs: List[hintSegment] = []
+        self.stemValues: List[stemValue] = []
+        self.mainValues: List[stemValue] = []
+        self.rejectValues: List[stemValue] = []
         self.counterHinted = False
-        self.stems = None  # in sorted glyphData format
+        self.stems: Optional[List[stem]] = None  # in sorted glyphData format
         self.weights = None
         self.keepHints = None
-        self.hasOverlaps = None
-        self.stemOverlaps = None
-        self.ghostCompat = None
-        self.goodMask = None
-        self.mainMask = None
+        self.hasOverlaps: bool = False
+        self.stemOverlaps: List[List[bool]] = []
+        self.ghostCompat: List[Optional[List[bool]]] = []
+        self.goodMask: List[bool] = []
+        self.mainMask: List[bool] = []
 
-    def getPEState(self, pe, make=False):
+    def getPEState(self, pe, make=False) -> Optional[pathElementHintState]:
         """
         Returns the pathElementHintState object for pe, allocating the object
         if necessary
@@ -301,18 +302,36 @@ class glyphHintState:
         if s:
             return s
         if make:
-            s = self.peStates[pe] = pathElementHintState()
-            return s
+            return self.getPEStateForced(pe)
         else:
             return None
 
-    def addSegment(self, fr, to, loc, pe1, pe2, typ, bonus, isV, mid1, mid2,
-                   desc):
+    def getPEStateForced(self, pe) -> pathElementHintState:
+        """
+        Returns the pathElementHintState object for pe, allocating the object
+        if necessary
+        """
+        return self.peStates.setdefault(pe, pathElementHintState())
+
+    def addSegment(
+        self,
+        fr,
+        to,
+        loc,
+        pe1: Optional[pathElement],
+        pe2: Optional[pathElement],
+        typ: hintSegment.sType,
+        bonus,
+        isV: bool,
+        mid1,
+        mid2,
+        desc: str,
+    ) -> None:
         """Adds a new segment associated with pathElements pe1 and pe2"""
         if isV:
-            pp = ('v', loc, fr, loc, to, desc)
+            pp = ("v", loc, fr, loc, to, desc)
         else:
-            pp = ('h', fr, loc, to, loc, desc)
+            pp = ("h", fr, loc, to, loc, desc)
         log.debug("add %sseg %g %g to %g %g %s" % pp)
         if fr > to:
             mn, mx = to, fr
@@ -323,9 +342,9 @@ class glyphHintState:
             isInc = True
             lst = self.increasingSegs
 
-        assert pe1 or pe2
-        s = hintSegment(loc, mn, mx, pe2 if pe2 else pe1, typ, bonus, isV,
-                        isInc, desc)
+        aSeg = pe2 or pe1
+        assert aSeg
+        s = hintSegment(loc, mn, mx, aSeg, typ, bonus, isV, isInc, desc)
         # Segments derived from the first point in a path c are typically
         # also added to the previous spline p, with p passed as pe1 and c
         # passed as pe2. Segments derived from the last point in a path
@@ -335,14 +354,14 @@ class glyphHintState:
         # from the middle of the spline.
         if pe1:
             if mid1:
-                self.getPEState(pe1, True).m_segs.append(s)
+                self.getPEStateForced(pe1).m_segs.append(s)
             else:
-                self.getPEState(pe1, True).e_segs.append(s)
+                self.getPEStateForced(pe1).e_segs.append(s)
         if pe2:
             if mid2:
-                self.getPEState(pe2, True).m_segs.append(s)
+                self.getPEStateForced(pe2).m_segs.append(s)
             else:
-                self.getPEState(pe2, True).s_segs.append(s)
+                self.getPEStateForced(pe2).s_segs.append(s)
 
         bisect.insort(lst, s)
 
@@ -484,14 +503,16 @@ class instanceStemState:
     State for the process of deciding on the lower and upper locations
     for a particular region stem.
     """
-    def __init__(self, loc, dhinter):
+
+    def __init__(self, loc: float, dhinter: AHinter) -> None:
         self.defaultLoc = loc
         self.dhinter = dhinter
-        self.candDict = {}
-        self.usedSegs = set()
+        self.candDict: Dict[float, stemLocCandidate] = {}
+        self.usedSegs: Set[int] = set()
         self.bb = None
 
-    def addToLoc(self, loc, score, strong=False, bb=False, seg=None):
+    def addToLoc(self, loc: float, score: float, strong=False,
+                 bb=False, seg: Any = None) -> None:
         if self.bb is not None:
             if self.bb != bb:
                 log.info("Mixed bounding-box and "
@@ -509,7 +530,7 @@ class instanceStemState:
             sLC = self.candDict[loc] = stemLocCandidate(loc)
         sLC.addScore(score, strong)
 
-    def bestLocation(self, isBottom):
+    def bestLocation(self, isBottom: bool) -> Any:
         weights = [(x.weight(self.dhinter.inBand(x.loc, isBottom)), x.loc)
                    for x in self.candDict.values()]
         try:
@@ -583,7 +604,10 @@ class links:
         for sv in stemValues:
             if not sv.lseg or not sv.useg or not sv.lseg.pe or not sv.useg.pe:
                 continue
-            lsubp, usubp = sv.lseg.pe().position[0], sv.useg.pe().position[0]
+            lseg_pe = sv.lseg.pe()
+            useg_pe = sv.useg.pe()
+            assert lseg_pe and useg_pe
+            lsubp, usubp = lseg_pe.position[0], useg_pe.position[0]
             if lsubp == usubp:
                 continue
             sv.show(isV, "mark")

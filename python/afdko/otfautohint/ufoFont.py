@@ -566,8 +566,6 @@ class UFOFontData:
                 glyphset = self._reader.getGlyphSet(layer_name)
             except UFOLibError:
                 pass
-            if glyphset is None:
-                raise FontParseError("No glyphset found for layer '%s'" % layer_name)
             self._glyphsets[layer_name] = glyphset
         return self._glyphsets[layer_name]
 

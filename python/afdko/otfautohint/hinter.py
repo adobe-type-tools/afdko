@@ -142,7 +142,7 @@ class dimensionHinter(ABC):
         self.HasFlex = False
         self.options = options
 
-        self.fddicts = None
+        self.fddicts: List[FDDict] = []
         self.gllist = None
         self.glyph = None
         self.report = None
@@ -373,7 +373,7 @@ class dimensionHinter(ABC):
         Top-level method for calculating stem hints for a glyph in one
         dimension
         """
-        assert self.glyph is not None
+        assert self.glyph is not None and self.hs is not None
         self.startHint()
         if self.glyph.hasHints(doVert=self.isV()):
             if force:
@@ -1826,6 +1826,8 @@ class dimensionHinter(ABC):
         self.glyph = self.gllist[glidx]
         self.fddict = self.fddicts[glidx]
         hs0 = self.hs
+        assert hs0 is not None
+        assert hs0.stems is not None
         numStems = len(hs0.stems[0])
         if numStems == 0:
             return
@@ -1912,6 +1914,8 @@ class dimensionHinter(ABC):
                     done[sidx][ul] = True
 
         sl = hs0.stems[glidx]
+        lo = None
+        hi = None
         for sidx, s0 in enumerate(hs0.stems[0]):
             isG = s0.isGhost()
             if isG != 'high':
@@ -2012,6 +2016,8 @@ class dimensionHinter(ABC):
             self.stopMaskConvert()
             return
 
+        assert self.hs
+        assert self.hs.stems
         dsl = self.hs.stems[0]
         l = len(dsl)
         hasConflicts = False
@@ -2036,7 +2042,8 @@ class dimensionHinter(ABC):
                                      if not g]))
 
         self.hs.hasOverlaps = False
-        self.hs.stemOverlaps = so = [[False] * l for _ in range(l)]
+        so: List[List[bool]] = [[False] * l for _ in range(l)]
+        self.hs.stemOverlaps = so
         for sidx in range(l):
             if not self.hs.goodMask[sidx]:
                 continue
@@ -2051,7 +2058,8 @@ class dimensionHinter(ABC):
         if self.hs.counterHinted and self.hs.hasOverlaps and not self.isMulti:
             log.warning("XXX TEMPORARY WARNING: overlapping counter hints")
 
-        self.hs.ghostCompat = gc = [None] * l
+        gc: List[Optional[List[bool]]] = [None] * l
+        self.hs.ghostCompat = gc
 
         # A ghost stem in the default should be a ghost everywhere
         for sidx, s in enumerate(dsl):
@@ -2063,7 +2071,8 @@ class dimensionHinter(ABC):
                     continue
                 if all(sl[sidx].ghostCompat(sl[sjdx]) for sl in self.hs.stems):
                     assert so[sidx][sjdx]
-                    gc[sidx][sjdx] = True
+                    assert gc[sidx] is not None
+                    gc[sidx][sjdx] = True  # pytype: disable=unsupported-operands
 
         # The stems corresponding to mainValues may conflict now. This isn't
         # a fatal problem because mainMask stems are only added if they don't
@@ -2076,6 +2085,7 @@ class dimensionHinter(ABC):
         while mv:
             ok = True
             c = mv.pop(0)
+            assert c.idx is not None
             for s in okl:
                 if so[c.idx][s.idx]:
                     ok = False
@@ -2091,8 +2101,9 @@ class dimensionHinter(ABC):
             self.makePEMask(pestate, pe)
         self.stopMaskConvert()
 
-    def makePEMask(self, pestate, c):
+    def makePEMask(self, pestate, c) -> None:
         """Convert the hints desired by pathElement to a conflict-free mask"""
+        assert self.hs and self.hs.stems
         l = len(self.hs.stems[0])
         mask = [False] * l
         segments = pestate.segments()
@@ -2173,7 +2184,12 @@ class dimensionHinter(ABC):
 
 
 class hhinter(dimensionHinter):
-    def startFlex(self):
+    def __init__(self, options) -> None:
+        super().__init__(options)
+        self.topPairs = []
+        self.bottomPairs = []
+    
+    def startFlex(self) -> None:
         """Make pt.a map to x and pt.b map to y"""
         set_log_parameters(dimension='-')
         pt.setAlign(False)
@@ -2340,13 +2356,13 @@ class glyphHinter:
         self.MaxHalfMargin = 20  # XXX 10 might better match original C code
         self.PromotionDistance = 50
 
-    def getSegments(self, glyph, pe, oppo=False):
+    def getSegments(self, glyph, pe, oppo=False) -> Any:
         """Returns the list of segments for pe in the requested dimension"""
         gstate = glyph.vhs if (self.doV == (not oppo)) else glyph.hhs
         pestate = gstate.getPEState(pe)
         return pestate.segments() if pestate else []
 
-    def getMasks(self, glyph, pe):
+    def getMasks(self, glyph, pe) -> list:
         """
         Returns the masks of hints needed by/desired for pe in each dimension
         """
@@ -2367,7 +2383,7 @@ class glyphHinter:
             masks.append(mask)
         return masks
 
-    def _hint(self, name, glyphTuple, fdKey):
+    def _hint(self, name: str, glyphTuple, fdKey) -> Tuple[str, Optional[Union[GlyphReport, Any]]]:
         """Top-level flex and stem hinting method for a glyph"""
         if isinstance(fdKey, tuple):
             assert len(fdKey) == 2
@@ -2503,7 +2519,7 @@ class glyphHinter:
                     return False
         return True
 
-    def distributeMasks(self, glyph):
+    def distributeMasks(self, glyph) -> Optional[list]:
         """
         When necessary, chose the locations and contents of hintmasks for
         the glyph
@@ -2636,7 +2652,7 @@ class glyphHinter:
             cntr = []
         glyph.cntr = cntr
 
-    def joinMasks(self, m, cm, log):
+    def joinMasks(self, m, cm, log) -> Tuple[list, bool]:
         """
         Try to add the stems in cm to m, or start a new mask if there are
         conflicts.
@@ -2715,7 +2731,8 @@ class glyphHinter:
                     _, ms = min(((stems[hv][i].distance(oloc), i)
                                  for i in range(len(o[hv]))
                                  if goodmask[hv][i]))
-                    o[hv][ms] = True
+                    assert ms < len(o[hv])
+                    o[hv][ms] = True  # pytype: disable=unsupported-operands
                 except ValueError:
                     pass
         if self.mergeMain(glyph):
@@ -2833,10 +2850,10 @@ class glyphHinter:
             c = glyph.nextInSubpath(c)
         return True
 
-    def isUSeg(self, loc, uloc, lloc):
+    def isUSeg(self, loc, uloc, lloc) -> Any:
         return abs(uloc - loc) <= abs(lloc - loc)
 
-    def reportRemFlare(self, pe, pe2, desc):
+    def reportRemFlare(self, pe, pe2, desc) -> None:
         log.debug("Removed %s flare at %g %g by %g %g : %s" %
                   ("vertical" if self.doV else "horizontal",
                    pe.e.x, pe.e.y, pe2.e.x, pe2.e.y, desc))
