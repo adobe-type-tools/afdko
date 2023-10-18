@@ -295,6 +295,7 @@ class fontWrapper:
         pcount = self.options.process_count
         if pcount is None:
             pcount = os.cpu_count()
+        assert pcount is not None
         if pcount < 0:
             pcount = os.cpu_count() - pcount
             if pcount < 0:

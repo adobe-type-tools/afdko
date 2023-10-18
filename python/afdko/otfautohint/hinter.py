@@ -358,6 +358,7 @@ class dimensionHinter(ABC):
         Top-level method for calculating stem hints for a glyph in one
         dimension
         """
+        assert self.glyph is not None
         self.startHint()
         if self.glyph.hasHints(doVert=self.isV()):
             if force:
@@ -385,6 +386,7 @@ class dimensionHinter(ABC):
         for sv in self.hs.stemValues:
             sv.show(self.isV(), "postmerge")
         log.debug("pick main %s" % self.aDesc())
+        assert self.glyph is not None
         self.glyph.syncPositions()
         lnks.mark(self.hs.stemValues, self.isV())
         self.checkVals()
@@ -1714,12 +1716,14 @@ class dimensionHinter(ABC):
                 continue
             lseg = hintSegment(mn_pt.o, mn_pt.a, mx_pt.a, pbs.extpes[0][peidx],
                                ltype, 0, self.isV(), not self.isV(), "l bbox")
-            self.hs.getPEState(pbs.extpes[0][peidx],
-                               True).m_segs.append(lseg)
+            pestate = self.hs.getPEState(pbs.extpes[0][peidx], True)
+            assert pestate is not None
+            pestate.m_segs.append(lseg)
             useg = hintSegment(mx_pt.o, mn_pt.a, mx_pt.a, pbs.extpes[1][peidx],
                                utype, 0, self.isV(), self.isV(), "u bbox")
-            self.hs.getPEState(pbs.extpes[1][peidx],
-                               True).m_segs.append(useg)
+            pestate = self.hs.getPEState(pbs.extpes[1][peidx], True)
+            assert pestate is not None
+            pestate.m_segs.append(useg)
             hv = stemValue(mn_pt.o, mx_pt.o, 100, 0, lseg, useg, False)
             self.insertStemValue(hv, "bboxadd")
             self.hs.mainValues.append(hv)
@@ -1848,6 +1852,7 @@ class dimensionHinter(ABC):
 
                     iSS = iSSl[sidx][ul]
                     found = False
+                    assert self.glyph
                     if seg0.isBBox():
                         if seg0.isGBBox():
                             pbs = self.glyph.getBounds(None)
