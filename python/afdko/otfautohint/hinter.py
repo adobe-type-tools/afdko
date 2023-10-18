@@ -1478,7 +1478,6 @@ class dimensionHinter(ABC):
         for sv in svl:
             sv.merge = False
         while True:
-            assert sv and sv.best
             try:
                 _, bst = max(((sv.best.compVal(self.SFactor), sv) for sv in svl
                               if not sv.merge))
