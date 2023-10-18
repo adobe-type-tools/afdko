@@ -1857,6 +1857,11 @@ class dimensionHinter(ABC):
                         if seg0.isGBBox():
                             pbs = self.glyph.getBounds(None)
                         else:
+                            # I don't believe this can be reached, because
+                            # peS is a pathElementHintState, and they
+                            # don't have a position attribute, so this
+                            # would crash
+                            raise NotImplementedError
                             pbs = self.glyph.getBounds(peSi.position[0])
                         if pbs is not None:
                             mn_pt = pt(tuple(pbs.bounds[0]))
