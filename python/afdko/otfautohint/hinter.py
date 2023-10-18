@@ -10,7 +10,7 @@ import logging
 import bisect
 import math
 from copy import copy, deepcopy
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from collections import namedtuple
 
 from fontTools.misc.bezierTools import solveCubic
@@ -52,7 +52,7 @@ LocDict = namedtuple("LocDict", "l u used")
 # whether to replace one value with another. It should be short-lived.
 
 
-class dimensionHinter:
+class dimensionHinter(ABC):
     """
     Common hinting implementation inherited by vertical and horizontal
     variants
