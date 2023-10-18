@@ -147,12 +147,12 @@ class dimensionHinter(ABC):
         self.gllist: List[glyphData] = []
         self.glyph: glyphData = glyphData(False)
         self.report = None
-        self.name = None
+        self.name = ""
         self.isMulti = False
         self.hs: glyphHintState = glyphHintState()
         self.fddict: Optional[FDDict] = None
         self.Bonus = None
-        self.Pruning = None
+        self.Pruning = False
 
     def setGlyph(
         self,
@@ -651,7 +651,7 @@ class dimensionHinter(ABC):
         and FlatMin
         """
         if not c:
-            return
+            return None
         if doPrev:
             sp = self.glyph.prevSlopePoint(c)
             if sp is None:
@@ -674,12 +674,12 @@ class dimensionHinter(ABC):
         if doPrev:
             p = self.glyph.prevInSubpath(c, skipTiny=True, segSub=True)
             if p is None:
-                return
+                return None
             p0, p1, p2 = c.e, c.s, p.s
         else:
             n = self.glyph.nextInSubpath(c, skipTiny=True, segSub=True)
             if n is None:
-                return
+                return None
             p0, p1, p2 = c.s, c.e, n.e
         if (self.diffSign(p0.y - p1.y, p1.y - p2.y) or
                 self.diffSign(p0.x - p1.x, p1.x - p2.x)):
@@ -1158,7 +1158,7 @@ class dimensionHinter(ABC):
             return 0
 
         if us.min > ls.max or us.max < ls.min:  # no overlap
-            return
+            return None
 
         overlen = min(us.max, ls.max) - max(us.min, ls.min)
         minlen = min(us.max - us.min, ls.max - ls.min)
@@ -1167,11 +1167,11 @@ class dimensionHinter(ABC):
         else:
             dist = loc_d * (1 + .4 * (1 - overlen / minlen))
         if dist < self.MinDist / 2:
-            return
+            return None
 
         d, nearStem = min(((abs(s - loc_d), s) for s in self.dominantStems()))
         if d == 0 or d > 2:
-            return
+            return None
         log.info("%s %s stem near miss: %g instead of %g at %g to %g." %
                  (self.aDesc(),
                   "curve" if (ls.isCurve() or us.isCurve()) else "linear",
@@ -1589,6 +1589,7 @@ class dimensionHinter(ABC):
         glyphTop = -1e40
         glyphBot = 1e40
         isV = self.isV()
+        assert self.report
         for sv in self.hs.stemValues:
             l, u = sv.lloc, sv.uloc
             glyphBot = min(l, glyphBot)
@@ -1680,7 +1681,9 @@ class dimensionHinter(ABC):
         (e.g. highest value) mainValue stems
         """
         minloc = midloc = maxloc = 1e40
-        mindelta = middelta = maxdelta = 0
+        mindelta: Number = 0
+        middelta: Number = 0
+        maxdelta: Number  = 0
         hvl = self.hs.mainValues
         hvll = len(hvl)
         if hvll < 3:
@@ -1797,7 +1800,8 @@ class dimensionHinter(ABC):
         valuepairmap = {}
         self.hs.stems = tuple(([] for g in self.gllist))
         if self.options.removeConflicts:
-            wl = self.hs.weights = []
+            self.hs.weights = []
+            wl =  self.hs.weights
         assert self.hs.stems
         dsl = self.hs.stems[0]
         if self.hs.counterHinted:

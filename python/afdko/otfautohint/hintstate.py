@@ -295,7 +295,7 @@ class glyphHintState:
         self.rejectValues: List[stemValue] = []
         self.counterHinted = False
         self.stems: Optional[List[stem]] = None  # in sorted glyphData format
-        self.weights = None
+        self.weights: List[float] = []
         self.keepHints = None
         self.hasOverlaps: bool = False
         self.stemOverlaps: List[List[bool]] = []
