@@ -1923,12 +1923,15 @@ class dimensionHinter(ABC):
             if isG != 'low':
                 hi = self.bestLocation(sidx, 1, iSSl, hs0)
             if isG == 'low':
+                assert lo is not None
                 lo = lo + 21
                 hi = lo - 21
             elif isG == 'high':
+                assert lo is not None
                 lo = hi
                 hi = lo - 20
             else:
+                assert lo is not None and hi is not None
                 if hi < lo:
                     # Differentiate bad stem from ghost stem
                     lo = hi + 50
@@ -2131,6 +2134,7 @@ class dimensionHinter(ABC):
                                       sg.hintval.idx == sjdx)))
                     vali, valj = segi.hintval, segj.hintval
                     assert vali.lloc <= valj.lloc or valj.isGhost
+                    assert self.glyph
                     n = self.glyph.nextInSubpath(c)
                     p = self.glyph.prevInSubpath(c)
                     if (vali.val < self.ConflictValMin and
@@ -2204,6 +2208,7 @@ class hhinter(dimensionHinter):
         for easier processing
         """
         self.startFlex()
+        assert self.fddict
         blues = self.fddict.BlueValuesPairs + self.fddict.OtherBlueValuesPairs  # pytype: disable=attribute-error
         self.topPairs = [pair for pair in blues if not pair[4]]
         self.bottomPairs = [pair for pair in blues if pair[4]]
@@ -2221,6 +2226,7 @@ class hhinter(dimensionHinter):
 
     def inBand(self, loc, isBottom=False) -> bool:
         """Return true if loc is within the selected set of bands"""
+        assert self.fddict
         if self.name in self.options.noBlues:
             return False
         if isBottom:
@@ -2268,6 +2274,7 @@ class hhinter(dimensionHinter):
                          "%f instead of %f." % (loc, p[0]))
 
     def segmentLists(self):
+        assert self.hs
         return self.hs.increasingSegs, self.hs.decreasingSegs
 
     def isCounterGlyph(self) -> bool:
@@ -2290,6 +2297,7 @@ class vhinter(dimensionHinter):
         return True
 
     def dominantStems(self) -> Any:
+        assert self.fddict
         return self.fddict.DominantV  # pytype: disable=attribute-error
 
     def inBand(self, loc, isBottom=False) -> bool:
@@ -2347,6 +2355,7 @@ class glyphHinter:
         self.hHinter = hhinter(options)
         self.vHinter = vhinter(options)
         self.cnt = 0
+        self.doV: bool = False
         if options.justReporting():
             self.taskDesc = 'analysis'
         else:
@@ -2525,7 +2534,7 @@ class glyphHinter:
         the glyph
         """
         stems = [None, None]
-        masks = [None, None]
+        masks: List[List[bool]] = [[], []]
         lnstm = [0, 0]
         # Initial horizontal data
         # If keepHints was true hhs.stems was already set to glyph.hstems in
@@ -2579,6 +2588,7 @@ class glyphHinter:
         mode = NOTSHORT
         ns = None
         c = glyph.nextForHints(glyph)
+        oldmasks: List[List[bool]] = []
         while c:
             if c.isShort() or c.flex == 2:
                 if mode == NOTSHORT:
@@ -2592,6 +2602,7 @@ class glyphHinter:
             else:
                 ns = c
                 if mode == SHORT:
+                    assert oldmasks
                     oldmasks[:] = masks
                     masks = oldmasks
                     incompatmasks = None
@@ -2661,6 +2672,7 @@ class glyphHinter:
         nm = [None, None]
         for hv in range(2):
             hs = self.vHinter.hs if hv == 1 else self.hHinter.hs
+            assert hs is not None
             l = len(m[hv])
 #            if hs.counterHinted:
 #                nm[hv] = [True] * l
@@ -2683,9 +2695,10 @@ class glyphHinter:
                         continue
                     if n[j] and hs.stemOverlaps[i][j]:
                         # See if we can do a ghost stem swap
-                        if hs.ghostCompat[i]:
+                        ghostStem = hs.ghostCompat[i]
+                        if ghostStem:
                             for k in range(l):
-                                if not n[k] or not hs.ghostCompat[i][k]:
+                                if not n[k] or not ghostStem[k]:
                                     continue
                                 else:
                                     ireplaced = True
