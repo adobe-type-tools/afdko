@@ -18,10 +18,13 @@ from fontTools.misc.bezierTools import (solveQuadratic, solveCubic,
 from fontTools.pens.basePen import BasePen
 
 import logging
+
 log = logging.getLogger(__name__)
 
+Number = Union[int, float]
 
-def norm_float(value):
+
+def norm_float(value: float) -> Number:
     """Converts a float (whose decimal part is zero) to integer"""
     if isinstance(value, float):
         value = round(value, 4)
@@ -31,12 +34,12 @@ def norm_float(value):
     return value
 
 
-def feq(a, b, factor=1.52e-5):
+def feq(a: float, b: float, factor=1.52e-5) -> bool:
     """Returns True if a and b are close enough to be considered equal"""
     return abs(a - b) < factor
 
 
-def fne(a, b, factor=1.52e-5):
+def fne(a: float, b: float, factor=1.52e-5) -> bool:
     """Returns True if a and b are not close enough to be considered equal"""
     return abs(a - b) >= factor
 
@@ -787,12 +790,12 @@ class pathElement:
         if self.is_line:
             return [tuple(self.s), tuple(self.e)]
         else:
-            return [tuple(self.s), tuple(self.cs), tuple(self.ce),
-                    tuple(self.e)]
+            return [tuple(self.s), tuple(self.cs), tuple(self.ce), tuple(self.e)]
 
 
 class glyphData(BasePen):
     """Stores state corresponding to a T2 CharString"""
+
     def __init__(self, roundCoords, name=''):
         super().__init__()
         self.roundCoords = roundCoords
@@ -1048,7 +1051,7 @@ class glyphData(BasePen):
                 wrapi -= 1
                 w = s[wrapi]
             pen.beginPath()
-            wt = 'line' if w.isLine() else "curve"
+            wt = 'line' if w.isLine() else 'curve'
             if doHints:
                 pln, pn = ufoH(w, pln, True)
             pen.addPoint((w.e.x, w.e.y), segmentType=wt, name=pn)
@@ -1245,6 +1248,7 @@ class glyphData(BasePen):
 
     class glyphiter:
         """An iterator for a glyphData path"""
+
         __slots__ = ('gd', 'pos')
 
         def __init__(self, gd):
