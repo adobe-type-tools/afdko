@@ -235,7 +235,7 @@ class dimensionHinter(ABC):
         pass
 
     @abstractmethod
-    def isV(self):
+    def isV(self) -> bool:
         pass
 
     @abstractmethod
@@ -243,7 +243,7 @@ class dimensionHinter(ABC):
         pass
 
     @abstractmethod
-    def dominantStems(self):
+    def dominantStems(self) -> Any:
         pass
 
     @abstractmethod
@@ -2254,7 +2254,7 @@ class hhinter(dimensionHinter):
     def segmentLists(self):
         return self.hs.increasingSegs, self.hs.decreasingSegs
 
-    def isCounterGlyph(self):
+    def isCounterGlyph(self) -> bool:
         return self.name in self.options.hCounterGlyphs
 
 
@@ -2289,16 +2289,16 @@ class vhinter(dimensionHinter):
         else:
             return self.name in self.options.upperSpecials
 
-    def aDesc(self):
+    def aDesc(self) -> str:
         return 'vertical'
 
-    def checkTfm(self):
+    def checkTfm(self) -> None:
         pass
 
     def segmentLists(self):
         return self.hs.decreasingSegs, self.hs.increasingSegs
 
-    def isCounterGlyph(self):
+    def isCounterGlyph(self) -> bool:
         return self.name in self.options.vCounterGlyphs
 
 
