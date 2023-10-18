@@ -689,7 +689,8 @@ class UFOFontData:
         for i in range(3, numBlueValues, 2):
             blueValues[i] = blueValues[i] - blueValues[i - 1]
 
-        numBlueValues = min(numBlueValues, len(fdTools.kBlueValueKeys))
+        numBlueValues = min(numBlueValues,
+                            len(fdTools.kBlueValueKeys))
         for i in range(numBlueValues):
             key = fdTools.kBlueValueKeys[i]
             value = blueValues[i]
@@ -782,6 +783,7 @@ class UFOFontData:
 
 
 class HashPointPen(AbstractPointPen):
+
     def __init__(self, glyph, glyphset=None):
         self.glyphset = glyphset
         self.width = norm_float(round(getattr(glyph, "width", 0), 9))

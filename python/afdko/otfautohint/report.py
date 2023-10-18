@@ -17,13 +17,14 @@ log = logging.getLogger(__name__)
 
 class GlyphReport:
     """Class to store stem and zone data from a particular glyph"""
-    def __init__(self, name: str="", all_stems=False):
+
+    def __init__(self, name: str = "", all_stems=False):
         self.name = name
-        self.hstems: Dict[float,int] = {}
-        self.vstems: Dict[float,int] = {}
-        self.hstems_pos: set[Tuple[Number,Number]] = set()
-        self.vstems_pos: set[Tuple[Number,Number]] = set()
-        self.char_zones: set[Tuple[Number,Number]] = set()
+        self.hstems: Dict[float, int] = {}
+        self.vstems: Dict[float, int] = {}
+        self.hstems_pos: set[Tuple[Number, Number]] = set()
+        self.vstems_pos: set[Tuple[Number, Number]] = set()
+        self.char_zones: set[Tuple[Number, Number]] = set()
         self.stem_zone_stems: set[Tuple[Number, Number]] = set()
         self.all_stems = all_stems
 
@@ -58,7 +59,7 @@ class Report:
         else:
             return int(val - 0.5)
 
-    def parse_stem_dict(self, stem_dict: Dict[float, int]) -> Dict[float,int]:
+    def parse_stem_dict(self, stem_dict: Dict[float, int]) -> Dict[float, int]:
         """
         stem_dict: {45.5: 1, 47.0: 2}
         """
@@ -75,8 +76,8 @@ class Report:
         all_zones_dict.update(stem_dict)
         # key: zone height
         # value: zone count
-        top_dict: Dict[Number,int] = defaultdict(int)
-        bot_dict: Dict[Number,int] = defaultdict(int)
+        top_dict: Dict[Number, int] = defaultdict(int)
+        bot_dict: Dict[Number, int] = defaultdict(int)
         for bot, top in all_zones_dict:
             top = self.round_value(top)
             top_dict[top] += 1
@@ -146,20 +147,20 @@ class Report:
         # item 0: stem count
         # item 1: stem width
         # item 2: list of glyph names
-        h_stem_list = self.assemble_rep_list(
-            h_stem_items_dict, h_stem_count_dict)
+        h_stem_list = self.assemble_rep_list(h_stem_items_dict,
+                                             h_stem_count_dict)
 
-        v_stem_list = self.assemble_rep_list(
-            v_stem_items_dict, v_stem_count_dict)
+        v_stem_list = self.assemble_rep_list(v_stem_items_dict,
+                                             v_stem_count_dict)
 
         # item 0: zone count
         # item 1: zone height
         # item 2: list of glyph names
-        top_zone_list = self.assemble_rep_list(
-            top_zone_items_dict, top_zone_count_dict)
+        top_zone_list = self.assemble_rep_list(top_zone_items_dict,
+                                               top_zone_count_dict)
 
-        bot_zone_list = self.assemble_rep_list(
-            bot_zone_items_dict, bot_zone_count_dict)
+        bot_zone_list = self.assemble_rep_list(bot_zone_items_dict,
+                                               bot_zone_count_dict)
 
         return h_stem_list, v_stem_list, top_zone_list, bot_zone_list
 
@@ -189,25 +190,29 @@ class Report:
 
     def save(self, path, options):
         h_stems, v_stems, top_zones, bot_zones = self._get_lists(options)
-        items = ([h_stems, self._sort_count],
-                 [v_stems, self._sort_count],
-                 [top_zones, self._sort_val_reversed],
-                 [bot_zones, self._sort_val])
+        items = (
+            [h_stems, self._sort_count],
+            [v_stems, self._sort_count],
+            [top_zones, self._sort_val_reversed],
+            [bot_zones, self._sort_val],
+        )
         atime = time.asctime()
         suffixes = (".hstm.txt", ".vstm.txt", ".top.txt", ".bot.txt")
-        titles = ("Horizontal Stem List for %s on %s\n" % (path, atime),
-                  "Vertical Stem List for %s on %s\n" % (path, atime),
-                  "Top Zone List for %s on %s\n" % (path, atime),
-                  "Bottom Zone List for %s on %s\n" % (path, atime),
-                  )
-        headers = (["count    width    glyphs\n"] * 2 +
-                   ["count   height    glyphs\n"] * 2)
+        titles = (
+            "Horizontal Stem List for %s on %s\n" % (path, atime),
+            "Vertical Stem List for %s on %s\n" % (path, atime),
+            "Top Zone List for %s on %s\n" % (path, atime),
+            "Bottom Zone List for %s on %s\n" % (path, atime),
+        )
+        headers = ["count    width    glyphs\n"] * 2 + [
+            "count   height    glyphs\n"
+        ] * 2
 
         for i, item in enumerate(items):
             reps, sortFunc = item
             if not reps:
                 continue
-            fName = f'{path}{suffixes[i]}'
+            fName = f"{path}{suffixes[i]}"
             title = titles[i]
             header = headers[i]
             with open(fName, "w") as fp:
@@ -215,6 +220,6 @@ class Report:
                 fp.write(header)
                 reps.sort(key=sortFunc)
                 for rep in reps:
-                    gnames = ' '.join(rep[2])
+                    gnames = " ".join(rep[2])
                     fp.write(f"{rep[0]:5}    {rep[1]:5}    [{gnames}]\n")
                 log.info("Wrote %s" % fName)

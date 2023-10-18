@@ -4,7 +4,6 @@
 Internal representation of a T2 CharString glyph with hints
 """
 
-import numbers
 import threading
 import operator
 from copy import deepcopy
@@ -31,6 +30,7 @@ import logging
 from . import Number
 
 log = logging.getLogger(__name__)
+
 
 def norm_float(value: float) -> Number:
     """Converts a float (whose decimal part is zero) to integer"""
