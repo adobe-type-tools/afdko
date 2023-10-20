@@ -157,7 +157,7 @@ class hintSegment:
         log.debug("%s %sseg %g %g to %g %g %s" % pp)
 
 
-HintSegListWithType = Tuple[str, list[hintSegment]]
+HintSegListWithType = Tuple[str, List[hintSegment]]
 
 
 class stemValue:
