@@ -791,7 +791,6 @@ class pathElement:
             self.e = pb
             self.is_close = False
             self.bounds = None
-            return ret
         else:
             s, n = splitCubicAtT(self.s, self.cs, self.ce, self.e, t)
             ptsn = [pt(p) for p in n]
@@ -803,7 +802,9 @@ class pathElement:
             self.e = pt(s[3])
             self.is_close = False
             self.bounds = None
-            return ret
+        # The typing is correct but neither mypy nor pytype handle
+        # self types well yet.
+        return ret  # type: ignore
 
     def atT(self, t: Number) -> pt:
         return pt(segmentPointAtT(self.fonttoolsSegment(), t))
