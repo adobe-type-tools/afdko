@@ -26,7 +26,6 @@ from fontTools.pens.basePen import BasePen
 
 import logging
 
-# from .hintstate import glyphHintState
 from . import Number
 
 log = logging.getLogger(__name__)
