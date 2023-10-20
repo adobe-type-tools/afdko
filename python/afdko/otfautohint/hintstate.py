@@ -27,7 +27,14 @@ from typing_extensions import Self
 
 log: logging.Logger = logging.getLogger(__name__)
 
-
+# instanceStemState stores a hinter as one of its members. We'd
+# love to be able to use the abstract base class `dimensionHinter`
+# as the type for that member, but that would mean this module
+# imports hinter which in turn imports this module. Instead, we
+# type check against a "protocol" class (a "trait" in other languages)
+# declaring only the method that instanceStemState will expect to
+# find on the object. `...` stands for "we don't care, nobody's
+# calling it anyway".
 class AHinter(Protocol):
     def inBand(self, loc, isBottom=False) -> bool:
         ...
