@@ -11,7 +11,7 @@ from math import sqrt
 from collections import defaultdict
 from builtins import tuple as _tuple
 from typing import Any, List, Optional, Tuple, Union
-from typing_extensions import Self
+from typing_extensions import Self  # pytype: disable=not-supported-yet
 
 # pytype: disable=import-error
 from fontTools.misc.bezierTools import (
