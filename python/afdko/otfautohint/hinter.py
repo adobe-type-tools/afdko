@@ -1968,7 +1968,7 @@ class dimensionHinter(ABC):
                     log.warning("Stem end is less than start for non-"
                                 "ghost stem, will be removed from set")
             assert lo is not None and hi is not None
-            sl.append(stem((lo, hi)))
+            sl.append(stem(lo, hi))
 
         self.fddict = self.fddicts[0]
         self.glyph = self.gllist[0]
