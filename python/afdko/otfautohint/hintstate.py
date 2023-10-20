@@ -12,9 +12,9 @@ from enum import IntEnum
 
 from . import Number
 from .glyphData import feq, pathElement, stem
-from _weakref import ReferenceType
 from typing import (
     Any,
+    Callable,
     Dict,
     List,
     Optional,
@@ -46,7 +46,9 @@ class hintSegment:
         UGBBOX = 7  # Calcualted from the upper bound of the whole glyph
         GHOST = 8
 
-    pe: Optional[ReferenceType[pathElement]]
+    # This is the *ideal* type hint, but 3.8 doesn't support it.
+    # pe: Optional[weakref.ReferenceType[pathElement]]
+    pe: Optional[Callable[[],pathElement]]
 
 
     def __init__(self, aloc: float, oMin: float, oMax: float,
@@ -87,7 +89,7 @@ class hintSegment:
         self.isInc = isInc
         self.desc = desc
         if pe:
-            self.pe = weakref.ref(pe)
+            self.pe = weakref.ref(pe)  # type: ignore
         else:
             self.pe = None
         self.hintval: Optional[stemValue] = None
