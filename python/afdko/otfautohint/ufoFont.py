@@ -416,10 +416,8 @@ class UFOFontData:
         if os.path.abspath(self.path) != os.path.abspath(path):
             # If user has specified a path other than the source font path,
             # then copy the entire UFO font, and operate on the copy.
-            log.info(
-                "Copying from source UFO font to output UFO font before "
-                "processing..."
-            )
+            log.info("Copying from source UFO font to output UFO font before "
+                     "processing...")
             if os.path.exists(path):
                 shutil.rmtree(path)
             shutil.copytree(self.path, path)
@@ -689,8 +687,7 @@ class UFOFontData:
         for i in range(3, numBlueValues, 2):
             blueValues[i] = blueValues[i] - blueValues[i - 1]
 
-        numBlueValues = min(numBlueValues,
-                            len(fdTools.kBlueValueKeys))
+        numBlueValues = min(numBlueValues, len(fdTools.kBlueValueKeys))
         for i in range(numBlueValues):
             key = fdTools.kBlueValueKeys[i]
             value = blueValues[i]

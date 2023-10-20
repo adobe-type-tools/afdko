@@ -433,27 +433,21 @@ class glyphHintState:
             for hsd in self.decreasingSegs[lo:hi]:
                 assert hsd.loc == hsi.loc
                 if hsd.min < hsi.max and hsd.max > hsi.min:
-                    if (
-                        hsi.type == hintSegment.sType.BEND
-                        and hsd.type != hintSegment.sType.BEND
-                        and hsd.type != hintSegment.sType.GHOST
-                        and (hsd.max - hsd.min) > (hsi.max - hsi.min) * 3
-                    ):
+                    if (hsi.type == hintSegment.sType.BEND and
+                            hsd.type != hintSegment.sType.BEND and
+                            hsd.type != hintSegment.sType.GHOST and
+                            (hsd.max - hsd.min) > (hsi.max - hsi.min) * 3):
                         hsi.deleted = True
-                        log.debug(
-                            "rem seg loc %g from %g to %g" % (hsi.loc, hsi.min, hsi.max)
-                        )
+                        log.debug("rem seg loc %g from %g to %g" %
+                                  (hsi.loc, hsi.min, hsi.max))
                         break
-                    elif (
-                        hsd.type == hintSegment.sType.BEND
-                        and hsi.type != hintSegment.sType.BEND
-                        and hsi.type != hintSegment.sType.GHOST
-                        and (hsi.max - hsi.min) > (hsd.max - hsd.min) * 3
-                    ):
+                    elif (hsd.type == hintSegment.sType.BEND and
+                          hsi.type != hintSegment.sType.BEND and
+                          hsi.type != hintSegment.sType.GHOST and
+                          (hsi.max - hsi.min) > (hsd.max - hsd.min) * 3):
                         hsd.deleted = True
-                        log.debug(
-                            "rem seg loc %g from %g to %g" % (hsd.loc, hsd.min, hsd.max)
-                        )
+                        log.debug("rem seg loc %g from %g to %g" %
+                                  (hsd.loc, hsd.min, hsd.max))
 
     def deleteSegments(self) -> None:
         for s in self.increasingSegs:
@@ -592,26 +586,17 @@ class links:
         if self.cnt == 0:
             return
         log.debug("Links")
-        log.debug(" ".join((str(i).rjust(2) for i in range(self.cnt))))
+        log.debug(' '.join((str(i).rjust(2) for i in range(self.cnt))))
         for j in range(self.cnt):
-            log.debug(
-                " ".join(
-                    (
-                        ("Y" if self.links[j][i] else " ").rjust(2)
-                        for i in range(self.cnt)
-                    )
-                )
-            )
+            log.debug(' '.join((('Y' if self.links[j][i] else ' ').rjust(2)
+                                for i in range(self.cnt))))
 
-    def logShort(self, shrt, lab) -> None:
+    def logShort(self, shrt, lab):
         """Prints a log message representing (1-d) shrt"""
         log.debug(lab)
-        log.debug(" ".join((str(i).rjust(2) for i in range(self.cnt))))
-        log.debug(
-            " ".join(
-                ((str(shrt[i]) if shrt[i] else " ").rjust(2) for i in range(self.cnt))
-            )
-        )
+        log.debug(' '.join((str(i).rjust(2) for i in range(self.cnt))))
+        log.debug(' '.join(((str(shrt[i]) if shrt[i] else ' ').rjust(2)
+                            for i in range(self.cnt))))
 
     def mark(self, stemValues: List[stemValue], isV) -> None:
         """
