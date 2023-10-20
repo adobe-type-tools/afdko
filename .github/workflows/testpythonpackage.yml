@@ -99,6 +99,10 @@ jobs:
       run: |
         python -m pytest -n auto --dist loadfile --no-cov tests --color=yes
 
+    - name: Test type hints (otfautohint only)
+      run: |
+        mypy python/afdko/otfautohint
+
     - name: Test uninstall AFDKO
       run: |
         python -m pip uninstall afdko -y
