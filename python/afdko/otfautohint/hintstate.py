@@ -50,7 +50,7 @@ class hintSegment:
 
 
     def __init__(self, aloc: float, oMin: float, oMax: float,
-                 pe: pathElement, typ, bonus, isV,
+                 pe: Optional[pathElement], typ, bonus, isV,
                  isInc, desc) -> None:
         """
         Initializes the object
