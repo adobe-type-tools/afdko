@@ -1,0 +1,6 @@
+{
+'.notdef': ['w100', ['checkOutlines', 'autohint']],
+'A': ['w400l47243l119456l353343l273183l173168', ['checkOutlines', 'autohint']],
+'hashMapVersion': (1, 0),
+'space': ['w200', ['checkOutlines', 'autohint']],
+}
