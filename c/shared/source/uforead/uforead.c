@@ -1682,8 +1682,11 @@ static void parseXMLGLIFKey(ufoCtx h, xmlNodePtr cur, unsigned long *unicode, in
     xmlAttr *attr = cur->properties;
     if (h->parseState.UFOFile == preParsingGLIF) {      /* called from preParseGLIF */
         if (xmlKeyEqual(cur, "advance")) {
-            if (xmlAttrEqual(attr, "width") || xmlAttrEqual(attr, "advance"))
-                setWidth(h, tag, strtolCheck(h, getXmlAttrValue(attr), false, NULL, 10));
+            while (attr != NULL) {
+                if (xmlAttrEqual(attr, "width") || xmlAttrEqual(attr, "advance"))
+                    setWidth(h, tag, strtolCheck(h, getXmlAttrValue(attr), false, NULL, 10));
+                attr = attr->next;
+            }
         } else if (xmlKeyEqual(cur, "unicode")) {
             if (xmlAttrEqual(attr, "hex"))
                 *unicode = strtoulCheck(h, getXmlAttrValue(attr), false, NULL, 16);
