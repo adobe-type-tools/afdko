@@ -58,13 +58,9 @@ bool FeatCtx::AALT::FeatureRecord::operator==(const Tag &b) const {
     return feature == b;
 }
 
-FeatCtx::FeatCtx(hotCtx g) : g(g) {
-    memset(&cvParameters, 0, sizeof(cvParameters));
-    dnaINIT(g->DnaCTX, cvParameters.charValues, 10, 10);
-}
+FeatCtx::FeatCtx(hotCtx g) : g(g) {}
 
 FeatCtx::~FeatCtx() {
-    dnaFREE(cvParameters.charValues);
     freeBlocks();
 }
 
@@ -2640,12 +2636,7 @@ void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
 
 void FeatCtx::clearCVParameters() {
     sawCVParams = true;
-    cvParameters.FeatUILabelNameID = 0;
-    cvParameters.FeatUITooltipTextNameID = 0;
-    cvParameters.SampleTextNameID = 0;
-    cvParameters.NumNamedParameters = 0;
-    cvParameters.FirstParamUILabelNameID = 0;
-    cvParameters.charValues.cnt = 0;
+    cvParameters.reset();
 }
 
 void FeatCtx::addCVNameID(int labelID) {
@@ -2689,14 +2680,13 @@ void FeatCtx::addCVNameID(int labelID) {
 }
 
 void FeatCtx::addCVParametersCharValue(unsigned long uv) {
-    unsigned long *uvp = dnaNEXT(cvParameters.charValues);
-    *uvp = uv;
+    cvParameters.charValues.push_back(uv);
 }
 
 void FeatCtx::addCVParam() {
     prepRule(GSUB_, GSUBCVParam, NULL, NULL);
 
-    GSUBAddCVParam(g, &cvParameters);
+    GSUBAddCVParam(g, std::move(cvParameters));
 
     wrapUpRule();
 }
