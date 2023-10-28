@@ -883,18 +883,17 @@ static void fillGSUBCVParam(hotCtx g, GSUBCtx h, Subtable *sub) {
 }
 
 static void writeGSUBCVParam(GSUBCtx h, Subtable *sub) {
-    int i = 0;
     CVParameterFormat *feat_param = (CVParameterFormat *)sub->tbl;
 
-    OUT2(feat_param->Format);
+    OUT2((uint16_t)0);
     OUT2(feat_param->FeatUILabelNameID);
     OUT2(feat_param->FeatUITooltipTextNameID);
     OUT2(feat_param->SampleTextNameID);
     OUT2(feat_param->NumNamedParameters);
     OUT2(feat_param->FirstParamUILabelNameID);
-    OUT2((unsigned short)feat_param->charValues.cnt);
-    while (i < feat_param->charValues.cnt) {
-        unsigned long uv = feat_param->charValues.array[i++];
+    OUT2((unsigned short)feat_param->charValues.size());
+    for (auto cv: feat_param->charValues) {
+        unsigned long uv = cv;
         char val1 = (char)(uv >> 16);
         unsigned short val2 = (unsigned short)(uv & 0x0000FFFF);
         OUT1(val1);
@@ -904,37 +903,17 @@ static void writeGSUBCVParam(GSUBCtx h, Subtable *sub) {
 
 static void freeGSUBCVParam(hotCtx g, Subtable *sub) {
     CVParameterFormat *feat_param = (CVParameterFormat *)sub->tbl;
-    dnaFREE(feat_param->charValues);
-    MEM_FREE(g, sub->tbl);
+    delete feat_param;
 }
 
-void GSUBAddCVParam(hotCtx g, void *param) {
+void GSUBAddCVParam(hotCtx g, CVParameterFormat &&param) {
     GSUBCtx h = g->ctx.GSUB;
     Subtable *sub;
-    int i;
-    CVParameterFormat *feat_param = (CVParameterFormat *)param;
-    CVParameterFormat *new_param;
-    Offset param_size = sizeof(CVParameterFormat);
-    Offset param_offset = (Offset)CV_PARAM_SIZE(feat_param);
+    CVParameterFormat *new_param = new CVParameterFormat(std::move(param));
+    Offset param_offset = (Offset)new_param->size();
 
     startNewSubtable(g);
     sub = h->nw.sub;
-
-    new_param = (CVParameterFormat *)MEM_NEW(g, param_size);
-
-    new_param->Format = feat_param->Format;
-    new_param->FeatUILabelNameID = feat_param->FeatUILabelNameID;
-    new_param->FeatUITooltipTextNameID = feat_param->FeatUITooltipTextNameID;
-    new_param->SampleTextNameID = feat_param->SampleTextNameID;
-    new_param->NumNamedParameters = feat_param->NumNamedParameters;
-    new_param->FirstParamUILabelNameID = feat_param->FirstParamUILabelNameID;
-
-    dnaINIT(g->DnaCTX, new_param->charValues, 20, 20);
-    i = 0;
-    while (i < feat_param->charValues.cnt) {
-        *dnaNEXT(new_param->charValues) = feat_param->charValues.array[i++];
-    }
-
     sub->tbl = new_param;
     h->offset.featParam += param_offset;
 }
