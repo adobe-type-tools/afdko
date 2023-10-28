@@ -7,12 +7,13 @@
 
 #include "otl.h"
 
-#include <assert.h>
+#include <cassert>
+#include <algorithm>
+#include <utility>
+
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <algorithm>
-#include <utility>
 
 #define FEAT_PARAM_ZERO 1
 

@@ -316,7 +316,7 @@ void GPOS::LookupBegin(uint32_t lkpType, uint32_t lkpFlag, Label label,
 
 /* End lookup */
 
-void GPOS::LookupEnd(Tag feature, SubtableInfo *si) {
+void GPOS::LookupEnd(SubtableInfo *si) {
     DF(2, (stderr, " } GPOS\n"));
 
     if (si == nullptr)
@@ -1724,7 +1724,7 @@ void GPOS::createAnonLookups() {
                                                              /* and will not be considered for adding to the FeatureList table */
 
         snprintf(g->error_id_text, sizeof(g->error_id_text), "feature '%c%c%c%c'", TAG_ARG(si.parentFeatTag));
-        LookupEnd(si.feature, &si); /* This is where the fill functions get called */
+        LookupEnd(&si); /* This is where the fill functions get called */
         FeatureEnd();
     }
 }
@@ -1748,15 +1748,13 @@ void GPOS::setAnonLookupIndices() {
 /* points to an input sequence; return new array of num coverages */
 
 void GPOS::setCoverages(std::vector<LOffset> &covs, otlTbl &otl, GNode *p, uint32_t num) {
-    if (num == 0) {
+    if (num == 0)
         return;
-    }
 
     covs.reserve(num);
     for (uint32_t i = 0; i != num; i++, p = p->nextSeq) {
-        GNode *q;
         otl.coverageBegin();
-        for (q = p; q != NULL; q = q->nextCl)
+        for (GNode *q = p; q != NULL; q = q->nextCl)
             otl.coverageAddGlyph(q->gid);
 
         covs.push_back(otl.coverageEnd()); /* Adjusted later */
@@ -1824,7 +1822,7 @@ ChainContextPosFormat3::ChainContextPosFormat3(GPOS &h, GPOS::SubtableInfo &si, 
                 nextNode = nextNode->nextSeq;
                 continue;
             }
-            PosLookupRecord slr;
+            GPOS::PosLookupRecord slr;
             /* Store ptr for easy access later on when lkpInx's are available */
             for (int j = 0; j < nextNode->lookupLabelCount; j++) {
                 slr.SequenceIndex = i;
@@ -1869,9 +1867,8 @@ void ChainContextPosFormat3::write(GPOS *h) {
     LOffset adjustment = 0; /* (Linux compiler complains) */
     bool isExt = extension.use;
 
-    if (!isExt) {
+    if (!isExt)
         adjustment = (h->offset.subtable - offset);
-    }
 
     OUT2(subformat());
 
@@ -2602,7 +2599,7 @@ void GPOS::fillExtensionPos(uint32_t ExtensionLookupType, ExtensionPosFormat1 &t
     tbl.PosFormat = 1;
     tbl.ExtensionLookupType = ExtensionLookupType;
     tbl.ExtensionOffset = offset.extension;
-    offset.subtable += EXTENSION1_SIZE;
+    offset.subtable += tbl.size();
 }
 
 void GPOS::writeExtension(Subtable &sub) {

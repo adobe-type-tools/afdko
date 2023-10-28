@@ -144,7 +144,7 @@ typedef struct {
 typedef struct {  // Coverage format 2
     unsigned short CoverageFormat; /* =2 */
     unsigned short RangeCount;
-    dnaDCL(RangeRecord, RangeRecord); /* [RangeCount] */
+    dnaDCL(RangeRecord, rangeRecord); /* [RangeCount] */
 } CoverageFormat2;
 #define COVERAGE2_SIZE(nRanges) (2 * 2 + (nRanges)*RANGE_RECORD_SIZE)
 
@@ -173,7 +173,7 @@ typedef struct {
     unsigned short ValueFormat1;
     unsigned short ValueFormat2;
     unsigned short PairSetCount;
-    dnaDCL(PairSet, PairSet); /* [PairSetCount] */
+    dnaDCL(PairSet, pairSet); /* [PairSetCount] */
 } PairPosFormat1;
 #define PAIR_POS1_SIZE(nPairSets) (5 * 2 + (nPairSets)*2)
 
@@ -1440,19 +1440,19 @@ static void CFF_RegisterTable(cefCtx h) {
 /* Safety initialization. */
 static void coverageSafe(cefCtx h) {
     h->coverage.gids.size = 0;
-    h->coverage.fmt2.RangeRecord.size = 0;
+    h->coverage.fmt2.rangeRecord.size = 0;
 }
 
 /* Initialize coverage-specific data. */
 static void coverageNew(cefCtx h) {
     dnaINIT(h->ctx.dna, h->coverage.gids, 100, 200);
-    dnaINIT(h->ctx.dna, h->coverage.fmt2.RangeRecord, 50, 100);
+    dnaINIT(h->ctx.dna, h->coverage.fmt2.rangeRecord, 50, 100);
 }
 
 /* Free coverage-specific data. */
 static void coverageFree(cefCtx h) {
     dnaFREE(h->coverage.gids);
-    dnaFREE(h->coverage.fmt2.RangeRecord);
+    dnaFREE(h->coverage.fmt2.rangeRecord);
 }
 
 /* Write format 1 coverage table. */
@@ -1474,7 +1474,7 @@ static void writeCoverage2(cefCtx h) {
     dstWrite2(h, fmt->CoverageFormat);
     dstWrite2(h, fmt->RangeCount);
     for (i = 0; i < fmt->RangeCount; i++) {
-        RangeRecord *rec = &fmt->RangeRecord.array[i];
+        RangeRecord *rec = &fmt->rangeRecord.array[i];
         dstWrite2(h, rec->Start);
         dstWrite2(h, rec->End);
         dstWrite2(h, rec->StartCoverageIndex);
@@ -1511,13 +1511,13 @@ static void fillCoverage2(cefCtx h, int nRanges, long nGlyphs, GID *glyphs) {
 
     fmt->CoverageFormat = 2;
     fmt->RangeCount = nRanges;
-    dnaSET_CNT(fmt->RangeRecord, nRanges);
+    dnaSET_CNT(fmt->rangeRecord, nRanges);
 
     iRange = 0;
     iStart = 0;
     for (i = 1; i <= nGlyphs; i++)
         if (i == nGlyphs || glyphs[i - 1] != glyphs[i] - 1) {
-            RangeRecord *rec = &fmt->RangeRecord.array[iRange++];
+            RangeRecord *rec = &fmt->rangeRecord.array[iRange++];
 
             rec->Start = glyphs[iStart];
             rec->End = glyphs[i - 1];
@@ -1574,7 +1574,7 @@ static unsigned short fillCoverage(cefCtx h) {
 /* Safety initialization. */
 static void GPOSInit(cefCtx h) {
     h->GPOS.pairs.size = 0;
-    h->GPOS.subtbl.PairSet.size = 0;
+    h->GPOS.subtbl.pairSet.size = 0;
     h->GPOS.pvrecs.size = 0;
     coverageSafe(h);
 }
@@ -1583,7 +1583,7 @@ static void GPOSInit(cefCtx h) {
 static int GPOSNew(sfwTableCallbacks *cb) {
     cefCtx h = (cefCtx) cb->ctx;
     dnaINIT(h->ctx.dna, h->GPOS.pairs, 1000, 2000);
-    dnaINIT(h->ctx.dna, h->GPOS.subtbl.PairSet, 100, 200);
+    dnaINIT(h->ctx.dna, h->GPOS.subtbl.pairSet, 100, 200);
     dnaINIT(h->ctx.dna, h->GPOS.pvrecs, 1000, 2000);
     coverageNew(h);
     return 0;
@@ -1593,7 +1593,7 @@ static int GPOSNew(sfwTableCallbacks *cb) {
 static int GPOSFree(sfwTableCallbacks *cb) {
     cefCtx h = (cefCtx) cb->ctx;
     dnaFREE(h->GPOS.pairs);
-    dnaFREE(h->GPOS.subtbl.PairSet);
+    dnaFREE(h->GPOS.subtbl.pairSet);
     dnaFREE(h->GPOS.pvrecs);
     coverageFree(h);
     return 0;
@@ -1639,7 +1639,7 @@ static void fillPairPos1(cefCtx h) {
     fmt->PairSetCount = fillCoverage(h);
 
     /* Allocate/size pair set array */
-    dnaSET_CNT(fmt->PairSet, fmt->PairSetCount);
+    dnaSET_CNT(fmt->pairSet, fmt->PairSetCount);
 
     /* Fill pair sets */
     j = 0;
@@ -1652,7 +1652,7 @@ static void fillPairPos1(cefCtx h) {
             int k;
             PairValueRecord *dst;
             cefKernPair *src = &h->GPOS.pairs.array[iFirst];
-            PairSet *ps = &fmt->PairSet.array[j++];
+            PairSet *ps = &fmt->pairSet.array[j++];
 
             /* Fill PairSet */
             ps->offset = offset;
@@ -1741,12 +1741,12 @@ static void writePairPos1(cefCtx h) {
 
     /* Write pair sets */
     for (i = 0; i < fmt->PairSetCount; i++)
-        dstWrite2(h, fmt->PairSet.array[i].offset);
+        dstWrite2(h, fmt->pairSet.array[i].offset);
 
     pvrec = h->GPOS.pvrecs.array;
     for (i = 0; i < fmt->PairSetCount; i++) {
         int j;
-        PairSet *ps = &fmt->PairSet.array[i];
+        PairSet *ps = &fmt->pairSet.array[i];
 
         /* Write pair value records */
         dstWrite2(h, ps->PairValueCount);
