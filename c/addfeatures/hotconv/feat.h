@@ -60,15 +60,46 @@
 
 typedef uint16_t Label;
 
-typedef struct { /* Subtable record */
-    unsigned short Format;
-    unsigned short FeatUILabelNameID;
-    unsigned short FeatUITooltipTextNameID;
-    unsigned short SampleTextNameID;
-    unsigned short NumNamedParameters;
-    unsigned short FirstParamUILabelNameID;
-    dnaDCL(unsigned long, charValues);
-} CVParameterFormat; /* Special case format for subtable data. */
+struct CVParameterFormat {
+    CVParameterFormat() {}
+    CVParameterFormat(const CVParameterFormat &other) = delete;
+    explicit CVParameterFormat(CVParameterFormat &&other) {
+        FeatUILabelNameID = other.FeatUILabelNameID;
+        FeatUITooltipTextNameID = other.FeatUITooltipTextNameID;
+        SampleTextNameID = other.SampleTextNameID;
+        NumNamedParameters = other.NumNamedParameters;
+        FirstParamUILabelNameID = other.FirstParamUILabelNameID;
+        other.FeatUILabelNameID = 0;
+        other.FeatUITooltipTextNameID = 0;
+        other.SampleTextNameID = 0;
+        other.NumNamedParameters = 0;
+        other.FirstParamUILabelNameID = 0;
+        charValues.swap(other.charValues);
+    };
+    void swap(CVParameterFormat &&other) {
+        std::swap(FeatUILabelNameID, other.FeatUILabelNameID);
+        std::swap(FeatUITooltipTextNameID, other.FeatUITooltipTextNameID);
+        std::swap(SampleTextNameID, other.SampleTextNameID);
+        std::swap(NumNamedParameters, other.NumNamedParameters);
+        std::swap(FirstParamUILabelNameID, other.FirstParamUILabelNameID);
+        charValues.swap(other.charValues);
+    }
+    void reset() {
+        FeatUILabelNameID = 0;
+        FeatUITooltipTextNameID = 0;
+        SampleTextNameID = 0;
+        NumNamedParameters = 0;
+        FirstParamUILabelNameID = 0;
+        charValues.clear();
+    }
+    int size() { return 7 * sizeof(uint16_t) + 3 * charValues.size(); }
+    uint16_t FeatUILabelNameID {0};
+    uint16_t FeatUITooltipTextNameID {0};
+    uint16_t SampleTextNameID {0};
+    uint16_t NumNamedParameters {0};
+    uint16_t FirstParamUILabelNameID {0};
+    std::vector<uint32_t> charValues;
+};
 
 typedef struct GNode_ GNode;
 
