@@ -47,10 +47,13 @@ enum {
     GPOSFeatureParam, /* Treated like a lookup in the code */
 };
 
-struct PosLookupRecord;
-
 class GPOS {
  public:
+    struct PosLookupRecord {
+        uint16_t SequenceIndex {0};
+        uint16_t LookupListIndex {0};
+    };
+
     enum ValueRecordFlag {
         ValueXPlacement = (1 << 0),
         ValueYPlacement = (1 << 1),
@@ -223,6 +226,7 @@ class GPOS {
     };
 
     struct ExtensionPosFormat1 {
+        static uint16_t size() { return sizeof(uint16_t) * 2 + sizeof(uint32_t); }
         uint16_t PosFormat {0};
         uint16_t ExtensionLookupType {0};
         LOffset ExtensionOffset {0};
@@ -340,7 +344,7 @@ class GPOS {
                  std::vector<AnchorMarkInfo> &anchorMarkInfo);
     void LookupBegin(uint32_t lkpType, uint32_t lkpFlag, Label label,
                      bool useExtension, uint16_t useMarkSetIndex);
-    void LookupEnd(Tag feature, SubtableInfo *si = nullptr);
+    void LookupEnd(SubtableInfo *si = nullptr);
     void AddParameters(const std::vector<uint16_t> &params);
     void SetSizeMenuNameID(uint16_t nameID);
     bool SubtableBreak();
@@ -486,24 +490,19 @@ struct PairPosFormat2 : public GPOS::PairPos {
     std::vector<std::vector<Class2Record>> ClassRecords;
 };
 
-struct PosLookupRecord {
-    uint16_t SequenceIndex {0};
-    uint16_t LookupListIndex {0};
-};
-
 struct ChainContextPosFormat3 : public GPOS::ChainContextPos {
     ChainContextPosFormat3() = delete;
     ChainContextPosFormat3(GPOS &h, GPOS::SubtableInfo &si, GPOS::PosRule &rule);
     void write(GPOS *h) override;
     uint16_t subformat() override { return 3; }
-    std::vector<PosLookupRecord> *getPosLookups() override {
+    std::vector<GPOS::PosLookupRecord> *getPosLookups() override {
         return &posLookupRecords;
     }
 
     std::vector<LOffset> backtracks;
     std::vector<LOffset> inputGlyphs;
     std::vector<LOffset> lookaheads;
-    std::vector<PosLookupRecord> posLookupRecords;
+    std::vector<GPOS::PosLookupRecord> posLookupRecords;
 };
 
 struct EntryExitRecord {

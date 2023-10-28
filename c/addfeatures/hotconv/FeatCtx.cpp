@@ -1122,7 +1122,7 @@ void FeatCtx::registerFeatureLangSys() {
                 g->ctx.GPOSp->LookupBegin(lkp.lkpType, lkp.lkpFlag,
                                           (Label)(lkp.label | REF_LAB),
                                           lkp.useExtension, lkp.markSetIndex);
-                g->ctx.GPOSp->LookupEnd(curr.feature);
+                g->ctx.GPOSp->LookupEnd();
             }
         }
         if (seenGSUB) {
@@ -1209,7 +1209,7 @@ void FeatCtx::closeFeatScriptLang(State &st) {
         GSUBFeatureEnd(g);
     } else if ( st.tbl == GPOS_ ) {
         if ( st.lkpType != 0 )
-            g->ctx.GPOSp->LookupEnd(st.feature);
+            g->ctx.GPOSp->LookupEnd();
         g->error_id_text[0] = '\0';
         g->ctx.GPOSp->FeatureEnd();
     }
