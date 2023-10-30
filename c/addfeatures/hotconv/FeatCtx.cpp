@@ -1102,13 +1102,13 @@ void FeatCtx::registerFeatureLangSys() {
         for (const auto &lkp : lookup) {
             if (lkp.tbl == GSUB_) {
                 if (!seenGSUB) {
-                    GSUBFeatureBegin(g, ls.first.script, ls.first.lang, curr.feature);
+                    g->ctx.GSUBp->FeatureBegin(ls.first.script, ls.first.lang, curr.feature);
                     seenGSUB = 1;
                 }
-                GSUBLookupBegin(g, lkp.lkpType, lkp.lkpFlag,
-                                (Label)(lkp.label | REF_LAB),
-                                lkp.useExtension, lkp.markSetIndex);
-                GSUBLookupEnd(g, curr.feature);
+                g->ctx.GSUBp->LookupBegin(lkp.lkpType, lkp.lkpFlag,
+                                          (Label)(lkp.label | REF_LAB),
+                                          lkp.useExtension, lkp.markSetIndex);
+                g->ctx.GSUBp->LookupEnd();
             } else {
                 /* lkp->tbl == GPOS_ */
                 if (!seenGPOS) {
@@ -1122,7 +1122,7 @@ void FeatCtx::registerFeatureLangSys() {
             }
         }
         if (seenGSUB) {
-            GSUBFeatureEnd(g);
+            g->ctx.GSUBp->FeatureEnd();
         }
         if (seenGPOS) {
             g->ctx.GPOSp->FeatureEnd();
@@ -1200,9 +1200,9 @@ void FeatCtx::closeFeatScriptLang(State &st) {
 
     if ( st.tbl == GSUB_ ) {
         if ( st.lkpType != 0 )
-            GSUBLookupEnd(g, st.feature);
+            g->ctx.GSUBp->LookupEnd();
         g->error_id_text[0] = '\0';
-        GSUBFeatureEnd(g);
+        g->ctx.GSUBp->FeatureEnd();
     } else if ( st.tbl == GPOS_ ) {
         if ( st.lkpType != 0 )
             g->ctx.GPOSp->LookupEnd();
@@ -1237,7 +1237,7 @@ void FeatCtx::subtableBreak() {
     }
 
     if (curr.tbl == GSUB_) {
-        retval = GSUBSubtableBreak(g);
+        retval = g->ctx.GSUBp->SubtableBreak();
     } else if (curr.tbl == GPOS_) {
         retval = g->ctx.GPOSp->SubtableBreak();
     } else {
@@ -1602,7 +1602,7 @@ void FeatCtx::addFeatureNameString(long platformId, long platspecId,
     /* all subsequent sizemenunames will share the same nameID.        */
     if (featNameID == 0) {
         nameID = nameReserveUserID(g);
-        GSUBSetFeatureNameID(g, curr.feature, nameID);
+        g->ctx.GSUBp->SetFeatureNameID(curr.feature, nameID);
         featNameID = nameID;
     } else {
         nameID = featNameID;
@@ -1614,7 +1614,7 @@ void FeatCtx::addFeatureNameString(long platformId, long platspecId,
 void FeatCtx::addFeatureNameParam() {
     prepRule(GSUB_, GSUBFeatureNameParam, NULL, NULL);
 
-    GSUBAddFeatureMenuParam(g, &featNameID);
+    g->ctx.GSUBp->AddFeatureNameParam(featNameID);
 
     wrapUpRule();
 }
@@ -1870,9 +1870,10 @@ void FeatCtx::prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
 
         /* Initiate calls to GSUB/GPOS */
         if (curr.tbl == GSUB_) {
-            GSUBFeatureBegin(g, curr.script, curr.language, curr.feature);
-            GSUBLookupBegin(g, curr.lkpType, curr.lkpFlag,
-                            curr.label, useExtension, curr.markSetIndex);
+            g->ctx.GSUBp->FeatureBegin(curr.script, curr.language,
+                                       curr.feature);
+            g->ctx.GSUBp->LookupBegin(curr.lkpType, curr.lkpFlag, curr.label,
+                                      useExtension, curr.markSetIndex);
         } else if (curr.tbl == GPOS_) {
             g->ctx.GPOSp->FeatureBegin(curr.script, curr.language, curr.feature);
             g->ctx.GPOSp->LookupBegin(curr.lkpType, curr.lkpFlag,
@@ -1908,7 +1909,7 @@ void FeatCtx::addGSUB(int lkpType, GNode *targ, GNode *repl) {
 
     prepRule(GSUB_, lkpType, targ, repl);
 
-    GSUBRuleAdd(g, targ, repl);
+    g->ctx.GSUBp->RuleAdd(targ, repl);
 
     wrapUpRule();
 }
@@ -2686,7 +2687,7 @@ void FeatCtx::addCVParametersCharValue(unsigned long uv) {
 void FeatCtx::addCVParam() {
     prepRule(GSUB_, GSUBCVParam, NULL, NULL);
 
-    GSUBAddCVParam(g, std::move(cvParameters));
+    g->ctx.GSUBp->AddCVParam(std::move(cvParameters));
 
     wrapUpRule();
 }
@@ -3023,52 +3024,51 @@ void FeatCtx::aaltCreate() {
 
     auto i = langSysMap.cbegin();
     assert(i != langSysMap.cend());
-    GSUBFeatureBegin(g, i->first.script, i->first.lang, aalt_);
+    g->ctx.GSUBp->FeatureBegin(i->first.script, i->first.lang, aalt_);
 
     /* --- Feed in single subs --- */
     if (sortTmp.begin() != single_end) {
         labelSingle = getNextAnonLabel();
-        GSUBLookupBegin(g, GSUBSingle, 0, labelSingle, aalt.useExtension, 0);
+        g->ctx.GSUBp->LookupBegin(GSUBSingle, 0, labelSingle, aalt.useExtension, 0);
         for (auto i = sortTmp.begin(); i != single_end; i++) {
-            GSUBRuleAdd(g, (*i)->targ, (*i)->repl);
+            g->ctx.GSUBp->RuleAdd((*i)->targ, (*i)->repl);
         }
-        GSUBLookupEnd(g, aalt_);
+        g->ctx.GSUBp->LookupEnd();
     }
 
     /* --- Feed in alt subs --- */
     if (single_end != sortTmp.end()) {
         labelAlternate = getNextAnonLabel();
-        GSUBLookupBegin(g, GSUBAlternate, 0, labelAlternate, aalt.useExtension, 0);
+        g->ctx.GSUBp->LookupBegin(GSUBAlternate, 0, labelAlternate, aalt.useExtension, 0);
         for (auto i = single_end; i != sortTmp.end(); i++) {
             aaltRuleSort(&(*i)->repl);  // sort alts in order of feature def
                                         // in aalt feature
-            GSUBRuleAdd(g, (*i)->targ, (*i)->repl);
+            g->ctx.GSUBp->RuleAdd((*i)->targ, (*i)->repl);
         }
-        GSUBLookupEnd(g, aalt_);
+        g->ctx.GSUBp->LookupEnd();
     }
 
-    GSUBFeatureEnd(g);
+    g->ctx.GSUBp->FeatureEnd();
 
     /* Also register these lookups under any other lang systems, if needed: */
     for (auto ls = langSysMap.cbegin(); ls != langSysMap.cend(); ls++) {
         if ( ls == langSysMap.cbegin() )
             continue;
 
-        GSUBFeatureBegin(g, ls->first.script, ls->first.lang, aalt_);
+        g->ctx.GSUBp->FeatureBegin(ls->first.script, ls->first.lang, aalt_);
 
         if (sortTmp.begin() != single_end) {
-            GSUBLookupBegin(g, GSUBSingle, 0, (Label)(labelSingle | REF_LAB),
-                            aalt.useExtension, 0);
-            GSUBLookupEnd(g, aalt_);
+            g->ctx.GSUBp->LookupBegin(GSUBSingle, 0, (Label)(labelSingle | REF_LAB),
+                                      aalt.useExtension, 0);
+            g->ctx.GSUBp->LookupEnd();
         }
         if (single_end != sortTmp.end()) {
-            GSUBLookupBegin(g, GSUBAlternate, 0,
-                            (Label)(labelAlternate | REF_LAB),
-                            aalt.useExtension, 0);
-            GSUBLookupEnd(g, aalt_);
+            g->ctx.GSUBp->LookupBegin(GSUBAlternate, 0,
+                                      (Label)(labelAlternate | REF_LAB),
+                                      aalt.useExtension, 0);
+            g->ctx.GSUBp->LookupEnd();
         }
-
-        GSUBFeatureEnd(g);
+        g->ctx.GSUBp->FeatureEnd();
     }
 }
 
@@ -3129,7 +3129,7 @@ void FeatCtx::storeRuleInfo(GNode *targ, GNode *repl) {
  * resulting sequences. pat is left intact; the client is responsible for
    recycling the result. */
 
-GNode **FeatCtx::makeCrossProduct(GNode *pat, unsigned *n) {
+GNode **FeatCtx::makeCrossProduct(GNode *pat, uint32_t *n) {
     GNode *cl;
 
     prod.clear();
@@ -3251,7 +3251,7 @@ std::string featMsgPrefix(hotCtx g) {
     return hctofc(g)->msgPrefix();
 }
 
-GNode **featMakeCrossProduct(hotCtx g, GNode *pat, unsigned *n) {
+GNode **featMakeCrossProduct(hotCtx g, GNode *pat, uint32_t *n) {
     return hctofc(g)->makeCrossProduct(pat, n);
 }
 
