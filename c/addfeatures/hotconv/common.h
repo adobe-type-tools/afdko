@@ -327,7 +327,6 @@ typedef struct mapCtx_ *mapCtx;
 typedef void *featVCtx;
 typedef struct cfrCtx_ *cfrCtx;
 typedef struct BASECtx_ *BASECtx;
-typedef struct GSUBCtx_ *GSUBCtx;
 typedef struct OS_2Ctx_ *OS_2Ctx;
 typedef struct STATCtx_ *STATCtx;
 typedef struct VORGCtx_ *VORGCtx;
@@ -343,8 +342,9 @@ typedef struct sfntCtx_ *sfntCtx;
 typedef struct vheaCtx_ *vheaCtx;
 typedef struct vmtxCtx_ *vmtxCtx;
 
-class GPOS;
 class GDEF;
+class GPOS;
+class GSUB;
 
 #define ID_TEXT_SIZE 1024 /* Size of text buffer used to hold identifying info about the current feature for error messages. */
 
@@ -362,7 +362,7 @@ struct hotCtx_ {
         BASECtx BASE;
         GDEF *GDEFp;
         GPOS *GPOSp;
-        GSUBCtx GSUB;
+        GSUB *GSUBp;
         OS_2Ctx OS_2;
         STATCtx STAT;
         VORGCtx VORG;

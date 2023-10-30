@@ -196,7 +196,7 @@ int featGetGlyphClassCount(hotCtx g, GNode *gc);
 
 unsigned int featGetPatternLen(hotCtx g, GNode *pat);
 void featGlyphClassSort(hotCtx g, GNode **list, int unique, int reportDups);
-GNode **featMakeCrossProduct(hotCtx g, GNode *pat, unsigned *n);
+GNode **featMakeCrossProduct(hotCtx g, GNode *pat, uint32_t *n);
 
 Label featGetNextAnonLabel(hotCtx g);
 
