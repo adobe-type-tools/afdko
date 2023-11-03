@@ -8,9 +8,11 @@
 
 #include "otl.h"
 
-#include <utility>
 #include <algorithm>
 #include <cstdio>
+#include <memory>
+#include <string>
+#include <utility>
 
 #include "OS_2.h"
 
@@ -974,11 +976,11 @@ void OTL::Header::lookupListWrite(hotCtx g, Offset lookupSize) {
 }
 
 void OTL::setAnonLookupIndices() {
-    for (auto &sub: subtables) {
+    for (auto &sub : subtables) {
         auto lv = sub->getLookups();
         if (lv == nullptr)
             continue;
-        for (auto &lr: *lv) {
+        for (auto &lr : *lv) {
             DF(2, (stderr, "lr: Label 0x%x", lr.LookupListIndex));
             lr.LookupListIndex = label2LookupIndex(lr.LookupListIndex);
             DF(2, (stderr, " -> LookupListIndex %u\n", lr.LookupListIndex));
