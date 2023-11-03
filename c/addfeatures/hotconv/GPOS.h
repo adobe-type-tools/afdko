@@ -402,6 +402,7 @@ class GPOS : public OTL {
     void AddParameters(const std::vector<uint16_t> &params);
     void SetSizeMenuNameID(uint16_t nameID);
     bool SubtableBreak();
+
  private:
     void reuseClassDefs();
     uint32_t makeValueFormat(SubtableInfo &si, int32_t xPla, int32_t yPla,
