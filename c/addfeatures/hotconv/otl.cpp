@@ -1,5 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-   This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
+   This software is licensed as OpenSource, under the Apache License, Version 2.0.
+   This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
 /*
  * Shared OpenType Layout support.
@@ -7,128 +8,13 @@
 
 #include "otl.h"
 
-#include <cassert>
-#include <algorithm>
 #include <utility>
+#include <algorithm>
+#include <cstdio>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "OS_2.h"
 
-
-#define FEAT_PARAM_ZERO 1
-
-#if HOT_DEBUG
-/* Initialize subtable. Not needed except for debug dumps */
-static void valDump(int16_t val, int16_t excep, bool isRef) {
-    if (val == excep) {
-        fprintf(stderr, "   * ");
-    } else if (isRef) {
-        fprintf(stderr, "   ->%hd ", val);
-    } else {
-        fprintf(stderr, "%4hd ", val);
-    }
-}
-
-static void tagDump(Tag tag, char ch) {
-    if (tag == TAG_UNDEF) {
-        fprintf(stderr, "****");
-    } else {
-        fprintf(stderr, "%c%c%c%c", TAG_ARG(tag));
-    }
-    if (ch != 0) {
-        fprintf(stderr, "%c", ch);
-    }
-}
-
-void otlTbl::Subtable::dump(std::vector<Subtable>::iterator sb) {
-    tagDump(script, ' ');
-    tagDump(language, ' ');
-    tagDump(feature, ' ');
-    fprintf(stderr, "   %2u/%hu|%-3x %4hx ",
-            lookup >> 16,
-            fmt,
-            lookup & 0xffff,
-            offset);
-    fprintf(stderr, "%4x ", label);
-
-    std::vector<Subtable>::iterator uninit;
-    valDump(span.script - sb, uninit - sb, 0);
-    valDump(span.language - sb, uninit - sb, 0);
-    valDump(span.feature - sb, uninit - sb, 0);
-    valDump(span.lookup - sb, uninit - sb, 0);
-    valDump(index.feature, -1, false);
-    valDump(index.lookup, -1, isRef());
-}
-
-void otlTbl::dumpSubtables() {
-    fprintf(stderr,
-            "# nCov: %ld, nClass: %ld; nCovReused: %d, nClassReused: %d\n"
-            "# [offs relative to start of subtable section]\n",
-            coverage.records.size(), classObj.records.size(),
-            coverage.reused, classObj.reused);
-    fprintf(stderr,
-            "      -----tag------ --look-----            -------span--------  --index--\n"
-            "      scri lang feat typ/fmt|flg offs  lab  scri lang feat look  feat look"
-            "\n");
-    uint32_t i = 0;
-    for (auto &sub : subtables) {
-        fprintf(stderr, "[%3d] ", i++);
-        sub.dump(subtables.begin());
-        fprintf(stderr, "\n");
-    }
-}
-
-/* Must call only after otlTableFill(). Returns total length of the Script-,
-   Feature-, and Lookup Lists, with all their associated structures (Script,
-   LangSys, Feature, Lookup). */
-LOffset otlTbl::getHeaderSize() {
-    return header.lookupOffset + lookupSize;
-}
-
-void otlTbl::dumpSizes(LOffset subtableSize, LOffset extensionSectionSize) {
-    LOffset s, tot = 0;
-
-    s = getHeaderSize();
-    tot += s;
-    DF(1, (stderr, "  Scr,Fea,Lkp lists:     size %5u, tot %5u\n", s, tot));
-
-    s = subtableSize;
-    tot += s;
-    DF(1, (stderr, "  Main subtable section: size %5u, tot %5u\n", s, tot));
-
-    s = getCoverageSize();
-    tot += s;
-    DF(1, (stderr, "  Main coverage section: size %5u, tot ", s));
-    if (s != 0) {
-        DF(1, (stderr, "%5u\n", tot));
-    } else {
-        DF(1, (stderr, "    \"\n"));
-    }
-
-    s = getClassSize();
-    tot += s;
-    DF(1, (stderr, "  Main class section:    size %5u, tot ", s));
-    if (s != 0) {
-        DF(1, (stderr, "%5u\n", tot));
-    } else {
-        DF(1, (stderr, "    \"\n"));
-    }
-
-    s = extensionSectionSize;
-    tot += s;
-    DF(1, (stderr, "  Extension section:     size %5u, tot ", s));
-    if (s != 0) {
-        DF(1, (stderr, "%5u\n", tot));
-    } else {
-        DF(1, (stderr, "    \"\n"));
-    }
-}
-
-#endif /* HOT_DEBUG */
-
-/* --------------------------- Standard Functions -------------------------- */
-
-otlTbl::CoverageRecord::CoverageRecord(Offset o, std::set<GID> &gl) : offset(o) {
+CoverageAndClass::CoverageRecord::CoverageRecord(Offset o, std::set<GID> &gl) : offset(o) {
     glyphs.swap(gl);
 
     uint16_t i = 0;
@@ -151,52 +37,43 @@ otlTbl::CoverageRecord::CoverageRecord(Offset o, std::set<GID> &gl) : offset(o) 
         ranges.clear();
 }
 
-/* Write format 1 table */
-void otlTbl::CoverageRecord::write(otlTbl &t) {
+void CoverageAndClass::CoverageRecord::write(hotCtx g) {
     if (ranges.size() > 0) {  // format 2
-        t.o2(2);
-        t.o2(ranges.size());
+        hotOut2(g, 2);
+        hotOut2(g, ranges.size());
         for (auto &range : ranges) {
-            t.o2(range.Start);
-            t.o2(range.End);
-            t.o2(range.startCoverageIndex);
+            hotOut2(g, range.Start);
+            hotOut2(g, range.End);
+            hotOut2(g, range.startCoverageIndex);
         }
     } else {  // format 1
-        t.o2(1);
-        t.o2(glyphs.size());
+        hotOut2(g, 1);
+        hotOut2(g, glyphs.size());
         for (auto gid : glyphs)
-            t.o2(gid);
+            hotOut2(g, gid);
     }
 }
 
-/* Fill coverage table */
-Offset otlTbl::Coverage::fill(otlTbl &t) {
-    records.emplace_back(size, current);
-    size += records.back().size();
+Offset CoverageAndClass::coverageFill() {
+    coverage.records.emplace_back(coverage.size, coverage.current);
+    coverage.size += coverage.records.back().size();
 
-    if (size > 0xFFFF)
-        hotMsg(t.g, hotFATAL, "coverage section too large (%0x)", size);
+    if (coverage.size > 0xFFFF)
+        hotMsg(g, hotFATAL, "coverage section too large (%0x)", coverage.size);
 
-    return records.back().offset;
+    return coverage.records.back().offset;
 }
 
-void otlTbl::Coverage::write(otlTbl &t) {
-    for (auto &record : records)
-        record.write(t);
+void CoverageAndClass::coverageWrite() {
+    for (auto &record : coverage.records)
+        record.write(g);
 }
 
-/* Write all coverage tables */
-void otlTbl::coverageWrite() {
-    coverage.write(*this);
-}
-
-/* Begin new coverage table */
-void otlTbl::coverageBegin() {
+void CoverageAndClass::coverageBegin() {
     coverage.current.clear();
 }
 
-/* Add coverage glyph */
-void otlTbl::coverageAddGlyph(GID gid, bool warn) {
+void CoverageAndClass::coverageAddGlyph(GID gid, bool warn) {
     auto [i, b] = coverage.current.insert(gid);
     if (!b) {
         if (warn) {
@@ -209,8 +86,7 @@ void otlTbl::coverageAddGlyph(GID gid, bool warn) {
     }
 }
 
-/* End coverage table; uniqueness of GIDs up to client. Sorting done here. */
-Offset otlTbl::coverageEnd() {
+Offset CoverageAndClass::coverageEnd() {
     for (auto &record : coverage.records) {
         if (record.glyphs == coverage.current) {
 #if HOT_DEBUG
@@ -229,18 +105,10 @@ Offset otlTbl::coverageEnd() {
         }
     }
 
-    return coverage.fill(*this);
+    return coverageFill();
 }
 
-/* Returns total length of the coverage section, for all coverages currently
-   defined. */
-LOffset otlTbl::getCoverageSize() {
-    return coverage.size;
-}
-
-/* ---------------------------- Class Functions ---------------------------- */
-
-otlTbl::ClassRecord::ClassRecord(Offset o, std::map<GID, uint16_t> &m) : offset(o) {
+CoverageAndClass::ClassRecord::ClassRecord(Offset o, std::map<GID, uint16_t> &m) : offset(o) {
     map.swap(m);
 
     if (map.empty())
@@ -273,57 +141,49 @@ otlTbl::ClassRecord::ClassRecord(Offset o, std::map<GID, uint16_t> &m) : offset(
     }
 }
 
-void otlTbl::ClassRecord::write(otlTbl &t) {
+void CoverageAndClass::ClassRecord::write(hotCtx g) {
     if (values.empty()) {  // Format 2
-        t.o2(2);
-        t.o2(ranges.size());
+        hotOut2(g, 2);
+        hotOut2(g, ranges.size());
         for (auto &range : ranges) {
-            t.o2(range.Start);
-            t.o2(range.End);
-            t.o2(range.classId);
+            hotOut2(g, range.Start);
+            hotOut2(g, range.End);
+            hotOut2(g, range.classId);
         }
     } else {  // Format 1
         assert(startGlyph != GID_UNDEF && ranges.size() == 0);
-        t.o2(1);
-        t.o2(startGlyph);
-        t.o2(values.size());
+        hotOut2(g, 1);
+        hotOut2(g, startGlyph);
+        hotOut2(g, values.size());
         for (auto classIndex : values)
-            t.o2(classIndex);
+            hotOut2(g, classIndex);
     }
 }
 
-/* Fill coverage table */
-Offset otlTbl::Class::fill(otlTbl &t) {
-    records.emplace_back(size, current);
-    size += records.back().size();
+Offset CoverageAndClass::classFill() {
+    cls.records.emplace_back(cls.size, cls.current);
+    cls.size += cls.records.back().size();
 
-    if (size > 0xFFFF) {
-        hotMsg(t.g, hotFATAL, "class section too large (%0x)", size);
+    if (cls.size > 0xFFFF) {
+        hotMsg(g, hotFATAL, "class section too large (%0x)", cls.size);
     }
 
-    return records.back().offset;
+    return cls.records.back().offset;
 }
 
-void otlTbl::Class::write(otlTbl &t) {
-    for (auto &record : records)
-        record.write(t);
+void CoverageAndClass::classWrite() {
+    for (auto &record : cls.records)
+        record.write(g);
 }
 
-/* Write all coverage tables */
-void otlTbl::classWrite() {
-    classObj.write(*this);
+void CoverageAndClass::classBegin() {
+    cls.current.clear();
 }
 
-/* Begin new coverage table */
-void otlTbl::classBegin() {
-    classObj.current.clear();
-}
-
-/* Add class mapping; ignore class 0's */
-void otlTbl::classAddMapping(GID gid, uint32_t classId) {
+void CoverageAndClass::classAddMapping(GID gid, uint32_t classId) {
     if (classId == 0)
         return;
-    auto [i, b] = classObj.current.insert({gid, classId});
+    auto [i, b] = cls.current.insert({gid, classId});
     if (!b) {
 #if HOT_DEBUG
         printf("duplicated glyph ['%d'] in class mapping.\n", gid);
@@ -331,12 +191,11 @@ void otlTbl::classAddMapping(GID gid, uint32_t classId) {
     }
 }
 
-/* End class table */
-Offset otlTbl::classEnd() {
-    for (auto &record : classObj.records) {
-        if (record.map == classObj.current) {
+Offset CoverageAndClass::classEnd() {
+    for (auto &record : cls.records) {
+        if (record.map == cls.current) {
 #if HOT_DEBUG
-            classObj.reused++;
+            cls.reused++;
 #if 0
             if (DF_LEVEL >= 2) {
                 auto lasti = classObj.current.rbegin();
@@ -352,13 +211,155 @@ Offset otlTbl::classEnd() {
         }
     }
 
-    return classObj.fill(*this);
+    return classFill();
 }
 
-/* Returns total length of the class section, for all classes currently
-   defined. */
-LOffset otlTbl::getClassSize() {
-    return classObj.size;
+#if HOT_DEBUG
+
+void CoverageAndClass::dump() {
+    fprintf(stderr,
+            "# nCov: %ld, nClass: %ld; nCovReused: %d, nClassReused: %d\n"
+            "# [offs relative to start of subtable section]\n",
+            coverage.records.size(), cls.records.size(),
+            coverage.reused, cls.reused);
+}
+#endif
+
+#define FEAT_PARAM_ZERO 1
+
+#if HOT_DEBUG
+/* Initialize subtable. Not needed except for debug dumps */
+void OTL::valDump(int16_t val, int16_t excep, bool isRef) {
+    if (val == excep) {
+        fprintf(stderr, "   * ");
+    } else if (isRef) {
+        fprintf(stderr, "   ->%hd ", val);
+    } else {
+        fprintf(stderr, "%4hd ", val);
+    }
+}
+
+void OTL::tagDump(Tag tag, char ch) {
+    if (tag == TAG_UNDEF) {
+        fprintf(stderr, "****");
+    } else {
+        fprintf(stderr, "%c%c%c%c", TAG_ARG(tag));
+    }
+    if (ch != 0) {
+        fprintf(stderr, "%c", ch);
+    }
+}
+
+void OTL::Subtable::dump(typename std::vector<std::unique_ptr<Subtable>>::iterator sb,
+                         uint32_t extLkpType) {
+    tagDump(script, ' ');
+    tagDump(language, ' ');
+    tagDump(feature, ' ');
+    fprintf(stderr, "   %2u/%hu|%-3x %4hx ",
+            isExt() ? extLkpType : (uint32_t)lkpType,
+            fmt(),
+            (uint32_t)lkpFlag,
+            offset);
+    fprintf(stderr, "%4x ", label);
+
+    typename std::vector<std::unique_ptr<Subtable>>::iterator uninit;
+    valDump(span.script - sb, uninit - sb, false);
+    valDump(span.language - sb, uninit - sb, false);
+    valDump(span.feature - sb, uninit - sb, false);
+    valDump(span.lookup - sb, uninit - sb, false);
+    valDump(index.feature, -1, false);
+    valDump(index.lookup, -1, isRef());
+}
+
+void OTL::dumpSubtables() {
+    cac->dump();
+    fprintf(stderr,
+            "      -----tag------ --look-----            -------span--------  --index--\n"
+            "      scri lang feat typ/fmt|flg offs  lab  scri lang feat look  feat look"
+            "\n");
+    uint32_t i = 0;
+    for (auto &sub : subtables) {
+        fprintf(stderr, "[%3d] ", i++);
+        sub->dump(subtables.begin(), extLkpType);
+        fprintf(stderr, "\n");
+    }
+}
+
+/* Must call only after otlTableFill(). Returns total length of the Script-,
+   Feature-, and Lookup Lists, with all their associated structures (Script,
+   LangSys, Feature, Lookup). */
+LOffset OTL::getHeaderSize() {
+    return header.lookupOffset + lookupSize;
+}
+
+void OTL::dumpSizes(LOffset subtableSize, LOffset extensionSectionSize) {
+    LOffset s, tot = 0;
+
+    s = getHeaderSize();
+    tot += s;
+    DF(1, (stderr, "  Scr,Fea,Lkp lists:     size %5u, tot %5u\n", s, tot));
+
+    s = subtableSize;
+    tot += s;
+    DF(1, (stderr, "  Main subtable section: size %5u, tot %5u\n", s, tot));
+
+    s = cac->coverageSize();
+    tot += s;
+    DF(1, (stderr, "  Main coverage section: size %5u, tot ", s));
+    if (s != 0) {
+        DF(1, (stderr, "%5u\n", tot));
+    } else {
+        DF(1, (stderr, "    \"\n"));
+    }
+
+    s = cac->classSize();
+    tot += s;
+    DF(1, (stderr, "  Main class section:    size %5u, tot ", s));
+    if (s != 0) {
+        DF(1, (stderr, "%5u\n", tot));
+    } else {
+        DF(1, (stderr, "    \"\n"));
+    }
+
+    s = extensionSectionSize;
+    tot += s;
+    DF(1, (stderr, "  Extension section:     size %5u, tot ", s));
+    if (s != 0) {
+        DF(1, (stderr, "%5u\n", tot));
+    } else {
+        DF(1, (stderr, "    \"\n"));
+    }
+}
+
+#endif /* HOT_DEBUG */
+
+void OTL::Subtable::ExtensionFormat1::write(hotCtx g, uint16_t lkpType, LOffset adjust) {
+    offset += adjust;
+    DF(1, (stderr, "  Extension: fmt=%1d, lkpType=%2d, offset=%08ux\n",
+           subformat(), lkpType, offset));
+
+    hotOut2(g, subformat());
+    hotOut2(g, lkpType);
+    hotOut4(g, offset);
+}
+
+OTL::Subtable::Subtable(OTL *otl, SubtableInfo *si, std::string &id_text,
+                        bool isFeatParam) :
+                          script(si->script), language(si->language),
+                          feature(si->feature), useExtension(si->useExtension),
+                          lkpType(si->lkpType), lkpFlag(si->lkpFlag),
+                          markSetIndex(si->markSetIndex),
+                          offset(IS_REF_LAB(si->label) ? 0 : isFeatParam ? otl->offset.featParam : otl->offset.subtable),
+                          label(si->label),
+                          seenInFeature(feature != TAG_STAND_ALONE),
+                          isFeatParam(isFeatParam), id_text(id_text) {
+    if (isExt() && !isRef()) {
+        cac = std::make_shared<CoverageAndClass>(otl->g);
+        extension.offset = otl->extOffset();
+        otl->incSubOffset(extension.size());
+    } else {
+        cac = otl->cac;
+    }
 }
 
 /* ---------------------------- Table Functions ---------------------------- */
@@ -366,7 +367,7 @@ LOffset otlTbl::getClassSize() {
 /* Returns the lookup index associated with baselabel (which should not have
    the reference bit set). May be called from outside this module only after
    otlTableFill() */
-int32_t otlTbl::label2LookupIndex(Label baseLabel) {
+int32_t OTL::label2LookupIndex(Label baseLabel) {
     auto li = labelMap.find(baseLabel);
     if (li == labelMap.end())
         hotMsg(g, hotFATAL, "(internal) label 0x%x not found", baseLabel);
@@ -379,9 +380,8 @@ int32_t otlTbl::label2LookupIndex(Label baseLabel) {
 /* Calculate LookupList indexes. Granularity of lookups has already been
    determined by the client of this module by labels. Prepare the label ->
    lkpInx mapping */
-void otlTbl::calcLookupListIndices() {
-    std::stable_sort(subtables.begin(), subtables.end(),
-                     Subtable::ltLookupList);
+void OTL::calcLookupListIndices() {
+    std::stable_sort(subtables.begin(), subtables.end(), Subtable::ltLookupList);
 
     /* Process all regular subtables and subtables with feature parameters.          */
     /* We want the lookups indices to be ordered in the order that they were created */
@@ -389,58 +389,61 @@ void otlTbl::calcLookupListIndices() {
     int prevLabel = -1;
     int indexCnt = 0;
     auto si = subtables.begin();
-    for (; si != subtables.end() && !si->isRef(); si++) {
-        if (si->label != prevLabel) {
+    for (; si != subtables.end() && !(*si)->isRef(); si++) {
+        auto &s = **si;
+        if (s.label != prevLabel) {
             /* Label i.e. lookup change. Store lab -> lookupInx info in this first subtable of the span of tables with the same label.  */
-            if (si->isFeatParam) {
-                si->index.lookup = -1;
+            if (s.isParam()) {
+                s.index.lookup = -1;
             } else {
-                si->index.lookup = indexCnt++;
+                s.index.lookup = indexCnt++;
             }
-            auto [li, b] = labelMap.emplace(si->label, si->index.lookup);
-            if (!b) {
+            auto [li, b] = labelMap.emplace(s.label, s.index.lookup);
+            if (!b)
                 hotMsg(g, hotFATAL, "[internal] duplicate subtable label encountered");
-            }
         } else {
-            si->index.lookup = indexCnt - 1;
+            s.index.lookup = indexCnt - 1;
         }
-        prevLabel = si->label;
+        prevLabel = s.label;
     }
 
     /* Fill the index of any reference subtables (sorted at end) */
-    for (; si != subtables.end(); si++)
-        si->index.lookup = label2LookupIndex(si->label & ~REF_LAB);
+    for (; si != subtables.end(); si++) {
+        auto &s = **si;
+        s.index.lookup = label2LookupIndex(s.label & ~REF_LAB);
+    }
 }
 
 /* Calculate feature indexes */
-void otlTbl::calcFeatureListIndices() {
+void OTL::calcFeatureListIndices() {
     /* Determine granularity of features */
-    std::stable_sort(subtables.begin(), subtables.end(),
-                     Subtable::ltScriptList);
+    std::stable_sort(subtables.begin(), subtables.end(), Subtable::ltScriptList);
 
     /* Assign temporary feature indexes according to feature granularity (i.e. */
     /* same script, language & feature), disregarding whether reference or has */
-    /* parameters or not                                                       */
+    /* earameters or not                                                       */
     auto previ = subtables.begin();
-    previ->index.feature = 0;
-    for (auto si = previ + 1; si != subtables.end() && !si->isAnon() &&
-                              !si->isStandAlone();
+    (*previ)->index.feature = 0;
+    for (auto si = previ + 1; si != subtables.end() && !(*si)->isAnon() &&
+                              !(*si)->isStandAlone();
                               previ = si, si++) {
-        if (si->script != previ->script || si->language != previ->language ||
-              si->feature != previ->feature) {
-            si->index.feature = previ->index.feature + 1;
+        auto &s = **si;
+        auto &p = **previ;
+        if (s.script != p.script || s.language != p.language || s.feature != p.feature) {
+            s.index.feature = p.index.feature + 1;
         } else {
-            si->index.feature = previ->index.feature;
+            s.index.feature = p.index.feature;
         }
     }
 
     /* Sort in final feature order */
-    std::stable_sort(subtables.begin(), subtables.end());
+    std::stable_sort(subtables.begin(), subtables.end(), Subtable::ltFeatureList);
 
     /* Assign final feature indexes */
     int prevIndex = -2;
     int curIndex = -1;
-    for (auto &s : subtables) {
+    for (auto &sub : subtables) {
+        auto &s = *sub;
         if (s.isAnon() || s.isStandAlone())
             continue;
         if (s.index.feature != prevIndex) {
@@ -454,29 +457,28 @@ void otlTbl::calcFeatureListIndices() {
 }
 
 /* Calculate script, language, and index.feature spans */
-void otlTbl::prepScriptList() {
-    std::stable_sort(subtables.begin(), subtables.end(),
-                     Subtable::ltScriptList);
+void OTL::prepScriptList() {
+    std::stable_sort(subtables.begin(), subtables.end(), Subtable::ltScriptList);
 
     auto prevs = subtables.begin();
     for (auto ss = prevs + 1; ss <= subtables.end(); ss++) {
-        if (ss == subtables.end() || ss->isAnon() || ss->isStandAlone() ||
-            ss->script != prevs->script) {
+        if (ss == subtables.end() || (*ss)->isAnon() || (*ss)->isStandAlone() ||
+            (*ss)->script != (*prevs)->script) {
             // script change
-            prevs->span.script = ss;
+            (*prevs)->span.script = ss;
 
             auto prevl = prevs;
             for (auto sl = prevl + 1; sl <= ss ; sl++) {
-                if (sl == ss || sl->language != prevl->language) {
+                if (sl == ss || (*sl)->language != (*prevl)->language) {
                     // language change
-                    prevl->span.language = sl;
+                    (*prevl)->span.language = sl;
 
                     auto prevf = prevl;
                     for (auto sf = prevf + 1; sf <= sl ; sf++) {
                         if (sf == sl ||
-                            sf->index.feature != prevf->index.feature) {
+                            (*sf)->index.feature != (*prevf)->index.feature) {
                             // feature index change
-                            prevf->span.feature = sf;
+                            (*prevf)->span.feature = sf;
                             prevf = sf;
                         }
                     }
@@ -485,59 +487,58 @@ void otlTbl::prepScriptList() {
             }
             prevs = ss;
         }
-        if (ss->isAnon() || ss->isStandAlone())
+        if (ss != subtables.end() && ((*ss)->isAnon() || (*ss)->isStandAlone()))
             break;
     }
 }
 
 /* Fill language system record */
-Offset otlTbl::LangSys::fill(Offset o, std::vector<Subtable>::iterator sl) {
+Offset OTL::LangSys::fill(Offset o, typename std::vector<std::unique_ptr<Subtable>>::iterator sl) {
     /* Fill record */
     LookupOrder = NULL_OFFSET;
     ReqFeatureIndex = 0xffff; /* xxx unsupported at present */
     offset = o;
-    LangSysTag = sl->language;
+    LangSysTag = (*sl)->language;
 
-    for (auto sf = sl; sf != sl->span.language; sf = sf->span.feature)
-        featureIndices.push_back(sf->index.feature);
+    for (auto sf = sl; sf != (*sl)->span.language; sf = (*sf)->span.feature)
+        featureIndices.push_back((*sf)->index.feature);
 
     return size(featureIndices.size());
 }
 
-/* Fill ScriptList */
-Offset otlTbl::fillScriptList() {
+Offset OTL::fillScriptList() {
     auto spanEnd = subtables.end() - (nAnonSubtables + nStandAloneSubtables);
     if (subtables.size() == 0 || spanEnd == subtables.begin())
         return Script::listSize(0);
 
     int nScripts {0};
-    for (auto ss = subtables.begin(); ss != spanEnd; ss = ss->span.script)
+    for (auto ss = subtables.begin(); ss != spanEnd; ss = (*ss)->span.script)
         nScripts++;
 
     Offset oScriptList = Script::listSize(nScripts);
 
     /* Build table */
-    for (auto ss = subtables.begin(); ss != spanEnd; ss = ss->span.script) {
-        Script script {oScriptList, ss->script};
+    for (auto ss = subtables.begin(); ss != spanEnd; ss = (*ss)->span.script) {
+        Script script {oScriptList, (*ss)->script};
 
         int nLanguages = 0;
-        for (auto sl = ss; sl != ss->span.script; sl = sl->span.language)
+        for (auto sl = ss; sl != (*ss)->span.script; sl = (*sl)->span.language)
             nLanguages++;
 
         Offset oScript {0};
         auto slb = ss;
-        if (slb->language == dflt_) {
+        if ((*slb)->language == dflt_) {
             nLanguages--;
             oScript = script.size(nLanguages);
             /* Fill default language system record */
             oScript += script.defaultLangSys.fill(oScript, slb);
-            slb = slb->span.language;
+            slb = (*slb)->span.language;
         } else {
             oScript = script.size(nLanguages);
         }
 
         /* Fill languages system records */
-        for (auto sl = slb; sl != ss->span.script; sl = sl->span.language) {
+        for (auto sl = slb; sl != (*ss)->span.script; sl = (*sl)->span.language) {
             LangSys ls;
             oScript += ls.fill(oScript, sl);
             script.langSystems.emplace_back(std::move(ls));
@@ -553,52 +554,51 @@ Offset otlTbl::fillScriptList() {
 /* Sort; span by feature index and lookup index. Caution: overwrites
    span.feature from prepScriptList().
  */
-void otlTbl::prepFeatureList() {
-    std::stable_sort(subtables.begin(), subtables.end());
+void OTL::prepFeatureList() {
+    std::stable_sort(subtables.begin(), subtables.end(), Subtable::ltFeatureList);
 
     auto prevf = subtables.begin();
     for (auto sf = prevf + 1; sf <= subtables.end(); sf++) {
-        /* This logic steps through the  t->subtable.array.                                                         */
-        /* Whenever it encounters a new feature subtable.array[fea].index.feature index,                            */
-        /* it stores the current subtable index in the first subtable of the sequence of subtables that             */
-        /* had the previous subtable index. The array is this divided into sequences of subtables with the          */
-        /* same index.feature, and the span.feature of the first subtable in the index gives the index of the first */
+        // Whenever we encounter new feature index, store the current subtable
+        // index in the first subtable of the sequence of subtables that
+        // had the previous subtable index. The array is this divided into
+        // sequences of subtables with the same index.feature, and the
+        // span.feature of the first subtable in the index gives the index of the first
         /* subtable in the next run.                                                                                */
         /* The same is then done for sequences of subtables with the same index.lookup                              */
         /* within the previous sequence of subtables with the same same index.feature.                              */
-        if (sf == subtables.end() || sf->isStandAlone() || sf->isAnon() ||
-            sf->index.feature != prevf->index.feature) {
+        if (sf == subtables.end() || (*sf)->isStandAlone() || (*sf)->isAnon() ||
+            (*sf)->index.feature != (*prevf)->index.feature) {
             // feature index change
-            prevf->span.feature = sf;
+            (*prevf)->span.feature = sf;
 
             auto prevl = prevf;
             for (auto sl = prevl + 1; sl <= sf; sl++) {
-                if (sl == sf || sl->index.lookup != prevl->index.lookup) {
+                if (sl == sf || (*sl)->index.lookup != (*prevl)->index.lookup) {
                     // lookup index change
-                    prevl->span.lookup = sl;
+                    (*prevl)->span.lookup = sl;
                     prevl = sl;
                 }
             }
             prevf = sf;
         }
-        if (sf->isStandAlone() || sf->isAnon())
+        if (sf != subtables.end() && ((*sf)->isStandAlone() || (*sf)->isAnon()))
             break;
     }
 }
 
-/* Fill FeatureList */
-Offset otlTbl::findFeatParamOffset(Tag featTag, Label featLabel) {
+Offset OTL::findFeatParamOffset(Tag featTag, Label featLabel) {
     Label matchLabel = (Label)(featLabel & ~REF_LAB);
 
     for (auto &s : subtables) {
-        if (s.feature == featTag && s.label == matchLabel)
-            return s.offset;
+        if (s->feature == featTag && s->label == matchLabel)
+            return s->offset;
     }
 
     return 0;
 }
 
-Offset otlTbl::fillFeatureList() {
+Offset OTL::fillFeatureList() {
     // This works because prepFeature has sorted the subtables so that
     // Anonymous subtables are last, preceded by Stand-Alone subtables
     auto spanEnd = subtables.end() - (nAnonSubtables + nStandAloneSubtables);
@@ -606,36 +606,37 @@ Offset otlTbl::fillFeatureList() {
         return Feature::listSize(0);
 
     auto last = spanEnd - 1;
-    int nFeatures = last->index.feature + 1;
+    int nFeatures = (*last)->index.feature + 1;
 
     /* Allocate features */
     header.features.reserve(nFeatures);
     Offset oFeatureList = Feature::listSize(nFeatures);
 
     /* Build table */
-    for (auto sf = subtables.begin(); sf != spanEnd; sf = sf->span.feature) {
-        Feature f {oFeatureList, sf->feature};
+    for (auto sf = subtables.begin(); sf != spanEnd; sf = (*sf)->span.feature) {
+        Feature f {oFeatureList, (*sf)->feature};
 
         /* sub is is the first subtable in a run of subtables with the same feature table index.                       */
         /* sub->span.feature is the array index for the first subtable with a different feature table index.           */
         /* This field is NOT set in any of the other subtables in the current run.                                     */
         /* Within the current run, the first subtable of a sequence with the same lookup table index                   */
         /* span.lookup set to the first subtable of the next sequence with a different lookup index or feature index.  */
-        for (auto sl = sf; sl != sf->span.feature; sl = sl->span.lookup) {
-            if (sl->isParam()) {
+        for (auto sl = sf; sl != (*sf)->span.feature; sl = (*sl)->span.lookup) {
+            auto &slr = *sl;
+            if (slr->isParam()) {
                 if (f.featureParams != NULL_OFFSET) {
-                    hotMsg(g, hotFATAL, "GPOS feature '%c%c%c%c' has more "
+                    hotMsg(g, hotFATAL, "%s feature '%c%c%c%c' has more "
                                         "than one FeatureParameter subtable! ",
-                                        TAG_ARG(f.FeatureTag));
+                                        objName(), TAG_ARG(f.FeatureTag));
                 }
-                if (sl->isRef())
-                    f.featureParams = findFeatParamOffset(sl->feature, sl->label);
+                if (slr->isRef())
+                    f.featureParams = findFeatParamOffset(slr->feature, slr->label);
                 else
-                    f.featureParams = sl->offset; /* Note! this is only the offset from the start of the subtable block that follows the lookupList */
+                    f.featureParams = slr->offset; /* Note! this is only the offset from the start of the subtable block that follows the lookupList */
                 if (f.featureParams == 0)
                     f.featureParams = FEAT_PARAM_ZERO;
             } else {
-                f.lookupIndices.push_back(sl->index.lookup);
+                f.lookupIndices.push_back(slr->index.lookup);
             }
         }
 
@@ -646,7 +647,7 @@ Offset otlTbl::fillFeatureList() {
     return oFeatureList;
 }
 
-void otlTbl::fixFeatureParamOffsets(Offset shortfeatureParamBaseOffset) {
+void OTL::fixFeatureParamOffsets(Offset shortfeatureParamBaseOffset) {
     for (auto &f : header.features) {
         if (f.featureParams != 0) {
             /* Undo fix so we can tell the diff between feature->FeatureParam==NULL_OFFSET, */
@@ -665,32 +666,33 @@ void otlTbl::fixFeatureParamOffsets(Offset shortfeatureParamBaseOffset) {
     }
 }
 
-void otlTbl::prepLookupList() {
-    std::stable_sort(subtables.begin(), subtables.end(),
-                     Subtable::ltLookupList);
+void OTL::prepLookupList() {
+    std::stable_sort(subtables.begin(), subtables.end(), Subtable::ltLookupList);
 
     auto prevl = subtables.begin();
     for (auto sl = prevl + 1; sl <= subtables.end(); sl++) {
-        if (sl == subtables.end() || sl->isRef() || sl->isParam() ||
-            sl->index.lookup != prevl->index.lookup) {
+        auto &slr = *sl;
+        auto &prevlr = *prevl;
+        if (sl == subtables.end() || slr->isRef() || slr->isParam() ||
+            slr->index.lookup != prevlr->index.lookup) {
             /* Lookup index change */
-            prevl->span.lookup = sl;
+            prevlr->span.lookup = sl;
             prevl = sl;
         }
-        if (sl->isRef() || sl->isParam())
+        if (sl != subtables.end() && (slr->isRef() || slr->isParam()))
             break;
     }
 }
 
-Offset otlTbl::fillLookupList() {
+Offset OTL::fillLookupList() {
     int nLookups = 0;
     auto spanEnd = subtables.end() - (nRefLookups + nFeatParams);
 
     if (spanEnd != subtables.begin()) {
-        // can  have 0 lookups when there is only a GPOS 'size' feature,
+        // can have 0 lookups when there is only a 'size' feature,
         // and no other features.
         auto last = spanEnd - 1;
-        nLookups = last->index.lookup + 1;
+        nLookups = (*last)->index.lookup + 1;
     }
 
     DF(2, (stderr, ">OTL: %d lookup%s allocated (%d ref%s skipped)\n",
@@ -702,15 +704,16 @@ Offset otlTbl::fillLookupList() {
     Offset oLookupList = Lookup::listSize(nLookups);
 
     /* Build table */
-    for (auto sl = subtables.begin(); sl < spanEnd; sl = sl->span.lookup) {
-        Lookup lookup {oLookupList, sl->lookup};
+    for (auto sl = subtables.begin(); sl < spanEnd; sl = (*sl)->span.lookup) {
+        auto &l = *sl;
+        Lookup lookup {oLookupList, l->isExt() ? extLkpType : l->lkpType, l->lkpFlag};
 
-        for (auto si = sl; si != sl->span.lookup; si++)
-            lookup.subtableOffsets.push_back(si->offset - oLookupList);
+        for (auto si = sl; si != (*sl)->span.lookup; si++)
+            lookup.subtableOffsets.push_back((*si)->offset - oLookupList);
 
         oLookupList += lookup.size(lookup.subtableOffsets.size());
         if (lookup.Flag & otlUseMarkFilteringSet) {
-            lookup.useMarkSetIndex = sl->markSetIndex;
+            lookup.useMarkSetIndex = (*sl)->markSetIndex;
             oLookupList += sizeof(lookup.useMarkSetIndex);
         }
         header.lookups.emplace_back(std::move(lookup));
@@ -719,39 +722,91 @@ Offset otlTbl::fillLookupList() {
     return oLookupList;
 }
 
-void otlTbl::checkStandAloneRefs() {
+void OTL::checkStandAloneRefs() {
     std::map<int32_t, bool> revUsedMap;
     for (auto li : labelMap)
         revUsedMap.emplace(li.second.lookupInx, li.second.used);
 
     // Now go back through all the real subtables, and check that
     // the stand-alone ones have been referenced.
-    for (auto s : subtables) {
-        if (s.isAnon() || s.isRef())
+    for (auto &s : subtables) {
+        if (s->isAnon() || s->isRef())
             continue;
-        if (s.seenInFeature)
+        if (s->seenInFeature)
             continue;
-        auto rli = revUsedMap.find(s.index.lookup);
+        auto rli = revUsedMap.find(s->index.lookup);
         if (rli == revUsedMap.end())
-            hotMsg(g, hotFATAL, "Base lookup %d not found", s.index.lookup);
-        s.seenInFeature = rli->second;
-        if (!s.seenInFeature)
+            hotMsg(g, hotFATAL, "Base lookup %d not found", s->index.lookup);
+        s->seenInFeature = rli->second;
+        if (!s->seenInFeature)
             hotMsg(g, hotWARNING, "Stand-alone lookup with Lookup Index %d "
                    "was not referenced from within any feature, and will "
-                   "never be used.", s.index.lookup);
+                   "never be used.", s->index.lookup);
     }
 }
 
-void otlTbl::fill(LOffset params_size) {
-    Offset offset = header.size();
+void OTL::checkOverflow(const char* offsetType, long offset, const char* posType) {
+    if (offset > 0xFFFF) {
+        hotMsg(g, hotFATAL,
+               "In %s %s rules cause an offset overflow (0x%lx) to a %s",
+               g->error_id_text.c_str(), posType, offset, offsetType);
+    }
+}
+
+    /* The font tables are in the order:
+     ScriptList
+     FeatureList
+     FeatureParams
+     LookupList
+     lookup subtables (with aalt subtables written last)
+     anon subtables (lookup subtables created by contextual rules)
+     coverage definition tables
+     class definition tables
+     extension sections.
+     Notes:
+     All directly defined lookup subtables are added in the order that they are
+     created by the feature file. The only exceptions are the subtables for
+     the aalt lookups, and anonymous subtables. 'aalt'subtables' are created
+     after the end of feature file parsing, in feat.c:featFill(), since the
+     aalt feature references can be used only after all the other features are
+     defined. Anonymous subtables, those implied by contextual rules rather
+     than being explicitly defined, are added at the end of the subtable list,
+     in createAnonLookups() above.
+
+     coverage and class subtables are seperately accumulated in otlTable
+     t->coverage.tables and t->class.tables, and are written after all the
+     lookup subtables, first coverage, then class subtables.
+
+     For featparams and lookup subtables, there are two parallel sets of arrays
+     of subtables. The GSUB arrays (h->*) contain the actual data to be
+     written, and is where the offsets are set. The other set is in the otl
+     table, and exists so that the GPOS and GSUB can share code for ordering
+     and writing feature and lookup indices. The latter inherit offset and
+     other data from the GSUB arrays. The GSUB arrays are created when the
+     feature file is processed, by all the fill* functions.  The otl table
+     arrays are created below.
+    */
+
+int OTL::fillOTL(bool force) {
+    if (subtables.size() == 0 && !force)
+        return 0;
+
+    if (g->hadError)
+        hotMsg(g, hotFATAL, "aborting because of errors");
+
+    createAnonLookups();
+
+    DF(1, (stderr, "### %s:\n", objName()));
+
+    Offset offst = header.size();
 
     calcLookupListIndices();
     calcFeatureListIndices();
 
     prepScriptList();
     Offset size = fillScriptList();
-    header.scriptOffset = offset;
-    offset += size;
+    header.scriptOffset = offst;
+    offst += size;
 
 #if HOT_DEBUG
     if (DF_LEVEL >= 1)
@@ -760,8 +815,8 @@ void otlTbl::fill(LOffset params_size) {
 
     prepFeatureList();
     size = fillFeatureList();
-    header.featureOffset = offset;
-    offset += size;
+    header.featureOffset = offst;
+    offst += size;
     if (nFeatParams > 0) {
         /* The feature table FeatureParam offsets are currently
          * from the start of the featureParam block, starting right
@@ -769,120 +824,181 @@ void otlTbl::fill(LOffset params_size) {
          * of the FeatureList and its records..
          */
         fixFeatureParamOffsets(size);
-        offset += params_size;
+        offst += offset.featParam;
     }
 
     prepLookupList();
-    header.lookupOffset = offset;
+    header.lookupOffset = offst;
     lookupSize = fillLookupList();
+
+    offset.extensionSection = offset.subtable + cac->coverageSize() + cac->classSize();
+#if HOT_DEBUG
+    dumpSizes(offset.subtable, offset.extension);
+#endif /* HOT_DEBUG */
+
+    /* setAnonLookupIndices marks as used not only the anonymous lookups, */
+    /* but also all lookups that were referenced from chain sub rules,    */
+    /* including the stand-alone lookups. This is why                     */
+    /* checkStandAloneTablRefs has to follow setAnonLookupIndices.        */
+    setAnonLookupIndices();
+
+    checkStandAloneRefs();
+
+    OS_2SetMaxContext(g, maxContext);
+
+    // Put the subtables back on offset order
+    std::stable_sort(subtables.begin(), subtables.end(), Subtable::ltOffset);
+
+    return 1;
 }
 
-void otlTbl::LangSys::write(otlTbl &t) {
-    t.o2(LookupOrder);
-    t.o2(ReqFeatureIndex);
-    t.o2(featureIndices.size());
+void OTL::writeOTL() {
+    header.write(g);
+
+    // Feature Parameters first
+    for (auto &sub : subtables) {
+        g->error_id_text = sub->id_text;
+
+        if (!sub->isRef() && sub->isParam())
+            sub->write(this);
+    }
+
+    lookupListWrite();
+
+    // Write main subtable section
+    for (auto &sub : subtables) {
+        if (sub->isRef())
+            continue;
+
+        g->error_id_text = sub->id_text;
+
+        if (sub->isExt())
+            sub->writeExt(this, offset.extensionSection);
+        else if (!sub->isParam())
+            sub->write(this);
+    }
+
+    // Write main coverage and class tables
+    cac->coverageWrite();
+    cac->classWrite();
+
+    // Write extension subtables section
+    // Each subtable is immediately followed by its coverages and classes
+    for (auto &sub : subtables) {
+        if (!sub->isRef() && sub->isExt()) {
+            g->error_id_text = sub->id_text;
+            sub->write(this);
+        }
+    }
+}
+
+void OTL::LangSys::write(hotCtx g) {
+    hotOut2(g, LookupOrder);
+    hotOut2(g, ReqFeatureIndex);
+    hotOut2(g, featureIndices.size());
 
     for (auto fi : featureIndices)
-        t.o2(fi);
+        hotOut2(g, fi);
 }
 
-void otlTbl::Header::write(otlTbl &t) {
-    t.o4(Version);
-    t.o2(scriptOffset);
-    t.o2(featureOffset);
-    t.o2(lookupOffset);
+void OTL::Header::write(hotCtx g) {
+    hotOut4(g, Version);
+    hotOut2(g, scriptOffset);
+    hotOut2(g, featureOffset);
+    hotOut2(g, lookupOffset);
 
     if (scriptOffset == 0)
         return;
 
     // Scripts
-    t.o2(scripts.size());
+    hotOut2(g, scripts.size());
     for (auto &s : scripts) {
-        t.o4(s.ScriptTag);
-        t.o2(s.offset);
+        hotOut4(g, s.ScriptTag);
+        hotOut2(g, s.offset);
     }
     for (auto &s : scripts) {
-        t.o2(s.defaultLangSys.offset);
-        t.o2(s.langSystems.size());
+        hotOut2(g, s.defaultLangSys.offset);
+        hotOut2(g, s.langSystems.size());
 
         for (auto &ls : s.langSystems) {
-            t.o4(ls.LangSysTag);
-            t.o2(ls.offset);
+            hotOut4(g, ls.LangSysTag);
+            hotOut2(g, ls.offset);
         }
 
         if (s.defaultLangSys.offset != 0)
-            s.defaultLangSys.write(t);
+            s.defaultLangSys.write(g);
 
         for (auto &ls : s.langSystems)
-            ls.write(t);
+            ls.write(g);
     }
 
     // Features
-    t.o2(features.size());
+    hotOut2(g, features.size());
     for (auto &f : features) {
-        t.o4(f.FeatureTag);
-        t.o2(f.offset);
+        hotOut4(g, f.FeatureTag);
+        hotOut2(g, f.offset);
     }
     for (auto &f : features) {
-        t.o2(f.featureParams);
-        t.o2(f.lookupIndices.size());
+        hotOut2(g, f.featureParams);
+        hotOut2(g, f.lookupIndices.size());
 
         for (auto li : f.lookupIndices)
-            t.o2(li);
+            hotOut2(g, li);
     }
 }
 
-void otlTbl::Header::lookupListWrite(otlTbl &t, Offset lookupSize) {
-    t.o2(lookups.size());
+void OTL::Header::lookupListWrite(hotCtx g, Offset lookupSize) {
+    hotOut2(g, lookups.size());
 
     for (auto &l : lookups)
-        t.o2(l.offset);
+        hotOut2(g, l.offset);
 
     int i = 0;
     for (auto &l : lookups) {
-        t.o2(l.Type);
-        t.o2(l.Flag);
-        t.o2(l.subtableOffsets.size());
+        hotOut2(g, l.Type);
+        hotOut2(g, l.Flag);
+        hotOut2(g, l.subtableOffsets.size());
         for (auto so : l.subtableOffsets) {
             LOffset subTableOffset = so + lookupSize;
             if (subTableOffset > 0xFFFF) {
-                hotMsg(t.g, hotFATAL, "subtable offset too large (%0lx) "
+                hotMsg(g, hotFATAL, "subtable offset too large (%0lx) "
                        "in lookup %i type %i",
                        subTableOffset, i, l.Type);
             }
-            t.o2(subTableOffset);
+            hotOut2(g, subTableOffset);
         }
         if (l.Flag & otlUseMarkFilteringSet)
-            t.o2(l.useMarkSetIndex);
+            hotOut2(g, l.useMarkSetIndex);
         i++;
     }
 }
 
-/* Add subtable to list. Assumes label has been set for intended granularity of
-   lookups (i.e. all subtables of the same lookup should have the same
-   label). */
-void otlTbl::subtableAdd(Tag script, Tag language, Tag feature,
-                         int32_t lkpType, int32_t lkpFlag,
-                         uint16_t markSetIndex, uint16_t extensionLookupType,
-                         LOffset offset, Label label, uint16_t fmt,
-                         bool isFeatParam) {
-    subtables.emplace_back(script, language, feature, lkpType, lkpFlag,
-                           markSetIndex, extensionLookupType, offset, label,
-                           fmt, isFeatParam);
+void OTL::setAnonLookupIndices() {
+    for (auto &sub: subtables) {
+        auto lv = sub->getLookups();
+        if (lv == nullptr)
+            continue;
+        for (auto &lr: *lv) {
+            DF(2, (stderr, "lr: Label 0x%x", lr.LookupListIndex));
+            lr.LookupListIndex = label2LookupIndex(lr.LookupListIndex);
+            DF(2, (stderr, " -> LookupListIndex %u\n", lr.LookupListIndex));
+        }
+    }
+}
 
+void OTL::AddSubtable(typename std::unique_ptr<Subtable> s) {
+    subtables.emplace_back(std::move(s));
     auto &sub = subtables.back();
 
-    if (sub.isAnon())
+    if (sub->isAnon())
         nAnonSubtables++;
-    if (sub.isStandAlone())
+    if (sub->isStandAlone())
         nStandAloneSubtables++;
 
-     /* FeatParam subtables may be labeled, but should NOT be added */
-     /* to the list of real look ups.                               */
-    if (sub.isRef())
+    // FeatParam subtables may be labeled, but should NOT be added
+    // to the list of real look ups.
+    if (sub->isRef())
         nRefLookups++;
-    else if (sub.isParam()) {
-        // Really counting non-ref isParams here
+    else if (sub->isParam())
         nFeatParams++;
-    }
 }

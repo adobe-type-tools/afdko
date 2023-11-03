@@ -91,7 +91,7 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
         hotcb->fatal(hotcb->ctx);
     }
 
-    g->hadError = 0;
+    g->hadError = false;
     g->convertFlags = 0;
 
     /* Set version numbers. The hot library version serves to identify the      */
@@ -704,7 +704,7 @@ static void setVBounds(hotCtx g) {
 static unsigned int dsigCnt = 0;
 
 static void hotReuse(hotCtx g) {
-    g->hadError = 0;
+    g->hadError = false;
     g->convertFlags = 0;
 
     initOverrides(g);
@@ -1227,7 +1227,7 @@ void CTL_CDECL hotMsg(hotCtx g, int level, const char *fmt, ...) {
     if (level == hotFATAL) {
         g->cb.fatal(g->cb.ctx);
     } else if (level == hotERROR && !g->hadError) {
-        g->hadError = 1;
+        g->hadError = true;
     }
 }
 

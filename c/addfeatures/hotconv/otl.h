@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <cassert>
 
 #include "feat.h"
 #include "common.h"
@@ -22,18 +23,34 @@ enum {
 };
 #define otlMarkAttachmentType 0xFF00 /* Mask */
 
-#define aalt_ TAG('a', 'a', 'l', 't') /* All alternates */
+#define aalt_ TAG('a', 'a', 'l', 't')
 
-class otlTbl {
-    // Coverage tables
+// Stores index into h->values, which is read at write time. If -1, then write 0;
+typedef int32_t ValueRecord;
+#define VAL_REC_UNDEF (-1)
+
+class CoverageAndClass {
  public:
-    struct RangeRecord {
-        GID Start {GID_UNDEF};
-        GID End {GID_UNDEF};
-        uint16_t startCoverageIndex {0};
-    };
-
-    struct CoverageRecord {
+    CoverageAndClass() = delete;
+    explicit CoverageAndClass(hotCtx g) : g(g) {}
+    virtual void coverageBegin();
+    virtual void coverageAddGlyph(GID gid, bool warn = false);
+    virtual void coverageWrite();
+    virtual Offset coverageEnd();
+    virtual LOffset coverageSize() { return coverage.size; }
+    virtual void classBegin();
+    virtual void classAddMapping(GID gid, uint32_t classId);
+    virtual void classWrite();
+    virtual Offset classEnd();
+    virtual LOffset classSize() { return cls.size; }
+#if HOT_DEBUG
+    virtual void dump();
+#endif
+ private:
+    virtual Offset coverageFill();
+    virtual Offset classFill();
+    class CoverageRecord {
+     public:
         CoverageRecord() = delete;
         CoverageRecord(Offset o, std::set<GID> &gl);
         Offset cov1size() {
@@ -43,32 +60,19 @@ class otlTbl {
             return sizeof(uint16_t) * (2 + 3 * ranges.size());
         }
         Offset size() { return ranges.size() != 0 ? cov2size() : cov1size(); }
-        void write(otlTbl &t);
+        void write(hotCtx g);
         Offset offset;
         std::set<GID> glyphs;             // format 1
+        struct RangeRecord {
+            GID Start {GID_UNDEF};
+            GID End {GID_UNDEF};
+            uint16_t startCoverageIndex {0};
+        };
         std::vector<RangeRecord> ranges;  // format 2
     };
 
-    struct Coverage {
-        Offset fill(otlTbl &t);
-        void write(otlTbl &t);
-        LOffset size {0};
-#if HOT_DEBUG
-        int16_t reused {0};
-#endif
-        std::vector<CoverageRecord> records;
-        std::set<GID> current;
-    };
-
-    // Classes
-
-    struct ClassRangeRecord {
-        GID Start {GID_UNDEF};
-        GID End {GID_UNDEF};
-        uint16_t classId {0xFFFF};
-    };
-
-    struct ClassRecord {
+    class ClassRecord {
+     public:
         ClassRecord() = delete;
         ClassRecord(Offset o, std::map<GID, uint16_t> &gl);
         Offset cls1size(uint16_t nvalues) {
@@ -80,28 +84,152 @@ class otlTbl {
         Offset size() {
             return values.size() != 0 ? cls1size(values.size()) : cls2size();
         }
-        void write(otlTbl &t);
-
+        void write(hotCtx g);
         std::map<GID, uint16_t> map;
         Offset offset;
         GID startGlyph {GID_UNDEF};
         std::vector<uint16_t> values;
+        struct ClassRangeRecord {
+            GID Start {GID_UNDEF};
+            GID End {GID_UNDEF};
+            uint16_t classId {0xFFFF};
+        };
         std::vector<ClassRangeRecord> ranges;
     };
-
-    struct Class {
-        Offset fill(otlTbl &t);
-        void write(otlTbl &t);
+ protected:
+    struct {
+        LOffset size {0};
+#if HOT_DEBUG
+        int16_t reused {0};
+#endif
+        std::vector<CoverageRecord> records;
+        std::set<GID> current;
+    } coverage;
+    struct {
         LOffset size {0};
 #if HOT_DEBUG
         int16_t reused {0};
 #endif
         std::vector<ClassRecord> records;
         std::map<GID, uint16_t> current;
+    } cls;
+    hotCtx g;
+};
+
+class OTL {
+ public:
+    struct LookupRecord {
+        LookupRecord() = delete;
+        LookupRecord(uint16_t si, uint16_t lli) : SequenceIndex(si), LookupListIndex(lli) {}
+        uint16_t SequenceIndex {0};
+        uint16_t LookupListIndex {0};
+    };
+    struct SubtableInfo {  /* New subtable data */
+        virtual void reset(uint32_t lt, uint32_t lf, Label l, bool ue, uint16_t umsi) {
+            useExtension = ue;
+            lkpType = lt;
+            label = l;
+            lkpFlag = lf;
+            markSetIndex = umsi;
+            parentFeatTag = 0;
+        }
+        Tag script {TAG_UNDEF};
+        Tag language {TAG_UNDEF};
+        Tag feature {TAG_UNDEF};
+        Tag parentFeatTag {0};     // The parent feature for anonymous lookups made by a chaining contextual feature
+        bool useExtension {false}; // Use extension lookupType?
+        uint16_t lkpType {0};
+        uint16_t lkpFlag {0};
+        uint16_t markSetIndex {0};
+        Label label {0};
     };
 
-    struct Subtable;
+    class Subtable {
+     public:
+        struct ExtensionFormat1 {
+            static uint16_t size() { return sizeof(uint16_t) * 2 + sizeof(uint32_t); }
+            static uint16_t subformat() { return 1; }
+            void write(hotCtx g, uint16_t lkpType, LOffset adjust);
+            LOffset offset {0};
+        };
+        Subtable() = delete;
+        Subtable(OTL *otl, SubtableInfo *si, std::string &id_text, bool isFeatParam);
+        static bool ltLookupList(const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
+            if (a->isRef() != b->isRef())
+                return b->isRef();
+            if (a->isParam() != b->isParam())
+                return b->isParam();
+            if (a->isAALT() != b->isAALT())  // aalt's come first
+                return a->isAALT();
+            return a->offset < b->offset;
+        }
+        static bool ltScriptList(const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
+            if (a->isStandAlone() != b->isStandAlone())
+                return b->isStandAlone();
+            if (a->isAnon() != b->isAnon())
+                return b->isAnon();
+            if (a->script != b->script)
+                return a->script < b->script;
+            if (a->language != b->language)
+                return a->language < b->language;
+            return a->feature < b->feature;
+        }
+        static bool ltFeatureList(const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
+            if (a->isAnon() != b->isAnon())
+                return b->isAnon();
+            if (a->isStandAlone() != b->isStandAlone())
+                return b->isStandAlone();
+            if (a->feature != b->feature)
+                return a->feature < b->feature;
+            if (a->index.feature != b->index.feature)
+                return a->index.feature < b->index.feature;
+            return a->index.lookup < b->index.lookup;
+        }
+        static bool ltOffset(const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
+            return a->offset < b->offset;
+        }
+        bool isStandAlone() const { return feature == TAG_STAND_ALONE; }
+        bool isAnon() const { return script == TAG_UNDEF; }
+        bool isRef() const { return IS_REF_LAB(label); }
+        bool isParam() const { return isFeatParam; }
+        bool isAALT() const { return feature == aalt_; }
+        bool isExt() const { return useExtension; }
+        virtual uint16_t subformat() { return 0; }
+        virtual uint16_t fmt() { return isRef() ? 0 : isExt() ? extension.subformat() : subformat(); }
+        virtual std::vector<LookupRecord> *getLookups() { return nullptr; }
+        virtual void writeExt(OTL *h, uint32_t extSec) { extension.write(h->g, lkpType, extSec - offset); }
+        virtual void write(OTL *h) = 0;
+#if HOT_DEBUG
+        virtual void dump(typename std::vector<std::unique_ptr<Subtable>>::iterator sb,
+                          uint32_t extLkpType);
+#endif
+        Tag script {TAG_UNDEF};
+        Tag language {TAG_UNDEF};
+        Tag feature {TAG_UNDEF};
+        bool useExtension {false};
+        uint16_t lkpType {0};
+        uint16_t lkpFlag {0};
+        uint16_t markSetIndex {0};
+        Offset offset {0};
+        Label label {0};
+        bool seenInFeature {false};
+        bool isFeatParam {false};
+        ExtensionFormat1 extension;
+        std::string id_text;
+        std::shared_ptr<CoverageAndClass> cac;
+        struct {
+            int16_t feature {-1};
+            int16_t lookup {-1};
+        } index;
+        struct {
+            typename std::vector<std::unique_ptr<Subtable>>::iterator script;
+            typename std::vector<std::unique_ptr<Subtable>>::iterator language;
+            typename std::vector<std::unique_ptr<Subtable>>::iterator feature;
+            typename std::vector<std::unique_ptr<Subtable>>::iterator lookup;
+        } span;
+    };
 
+ private:
     struct LangSys {
         static LOffset size(uint32_t nfeatures) {
             return sizeof(uint16_t) * (3 + nfeatures);
@@ -109,8 +237,8 @@ class otlTbl {
         static LOffset recordSize() {
             return sizeof(uint32_t) + sizeof(uint16_t);
         }
-        Offset fill(Offset o, std::vector<Subtable>::iterator sl);
-        void write(otlTbl &t);
+        Offset fill(Offset o, typename std::vector<std::unique_ptr<Subtable>>::iterator sl);
+        void write(hotCtx g);
 
         Offset offset {0};
         Tag LangSysTag {TAG_UNDEF};
@@ -153,8 +281,8 @@ class otlTbl {
 
     struct Lookup {
         Lookup() = delete;
-        Lookup(Offset o, uint32_t ft) : offset(o), Type(ft >> 16),
-                                        Flag(ft & 0xFFFF) {}
+        Lookup(Offset o, uint16_t type, uint16_t flag) : offset(o), Type(type),
+                                        Flag(flag) {}
         static Offset size(uint32_t nsubs) {
             return sizeof(uint16_t) * (3 + nsubs);
         }
@@ -172,8 +300,8 @@ class otlTbl {
         static Offset size() {
             return sizeof(uint32_t) + sizeof(uint16_t) * 3;
         }
-        void write(otlTbl &t);
-        void lookupListWrite(otlTbl &g, Offset lookupSize);
+        void write(hotCtx g);
+        void lookupListWrite(hotCtx g, Offset lookupSize);
         Fixed Version {VERSION(1, 0)};
         LOffset scriptOffset {0};
         std::vector<Script> scripts;
@@ -184,76 +312,6 @@ class otlTbl {
         }
         LOffset lookupOffset {0};
         std::vector<Lookup> lookups;
-    };
-
-    struct Subtable {
-        Subtable() = delete;
-        Subtable(Tag s, Tag l, Tag f, int32_t lt, int32_t lf, uint16_t msi,
-                 uint16_t elt, LOffset o, Label lb, uint16_t fmt, bool ifp)
-                : script(s), language(l), feature(f), lookup(lt << 16 | lf),
-                  markSetIndex(msi), extensionLookupType(elt), offset(o),
-                  label(lb), fmt(fmt), isFeatParam(ifp),
-                  seenInFeature(feature != TAG_STAND_ALONE) {}
-        static bool ltLookupList(const Subtable &a, const Subtable &b) {
-            if (a.isRef() != b.isRef())
-                return b.isRef();
-            if (a.isParam() != b.isParam())
-                return b.isParam();
-            if (a.isAALT() != b.isAALT())  // aalt's come first
-                return a.isAALT();
-            return a.offset < b.offset;
-        }
-        static bool ltScriptList(const Subtable &a, const Subtable &b) {
-            if (a.isStandAlone() != b.isStandAlone())
-                return b.isStandAlone();
-            if (a.isAnon() != b.isAnon())
-                return b.isAnon();
-            if (a.script != b.script)
-                return a.script < b.script;
-            if (a.language != b.language)
-                return a.language < b.language;
-            return a.feature < b.feature;
-        }
-        bool operator < (const Subtable &rhs) const {
-            if (isAnon() != rhs.isAnon())
-                return rhs.isAnon();
-            if (isStandAlone() != rhs.isStandAlone())
-                return rhs.isStandAlone();
-            if (feature != rhs.feature)
-                return feature < rhs.feature;
-            if (index.feature != rhs.index.feature)
-                return index.feature < rhs.index.feature;
-            return index.lookup < rhs.index.lookup;
-        }
-        bool isStandAlone() const { return feature == TAG_STAND_ALONE; }
-        bool isAnon() const { return script == TAG_UNDEF; }
-        bool isRef() const { return IS_REF_LAB(label); }
-        bool isParam() const { return isFeatParam; }
-        bool isAALT() const { return feature == aalt_; }
-#if HOT_DEBUG
-        void dump(std::vector<Subtable>::iterator sb);
-#endif
-        Tag script {TAG_UNDEF};
-        Tag language {TAG_UNDEF};
-        Tag feature {TAG_UNDEF};
-        uint32_t lookup {0};
-        uint16_t markSetIndex {0};
-        uint16_t extensionLookupType {0};
-        Offset offset {0};
-        Label label {0};
-        uint16_t fmt {0};
-        bool isFeatParam {false};
-        bool seenInFeature {false};
-        struct {
-            int16_t feature {-1};
-            int16_t lookup {-1};
-        } index;
-        struct {
-            std::vector<Subtable>::iterator script;
-            std::vector<Subtable>::iterator language;
-            std::vector<Subtable>::iterator feature;
-            std::vector<Subtable>::iterator lookup;
-        } span;
     };
 
     struct LabelInfo {
@@ -267,76 +325,81 @@ class otlTbl {
         Label baseLabel {0};
         Label refLabel {0};
     };
-
  public:
-    otlTbl() = delete;
-    explicit otlTbl(hotCtx g) : g(g) {}
-    void fill(LOffset params_size);
-    void fillStub();
-    void write() { header.write(*this); }
-    void lookupListWrite() { header.lookupListWrite(*this, lookupSize); }
-    void sortLabelList();
-    int32_t label2LookupIndex(Label baselabel);
-    void checkStandAloneRefs();
+    virtual LOffset extOffset() { return offset.extension; }
+    virtual LOffset subOffset() { return offset.subtable; }
+    virtual void incExtOffset(LOffset o) { offset.extension += o; }
+    virtual void incSubOffset(LOffset o) { offset.subtable += o; }
+    virtual void incFeatParamOffset(LOffset o) { offset.featParam += o; }
+    virtual void checkOverflow(const char* offsetType, long offset,
+                               const char* posType);
+    virtual void writeValueRecord(uint32_t valFmt, ValueRecord i) { assert(false); }
+ protected:
+    OTL() = delete;
+    explicit OTL(hotCtx g, uint16_t elt) : g(g), cac(std::make_shared<CoverageAndClass>(g)), extLkpType(elt) {}
+    virtual ~OTL() {}
+    virtual int fillOTL(bool force = false);
+    virtual void writeOTL();
+    virtual void AddSubtable(typename std::unique_ptr<Subtable> s);
+    virtual void updateMaxContext(uint16_t m) { maxContext = MAX(m, maxContext); }
 #if HOT_DEBUG
-    void dumpSubtables();
-    LOffset getHeaderSize();
     void dumpSizes(LOffset subtableSize, LOffset extensionSectionSize);
 #endif
-    void coverageBegin();
-    void coverageAddGlyph(GID glyph, bool warn = false);
-    Offset coverageEnd();
-    void coverageWrite();
+    virtual const char *objName() = 0;
+    virtual void createAnonLookups() = 0;
+ private:
+    static void valDump(int16_t val, int16_t excep, bool isRef);
+    static void tagDump(Tag tag, char ch);
 
-    LOffset getCoverageSize();
+    virtual void lookupListWrite() { header.lookupListWrite(g, lookupSize); }
+    virtual int32_t label2LookupIndex(Label baselabel);
+    virtual void checkStandAloneRefs();
 
-    void calcLookupListIndices();
-    void calcFeatureListIndices();
+    virtual void setAnonLookupIndices();
 
-    void prepScriptList();
-    Offset fillScriptList();
-    void fixFeatureParamOffsets(Offset size);
+    virtual void calcLookupListIndices();
+    virtual void calcFeatureListIndices();
 
-    void prepLookupList();
-    Offset findFeatParamOffset(Tag featTag, Label featLabel);
-    Offset fillLookupList();
+    virtual void prepScriptList();
+    virtual Offset fillScriptList();
+    virtual void fixFeatureParamOffsets(Offset size);
 
-    void prepFeatureList();
-    Offset fillFeatureList();
+    virtual void prepLookupList();
+    virtual Offset findFeatParamOffset(Tag featTag, Label featLabel);
+    virtual Offset fillLookupList();
 
-    bool seenRef(Label baseLookup);
+    virtual void prepFeatureList();
+    virtual Offset fillFeatureList();
 
-    void subtableAdd(Tag script, Tag language, Tag feature,
-                     int32_t lkpType, int32_t lkpFlag,
-                     uint16_t markSetIndex, uint16_t extensionLookupType,
-                     LOffset offset, Label label, uint16_t fmt,
-                     bool isFeatParam);
+#if HOT_DEBUG
+    virtual void dumpSubtables();
+    virtual LOffset getHeaderSize();
+#endif
 
-    void classBegin();
-    void classAddMapping(GID glyph, uint32_t classId);
-    Offset classEnd();
-    void classWrite();
-
-    LOffset getClassSize();
-
-    // Temporary
-    void o2(int16_t v) { hotOut2(g, v); }
-    void o4(int32_t v) { hotOut4(g, v); }
-
-    std::vector<Subtable> subtables;
+ public:
+    hotCtx g;
+ protected:
+    std::shared_ptr<CoverageAndClass> cac;
+ private:
+    uint16_t extLkpType {0};
+    struct {
+        LOffset featParam {0};
+        LOffset subtable {0};
+        LOffset extension {0};
+        LOffset extensionSection {0};
+    } offset;
+    std::vector<std::unique_ptr<Subtable>> subtables;
     std::map<Label, LabelInfo> labelMap;
     std::vector<RefLabelInfo> refLabels;
+    uint16_t maxContext {0};
 
     Header header;
     Offset lookupSize {0};
-    Coverage coverage;
-    Class classObj;
     int16_t nAnonSubtables {0};
     int16_t nStandAloneSubtables {0};
     int16_t nRefLookups {0};
     int16_t nFeatParams {0};
     LOffset params_size {0};
-    hotCtx g;
 };
 
 /* Script tags used by hotconv */
