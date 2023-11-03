@@ -136,6 +136,7 @@ class SfntEdit {
     int run(int argc, char *argv[]);
 
  protected:
+    uint32_t addTable(const Table &tbl, std::ostream &dstfile, uint32_t *length);
     int run_prot(int argc, char *argv[]);
     fs::path makeFullPath(const fs::path& source);
     void parseTagList(const std::string &arg, int option, int flag);
@@ -814,8 +815,10 @@ void SfntEdit::extractTables() {
 
         if (!(tbl.flags & TBL_SRC))
             continue;
-
-        file.open(makexFilename(tag, tbl), std::ios::binary);
+        std::string xfn = makexFilename(tag, tbl);
+        file.open(xfn, std::ios::binary);
+        if (file.fail())
+            fatal("file error <could not open> [%s]", xfn.c_str());
         srcfile.seekg(tbl.offset, std::ios::beg);
         fileCopy(srcfile, file, tbl.length);
         file.close();
@@ -853,12 +856,14 @@ static uint32_t tableCopy(std::istream &src, std::ostream &dst,
 }
 
 /* Add table from file */
-static uint32_t addTable(const Table &tbl, std::ostream &dstfile,
-                         uint32_t *length) {
+uint32_t SfntEdit::addTable(const Table &tbl, std::ostream &dstfile,
+                            uint32_t *length) {
     std::ifstream file;
     uint32_t checksum;
 
     file.open(tbl.afilename, std::ios::binary);
+    if (file.fail())
+        fatal("file error <could not open> [%s]", tbl.afilename.c_str());
     file.seekg(0, std::ios::end);
     *length = (uint32_t) file.tellg();
     checksum = tableCopy(file, dstfile, 0, *length);
@@ -1048,12 +1053,17 @@ int SfntEdit::run_prot(int argc, char *argv[]) {
         }
 
         srcfile.open(srcfilepath, std::ios::binary);
+        if (srcfile.fail())
+            fatal("file error <could not open> [%s]", srcfilepath.c_str());
 
         if (!doingScripting && srcfilepath.has_parent_path())
             sourcepath = srcfilepath.parent_path();
 
-        if (!dstfilepath.empty())  // Open destination file
+        if (!dstfilepath.empty()) {  // Open destination file
             dstfile.open(dstfilepath, std::ios::in|std::ios::out|std::ios::binary|std::ios::trunc);
+            if (dstfile.fail())
+                fatal("file error <could not open> [%s]", dstfilepath.c_str());
+        }
 
         /* Read sfnt header */
         readHdr();
