@@ -25,7 +25,7 @@ find_package(PythonExtensions REQUIRED)
 find_package(Cython REQUIRED)
 set(SKBUILD_LINK_LIBRARIES_KEYWORD PRIVATE)
 
-# add_compile_definitions(HOT_DEBUG)
+add_compile_definitions(HOT_DEBUG)
 
 add_compile_definitions(STRIP_EXTERN_C)
 

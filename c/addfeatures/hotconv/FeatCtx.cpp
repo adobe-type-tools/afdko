@@ -1,5 +1,5 @@
 /* Copyright 2021 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
- * This software is licensed as OpenSource, under the Apache License, Version 2.0. 
+ * This software is licensed as OpenSource, under the Apache License, Version 2.0.
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
@@ -340,16 +340,13 @@ const char *FeatCtx::tokstr() {
 }
 
 void FeatCtx::setIDText() {
-    int len;
     if (curr.feature == TAG_STAND_ALONE)
-        len = snprintf(g->error_id_text, ID_TEXT_SIZE, "standalone");
+        g->error_id_text = "standalone";
     else
-        len = snprintf(g->error_id_text, ID_TEXT_SIZE, "feature '%c%c%c%c'",
-                       TAG_ARG(curr.feature));
+        g->error_id_text = std::string("feature '") + TAG_STR(curr.feature) + std::string("'");
     if (IS_NAMED_LAB(curr.label)) {
-        char* p = g->error_id_text + len;
         NamedLkp *curr = lab2NamedLkp(currNamedLkp);
-        snprintf(p, ID_TEXT_SIZE-len, " lookup '%s'", curr->name.c_str());
+        g->error_id_text += std::string(" lookup '") + curr->name + std::string("'");
     }
 }
 
@@ -1201,12 +1198,12 @@ void FeatCtx::closeFeatScriptLang(State &st) {
     if ( st.tbl == GSUB_ ) {
         if ( st.lkpType != 0 )
             g->ctx.GSUBp->LookupEnd();
-        g->error_id_text[0] = '\0';
+        g->error_id_text.clear();
         g->ctx.GSUBp->FeatureEnd();
     } else if ( st.tbl == GPOS_ ) {
         if ( st.lkpType != 0 )
             g->ctx.GPOSp->LookupEnd();
-        g->error_id_text[0] = '\0';
+        g->error_id_text.clear();
         g->ctx.GPOSp->FeatureEnd();
     }
 }

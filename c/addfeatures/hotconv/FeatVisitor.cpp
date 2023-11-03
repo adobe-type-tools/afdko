@@ -1,5 +1,5 @@
 /* Copyright 2021 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
- * This software is licensed as OpenSource, under the Apache License, Version 2.0. 
+ * This software is licensed as OpenSource, under the Apache License, Version 2.0.
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
@@ -1545,11 +1545,11 @@ void FeatVisitor::addGCLiteralToCurrentGC(FeatParser::GcLiteralContext *ctx) {
             assert(gcle->startg != nullptr);
             /* The tokenizing stage doesn't separate a hyphen from a glyph
              * name if there are no spaces. So startg could be something like
-             * "a-r". If it is then "a-r - z" is an error, so if endg is 
+             * "a-r". If it is then "a-r - z" is an error, so if endg is
              * defined we just assume startg is a normal glyphname and let
              * the calls handle any errors.
              *
-             * XXX The grammar doesn't currently parse "a- z" as a range. 
+             * XXX The grammar doesn't currently parse "a- z" as a range.
              */
             if ( gcle->endg != nullptr ) {
                 GID sgid = getGlyph(gcle->startg, false);
