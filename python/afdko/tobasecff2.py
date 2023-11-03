@@ -49,7 +49,7 @@ def toBaseCFF2(cffFile, outname):
 
     unitsPerEm = 1000
     if hasattr(top, "FontMatrix"):
-        fm = getattr(top, "FontMatrix")
+        fm = top.FontMatrix
         mfm = max([abs(v) for v in fm[:4]])
         unitsPerEm = int(1 / mfm)
 
