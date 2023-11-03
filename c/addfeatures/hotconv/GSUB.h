@@ -61,7 +61,7 @@ class GSUB : public OTL {
         }
         uint16_t paramNameID {0};
         CVParameterFormat cvParams;
-        std::map<GID,GID> singles;
+        std::map<GID, GID> singles;
         std::vector<SubstRule> rules;
     };
 
@@ -206,6 +206,7 @@ class GSUB : public OTL {
     };
 
 #define EXTENSION1_SIZE (sizeof(uint16_t) * 2 + sizeof(uint32_t))
+
  public:
     GSUB() = delete;
     explicit GSUB(hotCtx g) : OTL(g, GSUBExtension) {}
@@ -226,6 +227,7 @@ class GSUB : public OTL {
     void SetFeatureNameID(Tag feat, uint16_t nameID);
     void AddFeatureNameParam(uint16_t nameID);
     void AddCVParam(CVParameterFormat &&params);
+
  private:
     virtual const char *objName() { return "GSUB"; }
     void recycleProd(GNode **prod, int count);

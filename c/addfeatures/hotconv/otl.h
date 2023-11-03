@@ -5,10 +5,12 @@
 #ifndef ADDFEATURES_HOTCONV_OTL_H_
 #define ADDFEATURES_HOTCONV_OTL_H_
 
-#include <map>
-#include <set>
-#include <vector>
 #include <cassert>
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
 #include "feat.h"
 #include "common.h"
@@ -46,6 +48,7 @@ class CoverageAndClass {
 #if HOT_DEBUG
     virtual void dump();
 #endif
+
  private:
     virtual Offset coverageFill();
     virtual Offset classFill();
@@ -96,6 +99,7 @@ class CoverageAndClass {
         };
         std::vector<ClassRangeRecord> ranges;
     };
+
  protected:
     struct {
         LOffset size {0};
@@ -136,8 +140,8 @@ class OTL {
         Tag script {TAG_UNDEF};
         Tag language {TAG_UNDEF};
         Tag feature {TAG_UNDEF};
-        Tag parentFeatTag {0};     // The parent feature for anonymous lookups made by a chaining contextual feature
-        bool useExtension {false}; // Use extension lookupType?
+        Tag parentFeatTag {0};      // The parent feature for anonymous lookups made by a chaining contextual feature
+        bool useExtension {false};  // Use extension lookupType?
         uint16_t lkpType {0};
         uint16_t lkpFlag {0};
         uint16_t markSetIndex {0};
@@ -325,6 +329,7 @@ class OTL {
         Label baseLabel {0};
         Label refLabel {0};
     };
+
  public:
     virtual LOffset extOffset() { return offset.extension; }
     virtual LOffset subOffset() { return offset.subtable; }
@@ -334,6 +339,7 @@ class OTL {
     virtual void checkOverflow(const char* offsetType, long offset,
                                const char* posType);
     virtual void writeValueRecord(uint32_t valFmt, ValueRecord i) { assert(false); }
+
  protected:
     OTL() = delete;
     explicit OTL(hotCtx g, uint16_t elt) : g(g), cac(std::make_shared<CoverageAndClass>(g)), extLkpType(elt) {}
@@ -347,6 +353,7 @@ class OTL {
 #endif
     virtual const char *objName() = 0;
     virtual void createAnonLookups() = 0;
+
  private:
     static void valDump(int16_t val, int16_t excep, bool isRef);
     static void tagDump(Tag tag, char ch);
@@ -378,8 +385,10 @@ class OTL {
 
  public:
     hotCtx g;
+
  protected:
     std::shared_ptr<CoverageAndClass> cac;
+
  private:
     uint16_t extLkpType {0};
     struct {

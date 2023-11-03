@@ -1314,7 +1314,7 @@ void GPOS::PairPos::Format1::write(OTL *h) {
     if (!isExt())
         Coverage += h->subOffset() - offset;  // Adjust offset
 
-    h->checkOverflow( "coverage table", Coverage, "pair positioning");
+    h->checkOverflow("coverage table", Coverage, "pair positioning");
 
     // Write header
     OUT2(subformat());

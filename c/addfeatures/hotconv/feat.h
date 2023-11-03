@@ -6,6 +6,8 @@
 #define ADDFEATURES_HOTCONV_FEAT_H_
 
 #include <string>
+#include <vector>
+#include <utility>
 
 #include "common.h"
 

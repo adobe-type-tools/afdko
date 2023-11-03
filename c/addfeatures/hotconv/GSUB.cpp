@@ -9,8 +9,8 @@
 
 #include <cassert>
 #include <algorithm>
-
-#include <assert.h>
+#include <string>
+#include <utility>
 
 #include "hotmap.h"
 #include "vmtx.h"
@@ -231,7 +231,6 @@ void GSUB::addSubstRule(SubtableInfo &si, GNode *targ, GNode *repl) {
                            "substitution in %s: %s",
                            g->error_id_text.c_str(), g->note.array);
                 }
-
             }
             // If repl is a glyph use it for all entries in targ
             if (r->nextCl != nullptr)
@@ -373,7 +372,7 @@ void GSUB::CVParam::write(OTL *h) {
     OUT2(params.NumNamedParameters);
     OUT2(params.FirstParamUILabelNameID);
     OUT2((uint16_t)params.charValues.size());
-    for (auto cv: params.charValues) {
+    for (auto cv : params.charValues) {
         uint32_t uv = cv;
         int8_t val1 = (int8_t)(uv >> 16);
         uint16_t val2 = (uint16_t)(uv & 0x0000FFFF);
@@ -392,7 +391,7 @@ GSUB::SingleSubst::SingleSubst(GSUB &h, SubtableInfo &si) : Subtable(h, si) {}
 
 Offset GSUB::SingleSubst::fillSingleCoverage(SubtableInfo &si) {
     cac->coverageBegin();
-    for (auto [t, _]: si.singles) {
+    for (auto [t, _] : si.singles) {
         cac->coverageAddGlyph(t);
     }
     return cac->coverageEnd();
@@ -415,7 +414,7 @@ GSUB::SingleSubst::Format2::Format2(GSUB &h, SubtableInfo &si) : SingleSubst(h, 
     LOffset sz = size(si.singles.size());
 
     Coverage = fillSingleCoverage(si); /* Adjusted later */
-    for (auto [_, r]: si.singles)
+    for (auto [_, r] : si.singles)
         gids.push_back(r);
 
     if (isExt()) {
@@ -432,7 +431,7 @@ void GSUB::SingleSubst::fill(GSUB &h, SubtableInfo &si) {
     if (si.feature == vrt2_) {
         h.g->convertFlags |= HOT_SEEN_VERT_ORIGIN_OVERRIDE;
 
-        for (auto [t, r]: si.singles) {
+        for (auto [t, r] : si.singles) {
             auto &hotgi = h.g->glyphs[r];
             if (hotgi.vAdv == SHRT_MAX) {
                 /* don't set it if it has already been set, as with vmtx overrides */
@@ -444,7 +443,7 @@ void GSUB::SingleSubst::fill(GSUB &h, SubtableInfo &si) {
     /* Determine format and fill subtable */
     bool first = true;
     int32_t delta;
-    for (auto [t, r]: si.singles) {
+    for (auto [t, r] : si.singles) {
         if (first) {
             delta = r - t;
             first = false;
@@ -479,7 +478,7 @@ void GSUB::SingleSubst::Format2::write(OTL *h) {
     OUT2(subformat());
     OUT2((Offset)(Coverage));
     OUT2((uint16_t)gids.size());
-    for (auto g: gids)
+    for (auto g : gids)
         OUT2((GID)g);
 
     if (isExt())
@@ -546,7 +545,7 @@ static void aaltDump(GSUB &h, GSUB::SubtableInfo &si) {
     if (si.feature == aalt_) {
         fprintf(stderr, "--- aalt GSUBAlternate --- %ld rules\n",
                 si.rules.size());
-        for (auto &rule: si.rules) {
+        for (auto &rule : si.rules) {
             fprintf(stderr, "sub ");
             featGlyphDump(h.g, rule.targ->gid, -1, 1);
             fprintf(stderr, " from ");
@@ -615,11 +614,11 @@ void GSUB::MultipleSubst::write(OTL *h) {
     OUT2((Offset)(Coverage));
     OUT2((uint32_t)sequences.size());
 
-    for (auto &seq: sequences)
+    for (auto &seq : sequences)
         OUT2((uint16_t)seq.offset);
-    for (auto &seq: sequences) {
+    for (auto &seq : sequences) {
         OUT2((uint16_t)seq.gids.size());
-        for (auto g: seq.gids)
+        for (auto g : seq.gids)
             OUT2(g);
     }
 
@@ -745,11 +744,11 @@ void GSUB::AlternateSubst::write(OTL *h) {
     OUT2((Offset)(Coverage));
     OUT2((uint16_t)altSets.size());
 
-    for (auto &set: altSets)
+    for (auto &set : altSets)
         OUT2((uint16_t)set.offset);
-    for (auto &set: altSets) {
+    for (auto &set : altSets) {
         OUT2((uint16_t)set.gids.size());
-        for (auto g: set.gids)
+        for (auto g : set.gids)
             OUT2(g);
     }
 
@@ -763,7 +762,6 @@ void GSUB::AlternateSubst::write(OTL *h) {
    Deleted duplicates (targ == NULL) sink to the bottom */
 
 bool GSUB::SubstRule::cmpLigature(const GSUB::SubstRule &a, const GSUB::SubstRule &b) {
-
     if (a.targ->gid != b.targ->gid)
         return a.targ->gid < b.targ->gid;
     else if (a.data != b.data)
@@ -896,16 +894,16 @@ void GSUB::LigatureSubst::write(OTL *h) {
     OUT2((Offset)Coverage);
     OUT2((uint16_t)ligatureSets.size());
 
-    for (auto &ls: ligatureSets)
+    for (auto &ls : ligatureSets)
         OUT2((Offset)ls.offset);
-    for (auto &ls: ligatureSets) {
+    for (auto &ls : ligatureSets) {
         OUT2((uint16_t)ls.ligatures.size());
-        for (auto &l: ls.ligatures)
+        for (auto &l : ls.ligatures)
             OUT2(l.offset);
-        for (auto &l: ls.ligatures) {
+        for (auto &l : ls.ligatures) {
             OUT2(l.ligGlyph);
             OUT2((uint16_t)l.components.size() + 1);  // first component in Coverage
-            for (auto g: l.components)
+            for (auto g : l.components)
                 OUT2(g);
         }
     }
@@ -945,7 +943,7 @@ bool GSUB::addSingleToAnonSubtbl(SubtableInfo &si, GNode *targ, GNode *repl) {
             r = r->nextCl;
     }
 
-    for (auto [tgid, rgid]: needed)
+    for (auto [tgid, rgid] : needed)
         si.singles.insert({tgid, rgid});
 
     featRecycleNodes(g, targ);
@@ -964,7 +962,7 @@ bool GSUB::addLigatureToAnonSubtbl(SubtableInfo &si, GNode *targ, GNode *repl) {
         GNode *t = prod[i];
 
         t->flags &= ~FEAT_MISC; /* Clear "found" flag */
-        for (auto &rule: si.rules) {
+        for (auto &rule : si.rules) {
             if (t->gid != rule.targ->gid)
                 continue;
 
@@ -1065,7 +1063,7 @@ Label GSUB::addAnonRule(SubtableInfo &cur_si, GNode *pMarked, uint32_t nMarked, 
 /* Create anonymous lookups (referred to only from within chain ctx lookups) */
 
 void GSUB::createAnonLookups() {
-    for (auto &si: anonSubtable) {
+    for (auto &si : anonSubtable) {
         DF(2, (stderr, "\n"));
 #if 1
         DF(1, (stderr, "{ GSUB '%c%c%c%c', '%c%c%c%c', '%c%c%c%c'\n",
@@ -1080,12 +1078,12 @@ void GSUB::createAnonLookups() {
         si.script = si.language = si.feature = TAG_UNDEF;
 #if HOT_DEBUG
         if (DF_LEVEL >= 2) {
-            for (auto [t, r]: si.singles) {
+            for (auto [t, r] : si.singles) {
                 DF(2, (stderr, "  * GSUB RuleAdd "));
                 featGlyphDump(g, t, ' ', true);
                 featGlyphDump(g, r, '\n', true);
             }
-            for (auto &rule: si.rules) {
+            for (auto &rule : si.rules) {
                 DF(2, (stderr, "  * GSUB RuleAdd "));
                 featPatternDump(g, rule.targ, ' ', 1);
                 if (rule.repl != NULL) {
@@ -1188,11 +1186,11 @@ GSUB::ChainSubst::ChainSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subta
     size = chain3size(nBack, nInput, nLook, nSubst);
     if (isExt()) {
         /* Set final values for coverages */
-        for (auto &bt: backtracks)
+        for (auto &bt : backtracks)
             bt += size;
-        for (auto &ig: inputGlyphs)
+        for (auto &ig : inputGlyphs)
             ig += size;
-        for (auto &la: lookaheads)
+        for (auto &la : lookaheads)
             la += size;
         h.incExtOffset(size + cac->coverageSize());
     } else {
@@ -1202,7 +1200,7 @@ GSUB::ChainSubst::ChainSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subta
 }
 
 void GSUB::ChainSubst::fill(GSUB &h, SubtableInfo &si) {
-    for (auto &rule: si.rules) {
+    for (auto &rule : si.rules) {
         h.AddSubtable(std::move(std::make_unique<ChainSubst>(h, si, rule)));
         h.checkOverflow("lookup subtable", h.subOffset(), "chain contextual substitution");
     }
@@ -1219,7 +1217,7 @@ void GSUB::ChainSubst::write(OTL *h) {
 
     if (h->g->convertFlags & HOT_ID2_CHAIN_CONTXT3) {
         /* do it per OpenType spec 1.4 and earlier,as In Design 2.0 and earlier requires. */
-        for (auto &bt: backtracks) {
+        for (auto &bt : backtracks) {
             if (!isExt())
                 bt += adjustment;
             h->checkOverflow("backtrack coverage table", bt, "chain contextual substitution");
@@ -1236,7 +1234,7 @@ void GSUB::ChainSubst::write(OTL *h) {
     }
 
     OUT2((uint16_t)inputGlyphs.size());
-    for (auto &ig: inputGlyphs) {
+    for (auto &ig : inputGlyphs) {
         if (!isExt())
             ig += adjustment;
         h->checkOverflow("input coverage table", ig, "chain contextual substitution");
@@ -1244,7 +1242,7 @@ void GSUB::ChainSubst::write(OTL *h) {
     }
 
     OUT2((uint16_t)lookaheads.size());
-    for (auto &la: lookaheads) {
+    for (auto &la : lookaheads) {
         if (!isExt())
             la += adjustment;
         h->checkOverflow("lookahead coverage table", la, "chain contextual substitution");
@@ -1252,7 +1250,7 @@ void GSUB::ChainSubst::write(OTL *h) {
     }
 
     OUT2((uint16_t)lookupRecords.size());
-    for (auto &lr: lookupRecords) {
+    for (auto &lr : lookupRecords) {
         OUT2(lr.SequenceIndex);
         OUT2(lr.LookupListIndex);
     }
@@ -1354,9 +1352,9 @@ GSUB::ReverseSubst::ReverseSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : S
 
     size = rchain1size(nBack, nLook, subCount);
     if (isExt()) {
-        for (auto &bt: backtracks)
+        for (auto &bt : backtracks)
             bt += size;
-        for (auto &la: lookaheads)
+        for (auto &la : lookaheads)
             la += size;
         h.incExtOffset(size + cac->coverageSize());
     } else {
@@ -1365,7 +1363,7 @@ GSUB::ReverseSubst::ReverseSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : S
 }
 
 void GSUB::ReverseSubst::fill(GSUB &h, SubtableInfo &si) {
-    for (auto &rule: si.rules) {
+    for (auto &rule : si.rules) {
         h.AddSubtable(std::move(std::make_unique<ReverseSubst>(h, si, rule)));
         h.checkOverflow("lookup subtable", h.subOffset(), "reverse chain contextual substitution");
     }
@@ -1387,7 +1385,7 @@ void GSUB::ReverseSubst::write(OTL *h) {
 
     if (h->g->convertFlags & HOT_ID2_CHAIN_CONTXT3) {
         /* do it per OpenType spec 1.4 and earlier,as In Design 2.0 and earlier requires. */
-        for (auto &bt: backtracks) {
+        for (auto &bt : backtracks) {
             if (!isExt())
                 bt += adjustment;
             h->checkOverflow("backtrack coverage table", bt, "reverse chain contextual substitution");
@@ -1404,7 +1402,7 @@ void GSUB::ReverseSubst::write(OTL *h) {
     }
 
     OUT2((uint16_t)lookaheads.size());
-    for (auto &la: lookaheads) {
+    for (auto &la : lookaheads) {
         if (!isExt())
             la += adjustment;
         h->checkOverflow("lookahead coverage table", la, "reverse chain contextual substitution");
@@ -1412,7 +1410,7 @@ void GSUB::ReverseSubst::write(OTL *h) {
     }
 
     OUT2((uint16_t)substitutes.size());
-    for (auto g: substitutes)
+    for (auto g : substitutes)
         OUT2(g);
 
     if (isExt())
