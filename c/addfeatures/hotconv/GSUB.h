@@ -37,92 +37,47 @@ enum {
     GSUBCVParam,
 };
 
-class GSUB {
- public:
-    struct SubstLookupRecord {
-        uint16_t SequenceIndex {0};
-        uint16_t LookupListIndex {0};
-    };
-
+class GSUB : public OTL {
+ private:
     struct SubstRule {
         SubstRule() = delete;
         SubstRule(GNode *targ, GNode *repl) : targ(targ), repl(repl) {}
         SubstRule(GNode *targ, GNode *repl, uint16_t data) : targ(targ), repl(repl),
                                                              data(data) {}
         bool operator<(const SubstRule &b) { return targ->gid < b.targ->gid; }
+        static bool cmpLigature(const GSUB::SubstRule &a, const GSUB::SubstRule &b);
         GNode *targ {nullptr};
         GNode *repl {nullptr};
         uint16_t data {0};
     };
 
-    struct SubtableInfo {  /* New subtable data */
-        void reset(uint32_t lt, uint32_t lf, Label l, bool ue, uint16_t umsi) {
-            useExtension = ue;
-            lkpType = lt;
-            label = l;
-            lkpFlag = lf;
-            markSetIndex = umsi;
+    struct SubtableInfo : public OTL::SubtableInfo {  /* New subtable data */
+        void reset(uint32_t lt, uint32_t lf, Label l, bool ue, uint16_t umsi) override {
+            OTL::SubtableInfo::reset(lt, lf, l, ue, umsi);
             paramNameID = 0;
-            parentFeatTag = 0;
             cvParams.reset();
             singles.clear();
             rules.clear();
         }
-        Tag script {TAG_UNDEF};
-        Tag language {TAG_UNDEF};
-        Tag feature {TAG_UNDEF};
-        Tag parentFeatTag {0}; /* The parent feature for anonymous lookups made by a chaining contextual feature */
-        bool useExtension {false}; /* Use extension lookupType? */
-        uint16_t lkpType {0};
-        uint16_t lkpFlag {0};
-        uint16_t markSetIndex {0};
-        Label label {0};
         uint16_t paramNameID {0};
         CVParameterFormat cvParams;
         std::map<GID,GID> singles;
         std::vector<SubstRule> rules;
     };
 
-    struct ExtensionSubstFormat1 {
-        static uint16_t size() { return sizeof(uint16_t) * 2 + sizeof(uint32_t); }
-        uint16_t SubstFormat {0};
-        uint16_t ExtensionLookupType {0};
-        LOffset ExtensionOffset {0};
-    };
-
-    struct Subtable {
+    struct Subtable : public OTL::Subtable {
         Subtable() = delete;
         Subtable(GSUB &h, SubtableInfo &si);
-        virtual void write(GSUB *h) { }  // For reference tables
-        virtual uint16_t subformat() { return 0; }
-        virtual std::vector<SubstLookupRecord> *getSubstLookups() { return nullptr; }
-        otlTbl &getOtl(GSUB &h) {
-            return extension.use ? *extension.otl : h.otl;
-        }
-        Tag script {TAG_UNDEF};
-        Tag language {TAG_UNDEF};
-        Tag feature {TAG_UNDEF};
-        char id_text[ID_TEXT_SIZE] {0};
-        uint16_t lkpType {0};
-        uint16_t lkpFlag {0};
-        uint16_t markSetIndex {0};
-        Label label {0};
-        LOffset offset {0};     /* From beginning of first subtable */
-        struct {            /* Extension-related data */
-            bool use {false};      /* Use extension lookupType? If set, then following used: */
-            std::unique_ptr<otlTbl> otl;  /* For coverages and classes of this extension subtable */
-            LOffset offset {0}; /* Offset to this extension subtable, from beginning of extension section. Debug only. */
-            ExtensionSubstFormat1 tbl;
-
-            /* Subtable data */
-        } extension;
+        void write(OTL *) override {}  // For reference subtables
     };
-    
+
     struct SingleSubst : public Subtable {
+        class Format1;
+        class Format2;
         SingleSubst() = delete;
         SingleSubst(GSUB &h, SubtableInfo &si);
         static void fill(GSUB &h, SubtableInfo &si);
-        Offset fillSingleCoverage(SubtableInfo &si, otlTbl &otl);
+        Offset fillSingleCoverage(SubtableInfo &si);
     };
 
     struct MultipleSubst : public Subtable {
@@ -138,11 +93,11 @@ class GSUB {
             return headerSize(seqCount) + sizeof(uint16_t) * (seqCount + subCount);
         }
         MultipleSubst() = delete;
-        MultipleSubst(GSUB &h, SubtableInfo &si, long beg,
-                      long end, long sz, uint32_t nSubs);
+        MultipleSubst(GSUB &h, SubtableInfo &si, int64_t beg,
+                      int64_t end, uint32_t sz, uint32_t nSubs);
         uint16_t subformat() override { return 1; }
         static void fill(GSUB &h, SubtableInfo &si);
-        void write(GSUB *h) override;
+        void write(OTL *h) override;
         LOffset Coverage;
         std::vector<MultSequence> sequences;
     };
@@ -160,11 +115,11 @@ class GSUB {
             return headerSize(setCount) + sizeof(uint16_t) * (setCount + altCount);
         }
         AlternateSubst() = delete;
-        AlternateSubst(GSUB &h, SubtableInfo &si,
-                       long beg, long end, long size, uint16_t numAlts);
+        AlternateSubst(GSUB &h, SubtableInfo &si, int64_t beg, int64_t end,
+                       uint32_t size, uint16_t numAlts);
         uint16_t subformat() override { return 1; }
         static void fill(GSUB &h, SubtableInfo &si);
-        void write(GSUB *h) override;
+        void write(OTL *h) override;
         LOffset Coverage;
         std::vector<AlternateSet> altSets;
     };
@@ -189,7 +144,7 @@ class GSUB {
         LigatureSubst(GSUB &h, SubtableInfo &si);
         uint16_t subformat() override { return 1; }
         static void fill(GSUB &h, SubtableInfo &si);
-        void write(GSUB *h) override;
+        void write(OTL *h) override;
         LOffset Coverage {0};
         std::vector<LigatureSet> ligatureSets;
     };
@@ -204,15 +159,15 @@ class GSUB {
                    substLookupRecSize() * nsub;
         }
         uint16_t subformat() override { return 3; }  // only support 3 at present
-        std::vector<SubstLookupRecord> *getSubstLookups() override {
-            return &substLookupRecords;
+        std::vector<LookupRecord> *getLookups() override {
+            return &lookupRecords;
         }
         static void fill(GSUB &h, SubtableInfo &si);
-        void write(GSUB *h) override;
+        void write(OTL *h) override;
         std::vector<LOffset> backtracks;
         std::vector<LOffset> inputGlyphs;
         std::vector<LOffset> lookaheads;
-        std::vector<SubstLookupRecord> substLookupRecords;
+        std::vector<LookupRecord> lookupRecords;
     };
 
     struct ReverseSubst : public Subtable {
@@ -224,7 +179,7 @@ class GSUB {
         }
         uint16_t subformat() override { return 1; }
         static void fill(GSUB &h, SubtableInfo &si);
-        void write(GSUB *h) override;
+        void write(OTL *h) override;
         LOffset InputCoverage;
         std::vector<LOffset> backtracks;
         std::vector<LOffset> lookaheads;
@@ -236,7 +191,7 @@ class GSUB {
         FeatureNameParam(GSUB &h, SubtableInfo &si, uint16_t nameID);
         static void fill(GSUB &h, SubtableInfo &si);
         static int size() { return 2 * sizeof(uint16_t); }
-        void write(GSUB *h) override;
+        void write(OTL *h) override;
         uint16_t subformat() override { return 0; }
         uint16_t nameID;
     };
@@ -245,15 +200,16 @@ class GSUB {
         CVParam() = delete;
         CVParam(GSUB &h, SubtableInfo &si, CVParameterFormat &&params);
         static void fill(GSUB &h, SubtableInfo &si);
-        void write(GSUB *h) override;
+        void write(OTL *h) override;
         uint16_t subformat() override { return 0; }
         CVParameterFormat params;
     };
 
 #define EXTENSION1_SIZE (sizeof(uint16_t) * 2 + sizeof(uint32_t))
-
+ public:
     GSUB() = delete;
-    explicit GSUB(hotCtx g) : otl(g), g(g) {}
+    explicit GSUB(hotCtx g) : OTL(g, GSUBExtension) {}
+    virtual ~GSUB() {}
 
     int Fill();
     void Write();
@@ -265,63 +221,41 @@ class GSUB {
                      bool useExtension, uint16_t useMarkSetIndex);
     void LookupEnd(SubtableInfo *si = nullptr);
 
-    void AddSubtable(std::unique_ptr<Subtable> s);
     bool SubtableBreak();
-    void featParamsWrite();
     void addSubstRule(SubtableInfo &si, GNode *targ, GNode *repl);
     void SetFeatureNameID(Tag feat, uint16_t nameID);
     void AddFeatureNameParam(uint16_t nameID);
     void AddCVParam(CVParameterFormat &&params);
-
+ private:
+    virtual const char *objName() { return "GSUB"; }
     void recycleProd(GNode **prod, int count);
     bool addSingleToAnonSubtbl(SubtableInfo &si, GNode *targ, GNode *repl);
     bool addLigatureToAnonSubtbl(SubtableInfo &si, GNode *targ, GNode *repl);
     Label addAnonRule(SubtableInfo &cur_si, GNode *pMarked, uint32_t nMarked, GNode *repl);
-    void createAnonLookups();
-    void setAnonLookupIndices();
-    void setCoverages(std::vector<LOffset> &covs, otlTbl &otl, GNode *p, uint32_t num);
-
-    void fillExtensionSubst(uint32_t ExtensionLookupType, ExtensionSubstFormat1 &tbl);
-    void writeExtension(Subtable &sub);
-
+    void createAnonLookups() override;
+    void setCoverages(std::vector<LOffset> &covs, std::shared_ptr<CoverageAndClass> &cac,
+                      GNode *p, uint32_t num);
     SubtableInfo nw;
-    struct {
-        LOffset featParam {0};    /* (Cumulative.) Next subtable offset |->  */
-        LOffset subtable {0};     /* (Cumulative.) Next subtable offset |->  */
-                                  /* start of subtable section. LOffset to   */
-                                  /* check for overflow                      */
-        LOffset extension {0};        /* (Cumulative.) Next extension subtable   */
-                                  /* offset |-> start of extension section.  */
-        LOffset extensionSection {0}; /* Start of extension section |-> start of */
-                                  /* main subtable section                   */
-    } offset;
-    std::vector<std::unique_ptr<Subtable>> subtables;  /* Subtable list */
     std::vector<SubtableInfo> anonSubtable;  /* Anon subtable accumulator */
-
     std::map<Tag, uint16_t> featNameID;
-
-    /* Info for chaining contextual lookups */
-
-    uint16_t maxContext {0};
-
-    otlTbl otl;  /* OTL table */
-    hotCtx g;
 };
 
-struct SingleSubstFormat1 : public GSUB::SingleSubst {
-    SingleSubstFormat1() = delete;
-    SingleSubstFormat1(GSUB &h, GSUB::SubtableInfo &si, int delta);
-    void write(GSUB *h) override;
+class GSUB::SingleSubst::Format1 : public GSUB::SingleSubst {
+ public:
+    Format1() = delete;
+    Format1(GSUB &h, GSUB::SubtableInfo &si, int delta);
+    void write(OTL *h) override;
     uint16_t subformat() override { return 1; }
     static LOffset size() { return sizeof(uint16_t) * 3; }
     LOffset Coverage {0};        // 32 bit for overflow check
     GID DeltaGlyphID {0};
 };
 
-struct SingleSubstFormat2 : public GSUB::SingleSubst {
-    SingleSubstFormat2() = delete;
-    SingleSubstFormat2(GSUB &h, GSUB::SubtableInfo &si);
-    void write(GSUB *h) override;
+class GSUB::SingleSubst::Format2 : public GSUB::SingleSubst {
+ public:
+    Format2() = delete;
+    Format2(GSUB &h, GSUB::SubtableInfo &si);
+    void write(OTL *h) override;
     uint16_t subformat() override { return 2; }
     static LOffset size(int count) { return sizeof(uint16_t) * (3 + count); }
     LOffset Coverage {0};        // 32 bit for overflow check

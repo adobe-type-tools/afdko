@@ -1517,10 +1517,9 @@ static int gnameHasSuppUV(hotCtx g, const char *gname) {
 /* Separate lookup table for ZapfDingbats */
 static void assignUVsZapfDingbats(hotCtx g) {
     mapCtx h = g->ctx.map;
-    long i;
     hotGlyphInfo *gi;
 
-    for (i = 1 /* Skip .notdef */; i < g->glyphs.size(); i++) {
+    for (size_t i = 1 /* Skip .notdef */; i < g->glyphs.size(); i++) {
         UnicodeChar *found;
 
         gi = &g->glyphs[i];
@@ -1576,7 +1575,6 @@ static char *getNextUVName(char **uvOverrideName) {
 /* For non-CID fonts. h->sort.gnames has been sorted by glyph name. */
 static void assignUVs(hotCtx g) {
     mapCtx h = g->ctx.map;
-    long i;
     h->num.unrec = h->num.unenc = 0;
 
     /* Special case for ZapfDingbats */
@@ -1587,7 +1585,7 @@ static void assignUVs(hotCtx g) {
 
     /* --- Assign recognized UVs. --- */
 
-    for (i = 1 /* Skip .notdef */; i < g->glyphs.size(); i++) {
+    for (size_t i = 1 /* Skip .notdef */; i < g->glyphs.size(); i++) {
         hotGlyphInfo *gi = &g->glyphs[i];
         UV uv;
         const char *uvOverrideName;

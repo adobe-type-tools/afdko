@@ -254,7 +254,7 @@ void nameNew(hotCtx g) {
     g->ctx.name = h;
 }
 
-/* XXX Eventually this will copy additional names from the source name table. 
+/* XXX Eventually this will copy additional names from the source name table.
  */
 void nameRead(hotCtx g, int offset, int length) {
 }

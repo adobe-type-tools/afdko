@@ -234,16 +234,16 @@ Offset GDEF::GlyphClassTable::fill(hotCtx g, Offset o) {
             continue;
         if (!offset) {
             offset = o;
-            otl.classBegin();
+            cac.classBegin();
         }
         for (GNode *p = gc; p != NULL; p = p->nextCl)
-            otl.classAddMapping(p->gid, classIDmap[i]);
+            cac.classAddMapping(p->gid, classIDmap[i]);
         featRecycleNodes(g, gc); /* Don't need this class any more*/
         gc = NULL;
     }
     if (offset) {
-        otl.classEnd();
-        return otl.getClassSize();
+        cac.classEnd();
+        return cac.classSize();
     } else
         return 0;
 }
@@ -258,17 +258,17 @@ Offset GDEF::AttachTable::fill(Offset o) {
     Offset sz = (Offset)size(cnt);
     std::sort(attachEntries.begin(), attachEntries.end());
 
-    otl.coverageBegin();
+    cac.coverageBegin();
     for (auto &ae : attachEntries) {
         ae.offset = sz;
         sz += ae.size(ae.contourIndices.size());
-        otl.coverageAddGlyph(ae.gid);
+        cac.coverageAddGlyph(ae.gid);
         std::sort(ae.contourIndices.begin(), ae.contourIndices.end());
     }
-    otl.coverageEnd();
+    cac.coverageEnd();
 
     Coverage = sz;
-    sz += (Offset)otl.getCoverageSize();
+    sz += (Offset)cac.coverageSize();
     return sz;
 }
 
@@ -282,7 +282,7 @@ Offset GDEF::LigCaretTable::fill(Offset o) {
     Offset sz = (Offset)size(cnt);
     std::sort(ligCaretEntries.begin(), ligCaretEntries.end());
 
-    otl.coverageBegin();
+    cac.coverageBegin();
     for (auto &lge : ligCaretEntries) {
         lge.offset = sz;
         LOffset caretOffset = lge.size(lge.caretTables.size());
@@ -294,11 +294,11 @@ Offset GDEF::LigCaretTable::fill(Offset o) {
             caretOffset += ct.size();
             sz += ct.size();
         }
-        otl.coverageAddGlyph(lge.gid);
+        cac.coverageAddGlyph(lge.gid);
     }
-    otl.coverageEnd();
+    cac.coverageEnd();
     Coverage = sz;
-    sz += (Offset)otl.getCoverageSize();
+    sz += (Offset)cac.coverageSize();
     return sz;
 }
 
@@ -363,7 +363,7 @@ Offset GDEF::MarkAttachClassTable::fill(hotCtx g, Offset o) {
 
     validate(g);
     // Add the to the OTL table.
-    otl.classBegin();
+    cac.classBegin();
     int i = -1;
     for (auto &srcNode : glyphClasses) {
         i++;
@@ -371,13 +371,13 @@ Offset GDEF::MarkAttachClassTable::fill(hotCtx g, Offset o) {
             continue;
 
         for (GNode *p = srcNode; p != NULL; p = p->nextCl)
-            otl.classAddMapping(p->gid, i + 1);
+            cac.classAddMapping(p->gid, i + 1);
 
         featRecycleNodes(g, srcNode); /* Don't need this class any more*/
         srcNode = NULL;
     }
-    otl.classEnd();
-    return otl.getClassSize();
+    cac.classEnd();
+    return cac.classSize();
 }
 
 Offset GDEF::MarkSetFilteringTable::fill(hotCtx g, Offset o) {
@@ -390,15 +390,15 @@ Offset GDEF::MarkSetFilteringTable::fill(hotCtx g, Offset o) {
     markSetTableFormat = 1;
     for (auto &srcNode : markSetClasses) {
         MarkSetEntry mse {g};
-        otlTbl &otl = mse.otl;
+        auto &cac = mse.cac;
 
-        otl.coverageBegin();
+        cac.coverageBegin();
         for (GNode *p = srcNode; p != NULL; p = p->nextCl)
-            otl.coverageAddGlyph(p->gid, true);
-        otl.coverageEnd();
+            cac.coverageAddGlyph(p->gid, true);
+        cac.coverageEnd();
 
         mse.MarkSetCoverage = sz;
-        sz += (Offset)otl.getCoverageSize();
+        sz += (Offset)cac.coverageSize();
         markSetEntries.emplace_back(std::move(mse));
         srcNode = NULL;   // XXX Figure out memory use later
     }
@@ -419,7 +419,7 @@ void GDEF::AttachTable::write(GDEF *h) {
         for (auto ci : ae.contourIndices)
             OUT2(ci);
     }
-    otl.coverageWrite();
+    cac.coverageWrite();
 }
 
 void GDEF::LigCaretTable::write(GDEF *h) {
@@ -442,7 +442,7 @@ void GDEF::LigCaretTable::write(GDEF *h) {
             OUT2(ct.CaretValue);
         }
     }
-    otl.coverageWrite();
+    cac.coverageWrite();
 }
 
 void GDEF::MarkSetFilteringTable::write(GDEF *h) {
@@ -457,5 +457,5 @@ void GDEF::MarkSetFilteringTable::write(GDEF *h) {
 
     /* Now write the coverage tables */
     for (auto mse : markSetEntries)
-        mse.otl.coverageWrite();
+        mse.cac.coverageWrite();
 }

@@ -81,6 +81,15 @@ typedef uint32_t Tag;
 #define CFF__ TAG('C', 'F', 'F', ' ')
 #define CFF2_ TAG('C', 'F', 'F', '2')
 
+inline std::string TAG_STR(Tag t) {
+    std::string s;
+    for (int i = 3; i >= 0; i--) {
+        char o = (char)(t >> (8*i) & 0xff);
+        s += o;
+    }
+    return s;
+}
+
 extern void *hotMemNew(hotCtx g, size_t s);
 extern void *hotMemResize(hotCtx g, void *old, size_t s);
 extern void hotMemFree(hotCtx g, void *ptr);
@@ -383,8 +392,8 @@ struct hotCtx_ {
     dnaDCL(char, note);
     void *in_stream;
     void *out_stream;
-    char error_id_text[ID_TEXT_SIZE]; /* buffer for text identifying class and feature of error */
-    short hadError;        /* Flags if error occurred */
+    std::string error_id_text;
+    bool hadError;         /* Flags if error occurred */
     uint32_t convertFlags; /* flags for building final OTF. */
     char *bufnext;         /* Next byte available in input buffer */
     long bufleft;          /* Number of bytes available in input buffer */

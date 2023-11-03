@@ -12,7 +12,7 @@
    ( c/addfeatures/utils/generate_uniblock.py )
 
    Unicode block information (struct type: UnicodeBlock). Ordered by first
-   Unicode value in range. Ranges do not overlap. Bit 57 "Non-Plane 0" is 
+   Unicode value in range. Ranges do not overlap. Bit 57 "Non-Plane 0" is
    handled separately in map.c (search on SUPP_UV_BITNUM).
 */
 
