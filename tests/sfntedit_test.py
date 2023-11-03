@@ -107,4 +107,4 @@ def test_missing_file_add_bug_1658():
                          '-f', font_path, actual_path])
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert b'[FATAL]: file error <No such file or directory> [non_existing_GDEF_file]' in output  # noqa: E501
+    assert b'file error <could not open> [non_existing_GDEF_file]' in output  # noqa: E501
