@@ -73,7 +73,11 @@ otfautohint = "afdko.otfautohint.__main__:main"
 otfstemhist = "afdko.otfautohint.__main__:stemhist"
 
 [project.optional-dependencies]
-tests = [ "pytest" ]
+tests = [
+    "pytest",
+    "pytest-cov >= 2.6.1",
+    "pytest-xdist >= 2.5.0",
+]
 
 [tool.scikit-build]
 # cmake.verbose = true
