@@ -206,7 +206,7 @@ class GPOS : public OTL {
             pairValFmt1 = 0;
             pairValFmt2 = 0;
         }
-        virtual ~SubtableInfo() override {}
+        ~SubtableInfo() override {}
         int32_t checkAddRule(GNode *targ);
         int32_t findMarkClassIndex(GNode *markNode);
         std::array<uint16_t, 5> params;
@@ -227,7 +227,7 @@ class GPOS : public OTL {
     struct Subtable : public OTL::Subtable {
         Subtable() = delete;
         Subtable(GPOS &h, SubtableInfo &si);
-        virtual ~Subtable() override {}
+        ~Subtable() override {}
         void write(OTL *) override {}
     };
 
@@ -384,7 +384,7 @@ class GPOS : public OTL {
     struct MarkLigaturePos : public AnchorPosBase {
         MarkLigaturePos() = delete;
         MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si);
-        virtual ~MarkLigaturePos() override {}
+        ~MarkLigaturePos() override {}
         static LOffset markLig1Size() { return sizeof(uint16_t) * 6; }
         static void fill(GPOS &h, GPOS::SubtableInfo &si);
         void write(OTL *h) override;
