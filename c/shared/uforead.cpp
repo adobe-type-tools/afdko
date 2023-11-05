@@ -2317,16 +2317,16 @@ static void setROSKeyValue(ufoCtx h, abfTopDict* top, char* keyValue) {
     if (keyValue[0] == '-')
         fatal(h, ufoErrKeyValueNULL, "Empty Registry value for com.adobe.type.ROS key. ROS value format should be: registry-ordering-supplement");
     else {
-        parsedValue = strtok_r(keyValue, "-", &ROSValues);
+        parsedValue = STRTOK_R(keyValue, "-", &ROSValues);
         top->cid.Registry.ptr = copyStr(h, parsedValue);
     }
     if (parsedValue == NULL || ROSValues[0] == '-')
         fatal(h, ufoErrKeyValueNULL, "Empty Ordering value for com.adobe.type.ROS key. ROS value format should be: registry-ordering-supplement");
     else {
-        parsedValue = strtok_r(ROSValues, "-", &ROSValues);
+        parsedValue = STRTOK_R(ROSValues, "-", &ROSValues);
         top->cid.Ordering.ptr = copyStr(h, parsedValue);
     }
-    parsedValue = strtok_r(ROSValues, "-", &ROSValues);
+    parsedValue = STRTOK_R(ROSValues, "-", &ROSValues);
     const char* errSupplementMsg = "Empty Supplement value for com.adobe.type.ROS key. ROS value format should be: registry-ordering-supplement";
     if (parsedValue != NULL)
         top->cid.Supplement = strtolCheck(h, parsedValue, true, errSupplementMsg, 10);
