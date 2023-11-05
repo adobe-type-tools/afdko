@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "common.h"
-#include "feat.h"
+#include "FeatCtx.h"
 #include "otl.h"
 
 #define GDEF_ TAG('G', 'D', 'E', 'F')

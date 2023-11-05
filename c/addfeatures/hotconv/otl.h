@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "feat.h"
+#include "FeatCtx.h"
 #include "common.h"
 
 /* Subtable lookup flags */

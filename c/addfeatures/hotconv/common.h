@@ -333,7 +333,6 @@ struct FontInfo_ { /* Font information */
 
 /* -------------------------------- Contexts ------------------------------- */
 typedef struct mapCtx_ *mapCtx;
-typedef void *featVCtx;
 typedef struct cfrCtx_ *cfrCtx;
 typedef struct BASECtx_ *BASECtx;
 typedef struct OS_2Ctx_ *OS_2Ctx;
@@ -351,6 +350,7 @@ typedef struct sfntCtx_ *sfntCtx;
 typedef struct vheaCtx_ *vheaCtx;
 typedef struct vmtxCtx_ *vmtxCtx;
 
+class FeatCtx;
 class GDEF;
 class GPOS;
 class GSUB;
@@ -366,7 +366,7 @@ struct hotCtx_ {
     hotCallbacks cb; /* Client callbacks */
     struct {         /* --- Package contexts */
         mapCtx map;
-        featVCtx feat;
+        FeatCtx *feat;
         cfrCtx cfr;
         BASECtx BASE;
         GDEF *GDEFp;

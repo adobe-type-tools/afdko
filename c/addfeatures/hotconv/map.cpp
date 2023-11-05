@@ -21,7 +21,7 @@
 #include "GPOS.h"
 #include "GSUB.h"
 #include "otl.h"
-#include "feat.h"
+#include "FeatCtx.h"
 
 #include "pstoken.h"
 

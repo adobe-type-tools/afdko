@@ -13,7 +13,7 @@
 
 #include "hotconv.h"
 #include "hotmap.h"
-#include "feat.h"
+#include "FeatCtx.h"
 #include "dynarr.h"
 
 /* ---------------------------- Table Definition --------------------------- */
