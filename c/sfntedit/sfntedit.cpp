@@ -273,13 +273,17 @@ void SfntEdit::fatal(const char *fmt, ...) {
     auto buf = std::make_unique<char[]>(INI_FATAL_BUFSIZ);
 
     va_start(ap, fmt);
+    va_list ap2;
+    va_copy(ap2, ap);
     int size = std::vsnprintf(buf.get(), INI_FATAL_BUFSIZ, fmt, ap);
+    va_end(ap);
     if (size <= 0)
         throw std::runtime_error("Error during formatting");
     else if (size > INI_FATAL_BUFSIZ-1) {
     buf = std::make_unique<char[]>(size+1);
-        std::snprintf(buf.get(), size+1, fmt, ap);
+        std::snprintf(buf.get(), size+1, fmt, ap2);
     }
+    va_end(ap2);
     throw std::runtime_error(buf.get());
 }
 
