@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(afdko)
-
-# Change and uncomment to build directly with cmake (outside of pip)
-# set(CMAKE_MODULE_PATH /usr/lib/python3.11/site-packages/skbuild/resources/cmake)
-# set(CMAKE_MODULE_PATH /opt/homebrew/lib/python3.9/site-packages/skbuild/resources/cmake)
-# set(CMAKE_FIND_FRAMEWORK_EXTRA_LOCATIONS /opt/homebrew/Cellar/python@3.9/3.9.13_4/Frameworks/Python.framework)
+project(afdko LANGUAGES C CXX)
 
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -19,20 +14,11 @@ message(STATUS "Build type is ${CMAKE_BUILD_TYPE}")
 
 set(CMAKE_CXX_STANDARD 11)
 
-# scikit-build
-find_package(PythonLibs REQUIRED)
-find_package(PythonExtensions REQUIRED)
-find_package(Cython REQUIRED)
-set(SKBUILD_LINK_LIBRARIES_KEYWORD PRIVATE)
+find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+find_program(CYTHON "cython")
 
 # add_compile_definitions(HOT_DEBUG)
-
 add_compile_definitions(STRIP_EXTERN_C)
-
-# Uncomment to export main__XXX functions in shared object on Linux
-# function(_set_python_extension_symbol_visibility _target)
-#   message("Skipping _set_python_extension_symbol_visibility")
-# endfunction()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -105,8 +91,7 @@ CHECK_LIBRARY_EXISTS(m floor "" HAVE_M_LIB)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_library(_internal MODULE)
-python_extension_module(_internal)
+python_add_library(_internal MODULE "${CMAKE_CURRENT_BINARY_DIR}/_internal.c" WITH_SOABI)
 
 if (HAVE_M_LIB)
     target_link_libraries(_internal PRIVATE m)
@@ -114,7 +99,13 @@ endif ()
 
 target_link_libraries(_internal PRIVATE ${CHOSEN_LIBXML2_LIBRARY})
 
-add_subdirectory(cython)
+add_custom_command(
+    OUTPUT _internal.c
+    DEPENDS cython/_internal.pyx
+    VERBATIM
+    COMMAND "${CYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/cython/_internal.pyx" --output-file
+            "${CMAKE_CURRENT_BINARY_DIR}/_internal.c")
+
 add_subdirectory(c/shared)
 add_subdirectory(c/detype1)
 add_subdirectory(c/mergefonts)
@@ -125,6 +116,6 @@ add_subdirectory(c/spot)
 add_subdirectory(c/type1)
 add_subdirectory(c/addfeatures)
 
-target_link_libraries(_internal PRIVATE adapter detype1 type1 addfeatures spot sfntedit sfntdiff mergefonts rotatefont shared antlr4_static)
+target_link_libraries(_internal PRIVATE detype1 type1 addfeatures spot sfntedit sfntdiff mergefonts rotatefont shared antlr4_static)
 
-install(TARGETS _internal LIBRARY DESTINATION python/afdko)
+install(TARGETS _internal LIBRARY DESTINATION afdko)
