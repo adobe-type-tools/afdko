@@ -4,6 +4,7 @@
 
 /* sfnt table edit utility. */
 
+#include <cstdarg>
 #include <string>
 #include <cstdio>
 #include <filesystem>
@@ -269,20 +270,21 @@ fs::path SfntEdit::makeFullPath(
 
 /* Throw "fatal" exception */
 void SfntEdit::fatal(const char *fmt, ...) {
-    va_list ap, cap;
+    std::va_list ap;
     std::vector<char> buf(INI_FATAL_BUFSIZ);
 
     va_start(ap, fmt);
-    va_copy(cap, ap);
-    int l = vsnprintf(buf.data(), buf.size(), fmt, ap) + 1;
+    int l = std::vsnprintf(buf.data(), buf.size(), fmt, ap) + 1;
     va_end(ap);
+
     if (l <= 0)
         throw std::runtime_error("Error during formatting");
     else if (l > INI_FATAL_BUFSIZ) {
         buf.resize(l);
-        vsnprintf(buf.data(), buf.size(), fmt, cap);
+        va_start(ap, fmt);
+        std::vsnprintf(buf.data(), buf.size(), fmt, ap);
+        va_end(ap);
     }
-    va_end(cap);
     throw std::runtime_error(buf.data());
 }
 
