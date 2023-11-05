@@ -382,7 +382,7 @@ void GSUB::CVParam::write(OTL *h) {
 }
 
 void GSUB::AddCVParam(CVParameterFormat &&params) {
-    nw.cvParams.swap(std::move(params));
+    nw.cvParams.swap(params);
 }
 
 /* -------------------------- Single Substitution -------------------------- */
