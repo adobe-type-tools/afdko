@@ -78,7 +78,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -r requirements-dev.txt
+        python -m pip install -r requirements.txt -r requirements-dev.txt
 
     - name: Lint Python code with flake8 using .flake8 config file (Linux only)
       if: matrix.os == 'ubuntu-latest'
