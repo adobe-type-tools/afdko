@@ -1,13 +1,10 @@
-cmake>=3.14
 cpplint>=1.4.3
 cython>=0.29.5
 flake8>=3.7.6
 flake8-bugbear>=20.1.4
-ninja>=1.9.0
 pip>=19.0.2
 pytest-cov>=2.6.1
 pytest-xdist>=2.5.0
-scikit-build>=0.11.1
-setuptools>=40.8.0
-setuptools_scm>=7.0.0
-wheel>=0.33.1
+# wheel>=0.33.1
+scikit-build-core>=0.11.1
+setuptools_scm>=3.2.0
