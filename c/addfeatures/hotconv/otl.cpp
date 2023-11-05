@@ -94,7 +94,7 @@ Offset CoverageAndClass::coverageEnd() {
 #if HOT_DEBUG
             coverage.reused++;
 #if 0
-            if (DF_LEVEL >= 2) {
+            if (DF_LEVEL(g) >= 2) {
                 auto lasti = coverage.current.rbegin();
                 fprintf(stderr, "# Using coverage already present:");
                 for (auto gid : coverage.current)
@@ -199,7 +199,7 @@ Offset CoverageAndClass::classEnd() {
 #if HOT_DEBUG
             cls.reused++;
 #if 0
-            if (DF_LEVEL >= 2) {
+            if (DF_LEVEL(g) >= 2) {
                 auto lasti = classObj.current.rbegin();
                 fprintf(stderr, "# Using class already present:");
                 for (auto i : classObj.current)
@@ -811,7 +811,7 @@ int OTL::fillOTL(bool force) {
     offst += size;
 
 #if HOT_DEBUG
-    if (DF_LEVEL >= 1)
+    if (DF_LEVEL(g) >= 1)
         dumpSubtables();
 #endif
 

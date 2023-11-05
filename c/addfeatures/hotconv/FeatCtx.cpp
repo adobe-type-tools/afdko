@@ -3177,28 +3177,8 @@ GNode **FeatCtx::makeCrossProduct(GNode *pat, uint32_t *n) {
 
 inline FeatCtx *hctofc(hotCtx g) {
     assert(g->ctx.feat != nullptr);
-    return (FeatCtx *) g->ctx.feat;
+    return g->ctx.feat;
 }
-
-void featNew(hotCtx g) {
-    assert(g->ctx.feat == nullptr);
-    FeatCtx *hfp = new FeatCtx(g);
-    g->ctx.feat = (void *) hfp;
-}
-
-void featFree(hotCtx g) {
-    delete hctofc(g);
-    g->ctx.feat = nullptr;
-}
-
-// Prior to Antlr 4 the old code reset the context here but with an object
-// that's an invitation for bugs so just reallocate.
-void featReuse(hotCtx g) {
-    featFree(g);
-    featNew(g);
-}
-
-void featFill(hotCtx g) { hctofc(g)->fill(); }
 
 GNode *featSetNewNode(hotCtx g, GID gid) {
     return hctofc(g)->setNewNode(gid);
