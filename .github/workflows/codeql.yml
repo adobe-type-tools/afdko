@@ -41,7 +41,7 @@ jobs:
         run: |
           pip3 install --upgrade --user cython
           pip3 install --upgrade --user wheel
-          pip3 install --upgrade --user scikit-build
+          pip3 install --upgrade --user scikit-build-core
           pip3 install --upgrade --user cmake
           pip3 install --upgrade --user ninja
           git config --global url.https://github.com/.insteadOf git://github.com/

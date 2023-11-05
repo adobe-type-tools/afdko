@@ -1,16 +1,93 @@
 [build-system]
-requires = [
-	"setuptools",
-	"wheel",
-	"setuptools_scm",
-	"scikit-build",
-	"cmake",
-	"ninja"
-]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core", "setuptools-scm", "cython"]
+build-backend = "scikit_build_core.build"
 
 [project]
-# version = "0.0.1"  # Remove any existing version parameter.
 dynamic = ["version"]
+name = "afdko"
+description = "Adobe Font Development Kit for OpenType"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache License, Version 2.0"}
+keywords = ["font", "development", "tools"]
+authors = [
+    {email = "afdko@adobe.com"},
+    {name = "Adobe Type team & friends"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.8",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+]
+dependencies = [
+    "lxml == 4.9.3",
+    "booleanOperations == 0.9.0",
+    "defcon[lxml,pens] == 0.10.3",
+    "fontMath == 0.9.3",
+    "fontTools[unicode,woff,lxml,ufo] == 4.43.0",
+    "tqdm == 4.66.1",
+    "ufonormalizer == 0.6.1",
+    "ufoProcessor == 1.9.0",
+]
+
+[project.urls]
+repository = "https://github.com/adobe-type-tools/afdko"
+documentation = "https://github.com/adobe-type-tools/afdko/tree/develop/docs"
+changelog = "https://github.com/adobe-type-tools/afdko/blob/develop/NEWS.md"
+
+[project.scripts]
+buildcff2vf = "afdko.buildcff2vf:main"
+buildmasterotfs = "afdko.buildmasterotfs:main"
+comparefamily = "afdko.comparefamily:main"
+checkoutlinesufo = "afdko.checkoutlinesufo:main"
+makeotf = "afdko.makeotf:main"
+makeinstancesufo = "afdko.makeinstancesufo:main"
+otc2otf = "afdko.otc2otf:main"
+otf2otc = "afdko.otf2otc:main"
+otf2ttf = "afdko.otf2ttf:main"
+ttfcomponentizer = "afdko.ttfcomponentizer:main"
+ttfdecomponentizer = "afdko.ttfdecomponentizer:main"
+ttxn = "afdko.ttxn:main"
+charplot = "afdko.proofpdf:charplot"
+digiplot = "afdko.proofpdf:digiplot"
+fontplot = "afdko.proofpdf:fontplot"
+fontplot2 = "afdko.proofpdf:fontplot2"
+fontsetplot = "afdko.proofpdf:fontsetplot"
+hintplot = "afdko.proofpdf:hintplot"
+waterfallplot = "afdko.proofpdf:waterfallplot"
+detype1 = "afdko._internal:detype1"
+addfeatures = "afdko._internal:addfeatures"
+mergefonts = "afdko._internal:mergefonts"
+rotatefont = "afdko._internal:rotatefont"
+sfntdiff = "afdko._internal:sfntdiff"
+sfntedit = "afdko._internal:sfntedit"
+spot = "afdko._internal:spot"
+tx = "afdko._internal:tx"
+type1 = "afdko._internal:type1"
+otfautohint = "afdko.otfautohint.__main__:main"
+otfstemhist = "afdko.otfautohint.__main__:stemhist"
+
+[project.optional-dependencies]
+tests = [ "pytest" ]
+
+[tool.scikit-build]
+# cmake.verbose = true
+# logging.level = "INFO"
+metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
+minimum-version = "0.5"
+cmake.minimum-version = "3.16"
+sdist.exclude = [".github"]
 
 [tool.setuptools_scm]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:tostring:DeprecationWarning",
+    "ignore:fromstring:DeprecationWarning",
+    "ignore:The py23 module:DeprecationWarning",
+]
