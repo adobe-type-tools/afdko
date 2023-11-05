@@ -180,6 +180,18 @@ class GPOS : public OTL {
     };
 
     struct SubtableInfo : public OTL::SubtableInfo {  /* New subtable data */
+        SubtableInfo() : OTL::SubtableInfo() {}
+        SubtableInfo(SubtableInfo &&si) : OTL::SubtableInfo(std::move(si)),
+                parentLkpType(si.parentLkpType), pairFmt(si.pairFmt),
+                pairValFmt1(si.pairValFmt1),  pairValFmt2(si.pairValFmt2) {
+            params = si.params;
+            rules.swap(si.rules);
+            markClassList.swap(si.markClassList);
+            baseList.swap(si.baseList);
+            singles.swap(si.singles);
+            pairs.swap(si.pairs);
+            glyphsSeen.swap(si.glyphsSeen);
+        }
         void reset(uint32_t lt, uint32_t lf, Label l, bool ue, uint16_t umsi) override {
             OTL::SubtableInfo::reset(lt, lf, l, ue, umsi);
             params.fill(0);
@@ -194,6 +206,7 @@ class GPOS : public OTL {
             pairValFmt1 = 0;
             pairValFmt2 = 0;
         }
+        virtual ~SubtableInfo() override {}
         int32_t checkAddRule(GNode *targ);
         int32_t findMarkClassIndex(GNode *markNode);
         std::array<uint16_t, 5> params;
@@ -214,6 +227,7 @@ class GPOS : public OTL {
     struct Subtable : public OTL::Subtable {
         Subtable() = delete;
         Subtable(GPOS &h, SubtableInfo &si);
+        virtual ~Subtable() override {}
         void write(OTL *) override {}
     };
 
@@ -231,6 +245,7 @@ class GPOS : public OTL {
         struct Format2;
         SinglePos() = delete;
         SinglePos(GPOS &h, SubtableInfo &si);
+        virtual ~SinglePos() {}
         static LOffset single1Size(uint32_t nval) {
             return sizeof(uint16_t) * 3 + sizeof(int16_t) * nval;
         }
@@ -265,6 +280,7 @@ class GPOS : public OTL {
         struct Format2;
         PairPos() = delete;
         PairPos(GPOS &h, SubtableInfo &si);
+        virtual ~PairPos() {}
         static LOffset pairSetSize(uint32_t nRecs, uint32_t nvals1,
                                    uint32_t nvals2) {
             return sizeof(uint16_t) * (1 + (1 + nvals1 + nvals2) * nRecs);
@@ -313,6 +329,7 @@ class GPOS : public OTL {
     struct AnchorPosBase : public Subtable {
         AnchorPosBase() = delete;
         AnchorPosBase(GPOS &h, SubtableInfo &si);
+        virtual ~AnchorPosBase() {}
         virtual LOffset getAnchorOffset(const AnchorMarkInfo &anchor);
 
         std::vector<AnchorRec> anchorList;
@@ -367,6 +384,7 @@ class GPOS : public OTL {
     struct MarkLigaturePos : public AnchorPosBase {
         MarkLigaturePos() = delete;
         MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si);
+        virtual ~MarkLigaturePos() override {}
         static LOffset markLig1Size() { return sizeof(uint16_t) * 6; }
         static void fill(GPOS &h, GPOS::SubtableInfo &si);
         void write(OTL *h) override;
@@ -386,6 +404,7 @@ class GPOS : public OTL {
  public:
     GPOS() = delete;
     explicit GPOS(hotCtx g) : OTL(g, GPOSExtension) {}
+    virtual ~GPOS() {}
 
     virtual const char *objName() { return "GPOS"; }
 

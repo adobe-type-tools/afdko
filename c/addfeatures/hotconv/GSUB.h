@@ -44,7 +44,7 @@ class GSUB : public OTL {
         SubstRule(GNode *targ, GNode *repl) : targ(targ), repl(repl) {}
         SubstRule(GNode *targ, GNode *repl, uint16_t data) : targ(targ), repl(repl),
                                                              data(data) {}
-        bool operator<(const SubstRule &b) { return targ->gid < b.targ->gid; }
+        bool operator<(const SubstRule &b) const { return targ->gid < b.targ->gid; }
         static bool cmpLigature(const GSUB::SubstRule &a, const GSUB::SubstRule &b);
         GNode *targ {nullptr};
         GNode *repl {nullptr};
@@ -52,6 +52,13 @@ class GSUB : public OTL {
     };
 
     struct SubtableInfo : public OTL::SubtableInfo {  /* New subtable data */
+        SubtableInfo() : OTL::SubtableInfo() {}
+        SubtableInfo(SubtableInfo &&si) : OTL::SubtableInfo(std::move(si)),
+                paramNameID(si.paramNameID) {
+            cvParams.swap(si.cvParams);
+            singles.swap(si.singles);
+            rules.swap(si.rules);
+        }
         void reset(uint32_t lt, uint32_t lf, Label l, bool ue, uint16_t umsi) override {
             OTL::SubtableInfo::reset(lt, lf, l, ue, umsi);
             paramNameID = 0;
@@ -59,6 +66,7 @@ class GSUB : public OTL {
             singles.clear();
             rules.clear();
         }
+        virtual ~SubtableInfo() override {}
         uint16_t paramNameID {0};
         CVParameterFormat cvParams;
         std::map<GID, GID> singles;
@@ -68,6 +76,7 @@ class GSUB : public OTL {
     struct Subtable : public OTL::Subtable {
         Subtable() = delete;
         Subtable(GSUB &h, SubtableInfo &si);
+        virtual ~Subtable() override {}
         void write(OTL *) override {}  // For reference subtables
     };
 
@@ -75,6 +84,7 @@ class GSUB : public OTL {
         class Format1;
         class Format2;
         SingleSubst() = delete;
+        virtual ~SingleSubst() {}
         SingleSubst(GSUB &h, SubtableInfo &si);
         static void fill(GSUB &h, SubtableInfo &si);
         Offset fillSingleCoverage(SubtableInfo &si);
@@ -246,6 +256,7 @@ class GSUB::SingleSubst::Format1 : public GSUB::SingleSubst {
  public:
     Format1() = delete;
     Format1(GSUB &h, GSUB::SubtableInfo &si, int delta);
+    virtual ~Format1() {}
     void write(OTL *h) override;
     uint16_t subformat() override { return 1; }
     static LOffset size() { return sizeof(uint16_t) * 3; }
@@ -257,6 +268,7 @@ class GSUB::SingleSubst::Format2 : public GSUB::SingleSubst {
  public:
     Format2() = delete;
     Format2(GSUB &h, GSUB::SubtableInfo &si);
+    virtual ~Format2() {}
     void write(OTL *h) override;
     uint16_t subformat() override { return 2; }
     static LOffset size(int count) { return sizeof(uint16_t) * (3 + count); }

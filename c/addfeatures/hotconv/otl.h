@@ -129,6 +129,11 @@ class OTL {
         uint16_t LookupListIndex {0};
     };
     struct SubtableInfo {  /* New subtable data */
+        SubtableInfo() {}
+        SubtableInfo(const SubtableInfo &&si) : script(si.script), language(si.language),
+            feature(si.feature), parentFeatTag(si.parentFeatTag), useExtension(si.useExtension),
+            lkpType(si.lkpType), lkpFlag(si.lkpFlag), markSetIndex(si.markSetIndex), label(si.label) {}
+        virtual ~SubtableInfo() {}
         virtual void reset(uint32_t lt, uint32_t lf, Label l, bool ue, uint16_t umsi) {
             useExtension = ue;
             lkpType = lt;
@@ -157,6 +162,7 @@ class OTL {
             LOffset offset {0};
         };
         Subtable() = delete;
+        virtual ~Subtable() {}
         Subtable(OTL *otl, SubtableInfo *si, std::string &id_text, bool isFeatParam);
         static bool ltLookupList(const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
             if (a->isRef() != b->isRef())
