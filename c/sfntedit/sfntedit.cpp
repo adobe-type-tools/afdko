@@ -864,7 +864,6 @@ uint32_t SfntEdit::addTable(const Table &tbl, std::ostream &dstfile,
     std::ifstream file;
     uint32_t checksum;
 
-    std::cerr << std::string("afilename is '") << tbl.afilename << std::string("'") << std::endl;
     file.open(tbl.afilename, std::ios::binary);
     if (file.fail())
         fatal("file error <could not open> [%s]", tbl.afilename.c_str());
