@@ -280,8 +280,8 @@ void SfntEdit::fatal(const char *fmt, ...) {
     if (size <= 0)
         throw std::runtime_error("Error during formatting");
     else if (size > INI_FATAL_BUFSIZ-1) {
-    buf = std::make_unique<char[]>(size+1);
-        std::snprintf(buf.get(), size+1, fmt, ap2);
+        buf = std::make_unique<char[]>(size+1);
+        std::vsnprintf(buf.get(), size+1, fmt, ap2);
     }
     va_end(ap2);
     throw std::runtime_error(buf.get());
