@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <utility>
 
 #include "common.h"
 #include "feat.h"
@@ -66,7 +67,7 @@ class GSUB : public OTL {
             singles.clear();
             rules.clear();
         }
-        virtual ~SubtableInfo() override {}
+        ~SubtableInfo() override {}
         uint16_t paramNameID {0};
         CVParameterFormat cvParams;
         std::map<GID, GID> singles;
@@ -76,7 +77,7 @@ class GSUB : public OTL {
     struct Subtable : public OTL::Subtable {
         Subtable() = delete;
         Subtable(GSUB &h, SubtableInfo &si);
-        virtual ~Subtable() override {}
+        ~Subtable() override {}
         void write(OTL *) override {}  // For reference subtables
     };
 
