@@ -11,7 +11,7 @@
 #include <utility>
 
 #include "common.h"
-#include "feat.h"
+#include "FeatCtx.h"
 #include "otl.h"
 
 #define GSUB_ TAG('G', 'S', 'U', 'B')

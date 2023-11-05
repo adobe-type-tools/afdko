@@ -200,7 +200,7 @@ void GSUB::FeatureEnd() {
 
 void GSUB::addSubstRule(SubtableInfo &si, GNode *targ, GNode *repl) {
 #if HOT_DEBUG
-    if (DF_LEVEL >= 2) {
+    if (DF_LEVEL(g) >= 2) {
         DF(2, (stderr, "  * GSUB RuleAdd "));
         featPatternDump(g, targ, ' ', 1);
         if (repl != NULL) {
@@ -256,7 +256,7 @@ void GSUB::addSubstRule(SubtableInfo &si, GNode *targ, GNode *repl) {
             featRecycleNodes(g, targ);
             for (i = 0; i < nSeq; i++) {
 #if HOT_DEBUG
-                if (DF_LEVEL >= 2) {
+                if (DF_LEVEL(g) >= 2) {
                     fprintf(stderr, "               > ");
                     featPatternDump(g, prod[i], '\n', 1);
                 }
@@ -1077,7 +1077,7 @@ void GSUB::createAnonLookups() {
         g->error_id_text = std::string("feature '") + TAG_STR(si.parentFeatTag) + std::string("'");
         si.script = si.language = si.feature = TAG_UNDEF;
 #if HOT_DEBUG
-        if (DF_LEVEL >= 2) {
+        if (DF_LEVEL(g) >= 2) {
             for (auto [t, r] : si.singles) {
                 DF(2, (stderr, "  * GSUB RuleAdd "));
                 featGlyphDump(g, t, ' ', true);

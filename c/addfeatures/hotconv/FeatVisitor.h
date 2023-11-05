@@ -20,7 +20,6 @@
 #include "FeatLexer.h"
 #include "FeatParserBaseVisitor.h"
 #include "FeatCtx.h"
-#include "feat.h"
 
 
 /* Include handling:

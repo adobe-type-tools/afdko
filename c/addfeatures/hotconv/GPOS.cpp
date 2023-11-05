@@ -457,7 +457,7 @@ void GPOS::AddSingle(SubtableInfo &si, GNode *targ, int xPla, int yPla, int xAdv
             }
         } else {
 #if HOT_DEBUG
-            if (DF_LEVEL >= 2) {
+            if (DF_LEVEL(g) >= 2) {
                 fprintf(stderr, "  * GPOSSingle ");
                 featGlyphDump(g, p->gid, ' ', 1);
                 fprintf(stderr, " %d %d %d %d\n", xPla, yPla, xAdv, yAdv);
@@ -585,8 +585,7 @@ void GPOS::SinglePos::fill(GPOS &h, SubtableInfo &si) {
 
 #if HOT_DEBUG
     {
-        auto g = h.g;
-        if (DF_LEVEL >= 2) {
+        if (DF_LEVEL(h.g) >= 2) {
             h.dumpSingles(si.singles);
         }
     }
@@ -717,7 +716,7 @@ void GPOS::addSpecPair(SubtableInfo &si, GID first, GID second,
     pair.metricsRec1 = metricsRec1;
     pair.metricsRec2 = metricsRec2;
 #if HOT_DEBUG
-    if (DF_LEVEL >= 2) {
+    if (DF_LEVEL(g) >= 2) {
         fprintf(stderr, "  * GPOSPair ");
         pair.dump(g, NULL, NULL);
     }
@@ -907,7 +906,7 @@ void GPOS::AddPair(SubtableInfo &si, GNode *first, GNode *second, std::string &l
             pair.metricsRec1 = metricsRec1;
             pair.metricsRec2 = metricsRec2;
 #if HOT_DEBUG
-            if (DF_LEVEL >= 2) {
+            if (DF_LEVEL(g) >= 2) {
                 fprintf(stderr, "  * GPOSPair ");
                 pair.dump(g, first, second);
             }
@@ -971,7 +970,7 @@ void GPOS::addPosRule(SubtableInfo &si, GNode *targ, std::string &locDesc,
         lkpType = si.parentLkpType;
 
 #if HOT_DEBUG
-    if (DF_LEVEL >= 2) {
+    if (DF_LEVEL(g) >= 2) {
         DF(2, (stderr, "  * GPOS RuleAdd "));
         featPatternDump(g, targ, ' ', 1);
         DF(2, (stderr, "\n"));

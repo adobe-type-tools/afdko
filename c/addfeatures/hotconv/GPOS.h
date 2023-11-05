@@ -15,7 +15,7 @@
 #include <utility>
 
 #include "common.h"
-#include "feat.h"
+#include "FeatCtx.h"
 #include "otl.h"
 
 #define GPOS_ TAG('G', 'P', 'O', 'S')

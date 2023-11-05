@@ -22,7 +22,7 @@
 #include "sfntread.h"
 #include "supportfp.h"
 #include "hotmap.h"
-#include "feat.h"
+#include "FeatCtx.h"
 #include "name.h"
 #include "GPOS.h"
 #include "OS_2.h"
@@ -157,7 +157,7 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     /* Initialize modules */
     sfntNew(g);
     mapNew(g);
-    featNew(g);
+    g->ctx.feat = new FeatCtx(g);
 
     if (logger)
         g->logger = logger;
@@ -636,7 +636,7 @@ static void prepWinData(hotCtx g) {
     }
 }
 
-/* Must be called after featFill(), since TypoAscender/TypoDescender could have
+/* Must be called after FeatCtx::fill(), since TypoAscender/TypoDescender could have
    been overwritten */
 static void setVBounds(hotCtx g) {
     long i;
@@ -710,7 +710,8 @@ static void hotReuse(hotCtx g) {
     initOverrides(g);
     sfntReuse(g);
     mapReuse(g);
-    featReuse(g);
+    delete g->ctx.feat;
+    g->ctx.feat = new FeatCtx(g);
     dsigCnt = 0;
 }
 
@@ -729,7 +730,7 @@ char *refillDSIG(void *ctx, long *count, unsigned long tag) {
 /* Convert to OTF */
 void hotConvert(hotCtx g) {
     mapFill(g);
-    featFill(g);
+    g->ctx.feat->fill();
 
     prepWinData(g);
 
@@ -751,7 +752,7 @@ void hotFree(hotCtx g) {
 
     sfntFree(g);
     mapFree(g);
-    featFree(g);
+    delete g->ctx.feat;
 
     dnaFREE(g->note);
     dnaFREE(g->font.kern.pairs);

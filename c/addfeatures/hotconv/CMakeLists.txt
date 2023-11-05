@@ -18,7 +18,6 @@ add_library(hotconv OBJECT
     cmap.cpp
     cmap.h
     common.h
-    feat.h
     FeatCtx.cpp
     FeatCtx.h
     ${GENERATED_SOURCES}
