@@ -78,7 +78,7 @@ struct CVParameterFormat {
         other.FirstParamUILabelNameID = 0;
         charValues.swap(other.charValues);
     };
-    void swap(CVParameterFormat &&other) {
+    void swap(CVParameterFormat &other) {
         std::swap(FeatUILabelNameID, other.FeatUILabelNameID);
         std::swap(FeatUITooltipTextNameID, other.FeatUITooltipTextNameID);
         std::swap(SampleTextNameID, other.SampleTextNameID);
