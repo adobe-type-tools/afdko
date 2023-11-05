@@ -269,22 +269,21 @@ fs::path SfntEdit::makeFullPath(
 
 /* Throw "fatal" exception */
 void SfntEdit::fatal(const char *fmt, ...) {
-    va_list ap;
-    auto buf = std::make_unique<char[]>(INI_FATAL_BUFSIZ);
+    va_list ap, cap;
+    std::vector<char> buf(INI_FATAL_BUFSIZ);
 
     va_start(ap, fmt);
-    va_list ap2;
-    va_copy(ap2, ap);
-    int size = std::vsnprintf(buf.get(), INI_FATAL_BUFSIZ, fmt, ap);
+    va_copy(cap, ap);
+    int l = vsnprintf(buf.data(), buf.size(), fmt, ap) + 1;
     va_end(ap);
-    if (size <= 0)
+    if (l <= 0)
         throw std::runtime_error("Error during formatting");
-    else if (size > INI_FATAL_BUFSIZ-1) {
-        buf = std::make_unique<char[]>(size+1);
-        std::vsnprintf(buf.get(), size+1, fmt, ap2);
+    else if (l > INI_FATAL_BUFSIZ) {
+        buf.resize(l);
+        vsnprintf(buf.data(), buf.size(), fmt, cap);
     }
-    va_end(ap2);
-    throw std::runtime_error(buf.get());
+    va_end(cap);
+    throw std::runtime_error(buf.data());
 }
 
 /* ----------------------------- Usage and Help ---------------------------- */
