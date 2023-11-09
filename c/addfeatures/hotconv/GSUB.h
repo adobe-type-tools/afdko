@@ -2,6 +2,32 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 /***********************************************************************/
 
+/*
+   Each feature definition is bracketed by a FeatureBegin() and
+   FeatureEnd(). Each lookup definition is bracketed by LookupBegin()
+   and LookupEnd(). Each substitution rule is specified by RuleAdd().
+   Substitution occurs when "target" glyphs are substituted by "replace"
+   glyphs.
+                    target                replacement
+                    ------                -----------
+   Single:          Single|Class          Single|Class
+   Ligature:        Sequence              Single
+   Alternate:       Single                Class
+   Contextual:      Sequence              Single
+
+   For example, fi and fl ligature formation may be specified thus:
+
+   FeatureBegin(g, latn_, dflt_, liga_);
+
+   LookupBegin(g, GSUBLigature, 0, label, 0, 0);
+
+   RuleAdd(g, targ, repl); // targ->("f")->("i"), repl->("fi")
+   RuleAdd(g, targ, repl); // targ->("f")->("l"), repl->("fl")
+
+   LookupEnd(g);
+
+   FeatureEnd(g); */
+
 #ifndef ADDFEATURES_HOTCONV_GSUB_H_
 #define ADDFEATURES_HOTCONV_GSUB_H_
 
@@ -42,14 +68,31 @@ class GSUB : public OTL {
  private:
     struct SubstRule {
         SubstRule() = delete;
-        SubstRule(GNode *targ, GNode *repl) : targ(targ), repl(repl) {}
-        SubstRule(GNode *targ, GNode *repl, uint16_t data) : targ(targ), repl(repl),
-                                                             data(data) {}
-        bool operator<(const SubstRule &b) const { return targ->gid < b.targ->gid; }
-        static bool cmpLigature(const GSUB::SubstRule &a, const GSUB::SubstRule &b);
-        GNode *targ {nullptr};
-        GNode *repl {nullptr};
-        uint16_t data {0};
+        SubstRule(GPat *targ, GPat *repl) : targ(targ), repl(repl) {}
+        bool operator<(const SubstRule &b) const {
+            return targ->classes[0].glyphs[0] < b.targ->classes[0].glyphs[0];
+        }
+        GPat *targ {nullptr};
+        GPat *repl {nullptr};
+    };
+    struct LigatureTarg {
+        explicit LigatureTarg(const LigatureTarg &o) : gids(o.gids) { }
+        explicit LigatureTarg(LigatureTarg &&o) : gids(std::move(o.gids)) { }
+        explicit LigatureTarg(std::vector<GID> &&gids) : gids(std::move(gids)) {}
+        void dumpAsPattern(hotCtx g, int ch, bool print) const;
+        bool operator==(const LigatureTarg &b) const { return gids == b.gids; }
+        bool operator<(const LigatureTarg &b) const {
+            if (gids[0] != b.gids[0])
+                return gids[0] < b.gids[0];
+            else if (gids.size() != b.gids.size())
+                return gids.size() > b.gids.size();  // longer patterns sort earlier
+            for (size_t i = 1; i < gids.size(); i++) {
+                if (gids[i] != b.gids[i])
+                    return gids[i] < b.gids[i];
+            }
+            return false;
+        }
+        std::vector<GID> gids;
     };
 
     struct SubtableInfo : public OTL::SubtableInfo {  /* New subtable data */
@@ -58,6 +101,7 @@ class GSUB : public OTL {
                 paramNameID(si.paramNameID) {
             cvParams.swap(si.cvParams);
             singles.swap(si.singles);
+            ligatures.swap(si.ligatures);
             rules.swap(si.rules);
         }
         void reset(uint32_t lt, uint32_t lf, Label l, bool ue, uint16_t umsi) override {
@@ -65,12 +109,14 @@ class GSUB : public OTL {
             paramNameID = 0;
             cvParams.reset();
             singles.clear();
+            ligatures.clear();
             rules.clear();
         }
         ~SubtableInfo() override {}
         uint16_t paramNameID {0};
         CVParameterFormat cvParams;
         std::map<GID, GID> singles;
+        std::map<LigatureTarg, GID> ligatures;
         std::vector<SubstRule> rules;
     };
 
@@ -137,20 +183,24 @@ class GSUB : public OTL {
 
     struct LigatureSubst : public Subtable {
         struct LigatureGlyph {
+            explicit LigatureGlyph(GID gid) : ligGlyph(gid) {}
             LOffset size() { return sizeof(uint16_t) * (2 + components.size()); }
             LOffset offset {0};
             GID ligGlyph {0};
             std::vector<GID> components;
         };
         struct LigatureSet {
-            static LOffset size(int count) { return sizeof(uint16_t) * (1 + count); }
+            LOffset size() { return sizeof(uint16_t) * (1 + ligatures.size()); }
+            void reset() {
+                offset = 0;
+                ligatures.clear();
+            }
             LOffset offset {0};
             std::vector<LigatureGlyph> ligatures;
         };
         static int headerSize(int setCount) {
             return sizeof(uint16_t) * (3 + setCount);
         }
-        static void checkAndSort(GSUB &h, SubtableInfo &si);
         LigatureSubst() = delete;
         LigatureSubst(GSUB &h, SubtableInfo &si);
         uint16_t subformat() override { return 1; }
@@ -228,26 +278,24 @@ class GSUB : public OTL {
 
     void FeatureBegin(Tag script, Tag language, Tag feature);
     void FeatureEnd();
-    void RuleAdd(GNode *targ, GNode *repl);
+    void RuleAdd(GPat *targ, GPat *repl);
     void LookupBegin(uint32_t lkpType, uint32_t lkpFlag, Label label,
                      bool useExtension, uint16_t useMarkSetIndex);
     void LookupEnd(SubtableInfo *si = nullptr);
 
     bool SubtableBreak();
-    void addSubstRule(SubtableInfo &si, GNode *targ, GNode *repl);
+    void addSubstRule(SubtableInfo &si, GPat *targ, GPat *repl);
     void SetFeatureNameID(Tag feat, uint16_t nameID);
     void AddFeatureNameParam(uint16_t nameID);
     void AddCVParam(CVParameterFormat &&params);
 
  private:
     virtual const char *objName() { return "GSUB"; }
-    void recycleProd(GNode **prod, int count);
-    bool addSingleToAnonSubtbl(SubtableInfo &si, GNode *targ, GNode *repl);
-    bool addLigatureToAnonSubtbl(SubtableInfo &si, GNode *targ, GNode *repl);
-    Label addAnonRule(SubtableInfo &cur_si, GNode *pMarked, uint32_t nMarked, GNode *repl);
+    bool addSingleToAnonSubtbl(SubtableInfo &si, GPat::ClassRec &tcr,
+                               GPat::ClassRec &rcr);
+    bool addLigatureToAnonSubtbl(SubtableInfo &si, GPat *targ, GPat *repl);
+    Label addAnonRule(SubtableInfo &cur_si, GPat *targ, GPat *repl);
     void createAnonLookups() override;
-    void setCoverages(std::vector<LOffset> &covs, std::shared_ptr<CoverageAndClass> &cac,
-                      GNode *p, uint32_t num);
     SubtableInfo nw;
     std::vector<SubtableInfo> anonSubtable;  /* Anon subtable accumulator */
     std::map<Tag, uint16_t> featNameID;
@@ -276,31 +324,5 @@ class GSUB::SingleSubst::Format2 : public GSUB::SingleSubst {
     LOffset Coverage {0};        // 32 bit for overflow check
     std::vector<GID> gids;
 };
-
-/*
-   Each feature definition is bracketed by a FeatureBegin() and
-   FeatureEnd(). Each lookup definition is bracketed by LookupBegin()
-   and LookupEnd(). Each substitution rule is specified by RuleAdd().
-   Substitution occurs when "target" glyphs are substituted by "replace"
-   glyphs.
-                    target                replacement
-                    ------                -----------
-   Single:          Single|Class          Single|Class
-   Ligature:        Sequence              Single
-   Alternate:       Single                Class
-   Contextual:      Sequence              Single
-
-   For example, fi and fl ligature formation may be specified thus:
-
-   FeatureBegin(g, latn_, dflt_, liga_);
-
-   LookupBegin(g, GSUBLigature, 0, label, 0, 0);
-
-   RuleAdd(g, targ, repl); // targ->("f")->("i"), repl->("fi")
-   RuleAdd(g, targ, repl); // targ->("f")->("l"), repl->("fl")
-
-   LookupEnd(g);
-
-   FeatureEnd(g); */
 
 #endif  // ADDFEATURES_HOTCONV_GSUB_H_

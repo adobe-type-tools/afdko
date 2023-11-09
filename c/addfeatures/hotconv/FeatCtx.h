@@ -6,6 +6,7 @@
 #ifndef ADDFEATURES_HOTCONV_FEATCTX_H_
 #define ADDFEATURES_HOTCONV_FEATCTX_H_
 
+#include <algorithm>
 #include <cassert>
 #include <map>
 #include <string>
@@ -24,7 +25,8 @@ inline int DF_LEVEL(hotCtx g) {
         return 2;
     else if (g->font.debug & HOT_DB_FEAT_1)
         return 1;
-    else return 0;
+    else
+        return 0;
 }
 #define DF(L, p)             \
     do {                     \
@@ -80,14 +82,17 @@ inline int DF_LEVEL(hotCtx g) {
 
 typedef uint16_t Label;
 
-typedef struct GNode_ GNode;
-
-typedef struct {
-    int8_t cnt;
-    short metrics[4];
-} MetricsInfo;
-
-#define METRICSINFOEMPTYPP { -1, { 0, 0, 0, 0 } }
+struct MetricsInfo {
+    MetricsInfo() {}
+    MetricsInfo(const MetricsInfo &o) : metrics(o.metrics) {}
+    MetricsInfo(MetricsInfo &&o) : metrics(std::move(o.metrics)) {}
+    MetricsInfo & operator=(const MetricsInfo &o) {
+        metrics = o.metrics;
+        return *this;
+    }
+    void reset() { metrics.clear(); }
+    std::vector<int16_t> metrics;
+};
 
 struct AnchorMarkInfo {
     bool operator < (const AnchorMarkInfo &rhs) const {
@@ -112,43 +117,200 @@ struct AnchorMarkInfo {
                x == rhs.x && y == rhs.y &&
                (format != 2 || contourpoint == rhs.contourpoint);
     }
+    void reset() {
+        format = 0;
+        markClassIndex = componentIndex = 0;
+        x = y = 0;
+        contourpoint = 0;
+        markClassName.clear();
+    }
+    uint32_t format {0};
+    int32_t markClassIndex {0};
+    int32_t componentIndex {0};
     int16_t x {0};
     int16_t y {0};
     uint16_t contourpoint {0};
-    uint32_t format {0};
-    GNode *markClass {nullptr};
-    int32_t markClassIndex {0};
-    int32_t componentIndex {0};
+    std::string markClassName;
 };
 
-struct GNode_ {
-    /* On first node in pattern: */
-#define FEAT_HAS_MARKED (1 << 0)      /* Pat has at least one marked node */
-#define FEAT_USED_MARK_CLASS (1 << 8) /* [This marked class as been used in a pos statement - not allowed to add new glyphs.] */
-#define FEAT_IGNORE_CLAUSE (1 << 9)   /* Pat is an ignore clause */
-#define FEAT_LOOKUP_NODE (1 << 12)    /* Pattern uses  direct lookup reference */
+class FeatCtx;
 
-    /* This particular node is ... */
-#define FEAT_MARKED (1 << 1)    /* Marked */
-#define FEAT_GCLASS (1 << 2)    /* Is glyph class (useful for singleton classes) */
-#define FEAT_BACKTRACK (1 << 3) /* Part of backtrack sequence */
-#define FEAT_INPUT (1 << 4)     /* Part of input sequence */
-#define FEAT_LOOKAHEAD (1 << 5) /* Part of lookahead sequence */
-#define FEAT_MISC (1 << 6)      /* [For use in local algorithms] */
-#define FEAT_ENUMERATE (1 << 7)
-#define FEAT_IS_BASE_NODE (1 << 10) /* Node is the base glyph in a mark attachment lookup. */
-#define FEAT_IS_MARK_NODE (1 << 11) /* Node is the mark glyph in a mark attachment lookup. */
-    unsigned short flags;
-    GID gid;
-    GNode *nextSeq;   /* next element in sequence, or mark class node id in a base glyph or mark glyph class. */
-    GNode *nextCl;    /* next element of class */
-    signed aaltIndex; /* index of contributing feature, in order of the aalt definitions. */
-                      /* Used only within aalCreate.                                      */
-    MetricsInfo metricsInfo;
-    int lookupLabelCount;
-    int lookupLabels[255];
-    char *markClassName;
-    AnchorMarkInfo markClassAnchorInfo; /* Used only be mark class definitions */
+struct GPat {
+    struct GlyphRec {
+        explicit GlyphRec(GID g) : gid(g) {}
+        GlyphRec(const GlyphRec &gr) : gid(gr.gid),
+                     markClassAnchorInfo(gr.markClassAnchorInfo) {}
+        GlyphRec(GlyphRec &&gr) : gid(gr.gid),
+                     markClassAnchorInfo(std::move(gr.markClassAnchorInfo)) {}
+        GlyphRec &operator=(const GlyphRec &o) {
+            gid = o.gid;
+            markClassAnchorInfo = o.markClassAnchorInfo;
+            return *this;
+        }
+        operator GID() const { return gid; }
+        bool operator<(const GlyphRec &gr) const { return gid < gr.gid; }
+        bool operator==(const GlyphRec &gr) const { return gid == gr.gid; }
+        bool operator==(GID g) const { return g == gid; }
+        GID gid {GID_UNDEF};
+        AnchorMarkInfo markClassAnchorInfo;
+    };
+    struct ClassRec {
+        ClassRec() : marked(false), gclass(false), backtrack(false), input(false),
+                     lookahead(false), basenode(false), marknode(false),
+                     used_mark_class(false) {}
+        explicit ClassRec(GID gid) : ClassRec() { glyphs.emplace_back(gid); }
+        ClassRec(const ClassRec &o) : glyphs(o.glyphs), lookupLabels(o.lookupLabels),
+                                      metricsInfo(o.metricsInfo),
+                                      markClassName(o.markClassName),
+                                      marked(o.marked), gclass(o.gclass),
+                                      backtrack(o.backtrack), input(o.input),
+                                      lookahead(o.lookahead), basenode(o.basenode),
+                                      marknode(o.marknode),
+                                      used_mark_class(o.used_mark_class) {}
+        ClassRec(ClassRec &&o) : glyphs(std::move(o.glyphs)),
+                                 lookupLabels(std::move(o.lookupLabels)),
+                                 metricsInfo(std::move(o.metricsInfo)),
+                                 markClassName(std::move(o.markClassName)),
+                                 marked(o.marked), gclass(o.gclass), backtrack(o.backtrack),
+                                 input(o.input), lookahead(o.lookahead), basenode(o.basenode),
+                                 marknode(o.marknode), used_mark_class(o.used_mark_class) {}
+        ClassRec & operator=(const ClassRec &other) {
+            glyphs = other.glyphs;
+            lookupLabels = other.lookupLabels;
+            metricsInfo = other.metricsInfo;
+            markClassName = other.markClassName;
+            marked = other.marked;
+            gclass = other.gclass;
+            backtrack = other.backtrack;
+            input = other.input;
+            lookahead = other.lookahead;
+            basenode = other.basenode;
+            marknode = other.marknode;
+            used_mark_class = other.used_mark_class;
+            return *this;
+        }
+        bool operator==(const ClassRec &rhs) const { return glyphs == rhs.glyphs; }
+        void reset() {
+            glyphs.clear();
+            lookupLabels.clear();
+            metricsInfo.reset();
+            markClassName.clear();
+            marked = gclass = backtrack = input = false;
+            lookahead = basenode = marknode = used_mark_class = false;
+        }
+        bool glyphInClass(GID gid) const {
+            return std::find(glyphs.begin(), glyphs.end(), gid) != glyphs.end();
+        }
+        bool is_glyph() const { return glyphs.size() == 1 && !gclass; }
+        bool is_multi_class() const { return glyphs.size() > 1; }
+        bool is_class() const { return is_multi_class() || gclass; }
+        bool has_lookups() const { return lookupLabels.size() > 0; }
+        int classSize() const { return glyphs.size(); }
+        void addGlyph(GID gid) { glyphs.emplace_back(gid); }
+        void sort() { std::sort(glyphs.begin(), glyphs.end()); }
+        void makeUnique(hotCtx g, bool report = false);
+        void concat(const ClassRec &other) {
+            glyphs.insert(glyphs.end(), other.glyphs.begin(), other.glyphs.end());
+        }
+        std::vector<GlyphRec> glyphs;
+        std::vector<int> lookupLabels;
+        MetricsInfo metricsInfo;
+        // XXX would like to get rid of this
+        std::string markClassName;
+        bool marked : 1;      // Sequence element is marked
+        bool gclass : 1;      // Sequence element is glyph class
+        bool backtrack : 1;   // Part of a backtrack sub-sequence
+        bool input : 1;       // Part of an input sub-sequence
+        bool lookahead : 1;   // Part of a lookhead sub-sequence
+        bool basenode : 1;    // Sequence element is base glyph in mark attachment lookup
+        bool marknode : 1;    // Sequence element is mark glyph in mark attachment lookup
+        bool used_mark_class : 1;  // This marked class is used in a pos statement (can't add new glyphs)
+    };
+    class CrossProductIterator {
+     public:
+        CrossProductIterator() = delete;
+        explicit CrossProductIterator(const std::vector<GPat::ClassRec *> &c) :
+                     classes(c), indices(classes.size(), 0) {}
+        explicit CrossProductIterator(std::vector<GPat::ClassRec *> &&c) :
+                     classes(std::move(c)), indices(classes.size(), 0) {}
+        bool next(std::vector<GID> &gids) {
+            size_t i;
+            assert(classes.size() == indices.size());
+            if (!first) {
+                for (i = 0; i < classes.size(); i++) {
+                    if (++indices[i] < classes[i]->glyphs.size())
+                        break;
+                    indices[i] = 0;
+                }
+                if (i == classes.size())
+                    return false;
+            }
+            first = false;
+            gids.clear();
+            for (i = 0; i < classes.size(); i++)
+                gids.push_back(classes[i]->glyphs[indices[i]].gid);
+            return true;
+        }
+
+     private:
+        std::vector<GPat::ClassRec *> classes;
+        std::vector<uint16_t> indices;
+        bool first {true};
+    };
+
+    GPat() : has_marked(false), ignore_clause(false), lookup_node(false),
+             enumerate(false) {}
+    explicit GPat(GID gid) : GPat() { classes.emplace_back(gid); }
+    explicit GPat(const GPat &o) : classes(o.classes),
+                                   has_marked(o.has_marked),
+                                   ignore_clause(o.ignore_clause),
+                                   lookup_node(o.lookup_node),
+                                   enumerate(o.enumerate) {}
+    GPat & operator=(GPat other) {
+        classes = other.classes;
+        has_marked = other.has_marked;
+        ignore_clause = other.ignore_clause;
+        lookup_node = other.lookup_node;
+        enumerate = other.enumerate;
+        return *this;
+    }
+    bool is_glyph() const { return classes.size() == 1 && classes[0].is_glyph(); }
+    bool is_class() const { return classes.size() == 1 && classes[0].is_class(); }
+    bool is_mult_class() const { return classes.size() == 1 && classes[0].is_multi_class(); }
+    bool is_unmarked_glyph() const { return is_glyph() && !has_marked; }
+    bool is_unmarked_class() const { return is_class() && !has_marked; }
+    uint16_t patternLen() const { return classes.size(); }
+    void addClass(ClassRec &cr) { classes.push_back(cr); }
+    void addClass(ClassRec &&cr) { classes.emplace_back(std::move(cr)); }
+    bool glyphInClass(GID gid, uint16_t idx = 0) const {
+        assert(idx < classes.size());
+        if (idx >= classes.size())
+            return false;
+        return classes[idx].glyphInClass(gid);
+    }
+    void sortClass(uint16_t idx = 0) {
+        assert(idx < classes.size());
+        if (idx >= classes.size())
+            return;
+        classes[idx].sort();
+    }
+    void makeClassUnique(hotCtx g, uint16_t idx = 0, bool report = false) {
+        assert(idx < classes.size());
+        if (idx >= classes.size())
+            return;
+        classes[idx].makeUnique(g, report);
+    }
+    int classSize(uint16_t idx = 0) const {
+        assert(idx < classes.size());
+        if (idx >= classes.size())
+            return 0;
+        return classes[idx].classSize();
+    }
+    std::vector<ClassRec> classes;
+    bool has_marked : 1;       // Sequence has at least one marked node
+    bool ignore_clause : 1;    // Sequence is an ignore clause
+    bool lookup_node : 1;      // Pattern uses direct lookup reference
+    bool enumerate : 1;        // Class should be enumerated
 };
 
 // This should technically be in GSUB but it's easier this way
@@ -193,29 +355,6 @@ struct CVParameterFormat {
     std::vector<uint32_t> charValues;
 };
 
-/* --- Supplementary functions --- */
-std::string featMsgPrefix(hotCtx g);
-GNode *featSetNewNode(hotCtx g, GID gid);
-void featRecycleNodes(hotCtx g, GNode *node);
-GNode **featGlyphClassCopy(hotCtx g, GNode **dst, GNode *src);
-
-void featGlyphDump(hotCtx g, GID gid, int ch, int print);
-void featGlyphClassDump(hotCtx g, GNode *gc, int ch, int print);
-void featPatternDump(hotCtx g, GNode *pat, int ch, int print);
-
-GNode **featPatternCopy(hotCtx g, GNode **dst, GNode *src, int num);
-
-void featExtendNodeToClass(hotCtx g, GNode *node, int num);
-int featGetGlyphClassCount(hotCtx g, GNode *gc);
-
-unsigned int featGetPatternLen(hotCtx g, GNode *pat);
-void featGlyphClassSort(hotCtx g, GNode **list, int unique, int reportDups);
-GNode **featMakeCrossProduct(hotCtx g, GNode *pat, uint32_t *n);
-
-Label featGetNextAnonLabel(hotCtx g);
-
-int featValidateGPOSChain(hotCtx g, GNode *targ, int lookupType);
-
 class FeatVisitor;
 
 class FeatCtx {
@@ -223,90 +362,29 @@ class FeatCtx {
 
  public:
     FeatCtx() = delete;
-    explicit FeatCtx(hotCtx g);
-    ~FeatCtx();
+    explicit FeatCtx(hotCtx g) : g(g) {}
 
     void fill();
 
-    // Implementations of "external" calls
-    GNode *setNewNode(GID gid);
-    void recycleNodes(GNode *node);
-
     void dumpGlyph(GID gid, int ch, bool print);
-    void dumpGlyphClass(GNode *gc, int ch, bool print);
-    void dumpPattern(GNode *pat, int ch, bool print);
-
-    GNode **copyGlyphClass(GNode **dst, GNode *src);
-    GNode **copyPattern(GNode **dst, GNode *src, int num);
-    void extendNodeToClass(GNode *node, int num);
-    static int getGlyphClassCount(GNode *gc);
-    static unsigned int getPatternLen(GNode *pat);
-    void sortGlyphClass(GNode **list, bool unique, bool reportDups);
+    void dumpGlyphClass(const GPat::ClassRec &cr, int ch, bool print);
+    void dumpPattern(const GPat *pat, int ch, bool print);
 
     std::string msgPrefix();
-    GNode **makeCrossProduct(GNode *pat, unsigned *n);
-    bool validateGPOSChain(GNode *targ, int lookupType);
+    bool validateGPOSChain(GPat *targ, int lookupType);
     Label getNextAnonLabel();
+    const GPat::ClassRec &lookupGlyphClass(const std::string &gcname);
 
     // Utility
     Tag str2tag(const std::string &tagName);
 
-    static inline bool is_glyph(GNode *p) {
-        return p != nullptr && p->nextSeq == nullptr &&
-               p->nextCl == nullptr &&
-               !(p->flags & FEAT_GCLASS);
-    }
-    static inline bool is_class(GNode *p) {
-        return p != nullptr && p->nextSeq == nullptr &&
-               (p->nextCl != nullptr || (p->flags & FEAT_GCLASS));
-    }
-    static inline bool is_mult_class(GNode *p) {
-        return p != nullptr && p->nextSeq == nullptr && p->nextCl != nullptr;
-    }
-    static inline bool is_unmarked_glyph(GNode *p) {
-        return is_glyph(p) && !(p->flags & FEAT_HAS_MARKED);
-    }
-    static inline bool is_unmarked_class(GNode *p) {
-        return is_class(p) && !(p->flags & FEAT_HAS_MARKED);
-    }
-
 #if HOT_DEBUG
-    void nodeStats();
     void tagDump(Tag);
 #endif
     static const int kMaxCodePageValue;
     static const int kCodePageUnSet;
 
  private:
-    // GNode memory management and utilities
-    struct BlockNode {
-        GNode *data;
-        BlockNode *next;
-    };
-
-    struct {
-        BlockNode *first {nullptr};
-        // Current BlockNode being filled
-        BlockNode *curr {nullptr};
-        // Index of next free GNode, relative to curr->data
-        long cnt {0};
-        long intl {3000};
-        long incr {6000};
-    } blockList;
-    GNode *freelist {nullptr};
-#if HOT_DEBUG
-    long int nAdded2FreeList {0};
-    long int nNewFromBlockList {0};
-    long int nNewFromFreeList {0};
-
-    void checkFreeNode(GNode *node);
-#endif
-    void addBlock();
-    void freeBlocks();
-    GNode *newNodeFromBlock();
-    GNode *newNode();
-    void recycleNode(GNode *pat);
-
     // Console message hooks
     struct {
         unsigned short numExcept {0};
@@ -339,16 +417,18 @@ class FeatCtx {
     GID cid2gid(const std::string &cidstr);
 
     // Glyph Classes
-    GNode *curGCHead {nullptr}, **curGCTailAddr {nullptr};
+    void sortGlyphClass(GPat *gp, bool unique, bool reportDups, uint16_t idx = 0);
+    GPat::ClassRec curGC;
     std::string curGCName;
-    std::unordered_map<std::string, GNode *> namedGlyphClasses;
+    std::unordered_map<std::string, GPat::ClassRec> namedGlyphClasses;
 
     void resetCurrentGC();
     void defineCurrentGC(const std::string &gcname);
     bool openAsCurrentGC(const std::string &gcname);
-    GNode *finishCurrentGC();
+    void finishCurrentGC();
+    void finishCurrentGC(GPat::ClassRec &cr);
     void addGlyphToCurrentGC(GID gid);
-    void addGlyphClassToCurrentGC(GNode *src);
+    void addGlyphClassToCurrentGC(const GPat::ClassRec &cr, bool init = false);
     void addGlyphClassToCurrentGC(const std::string &gcname);
     void addAlphaRangeToCurrentGC(GID first, GID last,
                                   const char *firstname, const char *p,
@@ -359,8 +439,7 @@ class FeatCtx {
     void addRangeToCurrentGC(GID first, GID last,
                              const std::string &firstName,
                              const std::string &lastName);
-    GNode *lookupGlyphClass(const std::string &gcname);
-    bool compareGlyphClassCount(GNode *targ, GNode *repl, bool isSubrule);
+    bool compareGlyphClassCount(int targc, int replc, bool isSubrule);
 
     // Tag management
     enum TagType { featureTag, scriptTag, languageTag, tableTag };
@@ -480,8 +559,8 @@ class FeatCtx {
                                long languageId, const std::string &str);
 
     void startTable(Tag tag);
-    void setGDEFGlyphClassDef(GNode *simple, GNode *ligature, GNode *mark,
-                              GNode *component);
+    void setGDEFGlyphClassDef(GPat::ClassRec &simple, GPat::ClassRec &ligature,
+                              GPat::ClassRec &mark, GPat::ClassRec &component);
     void createDefaultGDEFClasses();
     void setFontRev(const std::string &rev);
     void addNameString(long platformId, long platspecId,
@@ -505,12 +584,11 @@ class FeatCtx {
     };
     std::map<std::string, AnchorDef> anchorDefs;
     std::vector<AnchorMarkInfo> anchorMarkInfo;
-    std::vector<GNode *> markClasses;
     void addAnchorDef(const std::string &name, const AnchorDef &a);
     void addAnchorByName(const std::string &name, int componentIndex);
     void addAnchorByValue(const AnchorDef &a, bool isNull,
                           int componentIndex);
-    void addMark(const std::string &name, GNode *targ);
+    void addMark(const std::string &name, GPat::ClassRec &cr);
 
     // Metrics
     std::map<std::string, MetricsInfo> valueDefs;
@@ -518,22 +596,24 @@ class FeatCtx {
     void getValueDef(const std::string &name, MetricsInfo &mi);
 
     // Substitutions
-    void prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl);
-    void addGSUB(int lkpType, GNode *targ, GNode *repl);
-    bool validateGSUBSingle(GNode *targ, GNode *repl, bool isSubrule);
-    bool validateGSUBMultiple(GNode *targ, GNode *repl, bool isSubrule);
-    bool validateGSUBAlternate(GNode *targ, GNode *repl, bool isSubrule);
-    bool validateGSUBLigature(GNode *targ, GNode *repl, bool isSubrule);
-    bool validateGSUBReverseChain(GNode *targ, GNode *repl);
-    bool validateGSUBChain(GNode *targ, GNode *repl);
-    void addSub(GNode *targ, GNode *repl, int lkpType);
+    void prepRule(Tag newTbl, int newlkpType, GPat *targ, GPat *repl);
+    void addGSUB(int lkpType, GPat *targ, GPat *repl);
+    bool validateGSUBSingle(GPat::ClassRec &targcr, GPat *repl, bool isSubrule);
+    bool validateGSUBSingle(GPat *targ, GPat *repl);
+    bool validateGSUBMultiple(GPat::ClassRec &targcr, GPat *repl, bool isSubrule);
+    bool validateGSUBMultiple(GPat *targ, GPat *repl);
+    bool validateGSUBAlternate(GPat *targ, GPat *repl, bool isSubrule);
+    bool validateGSUBLigature(GPat *targ, GPat *repl, bool isSubrule);
+    bool validateGSUBReverseChain(GPat *targ, GPat *repl);
+    bool validateGSUBChain(GPat *targ, GPat *repl);
+    void addSub(GPat *targ, GPat *repl, int lkpType);
     void wrapUpRule();
 
     // Positions
     void addMarkClass(const std::string &markClassName);
-    void addGPOS(int lkpType, GNode *targ);
-    void addBaseClass(GNode *targ, const std::string &defaultClassName);
-    void addPos(GNode *targ, int type, bool enumerate);
+    void addGPOS(int lkpType, GPat *targ);
+    void addBaseClass(GPat *targ, const std::string &defaultClassName);
+    void addPos(GPat *targ, int type, bool enumerate);
 
     // CVParameters
     enum { cvUILabelEnum = 1, cvToolTipEnum, cvSampleTextEnum,
@@ -561,22 +641,30 @@ class FeatCtx {
         };
         std::vector<FeatureRecord> features;
         struct RuleInfo {
-            GNode *targ;
-            GNode *repl;
+            struct GlyphInfo {
+                GlyphInfo(GID g, int16_t a) : rgid(g), aaltIndex(a) {}
+                bool operator==(const GlyphInfo &b) const {
+                    return aaltIndex == b.aaltIndex;
+                }
+                bool operator<(const GlyphInfo &b) const {
+                    return aaltIndex < b.aaltIndex;
+                }
+                GID rgid {0};
+                int16_t aaltIndex {0};
+            };
+            explicit RuleInfo(GID gid) : targid(gid) {}
+            GID targid;
+            std::vector<GlyphInfo> glyphs;
         };
-        std::unordered_map<GID, RuleInfo> rules;
+        std::map<GID, RuleInfo> rules;
     } aalt;
 
     void aaltAddFeatureTag(Tag tag);
     void reportUnusedaaltTags();
-    void aaltRuleSort(GNode **list);
-    void aaltAddAlternates(GNode *targ, GNode *repl);
+    void aaltAddAlternates(GPat::ClassRec &targcr, GPat::ClassRec &replcr);
     void aaltCreate();
-    bool aaltCheckRule(int type, GNode *targ, GNode *repl);
-    void storeRuleInfo(GNode *targ, GNode *repl);
-
-    // Temporary for cross product
-    std::vector<GNode *> prod;
+    bool aaltCheckRule(int type, GPat *targ, GPat *repl);
+    void storeRuleInfo(GPat *targ, GPat *repl);
 
     hotCtx g;
     FeatVisitor *root_visitor {nullptr}, *current_visitor {nullptr};

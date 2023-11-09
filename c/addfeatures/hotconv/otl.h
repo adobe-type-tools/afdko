@@ -359,6 +359,9 @@ class OTL {
 #endif
     virtual const char *objName() = 0;
     virtual void createAnonLookups() = 0;
+    static void setCoverages(std::vector<LOffset> &covs,
+                             std::shared_ptr<CoverageAndClass> &cac,
+                             std::vector<GPat::ClassRec*> classes, LOffset o);
 
  private:
     static void valDump(int16_t val, int16_t excep, bool isRef);

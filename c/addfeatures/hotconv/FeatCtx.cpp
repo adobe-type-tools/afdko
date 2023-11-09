@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -38,6 +39,26 @@ const int AALT_INDEX {-1};        // used as feature index for sorting alt glyph
     "use \"languagesystem\" statement(s) at beginning of file instead to" \
     " specify the language system(s) this feature should be registered under"
 
+void GPat::ClassRec::makeUnique(hotCtx g, bool report) {
+    sort();
+    uint16_t glen = glyphs.size(), i = 0;
+    int32_t lastgid = -1;
+    while (i < glen) {
+        int32_t gid = glyphs[i];
+        if (gid == lastgid) {
+            if (report) {
+                g->ctx.feat->dumpGlyph(gid, -1, false);
+                hotMsg(g, hotNOTE, "Removing duplicate glyph <%s>",
+                       g->note.array);
+            }
+            glyphs.erase(glyphs.begin() + i);
+            glen--;
+        } else {
+            i++;
+        }
+    }
+}
+
 bool FeatCtx::LangSys::operator<(const FeatCtx::LangSys &b) const {
     return std::tie(script, lang) < std::tie(b.script, b.lang);
 }
@@ -56,12 +77,6 @@ bool FeatCtx::AALT::FeatureRecord::operator==(const FeatCtx::AALT::FeatureRecord
 
 bool FeatCtx::AALT::FeatureRecord::operator==(const Tag &b) const {
     return feature == b;
-}
-
-FeatCtx::FeatCtx(hotCtx g) : g(g) {}
-
-FeatCtx::~FeatCtx() {
-    freeBlocks();
 }
 
 // --------------------------- Main entry point ------------------------------
@@ -93,67 +108,7 @@ void FeatCtx::fill(void) {
     hotQuitOnError(g);
 }
 
-// ------------------------ GNode memory management --------------------------
-
-void FeatCtx::addBlock() {
-    auto &bl = blockList;
-    if (bl.first == nullptr) {
-        /* Initial allocation */
-        bl.first = bl.curr = (BlockNode *) MEM_NEW(g, sizeof(BlockNode));
-        bl.curr->data = (GNode *) MEM_NEW(g, sizeof(GNode) * bl.intl);
-    } else {
-        /* Incremental allocation */
-        bl.curr->next = (BlockNode *) MEM_NEW(g, sizeof(BlockNode));
-        bl.curr = bl.curr->next;
-        bl.curr->data = (GNode *) MEM_NEW(g, sizeof(GNode) * bl.incr);
-    }
-    bl.curr->next = nullptr;
-    bl.cnt = 0;
-}
-
-void FeatCtx::freeBlocks() {
-    BlockNode *p, *pNext;
-
-    for (p = blockList.first; p != nullptr; p = pNext) {
-        pNext = p->next;
-        MEM_FREE(g, p->data);
-        MEM_FREE(g, p);
-    }
-}
-
-GNode *FeatCtx::newNodeFromBlock() {
-    auto &bl = blockList;
-    if ( bl.first == nullptr || bl.cnt == (bl.curr == bl.first ? bl.intl : bl.incr) )
-        addBlock();
-    return bl.curr->data + bl.cnt++;
-}
-
 #if HOT_DEBUG
-
-void FeatCtx::nodeStats() {
-    BlockNode *p;
-    auto &bl = blockList;
-
-    fprintf(stderr,
-            "### GNode Stats\n"
-            "nAdded2FreeList: %ld, "
-            "nNewFromBlockList: %ld, "
-            "nNewFromFreeList: %ld.\n",
-            nAdded2FreeList, nNewFromBlockList, nNewFromFreeList);
-    fprintf(stderr, "%ld not freed\n",
-            nNewFromBlockList + nNewFromFreeList - nAdded2FreeList);
-
-    fprintf(stderr, "### BlockList:");
-
-    for (p = bl.first; p != NULL; p = p->next) {
-        long blSize = p == bl.first ? bl.intl : bl.incr;
-        if (p->next != NULL) {
-            fprintf(stderr, " %ld ->", blSize);
-        } else {
-            fprintf(stderr, " %ld/%ld\n", bl.cnt, blSize);
-        }
-    }
-}
 
 void FeatCtx::tagDump(Tag tag) {
     if (tag == TAG_UNDEF) {
@@ -177,109 +132,6 @@ void FeatCtx::stateDump(State &st) {
 }
 
 #endif /* HOT_DEBUG */
-
-/* Returns a glyph node, uninitialized except for flags */
-static void initAnchor(AnchorMarkInfo *anchor) {
-    anchor->x = 0;
-    anchor->y = 0;
-    anchor->contourpoint = 0;
-    anchor->format = 0;
-    anchor->markClass = NULL;
-    anchor->markClassIndex = 0;
-    anchor->componentIndex = 0;
-    return;
-}
-
-// Returns a glyph node, uninitialized except for flags
-GNode *FeatCtx::newNode() {
-    GNode *ret;
-    if (freelist != nullptr) {
-#if HOT_DEBUG
-        nNewFromFreeList++;
-#endif
-        /* Return first item from freelist */
-        ret = freelist;
-        freelist = freelist->nextSeq;
-    } else {
-        /* Return new item from da */
-#if HOT_DEBUG
-        nNewFromBlockList++;
-#endif
-        ret = newNodeFromBlock();
-    }
-
-    ret->flags = 0;
-    ret->nextSeq = NULL;
-    ret->nextCl = NULL;
-    ret->lookupLabelCount = 0;
-    ret->metricsInfo = METRICSINFOEMPTYPP;
-    ret->aaltIndex = 0;
-    ret->markClassName = NULL;
-    initAnchor(&ret->markClassAnchorInfo);
-    return ret;
-}
-
-GNode *FeatCtx::setNewNode(GID gid) {
-    GNode *n = newNode();
-    n->gid = gid;
-    return n;
-}
-
-#if HOT_DEBUG
-
-void FeatCtx::checkFreeNode(GNode *node) {
-    GNode *testNode = freelist;
-    long cnt = 0;
-    while ( testNode != NULL ) {
-        if ( testNode == node )
-            printf("Node duplication in free list %lu. gid: %d!\n", (unsigned long)node, node->gid);
-        testNode = testNode->nextSeq;
-        cnt++;
-        if ( cnt > nAdded2FreeList ) {
-            printf("Endless loop in checkFreeList.\n");
-            break;
-        }
-    }
-}
-
-#endif
-
-/* Add node to freelist (Insert at beginning) */
-
-void FeatCtx::recycleNode(GNode *node) {
-#if HOT_DEBUG
-    nAdded2FreeList++;
-#endif
-#if HOT_DEBUG
-    checkFreeNode(node);
-#endif
-    node->nextSeq = freelist;
-    freelist = node;
-}
-
-#define ITERATIONLIMIT 100000
-
-/* Add nodes to freelist */
-
-void FeatCtx::recycleNodes(GNode *node) {
-    GNode *nextSeq;
-    long iterations = 0;
-
-    for (; node != nullptr; node = nextSeq) {
-        nextSeq = node->nextSeq;
-        GNode *nextCl;
-
-        /* Recycle class */
-        for (GNode *cl = node; cl != nullptr; cl = nextCl) {
-            nextCl = cl->nextCl;
-            recycleNode(cl);
-            if (iterations++ > ITERATIONLIMIT) {
-                fprintf(stderr, "Makeotf [WARNING]: Many cycles in featRecycleNode. Possible error.\n");
-                return;
-            }
-        }
-    }
-}
 
 // ---------------------------- Console messages -----------------------------
 
@@ -416,116 +268,18 @@ GID FeatCtx::cid2gid(const std::string &cidstr) {
     return gid; /* Suppress compiler warning */
 }
 
-/* Get count of number of nodes in glyph class */
-
-int FeatCtx::getGlyphClassCount(GNode *gc) {
-    int cnt = 0;
-    for (; gc != NULL; gc = gc->nextCl) {
-        cnt++;
-    }
-    return cnt;
-}
-
-/* If gid not in cl, return address of end insertion point, else NULL */
-
-static int glyphInClass(GID gid, GNode **cl, GNode ***lastClass) {
-    GNode **p = cl;
-
-    for (p = cl; *p != NULL; p = &((*p)->nextCl)) {
-        if ((*p)->gid == gid) {
-            *lastClass = p;
-            return 1;
-        }
-    }
-
-    *lastClass = p;
-    return 0;
-}
-
-/* Return address of last nextCl. Preserves everything */
-/* but sets nextSeq of each copied GNode to NULL       */
-GNode **FeatCtx::copyGlyphClass(GNode **dst, GNode *src) {
-    GNode **newDst = dst;
-    for (; src != NULL; src = src->nextCl) {
-        *newDst = newNode();
-        **newDst = *src;
-        (*newDst)->nextSeq = NULL;
-        newDst = &(*newDst)->nextCl;
-    }
-    return newDst;
-}
-
-/* Sort a glyph class; head node retains flags of original head node */
-/* nextSeq, flags, markClassName, and markCnt of head now are zeroed. */
-
-void FeatCtx::sortGlyphClass(GNode **list, bool unique, bool reportDups) {
-    unsigned long i;
-    GNode *p = *list;
-    /* Preserve values that are kept with the head node only, and then zero them in the head node. */
-    GNode *nextTarg = p->nextSeq;
-    short flags = (*list)->flags;
-    MetricsInfo metricsInfo = p->metricsInfo;
-    char *markClassName = p->markClassName;
-    p->markClassName = NULL;
-    p->metricsInfo = METRICSINFOEMPTYPP;
-    p->nextSeq = NULL;
-    p->flags = 0;
-
-    /* Copy over pointers */
-    std::vector<GNode *> sortTmp;
-
-    for (; p != NULL; p = p->nextCl)
-        sortTmp.push_back(p);
-
-    struct {
-        bool operator()(GNode *a, GNode *b) const { return a->gid < b->gid; }
-    } cmpNode;
-    std::sort(sortTmp.begin(), sortTmp.end(), cmpNode);
-
-    /* Move pointers around */
-    for (i = 0; i < sortTmp.size() - 1; i++)
-        sortTmp[i]->nextCl = sortTmp[i + 1];
-    sortTmp[i]->nextCl = NULL;
-
-    *list = sortTmp[0];
-
-    /* Check for duplicates */
-    if (unique && !g->hadError) {
-        for (p = *list; p->nextCl != NULL;) {
-            if (p->gid == p->nextCl->gid) {
-                GNode *tmp = p->nextCl;
-
-                p->nextCl = tmp->nextCl;
-                tmp->nextCl = NULL;
-                tmp->nextSeq = NULL;
-
-                /* If current_visitor is null we are being called after the
-                 * feature files have been closed. In this case, we are
-                 * sorting GDEF classes, and duplicates don't need a
-                 * warning. */
-                if ( current_visitor != nullptr && reportDups ) {
-                    dumpGlyph(tmp->gid, '\0', 0);
-                    featMsg(hotNOTE, "Removing duplicate glyph <%s>",
-                            g->note.array);
-                }
-                recycleNodes(tmp);
-            } else {
-                p = p->nextCl;
-            }
-        }
-    }
-
-    /*restore head node values to the new head node.*/
-    p = *list;
-    p->flags = flags;
-    p->nextSeq = nextTarg;
-    p->metricsInfo = metricsInfo;
-    p->markClassName = markClassName;
+void FeatCtx::sortGlyphClass(GPat *gp, bool unique, bool reportDups, uint16_t idx) {
+    assert(idx < gp->patternLen());
+    if (unique)
+        // makeClassUnique also sorts
+        gp->makeClassUnique(g, idx, reportDups);
+    else
+        gp->sortClass(idx);
 }
 
 void FeatCtx::resetCurrentGC() {
-    assert(curGCHead == nullptr && curGCTailAddr == NULL && curGCName.empty());
-    curGCTailAddr = &curGCHead;
+    assert(curGCName.empty());
+    curGC.reset();
 }
 
 void FeatCtx::defineCurrentGC(const std::string &gcname) {
@@ -533,7 +287,6 @@ void FeatCtx::defineCurrentGC(const std::string &gcname) {
     auto search = namedGlyphClasses.find(gcname);
     if ( search != namedGlyphClasses.end() ) {
         featMsg(hotWARNING, "Glyph class %s redefined", gcname.c_str());
-        recycleNodes(search->second);
         namedGlyphClasses.erase(search);
     }
     curGCName = gcname;
@@ -541,41 +294,39 @@ void FeatCtx::defineCurrentGC(const std::string &gcname) {
 
 bool FeatCtx::openAsCurrentGC(const std::string &gcname) {
     resetCurrentGC();
+    curGCName = gcname;
     auto search = namedGlyphClasses.find(gcname);
     if ( search != namedGlyphClasses.end() ) {
-        GNode *nextClass = curGCHead = search->second;
-        while ( nextClass->nextCl != NULL )
-            nextClass = nextClass->nextCl;
-        curGCTailAddr = &nextClass->nextCl;
-        // If the class is found don't set curGCName as it doesn't need to
-        // be stored on Close.
+        curGC = search->second;
         return true;
     } else {
-        curGCName = gcname;
         return false;
     }
 }
 
-GNode *FeatCtx::finishCurrentGC() {
-    if ( !curGCName.empty() && curGCHead != nullptr )
-        namedGlyphClasses.insert({curGCName, curGCHead});
+void FeatCtx::finishCurrentGC() {
+    if ( !curGCName.empty() )
+        namedGlyphClasses.insert_or_assign(curGCName, std::move(curGC));
 
-    GNode *ret = curGCHead;
     curGCName.clear();
-    curGCHead = nullptr;
-    curGCTailAddr = nullptr;
-    return ret;
+}
+
+void FeatCtx::finishCurrentGC(GPat::ClassRec &cr) {
+    cr = curGC;
+    finishCurrentGC();
 }
 
 /* Add glyph to end of current glyph class */
 
 void FeatCtx::addGlyphToCurrentGC(GID gid) {
-    *curGCTailAddr = setNewNode(gid);
-    curGCTailAddr = &(*curGCTailAddr)->nextCl;
+    curGC.addGlyph(gid);
 }
 
-void FeatCtx::addGlyphClassToCurrentGC(GNode *src) {
-    curGCTailAddr = copyGlyphClass(curGCTailAddr, src);
+void FeatCtx::addGlyphClassToCurrentGC(const GPat::ClassRec &src, bool init) {
+    if (init)
+        curGC = src;
+    else
+        curGC.concat(src);
 }
 
 void FeatCtx::addGlyphClassToCurrentGC(const std::string &subGCName) {
@@ -589,7 +340,7 @@ void FeatCtx::addGlyphClassToCurrentGC(const std::string &subGCName) {
         return;
     }
 
-    curGCTailAddr = copyGlyphClass(curGCTailAddr, search->second);
+    addGlyphClassToCurrentGC(search->second);
 }
 
 static long getNum(const char *str, int length) {
@@ -734,11 +485,11 @@ void FeatCtx::addRangeToCurrentGC(GID first, GID last, const std::string &firstN
     }
 }
 
-GNode *FeatCtx::lookupGlyphClass(const std::string &gcname) {
+const GPat::ClassRec &FeatCtx::lookupGlyphClass(const std::string &gcname) {
     auto search = namedGlyphClasses.find(gcname);
     if ( search == namedGlyphClasses.end() ) {
-        featMsg(hotERROR, "glyph class not defined");
-        return nullptr;
+        featMsg(hotFATAL, "glyph class not defined");
+        return GPat::ClassRec {};
     }
     return search->second;
 }
@@ -746,58 +497,16 @@ GNode *FeatCtx::lookupGlyphClass(const std::string &gcname) {
 /* Return 1 if targ and repl have same number of glyphs in class, else
    emit error message and return 0 */
 
-bool FeatCtx::compareGlyphClassCount(GNode *targ, GNode *repl, bool isSubrule) {
-    int nTarg = getGlyphClassCount(targ);
-    int nRepl = getGlyphClassCount(repl);
-
-    if (nTarg == nRepl) {
+bool FeatCtx::compareGlyphClassCount(int targc, int replc, bool isSubrule) {
+    if (targc == replc) {
         return true;
     }
     featMsg(hotERROR,
             "Target glyph class in %srule doesn't have the same"
             " number of elements as the replacement class; the target has %d,"
             " the replacement, %d",
-            isSubrule ? "sub-" : "", nTarg, nRepl);
+            isSubrule ? "sub-" : "", targc, replc);
     return false;
-}
-
-/* Duplicates node (copies GID) num times to create a class */
-void FeatCtx::extendNodeToClass(GNode *node, int num) {
-    if (node->nextCl != NULL) {
-        featMsg(hotFATAL, "[internal] can't extend glyph class");
-    }
-
-    if (!(node->flags & FEAT_GCLASS)) {
-        node->flags |= FEAT_GCLASS;
-    }
-
-    for (int i = 0; i < num; i++) {
-        node->nextCl = setNewNode(node->gid);
-        node = node->nextCl;
-    }
-}
-
-/* Gets length of pattern sequence (ignores any classes) */
-unsigned int FeatCtx::getPatternLen(GNode *pat) {
-    unsigned int len = 0;
-    for (; pat != NULL; pat = pat->nextSeq) {
-        len++;
-    }
-    return len;
-}
-
-/* Make a copy of src pattern. If num != -1, copy up to num nodes only       */
-/* (assumes they exist); set the last nextSeq to NULL. Preserves all flags. */
-/* Return address of last nextSeq (so that client may add on to the end).   */
-
-GNode **FeatCtx::copyPattern(GNode **dst, GNode *src, int num) {
-    int i = 0;
-
-    for (; (num == -1) ? src != NULL : i < num; i++, src = src->nextSeq) {
-        copyGlyphClass(dst, src);
-        dst = &(*dst)->nextSeq;
-    }
-    return dst;
 }
 
 void FeatCtx::dumpGlyph(GID gid, int ch, bool print) {
@@ -831,40 +540,41 @@ void FeatCtx::dumpGlyph(GID gid, int ch, bool print) {
 
 /* If !print, add to g->notes */
 
-void FeatCtx::dumpGlyphClass(GNode *gc, int ch, bool print) {
-    GNode *p = gc;
-
+void FeatCtx::dumpGlyphClass(const GPat::ClassRec &cr, int ch, bool print) {
     DUMP_CH('[', print);
-    for (; p != NULL; p = p->nextCl) {
-        dumpGlyph(p->gid, (char)(p->nextCl != NULL ? ' ' : -1), print);
+    bool first = true;
+    for (GID gid : cr.glyphs) {
+        if (!first)
+            DUMP_CH(' ', print);
+        first = false;
+        dumpGlyph(gid, (char)(-1), print);
     }
     DUMP_CH(']', print);
-    if (ch >= 0) {
+    if (ch >= 0)
         DUMP_CH(ch, print);
-    }
 }
 
 /* If !print, add to g->notes */
 
-void FeatCtx::dumpPattern(GNode *pat, int ch, bool print) {
+void FeatCtx::dumpPattern(const GPat *pat, int ch, bool print) {
     DUMP_CH('{', print);
-    for (; pat != NULL; pat = pat->nextSeq) {
-        if (pat->nextCl == NULL) {
-            dumpGlyph(pat->gid, -1, print);
-        } else {
-            dumpGlyphClass(pat, -1, print);
-        }
-        if (pat->flags & FEAT_MARKED) {
-            DUMP_CH('\'', print);
-        }
-        if (pat->nextSeq != NULL) {
+    bool first = true;
+    for (auto &cr : pat->classes) {
+        if (!first)
             DUMP_CH(' ', print);
+        first = false;
+        if (cr.is_glyph()) {
+            dumpGlyph(cr.glyphs[0], -1, print);
+        } else {
+            dumpGlyphClass(cr, -1, print);
+        }
+        if (cr.marked) {
+            DUMP_CH('\'', print);
         }
     }
     DUMP_CH('}', print);
-    if (ch >= 0) {
+    if (ch >= 0)
         DUMP_CH(ch, print);
-    }
 }
 
 // ----------------------------------- Tags ------------------------------------
@@ -1463,15 +1173,15 @@ void FeatCtx::startTable(Tag tag) {
         featMsg(hotERROR, "table already specified");
 }
 
-void FeatCtx::setGDEFGlyphClassDef(GNode *simple, GNode *ligature, GNode *mark,
-                                   GNode *component) {
+void FeatCtx::setGDEFGlyphClassDef(GPat::ClassRec &simple, GPat::ClassRec &ligature,
+                                   GPat::ClassRec &mark, GPat::ClassRec &component) {
     gFlags |= seenGDEFGC;
     g->ctx.GDEFp->setGlyphClass(simple, ligature, mark, component);
 }
 
 void FeatCtx::createDefaultGDEFClasses() {
     if ( !(gFlags & seenGDEFGC) ) {
-        GNode *classes[4] = {nullptr};
+        GPat::ClassRec classes[4];
         const char *classnames[4] = { kDEFAULT_BASECLASS_NAME,
                                       kDEFAULT_LIGATURECLASS_NAME,
                                       kDEFAULT_MARKCLASS_NAME,
@@ -1489,11 +1199,8 @@ void FeatCtx::createDefaultGDEFClasses() {
 
         for (int i = 0; i < 4; ++i) {
             openAsCurrentGC(classnames[i]);
-            if (curGCHead != NULL) {
-                copyGlyphClass(classes + i, curGCHead);
-                sortGlyphClass(classes + i, true, false);
-            }
-            finishCurrentGC();
+            finishCurrentGC(classes[i]);
+            classes[i].makeUnique(g);
         }
 
         g->ctx.GDEFp->setGlyphClass(classes[0], classes[1], classes[2], classes[3]);
@@ -1673,7 +1380,6 @@ void FeatCtx::addAnchorByName(const std::string &name, int componentIndex) {
 
 void FeatCtx::addAnchorByValue(const AnchorDef &a, bool isNull, int componentIndex) {
     AnchorMarkInfo am;
-    initAnchor(&am);
     am.x = a.x;
     am.y = a.y;
     if ( isNull ) {
@@ -1688,48 +1394,24 @@ void FeatCtx::addAnchorByValue(const AnchorDef &a, bool isNull, int componentInd
     anchorMarkInfo.push_back(am);
 }
 
-/* Make a copy of a string */
-
-static void copyStr(hotCtx g, char **dst, const char *src) {
-    if (src == NULL) {
-        *dst = NULL;
-    } else {
-        int l = strlen(src);
-        *dst = (char *) MEM_NEW(g, l + 1);
-        STRCPY_S(*dst, l+1, src);
-    }
-}
-
 /* Add new mark class definition */
-void FeatCtx::addMark(const std::string &name, GNode *targ) {
-    GNode *curNode;
-
-    /* save this anchor info in all glyphs of this mark class */
-    curNode = targ;
-    while (curNode != NULL) {
-        curNode->markClassAnchorInfo = anchorMarkInfo.back();
-        curNode = curNode->nextCl;
-    }
+void FeatCtx::addMark(const std::string &name, GPat::ClassRec &cr) {
+    cr.markClassName = name;
+    for (auto &gr : cr.glyphs)
+        gr.markClassAnchorInfo = anchorMarkInfo.back();
 
     bool found = openAsCurrentGC(name);
-    addGlyphClassToCurrentGC(targ);
+    addGlyphClassToCurrentGC(cr, !found);
 
-    if ( curGCHead->flags & FEAT_USED_MARK_CLASS )
+    if ( curGC.used_mark_class )
         featMsg(hotERROR, "You cannot add glyphs to a mark class after the mark class has been used in a position statement. %s.", name.c_str());
-
-    if ( !found ) {
-        /* this is the first time this mark class name has been referenced; save the class name in the head node. */
-        copyStr(g, &curGCHead->markClassName, name.c_str());
-    }
 
     finishCurrentGC();  // Save new entry if needed
 
     /* add mark glyphs to default base class */
     openAsCurrentGC(kDEFAULT_MARKCLASS_NAME);
-    addGlyphClassToCurrentGC(targ);
+    addGlyphClassToCurrentGC(cr);
     finishCurrentGC();
-
-    recycleNodes(targ);
 
     gFlags |= seenMarkClassFlag;
 }
@@ -1753,7 +1435,7 @@ void FeatCtx::getValueDef(const std::string &name, MetricsInfo &mi) {
 
 // ------------------------------ Substitutions --------------------------------
 
-void FeatCtx::prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
+void FeatCtx::prepRule(Tag newTbl, int newlkpType, GPat *targ, GPat *repl) {
     int accumDFLTLkps = 1;
 
     curr.tbl = newTbl;
@@ -1900,7 +1582,7 @@ void FeatCtx::prepRule(Tag newTbl, int newlkpType, GNode *targ, GNode *repl) {
     }
 }
 
-void FeatCtx::addGSUB(int lkpType, GNode *targ, GNode *repl) {
+void FeatCtx::addGSUB(int lkpType, GPat *targ, GPat *repl) {
     if (aaltCheckRule(lkpType, targ, repl))
         return;
 
@@ -1911,49 +1593,52 @@ void FeatCtx::addGSUB(int lkpType, GNode *targ, GNode *repl) {
     wrapUpRule();
 }
 
+bool FeatCtx::validateGSUBSingle(GPat::ClassRec &targcr,
+                                 GPat *repl, bool isSubrule) {
+    if (targcr.is_glyph()) {
+        if (!repl->is_glyph()) {
+            featMsg(hotERROR, "Replacement in %srule must be a single glyph",
+                    isSubrule ? "sub-" : "");
+            return false;
+        }
+    } else if (repl->is_mult_class() &&
+               !compareGlyphClassCount(targcr.classSize(), repl->classSize(),
+                                       isSubrule)) {
+        return false;
+    }
+
+    return true;
+}
+
 /* Validate targ and repl for GSUBSingle. targ and repl come in with nextSeq
    NULL and repl not marked. If valid return 1, else emit error message(s) and
    return 0 */
 
-bool FeatCtx::validateGSUBSingle(GNode *targ, GNode *repl, bool isSubrule) {
-    if (!isSubrule && targ->flags & FEAT_MARKED) {
+bool FeatCtx::validateGSUBSingle(GPat *targ, GPat *repl) {
+    if (targ->has_marked) {
         featMsg(hotERROR, "Target must not be marked in this rule");
         return false;
     }
 
-    if (is_glyph(targ)) {
-        if (!is_glyph(repl)) {
-            featMsg(hotERROR, "Replacement in %srule must be a single glyph", isSubrule ? "sub-" : "");
-            return false;
-        }
-    } else if (repl->nextCl != NULL &&
-               !compareGlyphClassCount(targ, repl, isSubrule)) {
-        return false;
-    }
-
-    return true;
+    return targ->classes.size() > 0 &&
+           validateGSUBSingle(targ->classes[0], repl, false);
 }
 
 /* Return 1 if node is an unmarked pattern of 2 or more glyphs; glyph classes
    may be present */
-static bool isUnmarkedSeq(GNode *node) {
-    if (node == nullptr || node->flags & FEAT_HAS_MARKED || node->nextSeq == nullptr) {
-        return false;
-    }
-    return true;
+static bool isUnmarkedSeq(GPat *gp) {
+    return !(gp == nullptr || gp->has_marked || gp->patternLen() < 2);
 }
 
 /* Return 1 if node is an unmarked pattern of 2 or more glyphs, and no glyph
    classes are present */
-static bool isUnmarkedGlyphSeq(GNode *node) {
-    if (!isUnmarkedSeq(node)) {
+static bool isUnmarkedGlyphSeq(GPat *gp) {
+    if (!isUnmarkedSeq(gp))
         return false;
-    }
 
-    for (; node != nullptr; node = node->nextSeq) {
-        if (node->nextCl != nullptr) {
-            return true; /* A glyph class is present */
-        }
+    for (auto &cr : gp->classes) {
+        if (!cr.is_glyph())
+            return false; /* A glyph class is present */
     }
     return true;
 }
@@ -1962,36 +1647,42 @@ static bool isUnmarkedGlyphSeq(GNode *node) {
    repl NULL or with nextSeq non-NULL (and unmarked). If valid return 1, else
    emit error message(s) and return 0 */
 
-bool FeatCtx::validateGSUBMultiple(GNode *targ, GNode *repl, bool isSubrule) {
-    if (!isSubrule && targ->flags & FEAT_MARKED) {
-        featMsg(hotERROR, "Target must not be marked in this rule");
-        return false;
-    }
-
-    if (!((isSubrule || is_glyph(targ)) && isUnmarkedGlyphSeq(repl)) && (repl != NULL || targ->flags & FEAT_LOOKUP_NODE)) {
+bool FeatCtx::validateGSUBMultiple(GPat::ClassRec &targ, GPat *repl,
+                                   bool isSubrule) {
+    if (!((isSubrule || targ.is_glyph()) && isUnmarkedGlyphSeq(repl)) &&
+        (repl != NULL || targ.has_lookups())) {
         featMsg(hotERROR, "Invalid multiple substitution rule");
         return false;
     }
     return true;
 }
 
+bool FeatCtx::validateGSUBMultiple(GPat *targ, GPat *repl) {
+    if (targ->has_marked) {
+        featMsg(hotERROR, "Target must not be marked in this rule");
+        return false;
+    }
+    return targ->patternLen() > 0 &&
+           validateGSUBMultiple(targ->classes[0], repl, false);
+}
+
 /* Validate targ and repl for GSUBAlternate. repl is not marked. If valid
    return 1, else emit error message(s) and return 0 */
 
-bool FeatCtx::validateGSUBAlternate(GNode *targ, GNode *repl, bool isSubrule) {
-    if (!isSubrule && targ->flags & FEAT_MARKED) {
+bool FeatCtx::validateGSUBAlternate(GPat *targ, GPat *repl, bool isSubrule) {
+    if (targ->has_marked) {
         featMsg(hotERROR, "Target must not be marked in this rule");
         return false;
     }
 
-    if (!is_unmarked_glyph(targ)) {
+    if (!targ->is_unmarked_glyph()) {
         featMsg(hotERROR,
                 "Target of alternate substitution %srule must be a"
                 " single unmarked glyph",
                 isSubrule ? "sub-" : "");
         return false;
     }
-    if (!is_class(repl)) {
+    if (!repl->is_class()) {
         featMsg(hotERROR,
                 "Replacement of alternate substitution %srule must "
                 "be a glyph class",
@@ -2005,13 +1696,15 @@ bool FeatCtx::validateGSUBAlternate(GNode *targ, GNode *repl, bool isSubrule) {
    non-NULL and repl is unmarked. If valid return 1, else emit error message(s)
    and return 0 */
 
-bool FeatCtx::validateGSUBLigature(GNode *targ, GNode *repl, bool isSubrule) {
-    if (!isSubrule && targ->flags & FEAT_HAS_MARKED) {
+bool FeatCtx::validateGSUBLigature(GPat *targ, GPat *repl, bool isSubrule) {
+    assert(isSubrule || targ != nullptr);
+
+    if (!isSubrule && targ->has_marked) {
         featMsg(hotERROR, "Target must not be marked in this rule");
         return false;
     }
 
-    if (!(is_glyph(repl))) {
+    if (!repl->is_glyph()) {
         featMsg(hotERROR, "Invalid ligature %srule replacement", isSubrule ? "sub-" : "");
         return false;
     }
@@ -2020,69 +1713,69 @@ bool FeatCtx::validateGSUBLigature(GNode *targ, GNode *repl, bool isSubrule) {
 
 /* Analyze GSUBChain targ and repl. Return 1 if valid, else 0 */
 
-bool FeatCtx::validateGSUBReverseChain(GNode *targ, GNode *repl) {
-    int state;
-    GNode *p;
-    GNode *input = NULL; /* first node  of input sequence */
-    // GNode *m = NULL;
+bool FeatCtx::validateGSUBReverseChain(GPat *targ, GPat *repl) {
     int nMarked = 0;
+    bool after_marked = false;
 
     if (repl == NULL) {
         /* Except clause */
-        if (targ->flags & FEAT_HAS_MARKED) {
-            /* Mark backtrack */
-            for (p = targ; p != NULL && !(p->flags & FEAT_MARKED);
-                 p = p->nextSeq) {
-                p->flags |= FEAT_BACKTRACK;
-            }
-            for (; p != NULL && p->flags & FEAT_MARKED; p = p->nextSeq) {
-                p->flags |= FEAT_INPUT;
+        if (targ->has_marked) {
+            for (auto &cr : targ->classes) {
+                if (nMarked == 0 && !cr.marked) {
+                    cr.backtrack = true;
+                } else if (cr.marked) {
+                    if (after_marked) {
+                        featMsg(hotERROR,
+                                "ignore clause may have at most one run "
+                                "of marked glyphs");
+                        return false;
+                    }
+                    nMarked++;
+                    cr.input = true;
+                } else if (nMarked > 0) {
+                    after_marked = true;
+                    cr.lookahead = true;
+                }
             }
         } else {
-            /* If clause is unmarked: first char is INPUT, rest LOOKAHEAD */
-            targ->flags |= FEAT_INPUT;
-            p = targ->nextSeq;
-        }
-        /* Mark rest of glyphs as lookahead */
-        for (; p != NULL; p = p->nextSeq) {
-            if (p->flags & FEAT_MARKED) {
-                featMsg(hotERROR,
-                        "ignore clause may have at most one run "
-                        "of marked glyphs");
-                return false;
-            } else {
-                p->flags |= FEAT_LOOKAHEAD;
+            bool first = true;
+            for (auto &cr : targ->classes) {
+                if (first) {
+                    cr.input = true;
+                    first = false;
+                } else {
+                    cr.lookahead = true;
+                }
             }
         }
         return true;
     }
 
+    nMarked = 0;
+    after_marked = false;
     /* At most one run of marked positions supported, for now */
-    for (p = targ; p != NULL; p = p->nextSeq) {
-        if (p->flags & FEAT_MARKED) {
-            ++nMarked;
-        } else if (p->nextSeq != NULL && p->nextSeq->flags & FEAT_MARKED && nMarked > 0) {
-            featMsg(hotERROR, "Reverse contextual GSUB rule may must have one and only one glyph or class marked for replacement");
-            return false;
+    for (auto &cr : targ->classes) {
+        if (cr.marked) {
+            if (after_marked) {
+                featMsg(hotERROR, "Reverse contextual GSUB rule must have one and only one "
+                                  "glyph or class marked for replacement");
+                return false;
+            }
+            nMarked++;
+        } else if (nMarked > 0) {
+            after_marked = true;
         }
     }
 
     /* If nothing is marked, mark everything [xxx?] */
     if (nMarked == 0) {
-        // m = targ;
-        for (p = targ; p != NULL; p = p->nextSeq) {
-            p->flags |= FEAT_MARKED;
+        for (auto &cr : targ->classes) {
+            cr.marked = true;
             nMarked++;
         }
     }
-    /* m now points to beginning of marked run */
 
-#if 0
-    targ->flags |= (nMarked == 1) ? FEAT_HAS_SINGLE_MARK
-                                  : FEAT_HAS_LIGATURE_MARK;
-#endif
-
-    if (repl->nextSeq != NULL) {
+    if (repl->classes.size() != 1) {
         featMsg(hotERROR, "Reverse contextual GSUB replacement sequence may have only one glyph or class");
         return false;
     }
@@ -2094,20 +1787,22 @@ bool FeatCtx::validateGSUBReverseChain(GNode *targ, GNode *repl) {
 
     /* Divide into backtrack, input, and lookahead (xxx ff interface?). */
     /* For now, input is marked glyphs                                  */
-    state = FEAT_BACKTRACK;
-    for (p = targ; p != NULL; p = p->nextSeq) {
-        if (p->flags & FEAT_MARKED) {
-            if (input == NULL) {
-                input = p;
-            }
-            state = FEAT_INPUT;
-        } else if (state != FEAT_BACKTRACK) {
-            state = FEAT_LOOKAHEAD;
+    nMarked = 0;
+    GPat::ClassRec *crp = nullptr;
+    for (auto &cr : targ->classes) {
+        if (nMarked == 0 && !cr.marked) {
+            cr.backtrack = true;
+        } else if (cr.marked) {
+            if (nMarked == 0)
+                crp = &cr;
+            nMarked++;
+            cr.input = true;
+        } else if (nMarked > 0) {
+            cr.lookahead = true;
         }
-        p->flags |= state;
     }
 
-    if (!compareGlyphClassCount(input, repl, false)) {
+    if (!compareGlyphClassCount(crp->classSize(), repl->classSize(), false)) {
         return false;
     }
 
@@ -2117,77 +1812,86 @@ bool FeatCtx::validateGSUBReverseChain(GNode *targ, GNode *repl) {
 
 /* Analyze GSUBChain targ and repl. Return 1 if valid, else 0 */
 
-bool FeatCtx::validateGSUBChain(GNode *targ, GNode *repl) {
-    int state;
-    GNode *p;
+bool FeatCtx::validateGSUBChain(GPat *targ, GPat *repl) {
     int nMarked = 0;
-    GNode *m = NULL; /* Suppress optimizer warning */
-    int hasDirectLookups = (targ->flags & FEAT_LOOKUP_NODE);
 
-    if (targ->flags & FEAT_IGNORE_CLAUSE) {
-        /* Except clause */
-        if (targ->flags & FEAT_HAS_MARKED) {
-            /* Mark backtrack */
-            for (p = targ; p != NULL && !(p->flags & FEAT_MARKED);
-                 p = p->nextSeq) {
-                p->flags |= FEAT_BACKTRACK;
-            }
-            for (; p != NULL && p->flags & FEAT_MARKED; p = p->nextSeq) {
-                p->flags |= FEAT_INPUT;
+    bool after_marked {false};
+    if (targ->ignore_clause) {
+        if (targ->has_marked) {
+            for (auto &cr : targ->classes) {
+                if (nMarked == 0 && !cr.marked) {
+                    cr.backtrack = true;
+                } else if (cr.marked) {
+                    if (after_marked) {
+                        featMsg(hotERROR,
+                                "ignore clause may have at most one run "
+                                "of marked glyphs");
+                        return false;
+                    }
+                    nMarked++;
+                    cr.input = true;
+                } else if (nMarked > 0) {
+                    after_marked = true;
+                    cr.lookahead = true;
+                }
             }
         } else {
-            /* If clause is unmarked: first char is INPUT, rest LOOKAHEAD */
-            targ->flags |= FEAT_INPUT;
-            p = targ->nextSeq;
-        }
-        /* Mark rest of glyphs as lookahead */
-        for (; p != NULL; p = p->nextSeq) {
-            if (p->flags & FEAT_MARKED) {
-                featMsg(hotERROR,
-                        "ignore clause may have at most one run "
-                        "of marked glyphs");
-                return false;
-            } else {
-                p->flags |= FEAT_LOOKAHEAD;
+            bool first = true;
+            for (auto &cr : targ->classes) {
+                if (first) {
+                    cr.input = true;
+                    first = false;
+                } else {
+                    cr.lookahead = true;
+                }
             }
         }
-        return 1;
-    } else if ((repl == NULL) && (!hasDirectLookups)) {
+        return true;
+    } else if ((repl == NULL) && (!targ->lookup_node)) {
         featMsg(hotERROR, "contextual substitution clause must have a replacement rule or direct lookup reference.");
         return false;
     }
 
-    if (hasDirectLookups) {
+    if (targ->lookup_node) {
         if (repl != NULL) {
             featMsg(hotERROR, "contextual substitution clause cannot both have a replacement rule and a direct lookup reference.");
             return false;
         }
-        if (!(targ->flags & FEAT_HAS_MARKED)) {
+        if (!(targ->has_marked)) {
             featMsg(hotERROR, "The  direct lookup reference in a contextual substitution clause must be marked as part of a contextual input sequence.");
             return false;
         }
     }
 
+    nMarked = 0;
+    after_marked = false;
     /* At most one run of marked positions supported, for now */
-    for (p = targ; p != NULL; p = p->nextSeq) {
-        if (p->flags & FEAT_MARKED) {
-            if (++nMarked == 1) {
-                m = p;
+    GPat::ClassRec *crp = nullptr;
+    for (auto &cr : targ->classes) {
+        if (cr.marked) {
+            if (after_marked) {
+                featMsg(hotERROR, "Unsupported contextual GSUB target sequence");
+                return false;
             }
-        } else if (p->lookupLabelCount > 0) {
-            featMsg(hotERROR, "The  direct lookup reference in a contextual substitution clause must be marked as part of a contextual input sequence.");
-            return false;
-        } else if (p->nextSeq != NULL && p->nextSeq->flags & FEAT_MARKED && nMarked > 0) {
-            featMsg(hotERROR, "Unsupported contextual GSUB target sequence");
-            return false;
+            if (nMarked == 0)
+                crp = &cr;
+            nMarked++;
+        } else {
+            if (cr.lookupLabels.size() > 0) {
+                featMsg(hotERROR, "The direct lookup reference in a contextual substitution clause must be marked as part of a contextual input sequence.");
+                return false;
+            }
+            if (nMarked > 0)
+                after_marked = true;
         }
     }
 
     /* If nothing is marked, mark everything [xxx?] */
     if (nMarked == 0) {
-        m = targ;
-        for (p = targ; p != NULL; p = p->nextSeq) {
-            p->flags |= FEAT_MARKED;
+        for (auto &cr : targ->classes) {
+            if (nMarked == 0)
+                crp = &cr;
+            cr.marked = true;
             nMarked++;
         }
     }
@@ -2195,26 +1899,26 @@ bool FeatCtx::validateGSUBChain(GNode *targ, GNode *repl) {
 
     if (repl) {
         if (nMarked == 1) {
-            if (is_glyph(m) && is_class(repl)) {
+            if (crp->is_glyph() && repl->is_class()) {
                 featMsg(hotERROR, "Contextual alternate rule not yet supported");
                 return false;
             }
 
-            if (repl->nextSeq != NULL) {
-                if (!validateGSUBMultiple(m, repl, 1)) {
+            if (repl->patternLen() > 1) {
+                if (!validateGSUBMultiple(*crp, repl, true)) {
                     return false;
                 }
-            } else if (!validateGSUBSingle(m, repl, 1)) {
+            } else if (!validateGSUBSingle(*crp, repl, true)) {
                 return false;
             }
         } else if (nMarked > 1) {
-            if (repl->nextSeq != NULL) {
+            if (repl->patternLen() > 1) {
                 featMsg(hotERROR, "Unsupported contextual GSUB replacement sequence");
                 return false;
             }
 
             /* Ligature run may contain classes, but only with a single repl */
-            if (!validateGSUBLigature(m, repl, 1)) {
+            if (!validateGSUBLigature(nullptr, repl, true)) {
                 return false;
             }
         }
@@ -2222,25 +1926,25 @@ bool FeatCtx::validateGSUBChain(GNode *targ, GNode *repl) {
 
     /* Divide into backtrack, input, and lookahead (xxx ff interface?). */
     /* For now, input is marked glyphs                                  */
-    state = FEAT_BACKTRACK;
-    for (p = targ; p != NULL; p = p->nextSeq) {
-        if (p->flags & FEAT_MARKED) {
-            state = FEAT_INPUT;
-        } else if (state != FEAT_BACKTRACK) {
-            state = FEAT_LOOKAHEAD;
+    nMarked = 0;
+    for (auto &cr : targ->classes) {
+        if (nMarked == 0 && !cr.marked) {
+            cr.backtrack = true;
+        } else if (cr.marked) {
+            nMarked++;
+            cr.input = true;
+        } else if (nMarked > 0) {
+            cr.lookahead = true;
         }
-        p->flags |= state;
     }
 
     return true;
 }
 
-void FeatCtx::addSub(GNode *targ, GNode *repl, int lkpType) {
-    GNode *nextNode = targ;
-
-    for (nextNode = targ; nextNode != NULL; nextNode = nextNode->nextSeq) {
-        if (nextNode->flags & FEAT_MARKED) {
-            targ->flags |= FEAT_HAS_MARKED;
+void FeatCtx::addSub(GPat *targ, GPat *repl, int lkpType) {
+    for (auto &cr : targ->classes) {
+        if (cr.marked) {
+            targ->has_marked = true;
             if ((lkpType != GSUBReverse) && (lkpType != GSUBChain)) {
                 lkpType = GSUBChain;
             }
@@ -2248,7 +1952,7 @@ void FeatCtx::addSub(GNode *targ, GNode *repl, int lkpType) {
         }
     }
 
-    if (lkpType == GSUBChain || (targ->flags & FEAT_IGNORE_CLAUSE)) {
+    if (lkpType == GSUBChain || (targ->ignore_clause)) {
         /* Chain sub exceptions (further analyzed below).                */
         /* "sub f i by fi;" will be here if there was an "except" clause */
 
@@ -2263,47 +1967,30 @@ void FeatCtx::addSub(GNode *targ, GNode *repl, int lkpType) {
             addGSUB(GSUBReverse, targ, repl);
         }
     } else if (lkpType == GSUBAlternate) {
-        if (validateGSUBAlternate(targ, repl, 0)) {
+        if (validateGSUBAlternate(targ, repl, false)) {
             addGSUB(GSUBAlternate, targ, repl);
         }
-    } else if (targ->nextSeq == NULL && (repl == NULL || repl->nextSeq != NULL)) {
-        if (validateGSUBMultiple(targ, repl, 0)) {
+    } else if (targ->patternLen() == 1 && (repl == NULL || repl->patternLen() > 1)) {
+        if (validateGSUBMultiple(targ, repl)) {
             addGSUB(GSUBMultiple, targ, repl);
         }
-    } else if (targ->nextSeq == NULL && repl->nextSeq == NULL) {
-        if (validateGSUBSingle(targ, repl, 0)) {
+    } else if (targ->patternLen() == 1 && repl->patternLen() == 1) {
+        if (validateGSUBSingle(targ, repl)) {
             addGSUB(GSUBSingle, targ, repl);
         }
     } else {
-        GNode *next;
-
-        if (validateGSUBLigature(targ, repl, 0)) {
+        if (validateGSUBLigature(targ, repl, false)) {
             /* add glyphs to lig and component classes, in case we need to
             make a default GDEF table. Note that we may make a lot of
             duplicated. These get weeded out later. The components are
             linked by the next->nextSeq fields. For each component*/
             openAsCurrentGC(kDEFAULT_COMPONENTCLASS_NAME); /* looks up class, making if needed. Sets h->gcInsert to address of nextCl of last node, and returns it.*/
-            next = targ;
-            while (next != NULL) {
-                if (next->nextCl != NULL) {
-                    /* the current target node is a glyph class. Need to add all members of the class to the kDEFAULT_COMPONENTCLASS_NAME. */
-                    addGlyphClassToCurrentGC(next);
-                } else {
-                    addGlyphToCurrentGC(next->gid); /* adds new node at h->gcInsert, sets h->gcInsert to address of new node's nextCl */
-                }
-                next = next->nextSeq;
-            }
+            for (auto &cr : targ->classes)
+                addGlyphClassToCurrentGC(cr);
             finishCurrentGC();
             openAsCurrentGC(kDEFAULT_LIGATURECLASS_NAME);
-            next = repl;
-            while (next != NULL) {
-                if (next->nextCl != NULL) {
-                    addGlyphClassToCurrentGC(next);
-                } else {
-                    addGlyphToCurrentGC(next->gid);
-                }
-                next = next->nextSeq;
-            }
+            for (auto &cr : repl->classes)
+                addGlyphClassToCurrentGC(cr);
             finishCurrentGC();
             addGSUB(GSUBLigature, targ, repl);
         }
@@ -2323,13 +2010,13 @@ void FeatCtx::addMarkClass(const std::string &markClassName) {
         featMsg(hotERROR, "MarkToBase or MarkToMark rule references a mark class (%s) that has not yet been defined", markClassName.c_str());
         return;
     }
-    curGCHead->flags |= FEAT_USED_MARK_CLASS;
-    anchorMarkInfo.back().markClass = curGCHead;
+    curGC.used_mark_class = true;
+    anchorMarkInfo.back().markClassName = markClassName;
     finishCurrentGC();
 }
 
-void FeatCtx::addGPOS(int lkpType, GNode *targ) {
-    prepRule(GPOS_, (targ->flags & FEAT_HAS_MARKED) ? GPOSChain : lkpType, targ, NULL);
+void FeatCtx::addGPOS(int lkpType, GPat *targ) {
+    prepRule(GPOS_, (targ->has_marked) ? GPOSChain : lkpType, targ, NULL);
 
     std::string locDesc = current_visitor->tokenPositionMsg(true);
     g->ctx.GPOSp->RuleAdd(lkpType, targ, locDesc, anchorMarkInfo);
@@ -2340,84 +2027,82 @@ void FeatCtx::addGPOS(int lkpType, GNode *targ) {
 /* Analyze featValidateGPOSChain targ metrics. Return 1 if valid, else 0 */
 /* Also sets flags in backtrack and look-ahead sequences */
 
-bool FeatCtx::validateGPOSChain(GNode *targ, int lkpType) {
-    int state;
-    GNode *p;
-    int nMarked = 0;
-    int nNodesWithMetrics = 0;
-    bool seenTerminalMetrics = false; /* special case for kern -like syntax in a contextual sub statement. */
-    int nBaseGlyphs = 0;
-    int nLookupRefs = 0;
-    GNode *m = NULL;        /* Suppress optimizer warning */
-    GNode *lastNode = NULL; /* Suppress optimizer warning */
+bool FeatCtx::validateGPOSChain(GPat *targ, int lkpType) {
+    int nMarked {0};
+    int nNodesWithMetrics {0};
+    int nBaseGlyphs {0};
+    int nLookupRefs {0};
 
     /* At most one run of marked positions supported, for now */
-    for (p = targ; p != NULL; p = p->nextSeq) {
-        lastNode = p;
+    bool after_marked {false}, unmarked_metrics {false}, terminal_metrics {false};
+    GPat::ClassRec *mcr {nullptr};
+    for (auto &cr : targ->classes) {
+        terminal_metrics = false;
+        if (unmarked_metrics) {
+            featMsg(hotERROR, "Positioning values are allowed only in the marked glyph sequence, or after the final glyph node when only one glyph node is marked.");
+            return false;
+        }
 
-        if (p->flags & FEAT_MARKED) {
-            if (++nMarked == 1) {
-                m = p;
-            }
-            if (p->metricsInfo.cnt != -1) {
-                nNodesWithMetrics++;
-            }
-            if (p->lookupLabelCount > 0) {
-                nLookupRefs++;
-            }
-        } else {
-            if (p->lookupLabelCount > 0) {
-                featMsg(hotERROR, "Lookup references are allowed only in the input sequence: this is the sequence of marked glyphs.");
-            }
-
-            if (p->flags & FEAT_IS_MARK_NODE) {
-                featMsg(hotERROR, "The final mark class must be marked as part of the input sequence: this is the sequence of marked glyphs.");
-            }
-
-            if ((p->nextSeq != NULL) && (p->nextSeq->flags & FEAT_MARKED) && (nMarked > 0)) {
+        if (cr.marked) {
+            if (nMarked++ == 0)
+                mcr = &cr;
+            if (after_marked) {
                 featMsg(hotERROR, "Unsupported contextual GPOS target sequence: only one run of marked glyphs  is supported.");
                 return false;
             }
+            if (cr.metricsInfo.metrics.size() > 0) {
+                nNodesWithMetrics++;
+            }
+            if (cr.lookupLabels.size() > 0) {
+                nLookupRefs++;
+            }
+        } else {
+            if (nMarked > 0)
+                after_marked = true;
+
+            if (cr.lookupLabels.size() > 0) {
+                featMsg(hotERROR, "Lookup references are allowed only in the input sequence: this is the sequence of marked glyphs.");
+            }
+
+            if (cr.marknode) {
+                featMsg(hotERROR, "The final mark class must be marked as part of the input sequence: this is the sequence of marked glyphs.");
+            }
 
             /* We actually do allow  a value records after the last glyph node, if there is only one marked glyph */
-            if (p->metricsInfo.cnt != -1) {
+            if (cr.metricsInfo.metrics.size() > 0) {
+                terminal_metrics = true;
                 if (nMarked == 0) {
                     featMsg(hotERROR, "Positioning cannot be applied in the backtrack glyph sequence, before the marked glyph sequence.");
                     return false;
                 }
-                if ((p->nextSeq != NULL) || (nMarked > 1)) {
+                if (nMarked > 1) {
                     featMsg(hotERROR, "Positioning values are allowed only in the marked glyph sequence, or after the final glyph node when only one glyph node is marked.");
                     return false;
                 }
-
-                if ((p->nextSeq == NULL) && (nMarked == 1)) {
-                    seenTerminalMetrics = true;
-                }
-
                 nNodesWithMetrics++;
+            } else {
+                terminal_metrics = false;
             }
         }
 
-        if (p->flags & FEAT_IS_BASE_NODE) {
+        if (cr.basenode) {
             nBaseGlyphs++;
-            if ((lkpType == GPOSCursive) && (!(p->flags & FEAT_MARKED))) {
+            if ((lkpType == GPOSCursive) && (!cr.marked)) {
                 featMsg(hotERROR, "The base glyph or glyph class must be marked as part of the input sequence in a contextual pos cursive statement.");
             }
         }
     }
-
-    /* m now points to beginning of marked run */
-
     /* Check for special case of a single marked node, with one or more lookahead nodes, and a single value record attached to the last node */
-    if (seenTerminalMetrics) {
-        m->metricsInfo = lastNode->metricsInfo;
-        lastNode->metricsInfo = METRICSINFOEMPTYPP;
+    if (terminal_metrics && nMarked == 1) {
+        mcr->metricsInfo = targ->classes.back().metricsInfo;
+        targ->classes.back().metricsInfo.reset();
     }
 
-    if (targ->flags & FEAT_IGNORE_CLAUSE) {
+    if (targ->ignore_clause) {
         /* An ignore clause is always contextual. If not marked, then mark the first glyph in the sequence */
         if (nMarked == 0) {
-            targ->flags |= FEAT_MARKED;
+            assert(targ != nullptr && targ->classes.size() > 0);
+            targ->classes[0].marked = true;
             nMarked = 1;
         }
     } else if ((nNodesWithMetrics == 0) && (nBaseGlyphs == 0) && (nLookupRefs == 0)) {
@@ -2427,14 +2112,16 @@ bool FeatCtx::validateGPOSChain(GNode *targ, int lkpType) {
 
     /* Divide into backtrack, input, and lookahead (xxx ff interface?). */
     /* For now, input is marked glyphs                                  */
-    state = FEAT_BACKTRACK;
-    for (p = targ; p != NULL; p = p->nextSeq) {
-        if (p->flags & FEAT_MARKED) {
-            state = FEAT_INPUT;
-        } else if (state != FEAT_BACKTRACK) {
-            state = FEAT_LOOKAHEAD;
+    nMarked = 0;
+    for (auto &cr : targ->classes) {
+        if (nMarked == 0 && !cr.marked) {
+            cr.backtrack = true;
+        } else if (cr.marked) {
+            nMarked++;
+            cr.input = true;
+        } else if (nMarked > 0) {
+            cr.lookahead = true;
         }
-        p->flags |= state;
     }
 
     return true;
@@ -2458,73 +2145,61 @@ bool FeatCtx::validateGPOSChain(GNode *targ, int lkpType) {
     Can assume targ is at least one node. If h->metrics.cnt == 0
    then targ is an "ignore position" pattern. */
 
-void FeatCtx::addBaseClass(GNode *targ, const std::string &defaultClassName) {
+void FeatCtx::addBaseClass(GPat *targ, const std::string &defaultClassName) {
     /* Find base node in a possibly contextual sequence, */
     /* and add it to the default base glyph class        */
-    GNode *nextNode = targ;
+    assert(targ != nullptr && targ->patternLen() > 0);
+    GPat::ClassRec *crp {&targ->classes[0]};
 
-    /* If it is contextual, first find the base glyph */
-    if (targ->flags & FEAT_HAS_MARKED) {
-        while (nextNode != NULL) {
-            if (nextNode->flags & FEAT_IS_BASE_NODE) {
-                break;
-            }
-            nextNode = nextNode->nextSeq;
+    if (targ->has_marked) {
+        crp = nullptr;
+        for (auto &cr : targ->classes) {
+            if (cr.basenode)
+                crp = &cr;
         }
     }
-
-    if (nextNode->flags & FEAT_IS_BASE_NODE) {
-        openAsCurrentGC(defaultClassName);
-        if (nextNode->nextCl != NULL) {
-            addGlyphClassToCurrentGC(nextNode);
-        } else {
-            addGlyphToCurrentGC(nextNode->gid);
-        }
-        finishCurrentGC();
-    }
+    assert(crp != nullptr);
+    openAsCurrentGC(defaultClassName);
+    addGlyphClassToCurrentGC(*crp);
+    finishCurrentGC();
 }
 
-void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
-    int glyphCount = 0;
-    int markedCount = 0;
-    int lookupLabelCnt = 0;
-    GNode *next_targ = NULL;
-    GNode *copyHeadNode;
+void FeatCtx::addPos(GPat *targ, int type, bool enumerate) {
+    int glyphCount {0};
+    bool marked {false};
+    int lookupLabelCnt {0};
 
-    if (enumerate) {
-        targ->flags |= FEAT_ENUMERATE;
-    }
+    if (enumerate)
+        targ->enumerate = true;
 
     /* count glyphs, figure out if is single, pair, or context. */
-    next_targ = targ;
-    while (next_targ != NULL) {
+    for (auto &cr : targ->classes) {
         glyphCount++;
-        if (next_targ->flags & FEAT_MARKED) {
-            markedCount++;
-        }
-        if (next_targ->lookupLabelCount > 0) {
+        if (cr.marked)
+            marked = true;
+        if (cr.lookupLabels.size() > 0) {
             lookupLabelCnt++;
-            if (!(next_targ->flags & FEAT_MARKED)) {
+            if (!cr.marked) {
                 featMsg(hotERROR, "the glyph which precedes the 'lookup' keyword must be marked as part of the contextual input sequence");
             }
         }
-        next_targ = next_targ->nextSeq;
     }
 
     /* The ignore statement can only be used with contextual lookups. */
     /* If no glyph is marked, then mark the first.                    */
-    if (targ->flags & FEAT_IGNORE_CLAUSE) {
+    if (targ->ignore_clause) {
         type = GPOSChain;
-        if (markedCount == 0) {
-            markedCount = 1;
-            targ->flags |= FEAT_MARKED;
+        if (!marked) {
+            marked = true;
+            assert(targ->classes.size() > 0);
+            targ->classes[0].marked = true;
         }
     }
 
-    if (markedCount > 0) {
-        targ->flags |= FEAT_HAS_MARKED; /* used later to decide if stuff is contextual */
-    }
-    if ((glyphCount == 2) && (markedCount == 0) && (type == GPOSSingle)) {
+    if (marked)
+        targ->has_marked = true; /* used later to decide if stuff is contextual */
+
+    if ((glyphCount == 2) && (!marked) && (type == GPOSSingle)) {
         type = GPOSPair;
     } else if (enumerate) {
         featMsg(hotERROR, "\"enumerate\" only allowed with pair positioning,");
@@ -2534,36 +2209,15 @@ void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
         addGPOS(GPOSSingle, targ);
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSPair) {
-        next_targ = targ->nextSeq;
-        if (targ->nextCl != NULL) {
-            /* In order to sort and remove duplicates, I need to copy the   */
-            /* original class definition. This is because class definitions */
-            /* may be used for sequences as well as real classes, and       */
-            /* sorting and removing duplicates from the original class is a */
-            /* bad idea.                                                    */
-            copyGlyphClass(&copyHeadNode, targ);
-            targ = copyHeadNode;
-            sortGlyphClass(&targ, true, true);
-            targ->nextSeq = next_targ; /* featGlyphClassCopy zeros the  nextSeq field in all nodes.*/
-        }
-        if (next_targ->nextCl != NULL) {
-            /* In order to sort and remove duplicates, I need to copy the    */
-            /* original class definition. This is because class definitions  */
-            /* may be used for sequences as well as real classes, and        */
-            /* sorting and removing duplicates from the original class is a  */
-            /* bad idea. */
-            copyGlyphClass(&copyHeadNode, next_targ);
-            next_targ = copyHeadNode;
-            sortGlyphClass(&next_targ, true, true);
-            targ->nextSeq = next_targ; /* featGlyphClassSort may change which node in the next_targ class is the head node.  */
-        }
-        /* addGPOSPair(targ, second, enumerate); */
+        targ = new GPat(*targ);
+        sortGlyphClass(targ, true, true, 0);
+        sortGlyphClass(targ, true, true, 1);
         addGPOS(GPOSPair, targ);
-        /* These nodes are recycled in GPOS.c due to some complicated copying of nodes. */
+        delete targ;
     } else if (type == GPOSCursive) {
         if (anchorMarkInfo.size() != 2) {
             featMsg(hotERROR, "The 'cursive' statement requires two anchors. This has %ld. Skipping rule.", anchorMarkInfo.size());
-        } else if ((!(targ->flags & FEAT_HAS_MARKED)) && ((!(targ->flags & FEAT_IS_BASE_NODE)) || (targ->nextSeq != NULL))) {
+        } else if (!targ->has_marked && (!targ->classes[0].basenode || targ->patternLen() > 1)) {
             featMsg(hotERROR, "This statement has contextual glyphs around the cursive statement, but no glyphs are marked as part of the input sequence. Skipping rule.");
         } else {
             addGPOS(GPOSCursive, targ);
@@ -2571,14 +2225,14 @@ void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSMarkToBase) {
         addBaseClass(targ, kDEFAULT_BASECLASS_NAME);
-        if ((!(targ->flags & FEAT_HAS_MARKED)) && ((!(targ->flags & FEAT_IS_BASE_NODE)) || ((targ->nextSeq != NULL) && (targ->nextSeq->nextSeq != NULL)))) {
+        if (!targ->has_marked && (!targ->classes[0].basenode || targ->patternLen() > 2)) {
             featMsg(hotERROR, "This statement has contextual glyphs around the base-to-mark statement, but no glyphs are marked as part of the input sequence. Skipping rule.");
         }
         addGPOS(GPOSMarkToBase, targ);
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSMarkToLigature) {
         addBaseClass(targ, kDEFAULT_LIGATURECLASS_NAME);
-        if ((!(targ->flags & FEAT_HAS_MARKED)) && ((!(targ->flags & FEAT_IS_BASE_NODE)) || ((targ->nextSeq != NULL) && (targ->nextSeq->nextSeq != NULL)))) {
+        if (!targ->has_marked && (!targ->classes[0].basenode || targ->patternLen() > 2)) {
             featMsg(hotERROR, "This statement has contextual glyphs around the ligature statement, but no glyphs are marked as part of the input sequence. Skipping rule.");
         }
 
@@ -2586,24 +2240,10 @@ void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
         /* different components, which leads to duplicate GID's in the       */
         /* contextual mark node. As a result, we need to sort and get rid of */
         /* duplicates.                                                       */
-
-        if (targ->flags & FEAT_HAS_MARKED) {
-            /* find the mark node */
-            GNode *markClassNode = targ;
-            GNode *prevNode = NULL;
-
-            while (markClassNode != NULL) {
-                if (markClassNode->flags & FEAT_IS_MARK_NODE) {
-                    break;
-                }
-                prevNode = markClassNode;
-                markClassNode = markClassNode->nextSeq;
-            }
-            if ((markClassNode != NULL) && (markClassNode->flags & FEAT_IS_MARK_NODE)) {
-                copyGlyphClass(&copyHeadNode, markClassNode);
-                markClassNode = copyHeadNode;
-                sortGlyphClass(&markClassNode, true, false); /* changes value of markClassNode. I specify to NOT warn of duplicates, because they can happen with correct syntax. */
-                prevNode->nextSeq = markClassNode;
+        if (targ->has_marked) {
+            for (int i = 0; i < targ->patternLen(); i++) {
+                if (targ->classes[i].marked)
+                    sortGlyphClass(targ, true, false, i);
             }
         }
 
@@ -2611,14 +2251,14 @@ void FeatCtx::addPos(GNode *targ, int type, bool enumerate) {
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSMarkToMark) {
         addBaseClass(targ, kDEFAULT_MARKCLASS_NAME);
-        if ((!(targ->flags & FEAT_HAS_MARKED)) && ((!(targ->flags & FEAT_IS_BASE_NODE)) || ((targ->nextSeq != NULL) && (targ->nextSeq->nextSeq != NULL)))) {
+        if (!targ->has_marked && (!targ->classes[0].basenode || targ->patternLen() > 2)) {
             featMsg(hotERROR, "This statement has contextual glyphs around the mark-to-mark statement, but no glyphs are marked as part of the input sequence. Skipping rule.");
         }
         addGPOS(GPOSMarkToMark, targ);
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSChain) {
         /* is contextual */
-        if (markedCount == 0) {
+        if (!marked) {
             featMsg(hotERROR, "The 'lookup' keyword can be used only in a contextual statement. At least one glyph in the sequence must be marked. Skipping rule.");
         } else {
             validateGPOSChain(targ, type);
@@ -2849,90 +2489,44 @@ void FeatCtx::reportUnusedaaltTags() {
     }
 }
 
-/* For the alternate glyphs in a  GSUBAlternate rule, sort them */
-/* in the order of the GNode aaltIndex field, aka the order that */
-/* the features were named in the aalt definition. Alts that are */
-/* explicitly defined in the aalt feature have an index of -1. */
-/* See aaltAddAlternates. */
-void FeatCtx::aaltRuleSort(GNode **list) {
-    unsigned int i;
-    GNode *p = *list;
-    short flags = (*list)->flags;
+/* Ranges of 1-1, single 1-1, or 1 from n. (Only first glyph position in targ will
+ * be looked at)
+ * If the alt glyph is defined explicitly in the aalt feature, via a 'sub' directive,
+ * it gets an index of AALT_INDEX, aka, -1, so that it will sort before all the alts
+ * from included features. */
 
-    /* Copy over pointers */
-    std::vector<GNode *> sortTmp;
+void FeatCtx::aaltAddAlternates(GPat::ClassRec &targcr, GPat::ClassRec &replcr) {
+    auto it = std::find(std::begin(aalt.features), std::end(aalt.features), curr.feature);
+    short aaltTagIndex = it != std::end(aalt.features) ? it - aalt.features.begin() : -1;
 
-    for (; p != NULL; p = p->nextCl)
-        sortTmp.push_back(p);
-
-    struct {
-        bool operator()(GNode *a, GNode *b) const { return a->aaltIndex < b->aaltIndex; }
-    } cmpNode;
-    std::stable_sort(sortTmp.begin(), sortTmp.end(), cmpNode);
-
-    /* Move pointers around */
-    for (i = 0; i < sortTmp.size() - 1; i++)
-        sortTmp[i]->nextCl = sortTmp[i + 1];
-    sortTmp[i]->nextCl = NULL;
-
-    *list = sortTmp[0];
-
-    (*list)->flags = flags;
-}
-
-/* Input GNodes will be copied. Ranges of 1-1, single 1-1, or 1 from n. (Only
-   first glyph position in targ will be looked at)  */
-/* The aaltIndex is set to non-zero here in order to facilitate later sorting */
-/* of the target glyph alternates, by the order that the current feature file is */
-/* named in the aalt feature. If the alt glyph is defined explicitly in the */
-/* aalt feature, via a 'sub' directive, it gets an index of AALT_INDEX, aka, -1, */
-/* so that it will sort before all the alts from included features. */
-
-void FeatCtx::aaltAddAlternates(GNode *targ, GNode *repl) {
-    bool range = targ->nextCl != nullptr;
-
-    /* Duplicate repl if a single glyph: */
-    if ( targ->nextCl != nullptr && repl->nextCl == nullptr )
-        extendNodeToClass(repl, getGlyphClassCount(targ) - 1);
-
-    for (; targ != nullptr; targ = targ->nextCl, repl = repl->nextCl) {
-        GNode *replace;
-
-        /* Start new accumulator for targ->gid, if it doesn't already exist */
-        auto ru = aalt.rules.find(targ->gid);
+    auto tgi = targcr.glyphs.begin();
+    auto rgi = replcr.glyphs.begin();
+    while (tgi != targcr.glyphs.end() && rgi != replcr.glyphs.end()) {
+        /* Start new accumulator for gid if it doesn't already exist */
+        auto ru = aalt.rules.find(*tgi);
         if ( ru == aalt.rules.end() ) {
-            GNode *t = setNewNode(targ->gid);
-            aalt.rules.insert(std::make_pair(targ->gid, AALT::RuleInfo{ t, nullptr }));
-            ru = aalt.rules.find(targ->gid);
+            aalt.rules.insert(std::make_pair(*tgi, AALT::RuleInfo{*tgi}));
+            ru = aalt.rules.find(*tgi);
         }
-
         auto &ri = ru->second;
+        assert(ri.targid == *tgi);
         /* Add alternates to alt set,                 */
         /* checking for uniqueness & preserving order */
-        replace = repl;
-        for (; replace != nullptr; replace = range ? nullptr : replace->nextCl) {
-            GNode **lastClass;
-            GNode *p;
-
-            auto it = std::find(std::begin(aalt.features), std::end(aalt.features), curr.feature);
-            short aaltTagIndex = it != std::end(aalt.features) ? it - aalt.features.begin() : -1;
-            if (glyphInClass(replace->gid, &ri.repl, &lastClass)) {
-                p = *lastClass;
-
-                if ( aaltTagIndex < p->aaltIndex ) {
-                    p->aaltIndex = aaltTagIndex;
-                }
-            } else {
-                *lastClass = setNewNode(replace->gid);
-                p = *lastClass;
-
-                if (curr.feature == aalt_) {
-                    p->aaltIndex = AALT_INDEX;
-                } else {
-                    p->aaltIndex = aaltTagIndex;
-                }
+        bool found = false;
+        for (auto &rig : ri.glyphs) {
+            if (rig.rgid == *rgi) {
+                found = true;
+                if (aaltTagIndex < rig.aaltIndex)
+                    rig.aaltIndex = aaltTagIndex;
             }
         }
+        if (!found) {
+            ri.glyphs.emplace_back(*rgi, curr.feature == aalt_ ? AALT_INDEX : aaltTagIndex);
+        }
+        if (targcr.glyphs.size() > 1)
+            tgi++;
+        if (targcr.glyphs.size() == 1 || replcr.glyphs.size() > 1)
+            rgi++;
     }
 }
 
@@ -2946,70 +2540,46 @@ void FeatCtx::aaltCreate() {
     Label labelSingle = LAB_UNDEF;    /* Init to suppress compiler warning */
     Label labelAlternate = LAB_UNDEF; /* Init to Suppress compiler warning */
 
-    if (aalt.rules.size() == 0) {
+    if (aalt.rules.size() == 0)
         return;
+
+    // These will be sorted by GID in virtue of aalt.rules being a std::map
+    std::vector<AALT::RuleInfo> singles;
+    std::vector<AALT::RuleInfo> alts;
+    std::set<GID> altKeys;
+    for (auto &ru : aalt.rules) {
+        assert(ru.first == ru.second.targid);
+        if (ru.second.glyphs.size() > 1) {
+            alts.push_back(std::move(ru.second));
+            altKeys.insert(ru.first);
+        } else {
+            singles.push_back(std::move(ru.second));
+        }
     }
+    aalt.rules.clear();
 
-    // Create and sort a vector of RuleInfo pointers into the aalt.rules map
-    // (the latter must not be altered during this function)
-    std::vector<AALT::RuleInfo *> sortTmp;
-    sortTmp.reserve(aalt.rules.size());
-    for (auto &ru : aalt.rules)
-        sortTmp.push_back(&ru.second);
-
-    /* Sort single subs before alt subs, sort alt subs by targ GID */
-    struct {
-        bool operator()(AALT::RuleInfo *aa, AALT::RuleInfo *bb) const {
-            GNode *a = aa->repl, *b = bb->repl;
-
-            /* Sort single sub rules before alt sub rules */
-            if (is_glyph(a) && is_mult_class(b)) {
-                return true;
-            } else if (is_mult_class(a) && is_glyph(b)) {
-                return false;
-            } else if (is_mult_class(a) && is_mult_class(b)) {
-                // Sort alt sub rules by targ GID
-                return aa->targ->gid < bb->targ->gid;
-            } else {
-                return aa->targ->gid < bb->targ->gid;
-            }
-        }
-    } cmpNode;
-    std::sort(sortTmp.begin(), sortTmp.end(), cmpNode);
-
-    auto single_end = sortTmp.begin();
-    while ( single_end != sortTmp.end() && is_glyph((*single_end)->repl) )
-        single_end++;
-
-    if ( single_end != sortTmp.begin() && single_end != sortTmp.end() ) {
-        /* If the repl GID of a SingleSub rule is the same as an AltSub    */
-        /* rule's targ GID, then the SingleSub rule sinks to the bottom of */
-        /* the SingleSub rules, and becomes part of the AltSub rules       */
-        /* section:                                                        */
-        for (auto si = single_end-1; si >= sortTmp.begin(); si--) {
-            auto search = aalt.rules.find((*si)->repl->gid);
-            if ( search != aalt.rules.end() && is_mult_class(search->second.repl) ) {
-                single_end--;
-                if ( si != single_end ) {
-                    AALT::RuleInfo *tmp = *single_end;
-                    *single_end = *si;
-                    *si = tmp;
-                }
+    // If the repl GID of a SingleSub rule is the same as an AltSub
+    // rule's targ GID, then the SingleSub becomes part of the AltSub
+    // rules section:
+    for (int si = singles.size() - 1; si >= 0; si--) {
+        auto ssearch = altKeys.find(singles[si].glyphs[0].rgid);
+        if ( ssearch != altKeys.end() ) {
+            alts.insert(alts.begin(), std::move(singles[si]));
+            singles.erase(singles.begin() + si);
 #if HOT_DEBUG
-                nInterSingleRules++;
+            nInterSingleRules++;
 #endif
-            }
         }
-#if HOT_DEBUG
-        if (nInterSingleRules) {
-            DF(1, (stderr,
-                   "# aalt: %ld SingleSub rule%s moved to AltSub "
-                   "lookup to prevent lookup interaction\n",
-                   nInterSingleRules,
-                   nInterSingleRules == 1 ? "" : "s"));
-        }
-#endif
     }
+#if HOT_DEBUG
+    if (nInterSingleRules) {
+        DF(1, (stderr,
+               "# aalt: %ld SingleSub rule%s moved to AltSub "
+               "lookup to prevent lookup interaction\n",
+               nInterSingleRules,
+               nInterSingleRules == 1 ? "" : "s"));
+    }
+#endif
 
     /* Add default lang sys if none specified */
     if (langSysMap.size() == 0) {
@@ -3024,23 +2594,30 @@ void FeatCtx::aaltCreate() {
     g->ctx.GSUBp->FeatureBegin(i->first.script, i->first.lang, aalt_);
 
     /* --- Feed in single subs --- */
-    if (sortTmp.begin() != single_end) {
+    if (singles.size() > 0) {
         labelSingle = getNextAnonLabel();
         g->ctx.GSUBp->LookupBegin(GSUBSingle, 0, labelSingle, aalt.useExtension, 0);
-        for (auto i = sortTmp.begin(); i != single_end; i++) {
-            g->ctx.GSUBp->RuleAdd((*i)->targ, (*i)->repl);
+        for (auto &rule : singles) {
+            GPat *targ = new GPat(rule.targid);
+            GPat *repl = new GPat(rule.glyphs[0].rgid);
+            g->ctx.GSUBp->RuleAdd(targ, repl);
         }
         g->ctx.GSUBp->LookupEnd();
     }
 
     /* --- Feed in alt subs --- */
-    if (single_end != sortTmp.end()) {
+    if (alts.size() > 0) {
         labelAlternate = getNextAnonLabel();
         g->ctx.GSUBp->LookupBegin(GSUBAlternate, 0, labelAlternate, aalt.useExtension, 0);
-        for (auto i = single_end; i != sortTmp.end(); i++) {
-            aaltRuleSort(&(*i)->repl);  // sort alts in order of feature def
-                                        // in aalt feature
-            g->ctx.GSUBp->RuleAdd((*i)->targ, (*i)->repl);
+        for (auto &rule : alts) {
+            GPat *targ = new GPat(rule.targid);
+            // sort alts in order of feature def in aalt feature
+            std::sort(rule.glyphs.begin(), rule.glyphs.end());
+            GPat *repl = new GPat();
+            repl->addClass(GPat::ClassRec{});
+            for (auto &gr : rule.glyphs)
+                repl->classes[0].glyphs.emplace_back(gr.rgid);
+            g->ctx.GSUBp->RuleAdd(targ, repl);
         }
         g->ctx.GSUBp->LookupEnd();
     }
@@ -3054,29 +2631,31 @@ void FeatCtx::aaltCreate() {
 
         g->ctx.GSUBp->FeatureBegin(ls->first.script, ls->first.lang, aalt_);
 
-        if (sortTmp.begin() != single_end) {
+        if (singles.size() > 0) {
             g->ctx.GSUBp->LookupBegin(GSUBSingle, 0, (Label)(labelSingle | REF_LAB),
                                       aalt.useExtension, 0);
             g->ctx.GSUBp->LookupEnd();
         }
-        if (single_end != sortTmp.end()) {
+        if (alts.size() > 0) {
             g->ctx.GSUBp->LookupBegin(GSUBAlternate, 0,
                                       (Label)(labelAlternate | REF_LAB),
                                       aalt.useExtension, 0);
             g->ctx.GSUBp->LookupEnd();
         }
+
         g->ctx.GSUBp->FeatureEnd();
     }
 }
 
 /* Return 1 if this rule is to be treated specially */
 
-bool FeatCtx::aaltCheckRule(int type, GNode *targ, GNode *repl) {
+bool FeatCtx::aaltCheckRule(int type, GPat *targ, GPat *repl) {
     if (curr.feature == aalt_) {
         if (type == GSUBSingle || type == GSUBAlternate) {
-            aaltAddAlternates(targ, repl);
-            recycleNodes(targ);
-            recycleNodes(repl);
+            assert(repl != nullptr && repl->patternLen() > 0);
+            aaltAddAlternates(targ->classes[0], repl->classes[0]);
+            delete targ;
+            delete repl;
         } else {
             featMsg(hotWARNING,
                     "Only single and alternate "
@@ -3087,14 +2666,16 @@ bool FeatCtx::aaltCheckRule(int type, GNode *targ, GNode *repl) {
     return false;
 }
 
-void FeatCtx::storeRuleInfo(GNode *targ, GNode *repl) {
-    if (curr.tbl == GPOS_ || repl == NULL) {
+void FeatCtx::storeRuleInfo(GPat *targ, GPat *repl) {
+    assert(repl != nullptr && repl->patternLen() > 0);
+    if (curr.tbl == GPOS_) {
         return; /* No GPOS or except clauses */
     }
+    GPat::ClassRec *crp = &(targ->classes[0]);
     AALT::FeatureRecord t { curr.feature, false };
     auto f = std::find(std::begin(aalt.features), std::end(aalt.features), t);
     if ( curr.feature == aalt_ || f != std::end(aalt.features) ) {
-        /* Now check if lkpType is appropriate */
+        bool found = false;
 
         switch (curr.lkpType) {
             case GSUBSingle:
@@ -3103,10 +2684,12 @@ void FeatCtx::storeRuleInfo(GNode *targ, GNode *repl) {
 
             case GSUBChain:
                 /* Go to first marked glyph (guaranteed to be present) */
-                for (; !(targ->flags & FEAT_MARKED); targ = targ->nextSeq) {
-                }
-                if (targ->nextSeq != NULL && targ->nextSeq->flags & FEAT_MARKED) {
-                    return; /* Ligature sub-substitution */
+                for (auto &cr : targ->classes) {
+                    if (!found && cr.marked) {
+                        crp = &cr;
+                        found = true;
+                    } else if (cr.marked)
+                        return;  // Ligature sub-substitution;
                 }
                 break;
 
@@ -3118,124 +2701,6 @@ void FeatCtx::storeRuleInfo(GNode *targ, GNode *repl) {
             assert(f != std::end(aalt.features));
             f->used = true;
         }
-        aaltAddAlternates(targ, repl);
+        aaltAddAlternates(*crp, repl->classes[0]);
     }
-}
-
-/* Creates the cross product of pattern pat, and returns the array of *n
- * resulting sequences. pat is left intact; the client is responsible for
-   recycling the result. */
-
-GNode **FeatCtx::makeCrossProduct(GNode *pat, uint32_t *n) {
-    GNode *cl;
-
-    prod.clear();
-
-    /* Add each glyph class in pat to the cross product */
-    for (cl = pat; cl != NULL; cl = cl->nextSeq) {
-        long i;
-        long nProd;
-
-        if (cl == pat)
-            prod.push_back(nullptr);
-
-        nProd = prod.size();
-
-        for (i = 0; i < nProd; i++) {
-            GNode *p;
-            int cntCl = 0;
-            int lenSrc = 0;
-
-            /* h->prod.array[i] is the source. Don't store its address as a */
-            /* pointer in a local variable since dnaINDEX below may         */
-            /* obsolete it!                                                 */
-            for (p = cl; p != NULL; p = p->nextCl) {
-                GNode **r;
-
-                if (p == cl) {
-                    for (r = &prod[i]; *r != NULL; r = &(*r)->nextSeq) {
-                        lenSrc++;
-                    }
-                } else {
-                    size_t inxTarg = nProd * cntCl + i;
-                    if ( inxTarg >= prod.size() )
-                        prod.resize(inxTarg+1);
-
-                    r = copyPattern(&prod[inxTarg], prod[i], lenSrc);
-                }
-                *r = setNewNode(p->gid);
-                cntCl++;
-            }
-        }
-    }
-
-    *n = prod.size();
-    return prod.data();
-}
-
-// -------------------------------- C Hooks -----------------------------------
-
-inline FeatCtx *hctofc(hotCtx g) {
-    assert(g->ctx.feat != nullptr);
-    return g->ctx.feat;
-}
-
-GNode *featSetNewNode(hotCtx g, GID gid) {
-    return hctofc(g)->setNewNode(gid);
-}
-
-void featRecycleNodes(hotCtx g, GNode *node) {
-    hctofc(g)->recycleNodes(node);
-}
-
-GNode **featGlyphClassCopy(hotCtx g, GNode **dst, GNode *src) {
-    return hctofc(g)->copyGlyphClass(dst, src);
-}
-
-void featGlyphDump(hotCtx g, GID gid, int ch, int print) {
-    hctofc(g)->dumpGlyph(gid, ch, print);
-}
-
-void featGlyphClassDump(hotCtx g, GNode *gc, int ch, int print) {
-    hctofc(g)->dumpGlyphClass(gc, ch, print);
-}
-
-void featPatternDump(hotCtx g, GNode *pat, int ch, int print) {
-    hctofc(g)->dumpPattern(pat, ch, print);
-}
-
-GNode **featPatternCopy(hotCtx g, GNode **dst, GNode *src, int num) {
-    return hctofc(g)->copyPattern(dst, src, num);
-}
-
-void featExtendNodeToClass(hotCtx g, GNode *node, int num) {
-    hctofc(g)->extendNodeToClass(node, num);
-}
-
-int featGetGlyphClassCount(hotCtx g, GNode *gc) {
-    return hctofc(g)->getGlyphClassCount(gc);
-}
-
-unsigned int featGetPatternLen(hotCtx g, GNode *pat) {
-    return hctofc(g)->getPatternLen(pat);
-}
-
-void featGlyphClassSort(hotCtx g, GNode **list, int unique, int reportDups) {
-    hctofc(g)->sortGlyphClass(list, unique, reportDups);
-}
-
-std::string featMsgPrefix(hotCtx g) {
-    return hctofc(g)->msgPrefix();
-}
-
-GNode **featMakeCrossProduct(hotCtx g, GNode *pat, uint32_t *n) {
-    return hctofc(g)->makeCrossProduct(pat, n);
-}
-
-Label featGetNextAnonLabel(hotCtx g) {
-    return hctofc(g)->getNextAnonLabel();
-}
-
-int featValidateGPOSChain(hotCtx g, GNode *targ, int lookupType) {
-    return hctofc(g)->validateGPOSChain(targ, lookupType);
 }

@@ -161,12 +161,14 @@ class FeatVisitor : public FeatParserBaseVisitor {
     // Retrieval visitors
     void getValueRecord(FeatParser::ValueRecordContext *ctx, MetricsInfo &mi);
     void getValueLiteral(FeatParser::ValueLiteralContext *ctx, MetricsInfo &mi);
-    GNode *getLookupPattern(FeatParser::LookupPatternContext *ctx, bool markedOK);
-    GNode *getLookupPatternElement(FeatParser::LookupPatternElementContext *ctx, bool markedOK);
-    GNode *concatenatePattern(GNode **loc, FeatParser::PatternContext *ctx, int flags = 0);
-    GNode *concatenatePatternElement(GNode **loc, FeatParser::PatternElementContext *ctx);
-    GNode *getPatternElement(FeatParser::PatternElementContext *ctx, bool markedOK);
-    GNode *getGlyphClass(FeatParser::GlyphClassContext *ctx, bool dontcopy);
+    GPat *getLookupPattern(FeatParser::LookupPatternContext *ctx, bool markedOK);
+    GPat::ClassRec getLookupPatternElement(FeatParser::LookupPatternElementContext *ctx,
+                                           bool markedOK);
+    GPat *concatenatePattern(GPat *gp, FeatParser::PatternContext *ctx,
+                             bool isBaseNode = false);
+    GPat *concatenatePatternElement(GPat *loc, FeatParser::PatternElementContext *ctx);
+    GPat::ClassRec getPatternElement(FeatParser::PatternElementContext *ctx, bool markedOK);
+    GPat::ClassRec getGlyphClass(FeatParser::GlyphClassContext *ctx, bool dontcopy);
     GID getGlyph(FeatParser::GlyphContext *ctx, bool allowNotDef);
 
 
