@@ -145,7 +145,7 @@ void GPOS::rulesDump(SubtableInfo &si) {
         PosRule &rule = si.rules[i];
 
         fprintf(stderr, "  [%d] ", i);
-        g->ctx.feat->dumpPattern(rule.targ, ' ', 1);
+        g->ctx.feat->dumpPattern(*rule.targ, ' ', 1);
     }
 }
 
@@ -918,7 +918,7 @@ void GPOS::AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
     }
 }
 
-void GPOS::addPosRule(SubtableInfo &si, GPat *targ, std::string &locDesc,
+void GPOS::addPosRule(SubtableInfo &si, GPat::SP targ, std::string &locDesc,
                       std::vector<AnchorMarkInfo> &anchorMarkInfo) {
     uint16_t lkpType;
 
@@ -930,7 +930,7 @@ void GPOS::addPosRule(SubtableInfo &si, GPat *targ, std::string &locDesc,
 #if HOT_DEBUG
     if (DF_LEVEL(g) >= 2) {
         DF(2, (stderr, "  * GPOS RuleAdd "));
-        g->ctx.feat->dumpPattern(targ, ' ', 1);
+        g->ctx.feat->dumpPattern(*targ, ' ', 1);
         DF(2, (stderr, "\n"));
     }
 #endif
@@ -965,7 +965,7 @@ void GPOS::addPosRule(SubtableInfo &si, GPat *targ, std::string &locDesc,
             }
             /* now add the nodes to the contextual rule list. */
             si.parentLkpType = GPOSChain; /* So that this subtable will be processed as a chain at lookup end -> fill. */
-            si.rules.emplace_back(targ);
+            si.rules.emplace_back(std::move(targ));
         } else {
             auto &cr = targ->classes[0];
             if (cr.metricsInfo.metrics.size() == 1) {
@@ -1008,11 +1008,10 @@ void GPOS::addPosRule(SubtableInfo &si, GPat *targ, std::string &locDesc,
 
             /* now add the nodes to the contextual rule list. */
             si.parentLkpType = GPOSChain; /* So that this subtable will be processed as a chain at lookup end -> fill. */
-            si.rules.emplace_back(targ);
+            si.rules.emplace_back(std::move(targ));
         } else {
             /* isn't contextual */
             addCursive(si, targ->classes[0], anchorMarkInfo, locDesc);
-            delete targ;
         }
     } else if ((lkpType == GPOSMarkToBase) || (lkpType == GPOSMarkToMark) || (lkpType == GPOSMarkToLigature)) {
         /* Check if this is a contextual rule.*/
@@ -1039,21 +1038,20 @@ void GPOS::addPosRule(SubtableInfo &si, GPat *targ, std::string &locDesc,
                 hotMsg(g, hotFATAL, "aborting due to not finding base node");
             /* now add the nodes to the contextual rule list. */
             si.parentLkpType = GPOSChain; /* So that this subtable will be processed as a chain at lookup end -> fill. */
-            si.rules.emplace_back(targ);
+            si.rules.emplace_back(std::move(targ));
         } else {
             /* isn't contextual */
             addMark(si, targ->classes[0], anchorMarkInfo, locDesc);
-            delete targ;
         }
     } else {
         /* Add whole rule intact (no enumeration needed) */
-        si.rules.emplace_back(targ);
+        si.rules.emplace_back(std::move(targ));
     }
 }
 
 /* Add rule (enumerating if necessary) to subtable si */
 
-void GPOS::RuleAdd(int lkpType, GPat *targ, std::string &locDesc,
+void GPOS::RuleAdd(int lkpType, GPat::SP targ, std::string &locDesc,
                    std::vector<AnchorMarkInfo> &anchorMarkInfo) {
     if (g->hadError)
         return;
@@ -1063,7 +1061,7 @@ void GPOS::RuleAdd(int lkpType, GPat *targ, std::string &locDesc,
         nw.lkpType = GPOSChain;
     }
 
-    addPosRule(nw, targ, locDesc, anchorMarkInfo);
+    addPosRule(nw, std::move(targ), locDesc, anchorMarkInfo);
 }
 
 GPat::ClassRec &GPOS::getCR(uint32_t cls, int classDefInx) {
@@ -1474,8 +1472,6 @@ GPOS::ChainContextPos::ChainContextPos(GPOS &h, GPOS::SubtableInfo &si,
         h.incExtOffset(sz + cac->coverageSize());
     else
         h.incSubOffset(sz);
-
-    delete rule.targ;
 }
 
 void GPOS::ChainContextPos::fill(GPOS &h, SubtableInfo &si) {

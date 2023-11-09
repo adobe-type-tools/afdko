@@ -162,8 +162,8 @@ class GPOS : public OTL {
 
     struct PosRule {
         PosRule() = delete;
-        explicit PosRule(GPat *targ) : targ(targ) {}
-        GPat *targ;
+        explicit PosRule(GPat::SP targ) : targ(std::move(targ)) {}
+        GPat::SP targ;
     };
 
     struct ClassInfo {
@@ -419,7 +419,7 @@ class GPOS : public OTL {
 
     void FeatureBegin(Tag script, Tag language, Tag feature);
     void FeatureEnd();
-    void RuleAdd(int lkpType, GPat *targ, std::string &locDesc,
+    void RuleAdd(int lkpType, GPat::SP targ, std::string &locDesc,
                  std::vector<AnchorMarkInfo> &anchorMarkInfo);
     void LookupBegin(uint32_t lkpType, uint32_t lkpFlag, Label label,
                      bool useExtension, uint16_t useMarkSetIndex);
@@ -442,7 +442,7 @@ class GPOS : public OTL {
                      MetricsRec &metricsRec1, MetricsRec &metricsRec2);
     void AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
                  bool enumerate, std::string &locDesc);
-    void addPosRule(SubtableInfo &si, GPat *targ, std::string &locDesc,
+    void addPosRule(SubtableInfo &si, GPat::SP targ, std::string &locDesc,
                     std::vector<AnchorMarkInfo> &anchorMarkInfo);
     GPat::ClassRec &getCR(uint32_t cls, int classDefInx);
     void printKernPair(GID gid1, GID gid2, int val1, int val2, bool fmt1);

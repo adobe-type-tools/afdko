@@ -161,12 +161,12 @@ class FeatVisitor : public FeatParserBaseVisitor {
     // Retrieval visitors
     void getValueRecord(FeatParser::ValueRecordContext *ctx, MetricsInfo &mi);
     void getValueLiteral(FeatParser::ValueLiteralContext *ctx, MetricsInfo &mi);
-    GPat *getLookupPattern(FeatParser::LookupPatternContext *ctx, bool markedOK);
+    GPat::SP getLookupPattern(FeatParser::LookupPatternContext *ctx, bool markedOK);
     GPat::ClassRec getLookupPatternElement(FeatParser::LookupPatternElementContext *ctx,
                                            bool markedOK);
-    GPat *concatenatePattern(GPat *gp, FeatParser::PatternContext *ctx,
+    GPat::SP concatenatePattern(GPat::SP gp, FeatParser::PatternContext *ctx,
                              bool isBaseNode = false);
-    GPat *concatenatePatternElement(GPat *loc, FeatParser::PatternElementContext *ctx);
+    GPat::SP concatenatePatternElement(GPat::SP loc, FeatParser::PatternElementContext *ctx);
     GPat::ClassRec getPatternElement(FeatParser::PatternElementContext *ctx, bool markedOK);
     GPat::ClassRec getGlyphClass(FeatParser::GlyphClassContext *ctx, bool dontcopy);
     GID getGlyph(FeatParser::GlyphContext *ctx, bool allowNotDef);
