@@ -98,7 +98,7 @@ static void rulesDump(hotCtx g, GSUB::SubtableInfo &si) {
         auto &rule = si.rules[i];
 
         fprintf(stderr, "  [%d] ", i);
-        g->ctx.feat->dumpPattern(rule.targ, ' ', 1);
+        g->ctx.feat->dumpPattern(*rule.targ, ' ', 1);
     }
 }
 
@@ -186,13 +186,13 @@ void GSUB::FeatureEnd() {
 
 /* Add rule (enumerating if necessary) to subtable si */
 
-void GSUB::addSubstRule(SubtableInfo &si, GPat *targ, GPat *repl) {
+void GSUB::addSubstRule(SubtableInfo &si, GPat::SP targ, GPat::SP repl) {
 #if HOT_DEBUG
     if (DF_LEVEL(g) >= 2) {
         DF(2, (stderr, "  * GSUB RuleAdd "));
-        g->ctx.feat->dumpPattern(targ, ' ', 1);
+        g->ctx.feat->dumpPattern(*targ, ' ', 1);
         if (repl != NULL) {
-            g->ctx.feat->dumpPattern(repl, '\n', 1);
+            g->ctx.feat->dumpPattern(*repl, '\n', 1);
         }
     }
 #endif
@@ -225,8 +225,6 @@ void GSUB::addSubstRule(SubtableInfo &si, GPat *targ, GPat *repl) {
             if (rglyphs.size() > 1)
                 ri++;
         }
-        delete targ;
-        delete repl;
         return;
     } else if (si.lkpType == GSUBLigature) {
         assert(repl->is_glyph());
@@ -259,15 +257,15 @@ void GSUB::addSubstRule(SubtableInfo &si, GPat *targ, GPat *repl) {
         }
     } else {
         /* Add whole rule intact (no enumeration needed) */
-        si.rules.emplace_back(targ, repl);
+        si.rules.emplace_back(std::move(targ), std::move(repl));
     }
 }
 
-void GSUB::RuleAdd(GPat *targ, GPat *repl) {
+void GSUB::RuleAdd(GPat::SP targ, GPat::SP repl) {
     if (g->hadError)
         return;
 
-    addSubstRule(nw, targ, repl);
+    addSubstRule(nw, std::move(targ), std::move(repl));
 }
 
 /* Break the subtable at this point. Return 0 if successful, else 1. */
@@ -835,7 +833,7 @@ bool GSUB::addSingleToAnonSubtbl(SubtableInfo &si, GPat::ClassRec &tcr,
     return true;
 }
 
-bool GSUB::addLigatureToAnonSubtbl(SubtableInfo &si, GPat *targ, GPat *repl) {
+bool GSUB::addLigatureToAnonSubtbl(SubtableInfo &si, GPat::SP &targ, GPat::SP &repl) {
     assert(repl->is_glyph());
     auto rgid = repl->classes[0].glyphs[0].gid;
 
@@ -867,7 +865,7 @@ bool GSUB::addLigatureToAnonSubtbl(SubtableInfo &si, GPat *targ, GPat *repl) {
 /* Add the "anonymous" rule that occurs in a substitution within a chaining
    contextual rule. Return the label of the anonymous lookup */
 
-Label GSUB::addAnonRule(SubtableInfo &cur_si, GPat *targ, GPat *repl) {
+Label GSUB::addAnonRule(SubtableInfo &cur_si, GPat::SP targ, GPat::SP repl) {
     int lkpType;
 
     if (targ->patternLen() == 1) {
@@ -887,13 +885,9 @@ Label GSUB::addAnonRule(SubtableInfo &cur_si, GPat *targ, GPat *repl) {
             (si.parentFeatTag == cur_si.feature)) {
             if (lkpType == GSUBSingle &&
                 addSingleToAnonSubtbl(si, targ->classes[0], repl->classes[0])) {
-                delete targ;
-                delete repl;
                 return si.label;
             } else if (lkpType == GSUBLigature &&
                        addLigatureToAnonSubtbl(si, targ, repl)) {
-                delete targ;
-                delete repl;
                 return si.label;
             }
         }
@@ -911,7 +905,7 @@ Label GSUB::addAnonRule(SubtableInfo &cur_si, GPat *targ, GPat *repl) {
     asi.parentFeatTag = nw.feature;
     asi.useExtension = cur_si.useExtension;
 
-    addSubstRule(asi, targ, repl);
+    addSubstRule(asi, std::move(targ), std::move(repl));
 
     anonSubtable.emplace_back(std::move(asi));
 
@@ -948,9 +942,9 @@ void GSUB::createAnonLookups() {
             }
             for (auto &rule : si.rules) {
                 DF(2, (stderr, "  * GSUB RuleAdd "));
-                g->ctx.feat->dumpPattern(rule.targ, ' ', 1);
+                g->ctx.feat->dumpPattern(*rule.targ, ' ', 1);
                 if (rule.repl != NULL) {
-                    g->ctx.feat->dumpPattern(rule.repl, '\n', 1);
+                    g->ctx.feat->dumpPattern(*rule.repl, '\n', 1);
                 }
             }
         }
@@ -964,7 +958,7 @@ void GSUB::createAnonLookups() {
 
 GSUB::ChainSubst::ChainSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subtable(h, si) {
     std::vector<GPat::ClassRec*> backs, inputs, looks;
-    GPat *marks = new GPat();
+    GPat::SP marks = std::make_unique<GPat>();
     int iSeq = 0;  // offset into inputs of first mark
     uint32_t nSubst = (rule.repl != nullptr) ? 1 : 0;
 
@@ -994,9 +988,7 @@ GSUB::ChainSubst::ChainSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subta
     if (nSubst > 0) {
         if (rule.repl != NULL) {
             /* There is only a single replacement rule, not using direct lookup references */
-            lookupRecords.emplace_back(iSeq, h.addAnonRule(si, marks, rule.repl));
-            // Prevent deletion of marks object
-            marks = nullptr;
+            lookupRecords.emplace_back(iSeq, h.addAnonRule(si, std::move(marks), std::move(rule.repl)));
         } else {
             lookupRecords.reserve(nSubst);
             int i = 0;
@@ -1014,9 +1006,6 @@ GSUB::ChainSubst::ChainSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subta
         h.incExtOffset(sz + cac->coverageSize());
     else
         h.incSubOffset(sz);
-
-    delete marks;
-    delete rule.targ;
 }
 
 void GSUB::ChainSubst::fill(GSUB &h, SubtableInfo &si) {

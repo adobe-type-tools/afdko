@@ -268,7 +268,7 @@ GID FeatCtx::cid2gid(const std::string &cidstr) {
     return gid; /* Suppress compiler warning */
 }
 
-void FeatCtx::sortGlyphClass(GPat *gp, bool unique, bool reportDups, uint16_t idx) {
+void FeatCtx::sortGlyphClass(GPat::SP &gp, bool unique, bool reportDups, uint16_t idx) {
     assert(idx < gp->patternLen());
     if (unique)
         // makeClassUnique also sorts
@@ -556,10 +556,10 @@ void FeatCtx::dumpGlyphClass(const GPat::ClassRec &cr, int ch, bool print) {
 
 /* If !print, add to g->notes */
 
-void FeatCtx::dumpPattern(const GPat *pat, int ch, bool print) {
+void FeatCtx::dumpPattern(const GPat &pat, int ch, bool print) {
     DUMP_CH('{', print);
     bool first = true;
-    for (auto &cr : pat->classes) {
+    for (auto &cr : pat.classes) {
         if (!first)
             DUMP_CH(' ', print);
         first = false;
@@ -921,7 +921,7 @@ void FeatCtx::closeFeatScriptLang(State &st) {
 void FeatCtx::addFeatureParam(const std::vector<uint16_t> &params) {
     switch (curr.feature) {
         case size_:
-            prepRule(GPOS_, GPOSFeatureParam, NULL, NULL);
+            prepRule(GPOS_, GPOSFeatureParam, nullptr, nullptr);
 
             g->ctx.GPOSp->AddParameters(params);
 
@@ -1087,7 +1087,7 @@ void FeatCtx::callLkp(State &st) {
     currNamedLkp = (Label)(lab | REF_LAB); /* As in:  lookup <name> {  */
     curr.lkpFlag = st.lkpFlag;
     curr.markSetIndex = st.markSetIndex;
-    prepRule(st.tbl, st.lkpType, NULL, NULL);
+    prepRule(st.tbl, st.lkpType, nullptr, nullptr);
     /* No actual rules will be fed into GPOS/GSUB */
     wrapUpRule();
     currNamedLkp = LAB_UNDEF; /* As in:  } <name>;        */
@@ -1316,7 +1316,7 @@ void FeatCtx::addFeatureNameString(long platformId, long platspecId,
 }
 
 void FeatCtx::addFeatureNameParam() {
-    prepRule(GSUB_, GSUBFeatureNameParam, NULL, NULL);
+    prepRule(GSUB_, GSUBFeatureNameParam, nullptr, nullptr);
 
     g->ctx.GSUBp->AddFeatureNameParam(featNameID);
 
@@ -1435,7 +1435,8 @@ void FeatCtx::getValueDef(const std::string &name, MetricsInfo &mi) {
 
 // ------------------------------ Substitutions --------------------------------
 
-void FeatCtx::prepRule(Tag newTbl, int newlkpType, GPat *targ, GPat *repl) {
+void FeatCtx::prepRule(Tag newTbl, int newlkpType, const GPat::SP &targ,
+                       const GPat::SP &repl) {
     int accumDFLTLkps = 1;
 
     curr.tbl = newTbl;
@@ -1524,7 +1525,7 @@ void FeatCtx::prepRule(Tag newTbl, int newlkpType, GPat *targ, GPat *repl) {
         DFLTLkps.push_back(curr);
 
     /* Store, if applicable, for aalt creation */
-    if ((!IS_REF_LAB(curr.label)) && (repl != NULL))
+    if ((!IS_REF_LAB(curr.label)) && (repl != nullptr))
         storeRuleInfo(targ, repl);
 
     /* If h->prev != h->curr (ignoring markSet) */
@@ -1582,19 +1583,19 @@ void FeatCtx::prepRule(Tag newTbl, int newlkpType, GPat *targ, GPat *repl) {
     }
 }
 
-void FeatCtx::addGSUB(int lkpType, GPat *targ, GPat *repl) {
+void FeatCtx::addGSUB(int lkpType, GPat::SP targ, GPat::SP repl) {
     if (aaltCheckRule(lkpType, targ, repl))
         return;
 
     prepRule(GSUB_, lkpType, targ, repl);
 
-    g->ctx.GSUBp->RuleAdd(targ, repl);
+    g->ctx.GSUBp->RuleAdd(std::move(targ), std::move(repl));
 
     wrapUpRule();
 }
 
-bool FeatCtx::validateGSUBSingle(GPat::ClassRec &targcr,
-                                 GPat *repl, bool isSubrule) {
+bool FeatCtx::validateGSUBSingle(const GPat::ClassRec &targcr,
+                                 const GPat::SP &repl, bool isSubrule) {
     if (targcr.is_glyph()) {
         if (!repl->is_glyph()) {
             featMsg(hotERROR, "Replacement in %srule must be a single glyph",
@@ -1614,7 +1615,7 @@ bool FeatCtx::validateGSUBSingle(GPat::ClassRec &targcr,
    NULL and repl not marked. If valid return 1, else emit error message(s) and
    return 0 */
 
-bool FeatCtx::validateGSUBSingle(GPat *targ, GPat *repl) {
+bool FeatCtx::validateGSUBSingle(const GPat::SP &targ, const GPat::SP &repl) {
     if (targ->has_marked) {
         featMsg(hotERROR, "Target must not be marked in this rule");
         return false;
@@ -1626,13 +1627,13 @@ bool FeatCtx::validateGSUBSingle(GPat *targ, GPat *repl) {
 
 /* Return 1 if node is an unmarked pattern of 2 or more glyphs; glyph classes
    may be present */
-static bool isUnmarkedSeq(GPat *gp) {
+static bool isUnmarkedSeq(const GPat::SP &gp) {
     return !(gp == nullptr || gp->has_marked || gp->patternLen() < 2);
 }
 
 /* Return 1 if node is an unmarked pattern of 2 or more glyphs, and no glyph
    classes are present */
-static bool isUnmarkedGlyphSeq(GPat *gp) {
+static bool isUnmarkedGlyphSeq(const GPat::SP &gp) {
     if (!isUnmarkedSeq(gp))
         return false;
 
@@ -1647,8 +1648,8 @@ static bool isUnmarkedGlyphSeq(GPat *gp) {
    repl NULL or with nextSeq non-NULL (and unmarked). If valid return 1, else
    emit error message(s) and return 0 */
 
-bool FeatCtx::validateGSUBMultiple(GPat::ClassRec &targ, GPat *repl,
-                                   bool isSubrule) {
+bool FeatCtx::validateGSUBMultiple(const GPat::ClassRec &targ,
+                                   const GPat::SP &repl, bool isSubrule) {
     if (!((isSubrule || targ.is_glyph()) && isUnmarkedGlyphSeq(repl)) &&
         (repl != NULL || targ.has_lookups())) {
         featMsg(hotERROR, "Invalid multiple substitution rule");
@@ -1657,7 +1658,7 @@ bool FeatCtx::validateGSUBMultiple(GPat::ClassRec &targ, GPat *repl,
     return true;
 }
 
-bool FeatCtx::validateGSUBMultiple(GPat *targ, GPat *repl) {
+bool FeatCtx::validateGSUBMultiple(const GPat::SP &targ, const GPat::SP &repl) {
     if (targ->has_marked) {
         featMsg(hotERROR, "Target must not be marked in this rule");
         return false;
@@ -1669,7 +1670,8 @@ bool FeatCtx::validateGSUBMultiple(GPat *targ, GPat *repl) {
 /* Validate targ and repl for GSUBAlternate. repl is not marked. If valid
    return 1, else emit error message(s) and return 0 */
 
-bool FeatCtx::validateGSUBAlternate(GPat *targ, GPat *repl, bool isSubrule) {
+bool FeatCtx::validateGSUBAlternate(const GPat::SP &targ,
+                                    const GPat::SP &repl, bool isSubrule) {
     if (targ->has_marked) {
         featMsg(hotERROR, "Target must not be marked in this rule");
         return false;
@@ -1696,7 +1698,8 @@ bool FeatCtx::validateGSUBAlternate(GPat *targ, GPat *repl, bool isSubrule) {
    non-NULL and repl is unmarked. If valid return 1, else emit error message(s)
    and return 0 */
 
-bool FeatCtx::validateGSUBLigature(GPat *targ, GPat *repl, bool isSubrule) {
+bool FeatCtx::validateGSUBLigature(const GPat::SP &targ,
+                                   const GPat::SP &repl, bool isSubrule) {
     assert(isSubrule || targ != nullptr);
 
     if (!isSubrule && targ->has_marked) {
@@ -1713,7 +1716,7 @@ bool FeatCtx::validateGSUBLigature(GPat *targ, GPat *repl, bool isSubrule) {
 
 /* Analyze GSUBChain targ and repl. Return 1 if valid, else 0 */
 
-bool FeatCtx::validateGSUBReverseChain(GPat *targ, GPat *repl) {
+bool FeatCtx::validateGSUBReverseChain(GPat::SP &targ, GPat::SP &repl) {
     int nMarked = 0;
     bool after_marked = false;
 
@@ -1812,7 +1815,7 @@ bool FeatCtx::validateGSUBReverseChain(GPat *targ, GPat *repl) {
 
 /* Analyze GSUBChain targ and repl. Return 1 if valid, else 0 */
 
-bool FeatCtx::validateGSUBChain(GPat *targ, GPat *repl) {
+bool FeatCtx::validateGSUBChain(GPat::SP &targ, GPat::SP &repl) {
     int nMarked = 0;
 
     bool after_marked {false};
@@ -1941,7 +1944,7 @@ bool FeatCtx::validateGSUBChain(GPat *targ, GPat *repl) {
     return true;
 }
 
-void FeatCtx::addSub(GPat *targ, GPat *repl, int lkpType) {
+void FeatCtx::addSub(GPat::SP targ, GPat::SP repl, int lkpType) {
     for (auto &cr : targ->classes) {
         if (cr.marked) {
             targ->has_marked = true;
@@ -1959,24 +1962,24 @@ void FeatCtx::addSub(GPat *targ, GPat *repl, int lkpType) {
         if (!g->hadError) {
             if (validateGSUBChain(targ, repl)) {
                 lkpType = GSUBChain;
-                addGSUB(GSUBChain, targ, repl);
+                addGSUB(GSUBChain, std::move(targ), std::move(repl));
             }
         }
     } else if (lkpType == GSUBReverse) {
         if (validateGSUBReverseChain(targ, repl)) {
-            addGSUB(GSUBReverse, targ, repl);
+            addGSUB(GSUBReverse, std::move(targ), std::move(repl));
         }
     } else if (lkpType == GSUBAlternate) {
         if (validateGSUBAlternate(targ, repl, false)) {
-            addGSUB(GSUBAlternate, targ, repl);
+            addGSUB(GSUBAlternate, std::move(targ), std::move(repl));
         }
     } else if (targ->patternLen() == 1 && (repl == NULL || repl->patternLen() > 1)) {
         if (validateGSUBMultiple(targ, repl)) {
-            addGSUB(GSUBMultiple, targ, repl);
+            addGSUB(GSUBMultiple, std::move(targ), std::move(repl));
         }
     } else if (targ->patternLen() == 1 && repl->patternLen() == 1) {
         if (validateGSUBSingle(targ, repl)) {
-            addGSUB(GSUBSingle, targ, repl);
+            addGSUB(GSUBSingle, std::move(targ), std::move(repl));
         }
     } else {
         if (validateGSUBLigature(targ, repl, false)) {
@@ -1992,7 +1995,7 @@ void FeatCtx::addSub(GPat *targ, GPat *repl, int lkpType) {
             for (auto &cr : repl->classes)
                 addGlyphClassToCurrentGC(cr);
             finishCurrentGC();
-            addGSUB(GSUBLigature, targ, repl);
+            addGSUB(GSUBLigature, std::move(targ), std::move(repl));
         }
     }
 }
@@ -2015,11 +2018,11 @@ void FeatCtx::addMarkClass(const std::string &markClassName) {
     finishCurrentGC();
 }
 
-void FeatCtx::addGPOS(int lkpType, GPat *targ) {
-    prepRule(GPOS_, (targ->has_marked) ? GPOSChain : lkpType, targ, NULL);
+void FeatCtx::addGPOS(int lkpType, GPat::SP targ) {
+    prepRule(GPOS_, (targ->has_marked) ? GPOSChain : lkpType, targ, nullptr);
 
     std::string locDesc = current_visitor->tokenPositionMsg(true);
-    g->ctx.GPOSp->RuleAdd(lkpType, targ, locDesc, anchorMarkInfo);
+    g->ctx.GPOSp->RuleAdd(lkpType, std::move(targ), locDesc, anchorMarkInfo);
 
     wrapUpRule();
 }
@@ -2027,7 +2030,7 @@ void FeatCtx::addGPOS(int lkpType, GPat *targ) {
 /* Analyze featValidateGPOSChain targ metrics. Return 1 if valid, else 0 */
 /* Also sets flags in backtrack and look-ahead sequences */
 
-bool FeatCtx::validateGPOSChain(GPat *targ, int lkpType) {
+bool FeatCtx::validateGPOSChain(GPat::SP &targ, int lkpType) {
     int nMarked {0};
     int nNodesWithMetrics {0};
     int nBaseGlyphs {0};
@@ -2145,7 +2148,7 @@ bool FeatCtx::validateGPOSChain(GPat *targ, int lkpType) {
     Can assume targ is at least one node. If h->metrics.cnt == 0
    then targ is an "ignore position" pattern. */
 
-void FeatCtx::addBaseClass(GPat *targ, const std::string &defaultClassName) {
+void FeatCtx::addBaseClass(GPat::SP &targ, const std::string &defaultClassName) {
     /* Find base node in a possibly contextual sequence, */
     /* and add it to the default base glyph class        */
     assert(targ != nullptr && targ->patternLen() > 0);
@@ -2164,7 +2167,7 @@ void FeatCtx::addBaseClass(GPat *targ, const std::string &defaultClassName) {
     finishCurrentGC();
 }
 
-void FeatCtx::addPos(GPat *targ, int type, bool enumerate) {
+void FeatCtx::addPos(GPat::SP targ, int type, bool enumerate) {
     int glyphCount {0};
     bool marked {false};
     int lookupLabelCnt {0};
@@ -2206,21 +2209,19 @@ void FeatCtx::addPos(GPat *targ, int type, bool enumerate) {
     }
 
     if (type == GPOSSingle) {
-        addGPOS(GPOSSingle, targ);
+        addGPOS(GPOSSingle, std::move(targ));
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSPair) {
-        targ = new GPat(*targ);
         sortGlyphClass(targ, true, true, 0);
         sortGlyphClass(targ, true, true, 1);
-        addGPOS(GPOSPair, targ);
-        delete targ;
+        addGPOS(GPOSPair, std::move(targ));
     } else if (type == GPOSCursive) {
         if (anchorMarkInfo.size() != 2) {
             featMsg(hotERROR, "The 'cursive' statement requires two anchors. This has %ld. Skipping rule.", anchorMarkInfo.size());
         } else if (!targ->has_marked && (!targ->classes[0].basenode || targ->patternLen() > 1)) {
             featMsg(hotERROR, "This statement has contextual glyphs around the cursive statement, but no glyphs are marked as part of the input sequence. Skipping rule.");
         } else {
-            addGPOS(GPOSCursive, targ);
+            addGPOS(GPOSCursive, std::move(targ));
         }
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSMarkToBase) {
@@ -2228,7 +2229,7 @@ void FeatCtx::addPos(GPat *targ, int type, bool enumerate) {
         if (!targ->has_marked && (!targ->classes[0].basenode || targ->patternLen() > 2)) {
             featMsg(hotERROR, "This statement has contextual glyphs around the base-to-mark statement, but no glyphs are marked as part of the input sequence. Skipping rule.");
         }
-        addGPOS(GPOSMarkToBase, targ);
+        addGPOS(GPOSMarkToBase, std::move(targ));
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSMarkToLigature) {
         addBaseClass(targ, kDEFAULT_LIGATURECLASS_NAME);
@@ -2247,14 +2248,14 @@ void FeatCtx::addPos(GPat *targ, int type, bool enumerate) {
             }
         }
 
-        addGPOS(GPOSMarkToLigature, targ);
+        addGPOS(GPOSMarkToLigature, std::move(targ));
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSMarkToMark) {
         addBaseClass(targ, kDEFAULT_MARKCLASS_NAME);
         if (!targ->has_marked && (!targ->classes[0].basenode || targ->patternLen() > 2)) {
             featMsg(hotERROR, "This statement has contextual glyphs around the mark-to-mark statement, but no glyphs are marked as part of the input sequence. Skipping rule.");
         }
-        addGPOS(GPOSMarkToMark, targ);
+        addGPOS(GPOSMarkToMark, std::move(targ));
         /* These nodes are recycled in GPOS.c */
     } else if (type == GPOSChain) {
         /* is contextual */
@@ -2262,7 +2263,7 @@ void FeatCtx::addPos(GPat *targ, int type, bool enumerate) {
             featMsg(hotERROR, "The 'lookup' keyword can be used only in a contextual statement. At least one glyph in the sequence must be marked. Skipping rule.");
         } else {
             validateGPOSChain(targ, type);
-            addGPOS(GPOSChain, targ);
+            addGPOS(GPOSChain, std::move(targ));
         }
         /* These nodes are recycled in GPOS.c, as they are used in the fill phase, some time after this function returns. */
     } else {
@@ -2322,7 +2323,7 @@ void FeatCtx::addCVParametersCharValue(unsigned long uv) {
 }
 
 void FeatCtx::addCVParam() {
-    prepRule(GSUB_, GSUBCVParam, NULL, NULL);
+    prepRule(GSUB_, GSUBCVParam, nullptr, nullptr);
 
     g->ctx.GSUBp->AddCVParam(std::move(cvParameters));
 
@@ -2495,7 +2496,8 @@ void FeatCtx::reportUnusedaaltTags() {
  * it gets an index of AALT_INDEX, aka, -1, so that it will sort before all the alts
  * from included features. */
 
-void FeatCtx::aaltAddAlternates(GPat::ClassRec &targcr, GPat::ClassRec &replcr) {
+void FeatCtx::aaltAddAlternates(const GPat::ClassRec &targcr,
+                                const GPat::ClassRec &replcr) {
     auto it = std::find(std::begin(aalt.features), std::end(aalt.features), curr.feature);
     short aaltTagIndex = it != std::end(aalt.features) ? it - aalt.features.begin() : -1;
 
@@ -2598,9 +2600,9 @@ void FeatCtx::aaltCreate() {
         labelSingle = getNextAnonLabel();
         g->ctx.GSUBp->LookupBegin(GSUBSingle, 0, labelSingle, aalt.useExtension, 0);
         for (auto &rule : singles) {
-            GPat *targ = new GPat(rule.targid);
-            GPat *repl = new GPat(rule.glyphs[0].rgid);
-            g->ctx.GSUBp->RuleAdd(targ, repl);
+            GPat::SP targ = std::make_unique<GPat>(rule.targid);
+            GPat::SP repl = std::make_unique<GPat>(rule.glyphs[0].rgid);
+            g->ctx.GSUBp->RuleAdd(std::move(targ), std::move(repl));
         }
         g->ctx.GSUBp->LookupEnd();
     }
@@ -2610,14 +2612,14 @@ void FeatCtx::aaltCreate() {
         labelAlternate = getNextAnonLabel();
         g->ctx.GSUBp->LookupBegin(GSUBAlternate, 0, labelAlternate, aalt.useExtension, 0);
         for (auto &rule : alts) {
-            GPat *targ = new GPat(rule.targid);
+            GPat::SP targ = std::make_unique<GPat>(rule.targid);
             // sort alts in order of feature def in aalt feature
             std::sort(rule.glyphs.begin(), rule.glyphs.end());
-            GPat *repl = new GPat();
+            GPat::SP repl = std::make_unique<GPat>();
             repl->addClass(GPat::ClassRec{});
             for (auto &gr : rule.glyphs)
                 repl->classes[0].glyphs.emplace_back(gr.rgid);
-            g->ctx.GSUBp->RuleAdd(targ, repl);
+            g->ctx.GSUBp->RuleAdd(std::move(targ), std::move(repl));
         }
         g->ctx.GSUBp->LookupEnd();
     }
@@ -2649,13 +2651,11 @@ void FeatCtx::aaltCreate() {
 
 /* Return 1 if this rule is to be treated specially */
 
-bool FeatCtx::aaltCheckRule(int type, GPat *targ, GPat *repl) {
+bool FeatCtx::aaltCheckRule(int type, GPat::SP &targ, GPat::SP &repl) {
     if (curr.feature == aalt_) {
         if (type == GSUBSingle || type == GSUBAlternate) {
             assert(repl != nullptr && repl->patternLen() > 0);
             aaltAddAlternates(targ->classes[0], repl->classes[0]);
-            delete targ;
-            delete repl;
         } else {
             featMsg(hotWARNING,
                     "Only single and alternate "
@@ -2666,12 +2666,12 @@ bool FeatCtx::aaltCheckRule(int type, GPat *targ, GPat *repl) {
     return false;
 }
 
-void FeatCtx::storeRuleInfo(GPat *targ, GPat *repl) {
+void FeatCtx::storeRuleInfo(const GPat::SP &targ, const GPat::SP &repl) {
     assert(repl != nullptr && repl->patternLen() > 0);
     if (curr.tbl == GPOS_) {
         return; /* No GPOS or except clauses */
     }
-    GPat::ClassRec *crp = &(targ->classes[0]);
+    const GPat::ClassRec *crp = &(targ->classes[0]);
     AALT::FeatureRecord t { curr.feature, false };
     auto f = std::find(std::begin(aalt.features), std::end(aalt.features), t);
     if ( curr.feature == aalt_ || f != std::end(aalt.features) ) {

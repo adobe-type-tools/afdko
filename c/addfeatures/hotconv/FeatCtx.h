@@ -9,11 +9,12 @@
 #include <algorithm>
 #include <cassert>
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "FeatParser.h"
 #include "hotmap.h"
@@ -136,6 +137,7 @@ struct AnchorMarkInfo {
 class FeatCtx;
 
 struct GPat {
+    typedef std::unique_ptr<GPat> SP;
     struct GlyphRec {
         explicit GlyphRec(GID g) : gid(g) {}
         GlyphRec(const GlyphRec &gr) : gid(gr.gid),
@@ -266,14 +268,14 @@ struct GPat {
                                    ignore_clause(o.ignore_clause),
                                    lookup_node(o.lookup_node),
                                    enumerate(o.enumerate) {}
-    GPat & operator=(GPat other) {
+/*    GPat & operator=(GPat other) {
         classes = other.classes;
         has_marked = other.has_marked;
         ignore_clause = other.ignore_clause;
         lookup_node = other.lookup_node;
         enumerate = other.enumerate;
         return *this;
-    }
+    } */
     bool is_glyph() const { return classes.size() == 1 && classes[0].is_glyph(); }
     bool is_class() const { return classes.size() == 1 && classes[0].is_class(); }
     bool is_mult_class() const { return classes.size() == 1 && classes[0].is_multi_class(); }
@@ -368,10 +370,10 @@ class FeatCtx {
 
     void dumpGlyph(GID gid, int ch, bool print);
     void dumpGlyphClass(const GPat::ClassRec &cr, int ch, bool print);
-    void dumpPattern(const GPat *pat, int ch, bool print);
+    void dumpPattern(const GPat &pat, int ch, bool print);
 
     std::string msgPrefix();
-    bool validateGPOSChain(GPat *targ, int lookupType);
+    bool validateGPOSChain(GPat::SP &targ, int lookupType);
     Label getNextAnonLabel();
     const GPat::ClassRec &lookupGlyphClass(const std::string &gcname);
 
@@ -417,7 +419,7 @@ class FeatCtx {
     GID cid2gid(const std::string &cidstr);
 
     // Glyph Classes
-    void sortGlyphClass(GPat *gp, bool unique, bool reportDups, uint16_t idx = 0);
+    void sortGlyphClass(GPat::SP &gp, bool unique, bool reportDups, uint16_t idx = 0);
     GPat::ClassRec curGC;
     std::string curGCName;
     std::unordered_map<std::string, GPat::ClassRec> namedGlyphClasses;
@@ -596,24 +598,27 @@ class FeatCtx {
     void getValueDef(const std::string &name, MetricsInfo &mi);
 
     // Substitutions
-    void prepRule(Tag newTbl, int newlkpType, GPat *targ, GPat *repl);
-    void addGSUB(int lkpType, GPat *targ, GPat *repl);
-    bool validateGSUBSingle(GPat::ClassRec &targcr, GPat *repl, bool isSubrule);
-    bool validateGSUBSingle(GPat *targ, GPat *repl);
-    bool validateGSUBMultiple(GPat::ClassRec &targcr, GPat *repl, bool isSubrule);
-    bool validateGSUBMultiple(GPat *targ, GPat *repl);
-    bool validateGSUBAlternate(GPat *targ, GPat *repl, bool isSubrule);
-    bool validateGSUBLigature(GPat *targ, GPat *repl, bool isSubrule);
-    bool validateGSUBReverseChain(GPat *targ, GPat *repl);
-    bool validateGSUBChain(GPat *targ, GPat *repl);
-    void addSub(GPat *targ, GPat *repl, int lkpType);
+    void prepRule(Tag newTbl, int newlkpType, const GPat::SP &targ,
+                  const GPat::SP &repl);
+    void addGSUB(int lkpType, GPat::SP targ, GPat::SP repl);
+    bool validateGSUBSingle(const GPat::ClassRec &targcr,
+                            const GPat::SP &repl, bool isSubrule);
+    bool validateGSUBSingle(const GPat::SP &targ, const GPat::SP &repl);
+    bool validateGSUBMultiple(const GPat::ClassRec &targcr,
+                              const GPat::SP &repl, bool isSubrule);
+    bool validateGSUBMultiple(const GPat::SP &targ, const GPat::SP &repl);
+    bool validateGSUBAlternate(const GPat::SP &targ, const GPat::SP &repl, bool isSubrule);
+    bool validateGSUBLigature(const GPat::SP &targ, const GPat::SP &repl, bool isSubrule);
+    bool validateGSUBReverseChain(GPat::SP &targ, GPat::SP &repl);
+    bool validateGSUBChain(GPat::SP &targ, GPat::SP &repl);
+    void addSub(GPat::SP targ, GPat::SP repl, int lkpType);
     void wrapUpRule();
 
     // Positions
     void addMarkClass(const std::string &markClassName);
-    void addGPOS(int lkpType, GPat *targ);
-    void addBaseClass(GPat *targ, const std::string &defaultClassName);
-    void addPos(GPat *targ, int type, bool enumerate);
+    void addGPOS(int lkpType, GPat::SP targ);
+    void addBaseClass(GPat::SP &targ, const std::string &defaultClassName);
+    void addPos(GPat::SP targ, int type, bool enumerate);
 
     // CVParameters
     enum { cvUILabelEnum = 1, cvToolTipEnum, cvSampleTextEnum,
@@ -661,10 +666,10 @@ class FeatCtx {
 
     void aaltAddFeatureTag(Tag tag);
     void reportUnusedaaltTags();
-    void aaltAddAlternates(GPat::ClassRec &targcr, GPat::ClassRec &replcr);
+    void aaltAddAlternates(const GPat::ClassRec &targcr, const GPat::ClassRec &replcr);
     void aaltCreate();
-    bool aaltCheckRule(int type, GPat *targ, GPat *repl);
-    void storeRuleInfo(GPat *targ, GPat *repl);
+    bool aaltCheckRule(int type, GPat::SP &targ, GPat::SP &repl);
+    void storeRuleInfo(const GPat::SP &targ, const GPat::SP &repl);
 
     hotCtx g;
     FeatVisitor *root_visitor {nullptr}, *current_visitor {nullptr};
