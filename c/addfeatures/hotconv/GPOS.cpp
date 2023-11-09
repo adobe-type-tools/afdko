@@ -22,7 +22,7 @@ const std::array<int, 4> GPOS::MetricsRec::kernorder = {2, 3, 1, 0};
 #if HOT_DEBUG
 
 void GPOS::SingleRec::dump(GPOS &h) {
-    featGlyphDump(h.g, gid, -1, 1);
+    h.g->ctx.feat->dumpGlyph(gid, -1, 1);
     fprintf(stderr, "\t%4d %4d %4d %4d",
             metricsRec.value[0], metricsRec.value[1],
             metricsRec.value[2], metricsRec.value[3]);
@@ -50,16 +50,7 @@ void GPOS::dumpSingles(std::vector<SingleRec> &singles) {
     }
 }
 
-void GPOS::KernRec::dump(hotCtx g, GNode *gclass1, GNode *gclass2) {
-    if (gclass1 == NULL) {
-        featGlyphDump(g, first, ' ', 1);
-        featGlyphDump(g, second, ' ', 1);
-    } else {
-        featGlyphClassDump(g, gclass1, -1, 1);
-        fprintf(stderr, ":%u  ", first);
-        featGlyphClassDump(g, gclass2, -1, 1);
-        fprintf(stderr, ":%u  ", second);
-    }
+void GPOS::KernRec::dumpStats(hotCtx g) {
     fprintf(stderr, "<");
     for (int i = 0; i < 4; i++) {
         fprintf(stderr, "%hd ", metricsRec1.value[i]);
@@ -69,6 +60,20 @@ void GPOS::KernRec::dump(hotCtx g, GNode *gclass1, GNode *gclass2) {
         fprintf(stderr, "%hd ", metricsRec2.value[i]);
     }
     fprintf(stderr, ">\n");
+}
+
+void GPOS::KernRec::dump(hotCtx g) {
+    g->ctx.feat->dumpGlyph(first, ' ', 1);
+    g->ctx.feat->dumpGlyph(second, ' ', 1);
+    dumpStats(g);
+}
+
+void GPOS::KernRec::dump(hotCtx g, GPat::ClassRec &gclass1, GPat::ClassRec &gclass2) {
+    g->ctx.feat->dumpGlyphClass(gclass1, -1, 1);
+    fprintf(stderr, ":%u  ", first);
+    g->ctx.feat->dumpGlyphClass(gclass2, -1, 1);
+    fprintf(stderr, ":%u  ", second);
+    dumpStats(g);
 }
 
 #endif
@@ -140,7 +145,7 @@ void GPOS::rulesDump(SubtableInfo &si) {
         PosRule &rule = si.rules[i];
 
         fprintf(stderr, "  [%d] ", i);
-        featPatternDump(g, rule.targ, ' ', 1);
+        g->ctx.feat->dumpPattern(rule.targ, ' ', 1);
     }
 }
 
@@ -416,10 +421,9 @@ bool GPOS::SingleRec::cmpGID(const GPOS::SingleRec &a, const GPOS::SingleRec &b)
         return a.metricsRec < b.metricsRec;
 }
 
-/* Targ may be a class, as a convenience. Input GNodes are recycled. */
-
-void GPOS::AddSingle(SubtableInfo &si, GNode *targ, int xPla, int yPla, int xAdv, int yAdv) {
-    GNode *p;
+void GPOS::AddSingle(SubtableInfo &si, GPat::ClassRec &cr,
+                     std::unordered_set<GID> &found,
+                     int xPla, int yPla, int xAdv, int yAdv) {
     uint32_t valFmt;
 
     valFmt = makeValueFormat(si, xPla, yPla, xAdv, yAdv);
@@ -427,12 +431,10 @@ void GPOS::AddSingle(SubtableInfo &si, GNode *targ, int xPla, int yPla, int xAdv
     if (g->hadError)
         return;
 
-    for (p = targ; p != NULL; p = p->nextCl) {
-        SingleRec single;
-        if (p->flags & FEAT_MISC)
-            continue; /* skip rules that are duplicates of others that are in this lookup. This is set in addAnonPosRule */
-        single.gid = p->gid;
-        single.valFmt = valFmt;
+    for (GID gid : cr.glyphs) {
+        if (found.find(gid) != found.end())
+            continue;
+        SingleRec single {gid, valFmt};
         if (isVertFeature(si.feature) && (valFmt == ValueYAdvance) && (yAdv == 0))
             single.metricsRec.set(xPla, yPla, 0, xAdv);
         else
@@ -441,7 +443,7 @@ void GPOS::AddSingle(SubtableInfo &si, GNode *targ, int xPla, int yPla, int xAdv
         auto [i, b] = si.glyphsSeen.insert({std::pair<GID, GID>{single.gid, GID_UNDEF},
                                            (uint32_t) si.singles.size()});
         if (!b) {
-            featGlyphDump(g, single.gid, '\0', 0);
+            g->ctx.feat->dumpGlyph(single.gid, '\0', 0);
             if (!SingleRec::cmp(single, si.singles[i->second]) &&
                 !SingleRec::cmp(si.singles[i->second], single)) {
                 hotMsg(g, hotNOTE,
@@ -459,7 +461,7 @@ void GPOS::AddSingle(SubtableInfo &si, GNode *targ, int xPla, int yPla, int xAdv
 #if HOT_DEBUG
             if (DF_LEVEL(g) >= 2) {
                 fprintf(stderr, "  * GPOSSingle ");
-                featGlyphDump(g, p->gid, ' ', 1);
+                g->ctx.feat->dumpGlyph(gid, ' ', 1);
                 fprintf(stderr, " %d %d %d %d\n", xPla, yPla, xAdv, yAdv);
             }
 #endif
@@ -473,9 +475,7 @@ void GPOS::prepSinglePos(SubtableInfo &si) {
     std::sort(si.singles.begin(), si.singles.end(), SingleRec::cmp);
 
     /* Calculate value format and value record spans */
-    SingleRec sn;
-    sn.valFmt = -1;
-    si.singles.emplace_back(std::move(sn));
+    si.singles.emplace_back(0, -1);  // Temporary to make loop easier
     uint32_t pfmt = 0, fmt;
     for (fmt = 1; fmt < si.singles.size(); fmt++) {
         if (si.singles[fmt].valFmt != si.singles[pfmt].valFmt) {
@@ -657,33 +657,25 @@ bool GPOS::SubtableBreak() {
     return true;
 }
 
-/* Checks to see if gc can be a valid member of classDef.
-   Returns inx, which is -1 if gc cannot be a valid member of the classDef.
-   If  > -1, then class is set to gc's class value. insert is set to 1 if
-   gc needs to be inserted by a subsequent call to insertInClassDef(). */
+// when returns true gc needs to be inserted by a subsequent call to insertInClassDef()
 
-bool GPOS::validInClassDef(int classDefInx, GNode *gc, uint32_t &cls, bool &insert) {
+bool GPOS::validInClassDef(int classDefInx, GPat::ClassRec &cr,
+                           uint32_t &cls, bool &insert) {
     ClassDef &cdef = classDef[classDefInx];
 
-    GNode *p;
-    auto i = cdef.classInfo.find(gc->gid);
+    insert = false;
+    assert(cr.glyphs.size() > 0);
+    auto i = cdef.classInfo.find(cr.glyphs[0]);
     if (i != cdef.classInfo.end()) {
-        /* First glyph matches. Check to see if rest match. */
-        GNode *q = i->second.gc->nextCl;
-        for (p = gc->nextCl; p != NULL && q != NULL; p = p->nextCl, q = q->nextCl) {
-            if (p->gid != q->gid)
-                return false;
-        }
-        if (p != NULL || q != NULL) {
+        if (!(cr == i->second.cr))
             return false;
-        }
-        insert = false;
+        /* First glyph matches. Check to see if rest match. */
         cls = i->second.cls; /* gc already exists */
     } else {
         /* First glyph does not match.                                */
         /* Check to see if any members of gc are already in coverage. */
-        for (p = gc; p != NULL; p = p->nextCl) {
-            if (cdef.cov.find(p->gid) != cdef.cov.end())
+        for (GID gid : cr.glyphs) {
+            if (cdef.cov.find(gid) != cdef.cov.end())
                 return false;
         }
         /* Classes start numbering from 0 for ClassDef1, 1 for ClassDef2 */
@@ -695,15 +687,13 @@ bool GPOS::validInClassDef(int classDefInx, GNode *gc, uint32_t &cls, bool &inse
     return true;
 }
 
-/* Inserts gc into the relevant class def. Input GNodes stored. */
-
-void GPOS::insertInClassDef(ClassDef &cdef, GNode *gc, uint32_t cls) {
-    ClassInfo ci {cls, gc};
-    cdef.classInfo.insert({gc->gid, ci});
+void GPOS::insertInClassDef(ClassDef &cdef, GPat::ClassRec &cr, uint32_t cls) {
+    ClassInfo ci {cls, cr};
+    cdef.classInfo.emplace(cr.glyphs[0], std::move(ci));
 
     /* Add gids to glyph accumulator */
-    for (; gc != NULL; gc = gc->nextCl)
-        cdef.cov.insert(gc->gid);
+    for (GID gid : cr.glyphs)
+        cdef.cov.insert(gid);
 }
 
 void GPOS::addSpecPair(SubtableInfo &si, GID first, GID second,
@@ -718,7 +708,7 @@ void GPOS::addSpecPair(SubtableInfo &si, GID first, GID second,
 #if HOT_DEBUG
     if (DF_LEVEL(g) >= 2) {
         fprintf(stderr, "  * GPOSPair ");
-        pair.dump(g, NULL, NULL);
+        pair.dump(g);
     }
 #endif
     auto [i, b] = si.glyphsSeen.insert({std::pair<GID, GID>(first, second),
@@ -746,53 +736,40 @@ void GPOS::addSpecPair(SubtableInfo &si, GID first, GID second,
     }
 }
 
-/* Add pair. first and second must already be sorted with duplicate gids
-   removed. Input GNodes are stored; they are recycled in this function
-   (if fmt1), or at GPOSLookupEnd(?) (if fmt2). */
-
-void GPOS::AddPair(SubtableInfo &si, GNode *first, GNode *second, std::string &locDesc) {
-    bool enumerate;
+void GPOS::AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
+                   bool enumerate, std::string &locDesc) {
     int8_t pairFmt;
     uint32_t valFmt1 = 0;
     uint32_t valFmt2 = 0;
-    int16_t *values1 = NULL;
-    int16_t *values2 = NULL;
     MetricsRec metricsRec1;
     MetricsRec metricsRec2;
 
-    if (first->metricsInfo.cnt == -1) {
+    if (cr1.metricsInfo.metrics.size() == 0) {
         /* If the only metrics record is applied to the second glyph, then */
         /* this is shorthand for applying a single kern value to the first  */
         /* glyph. The parser enforces that if first->metricsInfo == null,   */
         /* then the second value record must exist.                         */
-        first->metricsInfo = second->metricsInfo;
-        second->metricsInfo = METRICSINFOEMPTYPP;
-        values1 = first->metricsInfo.metrics;
-    } else {
-        /* first->metricsInfo exists, but second->metricsInfo may or may not exist */
-        values1 = first->metricsInfo.metrics;
-        if (second->metricsInfo.cnt != -1) {
-            values2 = second->metricsInfo.metrics;
-        }
+        assert(cr2.metricsInfo.metrics.size() > 0);
+        cr1.metricsInfo.metrics.swap(cr2.metricsInfo.metrics);
     }
-
-    enumerate = first->flags & FEAT_ENUMERATE;
+    auto &m1 = cr1.metricsInfo.metrics;
+    auto &m2 = cr2.metricsInfo.metrics;
 
     /* The FEAT_GCLASS is essential for identifying a singleton gclass */
-    pairFmt = ((first->flags & FEAT_GCLASS || second->flags & FEAT_GCLASS) && !enumerate) ? 2 : 1;
+    pairFmt = ((cr1.is_class() || cr2.is_class()) && !enumerate) ? 2 : 1;
 
-    if (first->metricsInfo.cnt == 1) {
+    if (m1.size() == 1) {
         if (isVertFeature(si.feature)) {
             valFmt1 = (uint16_t) ValueYAdvance;
-            metricsRec1.value[3] = values1[0];
+            metricsRec1.value[3] = m1[0];
         } else {
             valFmt1 = (uint16_t) ValueXAdvance;
-            metricsRec1.value[2] = values1[0];
+            metricsRec1.value[2] = m1[0];
         }
     } else {
-        assert(first->metricsInfo.cnt == 4);
-        metricsRec1.set(values1[0], values1[1], values1[2], values1[3]);
-        valFmt1 = makeValueFormat(si, values1[0], values1[1], values1[2], values1[3]);
+        assert(m1.size() == 4);
+        metricsRec1.set(m1[0], m1[1], m1[2], m1[3]);
+        valFmt1 = makeValueFormat(si, m1[0], m1[1], m1[2], m1[3]);
         if (valFmt1 == 0) {
             /* If someone has specified a value of <0 0 0 0>, then valFmt   */
             /* is 0. This will cause a subtable break, since the valFmt     */
@@ -806,19 +783,19 @@ void GPOS::AddPair(SubtableInfo &si, GNode *first, GNode *second, std::string &l
         }
     }
 
-    if (second->metricsInfo.cnt != -1) {
-        if (second->metricsInfo.cnt == 1) {
+    if (m2.size() != 0) {
+        if (m2.size() == 1) {
             if (isVertFeature(si.feature)) {
                 valFmt2 = (uint16_t) ValueYAdvance;
-                metricsRec2.value[3] = values2[0];
+                metricsRec2.value[3] = m2[0];
             } else {
                 valFmt2 = (uint16_t) ValueXAdvance;
-                metricsRec2.value[2] = values2[0];
+                metricsRec2.value[2] = m2[0];
             }
         } else {
-            assert(second->metricsInfo.cnt == 4);
-            metricsRec2.set(values2[0], values2[1], values2[2], values2[3]);
-            valFmt2 = makeValueFormat(si, values2[0], values2[1], values2[2], values2[3]);
+            assert(m2.size() == 4);
+            metricsRec2.set(m2[0], m2[1], m2[2], m2[3]);
+            valFmt2 = makeValueFormat(si, m2[0], m2[1], m2[2], m2[3]);
             if (valFmt2 == 0) {
                 /* If someone has specified a value of <0 0 0 0>, then      */
                 /* valFmt is 0. This will cause a subtable break, since the */
@@ -842,9 +819,6 @@ void GPOS::AddPair(SubtableInfo &si, GNode *first, GNode *second, std::string &l
         valFmt2 = si.pairValFmt2;
     }
 
-    first->nextSeq = NULL;  /* else featRecycleNodes  recycles the second mode as well. */
-    second->nextSeq = NULL; /* else featRecycleNodes  recycles the second mode as well. */
-
     if (g->hadError)
         return;
 
@@ -856,8 +830,8 @@ void GPOS::AddPair(SubtableInfo &si, GNode *first, GNode *second, std::string &l
             /* Pause to create accumulated subtable */
             PairPos::fill(*this, si);
             if (si.pairFmt == 2 && pairFmt == 1) {
-                featGlyphDump(g, first->gid, ' ', 0);
-                featGlyphDump(g, second->gid, '\0', 0);
+                g->ctx.feat->dumpGlyph(cr1.glyphs[0], ' ', 0);
+                g->ctx.feat->dumpGlyph(cr2.glyphs[0], '\0', 0);
                 hotMsg(g, hotWARNING,
                        "Single kern pair occurring after "
                        "class kern pair in %s: %s",
@@ -873,24 +847,15 @@ void GPOS::AddPair(SubtableInfo &si, GNode *first, GNode *second, std::string &l
 
     /* Check if value record format needs updating */
     if (pairFmt == 1) {
-        /* --- Add specific pair(s) --- */
-        first->nextSeq = second;
-        if (first->nextCl == NULL && second->nextCl == NULL) {
-            addSpecPair(si, first->gid, second->gid, metricsRec1, metricsRec2);
-        } else {
-            /* Enumerate */
-            unsigned length;
-            GNode **prod;
-
-            prod = featMakeCrossProduct(g, first, &length);
-            for (uint32_t i = 0; i < length; i++) {
-                GNode *specPair = prod[i];
-                addSpecPair(si, specPair->gid, specPair->nextSeq->gid, metricsRec1, metricsRec2);
-                featRecycleNodes(g, specPair);
-            }
+        std::vector<GPat::ClassRec*> classes = { &cr1, &cr2 };
+        GPat::CrossProductIterator cpi {std::move(classes)};
+        std::vector<GID> gids;
+        while (cpi.next(gids)) {
+            assert(gids.size() == 2);
+            addSpecPair(si, gids[0], gids[1], metricsRec1, metricsRec2);
         }
-        featRecycleNodes(g, first);
     } else {
+        assert(pairFmt == 2);
         /* --- Add class pair --- */
         uint32_t cl1;
         uint32_t cl2;
@@ -898,8 +863,8 @@ void GPOS::AddPair(SubtableInfo &si, GNode *first, GNode *second, std::string &l
         bool insert2;
         KernRec pair;
 
-        if ((validInClassDef(0, first, cl1, insert1)) &&
-            (validInClassDef(1, second, cl2, insert2))) {
+        if ((validInClassDef(0, cr1, cl1, insert1)) &&
+            (validInClassDef(1, cr2, cl2, insert2))) {
             /* Add pair to current kern pair accumulator */
             pair.first = cl1; /* Store classes */
             pair.second = cl2;
@@ -908,8 +873,7 @@ void GPOS::AddPair(SubtableInfo &si, GNode *first, GNode *second, std::string &l
 #if HOT_DEBUG
             if (DF_LEVEL(g) >= 2) {
                 fprintf(stderr, "  * GPOSPair ");
-                pair.dump(g, first, second);
-            }
+                pair.dump(g, cr1, cr2); }
 #endif
             auto [i, b] = si.glyphsSeen.insert({std::pair<GID, GID>{cl1, cl2},
                                                (uint32_t)si.pairs.size()});
@@ -933,21 +897,15 @@ void GPOS::AddPair(SubtableInfo &si, GNode *first, GNode *second, std::string &l
 #endif
             } else {
                 /* Insert into the classDefs, if needed */
-                if (insert1) {
-                    insertInClassDef(classDef[0], first, cl1);
-                } else {
-                    featRecycleNodes(g, first);
-                }
-                if (insert2) {
-                    insertInClassDef(classDef[1], second, cl2);
-                } else {
-                    featRecycleNodes(g, second);
-                }
+                if (insert1)
+                    insertInClassDef(classDef[0], cr1, cl1);
+                if (insert2)
+                    insertInClassDef(classDef[1], cr2, cl2);
                 si.pairs.emplace_back(std::move(pair));
             }
         } else {
-            featGlyphClassDump(g, first, ' ', 0);
-            featGlyphClassDump(g, second, '\0', 0);
+            g->ctx.feat->dumpGlyphClass(cr1, ' ', 0);
+            g->ctx.feat->dumpGlyphClass(cr2, '\0', 0);
             hotMsg(g, hotWARNING,
                    "Start of new pair positioning subtable forced by overlapping glyph classes in %s; "
                    "some pairs may never be accessed: %s",
@@ -955,12 +913,12 @@ void GPOS::AddPair(SubtableInfo &si, GNode *first, GNode *second, std::string &l
                    g->note.array);
 
             startNewPairPosSubtbl = true;
-            AddPair(si, first, second, locDesc);
+            AddPair(si, cr1, cr2, enumerate, locDesc);
         }
     }
 }
 
-void GPOS::addPosRule(SubtableInfo &si, GNode *targ, std::string &locDesc,
+void GPOS::addPosRule(SubtableInfo &si, GPat *targ, std::string &locDesc,
                       std::vector<AnchorMarkInfo> &anchorMarkInfo) {
     uint16_t lkpType;
 
@@ -972,147 +930,120 @@ void GPOS::addPosRule(SubtableInfo &si, GNode *targ, std::string &locDesc,
 #if HOT_DEBUG
     if (DF_LEVEL(g) >= 2) {
         DF(2, (stderr, "  * GPOS RuleAdd "));
-        featPatternDump(g, targ, ' ', 1);
+        g->ctx.feat->dumpPattern(targ, ' ', 1);
         DF(2, (stderr, "\n"));
     }
 #endif
 
     if (lkpType == GPOSSingle) {
-        GNode *nextNode = targ;
-        if (targ->flags & FEAT_HAS_MARKED) {
-            if (featValidateGPOSChain(g, targ, lkpType) == 0) {
+        std::unordered_set<GID> found;
+        if (targ->has_marked) {
+            if (!g->ctx.feat->validateGPOSChain(targ, lkpType))
                 return;
-            }
 
             /* for each glyph node in the input sequence, */
             /* add the pos rule to the anonymous table,   */
             /* if there is one                            */
-            while (nextNode != NULL) {
-                if (!(nextNode->flags & FEAT_MARKED)) {
-                    nextNode = nextNode->nextSeq;
+            for (auto &cr : targ->classes) {
+                if (!cr.marked || cr.metricsInfo.metrics.size() == 0)
                     continue;
-                }
-                if (nextNode->metricsInfo.cnt == -1) {
-                    nextNode = nextNode->nextSeq;
-                    continue;
-                }
 
-                SubtableInfo &anon_si = addAnonPosRule(si, lkpType, nextNode);
-                if (nextNode->metricsInfo.cnt == 1) {
+                SubtableInfo &anon_si = addAnonPosRuleSing(si, cr, found);
+                if (cr.metricsInfo.metrics.size() == 1) {
                     /* assume it is an xAdvance adjustment */
-                    AddSingle(anon_si, nextNode, 0, 0, nextNode->metricsInfo.metrics[0], 0);
+                    AddSingle(anon_si, cr, found, 0, 0, cr.metricsInfo.metrics[0], 0);
                 } else {
-                    assert(nextNode->metricsInfo.cnt == 4);
-                    int16_t *metrics = nextNode->metricsInfo.metrics;
-
-                    AddSingle(anon_si, nextNode, metrics[0], metrics[1],
+                    assert(cr.metricsInfo.metrics.size() == 4);
+                    auto &metrics = cr.metricsInfo.metrics;
+                    AddSingle(anon_si, cr, found, metrics[0], metrics[1],
                               metrics[2], metrics[3]);
                 }
 
-                if (nextNode->lookupLabelCount > 255)
+                if (cr.lookupLabels.size() > 255)
                     hotMsg(g, hotFATAL, "Anonymous lookup in chain caused overflow.");
-
-                nextNode->lookupLabels[nextNode->lookupLabelCount] = anon_si.label;
-                nextNode->lookupLabelCount++;
-
-                nextNode = nextNode->nextSeq;
+                cr.lookupLabels.push_back(anon_si.label);
             }
             /* now add the nodes to the contextual rule list. */
             si.parentLkpType = GPOSChain; /* So that this subtable will be processed as a chain at lookup end -> fill. */
             si.rules.emplace_back(targ);
         } else {
-            if (targ->metricsInfo.cnt == 1) {
+            auto &cr = targ->classes[0];
+            if (cr.metricsInfo.metrics.size() == 1) {
                 /* assume it is an xAdvance adjustment */
-                AddSingle(si, targ, 0, 0, targ->metricsInfo.metrics[0], 0);
+                AddSingle(si, cr, found, 0, 0, cr.metricsInfo.metrics[0], 0);
             } else {
-                assert(targ->metricsInfo.cnt == 4);
-                int16_t *metrics = targ->metricsInfo.metrics;
-                AddSingle(si, targ, metrics[0], metrics[1],
+                assert(cr.metricsInfo.metrics.size() == 4);
+                auto &metrics = cr.metricsInfo.metrics;
+                AddSingle(si, cr, found, metrics[0], metrics[1],
                           metrics[2], metrics[3]);
             }
         }
         return;
     } else if (lkpType == GPOSPair) {
         /* metrics are now associated with the node they follow */
-        AddPair(si, targ, targ->nextSeq, locDesc);
+        assert(targ->classes.size() == 2);
+        AddPair(si, targ->classes[0], targ->classes[1], targ->enumerate, locDesc);
         return;
     } else if (lkpType == GPOSCursive) {
-        /* Add BaseGlyphRec records, making sure that there is no overlap in anchor and markClass */
-        GNode *nextNode = targ;
-
         /* Check if this is a contextual rule.*/
-        if (targ->flags & FEAT_HAS_MARKED) {
-            if (featValidateGPOSChain(g, targ, lkpType) == 0) {
+        if (targ->has_marked) {
+            if (!g->ctx.feat->validateGPOSChain(targ, lkpType))
                 return;
-            }
 
             /* add the pos rule to the anonymous tables. First, find the base glyph */
-            while ((nextNode != NULL) && (!(nextNode->flags & FEAT_IS_BASE_NODE))) {
-                nextNode = nextNode->nextSeq;
+            bool foundBaseNode = false;
+            for (auto &cr : targ->classes) {
+                if (!cr.basenode)
+                    continue;
+                foundBaseNode = true;
+                SubtableInfo &anon_si = addAnonPosRule(si, lkpType);
+                addCursive(anon_si, cr, anchorMarkInfo, locDesc);
+                if (cr.lookupLabels.size() > 255)
+                    hotMsg(g, hotFATAL, "Anonymous lookup in chain caused overflow.");
+                cr.lookupLabels.push_back(anon_si.label);
+                break;
             }
-
-            SubtableInfo &anon_si = addAnonPosRule(si, lkpType, nextNode);
-            addCursive(anon_si, nextNode, anchorMarkInfo, locDesc);
+            if (!foundBaseNode)
+                hotMsg(g, hotFATAL, "aborting due to not finding base node");
 
             /* now add the nodes to the contextual rule list. */
             si.parentLkpType = GPOSChain; /* So that this subtable will be processed as a chain at lookup end -> fill. */
             si.rules.emplace_back(targ);
-            if (nextNode != NULL) {
-                /*  add the lookupLabel. */
-                if (nextNode->lookupLabelCount > 255)
-                    hotMsg(g, hotFATAL, "Anonymous lookup in chain caused overflow.");
-
-                nextNode->lookupLabels[nextNode->lookupLabelCount] = anon_si.label;
-                nextNode->lookupLabelCount++;
-            } else {
-                hotMsg(g, hotFATAL, "aborting due to unexpected NULL nextNode pointer");
-            }
-            /* is contextual */
         } else {
             /* isn't contextual */
-            addCursive(si, targ, anchorMarkInfo, locDesc);
-            featRecycleNodes(g, targ); /* I do this here rather than in feat.c;                       */
-                                       /* addPos, as I have to NOT recycle them if they are contextual */
+            addCursive(si, targ->classes[0], anchorMarkInfo, locDesc);
+            delete targ;
         }
     } else if ((lkpType == GPOSMarkToBase) || (lkpType == GPOSMarkToMark) || (lkpType == GPOSMarkToLigature)) {
-        /* Add BaseGlyphRec records, making sure that there is no overlap in anchor and markClass */
-        GNode *nextNode = targ;
-
         /* Check if this is a contextual rule.*/
-        if (targ->flags & FEAT_HAS_MARKED) {
-            if (featValidateGPOSChain(g, targ, lkpType) == 0) {
+        if (targ->has_marked) {
+            if (!g->ctx.feat->validateGPOSChain(targ, lkpType))
                 return;
-            }
 
             /* add the pos rule to the anonymous tables. First, find the base glyph.
              In a chain contextual rule, this will be the one and only marked glyph
              or glyph class. */
-            while ((nextNode != NULL) && (!(nextNode->flags & FEAT_MARKED))) {
-                nextNode = nextNode->nextSeq;
+            bool foundMarked = true;
+            for (auto &cr : targ->classes) {
+                if (!cr.marked)
+                    continue;
+                foundMarked = true;
+                SubtableInfo &anon_si = addAnonPosRule(si, lkpType);
+                addMark(anon_si, cr, anchorMarkInfo, locDesc);
+                if (cr.lookupLabels.size() > 255)
+                    hotMsg(g, hotFATAL, "Anonymous lookup in chain caused overflow.");
+                cr.lookupLabels.push_back(anon_si.label);
+                break;
             }
-
-            SubtableInfo &anon_si = addAnonPosRule(si, lkpType, nextNode);
-
-            addMark(anon_si, nextNode, anchorMarkInfo, locDesc);
-
+            if (!foundMarked)
+                hotMsg(g, hotFATAL, "aborting due to not finding base node");
             /* now add the nodes to the contextual rule list. */
             si.parentLkpType = GPOSChain; /* So that this subtable will be processed as a chain at lookup end -> fill. */
-
             si.rules.emplace_back(targ);
-            if (nextNode != NULL) {
-                if (nextNode->lookupLabelCount > 255)
-                    hotMsg(g, hotFATAL, "Anonymous lookup in chain caused overflow.");
-
-                nextNode->lookupLabels[nextNode->lookupLabelCount] = anon_si.label;
-                nextNode->lookupLabelCount++;
-            } else {
-                hotMsg(g, hotFATAL, "aborting due to unexpected NULL nextNode pointer");
-            }
         } else {
             /* isn't contextual */
-            addMark(si, targ, anchorMarkInfo, locDesc);
-            featRecycleNodes(g, targ); /* I do this here rather than in feat.c;                       */
-                                       /* addPos, as I have to NOT recycle them if they are contextual */
+            addMark(si, targ->classes[0], anchorMarkInfo, locDesc);
+            delete targ;
         }
     } else {
         /* Add whole rule intact (no enumeration needed) */
@@ -1122,11 +1053,12 @@ void GPOS::addPosRule(SubtableInfo &si, GNode *targ, std::string &locDesc,
 
 /* Add rule (enumerating if necessary) to subtable si */
 
-void GPOS::RuleAdd(int lkpType, GNode *targ, std::string &locDesc, std::vector<AnchorMarkInfo> &anchorMarkInfo) {
+void GPOS::RuleAdd(int lkpType, GPat *targ, std::string &locDesc,
+                   std::vector<AnchorMarkInfo> &anchorMarkInfo) {
     if (g->hadError)
         return;
 
-    if (targ->flags & FEAT_HAS_MARKED) {
+    if (targ->has_marked) {
         nw.parentLkpType = lkpType;
         nw.lkpType = GPOSChain;
     }
@@ -1134,26 +1066,26 @@ void GPOS::RuleAdd(int lkpType, GNode *targ, std::string &locDesc, std::vector<A
     addPosRule(nw, targ, locDesc, anchorMarkInfo);
 }
 
-/* For a particular classDef and a given class, return the GNode linked list */
-
-GNode *GPOS::getGNodes(uint32_t cls, int classDefInx) {
-    for (auto ci : classDef[classDefInx].classInfo) {
+GPat::ClassRec &GPOS::getCR(uint32_t cls, int classDefInx) {
+    for (auto &ci : classDef[classDefInx].classInfo) {
         if (ci.second.cls == cls)
-            return ci.second.gc;
+            return ci.second.cr;
     }
     /* can't get here: the class definitions have already been conditioned in feat.c::addPos().
     hotMsg(g, hotFATAL, "class <%u> not valid in classDef", cls);
     */
-    return NULL; /* Suppress compiler warning */
+    assert(false);
+    GPat::ClassRec cr;
+    return cr;
 }
 
 void GPOS::printKernPair(GID gid1, GID gid2, int val1, int val2, bool fmt1) {
     if (fmt1) {
-        featGlyphDump(g, gid1, ' ', 0);
-        featGlyphDump(g, gid2, '\0', 0);
+        g->ctx.feat->dumpGlyph(gid1, ' ', 0);
+        g->ctx.feat->dumpGlyph(gid2, '\0', 0);
     } else {
-        featGlyphClassDump(g, getGNodes(gid1, 0), ' ', 0);
-        featGlyphClassDump(g, getGNodes(gid2, 1), '\0', 0);
+        g->ctx.feat->dumpGlyphClass(getCR(gid1, 0), ' ', 0);
+        g->ctx.feat->dumpGlyphClass(getCR(gid2, 1), '\0', 0);
     }
 }
 
@@ -1217,7 +1149,7 @@ Offset GPOS::classDefMake(std::shared_ptr<CoverageAndClass> &cac,
     /* --- Create coverage, if needed --- */
     if (coverage != NULL) {
         cac->coverageBegin();
-        for (auto gid : cdef.cov)
+        for (GID gid : cdef.cov)
             cac->coverageAddGlyph(gid);
 
         *coverage = cac->coverageEnd(); /* Adjusted later */
@@ -1231,10 +1163,9 @@ Offset GPOS::classDefMake(std::shared_ptr<CoverageAndClass> &cac,
         count = (uint16_t)((cdefInx == 0) ? cdef.classInfo.size() : cdef.classInfo.size() + 1);
     cac->classBegin();
     for (auto &ci : cdef.classInfo) {
-        for (GNode *p = ci.second.gc; p != NULL; p = p->nextCl) {
-            if (ci.second.cls != 0) {
-                cac->classAddMapping(p->gid, ci.second.cls);
-            }
+        if (ci.second.cls != 0) {
+            for (GID gid : ci.second.cr.glyphs)
+                cac->classAddMapping(gid, ci.second.cls);
         }
     }
     return cac->classEnd();
@@ -1378,17 +1309,11 @@ void GPOS::PairPos::Format2::write(OTL *h) {
 
 /* ------------------ Chaining Contextual Substitution --------------------- */
 
-/* Tries to add rule to current anon subtbl. If successful, returns 1, else 0.
-   If rule already exists in subtbl, recycles targ */
-
-int GPOS::SingleRec::cmpWithRule(GNode *targ, int nFound) {
-    GNode *t1 = targ;
-    int checkedMetrics = 0;
-    int i;
-    short metricsCnt1 = targ->metricsInfo.cnt;
-    short metricsCnt2;
-    short *metrics1 = targ->metricsInfo.metrics;
-    short metrics2[4];
+bool GPOS::SingleRec::cmpWithRule(GPat::ClassRec &cr, std::unordered_set<GID> &found) {
+    auto &metrics1 = cr.metricsInfo.metrics;
+    int16_t metricsCnt1 = metrics1.size();
+    int16_t metricsCnt2;
+    int16_t metrics2[4];
 
     if (valFmt == GPOS::ValueXAdvance) {
         metricsCnt2 = 1;
@@ -1401,94 +1326,41 @@ int GPOS::SingleRec::cmpWithRule(GNode *targ, int nFound) {
         metrics2[3] = metricsRec.value[3];
     }
 
-    assert(metricsCnt1 != -1);
+    assert(metricsCnt1 != 0);
 
-    for (; t1 != NULL; t1 = t1->nextCl) {
-        if ((t1->gid == gid) && (!(t1->flags & FEAT_MISC))) {
+    bool checkedMetrics {false};
+
+    for (GID cgid : cr.glyphs) {
+        if (cgid == gid) {
             if (!checkedMetrics) {
                 /* a test so that we only check the metrics for the head node of the class */
-                if (metricsCnt1 != metricsCnt2) {
-                    return -1;
+                if (metricsCnt1 != metricsCnt2)
+                    return false;
+                for (int i = 0; i < metricsCnt1; i++) {
+                    if (metrics1[i] != metrics2[i])
+                        return false;
                 }
-                for (i = 0; i < metricsCnt1; i++) {
-                    if (metrics1[i] != metrics2[i]) {
-                        return -1;
-                    }
-                }
-                checkedMetrics = 1;
+                checkedMetrics = true;
             }
-            nFound++;
-            t1->flags |= FEAT_MISC;
+            found.insert(cgid);
         }
     }
-    return nFound;
+    return true;
 }
 
-/* Add the "anonymous" rule that occurs in a substitution within a chaining
-   contextual rule. Return the label of the anonymous lookup */
-
-int32_t GPOS::SubtableInfo::checkAddRule(GNode *targ) {
-    GNode *t = targ;
-    int nTarg = 0;
-    int nFound = 0;
-
-    /* If all the class members for this single pos rule are in the current */
-    /* subtable, we can just return, after recycling all the nodes. If any  */
-    /* one is present but with a different metrics record, we need to       */
-    /* return 0, not found. If some nodes are new and others are not, we    */
-    /* need to remove the "already known" nodes from the rule, and recycle  */
-    /* them.                                                                */
-    for (; t != NULL; t = t->nextCl) {
-        nTarg++;
-    }
-
+bool GPOS::SubtableInfo::checkAddRule(GPat::ClassRec &cr,
+                                      std::unordered_set<GID> &found) {
+    found.clear();
     for (auto &cmpRec : singles) {
-        nFound = cmpRec.cmpWithRule(targ, nFound);
-        if (nFound < 0) {
-            break; /* found a match in coverage, but with a different metrics record. Must put it in a different lookup.*/
-        }
-        if (nFound == nTarg) {
-            break;
-        }
+        if (!cmpRec.cmpWithRule(cr, found))
+            return false;
     }
-
-    if (nFound < 0) {
-        return 0; /* Conflicting records - must use new subtable */
-    } else if (nTarg == nFound) {
-        return -1; /* All already present; no need to add more */
-    } else {
-        return 1; /* Can add to current subtable */
-    }
+    return true;
 }
 
-GPOS::SubtableInfo &GPOS::addAnonPosRule(SubtableInfo &cur_si, uint16_t lkpType, GNode *targ) {
-    /* For GPOSSingle lookups only, we check if the rule can be added to    */
-    /* the most current subtable in the anonymous list, and if not, look to */
-    /* see if it can be added to earlier subtables. For all others, we      */
-    /* check only the must current subtable, and assume that it is OK if    */
-    /* the type matches.                                                    */
-    for (auto si = anonSubtable.rbegin(); si != anonSubtable.rend(); si++) {
-        if ((si->script == cur_si.script) &&
-            (si->language == cur_si.language) &&
-            (si->feature == cur_si.feature) &&
-            (si->useExtension == cur_si.useExtension) &&
-            (si->lkpFlag == cur_si.lkpFlag) &&
-            (si->markSetIndex == cur_si.markSetIndex) &&
-            (si->parentFeatTag == nw.feature) &&
-            (lkpType == si->lkpType)) {
-                if (lkpType != GPOSSingle || si->checkAddRule(targ) != 0)
-                    return *si;
-            }
-        if (lkpType != GPOSSingle)
-            break;
-    }
-
-    /* If we get here, we could not use the most recent anonymous table, */
-    /* and must add a new one.                                           */
+GPOS::SubtableInfo &GPOS::newAnonSubtable(SubtableInfo &cur_si, uint16_t lkpType) {
     SubtableInfo asi;
 
-    /* *si = *cur_si; Can't do this, as it copies all the dna array pointers */
-    /* Copy all values except the dna array and format specific stuff */
     asi.script = cur_si.script;
     asi.language = cur_si.language;
     asi.feature = cur_si.feature;
@@ -1496,15 +1368,57 @@ GPOS::SubtableInfo &GPOS::addAnonPosRule(SubtableInfo &cur_si, uint16_t lkpType,
     asi.useExtension = cur_si.useExtension; /* Use extension lookupType? */
     asi.lkpFlag = cur_si.lkpFlag;
     asi.markSetIndex = cur_si.markSetIndex;
+    asi.parentLkpType = 0;
 
     /* Now for the new values that are specific to this table */
     asi.lkpType = lkpType;
-    asi.parentLkpType = 0;
-    asi.label = featGetNextAnonLabel(g);
+    asi.label = g->ctx.feat->getNextAnonLabel();
 
     anonSubtable.emplace_back(std::move(asi));
 
     return anonSubtable.back();
+}
+
+GPOS::SubtableInfo &GPOS::addAnonPosRuleSing(SubtableInfo &cur_si,
+                                             GPat::ClassRec &cr,
+                                             std::unordered_set<GID> &found) {
+    /* For GPOSSingle lookups only, we check if the rule can be added to    */
+    /* the most current subtable in the anonymous list, and if not, look to */
+    /* see if it can be added to earlier subtables. For all others, we      */
+    /* check only the must current subtable, and assume that it is OK if    */
+    /* the type matches.                                                    */
+    for (auto si = anonSubtable.rbegin(); si != anonSubtable.rend(); si++) {
+        if (si->script == cur_si.script &&
+            si->language == cur_si.language &&
+            si->feature == cur_si.feature &&
+            si->useExtension == cur_si.useExtension &&
+            si->lkpFlag == cur_si.lkpFlag &&
+            si->markSetIndex == cur_si.markSetIndex &&
+            si->parentFeatTag == nw.feature &&
+            si->lkpType == GPOSSingle &&
+            si->checkAddRule(cr, found)) {
+                return *si;
+        }
+    }
+    return newAnonSubtable(cur_si, GPOSSingle);
+}
+
+GPOS::SubtableInfo &GPOS::addAnonPosRule(SubtableInfo &cur_si, uint16_t lkpType) {
+    assert(lkpType != GPOSSingle);
+    if (anonSubtable.size() > 0) {
+        auto &b = anonSubtable.back();
+        if ((b.script == cur_si.script) &&
+            (b.language == cur_si.language) &&
+            (b.feature == cur_si.feature) &&
+            (b.useExtension == cur_si.useExtension) &&
+            (b.lkpFlag == cur_si.lkpFlag) &&
+            (b.markSetIndex == cur_si.markSetIndex) &&
+            (b.parentFeatTag == nw.feature) &&
+            (b.lkpType == lkpType)) {
+            return b;
+        }
+    }
+    return newAnonSubtable(cur_si, lkpType);
 }
 
 /* Create anonymous lookups (referred to only from within chain ctx lookups) */
@@ -1520,106 +1434,48 @@ void GPOS::createAnonLookups() {
     }
 }
 
-/* points to an input sequence; return new array of num coverages */
-
-void GPOS::setCoverages(std::vector<LOffset> &covs, std::shared_ptr<CoverageAndClass> &cac,
-                        GNode *p, uint32_t num) {
-    if (num == 0)
-        return;
-
-    covs.reserve(num);
-    for (uint32_t i = 0; i != num; i++, p = p->nextSeq) {
-        cac->coverageBegin();
-        for (GNode *q = p; q != NULL; q = q->nextCl)
-            cac->coverageAddGlyph(q->gid);
-
-        covs.push_back(cac->coverageEnd()); /* Adjusted later */
-    }
-}
-
-GPOS::ChainContextPos::ChainContextPos(GPOS &h, GPOS::SubtableInfo &si, GPOS::PosRule &rule) : Subtable(h, si) {
-    LOffset size;
-    uint32_t nBack = 0;
-    uint32_t nInput = 0;
-    uint32_t nLook = 0;
-    uint32_t nMarked = 0;
-    uint32_t seqCnt = 0;
-    GNode *pBack = NULL;
-    GNode *pInput = NULL;
-    GNode *pLook = NULL;
-    GNode *pMarked = NULL;
+GPOS::ChainContextPos::ChainContextPos(GPOS &h, GPOS::SubtableInfo &si,
+                                       GPOS::PosRule &rule) : Subtable(h, si) {
+    std::vector<GPat::ClassRec*> backs, looks, inputs;
     int nPos = 0;
 
-    GNode *p;
-
     /* Set counts of and pointers to Back, Input, Look, Marked areas */
-    pBack = rule.targ;
-    for (p = rule.targ; p != NULL; p = p->nextSeq) {
-        if (p->flags & FEAT_BACKTRACK) {
-            nBack++;
-        } else if (p->flags & FEAT_INPUT) {
-            if (pInput == NULL) {
-                pInput = p;
-            }
-            nInput++;
-            if (p->flags & FEAT_MARKED) {
-                /* Marked must be within Input */
-                if (pMarked == NULL) {
-                    pMarked = p;
-                }
-                nMarked++;
-                nPos += p->lookupLabelCount;
-            }
-            seqCnt++;
-        } else if (p->flags & FEAT_LOOKAHEAD) {
-            if (pLook == NULL) {
-                pLook = p;
-            }
-            nLook++;
-        }
+    for (auto &cr : rule.targ->classes) {
+        if (cr.backtrack)
+            backs.push_back(&cr);
+        else if (cr.input) {
+            inputs.push_back(&cr);
+            if (cr.marked)
+                nPos += cr.lookupLabels.size();
+        } else if (cr.lookahead)
+            looks.push_back(&cr);
     }
 
-    /* Fill table */
-    h.setCoverages(backtracks, cac, pBack, nBack);
-    h.setCoverages(inputGlyphs, cac, pInput, nInput);
-    h.setCoverages(lookaheads, cac, pLook, nLook);
+    LOffset sz = chain3Size(backs.size(), inputs.size(), looks.size(), nPos);
+    LOffset o = isExt() ? sz : 0;
+
+    h.setCoverages(backtracks, cac, backs, o);
+    h.setCoverages(inputGlyphs, cac, inputs, o);
+    h.setCoverages(lookaheads, cac, looks, o);
 
     if (nPos > 0) {
         lookupRecords.reserve(nPos);
-        GNode *nextNode = pInput;
-
-        for (uint32_t i = 0; i < seqCnt; i++) {
-            if (nextNode->lookupLabelCount == 0) {
-                nextNode = nextNode->nextSeq;
-                continue;
-            }
-            /* Store ptr for easy access later on when lkpInx's are available */
-            for (int j = 0; j < nextNode->lookupLabelCount; j++)
-                lookupRecords.emplace_back(i, nextNode->lookupLabels[j]);
-
-            nextNode = nextNode->nextSeq;
-            if (nextNode == NULL) {
-                break;
-            }
+        int i = 0;
+        for (auto icr : inputs) {
+            for (auto ll : icr->lookupLabels)
+                lookupRecords.emplace_back(i, ll);
+            i++;
         }
     }
 
-    h.updateMaxContext(nInput + nLook);
+    h.updateMaxContext(inputs.size() + looks.size());
 
-    size = chain3Size(nBack, nInput, nLook, nPos);
-    if (isExt()) {
-        /* Set final values for coverages */
-        for (auto &bt : backtracks)
-            bt += size;
-        for (auto &ig : inputGlyphs)
-            ig += size;
-        for (auto &la : lookaheads)
-            la += size;
-        h.incExtOffset(size + cac->coverageSize());
-    } else {
-        h.incSubOffset(size);
-    }
-    featRecycleNodes(h.g, rule.targ);
+    if (isExt())
+        h.incExtOffset(sz + cac->coverageSize());
+    else
+        h.incSubOffset(sz);
+
+    delete rule.targ;
 }
 
 void GPOS::ChainContextPos::fill(GPOS &h, SubtableInfo &si) {
@@ -1703,7 +1559,7 @@ void GPOS::checkBaseAnchorConflict(std::vector<BaseGlyphRec> &baseList) {
     while (++cur != baseList.end()) {
         if (cur->gid == prev->gid) {
             /* For mark to base and mark to mark, only a single entry is allowed in  the baseGlyphArray for a given GID. */
-            featGlyphDump(g, cur->gid, '\0', 0);
+            g->ctx.feat->dumpGlyph(cur->gid, '\0', 0);
             hotMsg(g, hotERROR, "MarkToBase or MarkToMark error in %s. Another statement has already defined the anchors and marks on glyph '%s'. [current at %s, previous at %s]",
                     g->error_id_text.c_str(), g->note.array, cur->locDesc.c_str(), prev->locDesc.c_str());
         }
@@ -1723,7 +1579,7 @@ void GPOS::checkBaseLigatureConflict(std::vector<BaseGlyphRec> &baseList) {
     while (++cur != baseList.end()) {
         if (cur->gid == prev->gid &&
             cur->anchorMarkInfo[0].componentIndex == prev->anchorMarkInfo[0].componentIndex) {
-            featGlyphDump(g, cur->gid, '\0', 0);
+            g->ctx.feat->dumpGlyph(cur->gid, '\0', 0);
             hotMsg(g, hotERROR,
                    "MarkToLigature error in %s. Two different statements referencing the ligature glyph '%s' have assigned the same mark class to the same ligature component. [current at %s, previous at %s]",
                 g->error_id_text.c_str(), g->note.array, cur->locDesc.c_str(), prev->locDesc.c_str());
@@ -1732,57 +1588,46 @@ void GPOS::checkBaseLigatureConflict(std::vector<BaseGlyphRec> &baseList) {
     }
 }
 
-int32_t GPOS::SubtableInfo::findMarkClassIndex(GNode *markNode) {
+int32_t GPOS::SubtableInfo::findMarkClassIndex(std::string &name) {
     int32_t i = 0;
     for (auto &mc : markClassList) {
-        if (markNode == mc.gnode) {
+        if (name == mc.name)
             return i;
-        }
         i++;
     }
     return -1;
 }
 
-int GPOS::addMarkClass(SubtableInfo &si, GNode *markNode) {
+int32_t GPOS::addMarkClass(SubtableInfo &si, std::string &name,
+                           GPat::ClassRec &ncr) {
     /* validate that there is no overlap between this class and previous classes; if not, add the MarkRec entry */
-    GNode *nextClass = markNode;
-    while (nextClass != NULL) {
-        GID newGID = nextClass->gid;
-
+    for (GID ngid : ncr.glyphs) {
         for (auto &mc : si.markClassList) {
-            GNode *curNode = mc.gnode;
-            while (curNode != NULL) {
-                if (curNode->gid == newGID) {
-                    featGlyphDump(g, newGID, '\0', 0);
+            for (GID gid : mc.cr.glyphs) {
+                if (gid == ngid) {
+                    g->ctx.feat->dumpGlyph(ngid, '\0', 0);
                     hotMsg(g, hotERROR, "In %s, glyph '%s' occurs in two different mark classes. Previous mark class: %s. Current mark class: %s.",
-                           g->error_id_text.c_str(), g->note.array, mc.gnode->markClassName, markNode->markClassName);
+                           g->error_id_text.c_str(), g->note.array, mc.name.c_str(), name.c_str());
                     return -1;
                 }
-                curNode = curNode->nextCl;
-            } /* end for all gnodes in markClassList.array[markRec->cls].gnode */
-        }     /* end for all previously seen classes for this lookup */
-
-        nextClass = nextClass->nextCl;
-    } /* end all nodes in the new mark class */
+            }
+        }
+    }
 
     /* Now validate that all glyph ID's are unique within the new class */
-    nextClass = markNode;
-    while (nextClass != NULL) {
-        GNode *testNode = nextClass->nextCl;
-        while (testNode != NULL) {
-            if (testNode->gid == nextClass->gid) {
-                featGlyphDump(g, testNode->gid, '\0', 0);
-                hotMsg(g, hotERROR, "In %s, glyph '%s' is repeated in the current class definition. Mark class: %s.",
-                       g->error_id_text.c_str(), g->note.array, markNode->markClassName);
-                return -1;
-            }
-            testNode = testNode->nextCl;
+    std::unordered_set<GID> gids;
+    for (GID ngid : ncr.glyphs) {
+        auto [i, b] = gids.insert(ngid);
+        if (!b) {
+            g->ctx.feat->dumpGlyph(ngid, '\0', 0);
+            hotMsg(g, hotERROR, "In %s, glyph '%s' is repeated in the current class definition. Mark class: %s.",
+                   g->error_id_text.c_str(), g->note.array, name.c_str());
+            return -1;
         }
-        nextClass = nextClass->nextCl;
     }
     /* If we got here, there was no GID conflict.*/
     /* now add the mark class head node to the markClassList */
-    si.markClassList.emplace_back(markNode);
+    si.markClassList.emplace_back(name, ncr);
     return si.markClassList.size() - 1;
 }
 
@@ -1808,16 +1653,14 @@ LOffset GPOS::AnchorPosBase::getAnchorOffset(const AnchorMarkInfo &anchor) {
     return offst;
 }
 
-void GPOS::addMark(SubtableInfo &si, GNode *targ,
+void GPOS::addMark(SubtableInfo &si, GPat::ClassRec &cr,
                    std::vector<AnchorMarkInfo> &anchorMarkInfo,
                    std::string &locDesc) {
-    GNode *nextNode = targ;
-
     /* Ligatures have multiple components. We can tell when we hit a new    */
     /* component, as the anchorMarkInfo componentIndex increases. For       */
     /* mark-to-base and mark-to-mark, there is only one component, and only */
     /* one baseRec.                                                         */
-    while (nextNode != NULL) {
+    for (GID gid : cr.glyphs) {
         BaseGlyphRec baseRec;
         baseRec.componentIndex = -1;
 
@@ -1825,22 +1668,22 @@ void GPOS::addMark(SubtableInfo &si, GNode *targ,
             if (baseRec.componentIndex != am.componentIndex) {
                 if (baseRec.componentIndex != -1)
                     si.baseList.push_back(std::move(baseRec));
-                baseRec.gid = nextNode->gid;
+                baseRec.gid = gid;
                 baseRec.locDesc = locDesc;
                 baseRec.componentIndex = am.componentIndex;
             }
             AnchorMarkInfo nam = am;
-            if (nam.markClass != NULL) {
-                nam.markClassIndex = si.findMarkClassIndex(nam.markClass);
+            if (!nam.markClassName.empty()) {
+                nam.markClassIndex = si.findMarkClassIndex(nam.markClassName);
                 if (nam.markClassIndex < 0) {
-                    nam.markClassIndex = addMarkClass(si, nam.markClass);
+                    auto cr = g->ctx.feat->lookupGlyphClass(nam.markClassName);
+                    nam.markClassIndex = addMarkClass(si, nam.markClassName, cr);
                 }
             }
             baseRec.anchorMarkInfo.push_back(nam);
         }
         if (baseRec.componentIndex != -1)
             si.baseList.push_back(std::move(baseRec));
-        nextNode = nextNode->nextCl;
     }
 }
 
@@ -1858,11 +1701,9 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
     uint32_t numMarkGlyphs = 0;
     cac->coverageBegin();
     for (auto mc : si.markClassList) {
-        GNode *nextNode = mc.gnode;
-        while (nextNode != NULL) {
-            cac->coverageAddGlyph(nextNode->gid);
+        for (GID gid : mc.cr.glyphs) {
+            cac->coverageAddGlyph(gid);
             numMarkGlyphs++;
-            nextNode = nextNode->nextCl;
         }
     }
     MarkCoverage = cac->coverageEnd(); /* otlCoverageEnd does the sort by GID */
@@ -1874,11 +1715,8 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
     MarkOffset = (Offset)size; /* offset from the start of the MarkToBase subtable */
     uint16_t i = 0;
     for (auto mc : si.markClassList) {
-        for (GNode *nextNode = mc.gnode; nextNode != NULL; nextNode = nextNode->nextCl) {
-            MarkRecords.emplace_back(nextNode->gid,
-                                     getAnchorOffset(nextNode->markClassAnchorInfo),
-                                     i);
-        }
+        for (auto &gr : mc.cr.glyphs)
+            MarkRecords.emplace_back(gr.gid, getAnchorOffset(gr.markClassAnchorInfo), i);
         i++;
     }
     size += sizeof(uint16_t) + (numMarkGlyphs * (2 * sizeof(uint16_t)));
@@ -1909,7 +1747,7 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
         for (auto am : baseRec.anchorMarkInfo) {
             if (br[am.markClassIndex] != 0xFFFFFFFFL) {
                 /*it has already been filled in !*/
-                featGlyphDump(h.g, prevGID, '\0', 0);
+                h.g->ctx.feat->dumpGlyph(prevGID, '\0', 0);
                 hotMsg(h.g, hotERROR, "MarkToBase or MarkToMark error in %s. Another statement has already assigned the current mark class to another anchor point on glyph '%s'. [previous at %s]",
                        h.g->error_id_text.c_str(), h.g->note.array, baseRec.locDesc.c_str());
             } else {
@@ -1928,7 +1766,7 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
 
         for (int j = 0; j < ClassCount; j++) {
             if (br[j] == 0xFFFFFFFFL) {
-                featGlyphDump(h.g, baseRec.gid, '\0', 0);
+                h.g->ctx.feat->dumpGlyph(baseRec.gid, '\0', 0);
                 hotMsg(h.g, hotWARNING, "MarkToBase or MarkToMark error in %s. Glyph '%s' does not have an anchor point for a mark class that was used in a previous statement in the same lookup table. Setting the anchor point offset to 0. [previous at %s]",
                     h.g->error_id_text.c_str(), h.g->note.array, baseRec.locDesc.c_str());
             }
@@ -2034,11 +1872,9 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
     uint32_t numMarkGlyphs = 0;
     cac->coverageBegin();
     for (auto mc : si.markClassList) {
-        GNode *nextNode = mc.gnode;
-        while (nextNode != NULL) {
-            cac->coverageAddGlyph(nextNode->gid);
+        for (GID gid : mc.cr.glyphs) {
+            cac->coverageAddGlyph(gid);
             numMarkGlyphs++;
-            nextNode = nextNode->nextCl;
         }
     }
     MarkCoverage = cac->coverageEnd(); /* coverageEnd does the sort by GID */
@@ -2050,11 +1886,8 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
     MarkOffset = (Offset)size; /* offset from the start of the MarkToBase subtable */
     uint16_t i = 0;
     for (auto mc : si.markClassList) {
-        for (GNode *nextNode = mc.gnode; nextNode != NULL; nextNode = nextNode->nextCl) {
-            MarkRecords.emplace_back(nextNode->gid,
-                                     getAnchorOffset(nextNode->markClassAnchorInfo),
-                                     i);
-        }
+        for (auto &gr : mc.cr.glyphs)
+            MarkRecords.emplace_back(gr.gid, getAnchorOffset(gr.markClassAnchorInfo), i);
         i++;
     }
     size += sizeof(uint16_t) + (numMarkGlyphs * (2 * sizeof(uint16_t)));
@@ -2091,7 +1924,7 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
         for (auto &am : baseRec.anchorMarkInfo) {
             if (clo[am.markClassIndex] != 0xFFFFFFFFL) {
                 /*it has already been filled in !*/
-                featGlyphDump(h.g, baseRec.gid, '\0', 0);
+                h.g->ctx.feat->dumpGlyph(baseRec.gid, '\0', 0);
                 hotMsg(h.g, hotERROR, "MarkToLigature statement error in %s. Glyph '%s' contains a duplicate mark class assignment for one of the ligature components. [previous at %s]",
                     h.g->error_id_text.c_str(), h.g->note.array, baseRec.locDesc.c_str());
             } else {
@@ -2215,21 +2048,17 @@ void GPOS::MarkLigaturePos::write(OTL *h) {
 
 /* ------------------------ Cursive Attachment ------------------------ */
 
-void GPOS::addCursive(SubtableInfo &si, GNode *targ,
+void GPOS::addCursive(SubtableInfo &si, GPat::ClassRec &cr,
                      std::vector<AnchorMarkInfo> &anchorMarkInfo,
                      std::string &locDesc) {
-    GNode *nextNode = targ;
-
-    while (nextNode != NULL) {
+    for (GID gid : cr.glyphs) {
         BaseGlyphRec baseRec;
-        baseRec.gid = nextNode->gid;
+        baseRec.gid = gid;
 
         for (auto am : anchorMarkInfo)
             baseRec.anchorMarkInfo.push_back(am);
         baseRec.locDesc = locDesc;
         si.baseList.emplace_back(std::move(baseRec));
-
-        nextNode = nextNode->nextCl;
     }
 }
 
@@ -2242,7 +2071,7 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
     cac->coverageBegin();
     for (auto &baseRec : si.baseList) {
         if (prevRec && (prevRec->gid == baseRec.gid)) {
-            featGlyphDump(h.g, baseRec.gid, '\0', 0);
+            h.g->ctx.feat->dumpGlyph(baseRec.gid, '\0', 0);
             hotMsg(h.g, hotERROR, "Cursive statement error in %s. A previous statement has already referenced glyph '%s'. [current at %s, previous at %s]",
                        h.g->error_id_text.c_str(), h.g->note.array, baseRec.locDesc.c_str(), prevRec->locDesc.c_str());
         } else {

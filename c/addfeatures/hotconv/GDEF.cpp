@@ -96,8 +96,8 @@ void GDEFFree(hotCtx g) {
     g->ctx.GDEFp = nullptr;
 }
 
-void GDEF::GlyphClassTable::set(GNode *simple, GNode *ligature,
-                                GNode *mark, GNode *component, hotCtx g) {
+void GDEF::GlyphClassTable::set(GPat::ClassRec &simple, GPat::ClassRec &ligature,
+                                GPat::ClassRec &mark, GPat::ClassRec &component, hotCtx g) {
     // Mark is first because glyphs there take presidence.
     glyphClasses[0] = mark;
     glyphClasses[1] = simple;
@@ -108,47 +108,31 @@ void GDEF::GlyphClassTable::set(GNode *simple, GNode *ligature,
     bool hadConflictingClassDef {false};
 
     /* Check if the same glyph has ended up in more than one class, keep only first. */
-    int16_t i = -1;
-    for (auto &gc : glyphClasses) {
-        i++;
-        GNode *prev {NULL}, *cur {gc};
-        while (cur != NULL) {
-            auto [seeni, b] = seen.emplace(cur->gid, i);
+    for (int8_t i = 0; i < 4; i++) {
+        auto &glyphs = glyphClasses[i].glyphs;
+        uint16_t j = 0;
+        while (j < glyphs.size()) {
+            GID gid = glyphs[j];
+            auto [seeni, b] = seen.emplace(gid, i);
             if (!b) {
                 // Don't complain if overriding mark class
                 if (seeni->second != 0) {
                     hadConflictingClassDef = true;
                     if (g->convertFlags & HOT_VERBOSE) {
-                        featGlyphDump(g, cur->gid, 0, 0);
+                        g->ctx.feat->dumpGlyph(gid, 0, 0);
                         hotMsg(g, hotWARNING, "GDEF GlyphClass. Glyph '%s' "
                                "gid '%d'. glyph class '%s' overrides "
-                               "class '%s'.", g->note.array, cur->gid,
+                               "class '%s'.", g->note.array, gid,
                                names[seeni->second], names[i]);
                     }
                 }
-                if (prev == NULL) {
-                    if (gc->nextCl == NULL) {
-                        gc = NULL;
-                    } else {
-                        // some flags are set only in the head node
-                        gc->nextCl->flags |= gc->flags;  // XXX do we want the | here?
-                        gc = gc->nextCl;
-                    }
-                    cur->nextCl = NULL;
-                    featRecycleNodes(g, cur);
-                    cur = gc;
-                } else {
-                    prev->nextCl = prev->nextCl->nextCl;
-                    cur->nextCl = NULL;
-                    featRecycleNodes(g, cur);
-                    cur = prev->nextCl;
-                }
+                glyphs.erase(glyphs.begin() + j);
             } else {
-                prev = cur;
-                cur = cur->nextCl;
+                j++;
             }
         }
     }
+
     if (hadConflictingClassDef && (g->convertFlags & HOT_VERBOSE)) {
         hotMsg(g, hotWARNING, "GDEF Glyph Class. Since there were conflicting "
                "GlyphClass assignments, you should examine this GDEF table, "
@@ -157,7 +141,7 @@ void GDEF::GlyphClassTable::set(GNode *simple, GNode *ligature,
     }
 }
 
-uint16_t GDEF::MarkSetFilteringTable::add(GNode *markClassNode) {
+uint16_t GDEF::MarkSetFilteringTable::add(GPat::ClassRec &&markClassNode) {
     uint16_t i = 0;
     for (auto markNode : markSetClasses) {
         if (markClassNode == markNode)
@@ -165,12 +149,12 @@ uint16_t GDEF::MarkSetFilteringTable::add(GNode *markClassNode) {
         i++;
     }
 
-    markSetClasses.emplace_back(markClassNode);
+    markSetClasses.emplace_back(std::move(markClassNode));
     return (uint16_t) (markSetClasses.size() - 1);
 }
 
 // GDEF MarkAttachment class index starts at 1, not 0.
-uint16_t GDEF::MarkAttachClassTable::add(GNode *markClassNode) {
+uint16_t GDEF::MarkAttachClassTable::add(GPat::ClassRec &&markClassNode) {
     uint16_t i = 0;
     for (auto markNode : glyphClasses) {
         if (markClassNode == markNode)
@@ -182,14 +166,14 @@ uint16_t GDEF::MarkAttachClassTable::add(GNode *markClassNode) {
     if (cnt > kMaxMarkAttachClasses)
         return kMaxMarkAttachClasses + 1;
 
-    glyphClasses.emplace_back(markClassNode);
+    glyphClasses.emplace_back(std::move(markClassNode));
     return cnt + 1;
 }
 
-bool GDEF::AttachTable::add(GNode *glyphNode, uint16_t contour) {
+bool GDEF::AttachTable::add(GID gid, uint16_t contour) {
     /* See if we can find matching GID entry in the attach point list.*/
     for (auto &ae : attachEntries) {
-        if (ae.gid != glyphNode->gid)
+        if (ae.gid != gid)
             continue;
         /* Check if the contour is already in the list. */
         for (auto ci : ae.contourIndices)
@@ -198,24 +182,24 @@ bool GDEF::AttachTable::add(GNode *glyphNode, uint16_t contour) {
         ae.contourIndices.emplace_back(contour);
         return false;
     }
-    AttachEntry ae {glyphNode->gid};
+    AttachEntry ae {gid};
     ae.contourIndices.emplace_back(contour);
     attachEntries.emplace_back(std::move(ae));
     return false;
 }
 
-void GDEF::LigCaretTable::add(GNode *glyphNode, std::vector<uint16_t> &caretValues,
+void GDEF::LigCaretTable::add(GID gid, std::vector<uint16_t> &caretValues,
                               uint16_t format, hotCtx g) {
     /* First, make sure that there is not another LGE for the same glyph
      We don't yet support format 3. */
     for (auto &lge : ligCaretEntries) {
-        if (lge.gid == glyphNode->gid) {
-            featGlyphDump(g, lge.gid, 0, 0);
+        if (lge.gid == gid) {
+            g->ctx.feat->dumpGlyph(lge.gid, 0, 0);
             hotMsg(g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature glyph entry. Skipping entry for format '%d'.", g->note.array, lge.gid, format);
             return;
         }
     }
-    LigGlyphEntry lge {glyphNode->gid, format};
+    LigGlyphEntry lge {gid, format};
 
     for (auto cv : caretValues)
         lge.caretTables.emplace_back(cv, format);
@@ -228,18 +212,17 @@ Offset GDEF::GlyphClassTable::fill(hotCtx g, Offset o) {
      * First glyph class is class index 1. */
     assert(o);
     int i = -1;
-    for (auto &gc : glyphClasses) {
+    for (int j = 0; j < 4; j++) {
+        auto &gc = glyphClasses[j];
         i++;
-        if (gc == NULL)
+        if (gc.glyphs.size() == 0)
             continue;
         if (!offset) {
             offset = o;
             cac.classBegin();
         }
-        for (GNode *p = gc; p != NULL; p = p->nextCl)
-            cac.classAddMapping(p->gid, classIDmap[i]);
-        featRecycleNodes(g, gc); /* Don't need this class any more*/
-        gc = NULL;
+        for (GID gid : gc.glyphs)
+            cac.classAddMapping(gid, classIDmap[i]);
     }
     if (offset) {
         cac.classEnd();
@@ -308,21 +291,21 @@ void GDEF::MarkAttachClassTable::validate(hotCtx g) {
     std::unordered_map<GID, const char *> seen;
 
     /* Check and warn if the same glyph has ended up in more than one class */
-    for (auto gc : glyphClasses) {
-        const char *className = gc->markClassName;
+    for (auto &gc : glyphClasses) {
+        const char *className = gc.markClassName.c_str();
         if (className == NULL)
             className = "[unnamed mark attachment class]";
 
-        for (GNode *p = gc; p != NULL; p = p->nextCl) {
-            auto [seeni, b] = seen.emplace(p->gid, className);
+        for (GID gid : gc.glyphs) {
+            auto [seeni, b] = seen.emplace(gid, className);
             if (!b) {
                 hadConflictingClassDef = true;
                 if (g->convertFlags & HOT_VERBOSE) {
-                    featGlyphDump(g, p->gid, 0, 0);
+                    g->ctx.feat->dumpGlyph(gid, 0, 0);
                     hotMsg(g, hotWARNING,
                            "GDEF MarkAttachment. Glyph '%s' gid '%d'. "
                            "previous glyph class '%s' conflicts with new "
-                           "class '%s'.", g->note.array, p->gid,
+                           "class '%s'.", g->note.array, g,
                            seeni->second, className);
                 }
             }
@@ -341,40 +324,17 @@ Offset GDEF::MarkAttachClassTable::fill(hotCtx g, Offset o) {
         return 0;
 
     offset = o;
-    // Copy Sort the glyph classes.
-    for (auto &srcNode : glyphClasses) {
-        if (srcNode == NULL) {
-            continue;
-        }
-
-        /* The mark attach glyph classes are all named classes. Named class */
-        /* glyphs get recycled when hashFree() is called, so we need to     */
-        /* make a copy of these classes here, and recycle the copy after    */
-        /* use. This is because we delete glyphs from within the class      */
-        /* lists to eliminate duplicates. If we operate on a named class    */
-        /* list, then any deleted duplicated glyphs gets deleted again when */
-        /* hashFree() is called. Also, the hash element head points to the  */
-        /* original first glyph, which may be sorted further down the list. */
-        GNode *headNode;
-        featGlyphClassCopy(g, &headNode, srcNode);
-        featGlyphClassSort(g, &headNode, 1, 1);
-        srcNode = headNode;
-    }
+    for (auto &gc : glyphClasses)
+        gc.makeUnique(g, true);
 
     validate(g);
     // Add the to the OTL table.
     cac.classBegin();
     int i = -1;
-    for (auto &srcNode : glyphClasses) {
+    for (auto &cr : glyphClasses) {
         i++;
-        if (srcNode == NULL)
-            continue;
-
-        for (GNode *p = srcNode; p != NULL; p = p->nextCl)
-            cac.classAddMapping(p->gid, i + 1);
-
-        featRecycleNodes(g, srcNode); /* Don't need this class any more*/
-        srcNode = NULL;
+        for (GID gid : cr.glyphs)
+            cac.classAddMapping(gid, i + 1);
     }
     cac.classEnd();
     return cac.classSize();
@@ -388,20 +348,20 @@ Offset GDEF::MarkSetFilteringTable::fill(hotCtx g, Offset o) {
     offset = o;
     Offset sz = (Offset)size(cnt);
     markSetTableFormat = 1;
-    for (auto &srcNode : markSetClasses) {
+    for (auto &cr : markSetClasses) {
         MarkSetEntry mse {g};
         auto &cac = mse.cac;
 
         cac.coverageBegin();
-        for (GNode *p = srcNode; p != NULL; p = p->nextCl)
-            cac.coverageAddGlyph(p->gid, true);
+        for (GID gid : cr.glyphs)
+            cac.coverageAddGlyph(gid, true);
         cac.coverageEnd();
 
         mse.MarkSetCoverage = sz;
         sz += (Offset)cac.coverageSize();
         markSetEntries.emplace_back(std::move(mse));
-        srcNode = NULL;   // XXX Figure out memory use later
     }
+    markSetClasses.clear();
     return sz;
 }
 

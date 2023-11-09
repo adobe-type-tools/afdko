@@ -9,6 +9,7 @@
 
 #include <cassert>
 #include <algorithm>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -27,41 +28,6 @@ int GSUBFill(hotCtx g) {
 }
 
 int GSUB::Fill() {
-    /* Add OTL features */
-
-    /* The font tables are in the order:
-     ScriptList
-     FeatureList
-     FeatureParams
-     LookupList
-     lookup subtables (with aalt subtables written last)
-     anon subtables (lookup subtables created by contextual rules)
-     coverage definition tables
-     class definition tables
-     extension sections.
-     Notes:
-     All directly defined lookup subtables are added in the order that they are
-     created by the feature file. The only exceptions are the subtables for
-     the aalt lookups, and anonymous subtables. 'aalt'subtables' are created
-     after the end of feature file parsing, in feat.c:featFill(), since the
-     aalt feature references can be used only after all the other features are
-     defined. Anonymous subtables, those implied by contextual rules rather
-     than being explicitly defined, are added at the end of the subtable list,
-     in createAnonLookups() above.
-
-     coverage and class subtables are seperately accumulated in otlTable
-     t->coverage.tables and t->class.tables, and are written after all the
-     lookup subtables, first coverage, then class subtables.
-
-     For featparams and lookup subtables, there are two parallel sets of arrays
-     of subtables. The GSUB arrays (h->*) contain the actual data to be
-     written, and is where the offsets are set. The other set is in the otl
-     table, and exists so that the GPOS and GSUB can share code for ordering
-     and writing feature and lookup indices. The latter inherit offset and
-     other data from the GSUB arrays. The GSUB arrays are created when the
-     feature file is processed, by all the fill* functions.  The otl table
-     arrays are created below.
-    */
     return fillOTL(g->convertFlags & HOT_ALLOW_STUB_GSUB);
 }
 
@@ -84,6 +50,28 @@ void GSUBFree(hotCtx g) {
 }
 
 /* ------------------------ Supplementary Functions ------------------------ */
+
+#define DUMP_CH(ch, print)             \
+    do {                               \
+        if (print)                     \
+            fprintf(stderr, "%c", ch); \
+        else                           \
+            *dnaNEXT(g->note) = (ch);  \
+    } while (0)
+
+void GSUB::LigatureTarg::dumpAsPattern(hotCtx g, int ch, bool print) const {
+    DUMP_CH('{', print);
+    bool first = true;
+    for (auto &gid : gids) {
+        if (!first)
+            DUMP_CH(' ', print);
+        first = false;
+        g->ctx.feat->dumpGlyph(gid, -1, print);
+    }
+    DUMP_CH('}', print);
+    if (ch >= 0)
+        DUMP_CH(ch, print);
+}
 
 /* Begin new feature (can be called multiple times for same feature) */
 
@@ -110,7 +98,7 @@ static void rulesDump(hotCtx g, GSUB::SubtableInfo &si) {
         auto &rule = si.rules[i];
 
         fprintf(stderr, "  [%d] ", i);
-        featPatternDump(g, rule.targ, ' ', 1);
+        g->ctx.feat->dumpPattern(rule.targ, ' ', 1);
     }
 }
 
@@ -198,34 +186,35 @@ void GSUB::FeatureEnd() {
 
 /* Add rule (enumerating if necessary) to subtable si */
 
-void GSUB::addSubstRule(SubtableInfo &si, GNode *targ, GNode *repl) {
+void GSUB::addSubstRule(SubtableInfo &si, GPat *targ, GPat *repl) {
 #if HOT_DEBUG
     if (DF_LEVEL(g) >= 2) {
         DF(2, (stderr, "  * GSUB RuleAdd "));
-        featPatternDump(g, targ, ' ', 1);
+        g->ctx.feat->dumpPattern(targ, ' ', 1);
         if (repl != NULL) {
-            featPatternDump(g, repl, '\n', 1);
+            g->ctx.feat->dumpPattern(repl, '\n', 1);
         }
     }
 #endif
 
     /* Add rule(s), enumerating if not supported by the OT format */
     if (si.lkpType == GSUBSingle) {
-        GNode *r = repl, *t = targ;
-        for (; t != NULL; t = t->nextCl) {
-            auto [i, b] = si.singles.insert({t->gid, r->gid});
+        auto &rglyphs = repl->classes[0].glyphs;
+        auto ri = rglyphs.begin();
+        for (GID tg : targ->classes[0].glyphs) {
+            auto [i, b] = si.singles.emplace(tg, ri->gid);
             if (!b) {
-                if (i->second == r->gid) {
-                    featGlyphDump(g, t->gid, ',', 0);
+                if (i->second == ri->gid) {
+                    g->ctx.feat->dumpGlyph(tg, ',', 0);
                     *dnaNEXT(g->note) = ' ';
-                    featGlyphDump(g, r->gid, '\0', 0);
+                    g->ctx.feat->dumpGlyph(ri->gid, '\0', 0);
                     hotMsg(g, hotNOTE,
                            "Removing duplicate single substitution "
                            "in %s: %s",
                            g->error_id_text.c_str(),
                            g->note.array);
                 } else {
-                    featGlyphDump(g, t->gid, '\0', 0);
+                    g->ctx.feat->dumpGlyph(tg, '\0', 0);
                     hotMsg(g, hotFATAL,
                            "Duplicate target glyph for single "
                            "substitution in %s: %s",
@@ -233,39 +222,40 @@ void GSUB::addSubstRule(SubtableInfo &si, GNode *targ, GNode *repl) {
                 }
             }
             // If repl is a glyph use it for all entries in targ
-            if (r->nextCl != nullptr)
-                r = r->nextCl;
+            if (rglyphs.size() > 1)
+                ri++;
         }
-        featRecycleNodes(g, targ);
-        featRecycleNodes(g, repl);
+        delete targ;
+        delete repl;
         return;
     } else if (si.lkpType == GSUBLigature) {
-        uint32_t length = featGetPatternLen(g, targ);
-        GNode *t;
-        for (t = targ; t != NULL; t = t->nextSeq) {
-            if (t->nextCl != NULL) {
-                break;
-            }
-        }
-
-        if (t != NULL) {
-            uint16_t i;
-            uint32_t nSeq;
-            GNode **prod = featMakeCrossProduct(g, targ, &nSeq);
-
-            featRecycleNodes(g, targ);
-            for (i = 0; i < nSeq; i++) {
-#if HOT_DEBUG
-                if (DF_LEVEL(g) >= 2) {
-                    fprintf(stderr, "               > ");
-                    featPatternDump(g, prod[i], '\n', 1);
+        assert(repl->is_glyph());
+        auto rgid = repl->classes[0].glyphs[0].gid;
+        std::vector<GPat::ClassRec*> tcp;
+        for (auto &cr : targ->classes)
+            tcp.push_back(&cr);
+        GPat::CrossProductIterator cpi {tcp};
+        std::vector<GID> gids;
+        while (cpi.next(gids)) {
+            auto [i, b] = si.ligatures.emplace(std::move(gids), rgid);
+            if (!b) {
+                if (i->second == rgid) {
+                    i->first.dumpAsPattern(g, ' ', false);
+                    *dnaNEXT(g->note) = ' ';
+                    g->ctx.feat->dumpGlyph(rgid, '\0', 0);
+                    hotMsg(g, hotNOTE,
+                           "Removing duplicate ligature substitution "
+                           "in %s: %s",
+                           g->error_id_text.c_str(),
+                           g->note.array);
+                } else {
+                    i->first.dumpAsPattern(g, '\0', false);
+                    hotMsg(g, hotFATAL,
+                           "Duplicate target sequence but different replacement "
+                           "glyphs in ligature substitutions in %s: %s",
+                           g->error_id_text.c_str(), g->note.array);
                 }
-#endif
-                si.rules.emplace_back(prod[i], i == 0 ? repl : featSetNewNode(g, repl->gid), length);
             }
-            return;
-        } else {
-            si.rules.emplace_back(targ, repl, length);
         }
     } else {
         /* Add whole rule intact (no enumeration needed) */
@@ -273,9 +263,7 @@ void GSUB::addSubstRule(SubtableInfo &si, GNode *targ, GNode *repl) {
     }
 }
 
-/* Stores input GNodes; they are recycled at GSUBLookupEnd. */
-
-void GSUB::RuleAdd(GNode *targ, GNode *repl) {
+void GSUB::RuleAdd(GPat *targ, GPat *repl) {
     if (g->hadError)
         return;
 
@@ -478,8 +466,8 @@ void GSUB::SingleSubst::Format2::write(OTL *h) {
     OUT2(subformat());
     OUT2((Offset)(Coverage));
     OUT2((uint16_t)gids.size());
-    for (auto g : gids)
-        OUT2((GID)g);
+    for (auto gid : gids)
+        OUT2((GID)gid);
 
     if (isExt())
         cac->coverageWrite();
@@ -506,10 +494,15 @@ GSUB::MultipleSubst::MultipleSubst(GSUB &h, SubtableInfo &si, int64_t beg,
         auto &rule = si.rules[i + beg];
         MultSequence seq;
 
-        cac->coverageAddGlyph(rule.targ->gid);
+        assert(rule.targ->is_glyph());
+        cac->coverageAddGlyph(rule.targ->classes[0].glyphs[0].gid);
 
-        for (GNode *node = rule.repl; node != NULL; node = node->nextSeq)
-            seq.gids.push_back(node->gid);
+        if (rule.repl != nullptr) {
+            for (auto &cr : rule.repl->classes) {
+                assert(cr.glyphs.size() == 1);
+                seq.gids.push_back(cr.glyphs[0].gid);
+            }
+        }
 
         seq.offset = offst;
         offst += seq.size();
@@ -539,23 +532,6 @@ GSUB::MultipleSubst::MultipleSubst(GSUB &h, SubtableInfo &si, int64_t beg,
     h.updateMaxContext(1);
 }
 
-#if 0
-/* Dump accumulated aalt rules */
-static void aaltDump(GSUB &h, GSUB::SubtableInfo &si) {
-    if (si.feature == aalt_) {
-        fprintf(stderr, "--- aalt GSUBAlternate --- %ld rules\n",
-                si.rules.size());
-        for (auto &rule : si.rules) {
-            fprintf(stderr, "sub ");
-            featGlyphDump(h.g, rule.targ->gid, -1, 1);
-            fprintf(stderr, " from ");
-            featPatternDump(h.g, rule.repl, '\n', 1);
-        }
-    }
-}
-
-#endif
-
 /* Fill the currently accumulated alternate substitution subtable, auto-
    breaking into several subtables if needed. */
 
@@ -564,15 +540,12 @@ void GSUB::MultipleSubst::fill(GSUB &h, SubtableInfo &si) {
     uint32_t nSubs = 0;
 
     std::sort(si.rules.begin(), si.rules.end());
-#if 0
-    aaltDump(h, si);
-#endif
     int i = 0;
     for (size_t j = 0; j < si.rules.size(); j++) {
         auto &rule = si.rules[j];
         /* Check for duplicates */
-        if (j != 0 && rule.targ->gid == si.rules[j-1].targ->gid) {
-            featGlyphDump(h.g, rule.targ->gid, '\0', 0);
+        if (j != 0 && rule.targ->classes[0].glyphs[0] == si.rules[j-1].targ->classes[0].glyphs[0]) {
+            h.g->ctx.feat->dumpGlyph(rule.targ->classes[0].glyphs[0].gid, '\0', 0);
             hotMsg(h.g, hotFATAL,
                    "Duplicate target glyph for multiple substitution in "
                    "%s: %s",
@@ -582,9 +555,7 @@ void GSUB::MultipleSubst::fill(GSUB &h, SubtableInfo &si) {
 
         /* Calculate nw size if this rule were included: */
         uint32_t nSubsNew = nSubs;
-        for (GNode *node = rule.repl; node != NULL; node = node->nextSeq)
-            nSubsNew++;
-
+        nSubsNew += rule.repl != nullptr ? rule.repl->patternLen() : 0;
         int32_t sizeNew = size(j - i + 1, nSubsNew);
 
         if (sizeNew > 0xFFFF) {
@@ -618,8 +589,8 @@ void GSUB::MultipleSubst::write(OTL *h) {
         OUT2((uint16_t)seq.offset);
     for (auto &seq : sequences) {
         OUT2((uint16_t)seq.gids.size());
-        for (auto g : seq.gids)
-            OUT2(g);
+        for (auto gid : seq.gids)
+            OUT2(gid);
     }
 
     if (isExt())
@@ -652,11 +623,12 @@ GSUB::AlternateSubst::AlternateSubst(GSUB &h, SubtableInfo &si,
         auto &rule = si.rules[i + beg];
         AlternateSet altSet;
 
-        cac->coverageAddGlyph(rule.targ->gid);
+        assert(rule.targ->is_glyph());
+        cac->coverageAddGlyph(rule.targ->classes[0].glyphs[0].gid);
 
         /* --- Fill an AlternateSet --- */
-        for (GNode *node = rule.repl; node != NULL; node = node->nextCl)
-            altSet.gids.push_back(node->gid);
+        for (GID gid : rule.repl->classes[0].glyphs)
+            altSet.gids.push_back(gid);
 
         altSet.offset = offst;
         offst += altSet.size();
@@ -703,8 +675,8 @@ void GSUB::AlternateSubst::fill(GSUB &h, SubtableInfo &si) {
         auto &rule = si.rules[j];
 
         /* Check for duplicates */
-        if (j != 0 && rule.targ->gid == si.rules[j-1].targ->gid) {
-            featGlyphDump(h.g, rule.targ->gid, '\0', 0);
+        if (j != 0 && rule.targ->classes[0].glyphs[0] == si.rules[j-1].targ->classes[0].glyphs[0]) {
+            h.g->ctx.feat->dumpGlyph(rule.targ->classes[0].glyphs[0].gid, '\0', 0);
             hotMsg(h.g, hotFATAL,
                    "Duplicate target glyph for alternate substitution in "
                    "%s: %s",
@@ -714,8 +686,7 @@ void GSUB::AlternateSubst::fill(GSUB &h, SubtableInfo &si) {
 
         /* Calculate new size if this rule were included: */
         uint32_t numAltsNew = numAlts;
-        for (GNode *node = rule.repl; node != NULL; node = node->nextCl)
-            numAltsNew++;
+        numAltsNew += rule.repl->classSize();
         long sizeNew = size(j - i + 1, numAltsNew);
 
         if (sizeNew > 0xFFFF) {
@@ -748,8 +719,8 @@ void GSUB::AlternateSubst::write(OTL *h) {
         OUT2((uint16_t)set.offset);
     for (auto &set : altSets) {
         OUT2((uint16_t)set.gids.size());
-        for (auto g : set.gids)
-            OUT2(g);
+        for (auto gid : set.gids)
+            OUT2(gid);
     }
 
     if (isExt())
@@ -758,115 +729,38 @@ void GSUB::AlternateSubst::write(OTL *h) {
 
 /* ------------------------- Ligature Substitution ------------------------- */
 
-/* Sort by targ's first gid, targ's length (decr), then all of targ's GIDs.
-   Deleted duplicates (targ == NULL) sink to the bottom */
-
-bool GSUB::SubstRule::cmpLigature(const GSUB::SubstRule &a, const GSUB::SubstRule &b) {
-    if (a.targ->gid != b.targ->gid)
-        return a.targ->gid < b.targ->gid;
-    else if (a.data != b.data)
-        return a.data > b.data;   // Longer patterns sort earlier
-    else {
-        // Lengths have to be the same now
-        GNode *ga = a.targ, *gb = b.targ;
-        for (; ga != NULL; ga = ga->nextSeq, gb = gb->nextSeq) {
-            if (ga->gid != gb->gid)
-                return ga->gid < gb->gid;
-        }
-    }
-    return false;
-}
-
-/* Check for duplicate ligatures; sort */
-
-void GSUB::LigatureSubst::checkAndSort(GSUB &h, SubtableInfo &si) {
-    std::sort(si.rules.begin(), si.rules.end(), SubstRule::cmpLigature);
-
-    size_t i = 1;
-    while (i < si.rules.size()) {
-        SubstRule &curr = si.rules[i];
-        SubstRule &prev = si.rules[i-1];
-
-        if (!SubstRule::cmpLigature(curr, prev) &&
-            !SubstRule::cmpLigature(prev, curr)) {
-            if (curr.repl->gid == prev.repl->gid) {
-                featPatternDump(h.g, curr.targ, ',', 0);
-                *dnaNEXT(h.g->note) = ' ';
-                featGlyphDump(h.g, curr.repl->gid, '\0', 0);
-                hotMsg(h.g, hotNOTE,
-                       "Removing duplicate ligature substitution"
-                       " in %s: %s",
-                       h.g->error_id_text.c_str(),
-                       h.g->note.array);
-
-                /* Set prev duplicates to NULL */
-                featRecycleNodes(h.g, curr.targ);
-                featRecycleNodes(h.g, prev.repl);
-            } else {
-                featPatternDump(h.g, curr.targ, '\0', 0);
-                hotMsg(h.g, hotFATAL,
-                       "Duplicate target sequence but different "
-                       "replacement glyphs in ligature substitutions in "
-                       "%s: %s",
-                       h.g->error_id_text.c_str(),
-                       h.g->note.array);
-            }
-            si.rules.erase(si.rules.begin() + i);
-        } else {
-            i++;
-        }
-    }
-}
-
-/* Fill ligature substitution subtable */
-
 GSUB::LigatureSubst::LigatureSubst(GSUB &h, SubtableInfo &si) : Subtable(h, si) {
-    unsigned nLigSets = 0;
-
-#if 0
-    fprintf(stderr, "--- Final sorted lig list (%ld els): \n",
-            si.rules.cnt);
-    rulesDump(h.g, si);
-#endif
-
+    LigatureSet ligSet;
+    int32_t lastgid = -1;
     cac->coverageBegin();
-    for (size_t i = 0; i < si.rules.size(); i++) {
-        SubstRule &curr = si.rules[i];
-
-        if (i == 0 || curr.targ->gid != si.rules[i-1].targ->gid) {
-            nLigSets++;
-            cac->coverageAddGlyph(curr.targ->gid);
-        }
-    }
-    LOffset offst = headerSize(nLigSets);
-
-    int iLigSet = 0;
-    for (size_t i = 1; i <= si.rules.size(); i++) {
-        if (i == si.rules.size() || si.rules[i].targ->gid != (si.rules[i - 1]).targ->gid) {
-            /* --- Fill a LigatureSet --- */
-            LigatureSet ligSet;
-            LOffset offLig = ligSet.size(i - iLigSet);
-
-            for (size_t k = iLigSet; k < i; k++) {
-                /* --- Fill a Ligature --- */
-                auto &rule = si.rules[k];
-                LigatureGlyph lg;
-
-                lg.ligGlyph = rule.repl->gid;
-
-                for (GNode *node = rule.targ->nextSeq; node != NULL;
-                     node = node->nextSeq)
-                    lg.components.push_back(node->gid);
-                lg.offset = offLig;
-                offLig += lg.size();
-                h.updateMaxContext(lg.size());
-                ligSet.ligatures.emplace_back(std::move(lg));
+    // Add coverage and populate ligatureSets (without offsets)
+    for (auto [l, rg] : si.ligatures) {
+        GID gid = l.gids[0];
+        if (gid != lastgid) {
+            if (lastgid != -1) {
+                ligatureSets.emplace_back(std::move(ligSet));
+                ligSet.reset();
             }
-            ligSet.offset = offst;
-            ligatureSets.emplace_back(std::move(ligSet));
-            offst += offLig;
-            iLigSet = i;
+            cac->coverageAddGlyph(gid);
+            lastgid = gid;
         }
+        LigatureGlyph lg {rg};
+        lg.components.insert(lg.components.begin(), l.gids.begin() + 1, l.gids.end());
+        h.updateMaxContext(lg.components.size() + 1);
+        ligSet.ligatures.emplace_back(std::move(lg));
+    }
+    ligatureSets.emplace_back(std::move(ligSet));
+
+    // Calculate offsets
+    LOffset offst = headerSize(ligatureSets.size());
+    for (auto &ls : ligatureSets) {
+        LOffset offLig = ls.size();
+        for (auto &lg : ls.ligatures) {
+            lg.offset = offLig;
+            offLig += lg.size();
+        }
+        ls.offset = offst;
+        offst += offLig;
     }
 
     h.checkOverflow("lookup subtable", offst, "ligature substitution");
@@ -880,8 +774,6 @@ GSUB::LigatureSubst::LigatureSubst(GSUB &h, SubtableInfo &si) : Subtable(h, si) 
 }
 
 void GSUB::LigatureSubst::fill(GSUB &h, SubtableInfo &si) {
-    checkAndSort(h, si);
-
     h.AddSubtable(std::move(std::make_unique<LigatureSubst>(h, si)));
 }
 
@@ -903,8 +795,8 @@ void GSUB::LigatureSubst::write(OTL *h) {
         for (auto &l : ls.ligatures) {
             OUT2(l.ligGlyph);
             OUT2((uint16_t)l.components.size() + 1);  // first component in Coverage
-            for (auto g : l.components)
-                OUT2(g);
+            for (auto gid : l.components)
+                OUT2(gid);
         }
     }
 
@@ -914,109 +806,72 @@ void GSUB::LigatureSubst::write(OTL *h) {
 
 /* ------------------ Chaining Contextual Substitution --------------------- */
 
-void GSUB::recycleProd(GNode **prod, int count) {
-    for (int i = 0; i < count; i++)
-        featRecycleNodes(g, prod[i]);
-}
-
 /* Tries to add rule to current anon subtbl. If successful, returns 1, else 0.
    If rule already exists in subtbl, recycles targ and repl */
 
-bool GSUB::addSingleToAnonSubtbl(SubtableInfo &si, GNode *targ, GNode *repl) {
-    GNode *t = targ;
-    GNode *r = repl;
+bool GSUB::addSingleToAnonSubtbl(SubtableInfo &si, GPat::ClassRec &tcr,
+                                 GPat::ClassRec &rcr) {
     std::map<GID, GID> needed;
 
     assert(si.lkpType == GSUBSingle);
     /* Determine which rules already exist in the subtable */
-    for (; t != NULL; t = t->nextCl) {
-        t->flags &= ~FEAT_MISC; /* Clear "found" flag */
-        auto i = si.singles.find(t->gid);
+    auto ri = rcr.glyphs.begin();
+    for (GID tg : tcr.glyphs) {
+        auto i = si.singles.find(tg);
         if (i != si.singles.end()) {
-            if (i->second != r->gid)
+            if (i->second != ri->gid)
                 return false;
         } else {
             // XXX warn about dups?
-            needed.insert({t->gid, r->gid});
+            needed.insert({tg, ri->gid});
         }
-        if (r->nextCl != nullptr)
-            r = r->nextCl;
+        if (rcr.glyphs.size() > 1)
+            ri++;
     }
 
     for (auto [tgid, rgid] : needed)
-        si.singles.insert({tgid, rgid});
-
-    featRecycleNodes(g, targ);
-    featRecycleNodes(g, repl);
+        si.singles.emplace(tgid, rgid);
 
     return true;
 }
 
-bool GSUB::addLigatureToAnonSubtbl(SubtableInfo &si, GNode *targ, GNode *repl) {
-    uint32_t nSeq;
+bool GSUB::addLigatureToAnonSubtbl(SubtableInfo &si, GPat *targ, GPat *repl) {
+    assert(repl->is_glyph());
+    auto rgid = repl->classes[0].glyphs[0].gid;
 
-    assert(si.lkpType == GSUBLigature);
-    GNode **prod = featMakeCrossProduct(g, targ, &nSeq);
+    std::vector<GPat::ClassRec*> tcp;
+    for (auto &cr : targ->classes)
+        tcp.push_back(&cr);
+    GPat::CrossProductIterator cpi {tcp};
+    std::vector<GID> gids;
+    std::set<LigatureTarg> needed;
 
-    for (uint32_t i = 0; i < nSeq; i++) {
-        GNode *t = prod[i];
-
-        t->flags &= ~FEAT_MISC; /* Clear "found" flag */
-        for (auto &rule : si.rules) {
-            if (t->gid != rule.targ->gid)
-                continue;
-
-            GNode *pI = t;
-            GNode *pJ = rule.targ;
-
-            for (; pI->nextSeq != NULL && pJ->nextSeq != NULL &&
-                   pI->nextSeq->gid == pJ->nextSeq->gid;
-                 pI = pI->nextSeq, pJ = pJ->nextSeq) {
-            }
-            /* pI and pJ now point at the last identical node */
-
-            if (pI->nextSeq == NULL && pJ->nextSeq == NULL) {
-                /* Identical targets */
-                if (repl->gid == rule.repl->gid) {
-                    /* Identical targ and repl */
-                    t->flags |= FEAT_MISC;
-                    continue;
-                } else {
-                    recycleProd(prod, nSeq);
-                    return false;
-                }
-            } else if (pI->nextSeq == NULL || pJ->nextSeq == NULL) {
-                /* One is a subset of the other */
-                recycleProd(prod, nSeq);
+    while (cpi.next(gids)) {
+        LigatureTarg lt {std::move(gids)};
+        auto i = si.ligatures.find(lt);
+        if (i != si.ligatures.end()) {
+            if (i->second != rgid)
                 return false;
-            }
+        } else {
+            // XXX What about dups?
+            needed.insert(std::move(lt));
         }
     }
 
-    /* Add any rules that were not found */
-    featRecycleNodes(g, targ);
-    for (uint32_t i = 0; i < nSeq; i++) {
-        GNode *t = prod[i];
-        if (!(t->flags & FEAT_MISC)) {
-            addSubstRule(si, t, featSetNewNode(g, repl->gid));
-        } else {
-            featRecycleNodes(g, t);
-        }
-    }
-    featRecycleNodes(g, repl);
+    for (auto &lt : needed)
+        si.ligatures.emplace(lt, rgid);
+
     return true;
 }
 
 /* Add the "anonymous" rule that occurs in a substitution within a chaining
    contextual rule. Return the label of the anonymous lookup */
 
-Label GSUB::addAnonRule(SubtableInfo &cur_si, GNode *pMarked, uint32_t nMarked, GNode *repl) {
-    GNode *targCp;
-    GNode *replCp;
+Label GSUB::addAnonRule(SubtableInfo &cur_si, GPat *targ, GPat *repl) {
     int lkpType;
 
-    if (nMarked == 1) {
-        if (repl->nextSeq != NULL) {
+    if (targ->patternLen() == 1) {
+        if (repl->patternLen() > 1) {
             lkpType = GSUBMultiple;
         } else {
             lkpType = GSUBSingle;
@@ -1025,19 +880,22 @@ Label GSUB::addAnonRule(SubtableInfo &cur_si, GNode *pMarked, uint32_t nMarked, 
         lkpType = GSUBLigature;
     }
 
-    /* Make copies in targCp, replCp */
-    featPatternCopy(g, &targCp, pMarked, nMarked);
-    featPatternCopy(g, &replCp, repl, -1);
-
     if (anonSubtable.size() > 0) {
         auto &si = anonSubtable.back();
         if ((si.lkpType == lkpType) && (si.lkpFlag == cur_si.lkpFlag) &&
             (si.markSetIndex == cur_si.markSetIndex) &&
             (si.parentFeatTag == cur_si.feature)) {
-            if (lkpType == GSUBSingle && addSingleToAnonSubtbl(si, targCp, replCp))
+            if (lkpType == GSUBSingle &&
+                addSingleToAnonSubtbl(si, targ->classes[0], repl->classes[0])) {
+                delete targ;
+                delete repl;
                 return si.label;
-            else if (lkpType == GSUBLigature && addLigatureToAnonSubtbl(si, targCp, replCp))
+            } else if (lkpType == GSUBLigature &&
+                       addLigatureToAnonSubtbl(si, targ, repl)) {
+                delete targ;
+                delete repl;
                 return si.label;
+            }
         }
     }
 
@@ -1049,11 +907,11 @@ Label GSUB::addAnonRule(SubtableInfo &cur_si, GNode *pMarked, uint32_t nMarked, 
     asi.lkpType = lkpType;
     asi.lkpFlag = cur_si.lkpFlag;
     asi.markSetIndex = cur_si.markSetIndex;
-    asi.label = featGetNextAnonLabel(g);
+    asi.label = g->ctx.feat->getNextAnonLabel();
     asi.parentFeatTag = nw.feature;
     asi.useExtension = cur_si.useExtension;
 
-    addSubstRule(asi, targCp, replCp);
+    addSubstRule(asi, targ, repl);
 
     anonSubtable.emplace_back(std::move(asi));
 
@@ -1080,14 +938,19 @@ void GSUB::createAnonLookups() {
         if (DF_LEVEL(g) >= 2) {
             for (auto [t, r] : si.singles) {
                 DF(2, (stderr, "  * GSUB RuleAdd "));
-                featGlyphDump(g, t, ' ', true);
-                featGlyphDump(g, r, '\n', true);
+                g->ctx.feat->dumpGlyph(t, ' ', true);
+                g->ctx.feat->dumpGlyph(r, '\n', true);
+            }
+            for (auto [l, r] : si.ligatures) {
+                DF(2, (stderr, "  * GSUB RuleAdd "));
+                l.dumpAsPattern(g, ' ', true);
+                g->ctx.feat->dumpGlyph(r, '\n', true);
             }
             for (auto &rule : si.rules) {
                 DF(2, (stderr, "  * GSUB RuleAdd "));
-                featPatternDump(g, rule.targ, ' ', 1);
+                g->ctx.feat->dumpPattern(rule.targ, ' ', 1);
                 if (rule.repl != NULL) {
-                    featPatternDump(g, rule.repl, '\n', 1);
+                    g->ctx.feat->dumpPattern(rule.repl, '\n', 1);
                 }
             }
         }
@@ -1097,106 +960,63 @@ void GSUB::createAnonLookups() {
     }
 }
 
-/* p points to an input sequence; return new array of num coverages */
-
-void GSUB::setCoverages(std::vector<LOffset> &covs, std::shared_ptr<CoverageAndClass> &cac, GNode *p, uint32_t num) {
-    if (num == 0)
-        return;
-
-    covs.reserve(num);
-    for (uint32_t i = 0; i != num; i++, p = p->nextSeq) {
-        cac->coverageBegin();
-        for (GNode *q = p; q != NULL; q = q->nextCl) {
-            cac->coverageAddGlyph(q->gid);
-        }
-        covs.push_back(cac->coverageEnd());
-    }
-}
-
 /* Fill chaining contextual subtable format 3 */
 
 GSUB::ChainSubst::ChainSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subtable(h, si) {
-    LOffset size;
-    unsigned nBack = 0;
-    unsigned nInput = 0;
-    unsigned nLook = 0;
-    unsigned nMarked = 0;
-    unsigned seqCnt = 0;
-    GNode *pBack = NULL;
-    GNode *pInput = NULL;
-    GNode *pLook = NULL;
-    GNode *pMarked = NULL;
-    int iSeq = 0; /* Suppress optimizer warning */
+    std::vector<GPat::ClassRec*> backs, inputs, looks;
+    GPat *marks = new GPat();
+    int iSeq = 0;  // offset into inputs of first mark
     uint32_t nSubst = (rule.repl != nullptr) ? 1 : 0;
 
-    GNode *p;
-
     /* Set counts of and pointers to Back, Input, Look, Marked areas */
-    pBack = rule.targ;
-    for (p = rule.targ; p != NULL; p = p->nextSeq) {
-        if (p->flags & FEAT_BACKTRACK) {
-            nBack++;
-        } else if (p->flags & FEAT_INPUT) {
-            if (pInput == NULL) {
-                pInput = p;
+    for (auto &cr : rule.targ->classes) {
+        if (cr.backtrack)
+            backs.push_back(&cr);
+        else if (cr.input) {
+            if (cr.marked) {
+                if (marks->patternLen() == 0)
+                    iSeq = inputs.size();
+                nSubst += cr.lookupLabels.size();
+                marks->addClass(cr);
             }
-            nInput++;
-            if (p->flags & FEAT_MARKED) {
-                /* Marked must be within Input */
-                if (pMarked == NULL) {
-                    pMarked = p;
-                    iSeq = seqCnt;
-                }
-                nMarked++;
-                nSubst += p->lookupLabelCount;
-            }
-            seqCnt++;
-        } else if (p->flags & FEAT_LOOKAHEAD) {
-            if (pLook == NULL) {
-                pLook = p;
-            }
-            nLook++;
-        }
+            inputs.push_back(&cr);
+        } else if (cr.lookahead)
+            looks.push_back(&cr);
     }
 
-    /* Fill table */
-    h.setCoverages(backtracks, cac, pBack, nBack);
-    h.setCoverages(inputGlyphs, cac, pInput, nInput);
-    h.setCoverages(lookaheads, cac, pLook, nLook);
+    LOffset sz = chain3size(backs.size(), inputs.size(), looks.size(), nSubst);
+    LOffset o = isExt() ? sz : 0;
+
+    h.setCoverages(backtracks, cac, backs, o);
+    h.setCoverages(inputGlyphs, cac, inputs, o);
+    h.setCoverages(lookaheads, cac, looks, o);
+
     if (nSubst > 0) {
         if (rule.repl != NULL) {
             /* There is only a single replacement rule, not using direct lookup references */
-            lookupRecords.emplace_back(iSeq, h.addAnonRule(si, pMarked, nMarked, rule.repl));
+            lookupRecords.emplace_back(iSeq, h.addAnonRule(si, marks, rule.repl));
+            // Prevent deletion of marks object
+            marks = nullptr;
         } else {
             lookupRecords.reserve(nSubst);
-            GNode *nextNode = pMarked;
-            for (uint32_t i = 0; i < nMarked; i++) {
-                if (nextNode->lookupLabelCount > 0) {
-                    for (int j = 0; j < nextNode->lookupLabelCount; j++) {
-                        lookupRecords.emplace_back(i, nextNode->lookupLabels[j]);
-                    }
-                }
-                nextNode = nextNode->nextSeq;
+            int i = 0;
+            for (auto &mcr : marks->classes) {
+                for (auto ll : mcr.lookupLabels)
+                    lookupRecords.emplace_back(i, ll);
+                i++;
             }
         }
     }
 
-    h.updateMaxContext(nInput + nLook);
+    h.updateMaxContext(inputs.size() + looks.size());
 
-    size = chain3size(nBack, nInput, nLook, nSubst);
-    if (isExt()) {
-        /* Set final values for coverages */
-        for (auto &bt : backtracks)
-            bt += size;
-        for (auto &ig : inputGlyphs)
-            ig += size;
-        for (auto &la : lookaheads)
-            la += size;
-        h.incExtOffset(size + cac->coverageSize());
-    } else {
-        h.incSubOffset(size);
-    }
-    featRecycleNodes(h.g, rule.targ);
+    if (isExt())
+        h.incExtOffset(sz + cac->coverageSize());
+    else
+        h.incSubOffset(sz);
+
+    delete marks;
+    delete rule.targ;
 }
 
 void GSUB::ChainSubst::fill(GSUB &h, SubtableInfo &si) {
@@ -1259,107 +1079,55 @@ void GSUB::ChainSubst::write(OTL *h) {
         cac->coverageWrite();
 }
 
-static bool CTL_CDECL cmpNode(GNode *an, GNode *bn) {
-    return an->gid < bn->gid;
-}
-
-static void sortInputList(GNode *&list) {
-    std::vector<GNode *> tmp;
-
-    for (GNode *p = list; p != NULL; p = p->nextCl)
-        tmp.push_back(p);
-
-    std::sort(tmp.begin(), tmp.end(), cmpNode);
-
-    /* Move pointers around */
-    for (size_t i = 0; i < tmp.size() - 1; i++) {
-        tmp[i]->nextCl = tmp[i + 1];
-    }
-    tmp.back()->nextCl = NULL;
-
-    list = tmp[0];
-}
-
 GSUB::ReverseSubst::ReverseSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subtable(h, si) {
-    LOffset size;
-    unsigned nBack = 0;
-    unsigned nInput = 0;
-    unsigned nLook = 0;
-    GNode *pBack = NULL;
-    GNode *pInput = NULL;
-    GNode *pLook = NULL;
-    GNode *p, *r;
-    unsigned subCount = 0;
+    std::vector<GPat::ClassRec*> backs, looks, inputs;
 
-    /* Set counts of and pointers to Back, Input, Look, Marked areas */
-    pBack = rule.targ;
-    for (p = rule.targ; p != NULL; p = p->nextSeq) {
-        if (p->flags & FEAT_BACKTRACK) {
-            nBack++;
-        } else if (p->flags & FEAT_INPUT) {
-            /* Note: we validate that there is only one Input glyph in feat.c */
-            if (pInput == NULL) {
-                pInput = p;
-            }
-            nInput++;
-        } else if (p->flags & FEAT_LOOKAHEAD) {
-            if (pLook == NULL) {
-                pLook = p;
-            }
-            nLook++;
-        }
+    for (auto &cr : rule.targ->classes) {
+        if (cr.backtrack)
+            backs.push_back(&cr);
+        else if (cr.input)
+            inputs.push_back(&cr);
+        else if (cr.lookahead)
+            looks.push_back(&cr);
     }
 
-    /* When we call otlCoverageEnd, the input coverage will be sorted in   */
-    /* GID order. The replacement glyph list must also be sorted in that   */
-    /* order. So, I copy the replacement glyph gids into the target Gnodes */
-    /* as the nextSeq value. We can then sort the target list, and get the */
-    /* Substitutions values back out in that order. Since the target list  */
-    /* is then sorted in GID order, otlCoverageEnd won't change the order  */
-    /* again.                                                              */
+    // When we call CoverageEnd, the input coverage will be sorted in
+    // GID order. The replacement glyph list must also be sorted in that
+    // order, so we sort both lists in advance so CoverageEnd won't
+    // change the correspondence
+    std::vector<std::pair<GID, GID>> subs;
     if (rule.repl != NULL) {
-        /* No need for this whole block, if subCount === 0. */
-        for (p = pInput, r = rule.repl; p != NULL; p = p->nextCl, r = r->nextCl) {
-            /* I require in feat.c that pInput and repl lists have the same length */
-            p->nextSeq = r;
-            subCount++;
+        auto &rglyphs = rule.repl->classes[0].glyphs;
+        assert(inputs[0]->glyphs.size() == rglyphs.size());
+        auto rgi = rglyphs.begin();
+        for (GID gid : inputs[0]->glyphs) {
+            subs.emplace_back(gid, rgi->gid);
+            rgi++;
         }
-        sortInputList(pInput);
+        std::sort(subs.begin(), subs.end());
     }
 
     cac->coverageBegin();
-    for (p = pInput; p != NULL; p = p->nextCl)
-        cac->coverageAddGlyph(p->gid);
+    for (auto [tg, _] : subs)
+        cac->coverageAddGlyph(tg);
 
     InputCoverage = cac->coverageEnd(); /* Adjusted later */
 
-    h.setCoverages(backtracks, cac, pBack, nBack);
-    h.setCoverages(lookaheads, cac, pLook, nLook);
+    LOffset sz = rchain1size(backs.size(), looks.size(), subs.size());
+    LOffset o = isExt() ? sz : 0;
 
-    /* When parsing the feat file, I enforced that the targ and repl glyph */
-    /* or glyph classes be the same length, except in the case of the      */
-    /* 'ignore' statement. In the latter case, repl is NULL                */
-    if (subCount > 0 && rule.repl != NULL) {
-        for (p = pInput; p != NULL; p = p->nextCl) {
-            substitutes.push_back(p->nextSeq->gid);
-            p->nextSeq = NULL; /* Remove this reference to the repl node from the target node, else      */
-                               /* featRecycleNodes will add it to the free list twice, once when freeing */
-                               /* the targ nodes, and once when freeing the repl nodes.                  */
-        }
-    }
+    h.setCoverages(backtracks, cac, backs, o);
+    h.setCoverages(lookaheads, cac, looks, o);
 
-    h.updateMaxContext(nInput + nLook);
+    for (auto [_, rg] : subs)
+        substitutes.push_back(rg);
 
-    size = rchain1size(nBack, nLook, subCount);
-    if (isExt()) {
-        for (auto &bt : backtracks)
-            bt += size;
-        for (auto &la : lookaheads)
-            la += size;
-        h.incExtOffset(size + cac->coverageSize());
-    } else {
-        h.incSubOffset(size);
-    }
+    h.updateMaxContext(inputs.size() + looks.size());
+
+    if (isExt())
+        h.incExtOffset(sz + cac->coverageSize());
+    else
+        h.incSubOffset(sz);
 }
 
 void GSUB::ReverseSubst::fill(GSUB &h, SubtableInfo &si) {
@@ -1410,8 +1178,8 @@ void GSUB::ReverseSubst::write(OTL *h) {
     }
 
     OUT2((uint16_t)substitutes.size());
-    for (auto g : substitutes)
-        OUT2(g);
+    for (auto gid : substitutes)
+        OUT2(gid);
 
     if (isExt())
         cac->coverageWrite();

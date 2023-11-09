@@ -411,7 +411,7 @@ void hotAddVertOriginY(hotCtx g, GID gid, short value) {
     }
 
     if (hotgi->vOrigY != SHRT_MAX) {
-        featGlyphDump(g, gid, '\0', 0);
+        g->ctx.feat->dumpGlyph(gid, '\0', 0);
         if (hotgi->vOrigY == value) {
             hotMsg(g, hotNOTE,
                    "Ignoring duplicate VertOriginY entry for "
@@ -434,7 +434,7 @@ void hotAddVertAdvanceY(hotCtx g, GID gid, short value) {
     }
 
     if (hotgi.vAdv != SHRT_MAX) {
-        featGlyphDump(g, gid, '\0', 0);
+        g->ctx.feat->dumpGlyph(gid, '\0', 0);
         if (hotgi.vAdv == value) {
             hotMsg(g, hotNOTE,
                    "Ignoring duplicate VertAdvanceY entry for "
@@ -1207,7 +1207,7 @@ void CTL_CDECL hotMsg(hotCtx g, int level, const char *fmt, ...) {
     } else {
         va_list ap;
 #define MAX_NOTE_LEN 1024
-        std::string prefix = featMsgPrefix(g), sfmt(fmt);
+        std::string prefix = g->ctx.feat->msgPrefix(), sfmt(fmt);
 
         sfmt.insert(0, prefix);
         /* xxx If note is used, crop it to MAX_NOTE_LEN. */
