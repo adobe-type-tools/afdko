@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <limits>
 #include <memory>
+#include <utility>
 
 #include "BASE.h"
 #include "GDEF.h"
@@ -338,7 +339,7 @@ antlrcpp::Any FeatVisitor::visitValueRecordDef(FeatParser::ValueRecordDefContext
     if ( stage != vExtract )
         return nullptr;
 
-    MetricsInfo mi = METRICSINFOEMPTYPP;
+    MetricsInfo mi;
     getValueLiteral(ctx->valueLiteral(), mi);
     fc->addValueDef(TOK(ctx->label())->getText(), mi);
 
@@ -414,7 +415,6 @@ antlrcpp::Any FeatVisitor::visitLookupflagAssign(FeatParser::LookupflagAssignCon
         return nullptr;
 
     uint16_t v = 0;
-    GNode *gc = nullptr;
     for (auto e : ctx->lookupflagElement()) {
         if ( e->RIGHT_TO_LEFT() != nullptr )
             v = fc->setLkpFlagAttribute(v, otlRightToLeft, 0);
@@ -425,13 +425,11 @@ antlrcpp::Any FeatVisitor::visitLookupflagAssign(FeatParser::LookupflagAssignCon
         else if ( e->IGNORE_MARKS() != nullptr )
             v = fc->setLkpFlagAttribute(v, otlIgnoreMarks, 0);
         else if ( e->USE_MARK_FILTERING_SET() != nullptr ) {
-            gc = getGlyphClass(e->glyphClass(), true);
-            uint16_t umfIndex = fc->g->ctx.GDEFp->addMarkSetClass(gc);
+            uint16_t umfIndex = fc->g->ctx.GDEFp->addMarkSetClass(getGlyphClass(e->glyphClass(), true));
             v = fc->setLkpFlagAttribute(v, otlUseMarkFilteringSet, umfIndex);
         } else {
             assert(e->MARK_ATTACHMENT_TYPE() != nullptr);
-            gc = getGlyphClass(e->glyphClass(), true);
-            uint16_t macIndex = fc->g->ctx.GDEFp->addGlyphMarkClass(gc);
+            uint16_t macIndex = fc->g->ctx.GDEFp->addGlyphMarkClass(getGlyphClass(e->glyphClass(), true));
             if ( macIndex > kMaxMarkAttachClasses )
                 fc->featMsg(hotERROR, "No more than 15 different class names can be used with the \"lookupflag MarkAttachmentType\". This would be a 16th.");
             v = fc->setLkpFlagAttribute(v, otlMarkAttachmentType, macIndex);
@@ -453,12 +451,12 @@ antlrcpp::Any FeatVisitor::visitIgnoreSubOrPos(FeatParser::IgnoreSubOrPosContext
     bool is_sub = ctx->postok() == nullptr;
 
     for (auto lp : ctx->lookupPattern()) {
-        GNode *targ = getLookupPattern(lp, true);
-        targ->flags |= FEAT_IGNORE_CLAUSE;
+        GPat *targ = getLookupPattern(lp, true);
+        targ->ignore_clause = true;
         if ( is_sub )
             fc->addSub(targ, nullptr, sub_type);
         else
-            fc->addPos(targ, 0, 0);
+            fc->addPos(targ, 0, false);
     }
 
     return nullptr;
@@ -468,7 +466,7 @@ antlrcpp::Any FeatVisitor::visitSubstitute(FeatParser::SubstituteContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
 
-    GNode *targ, *repl = nullptr;
+    GPat *targ, *repl = nullptr;
     int type = 0;
 
     if ( ctx->EXCEPT() != nullptr ) {
@@ -478,7 +476,7 @@ antlrcpp::Any FeatVisitor::visitSubstitute(FeatParser::SubstituteContext *ctx) {
             if ( i == ctx->startpat || i == ctx->endpat )
                 continue;
             targ = getLookupPattern(i, true);
-            targ->flags |= FEAT_IGNORE_CLAUSE;
+            targ->ignore_clause = true;
             fc->addSub(targ, nullptr, type);
         }
     }
@@ -508,19 +506,19 @@ antlrcpp::Any FeatVisitor::visitMark_statement(FeatParser::Mark_statementContext
     if ( stage != vExtract )
         return nullptr;
 
-    GNode *targ = nullptr;
+    GPat::ClassRec cr;
     fc->anchorMarkInfo.clear();
 
     if ( ctx->glyph() != nullptr ) {
-        targ = fc->setNewNode(getGlyph(ctx->glyph(), false));
+        cr.addGlyph(getGlyph(ctx->glyph(), false));
     } else {
         assert(ctx->glyphClass() != nullptr);
-        targ = getGlyphClass(ctx->glyphClass(), false);
+        cr = getGlyphClass(ctx->glyphClass(), false);
     }
 
     translateAnchor(ctx->anchor(), 0);
 
-    fc->addMark(TOK(ctx->GCLASS())->getText(), targ);
+    fc->addMark(TOK(ctx->GCLASS())->getText(), cr);
     return nullptr;
 }
 
@@ -530,72 +528,74 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
 
     bool enumerate = ctx->enumtok() != nullptr;
     int type = 0;
-    GNode *head = nullptr, *tail = nullptr, **marks;
+    GPat *gp = nullptr;
 
     fc->anchorMarkInfo.clear();
 
     if ( ctx->startpat != nullptr )
-        tail = concatenatePattern(&head, ctx->startpat);
+        gp = concatenatePattern(gp, ctx->startpat);
 
     if ( TOK(ctx->valueRecord()) != nullptr ) {
-        if ( tail == nullptr ) {
+        if ( gp == nullptr ) {
             fc->featMsg(hotERROR, "Glyph or glyph class must precede a value record.");
             return nullptr;
         }
+        assert(gp->patternLen() > 0);
         type = GPOSSingle;
-        getValueRecord(ctx->valueRecord(), tail->metricsInfo);
+        getValueRecord(ctx->valueRecord(), gp->classes.back().metricsInfo);
         for (auto vp : ctx->valuePattern()) {
-            tail = concatenatePatternElement(&tail, vp->patternElement());
+            concatenatePatternElement(gp, vp->patternElement());
             if ( vp->valueRecord() )
-                getValueRecord(vp->valueRecord(), tail->metricsInfo);
+                getValueRecord(vp->valueRecord(), gp->classes.back().metricsInfo);
         }
     } else if ( ctx->LOOKUP().size() != 0 ) {
-        if ( tail == nullptr ) {
+        if ( gp == nullptr || gp->patternLen() == 0 ) {
             TOK(ctx->LOOKUP(0));
             fc->featMsg(hotERROR, "Glyph or glyph class must precede a lookup reference in a contextual rule.");
             return nullptr;
         }
         type = GPOSChain;
         for (auto l : ctx->label()) {
-            tail->lookupLabels[tail->lookupLabelCount++] = fc->getLabelIndex(TOK(l)->getText());
-            if ( tail->lookupLabelCount > 255 )
+            gp->classes.back().lookupLabels.push_back(fc->getLabelIndex(TOK(l)->getText()));
+            gp->lookup_node = true;
+            if ( gp->classes.back().lookupLabels.size() > 255 )
                 fc->featMsg(hotFATAL, "Too many lookup references in one glyph position.");
         }
-        for (auto lpe : ctx->lookupPatternElement()) {
-            tail->nextSeq = getLookupPatternElement(lpe, true);
-            tail = tail->nextSeq;
-        }
+        for (auto lpe : ctx->lookupPatternElement())
+            gp->addClass(getLookupPatternElement(lpe, true));
     } else if ( ctx->cursiveElement() != nullptr ) {
         type = GPOSCursive;
-        tail = concatenatePatternElement(tail == nullptr ? &head : &tail,
-                                         ctx->cursiveElement()->patternElement());
-        tail->flags |= FEAT_IS_BASE_NODE;
+        gp = concatenatePatternElement(gp, ctx->cursiveElement()->patternElement());
+        gp->classes.back().basenode = true;
         for (auto a : ctx->cursiveElement()->anchor())
             translateAnchor(a, 0);
         if ( ctx->endpat != nullptr )
-            tail = concatenatePattern(&tail, ctx->endpat);
+            gp = concatenatePattern(gp, ctx->endpat);
     } else if ( ctx->MARKBASE() != nullptr ) {
         type = GPOSMarkToBase;
-        tail = concatenatePattern(tail == nullptr ? &head : &tail, ctx->midpat, FEAT_IS_BASE_NODE);
-        marks = &tail->nextSeq;
+        gp = concatenatePattern(gp, ctx->midpat, true);
+        auto sz = gp->patternLen();
+        bool addedMark = false;
         for (auto mbe : ctx->baseToMarkElement()) {
             translateAnchor(mbe->anchor(), 0);
             fc->addMarkClass(TOK(mbe->GCLASS())->getText());
-            if ( mbe->MARKER() != nullptr )
-                marks = fc->copyGlyphClass(marks, fc->lookupGlyphClass(mbe->GCLASS()->getText()));
+            if ( mbe->MARKER() != nullptr ) {
+                GPat::ClassRec cr {fc->lookupGlyphClass(mbe->GCLASS()->getText())};
+                cr.marknode = true;
+                gp->addClass(std::move(cr));
+                addedMark = true;
+            }
         }
-        if ( tail->nextSeq != nullptr ) {
-            tail->flags |= FEAT_MARKED;
-            tail = tail->nextSeq;
-            tail->flags |= FEAT_IS_MARK_NODE;
-        }
+        if (addedMark)
+            gp->classes[sz-1].marked = true;
         if ( ctx->endpat != nullptr )
-            tail = concatenatePattern(&tail, ctx->endpat);
+            concatenatePattern(gp, ctx->endpat);
     } else if ( ctx->markligtok() != nullptr ) {
         type = GPOSMarkToLigature;
         int componentIndex = 0;
-        tail = concatenatePattern(tail == nullptr ? &head : &tail, ctx->midpat, FEAT_IS_BASE_NODE);
-        marks = &tail->nextSeq;
+        gp = concatenatePattern(gp, ctx->midpat, true);
+        auto sz = gp->patternLen();
+        bool addedMark = false;
         for (auto lme : ctx->ligatureMarkElement()) {
             bool isNULL = translateAnchor(lme->anchor(), componentIndex);
             if ( lme->MARK() ) {
@@ -604,37 +604,40 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
                 fc->featMsg(hotERROR, "In mark to ligature, non-null anchor must be followed by a mark class.");
             if ( lme->LIG_COMPONENT() != nullptr )
                 componentIndex++;
-            if ( lme->MARKER() != nullptr )
-                marks = fc->copyGlyphClass(marks, fc->lookupGlyphClass(lme->GCLASS()->getText()));
+            if ( lme->MARKER() != nullptr ) {
+                GPat::ClassRec cr {fc->lookupGlyphClass(lme->GCLASS()->getText())};
+                cr.marknode = true;
+                gp->addClass(std::move(cr));
+                addedMark = true;
+            }
         }
-        if ( tail->nextSeq != nullptr ) {
-            tail->flags |= FEAT_MARKED;
-            tail = tail->nextSeq;
-            tail->flags |= FEAT_IS_MARK_NODE;
-        }
+        if (addedMark)
+            gp->classes[sz-1].marked = true;
         if ( ctx->endpat != nullptr )
-            tail = concatenatePattern(&tail, ctx->endpat);
+            concatenatePattern(gp, ctx->endpat);
     } else {
         assert(ctx->MARK() != nullptr);
         type = GPOSMarkToMark;
-        tail = concatenatePattern(tail == nullptr ? &head : &tail, ctx->midpat, FEAT_IS_BASE_NODE);
-        marks = &tail->nextSeq;
+        gp = concatenatePattern(gp, ctx->midpat, true);
+        auto sz = gp->patternLen();
+        bool addedMark = false;
         for (auto mbe : ctx->baseToMarkElement()) {
             translateAnchor(mbe->anchor(), 0);
             fc->addMarkClass(TOK(mbe->GCLASS())->getText());
-            if ( mbe->MARKER() != nullptr )
-                marks = fc->copyGlyphClass(marks, fc->lookupGlyphClass(mbe->GCLASS()->getText()));
+            if ( mbe->MARKER() != nullptr ) {
+                GPat::ClassRec cr {fc->lookupGlyphClass(mbe->GCLASS()->getText())};
+                cr.marknode = true;
+                gp->addClass(std::move(cr));
+                addedMark = true;
+            }
         }
-        if ( tail->nextSeq != nullptr ) {
-            tail->flags |= FEAT_MARKED;
-            tail = tail->nextSeq;
-            tail->flags |= FEAT_IS_MARK_NODE;
-        }
+        if (addedMark)
+            gp->classes[sz-1].marked = true;
         if ( ctx->endpat != nullptr )
-            tail = concatenatePattern(&tail, ctx->endpat);
+            concatenatePattern(gp, ctx->endpat);
     }
-    assert(head != nullptr);
-    fc->addPos(head, type, enumerate);
+    assert(gp != nullptr);
+    fc->addPos(gp, type, enumerate);
 
     return nullptr;
 }
@@ -877,7 +880,7 @@ antlrcpp::Any FeatVisitor::visitGdefGlyphClass(FeatParser::GdefGlyphClassContext
     if ( stage != vExtract )
         return nullptr;
 
-    GNode *gc[4] = {nullptr};
+    GPat::ClassRec gc[4];
     assert(ctx->glyphClassOptional().size() == 4);
 
     for (int i = 0; i < 4; ++i) {
@@ -893,19 +896,17 @@ antlrcpp::Any FeatVisitor::visitGdefAttach(FeatParser::GdefAttachContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
 
-    GNode *pat = getLookupPattern(ctx->lookupPattern(), false);
-    if (pat->nextSeq != NULL)
+    GPat *gp = getLookupPattern(ctx->lookupPattern(), false);
+    if (gp->patternLen() != 1)
         fc->featMsg(hotERROR,
                     "Only one glyph|glyphClass may be present per"
                     " AttachTable statement");
 
     for (auto n : ctx->NUM()) {
         int s = getNum<int16_t>(TOK(n)->getText(), 10);
-        GNode *next = pat;
-        while (next != NULL) {
-            if ( fc->g->ctx.GDEFp->addAttachEntry(next, s) )
+        for (GID gid : gp->classes[0].glyphs) {
+            if ( fc->g->ctx.GDEFp->addAttachEntry(gid, s) )
                 fc->featMsg(hotWARNING, "Skipping duplicate contour index %d", s);
-            next = next->nextCl;
         }
     }
     return nullptr;
@@ -1352,8 +1353,8 @@ void FeatVisitor::translateGdefLigCaret(FeatParser::LookupPatternContext *pctx,
                                  unsigned short format) {
     assert(stage == vExtract);
 
-    GNode *pat = getLookupPattern(pctx, false);
-    if (pat->nextSeq != NULL)
+    GPat *gp = getLookupPattern(pctx, false);
+    if (gp->patternLen() != 1)
         fc->featMsg(hotERROR, "Only one glyph|glyphClass may be present per"
                               " LigatureCaret statement");
 
@@ -1362,11 +1363,8 @@ void FeatVisitor::translateGdefLigCaret(FeatParser::LookupPatternContext *pctx,
     for (auto n : nv)
         sv.push_back(getNum<uint16_t>(TOK(n)->getText(), 10));
 
-    GNode *next = pat;
-    while ( next != nullptr ) {
-        fc->g->ctx.GDEFp->addLigCaretEntry(next, sv, format);
-        next = next->nextCl;
-    }
+    for (GID gid : gp->classes[0].glyphs)
+        fc->g->ctx.GDEFp->addLigCaretEntry(gid, sv, format);
 }
 
 bool FeatVisitor::translateAnchor(FeatParser::AnchorContext *ctx,
@@ -1403,100 +1401,94 @@ void FeatVisitor::getValueRecord(FeatParser::ValueRecordContext *ctx,
 
 void FeatVisitor::getValueLiteral(FeatParser::ValueLiteralContext *ctx,
                                   MetricsInfo &mi) {
-    mi.cnt = ctx->NUM().size();
-    assert(mi.cnt == 1 || mi.cnt == 4);
-    for (int16_t i = 0; i < mi.cnt; ++i)
-        mi.metrics[i] = getNum<int16_t>(TOK(ctx->NUM(i))->getText(), 10);
+    int cnt = ctx->NUM().size();
+    assert(cnt == 1 || cnt == 4);
+    for (int16_t i = 0; i < cnt; ++i)
+        mi.metrics.push_back(getNum<int16_t>(TOK(ctx->NUM(i))->getText(), 10));
 }
 
-GNode *FeatVisitor::getLookupPattern(FeatParser::LookupPatternContext *ctx,
-                                     bool markedOK) {
-    GNode *ret, **insert = &ret;
+GPat *FeatVisitor::getLookupPattern(FeatParser::LookupPatternContext *ctx,
+                                    bool markedOK) {
+    GPat *gp = new GPat();
     assert(stage == vExtract);
 
     for (auto &pe : ctx->lookupPatternElement()) {
-        *insert = getLookupPatternElement(pe, markedOK);
-        if ( (*insert)->flags & FEAT_LOOKUP_NODE ) {
-            (*insert)->flags &= ~FEAT_LOOKUP_NODE;
-            ret->flags |= FEAT_LOOKUP_NODE;
-        }
-        insert = &(*insert)->nextSeq;
+        gp->addClass(getLookupPatternElement(pe, markedOK));
+        if (gp->classes.back().lookupLabels.size() > 0)
+            gp->lookup_node = true;
     }
-    return ret;
+    return gp;
 }
 
-GNode *FeatVisitor::getLookupPatternElement(FeatParser::LookupPatternElementContext *ctx,
-                                            bool markedOK) {
-    GNode *ret = getPatternElement(ctx->patternElement(), markedOK);
+GPat::ClassRec FeatVisitor::getLookupPatternElement(FeatParser::LookupPatternElementContext *ctx,
+                                                    bool markedOK) {
+    GPat::ClassRec cr = getPatternElement(ctx->patternElement(), markedOK);
     for (auto l : ctx->label()) {
-        int labelIndex = fc->getLabelIndex(TOK(l)->getText());
-        ret->lookupLabels[ret->lookupLabelCount++] = labelIndex;
-        if ( ret->lookupLabelCount > 255 )
+        cr.lookupLabels.push_back(fc->getLabelIndex(TOK(l)->getText()));
+        if ( cr.lookupLabels.size() > 255 )
             fc->featMsg(hotFATAL, "Too many lookup references in one glyph position.");
-        // temporary tracking state will move to the head
-        ret->flags |= FEAT_LOOKUP_NODE;
     }
-    return ret;
+    return cr;
 }
 
-GNode *FeatVisitor::concatenatePattern(GNode **loc,
-                                       FeatParser::PatternContext *ctx,
-                                       int flags) {
-    GNode *ret = *loc, **insert = loc;
+GPat *FeatVisitor::concatenatePattern(GPat *gp,
+                                      FeatParser::PatternContext *ctx,
+                                      bool isBaseNode) {
     bool first = true;
     assert(stage == vExtract);
 
-    if ( *insert != nullptr )
-        insert = &(*insert)->nextSeq;
+    if ( gp == nullptr )
+        gp = new GPat();
 
     for (auto &pe : ctx->patternElement()) {
-        ret = *insert = getPatternElement(pe, true);
-        if ( first && flags != 0 )
-            ret->flags |= flags;
+        GPat::ClassRec cr = getPatternElement(pe, true);
+        cr.basenode = first && isBaseNode;
         first = false;
-        insert = &(*insert)->nextSeq;
+        gp->addClass(std::move(cr));
     }
-    return ret;
+    return gp;
 }
 
-GNode *FeatVisitor::concatenatePatternElement(GNode **loc,
-                                       FeatParser::PatternElementContext *ctx) {
+GPat *FeatVisitor::concatenatePatternElement(GPat *gp, FeatParser::PatternElementContext *ctx) {
     assert(stage == vExtract);
 
-    if ( *loc != nullptr )
-        loc = &(*loc)->nextSeq;
+    if (gp == nullptr)
+        gp = new GPat();
 
-    *loc = getPatternElement(ctx, true);
-    return *loc;
+    gp->addClass(getPatternElement(ctx, true));
+    return gp;
 }
 
-GNode *FeatVisitor::getPatternElement(FeatParser::PatternElementContext *ctx,
-                                      bool markedOK) {
-    GNode *ret;
+GPat::ClassRec FeatVisitor::getPatternElement(FeatParser::PatternElementContext *ctx,
+                                              bool markedOK) {
+    GPat::ClassRec cr;
 
     if ( ctx->glyph() != nullptr ) {
-        ret = fc->setNewNode(getGlyph(ctx->glyph(), false));
+        cr.glyphs.emplace_back(getGlyph(ctx->glyph(), false));
     } else {
         assert(ctx->glyphClass() != nullptr);
-        ret = getGlyphClass(ctx->glyphClass(), false);
+        cr = getGlyphClass(ctx->glyphClass(), false);
     }
     if ( ctx->MARKER() != nullptr ) {
         if ( markedOK )
-            ret->flags |= FEAT_MARKED;
+            cr.marked = true;
         else {
             TOK(ctx->MARKER());
             fc->featMsg(hotERROR, "cannot mark a replacement glyph pattern");
         }
     }
-    return ret;
+    return cr;
 }
 
-GNode *FeatVisitor::getGlyphClass(FeatParser::GlyphClassContext *ctx,
-                                  bool dontcopy) {
+GPat::ClassRec FeatVisitor::getGlyphClass(FeatParser::GlyphClassContext *ctx,
+                                          bool dontcopy) {
+    GPat::ClassRec cr;
     assert(stage == vExtract);
+
     getGlyphClassAsCurrentGC(ctx, nullptr, dontcopy);
     TOK(ctx);
-    return fc->finishCurrentGC();
+    fc->finishCurrentGC(cr);
+    return cr;
 }
 
 GID FeatVisitor::getGlyph(FeatParser::GlyphContext *ctx, bool allowNotDef) {
@@ -1512,7 +1504,7 @@ GID FeatVisitor::getGlyph(FeatParser::GlyphContext *ctx, bool allowNotDef) {
 // -------------------------------- Utility ----------------------------------
 
 void FeatVisitor::getGlyphClassAsCurrentGC(FeatParser::GlyphClassContext *ctx,
-                                          antlr4::tree::TerminalNode *target_gc,
+                                           antlr4::tree::TerminalNode *target_gc,
                                            bool dontcopy) {
     assert(stage == vExtract);
     if ( ctx->GCLASS() != nullptr && dontcopy ) {
@@ -1532,8 +1524,7 @@ void FeatVisitor::getGlyphClassAsCurrentGC(FeatParser::GlyphClassContext *ctx,
         assert(ctx->GCLASS() != nullptr);
         fc->addGlyphClassToCurrentGC(TOK(ctx->GCLASS())->getText());
     }
-    if ( fc->curGCHead != nullptr )
-        fc->curGCHead->flags |= FEAT_GCLASS;
+    fc->curGC.gclass = true;
 }
 
 void FeatVisitor::addGCLiteralToCurrentGC(FeatParser::GcLiteralContext *ctx) {

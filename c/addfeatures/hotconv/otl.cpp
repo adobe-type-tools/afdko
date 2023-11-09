@@ -79,7 +79,7 @@ void CoverageAndClass::coverageAddGlyph(GID gid, bool warn) {
     auto [i, b] = coverage.current.insert(gid);
     if (!b) {
         if (warn) {
-            featGlyphDump(g, gid, 0, 0);
+            g->ctx.feat->dumpGlyph(gid, 0, 0);
             hotMsg(g, hotNOTE, "Removing duplicate glyph <%s>", g->note.array);
         }
 #if HOT_DEBUG
@@ -1003,4 +1003,20 @@ void OTL::AddSubtable(typename std::unique_ptr<Subtable> s) {
         nRefLookups++;
     else if (sub->isParam())
         nFeatParams++;
+}
+
+void OTL::setCoverages(std::vector<LOffset> &covs,
+                       std::shared_ptr<CoverageAndClass> &cac,
+                       std::vector<GPat::ClassRec*> classes, LOffset o) {
+    if (classes.size() == 0)
+        return;
+
+    covs.reserve(classes.size());
+    for (auto cr : classes) {
+        cac->coverageBegin();
+        for (auto &g : cr->glyphs)
+            cac->coverageAddGlyph(g);
+
+        covs.push_back(cac->coverageEnd() + o);
+    }
 }

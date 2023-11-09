@@ -12,6 +12,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <utility>
 
 #include "common.h"
@@ -97,15 +98,16 @@ class GPOS : public OTL {
     };
 
     struct SingleRec {
+        SingleRec(GID gid, uint32_t valFmt) : gid(gid), valFmt(valFmt) {}
         static bool cmp(const GPOS::SingleRec &a, const GPOS::SingleRec &b);
         static bool cmpGID(const GPOS::SingleRec &a, const GPOS::SingleRec &b);
-        int cmpWithRule(GNode *targ, int nFound);
+        bool cmpWithRule(GPat::ClassRec &cr, std::unordered_set<GID> &found);
 #if HOT_DEBUG
         void dump(GPOS &h);
 #endif
         GID gid {0};
         MetricsRec metricsRec;
-        uint16_t valFmt {0};
+        uint32_t valFmt {0};
         struct {
             int16_t valFmt {0};
             int16_t valRec {0};
@@ -113,8 +115,9 @@ class GPOS : public OTL {
     };
 
     struct MarkClassRec {
-        explicit MarkClassRec(GNode *gnode) : gnode(gnode) {}
-        GNode *gnode {nullptr};
+        MarkClassRec(std::string &name, GPat::ClassRec &cr) : name(name), cr(cr) {}
+        std::string name;
+        GPat::ClassRec cr;
     };
 
     struct BaseGlyphRec {
@@ -147,7 +150,9 @@ class GPOS : public OTL {
             return metricsRec2.kernlt(rhs.metricsRec2);
         }
 #if HOT_DEBUG
-        void dump(hotCtx g, GNode *gclass1, GNode *gclass2);
+        void dumpStats(hotCtx g);
+        void dump(hotCtx g);
+        void dump(hotCtx g, GPat::ClassRec &gclass1, GPat::ClassRec &gclass2);
 #endif
         GID first {GID_UNDEF};
         GID second {GID_UNDEF};
@@ -157,21 +162,22 @@ class GPOS : public OTL {
 
     struct PosRule {
         PosRule() = delete;
-        explicit PosRule(GNode *targ) : targ(targ) {}
-        GNode *targ;
+        explicit PosRule(GPat *targ) : targ(targ) {}
+        GPat *targ;
     };
 
     struct ClassInfo {
         ClassInfo() = delete;
-        ClassInfo(uint32_t cls, GNode *gc) : cls(cls), gc(gc) {}
+        ClassInfo(uint32_t cls, GPat::ClassRec &cr) : cls(cls), cr(cr) {}
+        ClassInfo(uint32_t cls, GPat::ClassRec &&cr) : cls(cls), cr(std::move(cr)) {}
+        explicit ClassInfo(const ClassInfo &o) : cls(o.cls), cr(o.cr) {}
+        explicit ClassInfo(const ClassInfo &&o) : cls(o.cls), cr(std::move(o.cr)) {}
         uint32_t cls;
-        GNode *gc;
+        GPat::ClassRec cr;
     };
 
     struct ClassDef {
         void reset(hotCtx g) {
-            for (auto ci : classInfo)
-                featRecycleNodes(g, ci.second.gc);
             classInfo.clear();
             cov.clear();
         }
@@ -207,8 +213,8 @@ class GPOS : public OTL {
             pairValFmt2 = 0;
         }
         ~SubtableInfo() override {}
-        int32_t checkAddRule(GNode *targ);
-        int32_t findMarkClassIndex(GNode *markNode);
+        bool checkAddRule(GPat::ClassRec &cr, std::unordered_set<GID> &found);
+        int32_t findMarkClassIndex(std::string &name);
         std::array<uint16_t, 5> params;
 
         std::vector<PosRule> rules;
@@ -413,7 +419,7 @@ class GPOS : public OTL {
 
     void FeatureBegin(Tag script, Tag language, Tag feature);
     void FeatureEnd();
-    void RuleAdd(int lkpType, GNode *targ, std::string &locDesc,
+    void RuleAdd(int lkpType, GPat *targ, std::string &locDesc,
                  std::vector<AnchorMarkInfo> &anchorMarkInfo);
     void LookupBegin(uint32_t lkpType, uint32_t lkpFlag, Label label,
                      bool useExtension, uint16_t useMarkSetIndex);
@@ -430,32 +436,33 @@ class GPOS : public OTL {
     void writeValueRecord(uint32_t valFmt, ValueRecord i) override;
     void prepSinglePos(SubtableInfo &si);
     void AddSubtable(std::unique_ptr<OTL::Subtable> s) override;
-    bool validInClassDef(int classDefInx, GNode *gc, uint32_t &cls, bool &insert);
-    void insertInClassDef(ClassDef &cdef, GNode *gc, uint32_t cls);
+    bool validInClassDef(int classDefInx, GPat::ClassRec &cr, uint32_t &cls, bool &insert);
+    void insertInClassDef(ClassDef &cdef, GPat::ClassRec &cr, uint32_t cls);
     void addSpecPair(SubtableInfo &si, GID first, GID second,
                      MetricsRec &metricsRec1, MetricsRec &metricsRec2);
-    void AddPair(SubtableInfo &si, GNode *first, GNode *second, std::string &locDesc);
-    void addPosRule(SubtableInfo &si, GNode *targ, std::string &locDesc,
+    void AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
+                 bool enumerate, std::string &locDesc);
+    void addPosRule(SubtableInfo &si, GPat *targ, std::string &locDesc,
                     std::vector<AnchorMarkInfo> &anchorMarkInfo);
-    GNode *getGNodes(uint32_t cls, int classDefInx);
+    GPat::ClassRec &getCR(uint32_t cls, int classDefInx);
     void printKernPair(GID gid1, GID gid2, int val1, int val2, bool fmt1);
     Offset classDefMake(std::shared_ptr<CoverageAndClass> &cac, int classDefInx,
                         LOffset *coverage, uint16_t &count);
 
     void checkBaseAnchorConflict(std::vector<BaseGlyphRec> &baselist);
     void checkBaseLigatureConflict(std::vector<BaseGlyphRec> &baselist);
-    int32_t addMarkClass(SubtableInfo &si, GNode *markNode);
-    void addCursive(SubtableInfo &si, GNode *targ,
+    int32_t addMarkClass(SubtableInfo &si, std::string &name, GPat::ClassRec &ncr);
+    void addCursive(SubtableInfo &si, GPat::ClassRec &cr,
                     std::vector<AnchorMarkInfo> &anchorMarkInfo, std::string &locDesc);
-    void addMark(SubtableInfo &si, GNode *targ,
+    void addMark(SubtableInfo &si, GPat::ClassRec &cr,
                  std::vector<AnchorMarkInfo> &anchorMarkInfo, std::string &locDesc);
-    void createAnonLookups();
-    void setCoverages(std::vector<LOffset> &covs, std::shared_ptr<CoverageAndClass> &cac,
-                      GNode *p, uint32_t num);
-
-    SubtableInfo &addAnonPosRule(SubtableInfo &cur_si, uint16_t lkpType,
-                                 GNode *targ);
-    void AddSingle(SubtableInfo &si, GNode *targ, int32_t xPlacement,
+    void createAnonLookups() override;
+    SubtableInfo &newAnonSubtable(SubtableInfo &cur_si, uint16_t lkpType);
+    SubtableInfo &addAnonPosRuleSing(SubtableInfo &cur_si, GPat::ClassRec &cr,
+                                     std::unordered_set<GID> &found);
+    SubtableInfo &addAnonPosRule(SubtableInfo &cur_si, uint16_t lkpType);
+    void AddSingle(SubtableInfo &si, GPat::ClassRec &cr,
+                   std::unordered_set<GID> &found, int32_t xPlacement,
                    int32_t yPlacement, int32_t xAdvance, int32_t yAdvance);
 #if HOT_DEBUG
     void dumpSingles(std::vector<SingleRec> &singles);

@@ -6,6 +6,7 @@
 #define ADDFEATURES_HOTCONV_GDEF_H_
 
 #include <array>
+#include <utility>
 #include <vector>
 
 #include "common.h"
@@ -27,8 +28,8 @@ class GDEF {
     struct GlyphClassTable {
         GlyphClassTable() = delete;
         explicit GlyphClassTable(hotCtx g) : cac(g) {}
-        void set(GNode *simple, GNode *ligature, GNode *mark,
-                 GNode *component, hotCtx g);
+        void set(GPat::ClassRec &simple, GPat::ClassRec &ligature,
+                 GPat::ClassRec &mark, GPat::ClassRec &component, hotCtx g);
         static const char *names[4];
         static const uint16_t classIDmap[4];
         Offset fill(hotCtx g, Offset offset);
@@ -39,13 +40,13 @@ class GDEF {
         }
         Offset offset {0};
         CoverageAndClass cac;
-        std::array<GNode *, 4> glyphClasses = {nullptr};
+        std::array<GPat::ClassRec, 4> glyphClasses;
     };
 
     struct MarkAttachClassTable {
         MarkAttachClassTable() = delete;
         explicit MarkAttachClassTable(hotCtx g) : cac(g) {}
-        uint16_t add(GNode *markClassNode);
+        uint16_t add(GPat::ClassRec &&markClassNode);
         void validate(hotCtx g);
         Offset fill(hotCtx g, Offset offset);
         void write() {
@@ -56,7 +57,7 @@ class GDEF {
 
         Offset offset {0};
         CoverageAndClass cac;
-        std::vector<GNode *> glyphClasses;
+        std::vector<GPat::ClassRec> glyphClasses;
     };
 
     struct AttachEntry {
@@ -78,7 +79,7 @@ class GDEF {
         static LOffset size(uint32_t glyphCount) {
             return sizeof(uint16_t) * (2 + glyphCount);
         }
-        bool add(GNode *glyphNode, uint16_t contour);
+        bool add(GID gid, uint16_t contour);
         Offset fill(Offset offset);
         void write(GDEF *h);
 
@@ -124,7 +125,7 @@ class GDEF {
         static LOffset size(uint32_t glyphCount) {
             return sizeof(uint16_t) * (2 + glyphCount);
         }
-        void add(GNode *glyphNode, std::vector<uint16_t> &caretValues,
+        void add(GID gid, std::vector<uint16_t> &caretValues,
                  uint16_t format, hotCtx g);
         Offset fill(Offset offset);
         void write(GDEF *h);
@@ -146,13 +147,13 @@ class GDEF {
         static LOffset size(uint32_t markSetCount) {
             return sizeof(uint16_t) * 2 + sizeof(uint32_t) * markSetCount;
         }
-        uint16_t add(GNode *markClassNode);
+        uint16_t add(GPat::ClassRec &&markClassNode);
         Offset fill(hotCtx G, Offset offset);
         void write(GDEF *h);
 
         Offset offset {0};
         uint16_t markSetTableFormat {0};
-        std::vector<GNode *> markSetClasses;
+        std::vector<GPat::ClassRec> markSetClasses;
         std::vector<MarkSetEntry> markSetEntries;
     };
 
@@ -171,25 +172,25 @@ class GDEF {
         else
             return sizeof(Fixed) + 4 * sizeof(Offset);
     }
-    void setGlyphClass(GNode *simpl, GNode *ligature, GNode *mark,
-                           GNode *component) {
+    void setGlyphClass(GPat::ClassRec &simpl, GPat::ClassRec &ligature,
+                       GPat::ClassRec &mark, GPat::ClassRec &component) {
         glyphClassTable.set(simpl, ligature, mark, component, g);
     }
-    bool addAttachEntry(GNode *glyphNode, uint16_t contour) {
-        return attachTable.add(glyphNode, contour);
+    bool addAttachEntry(GID gid, uint16_t contour) {
+        return attachTable.add(gid, contour);
     }
-    void addLigCaretEntry(GNode *glyphNode, std::vector<uint16_t> &caretValues,
+    void addLigCaretEntry(GID gid, std::vector<uint16_t> &caretValues,
                           uint16_t format) {
-        ligCaretTable.add(glyphNode, caretValues, format, g);
+        ligCaretTable.add(gid, caretValues, format, g);
     }
-    uint16_t addGlyphMarkClass(GNode *markClass) {
-        return markAttachClassTable.add(markClass);
+    uint16_t addGlyphMarkClass(GPat::ClassRec &&markClass) {
+        return markAttachClassTable.add(std::move(markClass));
     }
-    uint16_t addMarkSetClass(GNode *markClass) {
-        return markSetClassTable.add(markClass);
+    uint16_t addMarkSetClass(GPat::ClassRec &&markClass) {
+        return markSetClassTable.add(std::move(markClass));
     }
 
-    void validateGlyphClasses(std::vector<GNode *> &glyphClasses);
+    void validateGlyphClasses(std::vector<GPat::ClassRec> &glyphClasses);
 
     uint32_t version {0};
     Offset offset {0};
