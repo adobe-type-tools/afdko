@@ -68,12 +68,13 @@ class GSUB : public OTL {
  private:
     struct SubstRule {
         SubstRule() = delete;
-        SubstRule(GPat *targ, GPat *repl) : targ(targ), repl(repl) {}
+        SubstRule(GPat::SP targ, GPat::SP repl) : targ(std::move(targ)),
+                                                  repl(std::move(repl)) {}
         bool operator<(const SubstRule &b) const {
             return targ->classes[0].glyphs[0] < b.targ->classes[0].glyphs[0];
         }
-        GPat *targ {nullptr};
-        GPat *repl {nullptr};
+        GPat::SP targ {nullptr};
+        GPat::SP repl {nullptr};
     };
     struct LigatureTarg {
         explicit LigatureTarg(const LigatureTarg &o) : gids(o.gids) { }
@@ -278,13 +279,13 @@ class GSUB : public OTL {
 
     void FeatureBegin(Tag script, Tag language, Tag feature);
     void FeatureEnd();
-    void RuleAdd(GPat *targ, GPat *repl);
+    void RuleAdd(GPat::SP targ, GPat::SP repl);
     void LookupBegin(uint32_t lkpType, uint32_t lkpFlag, Label label,
                      bool useExtension, uint16_t useMarkSetIndex);
     void LookupEnd(SubtableInfo *si = nullptr);
 
     bool SubtableBreak();
-    void addSubstRule(SubtableInfo &si, GPat *targ, GPat *repl);
+    void addSubstRule(SubtableInfo &si, GPat::SP targ, GPat::SP repl);
     void SetFeatureNameID(Tag feat, uint16_t nameID);
     void AddFeatureNameParam(uint16_t nameID);
     void AddCVParam(CVParameterFormat &&params);
@@ -293,8 +294,8 @@ class GSUB : public OTL {
     virtual const char *objName() { return "GSUB"; }
     bool addSingleToAnonSubtbl(SubtableInfo &si, GPat::ClassRec &tcr,
                                GPat::ClassRec &rcr);
-    bool addLigatureToAnonSubtbl(SubtableInfo &si, GPat *targ, GPat *repl);
-    Label addAnonRule(SubtableInfo &cur_si, GPat *targ, GPat *repl);
+    bool addLigatureToAnonSubtbl(SubtableInfo &si, GPat::SP &targ, GPat::SP &repl);
+    Label addAnonRule(SubtableInfo &cur_si, GPat::SP targ, GPat::SP repl);
     void createAnonLookups() override;
     SubtableInfo nw;
     std::vector<SubtableInfo> anonSubtable;  /* Anon subtable accumulator */

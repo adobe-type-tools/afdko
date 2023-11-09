@@ -451,12 +451,12 @@ antlrcpp::Any FeatVisitor::visitIgnoreSubOrPos(FeatParser::IgnoreSubOrPosContext
     bool is_sub = ctx->postok() == nullptr;
 
     for (auto lp : ctx->lookupPattern()) {
-        GPat *targ = getLookupPattern(lp, true);
+        GPat::SP targ = getLookupPattern(lp, true);
         targ->ignore_clause = true;
         if ( is_sub )
-            fc->addSub(targ, nullptr, sub_type);
+            fc->addSub(std::move(targ), nullptr, sub_type);
         else
-            fc->addPos(targ, 0, false);
+            fc->addPos(std::move(targ), 0, false);
     }
 
     return nullptr;
@@ -466,7 +466,7 @@ antlrcpp::Any FeatVisitor::visitSubstitute(FeatParser::SubstituteContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
 
-    GPat *targ, *repl = nullptr;
+    GPat::SP targ, repl;
     int type = 0;
 
     if ( ctx->EXCEPT() != nullptr ) {
@@ -477,7 +477,7 @@ antlrcpp::Any FeatVisitor::visitSubstitute(FeatParser::SubstituteContext *ctx) {
                 continue;
             targ = getLookupPattern(i, true);
             targ->ignore_clause = true;
-            fc->addSub(targ, nullptr, type);
+            fc->addSub(std::move(targ), nullptr, type);
         }
     }
     if ( ctx->revtok() != nullptr ) {
@@ -498,7 +498,7 @@ antlrcpp::Any FeatVisitor::visitSubstitute(FeatParser::SubstituteContext *ctx) {
             repl = getLookupPattern(ctx->endpat, false);
     }
     TOK(ctx);
-    fc->addSub(targ, repl, type);
+    fc->addSub(std::move(targ), std::move(repl), type);
     return nullptr;
 }
 
@@ -528,12 +528,12 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
 
     bool enumerate = ctx->enumtok() != nullptr;
     int type = 0;
-    GPat *gp = nullptr;
+    GPat::SP gp;
 
     fc->anchorMarkInfo.clear();
 
     if ( ctx->startpat != nullptr )
-        gp = concatenatePattern(gp, ctx->startpat);
+        gp = concatenatePattern(std::move(gp), ctx->startpat);
 
     if ( TOK(ctx->valueRecord()) != nullptr ) {
         if ( gp == nullptr ) {
@@ -544,7 +544,7 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
         type = GPOSSingle;
         getValueRecord(ctx->valueRecord(), gp->classes.back().metricsInfo);
         for (auto vp : ctx->valuePattern()) {
-            concatenatePatternElement(gp, vp->patternElement());
+            gp = concatenatePatternElement(std::move(gp), vp->patternElement());
             if ( vp->valueRecord() )
                 getValueRecord(vp->valueRecord(), gp->classes.back().metricsInfo);
         }
@@ -565,15 +565,15 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
             gp->addClass(getLookupPatternElement(lpe, true));
     } else if ( ctx->cursiveElement() != nullptr ) {
         type = GPOSCursive;
-        gp = concatenatePatternElement(gp, ctx->cursiveElement()->patternElement());
+        gp = concatenatePatternElement(std::move(gp), ctx->cursiveElement()->patternElement());
         gp->classes.back().basenode = true;
         for (auto a : ctx->cursiveElement()->anchor())
             translateAnchor(a, 0);
         if ( ctx->endpat != nullptr )
-            gp = concatenatePattern(gp, ctx->endpat);
+            gp = concatenatePattern(std::move(gp), ctx->endpat);
     } else if ( ctx->MARKBASE() != nullptr ) {
         type = GPOSMarkToBase;
-        gp = concatenatePattern(gp, ctx->midpat, true);
+        gp = concatenatePattern(std::move(gp), ctx->midpat, true);
         auto sz = gp->patternLen();
         bool addedMark = false;
         for (auto mbe : ctx->baseToMarkElement()) {
@@ -589,11 +589,11 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
         if (addedMark)
             gp->classes[sz-1].marked = true;
         if ( ctx->endpat != nullptr )
-            concatenatePattern(gp, ctx->endpat);
+            gp = concatenatePattern(std::move(gp), ctx->endpat);
     } else if ( ctx->markligtok() != nullptr ) {
         type = GPOSMarkToLigature;
         int componentIndex = 0;
-        gp = concatenatePattern(gp, ctx->midpat, true);
+        gp = concatenatePattern(std::move(gp), ctx->midpat, true);
         auto sz = gp->patternLen();
         bool addedMark = false;
         for (auto lme : ctx->ligatureMarkElement()) {
@@ -614,11 +614,11 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
         if (addedMark)
             gp->classes[sz-1].marked = true;
         if ( ctx->endpat != nullptr )
-            concatenatePattern(gp, ctx->endpat);
+            gp = concatenatePattern(std::move(gp), ctx->endpat);
     } else {
         assert(ctx->MARK() != nullptr);
         type = GPOSMarkToMark;
-        gp = concatenatePattern(gp, ctx->midpat, true);
+        gp = concatenatePattern(std::move(gp), ctx->midpat, true);
         auto sz = gp->patternLen();
         bool addedMark = false;
         for (auto mbe : ctx->baseToMarkElement()) {
@@ -634,10 +634,10 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
         if (addedMark)
             gp->classes[sz-1].marked = true;
         if ( ctx->endpat != nullptr )
-            concatenatePattern(gp, ctx->endpat);
+            gp = concatenatePattern(std::move(gp), ctx->endpat);
     }
     assert(gp != nullptr);
-    fc->addPos(gp, type, enumerate);
+    fc->addPos(std::move(gp), type, enumerate);
 
     return nullptr;
 }
@@ -896,7 +896,7 @@ antlrcpp::Any FeatVisitor::visitGdefAttach(FeatParser::GdefAttachContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
 
-    GPat *gp = getLookupPattern(ctx->lookupPattern(), false);
+    GPat::SP gp = getLookupPattern(ctx->lookupPattern(), false);
     if (gp->patternLen() != 1)
         fc->featMsg(hotERROR,
                     "Only one glyph|glyphClass may be present per"
@@ -1353,7 +1353,7 @@ void FeatVisitor::translateGdefLigCaret(FeatParser::LookupPatternContext *pctx,
                                  unsigned short format) {
     assert(stage == vExtract);
 
-    GPat *gp = getLookupPattern(pctx, false);
+    GPat::SP gp = getLookupPattern(pctx, false);
     if (gp->patternLen() != 1)
         fc->featMsg(hotERROR, "Only one glyph|glyphClass may be present per"
                               " LigatureCaret statement");
@@ -1407,9 +1407,9 @@ void FeatVisitor::getValueLiteral(FeatParser::ValueLiteralContext *ctx,
         mi.metrics.push_back(getNum<int16_t>(TOK(ctx->NUM(i))->getText(), 10));
 }
 
-GPat *FeatVisitor::getLookupPattern(FeatParser::LookupPatternContext *ctx,
-                                    bool markedOK) {
-    GPat *gp = new GPat();
+GPat::SP FeatVisitor::getLookupPattern(FeatParser::LookupPatternContext *ctx,
+                                       bool markedOK) {
+    GPat::SP gp = std::make_unique<GPat>();
     assert(stage == vExtract);
 
     for (auto &pe : ctx->lookupPatternElement()) {
@@ -1431,14 +1431,14 @@ GPat::ClassRec FeatVisitor::getLookupPatternElement(FeatParser::LookupPatternEle
     return cr;
 }
 
-GPat *FeatVisitor::concatenatePattern(GPat *gp,
-                                      FeatParser::PatternContext *ctx,
-                                      bool isBaseNode) {
+GPat::SP FeatVisitor::concatenatePattern(GPat::SP gp,
+                                         FeatParser::PatternContext *ctx,
+                                         bool isBaseNode) {
     bool first = true;
     assert(stage == vExtract);
 
     if ( gp == nullptr )
-        gp = new GPat();
+        gp = std::make_unique<GPat>();
 
     for (auto &pe : ctx->patternElement()) {
         GPat::ClassRec cr = getPatternElement(pe, true);
@@ -1449,11 +1449,12 @@ GPat *FeatVisitor::concatenatePattern(GPat *gp,
     return gp;
 }
 
-GPat *FeatVisitor::concatenatePatternElement(GPat *gp, FeatParser::PatternElementContext *ctx) {
+GPat::SP FeatVisitor::concatenatePatternElement(GPat::SP gp,
+                                                FeatParser::PatternElementContext *ctx) {
     assert(stage == vExtract);
 
     if (gp == nullptr)
-        gp = new GPat();
+        gp = std::make_unique<GPat>();
 
     gp->addClass(getPatternElement(ctx, true));
     return gp;
