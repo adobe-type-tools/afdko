@@ -1711,8 +1711,10 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
     MarkOffset = (Offset)size; /* offset from the start of the MarkToBase subtable */
     uint16_t i = 0;
     for (auto mc : si.markClassList) {
-        for (auto &gr : mc.cr.glyphs)
-            MarkRecords.emplace_back(gr.gid, getAnchorOffset(gr.markClassAnchorInfo), i);
+        for (auto &gr : mc.cr.glyphs) {
+            assert(gr.markClassAnchorInfo != nullptr);
+            MarkRecords.emplace_back(gr.gid, getAnchorOffset(*gr.markClassAnchorInfo), i);
+        }
         i++;
     }
     size += sizeof(uint16_t) + (numMarkGlyphs * (2 * sizeof(uint16_t)));
@@ -1882,8 +1884,10 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
     MarkOffset = (Offset)size; /* offset from the start of the MarkToBase subtable */
     uint16_t i = 0;
     for (auto mc : si.markClassList) {
-        for (auto &gr : mc.cr.glyphs)
-            MarkRecords.emplace_back(gr.gid, getAnchorOffset(gr.markClassAnchorInfo), i);
+        for (auto &gr : mc.cr.glyphs) {
+            assert(gr.markClassAnchorInfo != nullptr);
+            MarkRecords.emplace_back(gr.gid, getAnchorOffset(*gr.markClassAnchorInfo), i);
+        }
         i++;
     }
     size += sizeof(uint16_t) + (numMarkGlyphs * (2 * sizeof(uint16_t)));

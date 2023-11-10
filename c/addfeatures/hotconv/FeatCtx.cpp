@@ -1397,8 +1397,9 @@ void FeatCtx::addAnchorByValue(const AnchorDef &a, bool isNull, int componentInd
 /* Add new mark class definition */
 void FeatCtx::addMark(const std::string &name, GPat::ClassRec &cr) {
     cr.markClassName = name;
+    assert(anchorMarkInfo.size() > 0);
     for (auto &gr : cr.glyphs)
-        gr.markClassAnchorInfo = anchorMarkInfo.back();
+        gr.markClassAnchorInfo = std::make_unique<AnchorMarkInfo>(anchorMarkInfo.back());
 
     bool found = openAsCurrentGC(name);
     addGlyphClassToCurrentGC(cr, !found);
