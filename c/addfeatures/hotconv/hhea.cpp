@@ -27,12 +27,12 @@ typedef struct {
     FWord minLeftSideBearing;
     FWord minRightSideBearing;
     FWord xMaxExtent;
-    short caretSlopeRise;
-    short caretSlopeRun;
-    short caretOffset;
-    short reserved[4];
-    short metricDataFormat;
-    unsigned short numberOfLongHorMetrics;
+    int16_t caretSlopeRise;
+    int16_t caretSlopeRun;
+    int16_t caretOffset;
+    int16_t reserved[4];
+    int16_t metricDataFormat;
+    uint16_t numberOfLongHorMetrics;
 } hheaTbl;
 
 /* --------------------------- Context Definition -------------------------- */
@@ -92,7 +92,7 @@ void hheaRead(hotCtx g, int offset, int length) {
     t = hotIn2(g);  // reserved3
     t = hotIn2(g);  // metricDataFormat
     t = hotIn2(g);  // numberOfHMetrics
-    hmtxSetNLongHorMetrics(g, t);
+    h->tbl.numberOfLongHorMetrics = hotIn2(g);
 }
 
 int hheaFill(hotCtx g) {
@@ -142,7 +142,9 @@ int hheaFill(hotCtx g) {
     h->tbl.reserved[2] = 0;
     h->tbl.reserved[3] = 0;
     h->tbl.metricDataFormat = 0;
-    h->tbl.numberOfLongHorMetrics = hmtxGetNLongHorMetrics(g);
+    auto nlhm = g->ctx.hmtxp->getNLongMetrics();
+    if (nlhm != -1)
+        h->tbl.numberOfLongHorMetrics = nlhm;
 
     return 1;
 }

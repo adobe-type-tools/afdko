@@ -41,7 +41,6 @@ void VORGNew(hotCtx g) {
 
 int VORGFill(hotCtx g) {
     VORGCtx h = g->ctx.VORG;
-    long i;
     short dflt;
 
     if ((!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) && (!IS_CID(g))) {
@@ -52,7 +51,7 @@ int VORGFill(hotCtx g) {
     h->tbl.minorVersion = 0;
     h->tbl.defaultVertOriginY = dflt = g->font.TypoAscender;
 
-    for (i = 0; i < g->glyphs.size(); i++) {
+    for (size_t i = 0; i < g->glyphs.size(); i++) {
         if (g->glyphs[i].vOrigY != dflt) {
             VertOriginYMetric *vOrigMtx = dnaNEXT(h->tbl.vertOriginYMetrics);
             vOrigMtx->gid = (unsigned short)i;

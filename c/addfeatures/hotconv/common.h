@@ -342,18 +342,18 @@ typedef struct anonCtx_ *anonCtx;
 typedef struct cmapCtx_ *cmapCtx;
 typedef struct headCtx_ *headCtx;
 typedef struct hheaCtx_ *hheaCtx;
-typedef struct hmtxCtx_ *hmtxCtx;
 typedef struct maxpCtx_ *maxpCtx;
 typedef struct nameCtx_ *nameCtx;
 typedef struct postCtx_ *postCtx;
 typedef struct sfntCtx_ *sfntCtx;
 typedef struct vheaCtx_ *vheaCtx;
-typedef struct vmtxCtx_ *vmtxCtx;
 
 class FeatCtx;
 class GDEF;
 class GPOS;
 class GSUB;
+class hmtx;
+class vmtx;
 
 #define ID_TEXT_SIZE 1024 /* Size of text buffer used to hold identifying info about the current feature for error messages. */
 
@@ -379,13 +379,13 @@ struct hotCtx_ {
         cmapCtx cmap;
         headCtx head;
         hheaCtx hhea;
-        hmtxCtx hmtx;
+        hmtx *hmtxp;
         maxpCtx maxp;
         nameCtx name;
         postCtx post;
         sfntCtx sfnt;
         vheaCtx vhea;
-        vmtxCtx vmtx;
+        vmtx *vmtxp;
     } ctx;
     dnaCtx DnaCTX;
     std::string tmp;

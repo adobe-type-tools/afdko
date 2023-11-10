@@ -5,6 +5,8 @@
 #ifndef ADDFEATURES_HOTCONV_VMTX_H_
 #define ADDFEATURES_HOTCONV_VMTX_H_
 
+#include <vector>
+
 #include "common.h"
 
 #define vmtx_ TAG('v', 'm', 't', 'x')
@@ -17,6 +19,18 @@ void vmtxReuse(hotCtx g);
 void vmtxFree(hotCtx g);
 
 /* Supplementary Functions */
-int vmtxGetNLongVerMetrics(hotCtx g);
+class vmtx {
+ public:
+    vmtx() = delete;
+    explicit vmtx(hotCtx g) : g(g) {}
+    int getNLongMetrics() { return filled ? advanceHeight.size() : -1; }
+    int Fill();
+    void Write();
+ private:
+    std::vector<uFWord> advanceHeight;
+    std::vector<FWord> tsb;
+    bool filled {false};
+    hotCtx g {nullptr};
+};
 
 #endif  // ADDFEATURES_HOTCONV_VMTX_H_

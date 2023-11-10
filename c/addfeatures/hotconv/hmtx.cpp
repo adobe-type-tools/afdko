@@ -8,106 +8,68 @@
 
 #include "hmtx.h"
 
-/* ---------------------------- Table Definition --------------------------- */
-typedef struct {
-    uFWord advanceWidth;
-    FWord lsb;
-} LongHorMetrics;
-
-typedef struct {
-    dnaDCL(LongHorMetrics, hMetrics);
-    dnaDCL(FWord, leftSideBearing);
-} hmtxTbl;
-
-/* --------------------------- Context Definition -------------------------- */
-struct hmtxCtx_ {
-    unsigned short nLongHorMetrics;
-    unsigned short nLeftSideBearings;
-    hmtxTbl tbl; /* Table data */
-    hotCtx g;    /* Package context */
-};
+#include <cassert>
 
 /* --------------------------- Standard Functions -------------------------- */
 
 void hmtxNew(hotCtx g) {
-    hmtxCtx h = (hmtxCtx)MEM_NEW(g, sizeof(struct hmtxCtx_));
-
-    dnaINIT(g->DnaCTX, h->tbl.hMetrics, 315, 14000);
-    dnaINIT(g->DnaCTX, h->tbl.leftSideBearing, 315, 14000);
-
-    /* Link contexts */
-    h->g = g;
-    g->ctx.hmtx = h;
+    g->ctx.hmtxp = new hmtx(g);
 }
 
 int hmtxFill(hotCtx g) {
-    hmtxCtx h = g->ctx.hmtx;
-    int i;
-    int j;
-    FWord width;
+    return g->ctx.hmtxp->Fill();
+}
 
+int hmtx::Fill() {
     /* Fill table */
-    dnaSET_CNT(h->tbl.hMetrics, g->glyphs.size());
-    for (i = 0; i < h->tbl.hMetrics.cnt; i++) {
-        LongHorMetrics *metric = &h->tbl.hMetrics.array[i];
-        metric->advanceWidth = g->glyphs[i].hAdv;
-        metric->lsb = g->glyphs[i].bbox.left;
+    uint32_t glyphCount = g->glyphs.size();
+
+    advanceWidth.reserve(glyphCount);
+    lsb.reserve(glyphCount);
+
+    for (auto &g : g->glyphs) {
+        advanceWidth.push_back(g.hAdv);
+        lsb.push_back(g.bbox.left);
     }
 
     /* Optimize metrics */
-    width = h->tbl.hMetrics.array[h->tbl.hMetrics.cnt - 1].advanceWidth;
-    for (i = h->tbl.hMetrics.cnt - 2; i >= 0; i--) {
-        if (h->tbl.hMetrics.array[i].advanceWidth != width) {
+    FWord width = advanceWidth.back();
+    size_t i;
+    for (i = advanceWidth.size() - 2; i >= 0; i--) {
+        if (advanceWidth[i] != width)
             break;
-        }
     }
+    if (i + 2 != advanceWidth.size())
+        advanceWidth.resize(i+2);
 
-    /* Construct left side-bearing array */
-    dnaSET_CNT(h->tbl.leftSideBearing, h->tbl.hMetrics.cnt - i - 2);
-    j = 0;
-    for (i += 2; i < h->tbl.hMetrics.cnt; i++) {
-        h->tbl.leftSideBearing.array[j++] = h->tbl.hMetrics.array[i].lsb;
-    }
-    h->tbl.hMetrics.cnt -= h->tbl.leftSideBearing.cnt;
-
+    filled = true;
     return 1;
 }
 
 void hmtxWrite(hotCtx g) {
-    long i;
-    hmtxCtx h = g->ctx.hmtx;
+    g->ctx.hmtxp->Write();
+}
 
+void hmtx::Write() {
     /* Write horizontal metrics */
-    for (i = 0; i < h->tbl.hMetrics.cnt; i++) {
-        LongHorMetrics *metric = &h->tbl.hMetrics.array[i];
-        OUT2(metric->advanceWidth);
-        OUT2(metric->lsb);
-    }
+    auto h = this;
+    auto lsbl = lsb.size();
+    auto awl = advanceWidth.size();
 
-    /* Write left side-bearings */
-    for (i = 0; i < h->tbl.leftSideBearing.cnt; i++) {
-        OUT2(h->tbl.leftSideBearing.array[i]);
+    assert(awl <= lsbl);
+    for (size_t i = 0; i < lsbl; i++) {
+        if (i < awl)
+            OUT2(advanceWidth[i]);
+        OUT2(lsb[i]);
     }
 }
 
 void hmtxReuse(hotCtx g) {
+    delete g->ctx.hmtxp;
+    g->ctx.hmtxp = new hmtx(g);
 }
 
 void hmtxFree(hotCtx g) {
-    hmtxCtx h = g->ctx.hmtx;
-    dnaFREE(h->tbl.hMetrics);
-    dnaFREE(h->tbl.leftSideBearing);
-    MEM_FREE(g, g->ctx.hmtx);
-}
-
-/* ------------------------ Supplementary Functions ------------------------ */
-
-int hmtxGetNLongHorMetrics(hotCtx g) {
-    hmtxCtx h = g->ctx.hmtx;
-    return h->tbl.hMetrics.cnt;
-}
-
-void hmtxSetNLongHorMetrics(hotCtx g, int n) {
-    hmtxCtx h = g->ctx.hmtx;
-    h->tbl.hMetrics.cnt = n;
+    delete g->ctx.hmtxp;
+    g->ctx.hmtxp = nullptr;
 }
