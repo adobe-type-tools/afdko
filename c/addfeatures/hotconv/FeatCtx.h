@@ -140,13 +140,16 @@ struct GPat {
     typedef std::unique_ptr<GPat> SP;
     struct GlyphRec {
         explicit GlyphRec(GID g) : gid(g) {}
-        GlyphRec(const GlyphRec &gr) : gid(gr.gid),
-                     markClassAnchorInfo(gr.markClassAnchorInfo) {}
+        GlyphRec(const GlyphRec &gr) : gid(gr.gid) {
+            if (gr.markClassAnchorInfo != nullptr)
+                markClassAnchorInfo = std::make_unique<AnchorMarkInfo>(*gr.markClassAnchorInfo);
+        }
         GlyphRec(GlyphRec &&gr) : gid(gr.gid),
                      markClassAnchorInfo(std::move(gr.markClassAnchorInfo)) {}
         GlyphRec &operator=(const GlyphRec &o) {
             gid = o.gid;
-            markClassAnchorInfo = o.markClassAnchorInfo;
+            if (o.markClassAnchorInfo != nullptr)
+                markClassAnchorInfo = std::make_unique<AnchorMarkInfo>(*o.markClassAnchorInfo);
             return *this;
         }
         operator GID() const { return gid; }
@@ -154,7 +157,7 @@ struct GPat {
         bool operator==(const GlyphRec &gr) const { return gid == gr.gid; }
         bool operator==(GID g) const { return g == gid; }
         GID gid {GID_UNDEF};
-        AnchorMarkInfo markClassAnchorInfo;
+        std::unique_ptr<AnchorMarkInfo> markClassAnchorInfo;
     };
     struct ClassRec {
         ClassRec() : marked(false), gclass(false), backtrack(false), input(false),
