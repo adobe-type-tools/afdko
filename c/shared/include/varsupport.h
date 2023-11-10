@@ -5,8 +5,11 @@
 #ifndef SHARED_INCLUDE_VARSUPPORT_H_
 #define SHARED_INCLUDE_VARSUPPORT_H_
 
-#include <vector>
+#include <cassert>
+#include <iostream>
+#include <map>
 #include <memory>
+#include <vector>
 
 #include "sfntread.h"
 #include "supportfp.h"
@@ -17,12 +20,15 @@
    This library parses tables common tables used by variable OpenType fonts.
 */
 
-#define VARSUPPORT_VERSION CTL_MAKE_VERSION(1, 0, 8)
+#define VARSUPPORT_VERSION CTL_MAKE_VERSION(2, 0, 8)
 #define F2DOT14_TO_FIXED(v) (((Fixed)(v)) << 2)
 #define FIXED_TO_F2DOT14(v) ((var_F2dot14)(((Fixed)(v) + 0x00000002) >> 2))
 
-typedef int16_t var_F2dot14; /* 2.14 fixed point number */
+#define F2DOT14_ZERO 0
+#define F2DOT14_ONE (1 << 14)
+#define F2DOT14_MINUS_ONE (-F2DOT14_ONE)
 
+typedef int16_t var_F2dot14; /* 2.14 fixed point number */
 
 /* glyph width and side-bearing */
 struct var_glyphMetrics {
@@ -69,6 +75,7 @@ class var_axes {
     bool getAxis(uint16_t index, ctlTag *tag, Fixed *minValue,
                  Fixed *defaultValue, Fixed *maxValue, uint16_t *flags);
 
+    int16_t getAxisIndex(ctlTag tag);
     /* normalizeCoords() normalizes a variable font value coordinates.
 
     sscb       - a pointer to shared stream callback functions.
@@ -76,7 +83,7 @@ class var_axes {
     normCoords - where the resulting normalized coordinates are returned as 2.14 fixed point values.
     */
     bool normalizeCoords(ctlSharedStmCallbacks *sscb, Fixed *userCoords, Fixed *normCoords);
-
+    bool normalizeCoord(uint16_t index, Fixed userCoord, Fixed &normCoord);
 
     // Returns the number of named instances from the axes table data.
     uint16_t getInstanceCount() { return instances.size(); }
@@ -106,7 +113,6 @@ class var_axes {
     };
 
     struct segmentMap {
-        uint16_t positionMapCount {0};
         std::vector<axisValueMap> valueMaps;
     };
 
@@ -136,6 +142,65 @@ class var_axes {
 
     std::vector<variationAxis> axes;
     std::vector<variationInstance> instances;
+};
+
+class var_location {
+ public:
+    struct cmpSP {
+        bool operator()(const std::shared_ptr<var_location> &a,
+                        const std::shared_ptr<var_location> &b) const {
+            if (a == nullptr && b == nullptr)
+                return false;
+            if (a == nullptr)
+                return true;
+            if (b == nullptr)
+                return false;
+            return *a < *b;
+        }
+    };
+    var_location() = delete;
+    var_location(std::vector<var_F2dot14> &l) : alocs(std::move(l)) {}
+    var_location(const std::vector<var_F2dot14> &l) : alocs(l) {}
+    bool operator==(const var_location &o) const { return alocs == o.alocs; }
+    bool operator<(const var_location &o) const { return alocs < o.alocs; }
+    auto at(int i) const { return alocs.at(i); }
+    auto size() const { return alocs.size(); }
+    void toerr() const {
+        int i {0};
+        for (auto f2d: alocs) {
+            if (i++ > 0)
+                std::cerr << ", ";
+            std::cerr << var_F2dot14ToFloat(f2d);
+        }
+    }
+    std::vector<var_F2dot14> alocs;
+};
+
+
+class var_location_map {
+ public:
+    uint32_t getIndex(std::shared_ptr<var_location> &l) {
+        const auto [it, success] = locmap.emplace(l, static_cast<uint32_t>(locvec.size()));
+        if (success)
+            locvec.push_back(l);
+        return it->second;
+    }
+    std::shared_ptr<var_location> getLocation(uint32_t i) {
+        if (i >= locvec.size())
+            return nullptr;
+        return locvec[i];
+    }
+    void toerr() {
+        int i {0};
+        for (auto &loc: locvec) {
+            std::cerr << i++ << " ";
+            loc->toerr();
+            std::cerr << std::endl;
+        }
+    }
+ private:
+    std::map<std::shared_ptr<var_location>, uint32_t, var_location::cmpSP> locmap;
+    std::vector<std::shared_ptr<var_location>> locvec;
 };
 
 class itemVariationStore {

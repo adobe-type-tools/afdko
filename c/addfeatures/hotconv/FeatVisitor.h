@@ -89,6 +89,7 @@ class FeatVisitor : public FeatParserBaseVisitor {
     antlrcpp::Any visitInclude(FeatParser::IncludeContext *ctx) override;
     antlrcpp::Any visitLangsysAssign(FeatParser::LangsysAssignContext *ctx) override;
     antlrcpp::Any visitValueRecordDef(FeatParser::ValueRecordDefContext *ctx) override;
+    antlrcpp::Any visitLocationDef(FeatParser::LocationDefContext *ctx) override;
     antlrcpp::Any visitAnchorDef(FeatParser::AnchorDefContext *ctx) override;
     antlrcpp::Any visitGlyphClassAssign(FeatParser::GlyphClassAssignContext *ctx) override;
 
@@ -161,6 +162,9 @@ class FeatVisitor : public FeatParserBaseVisitor {
     // Retrieval visitors
     void getValueRecord(FeatParser::ValueRecordContext *ctx, MetricsInfo &mi);
     void getValueLiteral(FeatParser::ValueLiteralContext *ctx, MetricsInfo &mi);
+    uint32_t getLocationLiteral(FeatParser::LocationLiteralContext *ctx);
+    bool addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *ctx,
+                                std::vector<var_F2dot14> &l);
     GPat::SP getLookupPattern(FeatParser::LookupPatternContext *ctx, bool markedOK);
     GPat::ClassRec getLookupPatternElement(FeatParser::LookupPatternElementContext *ctx,
                                            bool markedOK);
@@ -194,6 +198,8 @@ class FeatVisitor : public FeatParserBaseVisitor {
     antlrcpp::Any visitLookupflagElement(FeatParser::LookupflagElementContext *) override { DEBSTOP }
     antlrcpp::Any visitValueRecord(FeatParser::ValueRecordContext *) override { DEBSTOP }
     antlrcpp::Any visitValueLiteral(FeatParser::ValueLiteralContext *) override { DEBSTOP }
+    antlrcpp::Any visitLocationLiteral(FeatParser::LocationLiteralContext *) override { DEBSTOP }
+    antlrcpp::Any visitAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *) override { DEBSTOP }
     antlrcpp::Any visitAnchor(FeatParser::AnchorContext *) override { DEBSTOP }
     antlrcpp::Any visitLookupPattern(FeatParser::LookupPatternContext *) override { DEBSTOP }
     antlrcpp::Any visitLookupPatternElement(FeatParser::LookupPatternElementContext *) override { DEBSTOP }

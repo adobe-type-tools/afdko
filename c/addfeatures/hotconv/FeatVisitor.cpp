@@ -346,6 +346,16 @@ antlrcpp::Any FeatVisitor::visitValueRecordDef(FeatParser::ValueRecordDefContext
     return nullptr;
 }
 
+antlrcpp::Any FeatVisitor::visitLocationDef(FeatParser::LocationDefContext *ctx) {
+    if ( stage != vExtract )
+        return nullptr;
+
+    uint32_t loc_idx = getLocationLiteral(ctx->locationLiteral());
+    fc->addLocationDef(TOK(ctx->label())->getText(), loc_idx);
+
+    return nullptr;
+}
+
 antlrcpp::Any FeatVisitor::visitAnchorDef(FeatParser::AnchorDefContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
@@ -1405,6 +1415,52 @@ void FeatVisitor::getValueLiteral(FeatParser::ValueLiteralContext *ctx,
     assert(cnt == 1 || cnt == 4);
     for (int16_t i = 0; i < cnt; ++i)
         mi.metrics.push_back(getNum<int16_t>(TOK(ctx->NUM(i))->getText(), 10));
+}
+
+uint32_t FeatVisitor::getLocationLiteral(FeatParser::LocationLiteralContext *ctx) {
+    uint16_t ac = fc->getAxisCount();
+    if (ac == 0) {
+        fc->featMsg(hotERROR, "Location literal in non-variable font");
+        return 0;
+    }
+    std::vector<int16_t> l(ac, 0);
+    for (auto all : ctx->axisLocationLiteral()) {
+        if (!addAxisLocationLiteral(all, l))
+            return 0;
+    }
+    return fc->locationToIndex(std::make_shared<var_location>(l));
+}
+
+bool FeatVisitor::addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *ctx,
+                                         std::vector<var_F2dot14> &l) {
+    Tag tag = fc->str2tag(TOK(ctx->tag())->getText());
+    int16_t axisIndex = fc->axisTagToIndex(tag);
+    if (axisIndex < 0)
+        return false;
+    assert(axisIndex < l.size());
+
+    std::string unit = TOK(ctx->AXISUNIT())->getText();
+    if (unit == "d") {
+        fc->featMsg(hotFATAL, "XXX No support for design units yet.");
+        return false;
+    }
+    Fixed v = getFixed<Fixed>(ctx->fixedNum());
+    if (unit == "u") {
+        assert(fc->g->ctx.axes != nullptr);
+        fc->g->ctx.axes->normalizeCoord(axisIndex, v, v);
+    } else {
+        assert(unit == "n");
+    }
+
+    var_F2dot14 f2v = FIXED_TO_F2DOT14(v);
+    f2v = fc->validAxisLocation(f2v);
+    if (l[axisIndex] != 0) {
+        TOK(ctx->tag());
+        fc->featMsg(hotERROR, "Already set location for axis '%c%c%c%c'.", TAG_ARG(tag));
+        return false;
+    }
+    l[axisIndex] = f2v;
+    return true;
 }
 
 GPat::SP FeatVisitor::getLookupPattern(FeatParser::LookupPatternContext *ctx,

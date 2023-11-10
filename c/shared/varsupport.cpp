@@ -19,12 +19,6 @@
 #define FIXED_ZERO 0
 #define FIXED_ONE 0x00010000
 #define FIXED_MINUS_ONE (-FIXED_ONE)
-#define F2DOT14_ZERO 0
-#define F2DOT14_ONE (1 << 14)
-#define F2DOT14_MINUS_ONE (-F2DOT14_ONE)
-
-#define F2DOT14_TO_FIXED(v) (((Fixed)(v)) << 2)
-#define FIXED_TO_F2DOT14(v) ((var_F2dot14)(((Fixed)(v) + 0x00000002) >> 2))
 
 /* ----------------------------- variation font table constants ---------------------------- */
 
@@ -116,25 +110,25 @@ bool var_axes::load_avar(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     for (i = 0; i < avarAxisCount; i++) {
         segmentMap seg;
         unsigned short j;
-        int hasZeroMap = 0;
-        seg.positionMapCount = sscb->read2(sscb);
+        bool hasZeroMap {false};
+        uint16_t positionMapCount = sscb->read2(sscb);
         if (table->length < sscb->tell(sscb) - table->offset +
-                            AVAR_AXIS_VALUE_MAP_SIZE * seg.positionMapCount) {
+                            AVAR_AXIS_VALUE_MAP_SIZE * positionMapCount) {
             sscb->message(sscb, "avar axis value map out of bounds");
             success = false;
             break;
         }
 
-        for (j = 0; j < seg.positionMapCount; j++) {
+        for (j = 0; j < positionMapCount; j++) {
             Fixed fromCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
             Fixed toCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
 
-            if (j > 0 && j < seg.positionMapCount - 1 && fromCoord == 0 && toCoord == 0) {
+            if (j > 0 && j < positionMapCount - 1 && fromCoord == 0 && toCoord == 0) {
                 hasZeroMap = 1;
             }
             seg.valueMaps.emplace_back(fromCoord, toCoord);
         }
-        if (seg.positionMapCount < 3
+        if (positionMapCount < 3
             || seg.valueMaps.front().fromCoord != FIXED_MINUS_ONE
             || seg.valueMaps.front().toCoord != FIXED_MINUS_ONE
             || !hasZeroMap
@@ -265,6 +259,16 @@ bool var_axes::getAxis(uint16_t index, ctlTag *tag, Fixed *minValue,
         return false;
 }
 
+int16_t var_axes::getAxisIndex(ctlTag tag) {
+    int i = 0;
+    for (auto &a: axes) {
+        if (a.tag == tag)
+            return i;
+        i++;
+    }
+    return -1;
+}
+
 Fixed var_axes::defaultNormalizeAxis(const variationAxis &axis,
                                             Fixed userValue) {
     if (userValue < axis.defaultValue) {
@@ -315,29 +319,34 @@ Fixed var_axes::applySegmentMap(const segmentMap &seg, Fixed value) {
                                       endFromVal - startFromVal));
 }
 
-bool var_axes::normalizeCoords(ctlSharedStmCallbacks *sscb, Fixed *userCoords, Fixed *normCoords) {
-    uint16_t i;
-    uint16_t axisCount;
+bool var_axes::normalizeCoord(uint16_t index, Fixed userCoord, Fixed &normCoord) {
+    if (index >= axes.size())
+        return false;
 
+    normCoord = defaultNormalizeAxis(axes[index], userCoord);
+
+    if (index >= segmentMaps.size())
+        return true;
+
+    segmentMap &seg = segmentMaps[index];
+    if (seg.valueMaps.size() > 0)
+
+        normCoord = applySegmentMap(seg, normCoord);
+    return true;
+}
+
+bool var_axes::normalizeCoords(ctlSharedStmCallbacks *sscb, Fixed *userCoords, Fixed *normCoords) {
     if (axes.size() < 1) {
         sscb->message(sscb, "var_normalizeCoords: invalid axis table");
         return false;
     }
 
-    /* default normalization */
-    for (i = 0; i < axes.size(); i++) {
-        normCoords[i] = defaultNormalizeAxis(axes[i], userCoords[i]);
-    }
-
-    /* modify the default normalized Coords with the axis variations table */
-    if (segmentMaps.size() > 0) {
-        for (i = 0; i < axes.size(); i++) {
-            segmentMap &seg = segmentMaps[i];
-            if (seg.positionMapCount > 0)
-                normCoords[i] = applySegmentMap(seg, normCoords[i]);
+    for (size_t i = 0; i < axes.size(); i++) {
+        if (!normalizeCoord(i, userCoords[i], normCoords[i])) {
+            sscb->message(sscb, "var_normalizeCoords: invalid axis %d", i);
+            return false;
         }
     }
-
     return true;
 }
 
@@ -347,7 +356,7 @@ int var_axes::findInstance(float *userCoords, uint16_t axisCount,
     if (axisCount != axes.size())
         return -1;
 
-    for (int i = 0; i < instances.size(); i++) {
+    for (size_t i = 0; i < instances.size(); i++) {
         bool match = true;
         for (uint16_t axis = 0; axis < axisCount; axis++) {
             if (userCoords[axis] != instances[i].coordinates[axis]) {
@@ -646,6 +655,7 @@ float itemVariationStore::applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
         return netAdjustment;
     }
 
+    // XXX can probably just use regions directly
     subRegionCount = getRegionIndices(pair.outerIndex, regionIndices,
                                       regionListCount);
     if (subRegionCount == 0) {

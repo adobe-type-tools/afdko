@@ -674,6 +674,16 @@ class FeatCtx {
     bool aaltCheckRule(int type, GPat::SP &targ, GPat::SP &repl);
     void storeRuleInfo(const GPat::SP &targ, const GPat::SP &repl);
 
+    // Variable
+    std::unordered_map<std::string, uint32_t> locationDefs;
+
+    uint16_t getAxisCount();
+    var_F2dot14 validAxisLocation(var_F2dot14 v);
+    int16_t axisTagToIndex(Tag tag);
+    uint32_t locationToIndex(std::shared_ptr<var_location> vl);
+    bool addLocationDef(const std::string &name, uint32_t loc_idx);
+    uint32_t getLocationDef(const std::string &name);
+
     hotCtx g;
     FeatVisitor *root_visitor {nullptr}, *current_visitor {nullptr};
 };

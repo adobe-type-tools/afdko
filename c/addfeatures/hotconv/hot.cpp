@@ -80,6 +80,65 @@ static void *hot_manage(ctlMemoryCallbacks *cb, void *old, size_t size) {
     }
 }
 
+// ctlSharedStmCallbacks adapter for varsupport (terrible but temporary)
+static void *sscbMemNew(ctlSharedStmCallbacks *h, size_t size) {
+    return hotMemNew((hotCtx) h->direct_ctx, size);
+}
+
+static void sscbMemFree(ctlSharedStmCallbacks *h, void *ptr) {
+    hotMemFree((hotCtx) h->direct_ctx, ptr);
+}
+
+static void sscbSeek(ctlSharedStmCallbacks *h, long offset) {
+    hotCtx g = (hotCtx) h->direct_ctx;
+    g->cb.stm.seek(&g->cb.stm, g->in_stream, offset);
+    g->bufleft = 0;
+}
+
+static long sscbTell(ctlSharedStmCallbacks *h) {
+    hotCtx g = (hotCtx) h->direct_ctx;
+    return g->cb.stm.tell(&g->cb.stm, g->in_stream) - g->bufleft;
+}
+
+static void sscbRead(ctlSharedStmCallbacks *h, size_t count, char *ptr) {
+    hotCtx g = (hotCtx) h->direct_ctx;
+    hotMsg(g, hotFATAL, "General reads not supported");
+}
+
+static uint8_t sscbRead1(ctlSharedStmCallbacks *h) {
+    return hin1((hotCtx) h->direct_ctx);
+}
+
+static uint16_t sscbRead2(ctlSharedStmCallbacks *h) {
+    return hotIn2((hotCtx) h->direct_ctx);
+}
+
+static uint32_t sscbRead4(ctlSharedStmCallbacks *h) {
+    return hotIn4((hotCtx) h->direct_ctx);
+}
+
+static void sscbMessage(ctlSharedStmCallbacks *h, const char *msg, ...) {
+    va_list ap;
+    va_start(ap, msg);
+    hotCtx g = (hotCtx) h->direct_ctx;
+    g->logger->vlog(sWARNING, msg, ap);
+    va_end(ap);
+}
+
+void hotMakeSSC(hotCtx g, ctlSharedStmCallbacks &c) {
+    c.direct_ctx = (void *) g;
+    c.dna = g->DnaCTX;
+    c.memNew = sscbMemNew;
+    c.memFree = sscbMemFree;
+    c.seek = sscbSeek;
+    c.tell = sscbTell;
+    c.read = sscbRead;
+    c.read1 = sscbRead1;
+    c.read2 = sscbRead2;
+    c.read4 = sscbRead4;
+    c.message = sscbMessage;
+}
+
 hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
               std::shared_ptr<slogger> logger) {
     time_t now;
@@ -133,9 +192,12 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->ctx.vhea = NULL;
     g->ctx.vmtxp = nullptr;
     g->ctx.VORG = NULL;
+    g->ctx.axes = nullptr;
 
     g->DnaCTX = dnaNew(&hot_memcb, DNA_CHECK_ARGS);
     dnaINIT(g->DnaCTX, g->note, 1024, 1024);
+
+    hotMakeSSC(g, g->sscb);
 
     /* Initialize font information */
 #if HOT_DEBUG
@@ -285,8 +347,23 @@ static void hotReadTables(hotCtx g) {
                     } else {
                         hotMsg(g, hotWARNING, "CFF2 sfnt does not include post table");
                     }
-                    // check for fvar, if there add variable tables as anon
-                    // except for MVAR, which we read in and write back out
+                    table = sfrGetTableByTag(sfr, fvar_);
+                    if (table != NULL) {
+                        sfntOverrideTable(g, fvar_, table->offset, table->length);
+                        g->ctx.axes = new var_axes(sfr, &g->sscb);
+                    }
+                    table = sfrGetTableByTag(sfr, avar_);
+                    if (table != NULL) {
+                        sfntOverrideTable(g, avar_, table->offset, table->length);
+                    }
+                    table = sfrGetTableByTag(sfr, HVAR_);
+                    if (table != NULL) {
+                        sfntOverrideTable(g, HVAR_, table->offset, table->length);
+                    }
+                    // temporary, will read in and write back out
+                    table = sfrGetTableByTag(sfr, MVAR_);
+                    if (table != NULL)
+                        sfntOverrideTable(g, MVAR_, table->offset, table->length);
                 }
             }
             // call name function to read in extra labels
@@ -705,6 +782,8 @@ static unsigned int dsigCnt = 0;
 static void hotReuse(hotCtx g) {
     g->hadError = false;
     g->convertFlags = 0;
+    delete g->ctx.axes;
+    g->ctx.axes = nullptr;
 
     initOverrides(g);
     sfntReuse(g);
@@ -749,6 +828,9 @@ void hotConvert(hotCtx g) {
 void hotFree(hotCtx g) {
     int i;
 
+    g->locationMap.toerr();
+
+    delete g->ctx.axes;
     sfntFree(g);
     mapFree(g);
     delete g->ctx.feat;
@@ -1241,10 +1323,10 @@ char hotFillBuf(hotCtx g) {
 }
 
 /* Input OTF data as 2-byte number in big-endian order */
-short hotIn2(hotCtx g) {
+int16_t hotIn2(hotCtx g) {
     uint16_t result;
-    result = (uint16_t)hin1(g) << 8;
-    result |= (uint16_t)hin1(g);
+    result = (uint8_t)hin1(g) << 8;
+    result |= (uint8_t)hin1(g);
     return (int16_t) result;
 }
 
