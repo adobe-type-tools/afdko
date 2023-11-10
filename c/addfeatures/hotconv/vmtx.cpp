@@ -6,115 +6,69 @@
  * Vertical metrics table.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "vmtx.h"
-#include "dynarr.h"
-/* ---------------------------- Table Definition --------------------------- */
-typedef struct {
-    uFWord advanceHeight;
-    FWord tsb;
-} LongVerMetrics;
 
-typedef struct {
-    dnaDCL(LongVerMetrics, vMetrics);
-    dnaDCL(FWord, topSideBearing);
-} vmtxTbl;
-
-/* --------------------------- Context Definition -------------------------- */
-
-typedef struct {
-    GID gid;
-    uFWord advanceHeight;
-} PropInfo;
-
-struct vmtxCtx_ {
-    vmtxTbl tbl; /* Table data */
-    hotCtx g;    /* Package context */
-};
-
-/* --------------------------- Standard Functions -------------------------- */
+#include <cassert>
 
 void vmtxNew(hotCtx g) {
-    vmtxCtx h = (vmtxCtx)MEM_NEW(g, sizeof(struct vmtxCtx_));
-
-    dnaINIT(g->DnaCTX, h->tbl.vMetrics, 14000, 14000);
-    dnaINIT(g->DnaCTX, h->tbl.topSideBearing, 14000, 14000);
-
-    /* Link contexts */
-    h->g = g;
-    g->ctx.vmtx = h;
+    g->ctx.vmtxp = new vmtx(g);
 }
 
 int vmtxFill(hotCtx g) {
-    vmtxCtx h = g->ctx.vmtx;
-    long i;
-    int j;
-    FWord height;
+    return g->ctx.vmtxp->Fill();
+}
 
-    if ((!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) && (!IS_CID(g))) {
+int vmtx::Fill() {
+    uint32_t glyphCount = g->glyphs.size();
+
+    if ((!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) && (!IS_CID(g)))
         return 0;
-    }
 
-    /* Fill table */
-    dnaSET_CNT(h->tbl.vMetrics, g->glyphs.size());
-    for (i = 0; i < h->tbl.vMetrics.cnt; i++) {
-        LongVerMetrics *metric = &h->tbl.vMetrics.array[i];
-        metric->advanceHeight = -g->glyphs[i].vAdv;
-        metric->tsb = g->glyphs[i].vOrigY - g->glyphs[i].bbox.top;
+    advanceHeight.reserve(glyphCount);
+    tsb.reserve(glyphCount);
+
+    for (auto &g : g->glyphs) {
+        advanceHeight.push_back(-g.vAdv);
+        tsb.push_back(g.vOrigY - g.bbox.top);
     }
 
     /* Optimize metrics */
-    height = h->tbl.vMetrics.array[h->tbl.vMetrics.cnt - 1].advanceHeight;
-    for (i = h->tbl.vMetrics.cnt - 2; i >= 0; i--) {
-        if (h->tbl.vMetrics.array[i].advanceHeight != height) {
+    FWord height = advanceHeight.back();
+    int64_t i;
+    for (i = (int64_t)advanceHeight.size() - 2; i >= 0; i--) {
+        if (advanceHeight[i] != height)
             break;
-        }
     }
+    if (i + 2 != (int64_t)advanceHeight.size())
+        advanceHeight.resize(i+2);
 
-    /* Construct top side-bearing array */
-    dnaSET_CNT(h->tbl.topSideBearing, h->tbl.vMetrics.cnt - i - 2);
-    j = 0;
-    for (i += 2; i < h->tbl.vMetrics.cnt; i++) {
-        h->tbl.topSideBearing.array[j++] = h->tbl.vMetrics.array[i].tsb;
-    }
-    h->tbl.vMetrics.cnt -= h->tbl.topSideBearing.cnt;
-
+    filled = true;
     return 1;
 }
 
 void vmtxWrite(hotCtx g) {
-    long i;
-    vmtxCtx h = g->ctx.vmtx;
+    g->ctx.vmtxp->Write();
+}
 
-    /* Write vertical metrics */
-    for (i = 0; i < h->tbl.vMetrics.cnt; i++) {
-        LongVerMetrics *metric = &h->tbl.vMetrics.array[i];
-        OUT2(metric->advanceHeight);
-        OUT2(metric->tsb);
-    }
+void vmtx::Write() {
+    auto h = this;
+    auto tsbl = tsb.size();
+    auto ahl = advanceHeight.size();
 
-    /* Write top side-bearings */
-    for (i = 0; i < h->tbl.topSideBearing.cnt; i++) {
-        OUT2(h->tbl.topSideBearing.array[i]);
+    assert(ahl <= tsbl);
+    for (size_t i = 0; i < tsbl; i++) {
+        if (i < ahl)
+            OUT2(advanceHeight[i]);
+        OUT2(tsb[i]);
     }
 }
 
 void vmtxReuse(hotCtx g) {
+    delete g->ctx.vmtxp;
+    g->ctx.vmtxp = new vmtx(g);
 }
 
 void vmtxFree(hotCtx g) {
-    vmtxCtx h = g->ctx.vmtx;
-    dnaFREE(h->tbl.vMetrics);
-    dnaFREE(h->tbl.topSideBearing);
-    MEM_FREE(g, g->ctx.vmtx);
-}
-
-/* ------------------------ Supplementary Functions ------------------------ */
-
-/* Must be called after vmtxFill() */
-int vmtxGetNLongVerMetrics(hotCtx g) {
-    vmtxCtx h = g->ctx.vmtx;
-    return h->tbl.vMetrics.cnt;
+    delete g->ctx.vmtxp;
+    g->ctx.vmtxp = nullptr;
 }
