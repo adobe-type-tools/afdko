@@ -2705,3 +2705,51 @@ void FeatCtx::storeRuleInfo(const GPat::SP &targ, const GPat::SP &repl) {
         aaltAddAlternates(*crp, repl->classes[0]);
     }
 }
+
+// -------------------------------- Variable ----------------------------------
+
+uint16_t FeatCtx::getAxisCount() {
+    if (g->ctx.axes == nullptr)
+        return 0;
+    return g->ctx.axes->getAxisCount();
+}
+
+var_F2dot14 FeatCtx::validAxisLocation(var_F2dot14 v) {
+    if (v > F2DOT14_ONE) {
+        featMsg(hotWARNING, "Normalized axis value > 1, will be rounded down.");
+        v = F2DOT14_ONE;
+    } else if (v < F2DOT14_MINUS_ONE) {
+        featMsg(hotWARNING, "Normalized axis value < -1, will be rounded up.");
+        v = F2DOT14_MINUS_ONE;
+    }
+    return v;
+}
+
+int16_t FeatCtx::axisTagToIndex(Tag tag) {
+    if (g->ctx.axes == nullptr) {
+        featMsg(hotERROR, "Reference to axis '%c%c%c%c' in non-variable font", TAG_ARG(tag));
+        return -1;
+    }
+    auto i = g->ctx.axes->getAxisIndex(tag);
+    if (i == -1)
+        featMsg(hotERROR, "Axis '%c%c%c%c' not found", TAG_ARG(tag));
+    return i;
+}
+
+uint32_t FeatCtx::locationToIndex(std::shared_ptr<var_location> vl) {
+    return g->locationMap.getIndex(vl);
+}
+
+bool FeatCtx::addLocationDef(const std::string &name, uint32_t loc_idx) {
+    const auto [it, success] = locationDefs.emplace(name, loc_idx);
+    return success;
+}
+
+uint32_t FeatCtx::getLocationDef(const std::string &name) {
+    auto search = locationDefs.find(name);
+    if ( search == locationDefs.end() ) {
+        featMsg(hotERROR, "Named location '%s' is not in list of named location records.", name.c_str());
+        return 0;
+    }
+    return search->second;
+}

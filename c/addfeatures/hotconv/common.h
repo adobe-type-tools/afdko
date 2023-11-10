@@ -24,6 +24,7 @@
 #include "hotconv.h"
 #include "dynarr.h"
 #include "cffread_abs.h"
+#include "varsupport.h"
 #include "ctutil.h"
 
 #if WIN32
@@ -80,6 +81,11 @@ typedef uint32_t Tag;
 
 #define CFF__ TAG('C', 'F', 'F', ' ')
 #define CFF2_ TAG('C', 'F', 'F', '2')
+#define fvar_ TAG('f', 'v', 'a', 'r')
+#define avar_ TAG('a', 'v', 'a', 'r')
+#define HVAR_ TAG('H', 'V', 'A', 'R')
+#define MVAR_ TAG('M', 'V', 'A', 'R')
+#define VVAR_ TAG('V', 'V', 'A', 'R')
 
 inline std::string TAG_STR(Tag t) {
     std::string s;
@@ -364,6 +370,7 @@ struct hotCtx_ {
     FontInfo_ font;  /* Font information */
     std::vector<hotGlyphInfo> glyphs;
     hotCallbacks cb; /* Client callbacks */
+    ctlSharedStmCallbacks sscb;
     struct {         /* --- Package contexts */
         mapCtx map;
         FeatCtx *feat;
@@ -386,6 +393,7 @@ struct hotCtx_ {
         sfntCtx sfnt;
         vheaCtx vhea;
         vmtx *vmtxp;
+        var_axes *axes;
     } ctx;
     dnaCtx DnaCTX;
     std::string tmp;
@@ -398,6 +406,7 @@ struct hotCtx_ {
     char *bufnext;         /* Next byte available in input buffer */
     long bufleft;          /* Number of bytes available in input buffer */
 
+    var_location_map locationMap;
     std::shared_ptr<slogger> logger;
     std::shared_ptr<GOADB> goadb;
 };
