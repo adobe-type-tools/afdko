@@ -1,5 +1,5 @@
 
-// Generated from FeatLexer.g4 by ANTLR 4.9.3
+// Generated from FeatLexer.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -23,26 +23,28 @@ public:
     POSITION = 38, POSITION_v = 39, PARAMETERS = 40, FEATURE_NAMES = 41, 
     CV_PARAMETERS = 42, CV_UI_LABEL = 43, CV_TOOLTIP = 44, CV_SAMPLE_TEXT = 45, 
     CV_PARAM_LABEL = 46, CV_CHARACTER = 47, SIZEMENUNAME = 48, CONTOURPOINT = 49, 
-    ANCHOR = 50, ANCHOR_DEF = 51, VALUE_RECORD_DEF = 52, MARK = 53, MARK_CLASS = 54, 
-    CURSIVE = 55, MARKBASE = 56, MARKLIG = 57, MARKLIG_v = 58, LIG_COMPONENT = 59, 
-    KNULL = 60, BASE = 61, HA_BTL = 62, VA_BTL = 63, HA_BSL = 64, VA_BSL = 65, 
-    GDEF = 66, GLYPH_CLASS_DEF = 67, ATTACH = 68, LIG_CARET_BY_POS = 69, 
-    LIG_CARET_BY_IDX = 70, HEAD = 71, FONT_REVISION = 72, HHEA = 73, ASCENDER = 74, 
-    DESCENDER = 75, LINE_GAP = 76, CARET_OFFSET = 77, NAME = 78, NAMEID = 79, 
-    OS_2 = 80, FS_TYPE = 81, FS_TYPE_v = 82, OS2_LOWER_OP_SIZE = 83, OS2_UPPER_OP_SIZE = 84, 
-    PANOSE = 85, TYPO_ASCENDER = 86, TYPO_DESCENDER = 87, TYPO_LINE_GAP = 88, 
-    WIN_ASCENT = 89, WIN_DESCENT = 90, X_HEIGHT = 91, CAP_HEIGHT = 92, WEIGHT_CLASS = 93, 
-    WIDTH_CLASS = 94, VENDOR = 95, UNICODE_RANGE = 96, CODE_PAGE_RANGE = 97, 
-    FAMILY_CLASS = 98, STAT = 99, ELIDED_FALLBACK_NAME = 100, ELIDED_FALLBACK_NAME_ID = 101, 
-    DESIGN_AXIS = 102, AXIS_VALUE = 103, FLAG = 104, LOCATION = 105, AXIS_EAVN = 106, 
-    AXIS_OSFA = 107, VHEA = 108, VERT_TYPO_ASCENDER = 109, VERT_TYPO_DESCENDER = 110, 
-    VERT_TYPO_LINE_GAP = 111, VMTX = 112, VERT_ORIGIN_Y = 113, VERT_ADVANCE_Y = 114, 
-    LCBRACE = 115, RCBRACE = 116, LBRACKET = 117, RBRACKET = 118, HYPHEN = 119, 
-    SEMI = 120, EQUALS = 121, MARKER = 122, COMMA = 123, QUOTE = 124, GCLASS = 125, 
-    CID = 126, ESCGNAME = 127, NAMELABEL = 128, EXTNAME = 129, POINTNUM = 130, 
-    NUMEXT = 131, NUMOCT = 132, NUM = 133, CATCHTAG = 134, A_WHITESPACE = 135, 
-    A_LABEL = 136, A_LBRACE = 137, A_CLOSE = 138, A_LINE = 139, I_WHITESPACE = 140, 
-    I_RPAREN = 141, IFILE = 142, I_LPAREN = 143, STRVAL = 144, EQUOTE = 145
+    ANCHOR = 50, ANCHOR_DEF = 51, VALUE_RECORD_DEF = 52, LOCATION_DEF = 53, 
+    MARK = 54, MARK_CLASS = 55, CURSIVE = 56, MARKBASE = 57, MARKLIG = 58, 
+    MARKLIG_v = 59, LIG_COMPONENT = 60, KNULL = 61, BASE = 62, HA_BTL = 63, 
+    VA_BTL = 64, HA_BSL = 65, VA_BSL = 66, GDEF = 67, GLYPH_CLASS_DEF = 68, 
+    ATTACH = 69, LIG_CARET_BY_POS = 70, LIG_CARET_BY_IDX = 71, HEAD = 72, 
+    FONT_REVISION = 73, HHEA = 74, ASCENDER = 75, DESCENDER = 76, LINE_GAP = 77, 
+    CARET_OFFSET = 78, NAME = 79, NAMEID = 80, OS_2 = 81, FS_TYPE = 82, 
+    FS_TYPE_v = 83, OS2_LOWER_OP_SIZE = 84, OS2_UPPER_OP_SIZE = 85, PANOSE = 86, 
+    TYPO_ASCENDER = 87, TYPO_DESCENDER = 88, TYPO_LINE_GAP = 89, WIN_ASCENT = 90, 
+    WIN_DESCENT = 91, X_HEIGHT = 92, CAP_HEIGHT = 93, WEIGHT_CLASS = 94, 
+    WIDTH_CLASS = 95, VENDOR = 96, UNICODE_RANGE = 97, CODE_PAGE_RANGE = 98, 
+    FAMILY_CLASS = 99, STAT = 100, ELIDED_FALLBACK_NAME = 101, ELIDED_FALLBACK_NAME_ID = 102, 
+    DESIGN_AXIS = 103, AXIS_VALUE = 104, FLAG = 105, LOCATION = 106, AXIS_EAVN = 107, 
+    AXIS_OSFA = 108, VHEA = 109, VERT_TYPO_ASCENDER = 110, VERT_TYPO_DESCENDER = 111, 
+    VERT_TYPO_LINE_GAP = 112, VMTX = 113, VERT_ORIGIN_Y = 114, VERT_ADVANCE_Y = 115, 
+    LCBRACE = 116, RCBRACE = 117, LBRACKET = 118, RBRACKET = 119, LPAREN = 120, 
+    RPAREN = 121, HYPHEN = 122, SEMI = 123, EQUALS = 124, MARKER = 125, 
+    COMMA = 126, COLON = 127, QUOTE = 128, GCLASS = 129, AXISUNIT = 130, 
+    CID = 131, ESCGNAME = 132, NAMELABEL = 133, EXTNAME = 134, POINTNUM = 135, 
+    NUMEXT = 136, NUMOCT = 137, NUM = 138, CATCHTAG = 139, A_WHITESPACE = 140, 
+    A_LABEL = 141, A_LBRACE = 142, A_CLOSE = 143, A_LINE = 144, I_WHITESPACE = 145, 
+    I_RPAREN = 146, IFILE = 147, I_LPAREN = 148, STRVAL = 149, EQUOTE = 150
   };
 
   enum {
@@ -50,7 +52,8 @@ public:
   };
 
   explicit FeatLexer(antlr4::CharStream *input);
-  ~FeatLexer();
+
+  ~FeatLexer() override;
 
 
    std::string anon_tag;
@@ -74,34 +77,31 @@ public:
        return true;
    }
 
-  virtual std::string getGrammarFileName() const override;
-  virtual const std::vector<std::string>& getRuleNames() const override;
 
-  virtual const std::vector<std::string>& getChannelNames() const override;
-  virtual const std::vector<std::string>& getModeNames() const override;
-  virtual const std::vector<std::string>& getTokenNames() const override; // deprecated, use vocabulary instead
-  virtual antlr4::dfa::Vocabulary& getVocabulary() const override;
+  std::string getGrammarFileName() const override;
 
-  virtual const std::vector<uint16_t> getSerializedATN() const override;
-  virtual const antlr4::atn::ATN& getATN() const override;
+  const std::vector<std::string>& getRuleNames() const override;
 
-  virtual void action(antlr4::RuleContext *context, size_t ruleIndex, size_t actionIndex) override;
-  virtual bool sempred(antlr4::RuleContext *_localctx, size_t ruleIndex, size_t predicateIndex) override;
+  const std::vector<std::string>& getChannelNames() const override;
+
+  const std::vector<std::string>& getModeNames() const override;
+
+  const antlr4::dfa::Vocabulary& getVocabulary() const override;
+
+  antlr4::atn::SerializedATNView getSerializedATN() const override;
+
+  const antlr4::atn::ATN& getATN() const override;
+
+  void action(antlr4::RuleContext *context, size_t ruleIndex, size_t actionIndex) override;
+
+  bool sempred(antlr4::RuleContext *_localctx, size_t ruleIndex, size_t predicateIndex) override;
+
+  // By default the static state used to implement the lexer is lazily initialized during the first
+  // call to the constructor. You can call this function if you wish to initialize the static state
+  // ahead of time.
+  static void initialize();
 
 private:
-  static std::vector<antlr4::dfa::DFA> _decisionToDFA;
-  static antlr4::atn::PredictionContextCache _sharedContextCache;
-  static std::vector<std::string> _ruleNames;
-  static std::vector<std::string> _tokenNames;
-  static std::vector<std::string> _channelNames;
-  static std::vector<std::string> _modeNames;
-
-  static std::vector<std::string> _literalNames;
-  static std::vector<std::string> _symbolicNames;
-  static antlr4::dfa::Vocabulary _vocabulary;
-  static antlr4::atn::ATN _atn;
-  static std::vector<uint16_t> _serializedATN;
-
 
   // Individual action functions triggered by action() above.
   void A_LABELAction(antlr4::RuleContext *context, size_t actionIndex);
@@ -109,9 +109,5 @@ private:
   // Individual semantic predicate functions triggered by sempred() above.
   bool A_CLOSESempred(antlr4::RuleContext *_localctx, size_t predicateIndex);
 
-  struct Initializer {
-    Initializer();
-  };
-  static Initializer _init;
 };
 

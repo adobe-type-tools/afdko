@@ -25,6 +25,7 @@ topLevelStatement:
     | mark_statement
     | anchorDef
     | valueRecordDef
+    | locationDef
     )
     SEMI
 ;
@@ -51,6 +52,10 @@ anchorDef:
 
 valueRecordDef:
     VALUE_RECORD_DEF valueLiteral label
+;
+
+locationDef:
+    LOCATION_DEF locationLiteral label
 ;
 
 featureBlock:
@@ -188,7 +193,36 @@ valueRecord:
 ;
 
 valueLiteral:
-    ( BEGINVALUE NUM NUM NUM NUM ENDVALUE ) | NUM
+      NUM
+    | ( BEGINVALUE NUM NUM NUM NUM ENDVALUE )
+    | parenLocationValue
+    | ( LPAREN locationMultiValueLiteral+ RPAREN )
+    | ( BEGINVALUE parenLocationValue parenLocationValue
+                   parenLocationValue parenLocationValue ENDVALUE )
+;
+
+parenLocationValue:
+    LPAREN locationValueLiteral+ RPAREN
+;
+
+locationValueLiteral:
+    locationSpecifier COLON NUM
+;
+
+locationMultiValueLiteral:
+    locationSpecifier COLON BEGINVALUE NUM NUM NUM NUM ENDVALUE
+;
+
+locationSpecifier:
+    locationLiteral | label
+;
+
+locationLiteral:
+    axisLocationLiteral ( COMMA axisLocationLiteral )*
+;
+
+axisLocationLiteral:
+    tag EQUALS fixedNum AXISUNIT
 ;
 
 cursiveElement:
@@ -495,15 +529,15 @@ glyph:
 ;
 
 glyphName:
-    ESCGNAME | NAMELABEL | EXTNAME | NOTDEF
+    ESCGNAME | NAMELABEL | EXTNAME | AXISUNIT | NOTDEF
 ;
 
 label:
-    NAMELABEL | MARK
+    NAMELABEL | MARK | AXISUNIT
 ;
 
 tag:
-    NAMELABEL | EXTNAME | CATCHTAG | MARK     // MARK included for "feature mark"
+    NAMELABEL | EXTNAME | CATCHTAG | AXISUNIT | MARK     // MARK included for "feature mark"
 ;
 
 fixedNum:
