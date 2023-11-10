@@ -5,6 +5,8 @@
 #ifndef ADDFEATURES_HOTCONV_HMTX_H_
 #define ADDFEATURES_HOTCONV_HMTX_H_
 
+#include <vector>
+
 #include "common.h"
 
 #define hmtx_ TAG('h', 'm', 't', 'x')
@@ -17,7 +19,18 @@ void hmtxReuse(hotCtx g);
 void hmtxFree(hotCtx g);
 
 /* Supplementary Functions */
-int hmtxGetNLongHorMetrics(hotCtx g);
-void hmtxSetNLongHorMetrics(hotCtx g, int n);
+class hmtx {
+ public:
+    hmtx() = delete;
+    explicit hmtx(hotCtx g) : g(g) {}
+    int getNLongMetrics() { return filled ? advanceWidth.size() : -1; }
+    int Fill();
+    void Write();
+ private:
+    std::vector<uFWord> advanceWidth;
+    std::vector<FWord> lsb;
+    bool filled {false};
+    hotCtx g {nullptr};
+};
 
 #endif  // ADDFEATURES_HOTCONV_HMTX_H_

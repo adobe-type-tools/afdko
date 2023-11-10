@@ -14,7 +14,6 @@
 #include <utility>
 
 #include "hotmap.h"
-#include "vmtx.h"
 #include "name.h"
 
 /* --------------------------- Standard Functions -------------------------- */

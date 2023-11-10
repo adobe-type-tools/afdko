@@ -76,7 +76,7 @@ int vheaFill(hotCtx g) {
     h->tbl.reserved[2] = 0;
     h->tbl.reserved[3] = 0;
     h->tbl.metricDataFormat = 0;
-    h->tbl.numberOfLongVerMetrics = vmtxGetNLongVerMetrics(g);
+    h->tbl.numberOfLongVerMetrics = g->ctx.vmtxp->getNLongMetrics();
 
     return 1;
 }

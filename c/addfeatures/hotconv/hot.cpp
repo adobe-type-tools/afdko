@@ -126,12 +126,12 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->ctx.cmap = NULL;
     g->ctx.head = NULL;
     g->ctx.hhea = NULL;
-    g->ctx.hmtx = NULL;
+    g->ctx.hmtxp = nullptr;
     g->ctx.name = NULL;
     g->ctx.post = NULL;
     g->ctx.sfnt = NULL;
     g->ctx.vhea = NULL;
-    g->ctx.vmtx = NULL;
+    g->ctx.vmtxp = nullptr;
     g->ctx.VORG = NULL;
 
     g->DnaCTX = dnaNew(&hot_memcb, DNA_CHECK_ARGS);
@@ -192,7 +192,7 @@ static void setVendId(hotCtx g) {
         return; /*Must have been set by feature file*/
 
     /* Match vendor */
-    for (int i = 0; i < ARRAY_LEN(vendor); i++) {
+    for (uint32_t i = 0; i < ARRAY_LEN(vendor); i++) {
         std::string vid = vendor[i].string;
         if (g->font.Notice.find(vid) != std::string::npos) {
             g->font.vendId = vendor[i].id;
@@ -639,7 +639,6 @@ static void prepWinData(hotCtx g) {
 /* Must be called after FeatCtx::fill(), since TypoAscender/TypoDescender could have
    been overwritten */
 static void setVBounds(hotCtx g) {
-    long i;
     FontInfo_ *font = &g->font;
     BBox *minBearing = &font->minBearing;
     hvMetric *maxAdv = &font->maxAdv;
@@ -664,7 +663,7 @@ static void setVBounds(hotCtx g) {
     maxExtent->v = 0;
 
     /* Compute vertical extents */
-    for (i = 0; i < g->glyphs.size(); i++) {
+    for (size_t i = 0; i < g->glyphs.size(); i++) {
         hotGlyphInfo *glyph = &g->glyphs[i];
         /* If glyph is a repl in the 'vrt2' feature, its vAdv has already been
            set appropriately from the GSUB module */
@@ -1243,19 +1242,19 @@ char hotFillBuf(hotCtx g) {
 
 /* Input OTF data as 2-byte number in big-endian order */
 short hotIn2(hotCtx g) {
-    unsigned short result;
-    result = (unsigned short)hin1(g) << 8;
-    result |= (unsigned short)hin1(g);
-    return (short) result;
+    uint16_t result;
+    result = (uint16_t)hin1(g) << 8;
+    result |= (uint16_t)hin1(g);
+    return (int16_t) result;
 }
 
 /* Input OTF data as 4-byte number in big-endian order */
 int32_t hotIn4(hotCtx g) {
-    unsigned long result;
-    result = (unsigned long)hin1(g) << 24;
-    result |= (unsigned long)hin1(g) << 16;
-    result |= (unsigned long)hin1(g) << 8;
-    result |= (unsigned long)hin1(g);
+    uint32_t result;
+    result = (uint8_t)hin1(g) << 24;
+    result |= (uint8_t)hin1(g) << 16;
+    result |= (uint8_t)hin1(g) << 8;
+    result |= (uint8_t)hin1(g);
     return (int32_t)result;
 }
 
