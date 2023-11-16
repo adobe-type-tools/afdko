@@ -27,12 +27,12 @@ class GDEF {
  public:
     struct GlyphClassTable {
         GlyphClassTable() = delete;
-        explicit GlyphClassTable(hotCtx g) : cac(g) {}
+        explicit GlyphClassTable(GDEF &h) : cac(h.g), h(h) {}
         void set(GPat::ClassRec &simple, GPat::ClassRec &ligature,
-                 GPat::ClassRec &mark, GPat::ClassRec &component, hotCtx g);
+                 GPat::ClassRec &mark, GPat::ClassRec &component);
         static const char *names[4];
         static const uint16_t classIDmap[4];
-        Offset fill(hotCtx g, Offset offset);
+        Offset fill(Offset offset);
         void write() {
             if (!offset)
                 return;
@@ -41,14 +41,15 @@ class GDEF {
         Offset offset {0};
         CoverageAndClass cac;
         std::array<GPat::ClassRec, 4> glyphClasses;
+        GDEF &h;
     };
 
     struct MarkAttachClassTable {
         MarkAttachClassTable() = delete;
-        explicit MarkAttachClassTable(hotCtx g) : cac(g) {}
+        explicit MarkAttachClassTable(GDEF &h) : cac(h.g), h(h) {}
         uint16_t add(GPat::ClassRec &&markClassNode);
-        void validate(hotCtx g);
-        Offset fill(hotCtx g, Offset offset);
+        void validate();
+        Offset fill(Offset offset);
         void write() {
             if (!offset)
                 return;
@@ -58,24 +59,25 @@ class GDEF {
         Offset offset {0};
         CoverageAndClass cac;
         std::vector<GPat::ClassRec> glyphClasses;
-    };
-
-    struct AttachEntry {
-        explicit AttachEntry(GID gid) : gid(gid) {}
-        static LOffset size(uint32_t numContours) {
-            return sizeof(uint16_t) * (1 + numContours);
-        }
-        bool operator < (const AttachEntry &rhs) const {
-            return gid < rhs.gid;
-        }
-        Offset offset {0};
-        GID gid {GID_UNDEF};
-        std::vector<uint16_t> contourIndices;
+        GDEF &h;
     };
 
     struct AttachTable {
+        struct AttachEntry {
+            explicit AttachEntry(GID gid) : gid(gid) {}
+            static LOffset size(uint32_t numContours) {
+                return sizeof(uint16_t) * (1 + numContours);
+            }
+            bool operator < (const AttachEntry &rhs) const {
+                return gid < rhs.gid;
+            }
+            Offset offset {0};
+            GID gid {GID_UNDEF};
+            std::vector<uint16_t> contourIndices;
+        };
+
         AttachTable() = delete;
-        explicit AttachTable(hotCtx g) : cac(g) {}
+        explicit AttachTable(GDEF &h) : cac(h.g) {}
         static LOffset size(uint32_t glyphCount) {
             return sizeof(uint16_t) * (2 + glyphCount);
         }
@@ -89,44 +91,43 @@ class GDEF {
         std::vector<AttachEntry> attachEntries;
     };
 
-    struct CaretTable {
-        CaretTable(uint16_t cv, uint16_t format) : CaretValue(cv), format(format) {}
-        bool operator < (const CaretTable &rhs) const {
-            if (format != rhs.format)
-                return format < rhs.format;
-            if (format == 1)
-                return (int16_t) CaretValue < (int16_t) rhs.CaretValue;
-            else
-                return (uint16_t) CaretValue < (uint16_t) rhs.CaretValue;
-        }
-        static LOffset size() { return sizeof(uint16_t) * 2; }
-        Offset offset {0};
-        uint16_t CaretValue {0};
-        uint16_t format {0};
-    };
-
-    struct LigGlyphEntry {
-        static LOffset size(uint32_t numCarets) {
-            return sizeof(uint16_t) * (1 + numCarets);
-        }
-        bool operator < (const LigGlyphEntry &rhs) const {
-            return gid < rhs.gid;
-        }
-        LigGlyphEntry(GID gid, uint16_t format) : gid(gid), format(format) {}
-        GID gid {GID_UNDEF};
-        uint16_t format {0};
-        Offset offset {0};
-        std::vector<CaretTable> caretTables;
-    };
-
     struct LigCaretTable {
+        struct LigGlyphEntry {
+            struct CaretTable {
+                CaretTable(uint16_t cv, uint16_t format) : CaretValue(cv), format(format) {}
+                bool operator < (const CaretTable &rhs) const {
+                    if (format != rhs.format)
+                        return format < rhs.format;
+                    if (format == 1)
+                        return (int16_t) CaretValue < (int16_t) rhs.CaretValue;
+                    else
+                        return (uint16_t) CaretValue < (uint16_t) rhs.CaretValue;
+                }
+                static LOffset size() { return sizeof(uint16_t) * 2; }
+                Offset offset {0};
+                uint16_t CaretValue {0};
+                uint16_t format {0};
+            };
+
+            static LOffset size(uint32_t numCarets) {
+                return sizeof(uint16_t) * (1 + numCarets);
+            }
+            bool operator < (const LigGlyphEntry &rhs) const {
+                return gid < rhs.gid;
+            }
+            LigGlyphEntry(GID gid, uint16_t format) : gid(gid), format(format) {}
+            GID gid {GID_UNDEF};
+            uint16_t format {0};
+            Offset offset {0};
+            std::vector<CaretTable> caretTables;
+        };
+
         LigCaretTable() = delete;
-        explicit LigCaretTable(hotCtx g) : cac(g) {}
+        explicit LigCaretTable(GDEF &h) : cac(h.g), h(h) {}
         static LOffset size(uint32_t glyphCount) {
             return sizeof(uint16_t) * (2 + glyphCount);
         }
-        void add(GID gid, std::vector<uint16_t> &caretValues,
-                 uint16_t format, hotCtx g);
+        void add(GID gid, std::vector<uint16_t> &caretValues, uint16_t format);
         Offset fill(Offset offset);
         void write(GDEF *h);
 
@@ -134,34 +135,37 @@ class GDEF {
         Offset Coverage {0};
         CoverageAndClass cac;
         std::vector<LigGlyphEntry> ligCaretEntries;
-    };
-
-    struct MarkSetEntry {
-        MarkSetEntry() = delete;
-        explicit MarkSetEntry(hotCtx g) : cac(g) {}
-        LOffset MarkSetCoverage {0};
-        CoverageAndClass cac;
+        GDEF &h;
     };
 
     struct MarkSetFilteringTable {
+        explicit MarkSetFilteringTable(GDEF &h) : h(h) {}
+        struct MarkSetEntry {
+            MarkSetEntry() = delete;
+            explicit MarkSetEntry(GDEF &h) : cac(h.g) {}
+            LOffset MarkSetCoverage {0};
+            CoverageAndClass cac;
+        };
+
         static LOffset size(uint32_t markSetCount) {
             return sizeof(uint16_t) * 2 + sizeof(uint32_t) * markSetCount;
         }
         uint16_t add(GPat::ClassRec &&markClassNode);
-        Offset fill(hotCtx G, Offset offset);
+        Offset fill(Offset offset);
         void write(GDEF *h);
 
         Offset offset {0};
         uint16_t markSetTableFormat {0};
         std::vector<GPat::ClassRec> markSetClasses;
         std::vector<MarkSetEntry> markSetEntries;
+        GDEF &h;
     };
 
 
     GDEF() = delete;
-    explicit GDEF(hotCtx g) : glyphClassTable(g), attachTable(g),
-                              ligCaretTable(g), markAttachClassTable(g),
-                              g(g) {}
+    explicit GDEF(hotCtx g) : g(g), glyphClassTable(*this), attachTable(*this),
+                              ligCaretTable(*this), markAttachClassTable(*this),
+                              markSetClassTable(*this) {}
 
     int Fill();
     void Write();
@@ -174,14 +178,14 @@ class GDEF {
     }
     void setGlyphClass(GPat::ClassRec &simpl, GPat::ClassRec &ligature,
                        GPat::ClassRec &mark, GPat::ClassRec &component) {
-        glyphClassTable.set(simpl, ligature, mark, component, g);
+        glyphClassTable.set(simpl, ligature, mark, component);
     }
     bool addAttachEntry(GID gid, uint16_t contour) {
         return attachTable.add(gid, contour);
     }
     void addLigCaretEntry(GID gid, std::vector<uint16_t> &caretValues,
                           uint16_t format) {
-        ligCaretTable.add(gid, caretValues, format, g);
+        ligCaretTable.add(gid, caretValues, format);
     }
     uint16_t addGlyphMarkClass(GPat::ClassRec &&markClass) {
         return markAttachClassTable.add(std::move(markClass));
@@ -195,13 +199,13 @@ class GDEF {
     uint32_t version {0};
     Offset offset {0};
 
+    hotCtx g;
+
     GlyphClassTable glyphClassTable;
     AttachTable attachTable;
     LigCaretTable ligCaretTable;
     MarkAttachClassTable markAttachClassTable;
     MarkSetFilteringTable markSetClassTable;
-
-    hotCtx g;
 };
 
 #endif  // ADDFEATURES_HOTCONV_GDEF_H_
