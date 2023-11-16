@@ -31,6 +31,7 @@
 typedef int16_t var_F2dot14; /* 2.14 fixed point number */
 
 /* glyph width and side-bearing */
+
 struct var_glyphMetrics {
     float width {0};
     float sideBearing {0};
@@ -44,6 +45,12 @@ struct var_indexPair {
 struct var_indexMap {
     uint32_t offset {0};
     std::vector<var_indexPair> map;
+};
+
+struct var_valueRecord {
+    var_indexPair indexes;
+    int16_t defaultValue {0};
+    std::map<uint32_t, int16_t> locationValues;
 };
 
 /* convert 2.14 fixed value to float */
@@ -215,6 +222,7 @@ class itemVariationStore {
     ivsOffset   - offset to the IVS data from the beginning of the
                   container table.
     */
+    itemVariationStore() {}
     itemVariationStore(ctlSharedStmCallbacks *sscb, uint32_t tableOffset,
                        uint32_t tableLength, uint32_t ivsOffset);
 
@@ -290,6 +298,7 @@ class itemVariationStore {
     uint16_t axisCount;
     std::vector<variationRegion> regions;
     std::vector<itemVariationDataSubtable> subtables;
+    std::vector<var_valueRecord> values;
 };
 
 /* horizontal metrics tables */
