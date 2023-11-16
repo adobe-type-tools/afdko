@@ -34,7 +34,7 @@ int GDEF::Fill() {
     version = markSetClassCount ? 0x00010002 : 0x00010000;
     offset = headerSize(markSetClassCount);
 
-    if ((tableSize = glyphClassTable.fill(g, offset)) > 0) {
+    if ((tableSize = glyphClassTable.fill(offset)) > 0) {
         offset += (Offset)tableSize;
         haveData = true;
     }
@@ -49,12 +49,12 @@ int GDEF::Fill() {
         haveData = true;
     }
 
-    if ((tableSize = markAttachClassTable.fill(g, offset)) > 0) {
+    if ((tableSize = markAttachClassTable.fill(offset)) > 0) {
         offset += (Offset)tableSize;
         haveData = true;
     }
 
-    if ((tableSize = markSetClassTable.fill(g, offset)) > 0) {
+    if ((tableSize = markSetClassTable.fill(offset)) > 0) {
         offset += (Offset)tableSize;
         haveData = true;
     }
@@ -97,7 +97,7 @@ void GDEFFree(hotCtx g) {
 }
 
 void GDEF::GlyphClassTable::set(GPat::ClassRec &simple, GPat::ClassRec &ligature,
-                                GPat::ClassRec &mark, GPat::ClassRec &component, hotCtx g) {
+                                GPat::ClassRec &mark, GPat::ClassRec &component) {
     // Mark is first because glyphs there take presidence.
     glyphClasses[0] = mark;
     glyphClasses[1] = simple;
@@ -118,11 +118,11 @@ void GDEF::GlyphClassTable::set(GPat::ClassRec &simple, GPat::ClassRec &ligature
                 // Don't complain if overriding mark class
                 if (seeni->second != 0) {
                     hadConflictingClassDef = true;
-                    if (g->convertFlags & HOT_VERBOSE) {
-                        g->ctx.feat->dumpGlyph(gid, 0, 0);
-                        hotMsg(g, hotWARNING, "GDEF GlyphClass. Glyph '%s' "
+                    if (h.g->convertFlags & HOT_VERBOSE) {
+                        h.g->ctx.feat->dumpGlyph(gid, 0, 0);
+                        hotMsg(h.g, hotWARNING, "GDEF GlyphClass. Glyph '%s' "
                                "gid '%d'. glyph class '%s' overrides "
-                               "class '%s'.", g->note.array, gid,
+                               "class '%s'.", h.g->note.array, gid,
                                names[seeni->second], names[i]);
                     }
                 }
@@ -133,8 +133,8 @@ void GDEF::GlyphClassTable::set(GPat::ClassRec &simple, GPat::ClassRec &ligature
         }
     }
 
-    if (hadConflictingClassDef && (g->convertFlags & HOT_VERBOSE)) {
-        hotMsg(g, hotWARNING, "GDEF Glyph Class. Since there were conflicting "
+    if (hadConflictingClassDef && (h.g->convertFlags & HOT_VERBOSE)) {
+        hotMsg(h.g, hotWARNING, "GDEF Glyph Class. Since there were conflicting "
                "GlyphClass assignments, you should examine this GDEF table, "
                "and make sure that the glyph class assignments are as "
                "needed.\n");
@@ -188,14 +188,13 @@ bool GDEF::AttachTable::add(GID gid, uint16_t contour) {
     return false;
 }
 
-void GDEF::LigCaretTable::add(GID gid, std::vector<uint16_t> &caretValues,
-                              uint16_t format, hotCtx g) {
+void GDEF::LigCaretTable::add(GID gid, std::vector<uint16_t> &caretValues, uint16_t format) {
     /* First, make sure that there is not another LGE for the same glyph
      We don't yet support format 3. */
     for (auto &lge : ligCaretEntries) {
         if (lge.gid == gid) {
-            g->ctx.feat->dumpGlyph(lge.gid, 0, 0);
-            hotMsg(g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature glyph entry. Skipping entry for format '%d'.", g->note.array, lge.gid, format);
+            h.g->ctx.feat->dumpGlyph(lge.gid, 0, 0);
+            hotMsg(h.g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature glyph entry. Skipping entry for format '%d'.", h.g->note.array, lge.gid, format);
             return;
         }
     }
@@ -207,7 +206,7 @@ void GDEF::LigCaretTable::add(GID gid, std::vector<uint16_t> &caretValues,
     ligCaretEntries.emplace_back(std::move(lge));
 }
 
-Offset GDEF::GlyphClassTable::fill(hotCtx g, Offset o) {
+Offset GDEF::GlyphClassTable::fill(Offset o) {
     /* There are always either none, or 4 glyph classes.
      * First glyph class is class index 1. */
     assert(o);
@@ -285,7 +284,7 @@ Offset GDEF::LigCaretTable::fill(Offset o) {
     return sz;
 }
 
-void GDEF::MarkAttachClassTable::validate(hotCtx g) {
+void GDEF::MarkAttachClassTable::validate() {
     bool hadConflictingClassDef {false};
 
     std::unordered_map<GID, const char *> seen;
@@ -300,34 +299,34 @@ void GDEF::MarkAttachClassTable::validate(hotCtx g) {
             auto [seeni, b] = seen.emplace(gid, className);
             if (!b) {
                 hadConflictingClassDef = true;
-                if (g->convertFlags & HOT_VERBOSE) {
-                    g->ctx.feat->dumpGlyph(gid, 0, 0);
-                    hotMsg(g, hotWARNING,
+                if (h.g->convertFlags & HOT_VERBOSE) {
+                    h.g->ctx.feat->dumpGlyph(gid, 0, 0);
+                    hotMsg(h.g, hotWARNING,
                            "GDEF MarkAttachment. Glyph '%s' gid '%d'. "
                            "previous glyph class '%s' conflicts with new "
-                           "class '%s'.", g->note.array, g,
+                           "class '%s'.", h.g->note.array, gid,
                            seeni->second, className);
                 }
             }
         }
     }
-    if (hadConflictingClassDef && (g->convertFlags & HOT_VERBOSE)) {
-        hotMsg(g, hotWARNING, "GDEF MarkAttachment Classes. There are "
+    if (hadConflictingClassDef && (h.g->convertFlags & HOT_VERBOSE)) {
+        hotMsg(h.g, hotWARNING, "GDEF MarkAttachment Classes. There are "
                               "conflicting MarkAttachment assignments.");
     }
 }
 
 // Classes start numbering from 1
-Offset GDEF::MarkAttachClassTable::fill(hotCtx g, Offset o) {
+Offset GDEF::MarkAttachClassTable::fill(Offset o) {
     uint32_t cnt = glyphClasses.size();
     if (cnt == 0)
         return 0;
 
     offset = o;
     for (auto &gc : glyphClasses)
-        gc.makeUnique(g, true);
+        gc.makeUnique(h.g, true);
 
-    validate(g);
+    validate();
     // Add the to the OTL table.
     cac.classBegin();
     int i = -1;
@@ -340,7 +339,7 @@ Offset GDEF::MarkAttachClassTable::fill(hotCtx g, Offset o) {
     return cac.classSize();
 }
 
-Offset GDEF::MarkSetFilteringTable::fill(hotCtx g, Offset o) {
+Offset GDEF::MarkSetFilteringTable::fill(Offset o) {
     uint32_t cnt = markSetClasses.size();
     if (cnt == 0)
         return 0;
@@ -349,7 +348,7 @@ Offset GDEF::MarkSetFilteringTable::fill(hotCtx g, Offset o) {
     Offset sz = (Offset)size(cnt);
     markSetTableFormat = 1;
     for (auto &cr : markSetClasses) {
-        MarkSetEntry mse {g};
+        MarkSetEntry mse {h};
         auto &cac = mse.cac;
 
         cac.coverageBegin();
