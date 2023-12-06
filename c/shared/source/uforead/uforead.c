@@ -1240,7 +1240,7 @@ static void updateGLIFRec(ufoCtx h, char* glyphName, xmlNodePtr cur) {
     if (fileName == NULL) {
         /* this is basically muted for now, as the previous check will return and skip if not parseable.
            We'll add this back once we add verbosity flag */
-        message(h, ufoErrParse, "Encountered glyph reference %s in alternate layer's contents.plist with an empty file path. ", glyphName);
+        message(h, "Encountered glyph reference %s in alternate layer's contents.plist with an empty file path. ", glyphName);
         return;
     }
 
@@ -2004,7 +2004,7 @@ static long strtolCheck(ufoCtx h, char* keyValue, bool fail, char* msg, int base
             fatal(h, ufoErrParse, msg);
         else if (msg)
             message(h, msg);
-        return NULL;
+        return 0;
     }
 }
 
@@ -2019,7 +2019,7 @@ static unsigned long strtoulCheck(ufoCtx h, char* keyValue, bool fail, char* msg
             fatal(h, ufoErrParse, msg);
         else if (msg)
             message(h, msg);
-        return NULL;
+        return 0;
     }
 }
 
