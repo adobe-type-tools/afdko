@@ -345,7 +345,8 @@ static int saveCstr(t1wCtx h, abfGlyphInfo *info,
     if (info != NULL && info->flags & ABF_GLYPH_CID &&
         !(h->arg.flags & T1W_TYPE_HOST)) {
         /* CID-keyed incremental download; write fd index */
-        if (writeTmp(h, 1, &info->iFD))
+        unsigned char c = info->iFD;
+        if (writeTmp(h, 1, &c))
             return 1;
         cstr->length++;
     }
