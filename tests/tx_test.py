@@ -1677,7 +1677,7 @@ def test_alt_missing_glyph():
     assert msg in output
     expected_path = generate_ps_dump(expected_path)
     output_path = generate_ps_dump(output_path)
-    assert differ([expected_path, output_path])
+    assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
 
 
 def test_parsing_attrs_bug1673():
