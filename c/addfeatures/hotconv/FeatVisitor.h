@@ -155,7 +155,7 @@ class FeatVisitor : public FeatParserBaseVisitor {
     void translateBaseScript(FeatParser::BaseScriptContext *ctx, bool vert, size_t cnt);
     void translateGdefLigCaret(FeatParser::LookupPatternContext *pctx,
                                std::vector<antlr4::tree::TerminalNode *> nv,
-                               unsigned short format);
+                               bool isPoints);
     bool translateAnchor(FeatParser::AnchorContext *ctx, int componentIndex);
 
 
