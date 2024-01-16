@@ -5,7 +5,7 @@
 select = E,F,W,B,B901,B902,B903
 
 # ignore W504 line break before binary operator
-ignore = W504,B017,E731,E741
+ignore = W504,B017,E731,E741,B038
 
 # explicitly set line length limitation
 max-line-length = 79
