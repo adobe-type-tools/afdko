@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ttFont>
+<ttFont sfntVersion="OTTO" ttLibVersion="4.47">
 
   <GDEF>
     <Version value="0x00010000"/>
@@ -19,10 +19,10 @@
       <LigGlyph index="1">
         <!-- CaretCount=2 -->
         <CaretValue index="0" Format="2">
-          <CaretValuePoint value="33"/>
+          <CaretValuePoint value="66"/>
         </CaretValue>
         <CaretValue index="1" Format="2">
-          <CaretValuePoint value="66"/>
+          <CaretValuePoint value="33"/>
         </CaretValue>
       </LigGlyph>
       <LigGlyph index="2">
