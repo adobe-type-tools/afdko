@@ -925,14 +925,14 @@ antlrcpp::Any FeatVisitor::visitGdefAttach(FeatParser::GdefAttachContext *ctx) {
 antlrcpp::Any FeatVisitor::visitGdefLigCaretPos(FeatParser::GdefLigCaretPosContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
-    translateGdefLigCaret(ctx->lookupPattern(), ctx->NUM(), 1);
+    translateGdefLigCaret(ctx->lookupPattern(), ctx->NUM(), false);
     return nullptr;
 }
 
 antlrcpp::Any FeatVisitor::visitGdefLigCaretIndex(FeatParser::GdefLigCaretIndexContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
-    translateGdefLigCaret(ctx->lookupPattern(), ctx->NUM(), 2);
+    translateGdefLigCaret(ctx->lookupPattern(), ctx->NUM(), true);
     return nullptr;
 }
 
@@ -1360,7 +1360,7 @@ void FeatVisitor::translateBaseScript(FeatParser::BaseScriptContext *ctx,
 
 void FeatVisitor::translateGdefLigCaret(FeatParser::LookupPatternContext *pctx,
                                  std::vector<antlr4::tree::TerminalNode *> nv,
-                                 unsigned short format) {
+                                 bool isPoints) {
     assert(stage == vExtract);
 
     GPat::SP gp = getLookupPattern(pctx, false);
@@ -1368,13 +1368,23 @@ void FeatVisitor::translateGdefLigCaret(FeatParser::LookupPatternContext *pctx,
         fc->featMsg(hotERROR, "Only one glyph|glyphClass may be present per"
                               " LigatureCaret statement");
 
-    std::vector<uint16_t> sv;
-    sv.reserve(nv.size());
-    for (auto n : nv)
-        sv.push_back(getNum<uint16_t>(TOK(n)->getText(), 10));
+    if (isPoints) {
+        std::vector<uint16_t> pv;
+        pv.reserve(nv.size());
+        for (auto n : nv)
+            pv.push_back(getNum<int16_t>(TOK(n)->getText(), 10));
 
-    for (GID gid : gp->classes[0].glyphs)
-        fc->g->ctx.GDEFp->addLigCaretEntry(gid, sv, format);
+        for (GID gid : gp->classes[0].glyphs)
+            fc->g->ctx.GDEFp->addLigCaretPoints(gid, pv);
+    } else {
+        std::vector<int16_t> cv;
+        cv.reserve(nv.size());
+        for (auto n : nv)
+            cv.push_back(getNum<uint16_t>(TOK(n)->getText(), 10));
+
+        for (GID gid : gp->classes[0].glyphs)
+            fc->g->ctx.GDEFp->addLigCaretCoords(gid, cv);
+    }
 }
 
 bool FeatVisitor::translateAnchor(FeatParser::AnchorContext *ctx,

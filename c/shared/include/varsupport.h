@@ -10,6 +10,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <utility>
 
 #include "sfntread.h"
 #include "supportfp.h"
@@ -166,15 +167,15 @@ class var_location {
         }
     };
     var_location() = delete;
-    var_location(std::vector<var_F2dot14> &l) : alocs(std::move(l)) {}
-    var_location(const std::vector<var_F2dot14> &l) : alocs(l) {}
+    explicit var_location(std::vector<var_F2dot14> &l) : alocs(std::move(l)) {}
+    explicit var_location(const std::vector<var_F2dot14> &l) : alocs(l) {}
     bool operator==(const var_location &o) const { return alocs == o.alocs; }
     bool operator<(const var_location &o) const { return alocs < o.alocs; }
     auto at(int i) const { return alocs.at(i); }
     auto size() const { return alocs.size(); }
     void toerr() const {
         int i {0};
-        for (auto f2d: alocs) {
+        for (auto f2d : alocs) {
             if (i++ > 0)
                 std::cerr << ", ";
             std::cerr << var_F2dot14ToFloat(f2d);
@@ -199,7 +200,7 @@ class var_location_map {
     }
     void toerr() {
         int i {0};
-        for (auto &loc: locvec) {
+        for (auto &loc : locvec) {
             std::cerr << i++ << " ";
             loc->toerr();
             std::cerr << std::endl;

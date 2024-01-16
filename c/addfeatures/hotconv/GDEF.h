@@ -6,8 +6,9 @@
 #define ADDFEATURES_HOTCONV_GDEF_H_
 
 #include <array>
-#include <utility>
+#include <memory>
 #include <vector>
+#include <utility>
 
 #include "common.h"
 #include "FeatCtx.h"
@@ -94,32 +95,62 @@ class GDEF {
     struct LigCaretTable {
         struct LigGlyphEntry {
             struct CaretTable {
-                CaretTable(uint16_t cv, uint16_t format) : CaretValue(cv), format(format) {}
-                bool operator < (const CaretTable &rhs) const {
-                    if (format != rhs.format)
-                        return format < rhs.format;
-                    if (format == 1)
-                        return (int16_t) CaretValue < (int16_t) rhs.CaretValue;
-                    else
-                        return (uint16_t) CaretValue < (uint16_t) rhs.CaretValue;
+                struct comparator {
+                    comparator() = delete;
+                    explicit comparator(std::vector<int16_t> &values) : values(values) {}
+                    bool operator()(const std::unique_ptr<CaretTable> &a,
+                                    const std::unique_ptr<CaretTable> &b) const {
+                        return a->sortValue(values) < b->sortValue(values);
+                    }
+                    std::vector<int16_t> &values;
+                };
+                virtual LOffset size() = 0;
+                virtual uint16_t format() = 0;
+                virtual void write(GDEF *h, std::vector<int16_t> &values) = 0;
+                virtual int16_t sortValue(std::vector<int16_t> &values) {
+                    return 0;
                 }
-                static LOffset size() { return sizeof(uint16_t) * 2; }
                 Offset offset {0};
-                uint16_t CaretValue {0};
-                uint16_t format {0};
             };
-
+            struct CoordCaretTable : public CaretTable {
+                CoordCaretTable() = delete;
+                explicit CoordCaretTable(uint32_t vi) : valueIndex(vi) {}
+                LOffset size() override {
+                    return sizeof(uint16_t) + sizeof(int16_t);
+                }
+                int16_t sortValue(std::vector<int16_t> &values) override {
+                    return values[valueIndex];
+                }
+                uint16_t format() override { return 1; }
+                void write(GDEF *h, std::vector<int16_t> &values) override {
+                    OUT2(format());
+                    OUT2(values[valueIndex]);
+                }
+                uint32_t valueIndex;
+            };
+            struct PointCaretTable : public CaretTable {
+                // Don't sort point records
+                PointCaretTable() = delete;
+                explicit PointCaretTable(uint16_t point) : point(point) {}
+                LOffset size() override { return 2 * sizeof(uint16_t); }
+                uint16_t format() override { return 2; }
+                void write(GDEF *h, std::vector<int16_t> &values) override {
+                    OUT2(format());
+                    OUT2(point);
+                }
+                uint16_t point;
+            };
             static LOffset size(uint32_t numCarets) {
                 return sizeof(uint16_t) * (1 + numCarets);
             }
             bool operator < (const LigGlyphEntry &rhs) const {
                 return gid < rhs.gid;
             }
-            LigGlyphEntry(GID gid, uint16_t format) : gid(gid), format(format) {}
+            LigGlyphEntry() = delete;
+            explicit LigGlyphEntry(GID gid) : gid(gid) {}
             GID gid {GID_UNDEF};
-            uint16_t format {0};
             Offset offset {0};
-            std::vector<CaretTable> caretTables;
+            std::vector<std::unique_ptr<CaretTable>> caretTables;
         };
 
         LigCaretTable() = delete;
@@ -127,7 +158,10 @@ class GDEF {
         static LOffset size(uint32_t glyphCount) {
             return sizeof(uint16_t) * (2 + glyphCount);
         }
-        void add(GID gid, std::vector<uint16_t> &caretValues, uint16_t format);
+        bool warnGid(GID gid);
+        void addCoords(GID gid, std::vector<int16_t> &coords,
+                       std::vector<int16_t> &values);
+        void addPoints(GID gid, std::vector<uint16_t> &points);
         Offset fill(Offset offset);
         void write(GDEF *h);
 
@@ -183,9 +217,11 @@ class GDEF {
     bool addAttachEntry(GID gid, uint16_t contour) {
         return attachTable.add(gid, contour);
     }
-    void addLigCaretEntry(GID gid, std::vector<uint16_t> &caretValues,
-                          uint16_t format) {
-        ligCaretTable.add(gid, caretValues, format);
+    void addLigCaretCoords(GID gid, std::vector<int16_t> &coords) {
+        ligCaretTable.addCoords(gid, coords, values);
+    }
+    void addLigCaretPoints(GID gid, std::vector<uint16_t> &points) {
+        ligCaretTable.addPoints(gid, points);
     }
     uint16_t addGlyphMarkClass(GPat::ClassRec &&markClass) {
         return markAttachClassTable.add(std::move(markClass));
@@ -206,6 +242,8 @@ class GDEF {
     LigCaretTable ligCaretTable;
     MarkAttachClassTable markAttachClassTable;
     MarkSetFilteringTable markSetClassTable;
+
+    std::vector<int16_t> values;
 };
 
 #endif  // ADDFEATURES_HOTCONV_GDEF_H_

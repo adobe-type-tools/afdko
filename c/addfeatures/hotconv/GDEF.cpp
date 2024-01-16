@@ -188,20 +188,43 @@ bool GDEF::AttachTable::add(GID gid, uint16_t contour) {
     return false;
 }
 
-void GDEF::LigCaretTable::add(GID gid, std::vector<uint16_t> &caretValues, uint16_t format) {
+bool GDEF::LigCaretTable::warnGid(GID gid) {
     /* First, make sure that there is not another LGE for the same glyph
      We don't yet support format 3. */
     for (auto &lge : ligCaretEntries) {
         if (lge.gid == gid) {
             h.g->ctx.feat->dumpGlyph(lge.gid, 0, 0);
-            hotMsg(h.g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature glyph entry. Skipping entry for format '%d'.", h.g->note.array, lge.gid, format);
-            return;
+            hotMsg(h.g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature glyph entry. Skipping entry.", h.g->note.array, lge.gid);
+            return true;
         }
     }
-    LigGlyphEntry lge {gid, format};
+    return false;
+}
 
-    for (auto cv : caretValues)
-        lge.caretTables.emplace_back(cv, format);
+void GDEF::LigCaretTable::addCoords(GID gid, std::vector<int16_t> &coords,
+                                    std::vector<int16_t> &values) {
+    if (warnGid(gid))
+        return;
+
+    LigGlyphEntry lge {gid};
+
+    for (auto &c : coords) {
+        auto cctp = std::make_unique<LigGlyphEntry::CoordCaretTable>(values.size());
+        lge.caretTables.emplace_back(std::move(cctp));
+        values.push_back(c);
+    }
+
+    ligCaretEntries.emplace_back(std::move(lge));
+}
+
+void GDEF::LigCaretTable::addPoints(GID gid, std::vector<uint16_t> &points) {
+    if (warnGid(gid))
+        return;
+
+    LigGlyphEntry lge {gid};
+
+    for (auto &p : points)
+        lge.caretTables.emplace_back(std::make_unique<LigGlyphEntry::PointCaretTable>(p));
 
     ligCaretEntries.emplace_back(std::move(lge));
 }
@@ -265,16 +288,17 @@ Offset GDEF::LigCaretTable::fill(Offset o) {
     std::sort(ligCaretEntries.begin(), ligCaretEntries.end());
 
     cac.coverageBegin();
+    LigGlyphEntry::CaretTable::comparator ctc {h.values};
     for (auto &lge : ligCaretEntries) {
         lge.offset = sz;
         LOffset caretOffset = lge.size(lge.caretTables.size());
         sz += caretOffset;
         /* we will write the caret tables right after each lge entry */
-        std::sort(lge.caretTables.begin(), lge.caretTables.end());
+        std::stable_sort(lge.caretTables.begin(), lge.caretTables.end(), ctc);
         for (auto &ct : lge.caretTables) {
-            ct.offset = caretOffset;
-            caretOffset += ct.size();
-            sz += ct.size();
+            ct->offset = caretOffset;
+            caretOffset += ct->size();
+            sz += ct->size();
         }
         cac.coverageAddGlyph(lge.gid);
     }
@@ -387,19 +411,17 @@ void GDEF::LigCaretTable::write(GDEF *h) {
     OUT2(Coverage);
     OUT2((uint16_t) ligCaretEntries.size());
 
-    for (auto lge : ligCaretEntries)
+    for (auto &lge : ligCaretEntries)
         OUT2(lge.offset);
 
-    for (auto lge : ligCaretEntries) {
+    for (auto &lge : ligCaretEntries) {
         OUT2((uint16_t)lge.caretTables.size());
         /* write offsets */
-        for (auto ct : lge.caretTables)
-            OUT2(ct.offset);
+        for (auto &ct : lge.caretTables)
+            OUT2(ct->offset);
         /* then write caret tables for this lge */
-        for (auto ct : lge.caretTables) {
-            OUT2(ct.format);
-            OUT2(ct.CaretValue);
-        }
+        for (auto &ct : lge.caretTables)
+            ct->write(h, h->values);
     }
     cac.coverageWrite();
 }

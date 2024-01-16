@@ -261,7 +261,7 @@ bool var_axes::getAxis(uint16_t index, ctlTag *tag, Fixed *minValue,
 
 int16_t var_axes::getAxisIndex(ctlTag tag) {
     int i = 0;
-    for (auto &a: axes) {
+    for (auto &a : axes) {
         if (a.tag == tag)
             return i;
         i++;
