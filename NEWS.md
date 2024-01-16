@@ -1,6 +1,17 @@
 Changelog
 =========
 
+4.0.1 (released 2024-01-16)
+---------------------------
+- [tx] Fix build failures discovered by an upcoming gcc-14 release (thanks @trofi!)([#1730](https://github.com/adobe-type-tools/afdko/pull/1730))
+- [tx] parse multiple attrs in xmlNode ([#1720](https://github.com/adobe-type-tools/afdko/pull/1720))
+- [makeotfexe] Add guards for h->otl == NULL before calling otlSubtableAdd ([#1716](https://github.com/adobe-type-tools/afdko/pull/1716))
+- [otfstemhist] Fix otfstemhist bugs ([#1703]((https://github.com/adobe-type-tools/afdko/pull/1703))
+- [sfntedit] Fix bug when attempting to add non-existent file ([#1696](https://github.com/adobe-type-tools/afdko/pull/1696))
+- [documentation] Updates ([#1711](https://github.com/adobe-type-tools/afdko/pull/1711))
+- [requirements.txt] Update dependencies, remove psautohint from dependencies ([#1725](https://github.com/adobe-type-tools/afdko/pull/1725))
+- [ci] Add Python 3.11 to CI test matrix ([#1718](https://github.com/adobe-type-tools/afdko/pull/1718))
+
 4.0.0 (released 2023-09-11)
 ---------------------------
 **The Python port of psautohint was (re)integrated into the AFDKO repository as "otfautohint"**
