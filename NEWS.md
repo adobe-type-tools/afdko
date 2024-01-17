@@ -6,7 +6,7 @@ Changelog
 - [tx] Fix build failures discovered by an upcoming gcc-14 release (thanks @trofi!)([#1730](https://github.com/adobe-type-tools/afdko/pull/1730))
 - [tx] parse multiple attrs in xmlNode ([#1720](https://github.com/adobe-type-tools/afdko/pull/1720))
 - [makeotfexe] Add guards for h->otl == NULL before calling otlSubtableAdd ([#1716](https://github.com/adobe-type-tools/afdko/pull/1716))
-- [otfstemhist] Fix otfstemhist bugs ([#1703]((https://github.com/adobe-type-tools/afdko/pull/1703))
+- [otfstemhist] Fix otfstemhist bugs ([#1703](https://github.com/adobe-type-tools/afdko/pull/1703))
 - [sfntedit] Fix bug when attempting to add non-existent file ([#1696](https://github.com/adobe-type-tools/afdko/pull/1696))
 - [documentation] Updates ([#1711](https://github.com/adobe-type-tools/afdko/pull/1711))
 - [requirements.txt] Update dependencies, remove psautohint from dependencies ([#1725](https://github.com/adobe-type-tools/afdko/pull/1725))
