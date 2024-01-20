@@ -6,6 +6,7 @@ import logging
 import plistlib
 import re
 import sys
+from typing import List
 
 from fontTools.ttLib import TTFont
 from fontTools.cffLib import FontDict, FDArrayIndex, PrivateDict, FDSelect
@@ -61,7 +62,15 @@ def get_options(args):
     return options
 
 
-class dictspec():
+class Dictspec():
+    name: str
+    re: List[re.Pattern]
+    BluePairs: List[int]
+    OtherPairs: List[int]
+    SIV: List[int]
+    SIH: List[int]
+    foundGlyph: bool
+
     pass
 
 
@@ -71,7 +80,7 @@ def getDictmap(options):
 
     dictmap = []
     for name, d in rawdictmap.items():
-        dct = dictspec()
+        dct = Dictspec()
         dct.name = name
         dct.BluePairs = d.get("blue_pairs", [])
         dct.OtherPairs = d.get("other_blue_pairs", [])
@@ -86,7 +95,7 @@ def getDictmap(options):
     return dictmap
 
 
-def remapDicts(fpath, dictmap):
+def remapDicts(fpath: str, dictmap: List[Dictspec]):
     f = TTFont(fpath)
     if 'CFF ' not in f:
         logger.error("No CFF table in %s: will not modify" % fpath)
@@ -103,7 +112,7 @@ def remapDicts(fpath, dictmap):
 
     # Create a new FDSelect object for the font and map the glyphs to
     # dictionary indexes according to the regular expressions in
-    # dictspec.re
+    # Dictspec.re
     fdselect = top.FDSelect = FDSelect()
     for gn in cff.getGlyphOrder():
         done = False
@@ -125,7 +134,7 @@ def remapDicts(fpath, dictmap):
     # wind up with empty dictionaries later.
     j = 0
     indexMap = []
-    newdictmap = []
+    newdictmap: List[Dictspec] = []
     for dictspec in dictmap:
         if dictspec.foundGlyph:
             newdictmap.append(dictspec)

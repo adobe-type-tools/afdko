@@ -200,7 +200,8 @@ def main():
               'setuptools_scm',
               'scikit-build',
               'cmake',
-              'ninja'
+              'ninja',
+              'typing_extensions'
           ],
           tests_require=[
               'pytest',
