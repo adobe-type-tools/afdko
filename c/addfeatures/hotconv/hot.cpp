@@ -27,6 +27,8 @@
 #include "GPOS.h"
 #include "OS_2.h"
 #include "dictops.h"
+#include "varsupport.h"
+#include "varvalue.h"
 
 /* Windows-specific macros */
 #define FAMILY_UNSET 255 /* Flags unset Windows Family field */
@@ -193,6 +195,7 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->ctx.vmtxp = nullptr;
     g->ctx.VORG = NULL;
     g->ctx.axes = nullptr;
+    g->ctx.locMap = nullptr;
 
     g->DnaCTX = dnaNew(&hot_memcb, DNA_CHECK_ARGS);
     dnaINIT(g->DnaCTX, g->note, 1024, 1024);
@@ -391,6 +394,9 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
     abfTopDict *top;
 
     hotReadTables(g);
+
+    if (g->ctx.axes != nullptr)
+        g->ctx.locMap = new VarLocationMap(g->ctx.axes->getAxisCount());
 
     /* Copy conversion flags */
     g->font.flags = 0;
@@ -782,6 +788,8 @@ static unsigned int dsigCnt = 0;
 static void hotReuse(hotCtx g) {
     g->hadError = false;
     g->convertFlags = 0;
+    delete g->ctx.locMap;
+    g->ctx.locMap = nullptr;
     delete g->ctx.axes;
     g->ctx.axes = nullptr;
 
@@ -828,8 +836,10 @@ void hotConvert(hotCtx g) {
 void hotFree(hotCtx g) {
     int i;
 
-    g->locationMap.toerr();
+    if (g->ctx.locMap != nullptr)
+        g->ctx.locMap->toerr();
 
+    delete g->ctx.locMap;
     delete g->ctx.axes;
     sfntFree(g);
     mapFree(g);

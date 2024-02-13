@@ -152,65 +152,6 @@ class var_axes {
     std::vector<variationInstance> instances;
 };
 
-class var_location {
- public:
-    struct cmpSP {
-        bool operator()(const std::shared_ptr<var_location> &a,
-                        const std::shared_ptr<var_location> &b) const {
-            if (a == nullptr && b == nullptr)
-                return false;
-            if (a == nullptr)
-                return true;
-            if (b == nullptr)
-                return false;
-            return *a < *b;
-        }
-    };
-    var_location() = delete;
-    explicit var_location(std::vector<var_F2dot14> &l) : alocs(std::move(l)) {}
-    explicit var_location(const std::vector<var_F2dot14> &l) : alocs(l) {}
-    bool operator==(const var_location &o) const { return alocs == o.alocs; }
-    bool operator<(const var_location &o) const { return alocs < o.alocs; }
-    auto at(int i) const { return alocs.at(i); }
-    auto size() const { return alocs.size(); }
-    void toerr() const {
-        int i {0};
-        for (auto f2d : alocs) {
-            if (i++ > 0)
-                std::cerr << ", ";
-            std::cerr << var_F2dot14ToFloat(f2d);
-        }
-    }
-    std::vector<var_F2dot14> alocs;
-};
-
-
-class var_location_map {
- public:
-    uint32_t getIndex(std::shared_ptr<var_location> &l) {
-        const auto [it, success] = locmap.emplace(l, static_cast<uint32_t>(locvec.size()));
-        if (success)
-            locvec.push_back(l);
-        return it->second;
-    }
-    std::shared_ptr<var_location> getLocation(uint32_t i) {
-        if (i >= locvec.size())
-            return nullptr;
-        return locvec[i];
-    }
-    void toerr() {
-        int i {0};
-        for (auto &loc : locvec) {
-            std::cerr << i++ << " ";
-            loc->toerr();
-            std::cerr << std::endl;
-        }
-    }
- private:
-    std::map<std::shared_ptr<var_location>, uint32_t, var_location::cmpSP> locmap;
-    std::vector<std::shared_ptr<var_location>> locvec;
-};
-
 class itemVariationStore {
  public:
     /* Parses the Item Variation Store (IVS) sub-table.

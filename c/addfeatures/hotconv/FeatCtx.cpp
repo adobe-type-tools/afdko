@@ -2736,8 +2736,12 @@ int16_t FeatCtx::axisTagToIndex(Tag tag) {
     return i;
 }
 
-uint32_t FeatCtx::locationToIndex(std::shared_ptr<var_location> vl) {
-    return g->locationMap.getIndex(vl);
+uint32_t FeatCtx::locationToIndex(std::shared_ptr<VarLocation> vl) {
+    if (g->ctx.locMap == nullptr) {
+        featMsg(hotERROR, "Designspace location seen in non-variable font");
+        return 0;
+    }
+    return g->ctx.locMap->getIndex(vl);
 }
 
 bool FeatCtx::addLocationDef(const std::string &name, uint32_t loc_idx) {
