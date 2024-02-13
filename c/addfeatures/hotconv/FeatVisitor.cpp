@@ -1438,7 +1438,7 @@ uint32_t FeatVisitor::getLocationLiteral(FeatParser::LocationLiteralContext *ctx
         if (!addAxisLocationLiteral(all, l))
             return 0;
     }
-    return fc->locationToIndex(std::make_shared<var_location>(l));
+    return fc->locationToIndex(std::make_shared<VarLocation>(l));
 }
 
 bool FeatVisitor::addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *ctx,

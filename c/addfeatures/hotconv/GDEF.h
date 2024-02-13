@@ -13,6 +13,7 @@
 #include "common.h"
 #include "FeatCtx.h"
 #include "otl.h"
+#include "varvalue.h"
 
 #define GDEF_ TAG('G', 'D', 'E', 'F')
 #define kMaxMarkAttachClasses 15
@@ -97,17 +98,17 @@ class GDEF {
             struct CaretTable {
                 struct comparator {
                     comparator() = delete;
-                    explicit comparator(std::vector<int16_t> &values) : values(values) {}
+                    explicit comparator(ValueVector &values) : values(values) {}
                     bool operator()(const std::unique_ptr<CaretTable> &a,
                                     const std::unique_ptr<CaretTable> &b) const {
                         return a->sortValue(values) < b->sortValue(values);
                     }
-                    std::vector<int16_t> &values;
+                    ValueVector &values;
                 };
                 virtual LOffset size() = 0;
                 virtual uint16_t format() = 0;
-                virtual void write(GDEF *h, std::vector<int16_t> &values) = 0;
-                virtual int16_t sortValue(std::vector<int16_t> &values) {
+                virtual void write(GDEF *h, ValueVector &values) = 0;
+                virtual int16_t sortValue(ValueVector &values) {
                     return 0;
                 }
                 Offset offset {0};
@@ -118,13 +119,13 @@ class GDEF {
                 LOffset size() override {
                     return sizeof(uint16_t) + sizeof(int16_t);
                 }
-                int16_t sortValue(std::vector<int16_t> &values) override {
-                    return values[valueIndex];
+                int16_t sortValue(ValueVector &values) override {
+                    return values[valueIndex].getDefault();
                 }
                 uint16_t format() override { return 1; }
-                void write(GDEF *h, std::vector<int16_t> &values) override {
+                void write(GDEF *h, ValueVector &values) override {
                     OUT2(format());
-                    OUT2(values[valueIndex]);
+                    OUT2(values[valueIndex].getDefault());
                 }
                 uint32_t valueIndex;
             };
@@ -134,7 +135,7 @@ class GDEF {
                 explicit PointCaretTable(uint16_t point) : point(point) {}
                 LOffset size() override { return 2 * sizeof(uint16_t); }
                 uint16_t format() override { return 2; }
-                void write(GDEF *h, std::vector<int16_t> &values) override {
+                void write(GDEF *h, ValueVector &values) override {
                     OUT2(format());
                     OUT2(point);
                 }
@@ -160,7 +161,7 @@ class GDEF {
         }
         bool warnGid(GID gid);
         void addCoords(GID gid, std::vector<int16_t> &coords,
-                       std::vector<int16_t> &values);
+                       ValueVector &values);
         void addPoints(GID gid, std::vector<uint16_t> &points);
         Offset fill(Offset offset);
         void write(GDEF *h);
@@ -243,7 +244,7 @@ class GDEF {
     MarkAttachClassTable markAttachClassTable;
     MarkSetFilteringTable markSetClassTable;
 
-    std::vector<int16_t> values;
+    ValueVector values;
 };
 
 #endif  // ADDFEATURES_HOTCONV_GDEF_H_

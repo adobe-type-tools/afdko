@@ -18,6 +18,9 @@
 
 #include "FeatParser.h"
 #include "hotmap.h"
+#include "varsupport.h"
+
+class VarLocation;
 
 // Debugging message support
 #if HOT_DEBUG
@@ -680,7 +683,7 @@ class FeatCtx {
     uint16_t getAxisCount();
     var_F2dot14 validAxisLocation(var_F2dot14 v);
     int16_t axisTagToIndex(Tag tag);
-    uint32_t locationToIndex(std::shared_ptr<var_location> vl);
+    uint32_t locationToIndex(std::shared_ptr<VarLocation> vl);
     bool addLocationDef(const std::string &name, uint32_t loc_idx);
     uint32_t getLocationDef(const std::string &name);
 
