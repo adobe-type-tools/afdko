@@ -24,7 +24,6 @@
 #include "hotconv.h"
 #include "dynarr.h"
 #include "cffread_abs.h"
-#include "varsupport.h"
 #include "ctutil.h"
 
 #if WIN32
@@ -360,6 +359,8 @@ class GPOS;
 class GSUB;
 class hmtx;
 class vmtx;
+class var_axes;
+class VarLocationMap;
 
 #define ID_TEXT_SIZE 1024 /* Size of text buffer used to hold identifying info about the current feature for error messages. */
 
@@ -394,6 +395,7 @@ struct hotCtx_ {
         vheaCtx vhea;
         vmtx *vmtxp;
         var_axes *axes;
+        VarLocationMap *locMap;
     } ctx;
     dnaCtx DnaCTX;
     std::string tmp;
@@ -406,7 +408,6 @@ struct hotCtx_ {
     char *bufnext;         /* Next byte available in input buffer */
     long bufleft;          /* Number of bytes available in input buffer */
 
-    var_location_map locationMap;
     std::shared_ptr<slogger> logger;
     std::shared_ptr<GOADB> goadb;
 };
