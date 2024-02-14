@@ -925,14 +925,42 @@ antlrcpp::Any FeatVisitor::visitGdefAttach(FeatParser::GdefAttachContext *ctx) {
 antlrcpp::Any FeatVisitor::visitGdefLigCaretPos(FeatParser::GdefLigCaretPosContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
-    translateGdefLigCaret(ctx->lookupPattern(), ctx->NUM(), false);
+
+    GPat::SP gp = getLookupPattern(ctx->lookupPattern(), false);
+    if (gp->patternLen() != 1)
+        fc->featMsg(hotERROR, "Only one glyph|glyphClass may be present per"
+                              " LigatureCaret statement");
+
+    ValueVector vv;
+    vv.reserve(ctx->singleValueLiteral().size());
+    for (auto cvl : ctx->singleValueLiteral()) {
+        vv.emplace_back();
+        getSingleValueLiteral(cvl, vv.back());
+    }
+
+    for (GID gid : gp->classes[0].glyphs)
+        fc->g->ctx.GDEFp->addLigCaretCoords(gid, vv);
+
     return nullptr;
 }
 
 antlrcpp::Any FeatVisitor::visitGdefLigCaretIndex(FeatParser::GdefLigCaretIndexContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
-    translateGdefLigCaret(ctx->lookupPattern(), ctx->NUM(), true);
+
+    GPat::SP gp = getLookupPattern(ctx->lookupPattern(), false);
+    if (gp->patternLen() != 1)
+        fc->featMsg(hotERROR, "Only one glyph|glyphClass may be present per"
+                              " LigatureCaretByIndex statement");
+
+    std::vector<uint16_t> pv;
+    pv.reserve(ctx->NUM().size());
+    for (auto n : ctx->NUM())
+        pv.push_back(getNum<uint16_t>(TOK(n)->getText(), 10));
+
+    for (GID gid : gp->classes[0].glyphs)
+        fc->g->ctx.GDEFp->addLigCaretPoints(gid, pv);
+
     return nullptr;
 }
 
@@ -1358,35 +1386,6 @@ void FeatVisitor::translateBaseScript(FeatParser::BaseScriptContext *ctx,
     BASEAddScript(fc->g, vert, script, db, sv.data());
 }
 
-void FeatVisitor::translateGdefLigCaret(FeatParser::LookupPatternContext *pctx,
-                                 std::vector<antlr4::tree::TerminalNode *> nv,
-                                 bool isPoints) {
-    assert(stage == vExtract);
-
-    GPat::SP gp = getLookupPattern(pctx, false);
-    if (gp->patternLen() != 1)
-        fc->featMsg(hotERROR, "Only one glyph|glyphClass may be present per"
-                              " LigatureCaret statement");
-
-    if (isPoints) {
-        std::vector<uint16_t> pv;
-        pv.reserve(nv.size());
-        for (auto n : nv)
-            pv.push_back(getNum<int16_t>(TOK(n)->getText(), 10));
-
-        for (GID gid : gp->classes[0].glyphs)
-            fc->g->ctx.GDEFp->addLigCaretPoints(gid, pv);
-    } else {
-        std::vector<int16_t> cv;
-        cv.reserve(nv.size());
-        for (auto n : nv)
-            cv.push_back(getNum<uint16_t>(TOK(n)->getText(), 10));
-
-        for (GID gid : gp->classes[0].glyphs)
-            fc->g->ctx.GDEFp->addLigCaretCoords(gid, cv);
-    }
-}
-
 bool FeatVisitor::translateAnchor(FeatParser::AnchorContext *ctx,
                                   int componentIndex) {
     FeatCtx::AnchorDef a;
@@ -1425,6 +1424,37 @@ void FeatVisitor::getValueLiteral(FeatParser::ValueLiteralContext *ctx,
     assert(cnt == 1 || cnt == 4);
     for (int16_t i = 0; i < cnt; ++i)
         mi.metrics.push_back(getNum<int16_t>(TOK(ctx->NUM(i))->getText(), 10));
+}
+
+void FeatVisitor::getSingleValueLiteral(FeatParser::SingleValueLiteralContext *ctx,
+                                        VarValueRecord &vvr) {
+    if (ctx->NUM() != nullptr) {
+        vvr.addValue(getNum<int16_t>(TOK(ctx->NUM())->getText(), 10));
+    } else {
+        assert(ctx->parenLocationValue() != nullptr);
+        getParenLocationValue(ctx->parenLocationValue(), vvr);
+    }
+}
+
+void FeatVisitor::getParenLocationValue(FeatParser::ParenLocationValueContext *ctx,
+                                        VarValueRecord &vvr) {
+    for (auto vll : ctx->locationValueLiteral())
+        addLocationValueLiteral(vll, vvr);
+    vvr.verifyDefault(fc->g);
+}
+
+void FeatVisitor::addLocationValueLiteral(FeatParser::LocationValueLiteralContext *ctx,
+                                          VarValueRecord &vvr) {
+    uint32_t locIndex = getLocationSpecifier(ctx->locationSpecifier());
+    int16_t num = getNum<int16_t>(TOK(ctx->NUM())->getText(), 10);
+    vvr.addValue(locIndex, num, fc->g);
+}
+
+uint32_t FeatVisitor::getLocationSpecifier(FeatParser::LocationSpecifierContext *ctx) {
+    if (ctx->label() != nullptr)
+        return fc->getLocationDef(TOK(ctx->label())->getText());
+    else
+        return getLocationLiteral(ctx->locationLiteral());
 }
 
 uint32_t FeatVisitor::getLocationLiteral(FeatParser::LocationLiteralContext *ctx) {

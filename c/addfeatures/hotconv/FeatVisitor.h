@@ -20,6 +20,7 @@
 #include "FeatLexer.h"
 #include "FeatParserBaseVisitor.h"
 #include "FeatCtx.h"
+#include "varvalue.h"
 
 
 /* Include handling:
@@ -153,15 +154,19 @@ class FeatVisitor : public FeatParserBaseVisitor {
 
     // Translating visitors
     void translateBaseScript(FeatParser::BaseScriptContext *ctx, bool vert, size_t cnt);
-    void translateGdefLigCaret(FeatParser::LookupPatternContext *pctx,
-                               std::vector<antlr4::tree::TerminalNode *> nv,
-                               bool isPoints);
     bool translateAnchor(FeatParser::AnchorContext *ctx, int componentIndex);
 
 
     // Retrieval visitors
     void getValueRecord(FeatParser::ValueRecordContext *ctx, MetricsInfo &mi);
     void getValueLiteral(FeatParser::ValueLiteralContext *ctx, MetricsInfo &mi);
+    void getSingleValueLiteral(FeatParser::SingleValueLiteralContext *ctx,
+                               VarValueRecord &vvr);
+    void getParenLocationValue(FeatParser::ParenLocationValueContext *ctx,
+                               VarValueRecord &vvr);
+    void addLocationValueLiteral(FeatParser::LocationValueLiteralContext *ctx,
+                                 VarValueRecord &vvr);
+    uint32_t getLocationSpecifier(FeatParser::LocationSpecifierContext *ctx);
     uint32_t getLocationLiteral(FeatParser::LocationLiteralContext *ctx);
     bool addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *ctx,
                                 std::vector<var_F2dot14> &l);

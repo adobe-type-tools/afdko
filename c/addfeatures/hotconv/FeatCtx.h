@@ -388,6 +388,7 @@ class FeatCtx {
 
 #if HOT_DEBUG
     void tagDump(Tag);
+    void dumpLocationDefs();
 #endif
     static const int kMaxCodePageValue;
     static const int kCodePageUnSet;

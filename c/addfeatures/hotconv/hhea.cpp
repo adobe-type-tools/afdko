@@ -91,7 +91,7 @@ void hheaRead(hotCtx g, int offset, int length) {
     t = hotIn2(g);  // reserved2
     t = hotIn2(g);  // reserved3
     t = hotIn2(g);  // metricDataFormat
-    t = hotIn2(g);  // numberOfHMetrics
+//    t = hotIn2(g);  // numberOfHMetrics
     h->tbl.numberOfLongHorMetrics = hotIn2(g);
 }
 

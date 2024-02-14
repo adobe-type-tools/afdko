@@ -160,8 +160,7 @@ class GDEF {
             return sizeof(uint16_t) * (2 + glyphCount);
         }
         bool warnGid(GID gid);
-        void addCoords(GID gid, std::vector<int16_t> &coords,
-                       ValueVector &values);
+        void addCoords(GID gid, ValueVector &coords, ValueVector &values);
         void addPoints(GID gid, std::vector<uint16_t> &points);
         Offset fill(Offset offset);
         void write(GDEF *h);
@@ -218,7 +217,7 @@ class GDEF {
     bool addAttachEntry(GID gid, uint16_t contour) {
         return attachTable.add(gid, contour);
     }
-    void addLigCaretCoords(GID gid, std::vector<int16_t> &coords) {
+    void addLigCaretCoords(GID gid, ValueVector &coords) {
         ligCaretTable.addCoords(gid, coords, values);
     }
     void addLigCaretPoints(GID gid, std::vector<uint16_t> &points) {
