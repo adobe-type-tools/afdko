@@ -201,7 +201,7 @@ bool GDEF::LigCaretTable::warnGid(GID gid) {
     return false;
 }
 
-void GDEF::LigCaretTable::addCoords(GID gid, std::vector<int16_t> &coords,
+void GDEF::LigCaretTable::addCoords(GID gid, ValueVector &coords,
                                     ValueVector &values) {
     if (warnGid(gid))
         return;
@@ -211,9 +211,7 @@ void GDEF::LigCaretTable::addCoords(GID gid, std::vector<int16_t> &coords,
     for (auto &c : coords) {
         auto cctp = std::make_unique<LigGlyphEntry::CoordCaretTable>(values.size());
         lge.caretTables.emplace_back(std::move(cctp));
-        VarValueRecord vvr;
-        vvr.addValue(c);
-        values.emplace_back(std::move(vvr));
+        values.emplace_back(std::move(c));
     }
 
     ligCaretEntries.emplace_back(std::move(lge));
