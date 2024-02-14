@@ -48,12 +48,6 @@ struct var_indexMap {
     std::vector<var_indexPair> map;
 };
 
-struct var_valueRecord {
-    var_indexPair indexes;
-    int16_t defaultValue {0};
-    std::map<uint32_t, int16_t> locationValues;
-};
-
 /* convert 2.14 fixed value to float */
 inline float var_F2dot14ToFloat(var_F2dot14 v) { return (float)v / (1 << 14); }
 
@@ -169,17 +163,18 @@ class itemVariationStore {
                        uint32_t tableLength, uint32_t ivsOffset);
 
     // Returns the number of regions in the region list in the IVS data.
-    uint16_t getRegionCount() { return regions.size() / axisCount; }
+    uint16_t getRegionCount() { return regions.size(); }
 
     uint32_t getRegionListSize() {
-        return 4 + regions.size() * 6;
+        return 4 + regions.size() * axisCount * 6;
     }
 
     uint32_t getDataItemSize(uint16_t i) {
         if (i >= subtables.size())  // XXX would be an error, assert instead?
             return 6;
         auto &ivd = subtables[i];
-        return 6 + ivd.regionIndices.size() * 2 + ivd.itemCount * 2;
+        return 6 + ivd.regionIndices.size() * 2 +
+               ivd.regionIndices.size() * ivd.deltaValues.size() * 2;
     }
 
     /* Returns the number of sub-regions applicable to an IVS sub-table.
@@ -223,9 +218,8 @@ class itemVariationStore {
     };
 
     struct itemVariationDataSubtable {
-        uint16_t itemCount;
         std::vector<int16_t> regionIndices;
-        std::vector<int16_t> deltaValues;
+        std::vector<std::vector<int16_t>> deltaValues;
     };
     float applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
                                   const var_indexPair &pair, float *scalars,
@@ -238,9 +232,8 @@ class itemVariationStore {
     // typedef std::vector<uint16_t> indexArray;
 
     uint16_t axisCount;
-    std::vector<variationRegion> regions;
+    std::vector<std::vector<variationRegion>> regions;
     std::vector<itemVariationDataSubtable> subtables;
-    std::vector<var_valueRecord> values;
 };
 
 /* horizontal metrics tables */
