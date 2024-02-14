@@ -786,6 +786,10 @@ static void setVBounds(hotCtx g) {
 static unsigned int dsigCnt = 0;
 
 static void hotReuse(hotCtx g) {
+    g->ctx.feat->dumpLocationDefs();
+    if (g->ctx.locMap != nullptr)
+        g->ctx.locMap->toerr();
+
     g->hadError = false;
     g->convertFlags = 0;
     delete g->ctx.locMap;
@@ -835,9 +839,6 @@ void hotConvert(hotCtx g) {
 
 void hotFree(hotCtx g) {
     int i;
-
-    if (g->ctx.locMap != nullptr)
-        g->ctx.locMap->toerr();
 
     delete g->ctx.locMap;
     delete g->ctx.axes;

@@ -67,7 +67,7 @@ class VarLocationMap {
     void toerr() {
         int i {0};
         for (auto &loc : locvec) {
-            std::cerr << i++ << " ";
+            std::cerr << i++ << ":  ";
             loc->toerr();
             std::cerr << std::endl;
         }

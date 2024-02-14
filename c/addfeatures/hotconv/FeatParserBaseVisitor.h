@@ -135,6 +135,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitSingleValueLiteral(FeatParser::SingleValueLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitParenLocationValue(FeatParser::ParenLocationValueContext *ctx) override {
     return visitChildren(ctx);
   }

@@ -56,32 +56,32 @@ public:
     RuleStatement = 18, RuleFeatureUse = 19, RuleScriptAssign = 20, RuleLangAssign = 21, 
     RuleLookupflagAssign = 22, RuleLookupflagElement = 23, RuleIgnoreSubOrPos = 24, 
     RuleSubstitute = 25, RulePosition = 26, RuleValuePattern = 27, RuleValueRecord = 28, 
-    RuleValueLiteral = 29, RuleParenLocationValue = 30, RuleLocationValueLiteral = 31, 
-    RuleLocationMultiValueLiteral = 32, RuleLocationSpecifier = 33, RuleLocationLiteral = 34, 
-    RuleAxisLocationLiteral = 35, RuleCursiveElement = 36, RuleBaseToMarkElement = 37, 
-    RuleLigatureMarkElement = 38, RuleParameters = 39, RuleSizemenuname = 40, 
-    RuleFeatureNames = 41, RuleSubtable = 42, RuleTable_BASE = 43, RuleBaseStatement = 44, 
-    RuleAxisTags = 45, RuleAxisScripts = 46, RuleBaseScript = 47, RuleTable_GDEF = 48, 
-    RuleGdefStatement = 49, RuleGdefGlyphClass = 50, RuleGdefAttach = 51, 
-    RuleGdefLigCaretPos = 52, RuleGdefLigCaretIndex = 53, RuleTable_head = 54, 
-    RuleHeadStatement = 55, RuleHead = 56, RuleTable_hhea = 57, RuleHheaStatement = 58, 
-    RuleHhea = 59, RuleTable_vhea = 60, RuleVheaStatement = 61, RuleVhea = 62, 
-    RuleTable_name = 63, RuleNameStatement = 64, RuleNameID = 65, RuleTable_OS_2 = 66, 
-    RuleOs_2Statement = 67, RuleOs_2 = 68, RuleTable_STAT = 69, RuleStatStatement = 70, 
-    RuleDesignAxis = 71, RuleAxisValue = 72, RuleAxisValueStatement = 73, 
-    RuleAxisValueLocation = 74, RuleAxisValueFlags = 75, RuleElidedFallbackName = 76, 
-    RuleNameEntryStatement = 77, RuleElidedFallbackNameID = 78, RuleNameEntry = 79, 
-    RuleTable_vmtx = 80, RuleVmtxStatement = 81, RuleVmtx = 82, RuleAnchor = 83, 
-    RuleLookupPattern = 84, RuleLookupPatternElement = 85, RulePattern = 86, 
-    RulePatternElement = 87, RuleGlyphClassOptional = 88, RuleGlyphClass = 89, 
-    RuleGcLiteral = 90, RuleGcLiteralElement = 91, RuleGlyph = 92, RuleGlyphName = 93, 
-    RuleLabel = 94, RuleTag = 95, RuleFixedNum = 96, RuleGenNum = 97, RuleFeatureFile = 98, 
-    RuleStatementFile = 99, RuleCvStatementFile = 100, RuleBaseFile = 101, 
-    RuleHeadFile = 102, RuleHheaFile = 103, RuleVheaFile = 104, RuleGdefFile = 105, 
-    RuleNameFile = 106, RuleVmtxFile = 107, RuleOs_2File = 108, RuleStatFile = 109, 
-    RuleAxisValueFile = 110, RuleNameEntryFile = 111, RuleSubtok = 112, 
-    RuleRevtok = 113, RuleAnontok = 114, RuleEnumtok = 115, RulePostok = 116, 
-    RuleMarkligtok = 117
+    RuleValueLiteral = 29, RuleSingleValueLiteral = 30, RuleParenLocationValue = 31, 
+    RuleLocationValueLiteral = 32, RuleLocationMultiValueLiteral = 33, RuleLocationSpecifier = 34, 
+    RuleLocationLiteral = 35, RuleAxisLocationLiteral = 36, RuleCursiveElement = 37, 
+    RuleBaseToMarkElement = 38, RuleLigatureMarkElement = 39, RuleParameters = 40, 
+    RuleSizemenuname = 41, RuleFeatureNames = 42, RuleSubtable = 43, RuleTable_BASE = 44, 
+    RuleBaseStatement = 45, RuleAxisTags = 46, RuleAxisScripts = 47, RuleBaseScript = 48, 
+    RuleTable_GDEF = 49, RuleGdefStatement = 50, RuleGdefGlyphClass = 51, 
+    RuleGdefAttach = 52, RuleGdefLigCaretPos = 53, RuleGdefLigCaretIndex = 54, 
+    RuleTable_head = 55, RuleHeadStatement = 56, RuleHead = 57, RuleTable_hhea = 58, 
+    RuleHheaStatement = 59, RuleHhea = 60, RuleTable_vhea = 61, RuleVheaStatement = 62, 
+    RuleVhea = 63, RuleTable_name = 64, RuleNameStatement = 65, RuleNameID = 66, 
+    RuleTable_OS_2 = 67, RuleOs_2Statement = 68, RuleOs_2 = 69, RuleTable_STAT = 70, 
+    RuleStatStatement = 71, RuleDesignAxis = 72, RuleAxisValue = 73, RuleAxisValueStatement = 74, 
+    RuleAxisValueLocation = 75, RuleAxisValueFlags = 76, RuleElidedFallbackName = 77, 
+    RuleNameEntryStatement = 78, RuleElidedFallbackNameID = 79, RuleNameEntry = 80, 
+    RuleTable_vmtx = 81, RuleVmtxStatement = 82, RuleVmtx = 83, RuleAnchor = 84, 
+    RuleLookupPattern = 85, RuleLookupPatternElement = 86, RulePattern = 87, 
+    RulePatternElement = 88, RuleGlyphClassOptional = 89, RuleGlyphClass = 90, 
+    RuleGcLiteral = 91, RuleGcLiteralElement = 92, RuleGlyph = 93, RuleGlyphName = 94, 
+    RuleLabel = 95, RuleTag = 96, RuleFixedNum = 97, RuleGenNum = 98, RuleFeatureFile = 99, 
+    RuleStatementFile = 100, RuleCvStatementFile = 101, RuleBaseFile = 102, 
+    RuleHeadFile = 103, RuleHheaFile = 104, RuleVheaFile = 105, RuleGdefFile = 106, 
+    RuleNameFile = 107, RuleVmtxFile = 108, RuleOs_2File = 109, RuleStatFile = 110, 
+    RuleAxisValueFile = 111, RuleNameEntryFile = 112, RuleSubtok = 113, 
+    RuleRevtok = 114, RuleAnontok = 115, RuleEnumtok = 116, RulePostok = 117, 
+    RuleMarkligtok = 118
   };
 
   explicit FeatParser(antlr4::TokenStream *input);
@@ -131,6 +131,7 @@ public:
   class ValuePatternContext;
   class ValueRecordContext;
   class ValueLiteralContext;
+  class SingleValueLiteralContext;
   class ParenLocationValueContext;
   class LocationValueLiteralContext;
   class LocationMultiValueLiteralContext;
@@ -784,10 +785,10 @@ public:
     virtual size_t getRuleIndex() const override;
     std::vector<antlr4::tree::TerminalNode *> NUM();
     antlr4::tree::TerminalNode* NUM(size_t i);
-    antlr4::tree::TerminalNode *BEGINVALUE();
-    antlr4::tree::TerminalNode *ENDVALUE();
     std::vector<ParenLocationValueContext *> parenLocationValue();
     ParenLocationValueContext* parenLocationValue(size_t i);
+    antlr4::tree::TerminalNode *BEGINVALUE();
+    antlr4::tree::TerminalNode *ENDVALUE();
     antlr4::tree::TerminalNode *LPAREN();
     antlr4::tree::TerminalNode *RPAREN();
     std::vector<LocationMultiValueLiteralContext *> locationMultiValueLiteral();
@@ -799,6 +800,20 @@ public:
   };
 
   ValueLiteralContext* valueLiteral();
+
+  class  SingleValueLiteralContext : public antlr4::ParserRuleContext {
+  public:
+    SingleValueLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *NUM();
+    ParenLocationValueContext *parenLocationValue();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  SingleValueLiteralContext* singleValueLiteral();
 
   class  ParenLocationValueContext : public antlr4::ParserRuleContext {
   public:
@@ -1169,8 +1184,8 @@ public:
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *LIG_CARET_BY_POS();
     LookupPatternContext *lookupPattern();
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
+    std::vector<SingleValueLiteralContext *> singleValueLiteral();
+    SingleValueLiteralContext* singleValueLiteral(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

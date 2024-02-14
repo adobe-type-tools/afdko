@@ -194,11 +194,16 @@ valueRecord:
 
 valueLiteral:
       NUM
-    | ( BEGINVALUE NUM NUM NUM NUM ENDVALUE )
     | parenLocationValue
+    | ( BEGINVALUE NUM NUM NUM NUM ENDVALUE )
     | ( LPAREN locationMultiValueLiteral+ RPAREN )
     | ( BEGINVALUE parenLocationValue parenLocationValue
                    parenLocationValue parenLocationValue ENDVALUE )
+;
+
+singleValueLiteral:
+      NUM
+    | parenLocationValue
 ;
 
 parenLocationValue:
@@ -307,7 +312,7 @@ gdefAttach:
 ;
 
 gdefLigCaretPos:
-    LIG_CARET_BY_POS lookupPattern NUM+
+    LIG_CARET_BY_POS lookupPattern singleValueLiteral+
 ;
 
 gdefLigCaretIndex:

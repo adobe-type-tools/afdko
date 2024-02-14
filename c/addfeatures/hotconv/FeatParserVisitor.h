@@ -79,6 +79,8 @@ public:
 
     virtual std::any visitValueLiteral(FeatParser::ValueLiteralContext *context) = 0;
 
+    virtual std::any visitSingleValueLiteral(FeatParser::SingleValueLiteralContext *context) = 0;
+
     virtual std::any visitParenLocationValue(FeatParser::ParenLocationValueContext *context) = 0;
 
     virtual std::any visitLocationValueLiteral(FeatParser::LocationValueLiteralContext *context) = 0;
