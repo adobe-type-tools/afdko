@@ -433,18 +433,21 @@ itemVariationStore::itemVariationStore(ctlSharedStmCallbacks *sscb,
     }
 
     for (i = 0; i < regionCount; i++) {
+        std::vector<variationRegion> vrv;
         for (axis = 0; axis < axisCount; axis++) {
             variationRegion region;
             region.startCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
             region.peakCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
             region.endCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
-            regions.push_back(region);
+            vrv.push_back(region);
         }
+        regions.emplace_back(std::move(vrv));
     }
 
     /* load item variation data list */
     for (i = 0; i < ivdSubtableCount; i++) {
         uint32_t ivdSubtablesOffset;
+        uint16_t itemCount;
         uint16_t shortDeltaCount;
         uint16_t subtableRegionCount;
         itemVariationDataSubtable ivd;
@@ -460,7 +463,7 @@ itemVariationStore::itemVariationStore(ctlSharedStmCallbacks *sscb,
         /* load item variation data sub-table header */
         sscb->seek(sscb, tableOffset + ivsOffset + ivdSubtablesOffset);
 
-        ivd.itemCount = sscb->read2(sscb);
+        itemCount = sscb->read2(sscb);
         shortDeltaCount = sscb->read2(sscb);
         subtableRegionCount = sscb->read2(sscb);
         if (subtableRegionCount > CFF2_MAX_MASTERS) {
@@ -475,10 +478,12 @@ itemVariationStore::itemVariationStore(ctlSharedStmCallbacks *sscb,
 
         /* load two-dimensional delta values array */
         j = 0;
-        for (t = 0; t < ivd.itemCount; t++) {
+        for (t = 0; t < itemCount; t++) {
+            std::vector<int16_t> dvv;
             for (r = 0; r < subtableRegionCount; r++) {
-                ivd.deltaValues.push_back((int16_t)((r < shortDeltaCount) ? sscb->read2(sscb) : (char)sscb->read1(sscb)));
+                dvv.push_back((int16_t)((r < shortDeltaCount) ? sscb->read2(sscb) : (char)sscb->read1(sscb)));
             }
+            ivd.deltaValues.emplace_back(std::move(dvv));
         }
         subtables.push_back(std::move(ivd));
     }
@@ -512,25 +517,23 @@ int32_t itemVariationStore::getRegionIndices(uint16_t vsIndex,
 void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
                                            uint16_t &fvarAxisCount,
                                            Fixed *instCoords, float *scalars) {
-    uint32_t regionCount = regions.size() / axisCount;
     int32_t i;
-    uint16_t axis;
 
     if (fvarAxisCount != axisCount) {
         sscb->message(sscb, "axis count in variation font region list does not match axis count in fvar table");
         fvarAxisCount = axisCount;
-        for (i = 0; i < regionCount; i++)
+        for (i = 0; i < regions.size(); i++)
             scalars[i] = .0f;
         return;
     }
 
-    for (i = 0; i < regionCount; i++) {
+    i = 0;
+    for (auto &rv: regions) {
         float scalar = 1.0f;
 
-        for (axis = 0; axis < axisCount; axis++) {
+        uint16_t axis {0};
+        for (auto &r: rv) {
             float axisScalar;
-            variationRegion &r = regions[i * axisCount + axis];
-
             if (r.startCoord > r.peakCoord || r.peakCoord > r.endCoord)
                 axisScalar = 1.0f;
             else if (r.startCoord < FIXED_ZERO && r.endCoord > FIXED_ZERO && r.peakCoord != FIXED_ZERO)
@@ -548,9 +551,10 @@ void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
                     axisScalar = (float)(r.endCoord - instCoords[axis]) / (r.endCoord - r.peakCoord);
             }
             scalar = scalar * axisScalar;
+            axis++;
         }
 
-        scalars[i] = scalar;
+        scalars[i++] = scalar;
     }
     return;
 }
@@ -623,9 +627,6 @@ float itemVariationStore::applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
                                                   float *scalars,
                                                   int32_t regionListCount) {
     float netAdjustment = .0f;
-    int32_t i, deltaSetIndex;
-    uint16_t regionIndices[CFF2_MAX_MASTERS];
-    long subRegionCount;
 
     if (pair.outerIndex >= subtables.size()) {
         sscb->message(sscb, "invalid outer index in index map");
@@ -647,26 +648,16 @@ float itemVariationStore::applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
         return netAdjustment;
     }
 
-    deltaSetIndex = srSize * pair.innerIndex;
-
-    if (pair.innerIndex >= subtable.itemCount ||
-        deltaSetIndex + srSize > subtable.deltaValues.size()) {
+    if (pair.innerIndex >= subtable.deltaValues.size()) {
         sscb->message(sscb, "invalid inner index in index map");
         return netAdjustment;
     }
 
-    // XXX can probably just use regions directly
-    subRegionCount = getRegionIndices(pair.outerIndex, regionIndices,
-                                      regionListCount);
-    if (subRegionCount == 0) {
-        sscb->message(sscb, "out of range region index found in item variation store subtable");
-    }
-
-    for (i = 0; i < subRegionCount; i++) {
-        unsigned short regionIndex = regionIndices[i];
-
+    auto &deltaValues = subtable.deltaValues[pair.innerIndex];
+    for (int32_t i = 0; i < subtable.regionIndices.size(); i++) {
+        auto regionIndex = subtable.regionIndices[i];
         if (scalars[regionIndex])
-            netAdjustment += scalars[regionIndex] * subtable.deltaValues[deltaSetIndex + i];
+            netAdjustment += scalars[regionIndex] * deltaValues[i];
     }
 
     return netAdjustment;
