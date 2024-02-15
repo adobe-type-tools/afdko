@@ -49,7 +49,7 @@ void GPat::ClassRec::makeUnique(hotCtx g, bool report) {
             if (report) {
                 g->ctx.feat->dumpGlyph(gid, -1, false);
                 hotMsg(g, hotNOTE, "Removing duplicate glyph <%s>",
-                       g->note.array);
+                       g->getNote());
             }
             glyphs.erase(glyphs.begin() + i);
             glen--;
@@ -526,7 +526,7 @@ void FeatCtx::dumpGlyph(GID gid, int ch, bool print) {
     if (print) {
         fprintf(stderr, "%s", msg);
     } else {
-        strncpy(dnaEXTEND(g->note, len), msg, len);
+        g->note.append(msg);
     }
 }
 
@@ -535,10 +535,10 @@ void FeatCtx::dumpGlyph(GID gid, int ch, bool print) {
         if (print)                     \
             fprintf(stderr, "%c", ch); \
         else                           \
-            *dnaNEXT(g->note) = (ch);  \
+            g->note.push_back(ch);     \
     } while (0)
 
-/* If !print, add to g->notes */
+/* If !print, add to g->note */
 
 void FeatCtx::dumpGlyphClass(const GPat::ClassRec &cr, int ch, bool print) {
     DUMP_CH('[', print);
@@ -554,7 +554,7 @@ void FeatCtx::dumpGlyphClass(const GPat::ClassRec &cr, int ch, bool print) {
         DUMP_CH(ch, print);
 }
 
-/* If !print, add to g->notes */
+/* If !print, add to g->note */
 
 void FeatCtx::dumpPattern(const GPat &pat, int ch, bool print) {
     DUMP_CH('{', print);

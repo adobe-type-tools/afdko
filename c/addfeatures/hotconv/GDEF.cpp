@@ -122,7 +122,7 @@ void GDEF::GlyphClassTable::set(GPat::ClassRec &simple, GPat::ClassRec &ligature
                         h.g->ctx.feat->dumpGlyph(gid, 0, 0);
                         hotMsg(h.g, hotWARNING, "GDEF GlyphClass. Glyph '%s' "
                                "gid '%d'. glyph class '%s' overrides "
-                               "class '%s'.", h.g->note.array, gid,
+                               "class '%s'.", h.g->getNote(), gid,
                                names[seeni->second], names[i]);
                     }
                 }
@@ -194,7 +194,7 @@ bool GDEF::LigCaretTable::warnGid(GID gid) {
     for (auto &lge : ligCaretEntries) {
         if (lge.gid == gid) {
             h.g->ctx.feat->dumpGlyph(lge.gid, 0, 0);
-            hotMsg(h.g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature glyph entry. Skipping entry.", h.g->note.array, lge.gid);
+            hotMsg(h.g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature glyph entry. Skipping entry.", h.g->getNote(), lge.gid);
             return true;
         }
     }
@@ -328,7 +328,7 @@ void GDEF::MarkAttachClassTable::validate() {
                     hotMsg(h.g, hotWARNING,
                            "GDEF MarkAttachment. Glyph '%s' gid '%d'. "
                            "previous glyph class '%s' conflicts with new "
-                           "class '%s'.", h.g->note.array, gid,
+                           "class '%s'.", h.g->getNote(), gid,
                            seeni->second, className);
                 }
             }
