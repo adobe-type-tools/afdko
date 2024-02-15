@@ -322,7 +322,7 @@ static char fillbuf(sfntCtx h) {
     hotCtx g = h->g;
     h->left = g->cb.stm.read(&g->cb.stm, g->out_stream, &h->next);
     if (h->left-- == 0) {
-        hotMsg(g, hotFATAL, "premature end of input");
+        g->logger->log(sFATAL, "premature end of input");
     }
     return *h->next++;
 }
@@ -448,7 +448,7 @@ void sfntAddAnonTable(hotCtx g, uint32_t tag, hotAnonRefill refill) {
     /* Check that table hasn't already been added */
     for (i = 0; i < h->funcs.cnt; i++) {
         if (h->funcs.array[i].tag == tag) {
-            hotMsg(g, hotFATAL, "attempt to add duplicate table");
+            g->logger->log(sFATAL, "attempt to add duplicate table");
         }
     }
 

@@ -297,7 +297,7 @@ static void CTL_CDECL cmapMsg(hotCtx g, int msgType, const char *fmt, ...) {
     va_end(ap);
     snprintf(msg, sizeof(msg), "cmap{plat=%u,script=%u,lang=%u}: %s",
              h->platformId, h->scriptId, h->language, msgVar);
-    hotMsg(g, msgType, msg);
+    g->logger->msg(msgType, msg);
 }
 
 /* Add a mapping pair to current encoding. Assumes that any notdef/cid layering
@@ -318,17 +318,17 @@ void cmapAddMapping(hotCtx g, unsigned long code, unsigned glyphId,
     if (codeSize == 1) {
         h->flags |= SEEN_1BYTE;
         if (code > 0xFF) {
-            cmapMsg(g, hotFATAL, "code <%lx> is not single-byte", code);
+            cmapMsg(g, sFATAL, "code <%lx> is not single-byte", code);
         }
     } else if (codeSize == 2) {
         h->flags |= SEEN_2BYTE;
         if (code > 0xFFFF) {
-            cmapMsg(g, hotFATAL, "code <%lx> is not double-byte", code);
+            cmapMsg(g, sFATAL, "code <%lx> is not double-byte", code);
         }
     } else if (codeSize == 4) {
         h->flags |= SEEN_4BYTE;
     } else {
-        hotMsg(g, hotFATAL, "[internal] invalid cmap codeSize");
+        g->logger->log(sFATAL, "[internal] invalid cmap codeSize");
     }
 
     if (h->maxCode < code) {
@@ -346,7 +346,7 @@ void cmapAddCodeSpaceRange(hotCtx g, unsigned lo, unsigned hi, int codeSize) {
     Range *csr;
 
     if (codeSize == 1 && (lo > 0xff || hi > 0xff)) {
-        cmapMsg(g, hotFATAL, "codespace range <%hx> <%hx> is not single-byte",
+        cmapMsg(g, sFATAL, "codespace range <%hx> <%hx> is not single-byte",
                 lo, hi);
     }
 
@@ -500,7 +500,7 @@ static void partitionSegments(cmapCtx h) {
     i = 0;
     for (;;) {
         if (i == h->mapping.cnt) {
-            cmapMsg(h->g, hotFATAL, "no multi-byte codes in encoding");
+            cmapMsg(h->g, sFATAL, "no multi-byte codes in encoding");
         } else if (mapping[i].flags & CODE_1BYTE) {
             i++;
         } else {
@@ -509,7 +509,7 @@ static void partitionSegments(cmapCtx h) {
     }
 
     if (i == 0) {
-        cmapMsg(h->g, hotFATAL, "no single-byte codes in encoding");
+        cmapMsg(h->g, sFATAL, "no single-byte codes in encoding");
     }
     mapping[0].span = (unsigned short)i;
 
@@ -915,11 +915,11 @@ static Format4 *makeFormat4(cmapCtx h, unsigned long *length) {
         if (tempLength < 0x10000L) {
             notOK = 0;
             if (truncateCmap) {
-                cmapMsg(g, hotWARNING, "cmap format 4 subtable was truncated to 2 segments, due to overflow with non-truncated version");
+                cmapMsg(g, sWARNING, "cmap format 4 subtable was truncated to 2 segments, due to overflow with non-truncated version");
             }
         } else {
             if (truncateCmap) {
-                cmapMsg(g, hotFATAL, "Length overflow in cmap format 4 subtable, despite truncating cmap to 2 segments.");
+                cmapMsg(g, sFATAL, "Length overflow in cmap format 4 subtable, despite truncating cmap to 2 segments.");
             } else {
                 truncateCmap = 1;
             }
@@ -1075,7 +1075,7 @@ static void checkDuplicates(hotCtx g, cmapCtx h, int isMixedByte) {
             } else {
                 g->ctx.feat->dumpGlyph(mapping[i - 1].glyphId, ',', 0);
                 g->ctx.feat->dumpGlyph(mapping[i].glyphId, 0, 0);
-                cmapMsg(g, hotFATAL, "multiple glyphs (%s) mapped to code <%lX>",
+                cmapMsg(g, sFATAL, "multiple glyphs (%s) mapped to code <%lX>",
                         g->getNote(), mapping[i].code);
             }
         }
@@ -1099,7 +1099,7 @@ int cmapEndEncoding(hotCtx g) {
     int isMixedByte;
 
     if (h->mapping.cnt == 0) {
-        cmapMsg(g, hotWARNING, "empty encoding");
+        cmapMsg(g, sWARNING, "empty encoding");
 
         if (h->platformId == cmap_MAC) {
             /* Mac cmap is required; the space wasn't present, so: */
@@ -1140,7 +1140,7 @@ int cmapEndEncoding(hotCtx g) {
     /* Choose most suitable format from 0, 2, 4, 6, or 12 */
     if (isMixedByte) {
         if (h->platformId != cmap_MAC) {
-            cmapMsg(g, hotWARNING, "platform %hd cmap is mixed-byte",
+            cmapMsg(g, sWARNING, "platform %hd cmap is mixed-byte",
                     h->platformId);
         }
         encoding->format = makeFormat2(h);
@@ -1148,12 +1148,12 @@ int cmapEndEncoding(hotCtx g) {
         /* Microsoft platform always has format restrictions! */
 
         if (h->flags & SEEN_1BYTE) {
-            cmapMsg(g, hotWARNING, "single-byte codes in MS platform");
+            cmapMsg(g, sWARNING, "single-byte codes in MS platform");
         }
 
         if (h->flags & SEEN_4BYTE) {
             if (h->flags & SEEN_2BYTE) {
-                cmapMsg(g, hotWARNING, "2-byte codes in 4-byte MS encoding");
+                cmapMsg(g, sWARNING, "2-byte codes in 4-byte MS encoding");
             }
 
             encoding->format = makeFormat12(h, NULL);
@@ -1161,7 +1161,7 @@ int cmapEndEncoding(hotCtx g) {
             encoding->format = makeFormat4(h, &format4Size);
         }
     } else if (h->maxCode > 0xFFFF) {
-        cmapMsg(g, hotFATAL, "[internal] maxCode > 0xFFFF");
+        cmapMsg(g, sFATAL, "[internal] maxCode > 0xFFFF");
     } else {
         /* Choose between formats 0, 4 and 6, if possible and allowed.         */
         /* o ATM/NT 4.1 and NT 5 restrictions: custom cmap must be format 0 or */
@@ -1185,7 +1185,7 @@ int cmapEndEncoding(hotCtx g) {
             encoding->format = makeFormat0(h);
         } else if (format4Size < format6Size) {
 #if HOT_DEBUG
-            cmapMsg(g, hotNOTE, "format 4 cmap created");
+            cmapMsg(g, sINFO, "format 4 cmap created");
 #endif
             encoding->format = format4;
         } else {
@@ -1194,7 +1194,7 @@ int cmapEndEncoding(hotCtx g) {
             /* A client may want to intercept this note if it wants to warn */
             /* customers that the font won't work in NT 5.                  */
             if (h->platformId == cmap_CUSTOM) {
-                cmapMsg(g, hotNOTE, "format 6 custom cmap created");
+                cmapMsg(g, sINFO, "format 6 custom cmap created");
             }
         }
     }
@@ -1317,11 +1317,11 @@ int cmapFill(hotCtx g) {
     unsigned long offset;
 
     if (h->tbl.encoding.cnt == 0) {
-        hotMsg(h->g, hotFATAL, "no cmap table specified");
+        h->g->logger->msg(sFATAL, "no cmap table specified");
     }
 
     if (!checkMacPlatform(h)) {
-        hotMsg(h->g, hotWARNING, "no Mac cmap specified");
+        h->g->logger->msg(sWARNING, "no Mac cmap specified");
     }
 
     h->tbl.version = cmap_VERSION;
@@ -1539,8 +1539,8 @@ static void writeFormat14(cmapCtx h, const Format14 *fmt) {
             }
         }
     }
-    cmapMsg(g, hotNOTE, "Number of default Unicode Variation Sequence values %lu", numDefaultUVSEntries);
-    cmapMsg(g, hotNOTE, "Number of non-default UVS values %lu", numExtUVSEntries);
+    cmapMsg(g, sINFO, "Number of default Unicode Variation Sequence values %lu", numDefaultUVSEntries);
+    cmapMsg(g, sINFO, "Number of non-default UVS values %lu", numExtUVSEntries);
 }
 
 void cmapWrite(hotCtx g) {

@@ -209,8 +209,8 @@ void GPOS::LookupEnd(SubtableInfo *si) {
 
         default:
             // Can't get here, but it is a useful check for future development.
-            hotMsg(g, hotFATAL, "unknown GPOS lkpType <%d> in %s.",
-                   si->lkpType, g->error_id_text.c_str());
+            g->logger->log(sFATAL, "unknown GPOS lkpType <%d> in %s.",
+                           si->lkpType, g->error_id_text.c_str());
     }
 
     checkOverflow("lookup subtable", subOffset(), "positioning");
@@ -306,11 +306,11 @@ void GPOS::writeValueRecord(uint32_t valFmt, ValueRecord i) {
 void GPOS::AddParameters(const std::vector<uint16_t> &params) {
     int l = params.size();
     if (l < 2) {
-        hotMsg(g, hotFATAL, "'size' feature must have at least two parameters! In %s.", g->error_id_text.c_str());
+        g->logger->log(sFATAL, "'size' feature must have at least two parameters! In %s.", g->error_id_text.c_str());
     } else if (params[ParamSubFamilyID] != 0 && l != 4) {
-        hotMsg(g, hotFATAL, "'size' feature must have 4 parameters if sub family ID code is non-zero! In %s.", g->error_id_text.c_str());
+        g->logger->log(sFATAL, "'size' feature must have 4 parameters if sub family ID code is non-zero! In %s.", g->error_id_text.c_str());
     } else if (params[ParamSubFamilyID] == 0 && l != 4 && l != 2) {
-        hotMsg(g, hotFATAL, "'size' feature must have 4 or 2 parameters if sub family code is zero! In %s.", g->error_id_text.c_str());
+        g->logger->log(sFATAL, "'size' feature must have 4 or 2 parameters if sub family code is zero! In %s.", g->error_id_text.c_str());
     }
 
     nw.params[ParamOpticalSize] = params[ParamOpticalSize];  /* decipoint size, in decipoints */
@@ -344,7 +344,7 @@ void GPOS::FeatureParameters::fill(GPOS &h, SubtableInfo &si) {
         if (nameid != 0) {
             uint16_t nameIDPresent = nameVerifyDefaultNames(h.g, nameid);
             if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
-                hotMsg(h.g, hotFATAL, "Missing Windows default name for 'sizemenuname' nameid %i in 'size' feature.", nameid);
+                h.g->logger->log(sFATAL, "Missing Windows default name for 'sizemenuname' nameid %i in 'size' feature.", nameid);
             }
         }
     } else {
@@ -446,16 +446,16 @@ void GPOS::AddSingle(SubtableInfo &si, GPat::ClassRec &cr,
             g->ctx.feat->dumpGlyph(single.gid, '\0', 0);
             if (!SingleRec::cmp(single, si.singles[i->second]) &&
                 !SingleRec::cmp(si.singles[i->second], single)) {
-                hotMsg(g, hotNOTE,
-                       "Removing duplicate single positioning "
-                       "in %s: %s",
-                       g->error_id_text.c_str(),
-                       g->getNote());
+                g->logger->log(sINFO,
+                               "Removing duplicate single positioning "
+                               "in %s: %s",
+                               g->error_id_text.c_str(),
+                               g->getNote());
             } else {
-                hotMsg(g, hotFATAL,
-                       "Duplicate single positioning glyph with "
-                       "different values in %s: %s",
-                       g->error_id_text.c_str(), g->getNote());
+                g->logger->log(sFATAL,
+                               "Duplicate single positioning glyph with "
+                               "different values in %s: %s",
+                               g->error_id_text.c_str(), g->getNote());
             }
         } else {
 #if HOT_DEBUG
@@ -719,16 +719,16 @@ void GPOS::addSpecPair(SubtableInfo &si, GID first, GID second,
         KernRec &prev = si.pairs[i->second];
         printKernPair(first, second, pair.metricsRec1.value[0], pair.metricsRec1.value[0], true);
         if (pair.metricsRec1 == prev.metricsRec1 && pair.metricsRec2 == prev.metricsRec2) {
-            hotMsg(g, hotNOTE,
-                   "Removing duplicate pair positioning in %s: %s",
-                   g->error_id_text.c_str(),
-                   g->getNote());
+            g->logger->log(sINFO,
+                           "Removing duplicate pair positioning in %s: %s",
+                           g->error_id_text.c_str(),
+                           g->getNote());
         } else {
-            hotMsg(g, hotWARNING,
-                   "Pair positioning has conflicting statements in "
-                   "%s; choosing the first "
-                   "value: %s",
-                   g->error_id_text.c_str(), g->getNote());
+            g->logger->log(sWARNING,
+                           "Pair positioning has conflicting statements in "
+                           "%s; choosing the first "
+                           "value: %s",
+                           g->error_id_text.c_str(), g->getNote());
         }
 #endif
     } else {
@@ -832,10 +832,10 @@ void GPOS::AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
             if (si.pairFmt == 2 && pairFmt == 1) {
                 g->ctx.feat->dumpGlyph(cr1.glyphs[0], ' ', 0);
                 g->ctx.feat->dumpGlyph(cr2.glyphs[0], '\0', 0);
-                hotMsg(g, hotWARNING,
-                       "Single kern pair occurring after "
-                       "class kern pair in %s: %s",
-                       g->error_id_text.c_str(), g->getNote());
+                g->logger->log(sWARNING,
+                               "Single kern pair occurring after "
+                               "class kern pair in %s: %s",
+                               g->error_id_text.c_str(), g->getNote());
             }
         }
         si.glyphsSeen.clear();
@@ -883,16 +883,16 @@ void GPOS::AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
                 KernRec &prev = si.pairs[i->second];
                 printKernPair(cl1, cl2, pair.metricsRec1.value[0], pair.metricsRec1.value[0], false);
                 if (pair.metricsRec1 == prev.metricsRec1 && pair.metricsRec2 == prev.metricsRec2) {
-                    hotMsg(g, hotNOTE,
-                           "Removing duplicate pair positioning in %s: %s",
-                           g->error_id_text.c_str(),
-                           g->getNote());
+                    g->logger->log(sINFO,
+                                   "Removing duplicate pair positioning in %s: %s",
+                                   g->error_id_text.c_str(),
+                                   g->getNote());
                 } else {
-                    hotMsg(g, hotWARNING,
-                           "Pair positioning has conflicting statements in "
-                           "%s; choosing the first "
-                           "value: %s",
-                           g->error_id_text.c_str(), g->getNote());
+                    g->logger->log(sWARNING,
+                                   "Pair positioning has conflicting statements in "
+                                   "%s; choosing the first "
+                                   "value: %s",
+                                   g->error_id_text.c_str(), g->getNote());
                 }
 #endif
             } else {
@@ -906,11 +906,11 @@ void GPOS::AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
         } else {
             g->ctx.feat->dumpGlyphClass(cr1, ' ', 0);
             g->ctx.feat->dumpGlyphClass(cr2, '\0', 0);
-            hotMsg(g, hotWARNING,
-                   "Start of new pair positioning subtable forced by overlapping glyph classes in %s; "
-                   "some pairs may never be accessed: %s",
-                   g->error_id_text.c_str(),
-                   g->getNote());
+            g->logger->log(sWARNING,
+                           "Start of new pair positioning subtable forced by overlapping glyph classes in %s; "
+                           "some pairs may never be accessed: %s",
+                           g->error_id_text.c_str(),
+                           g->getNote());
 
             startNewPairPosSubtbl = true;
             AddPair(si, cr1, cr2, enumerate, locDesc);
@@ -960,7 +960,7 @@ void GPOS::addPosRule(SubtableInfo &si, GPat::SP targ, std::string &locDesc,
                 }
 
                 if (cr.lookupLabels.size() > 255)
-                    hotMsg(g, hotFATAL, "Anonymous lookup in chain caused overflow.");
+                    g->logger->log(sFATAL, "Anonymous lookup in chain caused overflow.");
                 cr.lookupLabels.push_back(anon_si.label);
             }
             /* now add the nodes to the contextual rule list. */
@@ -999,12 +999,12 @@ void GPOS::addPosRule(SubtableInfo &si, GPat::SP targ, std::string &locDesc,
                 SubtableInfo &anon_si = addAnonPosRule(si, lkpType);
                 addCursive(anon_si, cr, anchorMarkInfo, locDesc);
                 if (cr.lookupLabels.size() > 255)
-                    hotMsg(g, hotFATAL, "Anonymous lookup in chain caused overflow.");
+                    g->logger->log(sFATAL, "Anonymous lookup in chain caused overflow.");
                 cr.lookupLabels.push_back(anon_si.label);
                 break;
             }
             if (!foundBaseNode)
-                hotMsg(g, hotFATAL, "aborting due to not finding base node");
+                g->logger->log(sFATAL, "aborting due to not finding base node");
 
             /* now add the nodes to the contextual rule list. */
             si.parentLkpType = GPOSChain; /* So that this subtable will be processed as a chain at lookup end -> fill. */
@@ -1030,12 +1030,12 @@ void GPOS::addPosRule(SubtableInfo &si, GPat::SP targ, std::string &locDesc,
                 SubtableInfo &anon_si = addAnonPosRule(si, lkpType);
                 addMark(anon_si, cr, anchorMarkInfo, locDesc);
                 if (cr.lookupLabels.size() > 255)
-                    hotMsg(g, hotFATAL, "Anonymous lookup in chain caused overflow.");
+                    g->logger->log(sFATAL, "Anonymous lookup in chain caused overflow.");
                 cr.lookupLabels.push_back(anon_si.label);
                 break;
             }
             if (!foundMarked)
-                hotMsg(g, hotFATAL, "aborting due to not finding base node");
+                g->logger->log(sFATAL, "aborting due to not finding base node");
             /* now add the nodes to the contextual rule list. */
             si.parentLkpType = GPOSChain; /* So that this subtable will be processed as a chain at lookup end -> fill. */
             si.rules.emplace_back(std::move(targ));
@@ -1070,7 +1070,7 @@ GPat::ClassRec &GPOS::getCR(uint32_t cls, int classDefInx) {
             return ci.second.cr;
     }
     /* can't get here: the class definitions have already been conditioned in feat.c::addPos().
-    hotMsg(g, hotFATAL, "class <%u> not valid in classDef", cls);
+    g->logger->log(sFATAL, "class <%u> not valid in classDef", cls);
     */
     assert(false);
     GPat::ClassRec cr;
@@ -1556,7 +1556,7 @@ void GPOS::checkBaseAnchorConflict(std::vector<BaseGlyphRec> &baseList) {
         if (cur->gid == prev->gid) {
             /* For mark to base and mark to mark, only a single entry is allowed in  the baseGlyphArray for a given GID. */
             g->ctx.feat->dumpGlyph(cur->gid, '\0', 0);
-            hotMsg(g, hotERROR, "MarkToBase or MarkToMark error in %s. Another statement has already defined the anchors and marks on glyph '%s'. [current at %s, previous at %s]",
+            g->logger->log(sERROR, "MarkToBase or MarkToMark error in %s. Another statement has already defined the anchors and marks on glyph '%s'. [current at %s, previous at %s]",
                     g->error_id_text.c_str(), g->getNote(), cur->locDesc.c_str(), prev->locDesc.c_str());
         }
         prev = cur;
@@ -1576,9 +1576,9 @@ void GPOS::checkBaseLigatureConflict(std::vector<BaseGlyphRec> &baseList) {
         if (cur->gid == prev->gid &&
             cur->anchorMarkInfo[0].componentIndex == prev->anchorMarkInfo[0].componentIndex) {
             g->ctx.feat->dumpGlyph(cur->gid, '\0', 0);
-            hotMsg(g, hotERROR,
-                   "MarkToLigature error in %s. Two different statements referencing the ligature glyph '%s' have assigned the same mark class to the same ligature component. [current at %s, previous at %s]",
-                g->error_id_text.c_str(), g->getNote(), cur->locDesc.c_str(), prev->locDesc.c_str());
+            g->logger->log(sERROR,
+                           "MarkToLigature error in %s. Two different statements referencing the ligature glyph '%s' have assigned the same mark class to the same ligature component. [current at %s, previous at %s]",
+                           g->error_id_text.c_str(), g->getNote(), cur->locDesc.c_str(), prev->locDesc.c_str());
         }
         prev = cur;
     }
@@ -1602,8 +1602,8 @@ int32_t GPOS::addMarkClass(SubtableInfo &si, std::string &name,
             for (GID gid : mc.cr.glyphs) {
                 if (gid == ngid) {
                     g->ctx.feat->dumpGlyph(ngid, '\0', 0);
-                    hotMsg(g, hotERROR, "In %s, glyph '%s' occurs in two different mark classes. Previous mark class: %s. Current mark class: %s.",
-                           g->error_id_text.c_str(), g->getNote(), mc.name.c_str(), name.c_str());
+                    g->logger->log(sERROR, "In %s, glyph '%s' occurs in two different mark classes. Previous mark class: %s. Current mark class: %s.",
+                                   g->error_id_text.c_str(), g->getNote(), mc.name.c_str(), name.c_str());
                     return -1;
                 }
             }
@@ -1616,8 +1616,8 @@ int32_t GPOS::addMarkClass(SubtableInfo &si, std::string &name,
         auto [i, b] = gids.insert(ngid);
         if (!b) {
             g->ctx.feat->dumpGlyph(ngid, '\0', 0);
-            hotMsg(g, hotERROR, "In %s, glyph '%s' is repeated in the current class definition. Mark class: %s.",
-                   g->error_id_text.c_str(), g->getNote(), name.c_str());
+            g->logger->log(sERROR, "In %s, glyph '%s' is repeated in the current class definition. Mark class: %s.",
+                           g->error_id_text.c_str(), g->getNote(), name.c_str());
             return -1;
         }
     }
@@ -1746,8 +1746,8 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
             if (br[am.markClassIndex] != 0xFFFFFFFFL) {
                 /*it has already been filled in !*/
                 h.g->ctx.feat->dumpGlyph(prevGID, '\0', 0);
-                hotMsg(h.g, hotERROR, "MarkToBase or MarkToMark error in %s. Another statement has already assigned the current mark class to another anchor point on glyph '%s'. [previous at %s]",
-                       h.g->error_id_text.c_str(), h.g->getNote(), baseRec.locDesc.c_str());
+                h.g->logger->log(sERROR, "MarkToBase or MarkToMark error in %s. Another statement has already assigned the current mark class to another anchor point on glyph '%s'. [previous at %s]",
+                                 h.g->error_id_text.c_str(), h.g->getNote(), baseRec.locDesc.c_str());
             } else {
                 br[am.markClassIndex] = getAnchorOffset(am); /* offset from start of anchor list */
             }
@@ -1765,8 +1765,8 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
         for (int j = 0; j < ClassCount; j++) {
             if (br[j] == 0xFFFFFFFFL) {
                 h.g->ctx.feat->dumpGlyph(baseRec.gid, '\0', 0);
-                hotMsg(h.g, hotWARNING, "MarkToBase or MarkToMark error in %s. Glyph '%s' does not have an anchor point for a mark class that was used in a previous statement in the same lookup table. Setting the anchor point offset to 0. [previous at %s]",
-                    h.g->error_id_text.c_str(), h.g->getNote(), baseRec.locDesc.c_str());
+                h.g->logger->log(sWARNING, "MarkToBase or MarkToMark error in %s. Glyph '%s' does not have an anchor point for a mark class that was used in a previous statement in the same lookup table. Setting the anchor point offset to 0. [previous at %s]",
+                                 h.g->error_id_text.c_str(), h.g->getNote(), baseRec.locDesc.c_str());
             }
         }
     }
@@ -1925,8 +1925,8 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
             if (clo[am.markClassIndex] != 0xFFFFFFFFL) {
                 /*it has already been filled in !*/
                 h.g->ctx.feat->dumpGlyph(baseRec.gid, '\0', 0);
-                hotMsg(h.g, hotERROR, "MarkToLigature statement error in %s. Glyph '%s' contains a duplicate mark class assignment for one of the ligature components. [previous at %s]",
-                    h.g->error_id_text.c_str(), h.g->getNote(), baseRec.locDesc.c_str());
+                h.g->logger->log(sERROR, "MarkToLigature statement error in %s. Glyph '%s' contains a duplicate mark class assignment for one of the ligature components. [previous at %s]",
+                                 h.g->error_id_text.c_str(), h.g->getNote(), baseRec.locDesc.c_str());
             } else {
                 if (am.format != 0) {
                     /* Skip anchor if the format is 0 aka NULL anchor */
@@ -2072,8 +2072,8 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
     for (auto &baseRec : si.baseList) {
         if (prevRec && (prevRec->gid == baseRec.gid)) {
             h.g->ctx.feat->dumpGlyph(baseRec.gid, '\0', 0);
-            hotMsg(h.g, hotERROR, "Cursive statement error in %s. A previous statement has already referenced glyph '%s'. [current at %s, previous at %s]",
-                       h.g->error_id_text.c_str(), h.g->getNote(), baseRec.locDesc.c_str(), prevRec->locDesc.c_str());
+            h.g->logger->log(sERROR, "Cursive statement error in %s. A previous statement has already referenced glyph '%s'. [current at %s, previous at %s]",
+                             h.g->error_id_text.c_str(), h.g->getNote(), baseRec.locDesc.c_str(), prevRec->locDesc.c_str());
         } else {
             EntryExitRecord eeRec;
             cac->coverageAddGlyph(baseRec.gid);

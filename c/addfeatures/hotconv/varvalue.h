@@ -87,7 +87,7 @@ class VarValueRecord {
     bool addValue(uint32_t locIndex, int16_t value, hotCtx g) {
         if (locIndex == 0) {
             if (seenDefault) {
-                hotMsg(g, hotERROR, "Duplicate values for default location");
+                g->logger->msg(sERROR, "Duplicate values for default location");
                 return false;
             } else {
                 defaultValue = value;
@@ -97,13 +97,13 @@ class VarValueRecord {
         } else {
             const auto [it, success] = locationValues.emplace(locIndex, value);
             if (!success)
-                hotMsg(g, hotERROR, "Duplicate values for location");
+                g->logger->msg(sERROR, "Duplicate values for location");
             return success;
         }
     }
     void verifyDefault(hotCtx g) {
         if (!seenDefault)
-            hotMsg(g, hotERROR, "No default entry for variable value");
+            g->logger->msg(sERROR, "No default entry for variable value");
     }
     int16_t getDefault() { return defaultValue; }
     bool isVariable() { return locationValues.size() > 0; }

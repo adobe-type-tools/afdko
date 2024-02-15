@@ -107,20 +107,7 @@ static void myfatal(void *ctx) {
 /* [hot callback] Print error message */
 static void motf_message(void *ctx, int type, const char *text) {
     cbCtx h = (cbCtx) ctx;
-    int slevel = sINFO;
-
-    if (type == hotINDENT) {
-        slevel = sINDENT;
-    } else if (type == hotFLUSH) {
-        slevel = sFLUSH;
-    } else if (type == hotWARNING) {
-        slevel = sWARNING;
-    } else if (type == hotERROR) {
-        slevel = sERROR;
-    } else if (type == hotFATAL) {
-        slevel = sFATAL;
-    }
-    h->logger->msg(slevel, text);
+    h->logger->msg(type, text);
 }
 
 /* Print fatal error message */

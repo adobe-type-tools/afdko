@@ -166,7 +166,7 @@ void GSUB::LookupEnd(SubtableInfo *si) {
 
         default:
             /* Can't get here, but it is a useful check for future development. */
-            hotMsg(g, hotFATAL, "unknown GSUB lkpType <%d> in %s.", si->lkpType, g->error_id_text.c_str());
+            g->logger->log(sFATAL, "unknown GSUB lkpType <%d> in %s.", si->lkpType, g->error_id_text.c_str());
     }
 
     checkOverflow("lookup subtable", subOffset(), "substitution");
@@ -207,17 +207,17 @@ void GSUB::addSubstRule(SubtableInfo &si, GPat::SP targ, GPat::SP repl) {
                     g->ctx.feat->dumpGlyph(tg, ',', 0);
                     g->note.push_back(' ');
                     g->ctx.feat->dumpGlyph(ri->gid, '\0', 0);
-                    hotMsg(g, hotNOTE,
-                           "Removing duplicate single substitution "
-                           "in %s: %s",
-                           g->error_id_text.c_str(),
-                           g->getNote());
+                    g->logger->log(sINFO,
+                                   "Removing duplicate single substitution "
+                                   "in %s: %s",
+                                   g->error_id_text.c_str(),
+                                   g->getNote());
                 } else {
                     g->ctx.feat->dumpGlyph(tg, '\0', 0);
-                    hotMsg(g, hotFATAL,
-                           "Duplicate target glyph for single "
-                           "substitution in %s: %s",
-                           g->error_id_text.c_str(), g->getNote());
+                    g->logger->log(sFATAL,
+                                   "Duplicate target glyph for single "
+                                   "substitution in %s: %s",
+                                   g->error_id_text.c_str(), g->getNote());
                 }
             }
             // If repl is a glyph use it for all entries in targ
@@ -240,17 +240,17 @@ void GSUB::addSubstRule(SubtableInfo &si, GPat::SP targ, GPat::SP repl) {
                     i->first.dumpAsPattern(g, ' ', false);
                     g->note.push_back(' ');
                     g->ctx.feat->dumpGlyph(rgid, '\0', 0);
-                    hotMsg(g, hotNOTE,
-                           "Removing duplicate ligature substitution "
-                           "in %s: %s",
-                           g->error_id_text.c_str(),
-                           g->getNote());
+                    g->logger->log(sINFO,
+                                   "Removing duplicate ligature substitution "
+                                   "in %s: %s",
+                                   g->error_id_text.c_str(),
+                                   g->getNote());
                 } else {
                     i->first.dumpAsPattern(g, '\0', false);
-                    hotMsg(g, hotFATAL,
-                           "Duplicate target sequence but different replacement "
-                           "glyphs in ligature substitutions in %s: %s",
-                           g->error_id_text.c_str(), g->getNote());
+                    g->logger->log(sFATAL,
+                                   "Duplicate target sequence but different replacement "
+                                   "glyphs in ligature substitutions in %s: %s",
+                                   g->error_id_text.c_str(), g->getNote());
                 }
             }
         }
@@ -294,15 +294,15 @@ void GSUB::FeatureNameParam::fill(GSUB &h, SubtableInfo &si) {
         if (si.paramNameID != 0) {
             uint16_t nameIDPresent = nameVerifyDefaultNames(h.g, si.paramNameID);
             if (nameIDPresent && (nameIDPresent & MISSING_WIN_DEFAULT_NAME)) {
-                hotMsg(h.g, hotFATAL,
-                       "Missing Windows default name for 'featureNames' nameid %i in %s.",
-                       si.paramNameID, h.g->error_id_text.c_str());
+                h.g->logger->log(sFATAL,
+                                 "Missing Windows default name for 'featureNames' nameid %i in %s.",
+                                 si.paramNameID, h.g->error_id_text.c_str());
             }
         }
     } else {
-        hotMsg(h.g, hotFATAL,
-               "A 'featureNames' block is only allowed in Stylistic Set (ssXX) features; it is being used in %s.",
-               h.g->error_id_text.c_str());
+        h.g->logger->log(sFATAL,
+                         "A 'featureNames' block is only allowed in Stylistic Set (ssXX) features; it is being used in %s.",
+                         h.g->error_id_text.c_str());
     }
     std::unique_ptr<GSUB::Subtable> s = std::make_unique<FeatureNameParam>(h, si, si.paramNameID);
     h.incFeatParamOffset(FeatureNameParam::size());
@@ -333,16 +333,16 @@ void GSUB::CVParam::fill(GSUB &h, SubtableInfo &si) {
             if (nameid != 0) {
                 uint16_t nameIDPresent = nameVerifyDefaultNames(h.g, nameid);
                 if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
-                    hotMsg(h.g, hotFATAL,
-                           "Missing Windows default name for 'cvParameters' nameid %i in %s.",
-                           nameid, h.g->error_id_text.c_str());
+                    h.g->logger->log(sFATAL,
+                                     "Missing Windows default name for 'cvParameters' nameid %i in %s.",
+                                     nameid, h.g->error_id_text.c_str());
                 }
             }
         }
     } else {
-        hotMsg(h.g, hotFATAL,
-               "A 'cvParameters' block is only allowed in Character Variant (cvXX) features; it is being used in %s.",
-               h.g->error_id_text.c_str());
+        h.g->logger->log(sFATAL,
+                         "A 'cvParameters' block is only allowed in Character Variant (cvXX) features; it is being used in %s.",
+                         h.g->error_id_text.c_str());
     }
     auto sz = si.cvParams.size();
     h.AddSubtable(std::move(std::make_unique<CVParam>(h, si, std::move(si.cvParams))));
@@ -508,7 +508,7 @@ GSUB::MultipleSubst::MultipleSubst(GSUB &h, SubtableInfo &si, int64_t beg,
 
 #if HOT_DEBUG
     if (offst != sz)
-        hotMsg(h.g, hotFATAL, "[internal] fillSubstitute() size miscalculation");
+        g->logger->log(sFATAL, "[internal] fillSubstitute() size miscalculation");
 #if AALT_STATS
     if (si.feature == aalt_) {
         DF(1, (stderr,
@@ -543,11 +543,11 @@ void GSUB::MultipleSubst::fill(GSUB &h, SubtableInfo &si) {
         /* Check for duplicates */
         if (j != 0 && rule.targ->classes[0].glyphs[0] == si.rules[j-1].targ->classes[0].glyphs[0]) {
             h.g->ctx.feat->dumpGlyph(rule.targ->classes[0].glyphs[0].gid, '\0', 0);
-            hotMsg(h.g, hotFATAL,
-                   "Duplicate target glyph for multiple substitution in "
-                   "%s: %s",
-                   h.g->error_id_text.c_str(),
-                   h.g->getNote());
+            h.g->logger->log(sFATAL,
+                             "Duplicate target glyph for multiple substitution in "
+                             "%s: %s",
+                             h.g->error_id_text.c_str(),
+                             h.g->getNote());
         }
 
         /* Calculate nw size if this rule were included: */
@@ -634,7 +634,7 @@ GSUB::AlternateSubst::AlternateSubst(GSUB &h, SubtableInfo &si,
 
 #if HOT_DEBUG
     if (offst != size)
-        hotMsg(h.g, hotFATAL, "[internal] fillAlternate() size miscalculation");
+        g->logger->log(sFATAL, "[internal] fillAlternate() size miscalculation");
 #if AALT_STATS
     if (si.feature == aalt_) {
         DF(1, (stderr,
@@ -674,11 +674,11 @@ void GSUB::AlternateSubst::fill(GSUB &h, SubtableInfo &si) {
         /* Check for duplicates */
         if (j != 0 && rule.targ->classes[0].glyphs[0] == si.rules[j-1].targ->classes[0].glyphs[0]) {
             h.g->ctx.feat->dumpGlyph(rule.targ->classes[0].glyphs[0].gid, '\0', 0);
-            hotMsg(h.g, hotFATAL,
-                   "Duplicate target glyph for alternate substitution in "
-                   "%s: %s",
-                   h.g->error_id_text.c_str(),
-                   h.g->getNote());
+            h.g->logger->log(sFATAL,
+                             "Duplicate target glyph for alternate substitution in "
+                             "%s: %s",
+                             h.g->error_id_text.c_str(),
+                             h.g->getNote());
         }
 
         /* Calculate new size if this rule were included: */
