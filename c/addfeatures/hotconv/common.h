@@ -366,6 +366,15 @@ class VarLocationMap;
 
 
 struct hotCtx_ {
+    const char *getNote() {
+        if (note.size() > 1024) {
+            note.resize(1024);
+            note[1023] = '.';
+            note[1022] = '.';
+            note[1021] = '.';
+        }
+        return note.c_str();
+    }
     long version;    /* Hot lib version number */
     struct tm time;  /* Local time */
     FontInfo_ font;  /* Font information */
@@ -399,7 +408,7 @@ struct hotCtx_ {
     } ctx;
     dnaCtx DnaCTX;
     std::string tmp;
-    dnaDCL(char, note);
+    std::string note;
     void *in_stream;
     void *out_stream;
     std::string error_id_text;

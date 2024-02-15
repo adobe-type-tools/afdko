@@ -1076,7 +1076,7 @@ static void checkDuplicates(hotCtx g, cmapCtx h, int isMixedByte) {
                 g->ctx.feat->dumpGlyph(mapping[i - 1].glyphId, ',', 0);
                 g->ctx.feat->dumpGlyph(mapping[i].glyphId, 0, 0);
                 cmapMsg(g, hotFATAL, "multiple glyphs (%s) mapped to code <%lX>",
-                        g->note.array, mapping[i].code);
+                        g->getNote(), mapping[i].code);
             }
         }
     }
