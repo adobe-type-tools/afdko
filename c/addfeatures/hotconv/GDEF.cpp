@@ -120,10 +120,10 @@ void GDEF::GlyphClassTable::set(GPat::ClassRec &simple, GPat::ClassRec &ligature
                     hadConflictingClassDef = true;
                     if (h.g->convertFlags & HOT_VERBOSE) {
                         h.g->ctx.feat->dumpGlyph(gid, 0, 0);
-                        hotMsg(h.g, hotWARNING, "GDEF GlyphClass. Glyph '%s' "
-                               "gid '%d'. glyph class '%s' overrides "
-                               "class '%s'.", h.g->getNote(), gid,
-                               names[seeni->second], names[i]);
+                        h.g->logger->log(sWARNING, "GDEF GlyphClass. Glyph '%s' "
+                                         "gid '%d'. glyph class '%s' overrides "
+                                         "class '%s'.", h.g->getNote(), gid,
+                                         names[seeni->second], names[i]);
                     }
                 }
                 glyphs.erase(glyphs.begin() + j);
@@ -134,10 +134,10 @@ void GDEF::GlyphClassTable::set(GPat::ClassRec &simple, GPat::ClassRec &ligature
     }
 
     if (hadConflictingClassDef && (h.g->convertFlags & HOT_VERBOSE)) {
-        hotMsg(h.g, hotWARNING, "GDEF Glyph Class. Since there were conflicting "
-               "GlyphClass assignments, you should examine this GDEF table, "
-               "and make sure that the glyph class assignments are as "
-               "needed.\n");
+        h.g->logger->log(sWARNING, "GDEF Glyph Class. Since there were conflicting "
+                         "GlyphClass assignments, you should examine this GDEF table, "
+                         "and make sure that the glyph class assignments are as "
+                         "needed.\n");
     }
 }
 
@@ -194,7 +194,7 @@ bool GDEF::LigCaretTable::warnGid(GID gid) {
     for (auto &lge : ligCaretEntries) {
         if (lge.gid == gid) {
             h.g->ctx.feat->dumpGlyph(lge.gid, 0, 0);
-            hotMsg(h.g, hotWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature glyph entry. Skipping entry.", h.g->getNote(), lge.gid);
+            h.g->logger->log(sWARNING, "GDEF Ligature Caret List Table. Glyph '%s' gid '%d'.\n A glyph can have at most one ligature glyph entry. Skipping entry.", h.g->getNote(), lge.gid);
             return true;
         }
     }
@@ -325,18 +325,18 @@ void GDEF::MarkAttachClassTable::validate() {
                 hadConflictingClassDef = true;
                 if (h.g->convertFlags & HOT_VERBOSE) {
                     h.g->ctx.feat->dumpGlyph(gid, 0, 0);
-                    hotMsg(h.g, hotWARNING,
-                           "GDEF MarkAttachment. Glyph '%s' gid '%d'. "
-                           "previous glyph class '%s' conflicts with new "
-                           "class '%s'.", h.g->getNote(), gid,
-                           seeni->second, className);
+                    h.g->logger->log(sWARNING,
+                                     "GDEF MarkAttachment. Glyph '%s' gid '%d'. "
+                                     "previous glyph class '%s' conflicts with new "
+                                     "class '%s'.", h.g->getNote(), gid,
+                                     seeni->second, className);
                 }
             }
         }
     }
     if (hadConflictingClassDef && (h.g->convertFlags & HOT_VERBOSE)) {
-        hotMsg(h.g, hotWARNING, "GDEF MarkAttachment Classes. There are "
-                              "conflicting MarkAttachment assignments.");
+        h.g->logger->log(sWARNING, "GDEF MarkAttachment Classes. There are "
+                         "conflicting MarkAttachment assignments.");
     }
 }
 

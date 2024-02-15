@@ -131,8 +131,8 @@ int STATFill(hotCtx g) {
     }
 
     if (!nameVerifyIDExists(g, h->elidedFallbackNameID))
-        hotMsg(g, hotFATAL, "[STAT] ElidedFallbackNameID points to a nameID that "
-                            "does not exist in \"name\" table.");
+        g->logger->log(sFATAL, "[STAT] ElidedFallbackNameID points to a nameID that "
+                       "does not exist in \"name\" table.");
 
     h->tbl.majorVersion = 1;
     h->tbl.minorVersion = 1;
@@ -161,9 +161,9 @@ int STATFill(hotCtx g) {
                 case 3:
                     if (!axisIndexOfTag(h, av->format1.axisTag,
                         &av->format1.axisIndex)) {
-                        hotMsg(g, hotFATAL,
-                               "[STAT] No DesignAxis defined for \"%c%c%c%c\".",
-                               TAG_ARG(av->format1.axisTag));
+                        g->logger->log(sFATAL,
+                                       "[STAT] No DesignAxis defined for \"%c%c%c%c\".",
+                                       TAG_ARG(av->format1.axisTag));
                     }
                     break;
 
@@ -173,17 +173,17 @@ int STATFill(hotCtx g) {
                         if (!axisIndexOfTag(h,
                                 av->format4.axisValues[j].axisTag,
                                 &av->format4.axisValues[j].axisIndex)) {
-                            hotMsg(g, hotFATAL,
-                                   "[STAT] No DesignAxis defined for \"%c%c%c%c\".",
-                                   TAG_ARG(av->format4.axisValues[j].axisTag));
+                            g->logger->log(sFATAL,
+                                           "[STAT] No DesignAxis defined for \"%c%c%c%c\".",
+                                           TAG_ARG(av->format4.axisValues[j].axisTag));
                         }
                     }
                     break;
 
                 default:
-                    hotMsg(g, hotFATAL,
-                           "[internal] unknown STAT Axis Value Table format <%d>.",
-                           av->format);
+                    g->logger->log(sFATAL,
+                                   "[internal] unknown STAT Axis Value Table format <%d>.",
+                                   av->format);
                     break;
             }
         }
@@ -259,9 +259,9 @@ void STATWrite(hotCtx g) {
                 break;
 
             default:
-                hotMsg(g, hotFATAL,
-                       "[internal] unknown STAT Axis Value Table format <%d>.",
-                       av->format);
+                g->logger->log(sFATAL,
+                               "[internal] unknown STAT Axis Value Table format <%d>.",
+                               av->format);
                 break;
         }
     }
@@ -329,16 +329,16 @@ void STATAddDesignAxis(hotCtx g, Tag tag, uint16_t nameID, uint16_t ordering) {
             }
         }
         if (hasLC) {
-            hotMsg(g, hotWARNING, "[STAT] Unregistered axis tag \"%c%c%c%c\" "
-            "should be uppercase.\n", TAG_ARG(tag));
+            g->logger->log(sWARNING, "[STAT] Unregistered axis tag \"%c%c%c%c\" "
+                           "should be uppercase.\n", TAG_ARG(tag));
         }
     }
 
     for (index = 0; index < h->designAxes.cnt; index++) {
         AxisRecord *ar = &h->designAxes.array[index];
         if (ar->axisTag == tag)
-            hotMsg(g, hotFATAL, "[STAT] DesignAxis tag \"%c%c%c%c\" "
-                   "is already defined.", TAG_ARG(tag));
+            g->logger->log(sFATAL, "[STAT] DesignAxis tag \"%c%c%c%c\" "
+                           "is already defined.", TAG_ARG(tag));
     }
 
     ar = dnaNEXT(h->designAxes);
@@ -368,9 +368,9 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
                 AxisValueTable *refav = &h->axisValues.array[i];
                 if (refav->format1.axisTag == axisTags[0]
                     && refav->format1.value == values[0])
-                    hotMsg(g, hotFATAL, "[STAT] AxisValueTable already defined "
-                    "for axis \"%c%c%c%c\" with value %.2f\n",
-                    TAG_ARG(axisTags[0]), FIX2DBL(values[0]));
+                    g->logger->log(sFATAL, "[STAT] AxisValueTable already defined "
+                                   "for axis \"%c%c%c%c\" with value %.2f\n",
+                                   TAG_ARG(axisTags[0]), FIX2DBL(values[0]));
             }
             av->size = AXIS_VALUE_TABLE1_SIZE;
             av->format1.axisTag = axisTags[0];
@@ -381,16 +381,16 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
 
         case 2:
             if (minValue > maxValue) {
-                    hotMsg(g, hotFATAL, "[STAT] \"%c%c%c%c\" AxisValue "
-                        "min %.2f cannot be greater than max %.2f",
-                        TAG_ARG(axisTags[0]), FIX2DBL(minValue),
-                        FIX2DBL(maxValue));
+                g->logger->log(sFATAL, "[STAT] \"%c%c%c%c\" AxisValue "
+                               "min %.2f cannot be greater than max %.2f",
+                               TAG_ARG(axisTags[0]), FIX2DBL(minValue),
+                               FIX2DBL(maxValue));
             }
             if ((values[0] < minValue) || (values[0] > maxValue)) {
-                    hotMsg(g, hotFATAL, "[STAT] \"%c%c%c%c\" AxisValue "
-                        "default value %.2f is not in range %.2f-%.2f",
-                        TAG_ARG(axisTags[0]), FIX2DBL(values[0]),
-                        FIX2DBL(minValue), FIX2DBL(maxValue));
+                g->logger->log(sFATAL, "[STAT] \"%c%c%c%c\" AxisValue "
+                               "default value %.2f is not in range %.2f-%.2f",
+                               TAG_ARG(axisTags[0]), FIX2DBL(values[0]),
+                               FIX2DBL(minValue), FIX2DBL(maxValue));
             }
 
             for (i = 0; i < h->axisValues.cnt; i++) {
@@ -399,8 +399,8 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
                     && refav->format2.nominalValue == values[0]
                     && refav->format2.rangeMinValue == minValue
                     && refav->format2.rangeMaxValue == maxValue)
-                    hotMsg(g, hotFATAL, "[STAT] AxisValueTable already defined "
-                    "for axis \"%c%c%c%c\" with values %.2f %.2f %.2f\n",
+                    g->logger->log(sFATAL, "[STAT] AxisValueTable already defined "
+                                   "for axis \"%c%c%c%c\" with values %.2f %.2f %.2f\n",
                     TAG_ARG(axisTags[0]), FIX2DBL(values[0]),
                         FIX2DBL(minValue), FIX2DBL(maxValue));
             }
@@ -420,10 +420,10 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
                 if (refav->format3.axisTag == axisTags[0]
                     && refav->format3.value == values[0]
                     && refav->format3.linkedValue == minValue)
-                    hotMsg(g, hotFATAL, "[STAT] AxisValueTable already defined "
-                    "for axis \"%c%c%c%c\" with values %.2f %.2f\n",
-                    TAG_ARG(axisTags[0]), FIX2DBL(values[0]),
-                    FIX2DBL(minValue));
+                    g->logger->log(sFATAL, "[STAT] AxisValueTable already defined "
+                                   "for axis \"%c%c%c%c\" with values %.2f %.2f\n",
+                                   TAG_ARG(axisTags[0]), FIX2DBL(values[0]),
+                                   FIX2DBL(minValue));
             }
             av->size = AXIS_VALUE_TABLE3_SIZE;
             av->format3.axisTag = axisTags[0];
@@ -475,8 +475,8 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
                             dupeMsg = (char *)MEM_NEW(g, l);
                             snprintf(dupeMsg, l, baseMsg, count);
                         }
-                        hotMsg(g, hotFATAL, dupeMsg);
-                        /* Shouldn't reach this MEM_FREE due to above hotFATAL, but just in case it gets changed to warning*/
+                        g->logger->log(sFATAL, dupeMsg);
+                        /* Shouldn't reach this MEM_FREE due to above sFATAL, but just in case it gets changed to warning*/
                         MEM_FREE(g, dupeMsg);
                     }
                 }
@@ -494,9 +494,9 @@ void STATAddAxisValueTable(hotCtx g, uint16_t format, Tag *axisTags,
             break;
 
         default:
-            hotMsg(g, hotFATAL,
-                   "[internal] unknown STAT Axis Value Table format <%d>.",
-                   av->format);
+            g->logger->log(sFATAL,
+                           "[internal] unknown STAT Axis Value Table format <%d>.",
+                           av->format);
             break;
     }
 }

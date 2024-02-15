@@ -73,7 +73,7 @@ void hheaRead(hotCtx g, int offset, int length) {
     g->bufleft = 0;
     Fixed version = hotIn4(g);
     if (version != VERSION(1, 0)) {
-        hotMsg(g, hotWARNING, "Unrecognized version of input hhea table, will not read");
+        g->logger->msg(sWARNING, "Unrecognized version of input hhea table, will not read");
         return;
     }
     h->tbl.ascender = hotIn2(g);

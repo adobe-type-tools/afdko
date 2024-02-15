@@ -61,7 +61,7 @@ void postRead(hotCtx g, int offset, int length) {
     h->tbl.maxMemType1 = hotIn4(g);
     */
     if (h->tbl.version != VERSION(2, 0) || length <= 32) {
-        hotMsg(g, hotWARNING, "here1");
+        g->logger->log(sWARNING, "here1");
         return;
     }
     g->cb.stm.seek(&g->cb.stm, g->in_stream, offset + 32);
@@ -72,7 +72,7 @@ void postRead(hotCtx g, int offset, int length) {
     while (length > 0) {
         int l = g->cb.stm.read(&g->cb.stm, g->in_stream, &buf);
         if (l <= 0) {
-            hotMsg(g, hotFATAL, "Input name table unexpectedly short");
+            g->logger->log(sFATAL, "Input name table unexpectedly short");
         } else if (l < length) {
             memcpy(p, buf, l);
             p += l;

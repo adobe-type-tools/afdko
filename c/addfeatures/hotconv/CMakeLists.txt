@@ -36,6 +36,8 @@ add_library(hotconv OBJECT
     hmtx.cpp
     hmtx.h
     hot.cpp
+    hotlogger.h
+    hotlogger.cpp
     hotmap.h
     map.cpp
     maxp.cpp

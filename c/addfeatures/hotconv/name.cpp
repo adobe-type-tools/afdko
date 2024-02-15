@@ -447,7 +447,7 @@ static char *translate2MacDflt(nameCtx h, char *src) {
         if (uv) {
             char macChar = mapUV2MacRoman(uv);
             if (macChar == 0) {
-                hotMsg(h->g, hotFATAL, "[name] Could not translate UTF8 glyph code into Mac Roman in name table name %s", begin);
+                h->g->logger->log(sFATAL, "[name] Could not translate UTF8 glyph code into Mac Roman in name table name %s", begin);
             }
             *dst++ = macChar;
         }
@@ -487,7 +487,7 @@ static void fillNames(nameCtx h) {
                              HOT_NAME_FAMILY);
 
         if (tempString == NULL) {
-            hotMsg(h->g, hotFATAL, "[name] I can't find a Family name for this font !");
+            h->g->logger->log(sFATAL, "[name] I can't find a Family name for this font !");
         }
         addWinDfltName(h, HOT_NAME_FAMILY, strlen(tempString), tempString);
     }
@@ -535,7 +535,7 @@ static void fillNames(nameCtx h) {
                     rec->languageId,
                     HOT_NAME_FAMILY, strlen(Family), Family);
             if (doWarning) {
-                hotMsg(h->g, hotWARNING, "[name] The Font Menu Name DB entry for this font is missing an MS Platform Compatible Family Name entry to match the MS Platform Preferred Family Name for language ID %d. Using the Preferred Name only.", rec->languageId);
+                h->g->logger->log(sWARNING, "[name] The Font Menu Name DB entry for this font is missing an MS Platform Compatible Family Name entry to match the MS Platform Preferred Family Name for language ID %d. Using the Preferred Name only.", rec->languageId);
             }
         }
 
@@ -691,7 +691,7 @@ static void fillNames(nameCtx h) {
                         rec->languageId,
                         HOT_NAME_FAMILY, strlen(Family), Family);
                 if (doWarning && (!doV1Names)) {
-                    hotMsg(h->g, hotWARNING, "[name] The Font Menu Name DB entry for this font is missing a Mac Platform Compatible Family Name entry to match the Mac Platform Preferred Family Name for language ID %d. Using the Preferred Name only.", rec->languageId);
+                    h->g->logger->log(sWARNING, "[name] The Font Menu Name DB entry for this font is missing a Mac Platform Compatible Family Name entry to match the Mac Platform Preferred Family Name for language ID %d. Using the Preferred Name only.", rec->languageId);
                 }
             }
             index++;
@@ -827,7 +827,7 @@ static void fillNames(nameCtx h) {
                 }
 
                 if (Subfamily == NULL) {
-                    hotMsg(h->g, hotFATAL, "[name] no Mac subfamily name specified");
+                    h->g->logger->log(sFATAL, "[name] no Mac subfamily name specified");
                 } else if (strcmp(Subfamily, "Regular") == 0) {
                     addName(h,
                             HOT_NAME_MAC_PLATFORM,
@@ -883,7 +883,7 @@ static void fillNames(nameCtx h) {
                 }
 
                 if (Subfamily == NULL) {
-                    hotMsg(h->g, hotFATAL, "[name] no Mac subfamily name specified");
+                    h->g->logger->log(sFATAL, "[name] no Mac subfamily name specified");
                 } else if (strcmp(Subfamily, "Regular") == 0) {
                     addName(h,
                             HOT_NAME_MAC_PLATFORM,
@@ -1132,7 +1132,7 @@ void nameAddReg(hotCtx g,
     if (nameVerifyIDExists(g, nameId)) {
         char *foundstr = getName(h, platformId, platspecId, languageId, nameId);
         if (foundstr != NULL) {
-            hotMsg(h->g, hotWARNING, "[name] Overwriting existing nameid %d %s with %s", nameId, foundstr, str);
+            h->g->logger->log(sWARNING, "[name] Overwriting existing nameid %d %s with %s", nameId, foundstr, str);
         }
     }
     addName(h, platformId, platspecId, languageId, nameId, strlen(str), str);

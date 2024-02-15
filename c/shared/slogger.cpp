@@ -7,6 +7,29 @@
 #include <iostream>
 #include <deque>
 
+#define INI_VLOG_BUFSIZ 128
+
+void slogger::vlog(int level, const char *fmt, va_list ap) {
+    va_list ap_cp;
+    auto buf = std::make_unique<char[]>(INI_VLOG_BUFSIZ);
+
+    va_copy(ap_cp, ap);
+    int size = std::vsnprintf(buf.get(), INI_VLOG_BUFSIZ, fmt, ap) + 1;
+    if ( size > INI_VLOG_BUFSIZ ) {
+        buf = std::make_unique<char[]>(size);
+        vsnprintf(buf.get(), size, fmt, ap_cp);
+    }
+    va_end(ap_cp);
+    msg(level, buf.get());
+}
+
+void CTL_CDECL slogger::log(int level, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vlog(level, fmt, ap);
+    va_end(ap);
+}
+
 struct LogContext {
     std::string key;
     std::string str;
@@ -15,11 +38,9 @@ struct LogContext {
 };
 
 class deflogger : public slogger {
-    virtual void msg(int level, const char *msg);
-    virtual void vlog(int level, const char *fmt, va_list ap);
-    virtual void CTL_CDECL log(int level, const char *fmt, ...);
-    virtual int set_context(const char *key, int level, const char *str);
-    virtual int clear_context(const char *key);
+    void msg(int level, const char *msg) override;
+    int set_context(const char *key, int level, const char *str) override;
+    int clear_context(const char *key) override;
  private:
     std::deque<LogContext> contexts;
 };
@@ -50,29 +71,6 @@ void deflogger::msg(int level, const char *msg) {
             break;
     }
     std::cerr << msg << std::endl;
-}
-
-#define INI_VLOG_BUFSIZ 128
-
-void deflogger::vlog(int level, const char *fmt, va_list ap) {
-    va_list ap_cp;
-    auto buf = std::make_unique<char[]>(INI_VLOG_BUFSIZ);
-
-    va_copy(ap_cp, ap);
-    int size = std::vsnprintf(buf.get(), INI_VLOG_BUFSIZ, fmt, ap) + 1;
-    if ( size > INI_VLOG_BUFSIZ ) {
-        buf = std::make_unique<char[]>(size);
-        vsnprintf(buf.get(), size, fmt, ap_cp);
-    }
-    va_end(ap_cp);
-    msg(level, buf.get());
-}
-
-void CTL_CDECL deflogger::log(int level, const char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vlog(level, fmt, ap);
-    va_end(ap);
 }
 
 int deflogger::set_context(const char *key, int level, const char *str) {

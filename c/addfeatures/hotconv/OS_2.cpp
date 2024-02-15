@@ -215,7 +215,7 @@ static void setClasses(hotCtx g, OS_2Ctx h) {
     }
 
     if (h->tbl.usWeightClass < 250) {
-        hotMsg(h->g, hotERROR, "OS/2 weight class was set below 250 <%d>; bumping to  250. Use correct feature file override.", h->tbl.usWeightClass);
+        h->g->logger->log(sERROR, "OS/2 weight class was set below 250 <%d>; bumping to  250. Use correct feature file override.", h->tbl.usWeightClass);
         h->tbl.usWeightClass = 250;
     }
 
@@ -303,7 +303,7 @@ static void setPanose(hotCtx g, OS_2Ctx h) {
 /* Fail if fields haven't been set */
 static void failIfNotSeen(OS_2Ctx h, int enumField, const char *desc) {
     if (!h->seen[enumField]) {
-        hotMsg(h->g, hotFATAL, "[internal] OS/2.%s not set", desc);
+        h->g->logger->log(sFATAL, "[internal] OS/2.%s not set", desc);
     }
 }
 

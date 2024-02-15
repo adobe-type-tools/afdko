@@ -15,6 +15,7 @@
 #include <limits>
 
 #include "head.h"
+#include "hotlogger.h"
 #include "hhea.h"
 #include "hmtx.h"
 #include "post.h"
@@ -104,7 +105,7 @@ static long sscbTell(ctlSharedStmCallbacks *h) {
 
 static void sscbRead(ctlSharedStmCallbacks *h, size_t count, char *ptr) {
     hotCtx g = (hotCtx) h->direct_ctx;
-    hotMsg(g, hotFATAL, "General reads not supported");
+    g->logger->log(sFATAL, "General reads not supported");
 }
 
 static uint8_t sscbRead1(ctlSharedStmCallbacks *h) {
@@ -144,7 +145,7 @@ void hotMakeSSC(hotCtx g, ctlSharedStmCallbacks &c) {
 hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
               std::shared_ptr<slogger> logger) {
     time_t now;
-    hotCtx g = new struct hotCtx_;
+    hotCtx g = new hotCtx_;
 
     if (g == NULL) {
         if (logger)
@@ -223,11 +224,7 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     mapNew(g);
     g->ctx.feat = new FeatCtx(g);
 
-    if (logger)
-        g->logger = logger;
-    else
-        g->logger = slogger::getLogger("hotconv");
-
+    g->logger = std::make_shared<hotlogger>(g, logger);
     g->goadb = goadb;
 
     return g;
@@ -329,25 +326,25 @@ static void hotReadTables(hotCtx g) {
                     sfntOverrideTable(g, CFF2_, table->offset, table->length);
                     table = sfrGetTableByTag(sfr, head_);
                     if (table == NULL)
-                        hotMsg(g, hotFATAL, "CFF2 sfnt must contain head table");
+                        g->logger->log(sFATAL, "CFF2 sfnt must contain head table");
                     headRead(g, table->offset, table->length);
                     table = sfrGetTableByTag(sfr, hhea_);
                     if (table == NULL)
-                        hotMsg(g, hotFATAL, "CFF2 sfnt must contain hhea table");
+                        g->logger->log(sFATAL, "CFF2 sfnt must contain hhea table");
                     hheaRead(g, table->offset, table->length);
                     table = sfrGetTableByTag(sfr, hmtx_);
                     if (table == NULL)
-                        hotMsg(g, hotFATAL, "CFF2 sfnt must contain hmtx table");
+                        g->logger->log(sFATAL, "CFF2 sfnt must contain hmtx table");
                     sfntOverrideTable(g, hmtx_, table->offset, table->length);
                     table = sfrGetTableByTag(sfr, name_);
                     if (table == NULL)
-                        hotMsg(g, hotFATAL, "CFF2 sfnt must contain name table");
+                        g->logger->log(sFATAL, "CFF2 sfnt must contain name table");
                     nameRead(g, table->offset, table->length);
                     table = sfrGetTableByTag(sfr, post_);
                     if (table != NULL) {
                         postRead(g, table->offset, table->length);
                     } else {
-                        hotMsg(g, hotWARNING, "CFF2 sfnt does not include post table");
+                        g->logger->log(sWARNING, "CFF2 sfnt does not include post table");
                     }
                     table = sfrGetTableByTag(sfr, fvar_);
                     if (table != NULL) {
@@ -370,17 +367,17 @@ static void hotReadTables(hotCtx g) {
             }
             // call name function to read in extra labels
         } else {
-            hotMsg(g, hotFATAL, "sfnt file must have CFF or CFF2 table");
+            g->logger->log(sFATAL, "sfnt file must have CFF or CFF2 table");
         }
     } else {
         g->cb.stm.seek(&g->cb.stm, g->in_stream, 0);
         char first = hotFillBuf(g);
         if (g->bufleft < 3)
-            hotMsg(g, hotFATAL, "Bad font file");
+            g->logger->log(sFATAL, "Bad font file");
         else if (first == 2)
-            hotMsg(g, hotFATAL, "Bad font file (or bare CFF2 table)");
+            g->logger->log(sFATAL, "Bad font file (or bare CFF2 table)");
         else if (first != 1)
-            hotMsg(g, hotFATAL, "Bad font file");
+            g->logger->log(sFATAL, "Bad font file");
         else
             sfntOverrideTable(g, CFF__, 0, -1);
     }
@@ -425,7 +422,7 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
     if (g->font.version.PS.empty())
         g->font.version.PS = "(version unavailable)";
     std::string &n = g->font.FontName.empty() ? g->font.FullName : g->font.FontName;
-    hotMsg(g, hotFLUSH, "%s processing font <%s>", "addfeatures", n.c_str());
+    g->logger->log(sFLUSH, "%s processing font <%s>", "addfeatures", n.c_str());
 
     /* Copy basic font information */
     g->font.bbox.left = top->FontBBox[0];
@@ -495,13 +492,13 @@ void hotAddVertOriginY(hotCtx g, GID gid, short value) {
     if (hotgi->vOrigY != SHRT_MAX) {
         g->ctx.feat->dumpGlyph(gid, '\0', 0);
         if (hotgi->vOrigY == value) {
-            hotMsg(g, hotNOTE,
-                   "Ignoring duplicate VertOriginY entry for "
-                   "glyph %s", g->getNote());
+            g->logger->log(sINFO,
+                           "Ignoring duplicate VertOriginY entry for "
+                           "glyph %s", g->getNote());
         } else {
-            hotMsg(g, hotFATAL,
-                   "VertOriginY redefined for "
-                   "glyph %s", g->getNote());
+            g->logger->log(sFATAL,
+                           "VertOriginY redefined for "
+                           "glyph %s", g->getNote());
         }
     } else {
         hotgi->vOrigY = value;
@@ -518,13 +515,13 @@ void hotAddVertAdvanceY(hotCtx g, GID gid, short value) {
     if (hotgi.vAdv != SHRT_MAX) {
         g->ctx.feat->dumpGlyph(gid, '\0', 0);
         if (hotgi.vAdv == value) {
-            hotMsg(g, hotNOTE,
-                   "Ignoring duplicate VertAdvanceY entry for "
-                   "glyph %s", g->getNote());
+            g->logger->log(sINFO,
+                           "Ignoring duplicate VertAdvanceY entry for "
+                           "glyph %s", g->getNote());
         } else {
-            hotMsg(g, hotFATAL,
-                   "VertAdvanceY redefined for "
-                   "glyph %s", g->getNote());
+            g->logger->log(sFATAL,
+                           "VertAdvanceY redefined for "
+                           "glyph %s", g->getNote());
         }
     } else {
         hotgi.vAdv = -value;
@@ -642,7 +639,7 @@ static void prepWinData(hotCtx g) {
     intLeading = font->win.ascent + font->win.descent - font->unitsPerEm;
     if (intLeading < 0) {
         /* Warn about negative internal leading */
-        hotMsg(g, hotWARNING, "Negative internal leading: win.ascent + win.descent < unitsPerEm");
+        g->logger->log(sWARNING, "Negative internal leading: win.ascent + win.descent < unitsPerEm");
     }
 
     /* Set typo ascender/descender/linegap */
@@ -687,7 +684,7 @@ static void prepWinData(hotCtx g) {
     /* warn if the override values don't sum correctly. */
     if ((font->TypoAscender - font->TypoDescender) != font->unitsPerEm) {
         /* can happen only if overrides are used */
-        hotMsg(g, hotWARNING, "The feature file OS/2 overrides TypoAscender and TypoDescender do not sum to the font em-square.");
+        g->logger->log(sWARNING, "The feature file OS/2 overrides TypoAscender and TypoDescender do not sum to the font em-square.");
     }
 
     if (!OVERRIDE(font->TypoLineGap)) {
@@ -698,7 +695,7 @@ static void prepWinData(hotCtx g) {
 
     /* warn if the line gap is negative. */
     if (font->TypoLineGap < 0) {
-        hotMsg(g, hotWARNING, "The feature file OS/2 override TypoLineGap value is negative!");
+        g->logger->log(sWARNING, "The feature file OS/2 override TypoLineGap value is negative!");
     }
 
     /* No need to duplicate PFM avgCharWidth algorithm: Euro, Zcarons added to
@@ -1180,10 +1177,10 @@ int hotAddName(hotCtx g,
 /* Add encoded kern pair to accumulator */
 void hotAddKernPair(hotCtx g, long iPair, unsigned first, unsigned second) {
     if (iPair >= g->font.kern.pairs.cnt) {
-        hotMsg(g, hotFATAL,
-               "invalid kern pair index: %ld; expecting maximum "
-               "index: %ld",
-               iPair, g->font.kern.pairs.cnt - 1);
+        g->logger->log(sFATAL,
+                       "invalid kern pair index: %ld; expecting maximum "
+                       "index: %ld",
+                       iPair, g->font.kern.pairs.cnt - 1);
     } else {
         KernPair_ *pair = &g->font.kern.pairs.array[iPair];
         pair->first = first;
@@ -1194,10 +1191,10 @@ void hotAddKernPair(hotCtx g, long iPair, unsigned first, unsigned second) {
 /* Add encoded kern value to accumulator */
 void hotAddKernValue(hotCtx g, long iPair, short value) {
     if (iPair >= g->font.kern.pairs.cnt) {
-        hotMsg(g, hotFATAL,
-               "invalid kern value index: %ld; expecting maximum "
-               "index: %ld",
-               iPair, g->font.kern.pairs.cnt - 1);
+        g->logger->log(sFATAL,
+                       "invalid kern value index: %ld; expecting maximum "
+                       "index: %ld",
+                       iPair, g->font.kern.pairs.cnt - 1);
     }
     g->font.kern.values.array[iPair] = value;
 }
@@ -1205,7 +1202,7 @@ void hotAddKernValue(hotCtx g, long iPair, short value) {
 /* Add unencoded char */
 void hotAddUnencChar(hotCtx g, int iChar, char *name) {
     if (iChar >= g->font.unenc.cnt) {
-        hotMsg(g, hotFATAL, "invalid unencoded char");
+        g->logger->log(sFATAL, "invalid unencoded char");
     } else {
         int l = strlen(name) + 1;
         STRCPY_S(dnaGROW(g->font.unenc.array[iChar], l), l, name);
@@ -1247,14 +1244,14 @@ void hotAddAnonTable(hotCtx g, unsigned long tag, hotAnonRefill refill) {
 void *hotMemNew(hotCtx g, size_t size) {
     void *ptr = malloc(size);
     if ( ptr == NULL )
-        hotMsg(g, hotFATAL, "out of memory");
+        g->logger->log(sFATAL, "out of memory");
     return ptr;
 }
 
 void *hotMemResize(hotCtx g, void *old, size_t size) {
     void *ptr = realloc(old, size);
     if ( ptr == NULL )
-        hotMsg(g, hotFATAL, "out of memory");
+        g->logger->log(sFATAL, "out of memory");
     return ptr;
 }
 
@@ -1262,55 +1259,10 @@ void hotMemFree(hotCtx g, void *ptr) {
     free(ptr);
 }
 
-/* Call fatal if hadError is set (this is set by a hotMsg() hotERROR call) */
+/* Call fatal if hadError is set (this is set by a hotlogger sERROR call) */
 void hotQuitOnError(hotCtx g) {
     if (g->hadError) {
-        hotMsg(g, hotFATAL, "aborting because of errors");
-    }
-}
-
-/* Print note, error, warning, or fatal message (from note buffer is fmt is
-   NULL). If note used, handle reuse of g->note. */
-void CTL_CDECL hotMsg(hotCtx g, int level, const char *fmt, ...) {
-    int slevel = sINFO;
-
-    switch (level) {
-        case hotINDENT:
-            slevel = sINDENT;
-            break;
-        case hotFLUSH:
-            slevel = sFLUSH;
-            break;
-        case hotWARNING:
-            slevel = sWARNING;
-            break;
-        case hotERROR:
-            slevel = sERROR;
-            break;
-        case hotFATAL:
-            slevel = sFATAL;
-            break;
-    }
-
-    if (fmt == NULL) {
-        g->logger->msg(slevel, g->note.c_str());
-    } else {
-        va_list ap;
-        std::string prefix = g->ctx.feat->msgPrefix(), sfmt(fmt);
-
-        sfmt.insert(0, prefix);
-
-        va_start(ap, fmt);
-        g->logger->vlog(slevel, sfmt.c_str(), ap);
-        va_end(ap);
-    }
-
-    g->note.clear();
-
-    if (level == hotFATAL) {
-        g->cb.fatal(g->cb.ctx);
-    } else if (level == hotERROR && !g->hadError) {
-        g->hadError = true;
+        g->logger->log(sFATAL, "aborting because of errors");
     }
 }
 
@@ -1318,7 +1270,7 @@ void CTL_CDECL hotMsg(hotCtx g, int level, const char *fmt, ...) {
 char hotFillBuf(hotCtx g) {
     g->bufleft = g->cb.stm.read(&g->cb.stm, g->in_stream, &g->bufnext);
     if (g->bufleft-- == 0) {
-        hotMsg(g, hotFATAL, "premature end of input");
+        g->logger->log(sFATAL, "premature end of input");
     }
     return *g->bufnext++;
 }
@@ -1386,7 +1338,7 @@ void hotCalcSearchParams(unsigned unitSize, long nUnits,
 void hotWritePString(hotCtx g, char *string) {
     int length = strlen(string);
     if (length > 255) {
-        hotMsg(g, hotFATAL, "string too long");
+        g->logger->log(sFATAL, "string too long");
     }
     hout1(g, length);
     g->cb.stm.write(&g->cb.stm, g->out_stream, length, string);
