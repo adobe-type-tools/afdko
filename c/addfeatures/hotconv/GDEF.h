@@ -13,7 +13,7 @@
 #include "common.h"
 #include "FeatCtx.h"
 #include "otl.h"
-#include "varvalue.h"
+#include "varsupport.h"
 
 #define GDEF_ TAG('G', 'D', 'E', 'F')
 #define kMaxMarkAttachClasses 15
@@ -98,17 +98,17 @@ class GDEF {
             struct CaretTable {
                 struct comparator {
                     comparator() = delete;
-                    explicit comparator(ValueVector &values) : values(values) {}
+                    explicit comparator(const VarTrackVec &values) : values(values) {}
                     bool operator()(const std::unique_ptr<CaretTable> &a,
                                     const std::unique_ptr<CaretTable> &b) const {
                         return a->sortValue(values) < b->sortValue(values);
                     }
-                    ValueVector &values;
+                    const VarTrackVec &values;
                 };
-                virtual LOffset size() = 0;
-                virtual uint16_t format() = 0;
-                virtual void write(GDEF *h, ValueVector &values) = 0;
-                virtual int16_t sortValue(ValueVector &values) {
+                virtual LOffset size(const VarTrackVec &values) = 0;
+                virtual uint16_t format(const VarTrackVec &values) = 0;
+                virtual void write(GDEF *h, const VarTrackVec &values) = 0;
+                virtual int16_t sortValue(const VarTrackVec &values) {
                     return 0;
                 }
                 Offset offset {0};
@@ -116,14 +116,16 @@ class GDEF {
             struct CoordCaretTable : public CaretTable {
                 CoordCaretTable() = delete;
                 explicit CoordCaretTable(uint32_t vi) : valueIndex(vi) {}
-                LOffset size() override {
+                LOffset size(const VarTrackVec &values) override {
                     return sizeof(uint16_t) + sizeof(int16_t);
                 }
-                int16_t sortValue(ValueVector &values) override {
+                int16_t sortValue(const VarTrackVec &values) override {
                     return values[valueIndex].getDefault();
                 }
-                uint16_t format() override { return 1; }
-                void write(GDEF *h, ValueVector &values) override {
+                uint16_t format(const VarTrackVec &values) override {
+                    return 1;
+                }
+                void write(GDEF *h, const ValTrackVec &values) override {
                     OUT2(format());
                     OUT2(values[valueIndex].getDefault());
                 }
@@ -133,9 +135,13 @@ class GDEF {
                 // Don't sort point records
                 PointCaretTable() = delete;
                 explicit PointCaretTable(uint16_t point) : point(point) {}
-                LOffset size() override { return 2 * sizeof(uint16_t); }
-                uint16_t format() override { return 2; }
-                void write(GDEF *h, ValueVector &values) override {
+                LOffset size(const VarTrackVec &values) override {
+                    return 2 * sizeof(uint16_t);
+                }
+                uint16_t format(const VarTrackVec &values) override {
+                    return 2;
+                }
+                void write(GDEF *h, const ValTrackVec &values) override {
                     OUT2(format());
                     OUT2(point);
                 }
@@ -160,7 +166,7 @@ class GDEF {
             return sizeof(uint16_t) * (2 + glyphCount);
         }
         bool warnGid(GID gid);
-        void addCoords(GID gid, ValueVector &coords, ValueVector &values);
+        void addCoords(GID gid, std::vector<uint32_t> valIndexes, ValueVector &values);
         void addPoints(GID gid, std::vector<uint16_t> &points);
         Offset fill(Offset offset);
         void write(GDEF *h);
@@ -218,7 +224,10 @@ class GDEF {
         return attachTable.add(gid, contour);
     }
     void addLigCaretCoords(GID gid, ValueVector &coords) {
-        ligCaretTable.addCoords(gid, coords, values);
+        std::vector<uint32_t> valIndexes;
+        for (auto &vvr : coords)
+            valIndexes.push_back(ivs.addValue(foo, vvr));
+        ligCaretTable.addCoords(gid, valIndexes, values);
     }
     void addLigCaretPoints(GID gid, std::vector<uint16_t> &points) {
         ligCaretTable.addPoints(gid, points);
@@ -243,7 +252,7 @@ class GDEF {
     MarkAttachClassTable markAttachClassTable;
     MarkSetFilteringTable markSetClassTable;
 
-    ValueVector values;
+    itemVariationStore ivs;
 };
 
 #endif  // ADDFEATURES_HOTCONV_GDEF_H_

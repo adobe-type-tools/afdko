@@ -201,17 +201,16 @@ bool GDEF::LigCaretTable::warnGid(GID gid) {
     return false;
 }
 
-void GDEF::LigCaretTable::addCoords(GID gid, ValueVector &coords,
+void GDEF::LigCaretTable::addCoords(GID gid, std::vector<uint32_t> valCoords,
                                     ValueVector &values) {
     if (warnGid(gid))
         return;
 
     LigGlyphEntry lge {gid};
 
-    for (auto &c : coords) {
-        auto cctp = std::make_unique<LigGlyphEntry::CoordCaretTable>(values.size());
+    for (auto i : valCoords) {
+        auto cctp = std::make_unique<LigGlyphEntry::CoordCaretTable>(i);
         lge.caretTables.emplace_back(std::move(cctp));
-        values.emplace_back(std::move(c));
     }
 
     ligCaretEntries.emplace_back(std::move(lge));
@@ -287,8 +286,10 @@ Offset GDEF::LigCaretTable::fill(Offset o) {
     Offset sz = (Offset)size(cnt);
     std::sort(ligCaretEntries.begin(), ligCaretEntries.end());
 
+    auto values = h.ivs.getValues();
+
     cac.coverageBegin();
-    LigGlyphEntry::CaretTable::comparator ctc {h.values};
+    LigGlyphEntry::CaretTable::comparator ctc {values};
     for (auto &lge : ligCaretEntries) {
         lge.offset = sz;
         LOffset caretOffset = lge.size(lge.caretTables.size());
