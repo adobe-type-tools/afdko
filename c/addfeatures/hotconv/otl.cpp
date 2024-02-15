@@ -80,7 +80,7 @@ void CoverageAndClass::coverageAddGlyph(GID gid, bool warn) {
     if (!b) {
         if (warn) {
             g->ctx.feat->dumpGlyph(gid, 0, 0);
-            hotMsg(g, hotNOTE, "Removing duplicate glyph <%s>", g->note.array);
+            hotMsg(g, hotNOTE, "Removing duplicate glyph <%s>", g->getNote());
         }
 #if HOT_DEBUG
         printf("duplicated glyph ['%d'] in coverage.\n", gid);

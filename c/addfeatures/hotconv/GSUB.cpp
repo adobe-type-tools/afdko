@@ -55,7 +55,7 @@ void GSUBFree(hotCtx g) {
         if (print)                     \
             fprintf(stderr, "%c", ch); \
         else                           \
-            *dnaNEXT(g->note) = (ch);  \
+            g->note.push_back(ch);     \
     } while (0)
 
 void GSUB::LigatureTarg::dumpAsPattern(hotCtx g, int ch, bool print) const {
@@ -205,19 +205,19 @@ void GSUB::addSubstRule(SubtableInfo &si, GPat::SP targ, GPat::SP repl) {
             if (!b) {
                 if (i->second == ri->gid) {
                     g->ctx.feat->dumpGlyph(tg, ',', 0);
-                    *dnaNEXT(g->note) = ' ';
+                    g->note.push_back(' ');
                     g->ctx.feat->dumpGlyph(ri->gid, '\0', 0);
                     hotMsg(g, hotNOTE,
                            "Removing duplicate single substitution "
                            "in %s: %s",
                            g->error_id_text.c_str(),
-                           g->note.array);
+                           g->getNote());
                 } else {
                     g->ctx.feat->dumpGlyph(tg, '\0', 0);
                     hotMsg(g, hotFATAL,
                            "Duplicate target glyph for single "
                            "substitution in %s: %s",
-                           g->error_id_text.c_str(), g->note.array);
+                           g->error_id_text.c_str(), g->getNote());
                 }
             }
             // If repl is a glyph use it for all entries in targ
@@ -238,19 +238,19 @@ void GSUB::addSubstRule(SubtableInfo &si, GPat::SP targ, GPat::SP repl) {
             if (!b) {
                 if (i->second == rgid) {
                     i->first.dumpAsPattern(g, ' ', false);
-                    *dnaNEXT(g->note) = ' ';
+                    g->note.push_back(' ');
                     g->ctx.feat->dumpGlyph(rgid, '\0', 0);
                     hotMsg(g, hotNOTE,
                            "Removing duplicate ligature substitution "
                            "in %s: %s",
                            g->error_id_text.c_str(),
-                           g->note.array);
+                           g->getNote());
                 } else {
                     i->first.dumpAsPattern(g, '\0', false);
                     hotMsg(g, hotFATAL,
                            "Duplicate target sequence but different replacement "
                            "glyphs in ligature substitutions in %s: %s",
-                           g->error_id_text.c_str(), g->note.array);
+                           g->error_id_text.c_str(), g->getNote());
                 }
             }
         }
@@ -547,7 +547,7 @@ void GSUB::MultipleSubst::fill(GSUB &h, SubtableInfo &si) {
                    "Duplicate target glyph for multiple substitution in "
                    "%s: %s",
                    h.g->error_id_text.c_str(),
-                   h.g->note.array);
+                   h.g->getNote());
         }
 
         /* Calculate nw size if this rule were included: */
@@ -678,7 +678,7 @@ void GSUB::AlternateSubst::fill(GSUB &h, SubtableInfo &si) {
                    "Duplicate target glyph for alternate substitution in "
                    "%s: %s",
                    h.g->error_id_text.c_str(),
-                   h.g->note.array);
+                   h.g->getNote());
         }
 
         /* Calculate new size if this rule were included: */

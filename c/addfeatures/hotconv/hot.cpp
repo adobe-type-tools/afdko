@@ -198,7 +198,6 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->ctx.locMap = nullptr;
 
     g->DnaCTX = dnaNew(&hot_memcb, DNA_CHECK_ARGS);
-    dnaINIT(g->DnaCTX, g->note, 1024, 1024);
 
     hotMakeSSC(g, g->sscb);
 
@@ -498,11 +497,11 @@ void hotAddVertOriginY(hotCtx g, GID gid, short value) {
         if (hotgi->vOrigY == value) {
             hotMsg(g, hotNOTE,
                    "Ignoring duplicate VertOriginY entry for "
-                   "glyph %s", g->note.array);
+                   "glyph %s", g->getNote());
         } else {
             hotMsg(g, hotFATAL,
                    "VertOriginY redefined for "
-                   "glyph %s", g->note.array);
+                   "glyph %s", g->getNote());
         }
     } else {
         hotgi->vOrigY = value;
@@ -521,11 +520,11 @@ void hotAddVertAdvanceY(hotCtx g, GID gid, short value) {
         if (hotgi.vAdv == value) {
             hotMsg(g, hotNOTE,
                    "Ignoring duplicate VertAdvanceY entry for "
-                   "glyph %s", g->note.array);
+                   "glyph %s", g->getNote());
         } else {
             hotMsg(g, hotFATAL,
                    "VertAdvanceY redefined for "
-                   "glyph %s", g->note.array);
+                   "glyph %s", g->getNote());
         }
     } else {
         hotgi.vAdv = -value;
@@ -846,7 +845,6 @@ void hotFree(hotCtx g) {
     mapFree(g);
     delete g->ctx.feat;
 
-    dnaFREE(g->note);
     dnaFREE(g->font.kern.pairs);
     dnaFREE(g->font.kern.values);
 
@@ -1295,27 +1293,19 @@ void CTL_CDECL hotMsg(hotCtx g, int level, const char *fmt, ...) {
     }
 
     if (fmt == NULL) {
-        g->logger->msg(slevel, g->note.array);
+        g->logger->msg(slevel, g->note.c_str());
     } else {
         va_list ap;
-#define MAX_NOTE_LEN 1024
         std::string prefix = g->ctx.feat->msgPrefix(), sfmt(fmt);
 
         sfmt.insert(0, prefix);
-        /* xxx If note is used, crop it to MAX_NOTE_LEN. */
-        if (g->note.cnt > MAX_NOTE_LEN) {
-            g->note.array[MAX_NOTE_LEN - 1] = '\0';
-            g->note.array[MAX_NOTE_LEN - 2] = '.';
-            g->note.array[MAX_NOTE_LEN - 3] = '.';
-            g->note.array[MAX_NOTE_LEN - 4] = '.';
-        }
 
         va_start(ap, fmt);
         g->logger->vlog(slevel, sfmt.c_str(), ap);
         va_end(ap);
     }
 
-    g->note.cnt = 0;
+    g->note.clear();
 
     if (level == hotFATAL) {
         g->cb.fatal(g->cb.ctx);
