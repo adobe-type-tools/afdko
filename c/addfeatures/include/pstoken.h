@@ -52,13 +52,6 @@ typedef struct {
 typedef struct psCtx_ *psCtx; /* Parse context */
 typedef dnaDCL(char, psBuf);  /* Client's grow buffer */
 
-/* Message types (for use with message callback) */
-enum {
-    psWARNING = 1,
-    psERROR,
-    psFATAL
-};
-
 /* Callbacks */
 typedef struct {
     void *ctx; /* Client's callback context (optional) */

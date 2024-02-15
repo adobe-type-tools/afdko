@@ -184,9 +184,9 @@ static void prepAxis(BASECtx h, int vert) {
     AxisInfo *ai = vert ? &h->vert : &h->horiz;
     if (ai->baseline.cnt != 0) {
         if (ai->script.cnt == 0) {
-            hotMsg(h->g, hotFATAL,
-                   "scripts not specified for %s baseline axis",
-                   vert ? "vertical" : "horizontal");
+            h->g->logger->log(sFATAL,
+                              "scripts not specified for %s baseline axis",
+                              vert ? "vertical" : "horizontal");
         }
         qsort(ai->script.array, ai->script.cnt, sizeof(ScriptInfo),
               cmpScriptInfo);
@@ -475,8 +475,8 @@ void BASESetBaselineTags(hotCtx g, int vert, int nTag, Tag *baselineTag) {
 
     for (i = 1; i < nTag; i++) {
         if (baselineTag[i] < baselineTag[i - 1]) {
-            hotMsg(g, hotFATAL, "baseline tag list not sorted for %s axis",
-                   vert ? "vertical" : "horizontal");
+            g->logger->log(sFATAL, "baseline tag list not sorted for %s axis",
+                           vert ? "vertical" : "horizontal");
         }
     }
 
@@ -542,8 +542,8 @@ void BASEAddScript(hotCtx g, int vert, Tag script, Tag dfltBaseline,
     long nBaseTags = ai->baseline.cnt;
 
     if (ai->baseline.cnt == 0) {
-        hotMsg(g, hotFATAL, "baseline tags not specified for %s axis",
-               vert ? "vertical" : "horizontal");
+        g->logger->log(sFATAL, "baseline tags not specified for %s axis",
+                       vert ? "vertical" : "horizontal");
     }
 
     /* Calculate dfltInx */
@@ -553,8 +553,8 @@ void BASEAddScript(hotCtx g, int vert, Tag script, Tag dfltBaseline,
         }
     }
     if (dfltInx == -1) {
-        hotMsg(g, hotFATAL, "baseline %c%c%c%c not specified for %s axis",
-               TAG_ARG(dfltBaseline), vert ? "vertical" : "horizontal");
+        g->logger->log(sFATAL, "baseline %c%c%c%c not specified for %s axis",
+                       TAG_ARG(dfltBaseline), vert ? "vertical" : "horizontal");
     }
 
 #if 0

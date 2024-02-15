@@ -71,14 +71,14 @@ void FeatVisitor::Parse(bool do_includes) {
     fc->g->logger->set_context("feat_file", sINHERIT, newFileMsg().c_str());
 
     if ( depth >= MAX_INCL ) {
-        fc->featMsg(hotFATAL, "Can't include [%s]; maximum include levels <%d> reached",
+        fc->featMsg(sFATAL, "Can't include [%s]; maximum include levels <%d> reached",
                     pathname.c_str(), MAX_INCL);
         return;
     }
     if ( parent == nullptr ) {
         stream.open(pathname);
         if ( !stream.is_open() ) {
-            fc->featMsg(hotFATAL, "Specified feature file '%s' not found", pathname.c_str());
+            fc->featMsg(sFATAL, "Specified feature file '%s' not found", pathname.c_str());
             return;
         }
         assignDirName(pathname, dirname);
@@ -108,7 +108,7 @@ void FeatVisitor::Parse(bool do_includes) {
             stream.open(fullname);
         }
         if ( !stream.is_open() ) {
-            fc->featMsg(hotERROR, "Included feature file '%s' not found", pathname.c_str());
+            fc->featMsg(sERROR, "Included feature file '%s' not found", pathname.c_str());
             return;
         }
         assignDirName(fullname, dirname);
@@ -231,7 +231,7 @@ void FeatVisitor::FeatErrorListener::syntaxError(antlr4::Recognizer *,
     // Whatever messages the parser can produce are printed as a group
     // before processing ends if there are any errors, so here we just
     // mark them all as ERR instead of FATAL
-    hotMsg(v.fc->g, hotERROR, msg.c_str());
+    v.fc->g->logger->msg(sERROR, msg.c_str());
 }
 
 // --------------------------------- Blocks -----------------------------------
@@ -441,7 +441,7 @@ antlrcpp::Any FeatVisitor::visitLookupflagAssign(FeatParser::LookupflagAssignCon
             assert(e->MARK_ATTACHMENT_TYPE() != nullptr);
             uint16_t macIndex = fc->g->ctx.GDEFp->addGlyphMarkClass(getGlyphClass(e->glyphClass(), true));
             if ( macIndex > kMaxMarkAttachClasses )
-                fc->featMsg(hotERROR, "No more than 15 different class names can be used with the \"lookupflag MarkAttachmentType\". This would be a 16th.");
+                fc->featMsg(sERROR, "No more than 15 different class names can be used with the \"lookupflag MarkAttachmentType\". This would be a 16th.");
             v = fc->setLkpFlagAttribute(v, otlMarkAttachmentType, macIndex);
         }
     }
@@ -547,7 +547,7 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
 
     if ( TOK(ctx->valueRecord()) != nullptr ) {
         if ( gp == nullptr ) {
-            fc->featMsg(hotERROR, "Glyph or glyph class must precede a value record.");
+            fc->featMsg(sERROR, "Glyph or glyph class must precede a value record.");
             return nullptr;
         }
         assert(gp->patternLen() > 0);
@@ -561,7 +561,7 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
     } else if ( ctx->LOOKUP().size() != 0 ) {
         if ( gp == nullptr || gp->patternLen() == 0 ) {
             TOK(ctx->LOOKUP(0));
-            fc->featMsg(hotERROR, "Glyph or glyph class must precede a lookup reference in a contextual rule.");
+            fc->featMsg(sERROR, "Glyph or glyph class must precede a lookup reference in a contextual rule.");
             return nullptr;
         }
         type = GPOSChain;
@@ -569,7 +569,7 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
             gp->classes.back().lookupLabels.push_back(fc->getLabelIndex(TOK(l)->getText()));
             gp->lookup_node = true;
             if ( gp->classes.back().lookupLabels.size() > 255 )
-                fc->featMsg(hotFATAL, "Too many lookup references in one glyph position.");
+                fc->featMsg(sFATAL, "Too many lookup references in one glyph position.");
         }
         for (auto lpe : ctx->lookupPatternElement())
             gp->addClass(getLookupPatternElement(lpe, true));
@@ -611,7 +611,7 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
             if ( lme->MARK() ) {
                 fc->addMarkClass(TOK(lme->GCLASS())->getText());
             } else if ( !isNULL )
-                fc->featMsg(hotERROR, "In mark to ligature, non-null anchor must be followed by a mark class.");
+                fc->featMsg(sERROR, "In mark to ligature, non-null anchor must be followed by a mark class.");
             if ( lme->LIG_COMPONENT() != nullptr )
                 componentIndex++;
             if ( lme->MARKER() != nullptr ) {
@@ -659,7 +659,7 @@ antlrcpp::Any FeatVisitor::visitParameters(FeatParser::ParametersContext *ctx) {
     size_t s = ctx->fixedNum().size();
     if ( s > MAX_FEAT_PARAM_NUM ) {
         TOK(ctx->fixedNum(0));
-        fc->featMsg(hotERROR, "Too many parameter values.");
+        fc->featMsg(sERROR, "Too many parameter values.");
         s = MAX_FEAT_PARAM_NUM;
     }
     fc->featNameID = 0;
@@ -684,7 +684,7 @@ antlrcpp::Any FeatVisitor::visitSizemenuname(FeatParser::SizemenunameContext *ct
     if ( ctx->genNum().size() > 0 &&
          v[0] != HOT_NAME_MS_PLATFORM && v[0] != HOT_NAME_MAC_PLATFORM ) {
         TOK(ctx->genNum(0));
-        fc->featMsg(hotERROR, "platform id must be %d or %d",
+        fc->featMsg(sERROR, "platform id must be %d or %d",
                     HOT_NAME_MS_PLATFORM, HOT_NAME_MAC_PLATFORM);
     }
 
@@ -807,7 +807,7 @@ antlrcpp::Any FeatVisitor::visitTable_BASE(FeatParser::Table_BASEContext *ctx) {
 
     if ( stage == vExtract ) {
         if ( fc->axistag_count != 0 )
-            fc->featMsg(hotERROR, fc->axistag_visitor, fc->axistag_token,
+            fc->featMsg(sERROR, fc->axistag_visitor, fc->axistag_token,
                         "BaseTagList without corresponding BaseScriptList");
         fc->axistag_count = 0;
         fc->axistag_token = nullptr;
@@ -824,7 +824,7 @@ antlrcpp::Any FeatVisitor::visitAxisTags(FeatParser::AxisTagsContext *ctx) {
     assert(ctx->HA_BTL() != nullptr || ctx->VA_BTL() != nullptr);
 
     if ( fc->axistag_count != 0 )
-        fc->featMsg(hotERROR, fc->axistag_visitor, fc->axistag_token,
+        fc->featMsg(sERROR, fc->axistag_visitor, fc->axistag_token,
                     "BaseTagList without corresponding BaseScriptList");
 
     fc->axistag_vert = ctx->VA_BTL() != nullptr;
@@ -835,11 +835,11 @@ antlrcpp::Any FeatVisitor::visitAxisTags(FeatParser::AxisTagsContext *ctx) {
     TOK(ctx);
     if ( fc->axistag_vert ) {
         if ( fc->sawBASEvert )
-            fc->featMsg(hotERROR, "VertAxis.BaseTagList must only be specified once");
+            fc->featMsg(sERROR, "VertAxis.BaseTagList must only be specified once");
         fc->sawBASEvert = true;
     } else {
         if ( fc->sawBASEhoriz )
-            fc->featMsg(hotERROR, "HorizAxis.BaseTagList must only be specified once");
+            fc->featMsg(sERROR, "HorizAxis.BaseTagList must only be specified once");
         fc->sawBASEhoriz = true;
     }
 
@@ -858,9 +858,9 @@ antlrcpp::Any FeatVisitor::visitAxisScripts(FeatParser::AxisScriptsContext *ctx)
     assert(ctx->HA_BSL() != nullptr || ctx->VA_BSL() != nullptr);
 
     if ( ctx->HA_BSL() != nullptr && fc->axistag_vert )
-        fc->featMsg(hotERROR, "expecting \"VertAxis.BaseScriptList\"");
+        fc->featMsg(sERROR, "expecting \"VertAxis.BaseScriptList\"");
     else if ( ctx->VA_BSL() != nullptr && !fc->axistag_vert )
-        fc->featMsg(hotERROR, "expecting \"HorizAxis.BaseScriptList\"");
+        fc->featMsg(sERROR, "expecting \"HorizAxis.BaseScriptList\"");
 
     for (auto bs : ctx->baseScript())
         translateBaseScript(bs, fc->axistag_vert, fc->axistag_count);
@@ -908,7 +908,7 @@ antlrcpp::Any FeatVisitor::visitGdefAttach(FeatParser::GdefAttachContext *ctx) {
 
     GPat::SP gp = getLookupPattern(ctx->lookupPattern(), false);
     if (gp->patternLen() != 1)
-        fc->featMsg(hotERROR,
+        fc->featMsg(sERROR,
                     "Only one glyph|glyphClass may be present per"
                     " AttachTable statement");
 
@@ -916,7 +916,7 @@ antlrcpp::Any FeatVisitor::visitGdefAttach(FeatParser::GdefAttachContext *ctx) {
         int s = getNum<int16_t>(TOK(n)->getText(), 10);
         for (GID gid : gp->classes[0].glyphs) {
             if ( fc->g->ctx.GDEFp->addAttachEntry(gid, s) )
-                fc->featMsg(hotWARNING, "Skipping duplicate contour index %d", s);
+                fc->featMsg(sWARNING, "Skipping duplicate contour index %d", s);
         }
     }
     return nullptr;
@@ -928,7 +928,7 @@ antlrcpp::Any FeatVisitor::visitGdefLigCaretPos(FeatParser::GdefLigCaretPosConte
 
     GPat::SP gp = getLookupPattern(ctx->lookupPattern(), false);
     if (gp->patternLen() != 1)
-        fc->featMsg(hotERROR, "Only one glyph|glyphClass may be present per"
+        fc->featMsg(sERROR, "Only one glyph|glyphClass may be present per"
                               " LigatureCaret statement");
 
     ValueVector vv;
@@ -950,7 +950,7 @@ antlrcpp::Any FeatVisitor::visitGdefLigCaretIndex(FeatParser::GdefLigCaretIndexC
 
     GPat::SP gp = getLookupPattern(ctx->lookupPattern(), false);
     if (gp->patternLen() != 1)
-        fc->featMsg(hotERROR, "Only one glyph|glyphClass may be present per"
+        fc->featMsg(sERROR, "Only one glyph|glyphClass may be present per"
                               " LigatureCaretByIndex statement");
 
     std::vector<uint16_t> pv;
@@ -984,7 +984,7 @@ antlrcpp::Any FeatVisitor::visitHead(FeatParser::HeadContext *ctx) {
 
     const std::string s = TOK(ctx->POINTNUM())->getText();
     if ( s[0] == '-' )
-        fc->featMsg(hotERROR, "Font revision numbers must be positive");
+        fc->featMsg(sERROR, "Font revision numbers must be positive");
 
     fc->setFontRev(s);
     return nullptr;
@@ -1080,18 +1080,18 @@ antlrcpp::Any FeatVisitor::visitNameID(FeatParser::NameIDContext *ctx) {
         v[i] = getNum<uint16_t>(TOK(ctx->genNum(i))->getText());
 
     if ( fc->sawSTAT && v[0] > 255 )
-        fc->featMsg(hotFATAL, "name table should be defined before "
+        fc->featMsg(sFATAL, "name table should be defined before "
                               "STAT table with nameids above 255");
     if ( fc->sawCVParams && v[0] > 255)
-        fc->featMsg(hotFATAL, "name table should be defined before "
+        fc->featMsg(sFATAL, "name table should be defined before "
                               "GSUB cvParameters with nameids above 255");
     if ( fc->sawFeatNames && v[0] > 255)
-        fc->featMsg(hotFATAL, "name table should be defined before "
+        fc->featMsg(sFATAL, "name table should be defined before "
                               "GSUB featureNames with nameids above 255");
     if ( ctx->genNum().size() > 1 &&
          v[1] != HOT_NAME_MS_PLATFORM && v[1] != HOT_NAME_MAC_PLATFORM ) {
         TOK(ctx->genNum(1));
-        fc->featMsg(hotFATAL, "platform id must be %d or %d",
+        fc->featMsg(sFATAL, "platform id must be %d or %d",
                               HOT_NAME_MS_PLATFORM, HOT_NAME_MAC_PLATFORM);
     }
     fc->addNameString(v[1], v[2], v[3], v[0], TOK(ctx->STRVAL())->getText());
@@ -1179,7 +1179,7 @@ antlrcpp::Any FeatVisitor::visitNameEntry(FeatParser::NameEntryContext *ctx) {
     if ( ctx->genNum().size() > 0 &&
          v[0] != HOT_NAME_MS_PLATFORM && v[0] != HOT_NAME_MAC_PLATFORM ) {
         TOK(ctx->genNum(0));
-        fc->featMsg(hotERROR, "platform id must be %d or %d",
+        fc->featMsg(sERROR, "platform id must be %d or %d",
                     HOT_NAME_MS_PLATFORM, HOT_NAME_MAC_PLATFORM);
     }
 
@@ -1202,9 +1202,9 @@ antlrcpp::Any FeatVisitor::visitAxisValue(FeatParser::AxisValueContext *ctx) {
 
     if ( stage == vExtract ) {
         if ( fc->stat.format == 0 )
-            fc->featMsg(hotERROR, "AxisValue missing location statement");
+            fc->featMsg(sERROR, "AxisValue missing location statement");
         if ( fc->featNameID == 0 )
-            fc->featMsg(hotERROR, "AxisValue missing name entry");
+            fc->featMsg(sERROR, "AxisValue missing name entry");
         STATAddAxisValueTable(fc->g, fc->stat.format, fc->stat.axisTags.data(),
                               fc->stat.values.data(), fc->stat.values.size(),
                               fc->stat.flags, fc->featNameID,
@@ -1242,7 +1242,7 @@ antlrcpp::Any FeatVisitor::visitAxisValueLocation(FeatParser::AxisValueLocationC
         fc->stat.max = getFixed<Fixed>(ctx->fixedNum(2));
     }
     if ( fc->stat.prev != 0 && (fc->stat.prev != 1 || fc->stat.format != fc->stat.prev) )
-        fc->featMsg(hotERROR, "AxisValue with unsupported multiple location statements");
+        fc->featMsg(sERROR, "AxisValue with unsupported multiple location statements");
     fc->stat.axisTags.push_back(t);
     fc->stat.values.push_back(v);
     fc->stat.prev = fc->stat.format;
@@ -1263,7 +1263,7 @@ antlrcpp::Any FeatVisitor::visitElidedFallbackName(FeatParser::ElidedFallbackNam
 
     if ( stage == vExtract ) {
         if ( !STATSetElidedFallbackNameID(fc->g, fc->featNameID) )
-            fc->featMsg(hotERROR, "ElidedFallbackName already defined.");
+            fc->featMsg(sERROR, "ElidedFallbackName already defined.");
         fc->featNameID = 0;
     }
     include_ep = tmp_ep;
@@ -1276,7 +1276,7 @@ antlrcpp::Any FeatVisitor::visitElidedFallbackNameID(FeatParser::ElidedFallbackN
 
     uint16_t v = getNum<uint16_t>(TOK(ctx->genNum())->getText());
     if ( !STATSetElidedFallbackNameID(fc->g, v) )
-        fc->featMsg(hotERROR, "ElidedFallbackName already defined.");
+        fc->featMsg(sERROR, "ElidedFallbackName already defined.");
     return nullptr;
 }
 
@@ -1376,7 +1376,7 @@ void FeatVisitor::translateBaseScript(FeatParser::BaseScriptContext *ctx,
         if ( ctx->NUM().size() > cnt )
             sv.reserve(ctx->NUM().size());
         TOK(ctx);
-        fc->featMsg(hotERROR, "The number of coordinates is not equal to "
+        fc->featMsg(sERROR, "The number of coordinates is not equal to "
                               "the number of baseline tags");
     }
 
@@ -1460,7 +1460,7 @@ uint32_t FeatVisitor::getLocationSpecifier(FeatParser::LocationSpecifierContext 
 uint32_t FeatVisitor::getLocationLiteral(FeatParser::LocationLiteralContext *ctx) {
     uint16_t ac = fc->getAxisCount();
     if (ac == 0) {
-        fc->featMsg(hotERROR, "Location literal in non-variable font");
+        fc->featMsg(sERROR, "Location literal in non-variable font");
         return 0;
     }
     std::vector<int16_t> l(ac, 0);
@@ -1481,7 +1481,7 @@ bool FeatVisitor::addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext 
 
     std::string unit = TOK(ctx->AXISUNIT())->getText();
     if (unit == "d") {
-        fc->featMsg(hotFATAL, "XXX No support for design units yet.");
+        fc->featMsg(sFATAL, "XXX No support for design units yet.");
         return false;
     }
     Fixed v = getFixed<Fixed>(ctx->fixedNum());
@@ -1496,7 +1496,7 @@ bool FeatVisitor::addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext 
     f2v = fc->validAxisLocation(f2v);
     if (l[axisIndex] != 0) {
         TOK(ctx->tag());
-        fc->featMsg(hotERROR, "Already set location for axis '%c%c%c%c'.", TAG_ARG(tag));
+        fc->featMsg(sERROR, "Already set location for axis '%c%c%c%c'.", TAG_ARG(tag));
         return false;
     }
     l[axisIndex] = f2v;
@@ -1522,7 +1522,7 @@ GPat::ClassRec FeatVisitor::getLookupPatternElement(FeatParser::LookupPatternEle
     for (auto l : ctx->label()) {
         cr.lookupLabels.push_back(fc->getLabelIndex(TOK(l)->getText()));
         if ( cr.lookupLabels.size() > 255 )
-            fc->featMsg(hotFATAL, "Too many lookup references in one glyph position.");
+            fc->featMsg(sFATAL, "Too many lookup references in one glyph position.");
     }
     return cr;
 }
@@ -1571,7 +1571,7 @@ GPat::ClassRec FeatVisitor::getPatternElement(FeatParser::PatternElementContext 
             cr.marked = true;
         else {
             TOK(ctx->MARKER());
-            fc->featMsg(hotERROR, "cannot mark a replacement glyph pattern");
+            fc->featMsg(sERROR, "cannot mark a replacement glyph pattern");
         }
     }
     return cr;
@@ -1682,7 +1682,7 @@ Tag FeatVisitor::checkTag(FeatParser::TagContext *start,
         etag = fc->str2tag(TOK(end)->getText());
 
     if ( stag != etag )
-        fc->featMsg(hotERROR, "End tag %c%c%c%c does not match "
+        fc->featMsg(sERROR, "End tag %c%c%c%c does not match "
                               "start tag %c%c%c%c.",
                     TAG_ARG(etag), TAG_ARG(stag));
 
@@ -1693,7 +1693,7 @@ void FeatVisitor::checkLabel(FeatParser::LabelContext *start,
                              FeatParser::LabelContext *end) {
     if ( start == nullptr || end == nullptr ||
          start->getText() != end->getText() )
-        fc->featMsg(hotERROR, "End label %s does not match start label %s.",
+        fc->featMsg(sERROR, "End label %s does not match start label %s.",
                     TOK(end)->getText().c_str(), start->getText().c_str());
 }
 
@@ -1703,11 +1703,11 @@ T FeatVisitor::getNum(const std::string &str, int base) {
 
     int64_t v = strtoll(str.c_str(), &end, base);
     if ( end == str.c_str() )
-        fc->featMsg(hotERROR, "Could not parse numeric string");
+        fc->featMsg(sERROR, "Could not parse numeric string");
 
     using NL = std::numeric_limits<T>;
     if ( v < NL::min() || v > NL::max() ) {
-        fc->featMsg(hotERROR, "Number not in range [%ld, %ld]",
+        fc->featMsg(sERROR, "Number not in range [%ld, %ld]",
                     (long) NL::min(), (long) NL::max());
     }
     return (T) v;
@@ -1727,15 +1727,15 @@ T FeatVisitor::getFixed(FeatParser::FixedNumContext *ctx, bool param) {
     char *end;
     long v = (long)floor(0.5 + mult*strtod(str.c_str(), &end));
     if ( end == str.c_str() )
-        fc->featMsg(hotERROR, "Could not parse numeric string");
+        fc->featMsg(sERROR, "Could not parse numeric string");
 
     using NL = std::numeric_limits<T>;
     if ( v < NL::min() || v > NL::max() ) {
         if ( param )
-            fc->featMsg(hotERROR, "Number not in range [%ld, %ld]",
+            fc->featMsg(sERROR, "Number not in range [%ld, %ld]",
                         (long) NL::min(), (long) NL::max());
         else
-            fc->featMsg(hotERROR, "Number not in range [-32768.0, 32767.99998]");
+            fc->featMsg(sERROR, "Number not in range [-32768.0, 32767.99998]");
     }
     return (T) v;
 }

@@ -370,7 +370,7 @@ hotGlyphInfo *mapCID2Glyph(hotCtx g, CID cid) {
     hotGlyphInfo **found;
 
     if (!IS_CID(g)) {
-        hotMsg(g, hotFATAL, "Not a CID font");
+        g->logger->log(sFATAL, "Not a CID font");
     }
     found =
         (hotGlyphInfo **)bsearch(&cid, h->sort.gname.array, h->sort.gname.cnt,
@@ -429,7 +429,7 @@ hotGlyphInfo *mapName2Glyph(hotCtx g, const char *gname, const char **useAliasDB
     hotGlyphInfo **found;
 
     if (IS_CID(g) && useAliasDB == NULL) {
-        hotMsg(g, hotFATAL, "Not a non-CID font");
+        g->logger->log(sFATAL, "Not a non-CID font");
     }
 
     if (useAliasDB != NULL) {
@@ -481,7 +481,7 @@ static int mapName2UVOverrideName(hotCtx g, const char *gname,
                                   const char **uvOverrideName) {
     const char *uvName = NULL;
     if (IS_CID(g)) {
-        hotMsg(g, hotFATAL, "Not a non-CID font");
+        g->logger->log(sFATAL, "Not a non-CID font");
     }
 
     uvName = g->goadb->getUVOverrideName(gname);
@@ -575,7 +575,7 @@ hotGlyphInfo *mapPlatEnc2Glyph(hotCtx g, int code) {
     mapCtx h = g->ctx.map;
 
     if (IS_CID(g)) {
-        hotMsg(g, hotFATAL, "Not a non-CID font");
+        g->logger->log(sFATAL, "Not a non-CID font");
     }
     return h->sort.platEnc[code];
 }
@@ -661,7 +661,7 @@ static void CTL_CDECL CMapMsg(mapCtx h, int msgType, const char *fmt, ...) {
     snprintf(msg, sizeof(msg), "%s [%s]", msgVar,
              h->ps.cb.psId ? h->ps.cb.psId(h->ps.cb.ctx) : "");
 
-    hotMsg(h->g, msgType, msg);
+    h->g->logger->msg(msgType, msg);
 }
 
 /* [CMap] Validate first line. */
@@ -671,12 +671,12 @@ static void checkCMapFirstLine(hotCtx g, psToken *token) {
     char p[512];
 
     if (token->type != PS_DOCTYPE) {
-        CMapMsg(h, hotFATAL, "Invalid first line in CMap");
+        CMapMsg(h, sFATAL, "Invalid first line in CMap");
     }
     memcpy(p, psGetValue(ps, token), token->length);
     p[token->length] = '\0';
     if (strstr(p, "Resource-CMap") == NULL) {
-        CMapMsg(h, hotFATAL, "Invalid first line in CMap");
+        CMapMsg(h, sFATAL, "Invalid first line in CMap");
     }
 }
 
@@ -691,23 +691,23 @@ static void checkCMapCompatibility(hotCtx g) {
     Reg = g->font.cid.registry.c_str();
     Reglen = g->font.cid.registry.length();
     if (reglen != Reglen || memcmp(reg, Reg, reglen) != 0) {
-        CMapMsg(h, hotFATAL, "CMap /Registry incompatible with CID font");
+        CMapMsg(h, sFATAL, "CMap /Registry incompatible with CID font");
     }
     if (!psMatchToken(ps, psGetToken(ps), PS_OPERATOR, "def")) {
-        CMapMsg(h, hotFATAL, "expecting def after /Registry value");
+        CMapMsg(h, sFATAL, "expecting def after /Registry value");
     }
 
     if (!psMatchToken(ps, psGetToken(ps), PS_LITERAL, "/Ordering")) {
-        CMapMsg(h, hotFATAL, "expecting /Ordering after /Registry def");
+        CMapMsg(h, sFATAL, "expecting /Ordering after /Registry def");
     }
     ord = psGetString(ps, &ordlen);
     Ord = g->font.cid.ordering.c_str();
     Ordlen = g->font.cid.ordering.length();
     if (ordlen != Ordlen || memcmp(ord, Ord, ordlen) != 0) {
-        CMapMsg(h, hotFATAL, "CMap /Ordering incompatible with CID font");
+        CMapMsg(h, sFATAL, "CMap /Ordering incompatible with CID font");
     }
     if (!psMatchToken(ps, psGetToken(ps), PS_OPERATOR, "def")) {
-        CMapMsg(h, hotFATAL, "expecting def after /Ordering value");
+        CMapMsg(h, sFATAL, "expecting def after /Ordering value");
     }
 }
 
@@ -727,7 +727,7 @@ static SInx getUseCMap(hotCtx g, psToken *last) {
     unsigned length;
 
     if (last->type != PS_LITERAL) {
-        CMapMsg(h, hotFATAL, "expecting literal before usecmap");
+        CMapMsg(h, sFATAL, "expecting literal before usecmap");
     }
     usecmap = psConvLiteral(ps, last, &length);
     return addString(h, usecmap, length);
@@ -742,7 +742,7 @@ static SInx getCMapName(hotCtx g) {
     psToken *token = psGetToken(ps);
 
     if (token->type != PS_LITERAL) {
-        CMapMsg(h, hotFATAL, "expecting literal after /CMapName");
+        CMapMsg(h, sFATAL, "expecting literal after /CMapName");
     }
     name = psConvLiteral(ps, token, &length);
     return addString(h, name, length);
@@ -755,7 +755,7 @@ static int getCMapWMode(hotCtx g) {
     long wMode = psGetInteger(ps);
 
     if (wMode != 0 && wMode != 1) {
-        CMapMsg(h, hotFATAL, "invalid /WMode value");
+        CMapMsg(h, sFATAL, "invalid /WMode value");
     }
     return wMode;
 }
@@ -778,28 +778,28 @@ static void readRange(hotCtx g, psToken *last, char rangeType, int *isMac,
 
     if (IS_UNSET(vert)) {
         /* xxx Actually, this ordering is not required: */
-        CMapMsg(h, hotFATAL, "expecting /WMode before CMap range operations");
+        CMapMsg(h, sFATAL, "expecting /WMode before CMap range operations");
     }
 
     if (!vert) {
         if (!codespace && IS_UNSET(*isMac)) {
-            CMapMsg(h, hotFATAL, "codespacerange not seen in CMap");
+            CMapMsg(h, sFATAL, "codespacerange not seen in CMap");
         }
     } else {
         if (*isMac == -1) {
             *isMac = 0;
         }
         if (codespace) {
-            CMapMsg(h, hotFATAL, "codespace range not supported in V CMap");
+            CMapMsg(h, sFATAL, "codespace range not supported in V CMap");
         }
         if (notdef) {
             /* [xxx Actually, it is legal:] */
-            CMapMsg(h, hotFATAL, "notdef range not supported in V CMap");
+            CMapMsg(h, sFATAL, "notdef range not supported in V CMap");
         }
     }
 
     if (last->type != PS_INTEGER) {
-        CMapMsg(h, hotFATAL, "bad begin%srange count", rangeName);
+        CMapMsg(h, sFATAL, "bad begin%srange count", rangeName);
     }
 
     nRanges = psConvInteger(ps, last);
@@ -814,7 +814,7 @@ static void readRange(hotCtx g, psToken *last, char rangeType, int *isMac,
             hi = psGetHexString(ps, &hiLength);
 
             if (loLength != hiLength || lo > hi) {
-                CMapMsg(h, hotFATAL, "bad range: <%0*lx> <%0*lx>", loLength, lo,
+                CMapMsg(h, sFATAL, "bad range: <%0*lx> <%0*lx>", loLength, lo,
                         hiLength, hi);
             }
         }
@@ -829,10 +829,10 @@ static void readRange(hotCtx g, psToken *last, char rangeType, int *isMac,
         } else {
             cid = psGetInteger(ps);
             if (cid < 0 || cid > 0xffff) {
-                CMapMsg(h, hotFATAL, "invalid CID <%ld>", cid);
+                CMapMsg(h, sFATAL, "invalid CID <%ld>", cid);
             }
             if (!(*isMac) && loLength == 1) {
-                CMapMsg(h, hotFATAL,
+                CMapMsg(h, sFATAL,
                         " 1-byte encoded Unicode CMaps are not supported for other than the Mac encoding.");
             }
         }
@@ -862,7 +862,7 @@ static void readRange(hotCtx g, psToken *last, char rangeType, int *isMac,
 
     if (!psMatchToken(ps, psGetToken(ps), PS_OPERATOR,
                       codespace ? "endcodespacerange" : notdef ? "endnotdefrange" : charrange ? "endcidchar" : "endcidrange")) {
-        CMapMsg(h, hotFATAL, "expecting end%srange; range count too small?",
+        CMapMsg(h, sFATAL, "expecting end%srange; range count too small?",
                 rangeName);
     }
 
@@ -963,7 +963,7 @@ static void addRanges(hotCtx g, int isMac) {
             {
                 char tempString[256];
                 snprintf(tempString, sizeof(tempString), " lo <%d> hi <%d> cid <%d> item count <%d>", code, range->hi, cid, itemCount);
-                hotMsg(g, hotWARNING, "adding cid range <%s>", tempString);
+                g->logger->log(sWARNING, "adding cid range <%s>", tempString);
             }
 #endif
             while (code <= range->hi) {
@@ -996,7 +996,7 @@ void mapAddCMap(hotCtx g, hotCMapId id, hotCMapRefill refill) {
 
     if (h->cid.hor.name != SINX_UNDEF && h->cid.ver.name != SINX_UNDEF &&
         h->cid.mac.name != SINX_UNDEF) {
-        CMapMsg(h, hotFATAL, "can only read 3 CMaps");
+        CMapMsg(h, sFATAL, "can only read 3 CMaps");
     }
 
     if (h->cid.hor.name == SINX_UNDEF && h->cid.ver.name == SINX_UNDEF &&
@@ -1052,27 +1052,27 @@ void mapAddCMap(hotCtx g, hotCMapId id, hotCMapRefill refill) {
 
     /* Check and store data */
     if (name == SINX_UNDEF) {
-        CMapMsg(h, hotFATAL, "/CMapName not found");
+        CMapMsg(h, sFATAL, "/CMapName not found");
     }
     if (wMode == 0) {
         if (isMac) {
             if (h->cid.mac.name != SINX_UNDEF) {
-                CMapMsg(h, hotFATAL, "Macintosh CMap already seen");
+                CMapMsg(h, sFATAL, "Macintosh CMap already seen");
             }
             h->cid.mac.name = name; /* Used only to flag Mac CMap seen */
         } else {
             if (h->cid.hor.name != SINX_UNDEF) {
-                CMapMsg(h, hotFATAL, "H Unicode CMap already seen");
+                CMapMsg(h, sFATAL, "H Unicode CMap already seen");
             }
             h->cid.hor.name = name;
             if (usecmap != SINX_UNDEF) {
-                CMapMsg(h, hotFATAL, "usecmap not supported in H CMap");
+                CMapMsg(h, sFATAL, "usecmap not supported in H CMap");
             }
 
             /* Add UVs to sort.uv da */
             addRanges(g, 0);
             if (h->sort.uv.cnt == 0) {
-                CMapMsg(h, hotFATAL, "No cid maps in H Unicode CMap");
+                CMapMsg(h, sFATAL, "No cid maps in H Unicode CMap");
             }
             qsort(h->sort.uv.array, h->sort.uv.cnt, sizeof(hotGlyphInfo *),
                   cmpUV);
@@ -1082,14 +1082,14 @@ void mapAddCMap(hotCtx g, hotCMapId id, hotCMapRefill refill) {
             isMac = 0;
         }
         if (isMac) {
-            CMapMsg(h, hotFATAL, "Macintosh CMap must have /WMode 0");
+            CMapMsg(h, sFATAL, "Macintosh CMap must have /WMode 0");
         }
         if (h->cid.ver.name != SINX_UNDEF) {
-            CMapMsg(h, hotFATAL, "V Unicode CMap already seen");
+            CMapMsg(h, sFATAL, "V Unicode CMap already seen");
         }
         h->cid.ver.name = name; /* Used only to flag V CMap seen */
         if (usecmap == SINX_UNDEF) {
-            CMapMsg(h, hotFATAL, "usecmap not seen in V CMap");
+            CMapMsg(h, sFATAL, "usecmap not seen in V CMap");
         }
         h->cid.ver.usecmap = usecmap;
     }
@@ -1097,7 +1097,7 @@ void mapAddCMap(hotCtx g, hotCMapId id, hotCMapRefill refill) {
     if (h->cid.hor.name != SINX_UNDEF && h->cid.ver.name != SINX_UNDEF) {
         /* Both Unicode CMaps read in */
         if (strcmp(STR(h->cid.ver.usecmap), STR(h->cid.hor.name)) != 0) {
-            CMapMsg(h, hotFATAL,
+            CMapMsg(h, sFATAL,
                     "usecmap resource <%s> in V Unicode CMap not "
                     "found",
                     STR(h->cid.ver.usecmap));
@@ -1181,10 +1181,10 @@ static void gnameError(hotCtx g, const char *message, const char *token, const c
 
     if (messageLen > (256 - 6)) {
         /* 6 is max probable max length of decimal line number in Glyph Name Alias Database file */
-        hotMsg(g, hotWARNING, "%s  at token %s [%s: line %ld] (record skipped)", message, token, "UVS file", line);
-        hotMsg(g, hotWARNING, "UVS  file path name  is too long to include in error message. Please move Unicode Variation Selector  file to shorter absolute path.\n");
+        g->logger->log(sWARNING, "%s  at token %s [%s: line %ld] (record skipped)", message, token, "UVS file", line);
+        g->logger->log(sWARNING, "UVS  file path name  is too long to include in error message. Please move Unicode Variation Selector  file to shorter absolute path.\n");
     } else {
-        hotMsg(g, hotWARNING, "%s  at token %s [%s: line %ld] (record skipped)", message, token, filename, line);
+        g->logger->log(sWARNING, "%s  at token %s [%s: line %ld] (record skipped)", message, token, filename, line);
     }
 }
 
@@ -1391,8 +1391,8 @@ static UnicodeChar *getUVFromAGL(hotCtx g, const char *glyphName, int fatalErr) 
                                sizeof(UnicodeChar), cmpGlyphNameUC);
 
     if (found == NULL && fatalErr) {
-        hotMsg(g, hotFATAL, "glyphName <%s> not found in internal tables",
-               glyphName);
+        g->logger->log(sFATAL, "glyphName <%s> not found in internal tables",
+                       glyphName);
     }
 
     return found;
@@ -1449,13 +1449,11 @@ static int checkUniGName(hotCtx g, const char *gn, uint32_t *usv) {
 
 #if 0
     if (IN_RANGE(code, UV_SURR_BEG, UV_SURR_END)) {
-        hotMsg(g, hotWARNING, "surrogate Unicode value in glyph name <%s>",
-               gn);
+        g->logger->log(sWARNING, "surrogate Unicode value in glyph name <%s>", gn);
     }
 #endif
     if (IS_NONCHAR_UV(code)) {
-        hotMsg(g, hotWARNING, "Unicode noncharacter value in glyph name <%s>",
-               gn);
+        g->logger->log(sWARNING, "Unicode noncharacter value in glyph name <%s>", gn);
     }
 
     *usv = code;
@@ -1640,10 +1638,10 @@ static void assignUVs(hotCtx g) {
                 if (assignedUVs == 0) {
                     h->num.unenc++;
                     gi->flags |= GNAME_UNENC;
-                    hotMsg(g, hotWARNING,
-                           "glyph <%s> not encoded in Unicode "
-                           "cmap: overridden by uni<CODE> glyph(s)",
-                           gi->gname.c_str());
+                    g->logger->log(sWARNING,
+                                   "glyph <%s> not encoded in Unicode "
+                                   "cmap: overridden by uni<CODE> glyph(s)",
+                                   gi->gname.c_str());
                 } else if (assignedUVs == 2) {
                     gi->flags |= GNAME_DBLMAP;
                 }
@@ -1889,7 +1887,7 @@ static int doMacHeuristics(hotCtx g, hotEncoding *hotEnc, int usePlatEnc) {
                     continue;
                 }
             } else {
-                hotMsg(g, hotWARNING, "can't do Mac heuristics");
+                g->logger->log(sWARNING, "can't do Mac heuristics");
                 return -1;
             }
 
@@ -1980,7 +1978,7 @@ static void makeNonCIDMaccmap(hotCtx g, hotEncoding *comEncoding,
                               hotEncoding *macEncoding) {
 /* #if HOT_DEBUG && 1 */
 #if 0
-#define MAC_MSG(msg) hotMsg msg
+#define MAC_MSG(msg) g->logger->log msg
 #else
 #define MAC_MSG(msg)
 #endif
@@ -1988,7 +1986,7 @@ static void makeNonCIDMaccmap(hotCtx g, hotEncoding *comEncoding,
     int macEncInx;
 
     if (macEncoding != NULL) {
-        MAC_MSG((g, hotNOTE, "[1. FONT.NSMR or fcdb entry]"));
+        MAC_MSG((sINFO, "[1. FONT.NSMR or fcdb entry]"));
         if (g->font.flags & HOT_MAC) {
             createMaccmap(g, HOT_CMAP_UNKNOWN, HOT_CMAP_UNKNOWN,
                           NULL, NULL, 1 /* usePlatEnc */);
@@ -2000,7 +1998,7 @@ static void makeNonCIDMaccmap(hotCtx g, hotEncoding *comEncoding,
     }
 
     if (g->font.flags & HOT_MAC && comEncoding == NULL) {
-        MAC_MSG((g, hotNOTE, "[2. Create cmap from PS encoding (link)]"));
+        MAC_MSG((sINFO, "[2. Create cmap from PS encoding (link)]"));
         createMaccmap(g, HOT_CMAP_UNKNOWN, HOT_CMAP_UNKNOWN,
                       NULL, NULL, 1 /* usePlatEnc */);
         return;
@@ -2008,7 +2006,7 @@ static void makeNonCIDMaccmap(hotCtx g, hotEncoding *comEncoding,
 
     if ((g->font.flags & HOT_MAC && comEncoding != NULL) ||
         g->font.Encoding == FI_STD_ENC) {
-        MAC_MSG((g, hotNOTE, "[3. Create Mac Std Roman]"));
+        MAC_MSG((sINFO, "[3. Create Mac Std Roman]"));
         createMaccmap(g, MAC_SCR_ROMAN, MAC_LANG_UNSPEC,
                       NULL, macEnc[0] /* Mac Roman */, 0);
         return;
@@ -2018,7 +2016,7 @@ static void makeNonCIDMaccmap(hotCtx g, hotEncoding *comEncoding,
         static hotEncoding macExpert = {
 #include "macexprt.h"
         };
-        MAC_MSG((g, hotNOTE, "[4. Create Mac Expert]"));
+        MAC_MSG((sINFO, "[4. Create Mac Expert]"));
         createMaccmap(g, MAC_SCR_ROMAN, MAC_LANG_UNSPEC,
                       &macExpert, NULL, 0);
         return;
@@ -2031,11 +2029,10 @@ static void makeNonCIDMaccmap(hotCtx g, hotEncoding *comEncoding,
         if (cp->maccmapScript != HOT_CMAP_UNKNOWN) {
             macEncInx++;
             if (cp->isSupported && !IS_MATH_FONT(cp->script)) {
-                MAC_MSG((g, hotNOTE, "[5. heuristic UVs: macEncInx %d]",
+                MAC_MSG((sINFO, "[5. heuristic UVs: macEncInx %d]",
                          macEncInx));
                 if (macEncInx >= (long)ARRAY_LEN(macEnc)) {
-                    hotMsg(g, hotFATAL, "macEnc index %d not supported",
-                           macEncInx);
+                    g->logger->log(sFATAL, "macEnc index %d not supported", macEncInx);
                 }
                 createMaccmap(g, cp->maccmapScript, cp->maccmapLanguage,
                               NULL, macEnc[macEncInx], 0);
@@ -2045,11 +2042,11 @@ static void makeNonCIDMaccmap(hotCtx g, hotEncoding *comEncoding,
     }
 
 #if 0
-    MAC_MSG((g, hotNOTE, "[6. Record PS encoding (link)]"));
+    MAC_MSG((sINFO, "[6. Record PS encoding (link)]"));
     createMaccmap(g, MAC_SCR_ROMAN, MAC_LANG_UNSPEC,
                   NULL, NULL, 1 /* usePlatEnc */);
 #endif
-    MAC_MSG((g, hotNOTE, "[6. Failed to identify lang encoding, Force MacRoman]"));
+    MAC_MSG((sINFO, "[6. Failed to identify lang encoding, Force MacRoman]"));
     createMaccmap(g, MAC_SCR_ROMAN, MAC_LANG_UNSPEC,
                   NULL, macEnc[0] /* Mac Roman */, 0);
 }
@@ -2108,10 +2105,10 @@ static void makeCIDMaccmap(hotCtx g) {
     long i;
 
     if (g->font.mac.cmapScript == HOT_CMAP_UNKNOWN) {
-        hotMsg(g, hotWARNING,
-               "can't autodetect Macintosh cmap script for CID "
-               "font <%s>; defaulting to Roman script",
-               g->font.FontName.c_str());
+        g->logger->log(sWARNING,
+                       "can't autodetect Macintosh cmap script for CID "
+                       "font <%s>; defaulting to Roman script",
+                       g->font.FontName.c_str());
         g->font.mac.cmapScript = MAC_SCR_ROMAN;
     }
     if (g->font.mac.cmapLanguage == HOT_CMAP_UNKNOWN) {
@@ -2150,14 +2147,14 @@ static void makeUVScmap(hotCtx g) {
         if (IS_CID(g)) {
             gi_id = mapCID2Glyph(g, uve->cid);
             if (gi_id == NULL) {
-                hotMsg(g, hotWARNING, "Skipping UVS entry for CID '%d': not found in source font.", uve->cid);
+                g->logger->log(sWARNING, "Skipping UVS entry for CID '%d': not found in source font.", uve->cid);
                 continue;
             }
         } else {
             const char *finalName;
             gi_id = mapName2Glyph(g, uve->gName, &finalName);
             if (gi_id == NULL) {
-                hotMsg(g, hotWARNING, "Skipping  UVS entry for glyph name '%s': not found in source font.", uve->gName);
+                g->logger->log(sWARNING, "Skipping  UVS entry for glyph name '%s': not found in source font.", uve->gName);
                 continue;
             }
             if (finalName != NULL) {
@@ -2303,7 +2300,7 @@ static void AFMPrintKernData(hotCtx g) {
     if (nPairs == 0) {
         return;
     } else if (IS_CID(g)) {
-        hotMsg(g, hotWARNING, "can't print AFM KernData for CID");
+        g->logger->log(sWARNING, "can't print AFM KernData for CID");
         return;
     }
 
@@ -2520,7 +2517,7 @@ int mapFill(hotCtx g) {
     mapCtx h = g->ctx.map;
 
     if (IS_CID(g) && h->cid.hor.name == SINX_UNDEF) {
-        hotMsg(g, hotFATAL, "H Unicode CMap not seen");
+        g->logger->log(sFATAL, "H Unicode CMap not seen");
     }
 
     /* Roman Custom cmap made in mapInit(), Roman Mac cmap made in mapApplyReencoding(). */
@@ -2530,11 +2527,11 @@ int mapFill(hotCtx g) {
     if (IS_CID(g)) {
         makeCIDMaccmap(g); /* will make a Mac cmap with only a not def, if Macintosh Adobe CMap is not provided.*/
         if (h->cid.mac.name == SINX_UNDEF) {
-            hotMsg(g, hotWARNING, "Macintosh Adobe CMap not seen");
+            g->logger->log(sWARNING, "Macintosh Adobe CMap not seen");
         }
 
         if (h->uvs.entries.cnt == 0) {
-            hotMsg(g, hotWARNING, "Unicode variation Selector File not seen");
+            g->logger->log(sWARNING, "Unicode variation Selector File not seen");
         }
     }
 
@@ -2637,8 +2634,7 @@ void mapApplyReencoding(hotCtx g, hotEncoding *comEncoding,
         reenc = comEncoding;
     } else if (g->font.flags & HOT_MAC) {
         if (comEncoding != NULL && macEncoding != NULL) {
-            hotMsg(g, hotFATAL,
-                   "can't apply standard and non-standard Mac reencoding");
+            g->logger->log(sFATAL, "can't apply standard and non-standard Mac reencoding");
         }
         reenc = (comEncoding != NULL) ? comEncoding : macEncoding;
     }

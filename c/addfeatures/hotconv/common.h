@@ -422,7 +422,6 @@ struct hotCtx_ {
 };
 
 /* Functions */
-void CTL_CDECL hotMsg(hotCtx g, int level, const char *fmt, ...);
 void hotQuitOnError(hotCtx g);
 
 inline void hout1(hotCtx g, char c) {

@@ -173,16 +173,6 @@ hotCtx hotNew(hotCallbacks *cb, std::shared_ptr<GOADB> goadb = {},
    BUFSIZ would be a good choice because it will match the underlying low-level
    system input functions. */
 
-/* Message types */
-enum {
-    hotNOTE,
-    hotWARNING,
-    hotERROR,
-    hotFATAL,
-    hotINDENT,
-    hotFLUSH
-};
-
 struct hotCallbacks_ {
     void *ctx; /* Client context (optional) */
 
@@ -203,9 +193,7 @@ struct hotCallbacks_ {
     void (*message)(void *ctx, int type, const char *text); /* (optional) */
 
     /* [Optional] message() simply passes a message back to the client as a
-   null-terminated string. Four message types are supported: hotNOTE,
-   hotWARNING, hotERROR, and hotFATAL. A client is free to handle messages in
-   any manner they choose.
+    null-terminated string. Message types are those in slogger.h
 
    PostScript data input: */
 

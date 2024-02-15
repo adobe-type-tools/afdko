@@ -61,7 +61,7 @@ Offset CoverageAndClass::coverageFill() {
     coverage.size += coverage.records.back().size();
 
     if (coverage.size > 0xFFFF)
-        hotMsg(g, hotFATAL, "coverage section too large (%0x)", coverage.size);
+        g->logger->log(sFATAL, "coverage section too large (%0x)", coverage.size);
 
     return coverage.records.back().offset;
 }
@@ -80,7 +80,7 @@ void CoverageAndClass::coverageAddGlyph(GID gid, bool warn) {
     if (!b) {
         if (warn) {
             g->ctx.feat->dumpGlyph(gid, 0, 0);
-            hotMsg(g, hotNOTE, "Removing duplicate glyph <%s>", g->getNote());
+            g->logger->log(sINFO, "Removing duplicate glyph <%s>", g->getNote());
         }
 #if HOT_DEBUG
         printf("duplicated glyph ['%d'] in coverage.\n", gid);
@@ -167,7 +167,7 @@ Offset CoverageAndClass::classFill() {
     cls.size += cls.records.back().size();
 
     if (cls.size > 0xFFFF) {
-        hotMsg(g, hotFATAL, "class section too large (%0x)", cls.size);
+        g->logger->log(sFATAL, "class section too large (%0x)", cls.size);
     }
 
     return cls.records.back().offset;
@@ -372,7 +372,7 @@ OTL::Subtable::Subtable(OTL *otl, SubtableInfo *si, std::string &id_text,
 int32_t OTL::label2LookupIndex(Label baseLabel) {
     auto li = labelMap.find(baseLabel);
     if (li == labelMap.end())
-        hotMsg(g, hotFATAL, "(internal) label 0x%x not found", baseLabel);
+        g->logger->log(sFATAL, "(internal) label 0x%x not found", baseLabel);
     else
         li->second.used = true;
 
@@ -402,7 +402,7 @@ void OTL::calcLookupListIndices() {
             }
             auto [li, b] = labelMap.emplace(s.label, s.index.lookup);
             if (!b)
-                hotMsg(g, hotFATAL, "[internal] duplicate subtable label encountered");
+                g->logger->log(sFATAL, "[internal] duplicate subtable label encountered");
         } else {
             s.index.lookup = indexCnt - 1;
         }
@@ -627,9 +627,9 @@ Offset OTL::fillFeatureList() {
             auto &slr = *sl;
             if (slr->isParam()) {
                 if (f.featureParams != NULL_OFFSET) {
-                    hotMsg(g, hotFATAL, "%s feature '%c%c%c%c' has more "
-                                        "than one FeatureParameter subtable! ",
-                                        objName(), TAG_ARG(f.FeatureTag));
+                    g->logger->log(sFATAL, "%s feature '%c%c%c%c' has more "
+                                   "than one FeatureParameter subtable! ",
+                                   objName(), TAG_ARG(f.FeatureTag));
                 }
                 if (slr->isRef())
                     f.featureParams = findFeatParamOffset(slr->feature, slr->label);
@@ -661,8 +661,8 @@ void OTL::fixFeatureParamOffsets(Offset shortfeatureParamBaseOffset) {
             /* featureParamBaseOffset is (size of featureList).                     */
             f.featureParams += shortfeatureParamBaseOffset - f.offset;
             if (f.featureParams > 0xFFFF) {
-                hotMsg(g, hotFATAL, "feature parameter offset too large (%0x)",
-                       f.featureParams);
+                g->logger->log(sFATAL, "feature parameter offset too large (%0x)",
+                               f.featureParams);
             }
         }
     }
@@ -738,20 +738,20 @@ void OTL::checkStandAloneRefs() {
             continue;
         auto rli = revUsedMap.find(s->index.lookup);
         if (rli == revUsedMap.end())
-            hotMsg(g, hotFATAL, "Base lookup %d not found", s->index.lookup);
+            g->logger->log(sFATAL, "Base lookup %d not found", s->index.lookup);
         s->seenInFeature = rli->second;
         if (!s->seenInFeature)
-            hotMsg(g, hotWARNING, "Stand-alone lookup with Lookup Index %d "
-                   "was not referenced from within any feature, and will "
-                   "never be used.", s->index.lookup);
+            g->logger->log(sWARNING, "Stand-alone lookup with Lookup Index %d "
+                           "was not referenced from within any feature, and will "
+                           "never be used.", s->index.lookup);
     }
 }
 
 void OTL::checkOverflow(const char* offsetType, long offset, const char* posType) {
     if (offset > 0xFFFF) {
-        hotMsg(g, hotFATAL,
-               "In %s %s rules cause an offset overflow (0x%lx) to a %s",
-               g->error_id_text.c_str(), posType, offset, offsetType);
+        g->logger->log(sFATAL,
+                       "In %s %s rules cause an offset overflow (0x%lx) to a %s",
+                       g->error_id_text.c_str(), posType, offset, offsetType);
     }
 }
 
@@ -794,7 +794,7 @@ int OTL::fillOTL(bool force) {
         return 0;
 
     if (g->hadError)
-        hotMsg(g, hotFATAL, "aborting because of errors");
+        g->logger->log(sFATAL, "aborting because of errors");
 
     createAnonLookups();
 
@@ -963,9 +963,9 @@ void OTL::Header::lookupListWrite(hotCtx g, Offset lookupSize) {
         for (auto so : l.subtableOffsets) {
             LOffset subTableOffset = so + lookupSize;
             if (subTableOffset > 0xFFFF) {
-                hotMsg(g, hotFATAL, "subtable offset too large (%0lx) "
-                       "in lookup %i type %i",
-                       subTableOffset, i, l.Type);
+                g->logger->log(sFATAL, "subtable offset too large (%0lx) "
+                               "in lookup %i type %i",
+                               subTableOffset, i, l.Type);
             }
             hotOut2(g, subTableOffset);
         }

@@ -23,6 +23,13 @@
 #define G_ (1 << 5) /* Sign (+ -) */
 #define E_ (1 << 6) /* Exponent (E e) */
 
+/* Message types, synchronized with slogger.h */
+enum {
+    sWARNING = 30,
+    sERROR = 40,
+    sFATAL = 50
+};
+
 /* Index by ascii character and return lexical class(es) */
 static char class[256] = {
     W_,    0,     0,     0,     0,     0,     0,     0,     /* 00-07 */
@@ -205,7 +212,7 @@ psCtx psNew(psCallbacks *cb) {
     psCtx h = malloc(sizeof(struct psCtx_));
     if ( h == NULL ) {
         if (cb->message != NULL)
-            cb->message(cb->ctx, psFATAL, "out of memory");
+            cb->message(cb->ctx, sFATAL, "out of memory");
         cb->fatal(cb->ctx);
     }
 
@@ -809,7 +816,7 @@ void CTL_CDECL psWarning(psCtx h, const char *fmt, ...) {
             sprintf(&text[strlen(text)], " [%s]", h->cb.psId(h->cb.ctx));
         }
 
-        h->cb.message(h->cb.ctx, psWARNING, text);
+        h->cb.message(h->cb.ctx, sWARNING, text);
         va_end(ap);
     }
 }
@@ -831,7 +838,7 @@ void CTL_CDECL psFatal(psCtx h, const char *fmt, ...) {
             sprintf(&text[strlen(text)], " [%s]", h->cb.psId(h->cb.ctx));
         }
 
-        h->cb.message(ctx, psFATAL, text);
+        h->cb.message(ctx, sFATAL, text);
         va_end(ap);
     }
     h->cb.fatal(h->cb.ctx);

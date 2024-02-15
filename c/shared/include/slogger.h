@@ -47,8 +47,8 @@ class slogger {
     static std::shared_ptr<slogger> (*getLogger)(const char *name);
     static std::shared_ptr<slogger> extc_logger;
     virtual void msg(int level, const char *msg) = 0;
-    virtual void CTL_CDECL log(int level, const char *fmt, ...) = 0;
-    virtual void vlog(int level, const char *fmt, va_list ap) = 0;
+    virtual void CTL_CDECL log(int level, const char *fmt, ...);
+    virtual void vlog(int level, const char *fmt, va_list ap);
     virtual int set_context(const char *key, int level, const char *str) = 0;
     virtual int clear_context(const char *key) = 0;
 };
