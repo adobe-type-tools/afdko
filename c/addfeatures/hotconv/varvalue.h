@@ -79,12 +79,12 @@ class VarLocationMap {
 
 class VarValueRecord {
  public:
-    void addValue(int16_t value) {
+    void addValue(int32_t value) {
         assert(!seenDefault);
         seenDefault = true;
         defaultValue = value;
     }
-    bool addValue(uint32_t locIndex, int16_t value, hotCtx g) {
+    bool addValue(uint32_t locIndex, int32_t value, hotCtx g) {
         if (locIndex == 0) {
             if (seenDefault) {
                 g->logger->msg(sERROR, "Duplicate values for default location");
@@ -110,9 +110,7 @@ class VarValueRecord {
  private:
      bool seenDefault {false};
      int16_t defaultValue {0};
-     uint32_t model {0};
-     uint32_t index {0};
-     std::map<uint32_t, int16_t> locationValues;
+     std::map<uint32_t, int32_t> locationValues;
 };
 
 typedef std::vector<VarValueRecord> ValueVector;

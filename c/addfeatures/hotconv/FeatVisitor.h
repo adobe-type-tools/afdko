@@ -20,7 +20,7 @@
 #include "FeatLexer.h"
 #include "FeatParserBaseVisitor.h"
 #include "FeatCtx.h"
-#include "varvalue.h"
+#include "varsupport.h"
 
 
 /* Include handling:

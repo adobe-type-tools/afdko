@@ -29,7 +29,6 @@
 #include "OS_2.h"
 #include "dictops.h"
 #include "varsupport.h"
-#include "varvalue.h"
 
 /* Windows-specific macros */
 #define FAMILY_UNSET 255 /* Flags unset Windows Family field */
