@@ -559,6 +559,13 @@ void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
     return;
 }
 
+uint32_t itemVariationStore::addValue(VarValueRecord &vvr,
+                                      std::shared_ptr<slogger> logger) {
+    uint32_t index = values.size();
+    values.emplace_back(vvr.getDefault());
+    return index;
+}
+
 static bool loadIndexMap(ctlSharedStmCallbacks *sscb, sfrTable *table,
                          uint32_t indexOffset, var_indexMap &ima) {
     uint16_t entryFormat;

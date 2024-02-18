@@ -125,9 +125,9 @@ class GDEF {
                 uint16_t format(const VarTrackVec &values) override {
                     return 1;
                 }
-                void write(GDEF *h, const ValTrackVec &values) override {
-                    OUT2(format());
-                    OUT2(values[valueIndex].getDefault());
+                void write(GDEF *h, const VarTrackVec &values) override {
+                    OUT2(format(values));
+                    OUT2((int16_t) values[valueIndex].getDefault());
                 }
                 uint32_t valueIndex;
             };
@@ -141,8 +141,8 @@ class GDEF {
                 uint16_t format(const VarTrackVec &values) override {
                     return 2;
                 }
-                void write(GDEF *h, const ValTrackVec &values) override {
-                    OUT2(format());
+                void write(GDEF *h, const VarTrackVec &values) override {
+                    OUT2(format(values));
                     OUT2(point);
                 }
                 uint16_t point;
@@ -166,7 +166,7 @@ class GDEF {
             return sizeof(uint16_t) * (2 + glyphCount);
         }
         bool warnGid(GID gid);
-        void addCoords(GID gid, std::vector<uint32_t> valIndexes, ValueVector &values);
+        void addCoords(GID gid, std::vector<uint32_t> valIndexes);
         void addPoints(GID gid, std::vector<uint16_t> &points);
         Offset fill(Offset offset);
         void write(GDEF *h);
@@ -224,10 +224,10 @@ class GDEF {
         return attachTable.add(gid, contour);
     }
     void addLigCaretCoords(GID gid, ValueVector &coords) {
-        std::vector<uint32_t> valIndexes;
+        std::vector<uint32_t> valIndices;
         for (auto &vvr : coords)
-            valIndexes.push_back(ivs.addValue(foo, vvr));
-        ligCaretTable.addCoords(gid, valIndexes, values);
+            valIndices.push_back(ivs.addValue(vvr, g->logger));
+        ligCaretTable.addCoords(gid, valIndices);
     }
     void addLigCaretPoints(GID gid, std::vector<uint16_t> &points) {
         ligCaretTable.addPoints(gid, points);

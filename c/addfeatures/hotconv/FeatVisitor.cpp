@@ -1440,14 +1440,14 @@ void FeatVisitor::getParenLocationValue(FeatParser::ParenLocationValueContext *c
                                         VarValueRecord &vvr) {
     for (auto vll : ctx->locationValueLiteral())
         addLocationValueLiteral(vll, vvr);
-    vvr.verifyDefault(fc->g);
+    vvr.verifyDefault(fc->g->logger);
 }
 
 void FeatVisitor::addLocationValueLiteral(FeatParser::LocationValueLiteralContext *ctx,
                                           VarValueRecord &vvr) {
     uint32_t locIndex = getLocationSpecifier(ctx->locationSpecifier());
     int16_t num = getNum<int16_t>(TOK(ctx->NUM())->getText(), 10);
-    vvr.addValue(locIndex, num, fc->g);
+    vvr.addLocationValue(locIndex, num, fc->g->logger);
 }
 
 uint32_t FeatVisitor::getLocationSpecifier(FeatParser::LocationSpecifierContext *ctx) {
