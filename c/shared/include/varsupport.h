@@ -218,10 +218,10 @@ class VarValueRecord {
         seenDefault = true;
         defaultValue = value;
     }
-    bool addValue(uint32_t locIndex, int32_t value, hotCtx g) {
+    bool addLocationValue(uint32_t locIndex, int32_t value, std::shared_ptr<slogger> logger) {
         if (locIndex == 0) {
             if (seenDefault) {
-                hotMsg(g, hotERROR, "Duplicate values for default location");
+                logger->msg(sERROR, "Duplicate values for default location");
                 return false;
             } else {
                 defaultValue = value;
@@ -231,13 +231,13 @@ class VarValueRecord {
         } else {
             const auto [it, success] = locationValues.emplace(locIndex, value);
             if (!success)
-                hotMsg(g, hotERROR, "Duplicate values for location");
+                logger->msg(sERROR, "Duplicate values for location");
             return success;
         }
     }
-    void verifyDefault(hotCtx g) {
+    void verifyDefault(std::shared_ptr<slogger> logger) {
         if (!seenDefault)
-            hotMsg(g, hotERROR, "No default entry for variable value");
+            logger->msg(sERROR, "No default entry for variable value");
     }
     int32_t getDefault() { return defaultValue; }
     bool isVariable() { return locationValues.size() > 0; }
@@ -249,7 +249,6 @@ class VarValueRecord {
 
 typedef std::vector<VarValueRecord> ValueVector;
 
-#endif  // ADDFEATURES_HOTCONV_VARVALUE_H
 class itemVariationStore {
  public:
     /* Parses the Item Variation Store (IVS) sub-table.
@@ -315,7 +314,7 @@ class itemVariationStore {
     void calcRegionScalars(ctlSharedStmCallbacks *sscb, uint16_t &axisCount,
                            Fixed *instCoords, float *scalars);
 
-    uint32_t addValue(ctlSharedCallbacks *sscb, VarValueRecord &vvr);
+    uint32_t addValue(VarValueRecord &vvr, std::shared_ptr<slogger> logger);
 
 // private:  (Can't make private until cffwrite_varstore restructuring
     struct variationRegion {
@@ -333,10 +332,10 @@ class itemVariationStore {
         valueTracker() = delete;
         explicit valueTracker(int16_t v) : defaultValue(v) {}
         explicit valueTracker(int32_t v) : defaultValue(v) {}
-        int32_t getDefault() { return defaultValue; }
+        int32_t getDefault() const { return defaultValue; }
         int32_t defaultValue;
         var_indexPair pair;
-    }
+    };
 
     float applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
                                   const var_indexPair &pair, float *scalars,
