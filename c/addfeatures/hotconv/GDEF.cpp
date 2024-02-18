@@ -201,8 +201,7 @@ bool GDEF::LigCaretTable::warnGid(GID gid) {
     return false;
 }
 
-void GDEF::LigCaretTable::addCoords(GID gid, std::vector<uint32_t> valCoords,
-                                    ValueVector &values) {
+void GDEF::LigCaretTable::addCoords(GID gid, std::vector<uint32_t> valCoords) {
     if (warnGid(gid))
         return;
 
@@ -298,8 +297,8 @@ Offset GDEF::LigCaretTable::fill(Offset o) {
         std::stable_sort(lge.caretTables.begin(), lge.caretTables.end(), ctc);
         for (auto &ct : lge.caretTables) {
             ct->offset = caretOffset;
-            caretOffset += ct->size();
-            sz += ct->size();
+            caretOffset += ct->size(values);
+            sz += ct->size(values);
         }
         cac.coverageAddGlyph(lge.gid);
     }
@@ -422,7 +421,7 @@ void GDEF::LigCaretTable::write(GDEF *h) {
             OUT2(ct->offset);
         /* then write caret tables for this lge */
         for (auto &ct : lge.caretTables)
-            ct->write(h, h->values);
+            ct->write(h, h->ivs.getValues());
     }
     cac.coverageWrite();
 }
