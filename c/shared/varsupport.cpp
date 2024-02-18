@@ -433,14 +433,14 @@ itemVariationStore::itemVariationStore(ctlSharedStmCallbacks *sscb,
     }
 
     for (i = 0; i < regionCount; i++) {
-        std::vector<variationRegion> vrv;
+        VariationRegion vrv;
         for (axis = 0; axis < axisCount; axis++) {
-            variationRegion region;
-            region.startCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
-            region.peakCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
-            region.endCoord = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
-            vrv.push_back(region);
+            Fixed start = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
+            Fixed peak = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
+            Fixed end = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
+            vrv.push_back(std::make_tuple(start, peak, end));
         }
+        regionMap.emplace(vrv, (uint32_t) regions.size());
         regions.emplace_back(std::move(vrv));
     }
 
@@ -487,6 +487,7 @@ itemVariationStore::itemVariationStore(ctlSharedStmCallbacks *sscb,
         }
         subtables.push_back(std::move(ivd));
     }
+    maxUnbuiltSubtable = subtables.size() - 1;
 }
 
 int32_t itemVariationStore::getRegionIndices(uint16_t vsIndex,
@@ -528,27 +529,30 @@ void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
     }
 
     i = 0;
-    for (auto &rv: regions) {
+    for (auto &vr: regions) {
         float scalar = 1.0f;
 
         uint16_t axis {0};
-        for (auto &r: rv) {
+        for (auto &ar: vr) {
             float axisScalar;
-            if (r.startCoord > r.peakCoord || r.peakCoord > r.endCoord)
+            Fixed startCoord = std::get<0>(ar);
+            Fixed peakCoord = std::get<1>(ar);
+            Fixed endCoord = std::get<2>(ar);
+            if (startCoord > peakCoord || peakCoord > endCoord)
                 axisScalar = 1.0f;
-            else if (r.startCoord < FIXED_ZERO && r.endCoord > FIXED_ZERO && r.peakCoord != FIXED_ZERO)
+            else if (startCoord < FIXED_ZERO && endCoord > FIXED_ZERO && peakCoord != FIXED_ZERO)
                 axisScalar = 1.0f;
-            else if (r.peakCoord == FIXED_ZERO)
+            else if (peakCoord == FIXED_ZERO)
                 axisScalar = 1.0f;
-            else if (instCoords[axis] < r.startCoord || instCoords[axis] > r.endCoord)
+            else if (instCoords[axis] < startCoord || instCoords[axis] > endCoord)
                 axisScalar = .0f;
             else {
-                if (instCoords[axis] == r.peakCoord)
+                if (instCoords[axis] == peakCoord)
                     axisScalar = 1.0f;
-                else if (instCoords[axis] < r.peakCoord)
-                    axisScalar = (float)(instCoords[axis] - r.startCoord) / (r.peakCoord - r.startCoord);
-                else /* instCoords[axis] > r.peakCoord */
-                    axisScalar = (float)(r.endCoord - instCoords[axis]) / (r.endCoord - r.peakCoord);
+                else if (instCoords[axis] < peakCoord)
+                    axisScalar = (float)(instCoords[axis] - startCoord) / (peakCoord - startCoord);
+                else /* instCoords[axis] > peakCoord */
+                    axisScalar = (float)(endCoord - instCoords[axis]) / (endCoord - peakCoord);
             }
             scalar = scalar * axisScalar;
             axis++;
@@ -561,6 +565,12 @@ void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
 
 uint32_t itemVariationStore::addValue(VarValueRecord &vvr,
                                       std::shared_ptr<slogger> logger) {
+    ensureBuilder();
+    return builder->addValue(vvr, logger);
+}
+
+uint32_t itemVariationStore::Builder::addValue(VarValueRecord &vvr,
+                                               std::shared_ptr<slogger> logger) {
     uint32_t index = values.size();
     values.emplace_back(vvr.getDefault());
     return index;
