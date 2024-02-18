@@ -317,24 +317,13 @@ class itemVariationStore {
     uint32_t addValue(VarValueRecord &vvr, std::shared_ptr<slogger> logger);
 
 // private:  (Can't make private until cffwrite_varstore restructuring
-    struct variationRegion {
-        Fixed startCoord;
-        Fixed peakCoord;
-        Fixed endCoord;
-    };
+    typedef std::tuple<Fixed, Fixed, Fixed> AxisRegion;
+    typedef std::vector<AxisRegion> VariationRegion;
 
     struct itemVariationDataSubtable {
+        // uint32_t modelIndex {0};
         std::vector<int16_t> regionIndices;
         std::vector<std::vector<int16_t>> deltaValues;
-    };
-
-    struct valueTracker {
-        valueTracker() = delete;
-        explicit valueTracker(int16_t v) : defaultValue(v) {}
-        explicit valueTracker(int32_t v) : defaultValue(v) {}
-        int32_t getDefault() const { return defaultValue; }
-        int32_t defaultValue;
-        var_indexPair pair;
     };
 
     float applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
@@ -343,24 +332,52 @@ class itemVariationStore {
     float applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_indexMap &map,
                             uint16_t gid, float *scalars,
                             int32_t regionListCount);
+
+    class Builder {
+     public:
+        class ValueTracker {
+         public:
+            ValueTracker() = delete;
+            explicit ValueTracker(int16_t v) : defaultValue(v) {}
+            explicit ValueTracker(int32_t v) : defaultValue(v) {}
+            int32_t getDefault() const { return defaultValue; }
+            int32_t defaultValue;
+            var_indexPair pair;
+        };
+
+        uint32_t addValue(VarValueRecord &vvr, std::shared_ptr<slogger> logger);
+        std::vector<ValueTracker> values;
+        /* std::vector<std::unique_ptr<Model>> models;
+        std::map<std::vector<uint32_t>, uint32_t> locationSetMap; */
+    };
+
+
     void reset() {
         axisCount = 0;
         regions.clear();
         subtables.clear();
-        values.clear();
+        builder = nullptr;
     }
 
-    const std::vector<valueTracker> &getValues() { return values; }
+    void ensureBuilder() {
+        if (!builder)
+            builder = std::make_unique<Builder>();
+    }
 
-    // typedef std::vector<uint16_t> indexArray;
+    const std::vector<Builder::ValueTracker> &getValues() {
+        ensureBuilder();
+        return builder->values;
+    }
 
     uint16_t axisCount;
-    std::vector<std::vector<variationRegion>> regions;
+    int32_t maxUnbuiltSubtable {-1};
+    std::vector<VariationRegion> regions;
+    std::map<VariationRegion, uint32_t> regionMap;
     std::vector<itemVariationDataSubtable> subtables;
-    std::vector<valueTracker> values;
+    std::unique_ptr<Builder> builder;
 };
 
-typedef std::vector<itemVariationStore::valueTracker> VarTrackVec;
+typedef std::vector<itemVariationStore::Builder::ValueTracker> VarTrackVec;
 
 /* horizontal metrics tables */
 

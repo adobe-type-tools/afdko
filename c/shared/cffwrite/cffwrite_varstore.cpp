@@ -37,16 +37,16 @@ void cfwDictSaveLongInt(DICT *dict, long i) {
 }
 
 void writeRegionList(DICT *dst, uint16_t axisCount,
-                     std::vector<std::vector<itemVariationStore::variationRegion>> &regions) {
+                     std::vector<itemVariationStore::VariationRegion> &regions) {
     uint16_t i;
     cfwDictSaveShortInt(dst, axisCount);
     cfwDictSaveShortInt(dst, (int16_t) regions.size());
 
-    for (auto &r : regions) {
-        for (auto &vr: r) {
-            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr.startCoord));
-            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr.peakCoord));
-            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(vr.endCoord));
+    for (auto &vr : regions) {
+        for (auto &ar: vr) {
+            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(std::get<0>(ar)));
+            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(std::get<1>(ar)));
+            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(std::get<2>(ar)));
         }
     }
 }
