@@ -44,9 +44,9 @@ void writeRegionList(DICT *dst, uint16_t axisCount,
 
     for (auto &vr : regions) {
         for (auto &ar: vr) {
-            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(std::get<0>(ar)));
-            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(std::get<1>(ar)));
-            cfwDictSaveShortInt(dst, FIXED_TO_F2DOT14(std::get<2>(ar)));
+            cfwDictSaveShortInt(dst, std::get<0>(ar));
+            cfwDictSaveShortInt(dst, std::get<1>(ar));
+            cfwDictSaveShortInt(dst, std::get<2>(ar));
         }
     }
 }
