@@ -226,7 +226,7 @@ class GDEF {
     void addLigCaretCoords(GID gid, ValueVector &coords) {
         std::vector<uint32_t> valIndices;
         for (auto &vvr : coords)
-            valIndices.push_back(ivs.addValue(vvr, g->logger));
+            valIndices.push_back(ivs.addValue(*(g->ctx.locMap), vvr, g->logger));
         ligCaretTable.addCoords(gid, valIndices);
     }
     void addLigCaretPoints(GID gid, std::vector<uint16_t> &points) {
