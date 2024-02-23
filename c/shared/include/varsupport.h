@@ -5,10 +5,12 @@
 #ifndef SHARED_INCLUDE_VARSUPPORT_H_
 #define SHARED_INCLUDE_VARSUPPORT_H_
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <map>
 #include <memory>
+#include <set>
 #include <vector>
 #include <utility>
 
@@ -39,6 +41,8 @@ struct var_glyphMetrics {
 };
 
 struct var_indexPair {
+    var_indexPair() {}
+    var_indexPair(uint16_t outer, uint16_t inner) : outerIndex(outer), innerIndex(inner) {}
     uint16_t outerIndex {0};
     uint16_t innerIndex {0};
 };
@@ -181,7 +185,7 @@ class VarLocation {
 class VarLocationMap {
  public:
     VarLocationMap() = delete;
-    explicit VarLocationMap(uint16_t axis_count) {
+    explicit VarLocationMap(uint16_t axis_count) : axis_count(axis_count) {
         // Store default location first, always has index 0
         std::vector<var_F2dot14> defaxis(axis_count, 0);
         auto defloc = std::make_shared<VarLocation>(std::move(defaxis));
@@ -193,12 +197,15 @@ class VarLocationMap {
             locvec.push_back(l);
         return it->second;
     }
-    std::shared_ptr<VarLocation> getLocation(uint32_t i) {
+    uint16_t getAxisCount() const { return axis_count; }
+    const std::shared_ptr<VarLocation> getLocation(uint32_t i) {
         if (i >= locvec.size())
             return nullptr;
         return locvec[i];
     }
     void toerr() {
+        if (axis_count == 0)
+            return;
         int i {0};
         for (auto &loc : locvec) {
             std::cerr << i++ << ":  ";
@@ -207,6 +214,7 @@ class VarLocationMap {
         }
     }
  private:
+    uint16_t axis_count;
     std::map<std::shared_ptr<VarLocation>, uint32_t, VarLocation::cmpSP> locmap;
     std::vector<std::shared_ptr<VarLocation>> locvec;
 };
@@ -235,12 +243,24 @@ class VarValueRecord {
             return success;
         }
     }
-    void verifyDefault(std::shared_ptr<slogger> logger) {
+    void verifyDefault(std::shared_ptr<slogger> logger) const {
         if (!seenDefault)
             logger->msg(sERROR, "No default entry for variable value");
     }
-    int32_t getDefault() { return defaultValue; }
-    bool isVariable() { return locationValues.size() > 0; }
+    int32_t getDefault() const { return defaultValue; }
+    bool isVariable() const { return locationValues.size() > 0; }
+    std::vector<uint32_t> getLocations() {
+        std::vector<uint32_t> r;
+        for (auto i : locationValues)
+            r.push_back(i.first);
+        return r;
+    }
+    int16_t getLocationValue(uint32_t locationIndex) {
+        auto f = locationValues.find(locationIndex);
+        if (f == locationValues.end())
+            return defaultValue;
+        return f->second;
+    }
  private:
      bool seenDefault {false};
      int16_t defaultValue {0};
@@ -248,6 +268,8 @@ class VarValueRecord {
 };
 
 typedef std::vector<VarValueRecord> ValueVector;
+
+class VarModel;
 
 class itemVariationStore {
  public:
@@ -314,15 +336,19 @@ class itemVariationStore {
     void calcRegionScalars(ctlSharedStmCallbacks *sscb, uint16_t &axisCount,
                            Fixed *instCoords, float *scalars);
 
-    uint32_t addValue(VarValueRecord &vvr, std::shared_ptr<slogger> logger);
+    uint32_t addValue(VarLocationMap &vlm, VarValueRecord &vvr,
+                      std::shared_ptr<slogger> logger);
 
 // private:  (Can't make private until cffwrite_varstore restructuring
-    typedef std::tuple<Fixed, Fixed, Fixed> AxisRegion;
+    typedef std::tuple<var_F2dot14, var_F2dot14, var_F2dot14> AxisRegion;
     typedef std::vector<AxisRegion> VariationRegion;
 
+    float calcRegionScalar(uint16_t refRegionIndex, uint16_t locRegionIndex);
+
     struct itemVariationDataSubtable {
-        // uint32_t modelIndex {0};
-        std::vector<int16_t> regionIndices;
+        itemVariationDataSubtable() {}
+        itemVariationDataSubtable(itemVariationDataSubtable &&s) : regionIndices(std::move(s.regionIndices)), deltaValues(std::move(s.deltaValues)) {}
+        std::vector<uint16_t> regionIndices;
         std::vector<std::vector<int16_t>> deltaValues;
     };
 
@@ -333,51 +359,76 @@ class itemVariationStore {
                             uint16_t gid, float *scalars,
                             int32_t regionListCount);
 
-    class Builder {
+    class ValueTracker {
      public:
-        class ValueTracker {
-         public:
-            ValueTracker() = delete;
-            explicit ValueTracker(int16_t v) : defaultValue(v) {}
-            explicit ValueTracker(int32_t v) : defaultValue(v) {}
-            int32_t getDefault() const { return defaultValue; }
-            int32_t defaultValue;
-            var_indexPair pair;
-        };
-
-        uint32_t addValue(VarValueRecord &vvr, std::shared_ptr<slogger> logger);
-        std::vector<ValueTracker> values;
-        /* std::vector<std::unique_ptr<Model>> models;
-        std::map<std::vector<uint32_t>, uint32_t> locationSetMap; */
+        ValueTracker() = delete;
+        explicit ValueTracker(int16_t v, uint16_t outer, uint16_t inner) :
+            defaultValue(v), pair(outer, inner) {}
+        explicit ValueTracker(int32_t v, uint16_t outer, uint16_t inner) :
+            defaultValue(v), pair(outer, inner) {}
+        int32_t getDefault() const { return defaultValue; }
+        int32_t defaultValue;
+        var_indexPair pair;
     };
-
 
     void reset() {
         axisCount = 0;
         regions.clear();
+        regionMap.clear();
         subtables.clear();
-        builder = nullptr;
+        values.clear();
+        models.clear();
+        locationSetMap.clear();
     }
 
-    void ensureBuilder() {
-        if (!builder)
-            builder = std::make_unique<Builder>();
-    }
+    const std::vector<ValueTracker> &getValues() { return values; }
 
-    const std::vector<Builder::ValueTracker> &getValues() {
-        ensureBuilder();
-        return builder->values;
-    }
+    uint16_t newSubtable(std::vector<VariationRegion> reg);
 
     uint16_t axisCount;
-    int32_t maxUnbuiltSubtable {-1};
     std::vector<VariationRegion> regions;
     std::map<VariationRegion, uint32_t> regionMap;
     std::vector<itemVariationDataSubtable> subtables;
-    std::unique_ptr<Builder> builder;
+    std::vector<ValueTracker> values;
+    std::vector<std::unique_ptr<VarModel>> models;
+    std::map<std::vector<uint32_t>, uint32_t> locationSetMap;
 };
 
-typedef std::vector<itemVariationStore::Builder::ValueTracker> VarTrackVec;
+typedef std::vector<itemVariationStore::ValueTracker> VarTrackVec;
+
+class VarModel {
+ public:
+    VarModel() = delete;
+    VarModel(itemVariationStore &ivs, VarLocationMap &vlm, std::vector<uint32_t> locationList);
+    uint16_t addValue(VarValueRecord &vvr, std::shared_ptr<slogger> logger);
+    explicit VarModel(VarModel &&vm) : subtableIndex(vm.subtableIndex),
+                                       sortedLocations(std::move(vm.sortedLocations)),
+                                       deltaWeights(std::move(vm.deltaWeights)),
+                                       ivs (vm.ivs) {}
+    static std::vector<std::set<var_F2dot14>> getAxisPoints(VarLocationMap &vlm, std::vector<uint32_t> locationList);
+    struct cmpLocation {
+        cmpLocation() = delete;
+        explicit cmpLocation(VarLocationMap &vlm, std::vector<uint32_t> locationList) : vlm(vlm) {
+            axisPoints = VarModel::getAxisPoints(vlm, locationList);
+        }
+        bool operator()(uint32_t &a, uint32_t &b);
+        std::vector<std::set<var_F2dot14>> axisPoints;
+        VarLocationMap &vlm;
+    };
+    void sortLocations(VarLocationMap &vlm, std::vector<uint32_t> locationList) {
+        sortedLocations = locationList;
+        cmpLocation cl(vlm, locationList);
+        std::sort(sortedLocations.begin(), sortedLocations.end(), cl);
+    }
+    std::vector<itemVariationStore::VariationRegion> locationsToInitialRegions(VarLocationMap &vlm,
+                                                                               std::vector<uint32_t> locationList);
+    void narrowRegions(std::vector<itemVariationStore::VariationRegion> reg);
+    void calcDeltaWeights(VarLocationMap &vlm);
+    uint16_t subtableIndex {0};
+    std::vector<uint32_t> sortedLocations;
+    std::vector<std::vector<std::pair<uint16_t, float>>> deltaWeights;
+    itemVariationStore &ivs;
+};
 
 /* horizontal metrics tables */
 

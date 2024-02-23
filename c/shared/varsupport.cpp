@@ -373,6 +373,227 @@ int var_axes::findInstance(float *userCoords, uint16_t axisCount,
     return -1;
 }
 
+VarModel::VarModel(itemVariationStore &ivs, VarLocationMap &vlm,
+                   std::vector<uint32_t> locationList) : ivs(ivs) {
+    sortLocations(vlm, locationList);
+    std::vector<itemVariationStore::VariationRegion> regions = locationsToInitialRegions(vlm, sortedLocations);
+    narrowRegions(regions);
+    subtableIndex = ivs.newSubtable(regions);
+    calcDeltaWeights(vlm);
+}
+
+std::vector<std::set<var_F2dot14>> VarModel::getAxisPoints(VarLocationMap &vlm,
+                                                           std::vector<uint32_t> locationList) {
+    std::vector<std::set<var_F2dot14>> r;
+
+    for (int16_t a = 0; a < vlm.getAxisCount(); a++)
+        r.emplace_back();
+
+    for (auto i : locationList) {
+        auto vr = vlm.getLocation(i);
+        int32_t a {-1};
+        var_F2dot14 l {0};
+        for (size_t j = 0; j < vr->size(); j++) {
+            auto t = vr->at(j);
+            if (t != 0) {
+                if (a != -1) {
+                    a = -1;
+                    l = 0;
+                    break;
+                } else {
+                    a = j;
+                    l = t;
+                }
+            }
+        }
+        if (l != 0) {
+            if (r[a].size() == 0)
+                r[a].insert((var_F2dot14) 0);
+            r[a].insert(l);
+        }
+    }
+    return r;
+}
+
+bool VarModel::cmpLocation::operator()(uint32_t &a, uint32_t &b) {
+    auto vla = vlm.getLocation(a);
+    auto vlb = vlm.getLocation(b);
+    int16_t nonZeroA {0}, nonZeroB {0}, apA {0}, apB {0};
+    int8_t firstAxis {0}, firstSign {0}, firstAbs {0};
+    for (int i = 0; i < vlm.getAxisCount(); i++) {
+        auto av = vla->at(i);
+        auto bv = vlb->at(i);
+        if (av != F2DOT14_ZERO)
+            nonZeroA++;
+        if (bv != F2DOT14_ZERO)
+            nonZeroB++;
+        if (axisPoints[i].find(av) != axisPoints[i].end())
+            apA++;
+        if (axisPoints[i].find(bv) != axisPoints[i].end())
+            apB++;
+        if (firstAxis == 0) {
+            if (av == F2DOT14_ZERO && bv != F2DOT14_ZERO)
+                firstAxis = -1;
+            else if (av != F2DOT14_ZERO && bv == F2DOT14_ZERO)
+                firstAxis = 1;
+        }
+        if (firstSign == 0) {
+            // This test won't give the right result in isolation but
+            // it should when testing the firstAxis value first, so
+            // that this value is only looked at when both values for
+            // the axis are non-zero.
+            if (av < F2DOT14_ZERO && bv > F2DOT14_ZERO)
+                firstSign = -1;
+            else if (av > F2DOT14_ZERO && bv < F2DOT14_ZERO)
+                firstSign = 1;
+        }
+        if (firstAbs == 0) {
+            // Same with this test as with firstSign
+            int16_t absA = abs(av), absB = abs(bv);
+            if (absA != absB)
+                firstAbs = (absA < absB) ? -1 : 1;
+        }
+    }
+    if (nonZeroA != nonZeroB)
+        return nonZeroA < nonZeroB;
+    if (apA != apB)
+        return apA > apB;
+    if (firstAxis)
+        return firstAxis < 0;
+    if (firstSign)
+        return firstSign < 0;
+    if (firstAbs)
+        return firstAbs < 0;
+    return false;
+}
+
+uint16_t VarModel::addValue(VarValueRecord &vvr, std::shared_ptr<slogger> logger) {
+    auto &subtable = ivs.subtables[subtableIndex];
+    // XXX deal with exceeding length
+    std::vector<int16_t> deltas;
+    for (uint16_t i = 0; i < deltaWeights.size(); i++) {
+        int16_t delta = vvr.getLocationValue(sortedLocations[i]) - vvr.getDefault();
+        for (auto [j, weight] : deltaWeights[i]) {
+            if (weight == 1)
+                delta -= deltas[j];
+            else
+                delta -= deltas[j] * weight;
+        }
+        deltas.push_back(delta);
+    }
+    uint16_t r = subtable.deltaValues.size();
+    subtable.deltaValues.emplace_back(std::move(deltas));
+    return r;
+}
+
+std::vector<itemVariationStore::VariationRegion> VarModel::locationsToInitialRegions(
+        VarLocationMap &vlm,
+        std::vector<uint32_t> locationList) {
+    auto axisCount = vlm.getAxisCount();
+    std::vector<var_F2dot14> mins(axisCount, 0), maxes(axisCount, 0);
+
+    for (auto i : locationList) {
+        auto vr = vlm.getLocation(i);
+        for (uint16_t j = 0; j < axisCount; j++) {
+            auto v = vr->at(j);
+            if (mins[j] > v)
+                mins[j] = v;
+            if (maxes[j] < v)
+                maxes[j] = v;
+        }
+    }
+
+    std::vector<itemVariationStore::VariationRegion> r;
+    for (auto i : locationList) {
+        auto vr = vlm.getLocation(i);
+        itemVariationStore::VariationRegion varReg;
+        for (uint16_t j = 0; j < axisCount; j++) {
+            auto v = vr->at(j);
+            if (v == 0)
+                varReg.push_back(std::make_tuple(0, 0, 0));
+            else if (v > 0)
+                varReg.push_back(std::make_tuple(0, v, maxes[j]));
+            else
+                varReg.push_back(std::make_tuple(mins[j], v, 0));
+        }
+        r.emplace_back(std::move(varReg));
+    }
+    return r;
+}
+
+void VarModel::narrowRegions(std::vector<itemVariationStore::VariationRegion> reg) {
+
+    for (auto ri = reg.begin(); ri != reg.end(); ri++) {
+        for (auto pi = reg.begin(); pi != ri; pi++) {
+            bool relevant = true;
+            for (auto a = 0; a < ri->size(); a++) {
+                auto &ra = (*ri)[a];
+                auto &pa = (*pi)[a];
+                auto peakR = std::get<1>(ra);
+                auto peakP = std::get<1>(pa);
+                // Skip over pairs that don't use the same axes
+                if (   (peakR == 0 && peakP != 0) 
+                    || (peakR != 0 && peakP == 0)) {
+                    relevant = false;
+                    break;
+                }
+                auto lowerR = std::get<0>(ra);
+                auto upperR = std::get<2>(ra);
+                // Skip over pairs that don't intersect ranges
+                if (! (   (peakR == peakP)
+                       || (lowerR < peakP && peakP < upperR))) {
+                    relevant = false;
+                    break;
+                }
+            }
+            if (! relevant)
+                continue;
+
+            std::vector<std::pair<uint16_t, itemVariationStore::AxisRegion>> narrowings;
+            float bestRatio = -1, ratio;
+            for (auto a = 0; a < ri->size(); a++) {
+                auto &ra = (*ri)[a];
+                auto &pa = (*pi)[a];
+                auto lowerR = std::get<0>(ra);
+                auto peakR = std::get<1>(ra);
+                auto upperR = std::get<2>(ra);
+                auto peakP = std::get<1>(pa);
+                auto newLowerR = lowerR, newUpperR = upperR;
+                if (peakP < peakR) {
+                    newLowerR = peakP;
+                    ratio = (peakP - peakR) / (lowerR - peakR);
+                } else if (peakP > peakR) {
+                    newUpperR = peakP;
+                    ratio = (peakP - peakR) / (upperR - peakR);
+                } else {
+                    continue;
+                }
+                if (ratio > bestRatio) {
+                    narrowings.clear();
+                    ratio = bestRatio;
+                }
+                if (ratio == bestRatio)
+                    narrowings.emplace_back(a, itemVariationStore::AxisRegion{newLowerR, peakR, newUpperR});
+            }
+            for (auto &[a, tup] : narrowings)
+                (*ri)[a] = tup;
+        }
+    }
+}
+
+void VarModel::calcDeltaWeights(VarLocationMap &vlm) {
+    auto &subt = ivs.subtables[subtableIndex];
+    for (uint16_t i = 0; i < subt.regionIndices.size(); i++) {
+        std::vector<std::pair<uint16_t, float>> weights;
+        for (uint16_t j = 0; j < i; j++) {
+            float scalar = ivs.calcRegionScalar(subt.regionIndices[j], subt.regionIndices[i]);
+            if (scalar != 0)
+                weights.emplace_back(j, scalar);
+        }
+        deltaWeights.push_back(weights);
+    }
+}
+
 /* item variation store sub-table */
 
 itemVariationStore::itemVariationStore(ctlSharedStmCallbacks *sscb,
@@ -435,9 +656,9 @@ itemVariationStore::itemVariationStore(ctlSharedStmCallbacks *sscb,
     for (i = 0; i < regionCount; i++) {
         VariationRegion vrv;
         for (axis = 0; axis < axisCount; axis++) {
-            Fixed start = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
-            Fixed peak = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
-            Fixed end = F2DOT14_TO_FIXED((var_F2dot14)sscb->read2(sscb));
+            var_F2dot14 start = (var_F2dot14)sscb->read2(sscb);
+            var_F2dot14 peak = (var_F2dot14)sscb->read2(sscb);
+            var_F2dot14 end = (var_F2dot14)sscb->read2(sscb);
             vrv.push_back(std::make_tuple(start, peak, end));
         }
         regionMap.emplace(vrv, (uint32_t) regions.size());
@@ -474,7 +695,7 @@ itemVariationStore::itemVariationStore(ctlSharedStmCallbacks *sscb,
 
         /* load region indices */
         for (r = 0; r < subtableRegionCount; r++)
-            ivd.regionIndices.push_back((int16_t)sscb->read2(sscb));
+            ivd.regionIndices.push_back((uint16_t)sscb->read2(sscb));
 
         /* load two-dimensional delta values array */
         j = 0;
@@ -487,7 +708,6 @@ itemVariationStore::itemVariationStore(ctlSharedStmCallbacks *sscb,
         }
         subtables.push_back(std::move(ivd));
     }
-    maxUnbuiltSubtable = subtables.size() - 1;
 }
 
 int32_t itemVariationStore::getRegionIndices(uint16_t vsIndex,
@@ -515,6 +735,42 @@ int32_t itemVariationStore::getRegionIndices(uint16_t vsIndex,
 }
 
 /* calculate scalars for all regions given a normalized design vector. */
+
+float itemVariationStore::calcRegionScalar(uint16_t refRegionIndex, uint16_t locRegionIndex) {
+    float r {0};
+
+    auto &rr = regions[refRegionIndex];
+    auto &lr = regions[locRegionIndex];
+
+    for (uint16_t a = 0; a < axisCount; a++) {
+        float axisScalar;
+        auto &arr = rr[a];
+        auto &alr = lr[a];
+        var_F2dot14 aloc = std::get<1>(alr);
+        var_F2dot14 startCoord = std::get<0>(arr);
+        var_F2dot14 peakCoord = std::get<1>(arr);
+        var_F2dot14 endCoord = std::get<2>(arr);
+        if (startCoord > peakCoord || peakCoord > endCoord)
+            axisScalar = 1.0f;
+        else if (startCoord < F2DOT14_ZERO && endCoord > F2DOT14_ZERO && peakCoord != F2DOT14_ZERO)
+            axisScalar = 1.0f;
+        else if (peakCoord == F2DOT14_ZERO)
+            axisScalar = 1.0f;
+        else if (aloc < startCoord || aloc > endCoord)
+            axisScalar = .0f;
+        else {
+            if (aloc == peakCoord)
+                axisScalar = 1.0f;
+            else if (aloc < peakCoord)
+                axisScalar = (float)(aloc - startCoord) / (peakCoord - startCoord);
+            else /* aloc > peakCoord */
+                axisScalar = (float)(endCoord - aloc) / (endCoord - peakCoord);
+        }
+        r *= axisScalar;
+    }
+    return r;
+}
+
 void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
                                            uint16_t &fvarAxisCount,
                                            Fixed *instCoords, float *scalars) {
@@ -535,9 +791,9 @@ void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
         uint16_t axis {0};
         for (auto &ar: vr) {
             float axisScalar;
-            Fixed startCoord = std::get<0>(ar);
-            Fixed peakCoord = std::get<1>(ar);
-            Fixed endCoord = std::get<2>(ar);
+            Fixed startCoord = F2DOT14_TO_FIXED(std::get<0>(ar));
+            Fixed peakCoord = F2DOT14_TO_FIXED(std::get<1>(ar));
+            Fixed endCoord = F2DOT14_TO_FIXED(std::get<2>(ar));
             if (startCoord > peakCoord || peakCoord > endCoord)
                 axisScalar = 1.0f;
             else if (startCoord < FIXED_ZERO && endCoord > FIXED_ZERO && peakCoord != FIXED_ZERO)
@@ -563,16 +819,28 @@ void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
     return;
 }
 
-uint32_t itemVariationStore::addValue(VarValueRecord &vvr,
+uint32_t itemVariationStore::addValue(VarLocationMap &vlm, VarValueRecord &vvr,
                                       std::shared_ptr<slogger> logger) {
-    ensureBuilder();
-    return builder->addValue(vvr, logger);
-}
-
-uint32_t itemVariationStore::Builder::addValue(VarValueRecord &vvr,
-                                               std::shared_ptr<slogger> logger) {
     uint32_t index = values.size();
-    values.emplace_back(vvr.getDefault());
+    uint16_t outer = 0xFFFF, inner = 0xFFFF;
+    if (vvr.isVariable()) {
+        auto ls = vvr.getLocations();
+        assert(ls.size() != 0);
+        uint32_t modelIndex;
+        auto i = locationSetMap.find(ls);
+        if (i != locationSetMap.end()) {
+            modelIndex = i->second;
+        } else {
+            modelIndex = models.size();
+            auto modelPtr = std::make_unique<VarModel>(*this, vlm, ls);
+            models.emplace_back(std::move(modelPtr));
+            locationSetMap.emplace(std::move(ls), modelIndex);
+        }
+        auto &model = models[modelIndex];
+        outer = model->subtableIndex;
+        inner = model->addValue(vvr, logger);
+    }
+    values.emplace_back(vvr.getDefault(), outer, inner);
     return index;
 }
 
@@ -694,6 +962,28 @@ float itemVariationStore::applyDeltasForGid(ctlSharedStmCallbacks *sscb,
         lookupIndexMap(map, gid, pair);
 
     return applyDeltasForIndexPair(sscb, pair, scalars, regionListCount);
+}
+
+uint16_t itemVariationStore::newSubtable(std::vector<VariationRegion> reg) {
+    uint16_t r = subtables.size();
+
+    itemVariationDataSubtable s;
+    for (auto &r : reg) {
+        uint16_t regIndex;
+        auto rfi = regionMap.find(r);
+        if (rfi != regionMap.end()) {
+            regIndex = rfi->second;
+        } else {
+            regIndex = regions.size();
+            regions.push_back(r);
+            regionMap.emplace(r, regIndex);
+        }
+        s.regionIndices.push_back(regIndex);
+    }
+    // XXX check/deal with for subables overflow here.
+    uint16_t sindex = subtables.size();
+    subtables.emplace_back(std::move(s));
+    return sindex;
 }
 
 /* HVAR / vmtx tables */

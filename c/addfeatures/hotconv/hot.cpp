@@ -392,6 +392,8 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
 
     if (g->ctx.axes != nullptr)
         g->ctx.locMap = new VarLocationMap(g->ctx.axes->getAxisCount());
+    else
+        g->ctx.locMap = new VarLocationMap(0);
 
     /* Copy conversion flags */
     g->font.flags = 0;
