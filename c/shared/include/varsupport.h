@@ -13,6 +13,7 @@
 #include <set>
 #include <vector>
 #include <utility>
+#include <variant>
 
 #include "sfntread.h"
 #include "supportfp.h"
@@ -348,6 +349,24 @@ class itemVariationStore {
     struct itemVariationDataSubtable {
         itemVariationDataSubtable() {}
         itemVariationDataSubtable(itemVariationDataSubtable &&s) : regionIndices(std::move(s.regionIndices)), deltaValues(std::move(s.deltaValues)) {}
+        void toerr(std::vector<VariationRegion> &regions) {
+            std::cerr << "Regions:" << std::endl;
+            for (auto ri : regionIndices) {
+                std::cerr << ri << ":  ";
+                auto &r = regions[ri];
+                bool first = true;
+                for (auto &a : r) {
+                    if (first)
+                        first = false;
+                    else
+                        std::cerr << ',';
+                    std::cerr << '{' << var_F2dot14ToFloat(std::get<0>(a))
+                              << ',' << var_F2dot14ToFloat(std::get<1>(a))
+                              << ',' << var_F2dot14ToFloat(std::get<2>(a)) << '}';
+                }
+                std::cerr << std::endl;
+            }
+        }
         std::vector<uint16_t> regionIndices;
         std::vector<std::vector<int16_t>> deltaValues;
     };
@@ -379,6 +398,24 @@ class itemVariationStore {
         values.clear();
         models.clear();
         locationSetMap.clear();
+    }
+    void toerr() {
+        int i = 0;
+        for (auto &s : subtables) {
+            std::cerr << std::endl << "Subtable " << i++ << ":" << std::endl;
+            s.toerr(regions);
+        }
+        i = -1;
+        for (auto &v : values) {
+            i++;
+            if (v.pair.outerIndex == 0xFFFF)
+                continue;
+            std::cerr << std::endl << "Value " << i++ << " (subtable " << v.pair.outerIndex << "):  " << v.getDefault();
+            auto &dv = subtables[v.pair.outerIndex].deltaValues[v.pair.innerIndex];
+            for (auto d : dv)
+                std::cerr << " " << d;
+            std::cerr << std::endl;
+        }
     }
 
     const std::vector<ValueTracker> &getValues() { return values; }
@@ -422,7 +459,7 @@ class VarModel {
     }
     std::vector<itemVariationStore::VariationRegion> locationsToInitialRegions(VarLocationMap &vlm,
                                                                                std::vector<uint32_t> locationList);
-    void narrowRegions(std::vector<itemVariationStore::VariationRegion> reg);
+    void narrowRegions(std::vector<itemVariationStore::VariationRegion> &reg);
     void calcDeltaWeights(VarLocationMap &vlm);
     uint16_t subtableIndex {0};
     std::vector<uint32_t> sortedLocations;
