@@ -521,7 +521,7 @@ std::vector<itemVariationStore::VariationRegion> VarModel::locationsToInitialReg
     return r;
 }
 
-void VarModel::narrowRegions(std::vector<itemVariationStore::VariationRegion> reg) {
+void VarModel::narrowRegions(std::vector<itemVariationStore::VariationRegion> &reg) {
 
     for (auto ri = reg.begin(); ri != reg.end(); ri++) {
         for (auto pi = reg.begin(); pi != ri; pi++) {
@@ -561,22 +561,22 @@ void VarModel::narrowRegions(std::vector<itemVariationStore::VariationRegion> re
                 auto newLowerR = lowerR, newUpperR = upperR;
                 if (peakP < peakR) {
                     newLowerR = peakP;
-                    ratio = (peakP - peakR) / (lowerR - peakR);
+                    ratio = (float)(peakP - peakR) / (float)(lowerR - peakR);
                 } else if (peakP > peakR) {
                     newUpperR = peakP;
-                    ratio = (peakP - peakR) / (upperR - peakR);
+                    ratio = (float)(peakP - peakR) / (float)(upperR - peakR);
                 } else {
                     continue;
                 }
                 if (ratio > bestRatio) {
                     narrowings.clear();
-                    ratio = bestRatio;
+                    bestRatio = ratio;
                 }
                 if (ratio == bestRatio)
                     narrowings.emplace_back(a, itemVariationStore::AxisRegion{newLowerR, peakR, newUpperR});
             }
-            for (auto &[a, tup] : narrowings)
-                (*ri)[a] = tup;
+            for (auto ni : narrowings)
+                (*ri)[ni.first] = ni.second;
         }
     }
 }
