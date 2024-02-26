@@ -26,6 +26,7 @@
 #include "FeatCtx.h"
 #include "name.h"
 #include "GPOS.h"
+#include "GDEF.h"
 #include "OS_2.h"
 #include "dictops.h"
 #include "varsupport.h"
@@ -786,6 +787,8 @@ static void hotReuse(hotCtx g) {
     g->ctx.feat->dumpLocationDefs();
     if (g->ctx.locMap != nullptr)
         g->ctx.locMap->toerr();
+    if (g->ctx.GDEFp != nullptr)
+        g->ctx.GDEFp->ivs.toerr();
 
     g->hadError = false;
     g->convertFlags = 0;
