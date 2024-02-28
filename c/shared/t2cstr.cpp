@@ -943,7 +943,7 @@ static void setNumMasters(t2cCtx h) {
     h->glyph->info->blendInfo.numRegions = h->stack.numRegions;
     if (h->aux->varStore && !h->aux->varStore->getRegionIndices(vsindex,
                                                                 h->regionIndices,
-                                                                h->aux->varStore->regions.size())) {
+                                                                h->aux->varStore->getRegionCount())) {
         message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
         h->stack.numRegions = 0;
     }
