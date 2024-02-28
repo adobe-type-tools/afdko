@@ -391,10 +391,8 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
 
     hotReadTables(g);
 
-    if (g->ctx.axes != nullptr)
-        g->ctx.locMap = new VarLocationMap(g->ctx.axes->getAxisCount());
-    else
-        g->ctx.locMap = new VarLocationMap(0);
+    g->ctx.locMap = new VarLocationMap(g->ctx.feat->getAxisCount());
+    g->ctx.GDEFp->setAxisCount(g->ctx.feat->getAxisCount());
 
     /* Copy conversion flags */
     g->font.flags = 0;
