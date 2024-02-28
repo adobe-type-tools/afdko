@@ -207,6 +207,7 @@ class GDEF {
                               ligCaretTable(*this), markAttachClassTable(*this),
                               markSetClassTable(*this) {}
 
+    void setAxisCount(uint16_t axisCount) { ivs.setAxisCount(axisCount); }
     int Fill();
     void Write();
 

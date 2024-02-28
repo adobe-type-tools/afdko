@@ -383,6 +383,8 @@ class FeatCtx {
     Label getNextAnonLabel();
     const GPat::ClassRec &lookupGlyphClass(const std::string &gcname);
 
+    uint16_t getAxisCount();
+
     // Utility
     Tag str2tag(const std::string &tagName);
 
@@ -681,7 +683,6 @@ class FeatCtx {
     // Variable
     std::unordered_map<std::string, uint32_t> locationDefs;
 
-    uint16_t getAxisCount();
     var_F2dot14 validAxisLocation(var_F2dot14 v);
     int16_t axisTagToIndex(Tag tag);
     uint32_t locationToIndex(std::shared_ptr<VarLocation> vl);
