@@ -53,6 +53,13 @@ struct var_indexMap {
     std::vector<var_indexPair> map;
 };
 
+class VarWriter {
+ public:
+    virtual void w1(char o) = 0;
+    virtual void w2(int16_t o) = 0;
+    virtual void w4(int32_t o) = 0;
+};
+
 /* convert 2.14 fixed value to float */
 inline float var_F2dot14ToFloat(var_F2dot14 v) { return (float)v / (1 << 14); }
 
@@ -273,6 +280,22 @@ class VarModel;
 
 class itemVariationStore {
  public:
+    friend class VarModel;
+    typedef std::tuple<var_F2dot14, var_F2dot14, var_F2dot14> AxisRegion;
+    typedef std::vector<AxisRegion> VariationRegion;
+
+    class ValueTracker {
+     public:
+        ValueTracker() = delete;
+        explicit ValueTracker(int16_t v, uint16_t outer, uint16_t inner) :
+            defaultValue(v), pair(outer, inner) {}
+        explicit ValueTracker(int32_t v, uint16_t outer, uint16_t inner) :
+            defaultValue(v), pair(outer, inner) {}
+        int32_t getDefault() const { return defaultValue; }
+        int32_t defaultValue;
+        var_indexPair pair;
+    };
+
     /* Parses the Item Variation Store (IVS) sub-table.
        returns a pointer to IVS data, or NULL if not found.
 
@@ -291,17 +314,26 @@ class itemVariationStore {
     // Returns the number of regions in the region list in the IVS data.
     uint16_t getRegionCount() { return regions.size(); }
 
-    uint32_t getRegionListSize() {
-        return 4 + regions.size() * axisCount * 6;
+#if HOT_DEBUG
+    void toerr() {
+        int i = 0;
+        for (auto &s : subtables) {
+            std::cerr << std::endl << "Subtable " << i++ << ":" << std::endl;
+            s.toerr(regions);
+        }
+        i = -1;
+        for (auto &v : values) {
+            i++;
+            if (v.pair.outerIndex == 0xFFFF)
+                continue;
+            std::cerr << std::endl << "Value " << i++ << " (subtable " << v.pair.outerIndex << "):  " << v.getDefault();
+            auto &dv = subtables[v.pair.outerIndex].deltaValues[v.pair.innerIndex];
+            for (auto d : dv)
+                std::cerr << " " << d;
+            std::cerr << std::endl;
+        }
     }
-
-    uint32_t getDataItemSize(uint16_t i) {
-        if (i >= subtables.size())  // XXX would be an error, assert instead?
-            return 6;
-        auto &ivd = subtables[i];
-        return 6 + ivd.regionIndices.size() * 2 +
-               ivd.regionIndices.size() * ivd.deltaValues.size() * 2;
-    }
+#endif  // HOT_DEBUG
 
     /* Returns the number of sub-regions applicable to an IVS sub-table.
 
@@ -337,14 +369,48 @@ class itemVariationStore {
     void calcRegionScalars(ctlSharedStmCallbacks *sscb, uint16_t &axisCount,
                            Fixed *instCoords, float *scalars);
 
+    Fixed calcRegionScalar(uint16_t refRegionIndex, uint16_t locRegionIndex);
+
+    float applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
+                                  const var_indexPair &pair, float *scalars,
+                                  int32_t regionListCount);
+    float applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_indexMap &map,
+                            uint16_t gid, float *scalars,
+                            int32_t regionListCount);
+
     uint32_t addValue(VarLocationMap &vlm, VarValueRecord &vvr,
                       std::shared_ptr<slogger> logger);
 
-// private:  (Can't make private until cffwrite_varstore restructuring
-    typedef std::tuple<var_F2dot14, var_F2dot14, var_F2dot14> AxisRegion;
-    typedef std::vector<AxisRegion> VariationRegion;
+    const std::vector<ValueTracker> &getValues() { return values; }
 
-    Fixed calcRegionScalar(uint16_t refRegionIndex, uint16_t locRegionIndex);
+    uint16_t newSubtable(std::vector<VariationRegion> reg);
+
+    uint32_t getSize() {
+        uint32_t r = 8 + subtables.size() * 4;
+        r += getRegionListSize();
+        for (auto &sub : subtables)
+            r += sub.getSize();
+        return r;
+    }
+
+    void write(VarWriter *);
+
+    void reset() {
+        axisCount = 0;
+        regions.clear();
+        regionMap.clear();
+        subtables.clear();
+        values.clear();
+        models.clear();
+        locationSetMap.clear();
+    }
+
+ private:
+    uint32_t getRegionListSize() {
+        return 4 + regions.size() * axisCount * 6;
+    }
+
+// private:  (Can't make private until cffwrite_varstore restructuring
 
     struct itemVariationDataSubtable {
         itemVariationDataSubtable() {}
@@ -367,60 +433,15 @@ class itemVariationStore {
                 std::cerr << std::endl;
             }
         }
+        uint32_t getSize() {
+            return 6 + regionIndices.size() * (2 + deltaValues.size() * 2);
+        }
+        void write(VarWriter *vw);
         std::vector<uint16_t> regionIndices;
         std::vector<std::vector<int16_t>> deltaValues;
     };
 
-    float applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
-                                  const var_indexPair &pair, float *scalars,
-                                  int32_t regionListCount);
-    float applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_indexMap &map,
-                            uint16_t gid, float *scalars,
-                            int32_t regionListCount);
-
-    class ValueTracker {
-     public:
-        ValueTracker() = delete;
-        explicit ValueTracker(int16_t v, uint16_t outer, uint16_t inner) :
-            defaultValue(v), pair(outer, inner) {}
-        explicit ValueTracker(int32_t v, uint16_t outer, uint16_t inner) :
-            defaultValue(v), pair(outer, inner) {}
-        int32_t getDefault() const { return defaultValue; }
-        int32_t defaultValue;
-        var_indexPair pair;
-    };
-
-    void reset() {
-        axisCount = 0;
-        regions.clear();
-        regionMap.clear();
-        subtables.clear();
-        values.clear();
-        models.clear();
-        locationSetMap.clear();
-    }
-    void toerr() {
-        int i = 0;
-        for (auto &s : subtables) {
-            std::cerr << std::endl << "Subtable " << i++ << ":" << std::endl;
-            s.toerr(regions);
-        }
-        i = -1;
-        for (auto &v : values) {
-            i++;
-            if (v.pair.outerIndex == 0xFFFF)
-                continue;
-            std::cerr << std::endl << "Value " << i++ << " (subtable " << v.pair.outerIndex << "):  " << v.getDefault();
-            auto &dv = subtables[v.pair.outerIndex].deltaValues[v.pair.innerIndex];
-            for (auto d : dv)
-                std::cerr << " " << d;
-            std::cerr << std::endl;
-        }
-    }
-
-    const std::vector<ValueTracker> &getValues() { return values; }
-
-    uint16_t newSubtable(std::vector<VariationRegion> reg);
+    void writeRegionList(VarWriter *vw);
 
     uint16_t axisCount;
     std::vector<VariationRegion> regions;
