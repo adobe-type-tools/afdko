@@ -470,19 +470,23 @@ bool VarModel::cmpLocation::operator()(uint32_t &a, uint32_t &b) {
 uint16_t VarModel::addValue(VarValueRecord &vvr, std::shared_ptr<slogger> logger) {
     auto &subtable = ivs.subtables[subtableIndex];
     // XXX deal with exceeding length
-    std::vector<int16_t> deltas;
+    std::vector<Fixed> deltas;
     for (uint16_t i = 0; i < deltaWeights.size(); i++) {
-        int16_t delta = vvr.getLocationValue(sortedLocations[i]) - vvr.getDefault();
+        Fixed delta = FixInt(vvr.getLocationValue(sortedLocations[i]) - vvr.getDefault());
         for (auto [j, weight] : deltaWeights[i]) {
             if (weight == 1)
                 delta -= deltas[j];
             else
-                delta -= deltas[j] * weight;
+                delta -= fixmul(deltas[j], weight);
         }
         deltas.push_back(delta);
     }
     uint16_t r = subtable.deltaValues.size();
-    subtable.deltaValues.emplace_back(std::move(deltas));
+    std::vector<int16_t> rdeltas;
+    rdeltas.reserve(r);
+    for (auto d : deltas)
+        rdeltas.push_back(FRound(d));
+    subtable.deltaValues.emplace_back(std::move(rdeltas));
     return r;
 }
 
@@ -584,9 +588,9 @@ void VarModel::narrowRegions(std::vector<itemVariationStore::VariationRegion> &r
 void VarModel::calcDeltaWeights(VarLocationMap &vlm) {
     auto &subt = ivs.subtables[subtableIndex];
     for (uint16_t i = 0; i < subt.regionIndices.size(); i++) {
-        std::vector<std::pair<uint16_t, float>> weights;
+        std::vector<std::pair<uint16_t, Fixed>> weights;
         for (uint16_t j = 0; j < i; j++) {
-            float scalar = ivs.calcRegionScalar(subt.regionIndices[j], subt.regionIndices[i]);
+            Fixed scalar = ivs.calcRegionScalar(subt.regionIndices[j], subt.regionIndices[i]);
             if (scalar != 0)
                 weights.emplace_back(j, scalar);
         }
@@ -736,13 +740,13 @@ int32_t itemVariationStore::getRegionIndices(uint16_t vsIndex,
 
 /* calculate scalars for all regions given a normalized design vector. */
 
-float itemVariationStore::calcRegionScalar(uint16_t refRegionIndex, uint16_t locRegionIndex) {
-    float r {0};
+Fixed itemVariationStore::calcRegionScalar(uint16_t refRegionIndex, uint16_t locRegionIndex) {
+    Fixed r {FIXED_ONE};
 
     auto &rr = regions[refRegionIndex];
     auto &lr = regions[locRegionIndex];
 
-    for (uint16_t a = 0; a < axisCount; a++) {
+    for (uint16_t a = 0; a < rr.size(); a++) {
         float axisScalar;
         auto &arr = rr[a];
         auto &alr = lr[a];
@@ -751,22 +755,24 @@ float itemVariationStore::calcRegionScalar(uint16_t refRegionIndex, uint16_t loc
         var_F2dot14 peakCoord = std::get<1>(arr);
         var_F2dot14 endCoord = std::get<2>(arr);
         if (startCoord > peakCoord || peakCoord > endCoord)
-            axisScalar = 1.0f;
+            axisScalar = FIXED_ONE; 
         else if (startCoord < F2DOT14_ZERO && endCoord > F2DOT14_ZERO && peakCoord != F2DOT14_ZERO)
-            axisScalar = 1.0f;
+            axisScalar = FIXED_ONE;
         else if (peakCoord == F2DOT14_ZERO)
-            axisScalar = 1.0f;
+            axisScalar = FIXED_ONE;
         else if (aloc < startCoord || aloc > endCoord)
-            axisScalar = .0f;
+            axisScalar = FIXED_ZERO;
         else {
             if (aloc == peakCoord)
-                axisScalar = 1.0f;
+                axisScalar = FIXED_ONE;
             else if (aloc < peakCoord)
-                axisScalar = (float)(aloc - startCoord) / (peakCoord - startCoord);
+                axisScalar = fixdiv(F2DOT14_TO_FIXED(aloc - startCoord),
+                                    F2DOT14_TO_FIXED(peakCoord - startCoord));
             else /* aloc > peakCoord */
-                axisScalar = (float)(endCoord - aloc) / (endCoord - peakCoord);
+                axisScalar = fixdiv(F2DOT14_TO_FIXED(endCoord - aloc),
+                                    F2DOT14_TO_FIXED(endCoord - peakCoord));
         }
-        r *= axisScalar;
+        r = fixmul(r, axisScalar);
     }
     return r;
 }
@@ -1105,7 +1111,7 @@ bool var_hmtx::lookup(ctlSharedStmCallbacks *sscb, uint16_t axisCount,
     metrics = defaultMetrics[gid];
 
     /* modify the default metrics if the font has variable font tables */
-    if (instCoords && (axisCount > 0)) {
+    if (instCoords && (axisCount > 0) && ivs) {
         long regionListCount = ivs->getRegionCount();
         float scalars[CFF2_MAX_MASTERS];
 

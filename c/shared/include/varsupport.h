@@ -106,7 +106,6 @@ class var_axes {
     */
     int findInstance(float *userCoords, uint16_t axisCount, uint16_t &subfamilyID,
                      uint16_t &postscriptID);
-
  private:
     bool load_avar(sfrCtx sfr, ctlSharedStmCallbacks *sscb);
     bool load_fvar(sfrCtx sfr, ctlSharedStmCallbacks *sscb);
@@ -288,6 +287,7 @@ class itemVariationStore {
     itemVariationStore(ctlSharedStmCallbacks *sscb, uint32_t tableOffset,
                        uint32_t tableLength, uint32_t ivsOffset);
 
+    void setAxisCount(uint16_t ac) { axisCount = ac; }
     // Returns the number of regions in the region list in the IVS data.
     uint16_t getRegionCount() { return regions.size(); }
 
@@ -344,7 +344,7 @@ class itemVariationStore {
     typedef std::tuple<var_F2dot14, var_F2dot14, var_F2dot14> AxisRegion;
     typedef std::vector<AxisRegion> VariationRegion;
 
-    float calcRegionScalar(uint16_t refRegionIndex, uint16_t locRegionIndex);
+    Fixed calcRegionScalar(uint16_t refRegionIndex, uint16_t locRegionIndex);
 
     struct itemVariationDataSubtable {
         itemVariationDataSubtable() {}
@@ -463,7 +463,7 @@ class VarModel {
     void calcDeltaWeights(VarLocationMap &vlm);
     uint16_t subtableIndex {0};
     std::vector<uint32_t> sortedLocations;
-    std::vector<std::vector<std::pair<uint16_t, float>>> deltaWeights;
+    std::vector<std::vector<std::pair<uint16_t, Fixed>>> deltaWeights;
     itemVariationStore &ivs;
 };
 
