@@ -31,8 +31,14 @@ int GDEF::Fill() {
 
     uint32_t markSetClassCount = markSetClassTable.markSetClasses.size();
 
-    version = markSetClassCount ? 0x00010002 : 0x00010000;
-    offset = headerSize(markSetClassCount);
+    if (ivs.getRegionCount() > 0)
+        version = 0x00010003;
+    else if (markSetClassCount > 0)
+        version = 0x00010002;
+    else
+        version = 0x00010000;
+
+    offset = headerSize();
 
     if ((tableSize = glyphClassTable.fill(offset)) > 0) {
         offset += (Offset)tableSize;
@@ -58,6 +64,10 @@ int GDEF::Fill() {
         offset += (Offset)tableSize;
         haveData = true;
     }
+    if (ivs.getRegionCount() > 0) {
+        ivsOffset = offset;
+        haveData = true;
+    }
 
     return haveData ? 1 : 0;
 }
@@ -69,21 +79,26 @@ void GDEFWrite(hotCtx g) {
 void GDEF::Write() {
     /* Perform checksum adjustment */
     auto h = this;
+    hotVarWriter vw(g);
     OUT4(version);
     OUT2(glyphClassTable.offset);
     OUT2(attachTable.offset);
     OUT2(ligCaretTable.offset);
     OUT2(markAttachClassTable.offset);
-    if (markSetClassTable.offset) {
+    if (version != 0x00010000)
         /* If this is zero, then we write a Version 1,0 table, which doesn't have this offset. */
         OUT2(markSetClassTable.offset);
-    }
+
+    if (version == 0x00010003)
+        OUT4(ivsOffset);
 
     glyphClassTable.write();
     attachTable.write(h);
-    ligCaretTable.write(h);
+    ligCaretTable.write(h, &vw);
     markAttachClassTable.write();
     markSetClassTable.write(h);
+    if (ivs.getRegionCount() > 0)
+        ivs.write(&vw);
 }
 
 void GDEFReuse(hotCtx g) {
@@ -405,7 +420,7 @@ void GDEF::AttachTable::write(GDEF *h) {
     cac.coverageWrite();
 }
 
-void GDEF::LigCaretTable::write(GDEF *h) {
+void GDEF::LigCaretTable::write(GDEF *h, VarWriter *vw) {
     if (!offset)
         return;
     OUT2(Coverage);
@@ -421,7 +436,7 @@ void GDEF::LigCaretTable::write(GDEF *h) {
             OUT2(ct->offset);
         /* then write caret tables for this lge */
         for (auto &ct : lge.caretTables)
-            ct->write(h, h->ivs.getValues());
+            ct->write(h, h->ivs.getValues(), vw);
     }
     cac.coverageWrite();
 }
