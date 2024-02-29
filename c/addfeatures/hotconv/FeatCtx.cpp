@@ -2760,7 +2760,7 @@ uint32_t FeatCtx::getLocationDef(const std::string &name) {
 
 #if HOT_DEBUG
 void FeatCtx::dumpLocationDefs() {
-    for (auto &[name, index]: locationDefs)
+    for (auto &[name, index] : locationDefs)
         std::cerr << " " << name << ":  " << index << std::endl;
 }
 #endif  // HOT_DEBUG
