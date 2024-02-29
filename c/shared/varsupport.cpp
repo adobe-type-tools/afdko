@@ -526,7 +526,6 @@ std::vector<itemVariationStore::VariationRegion> VarModel::locationsToInitialReg
 }
 
 void VarModel::narrowRegions(std::vector<itemVariationStore::VariationRegion> &reg) {
-
     for (auto ri = reg.begin(); ri != reg.end(); ri++) {
         for (auto pi = reg.begin(); pi != ri; pi++) {
             bool relevant = true;
@@ -536,7 +535,7 @@ void VarModel::narrowRegions(std::vector<itemVariationStore::VariationRegion> &r
                 auto peakR = std::get<1>(ra);
                 auto peakP = std::get<1>(pa);
                 // Skip over pairs that don't use the same axes
-                if (   (peakR == 0 && peakP != 0) 
+                if (   (peakR == 0 && peakP != 0)
                     || (peakR != 0 && peakP == 0)) {
                     relevant = false;
                     break;
@@ -544,13 +543,13 @@ void VarModel::narrowRegions(std::vector<itemVariationStore::VariationRegion> &r
                 auto lowerR = std::get<0>(ra);
                 auto upperR = std::get<2>(ra);
                 // Skip over pairs that don't intersect ranges
-                if (! (   (peakR == peakP)
-                       || (lowerR < peakP && peakP < upperR))) {
+                if (!(   (peakR == peakP)
+                      || (lowerR < peakP && peakP < upperR))) {
                     relevant = false;
                     break;
                 }
             }
-            if (! relevant)
+            if (!relevant)
                 continue;
 
             std::vector<std::pair<uint16_t, itemVariationStore::AxisRegion>> narrowings;
@@ -755,7 +754,7 @@ Fixed itemVariationStore::calcRegionScalar(uint16_t refRegionIndex, uint16_t loc
         var_F2dot14 peakCoord = std::get<1>(arr);
         var_F2dot14 endCoord = std::get<2>(arr);
         if (startCoord > peakCoord || peakCoord > endCoord)
-            axisScalar = FIXED_ONE; 
+            axisScalar = FIXED_ONE;
         else if (startCoord < F2DOT14_ZERO && endCoord > F2DOT14_ZERO && peakCoord != F2DOT14_ZERO)
             axisScalar = FIXED_ONE;
         else if (peakCoord == F2DOT14_ZERO)
@@ -791,11 +790,11 @@ void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
     }
 
     i = 0;
-    for (auto &vr: regions) {
+    for (auto &vr : regions) {
         float scalar = 1.0f;
 
         uint16_t axis {0};
-        for (auto &ar: vr) {
+        for (auto &ar : vr) {
             float axisScalar;
             Fixed startCoord = F2DOT14_TO_FIXED(std::get<0>(ar));
             Fixed peakCoord = F2DOT14_TO_FIXED(std::get<1>(ar));
@@ -1010,7 +1009,7 @@ void itemVariationStore::writeRegionList(VarWriter *vw) {
     vw->w2((int16_t) regions.size());
 
     for (auto &vr : regions) {
-        for (auto &ar: vr) {
+        for (auto &ar : vr) {
             vw->w2(std::get<0>(ar));
             vw->w2(std::get<1>(ar));
             vw->w2(std::get<2>(ar));

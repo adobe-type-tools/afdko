@@ -6,6 +6,7 @@
 #define ADDFEATURES_HOTCONV_GDEF_H_
 
 #include <array>
+#include <cassert>
 #include <memory>
 #include <vector>
 #include <utility>
@@ -17,6 +18,20 @@
 
 #define GDEF_ TAG('G', 'D', 'E', 'F')
 #define kMaxMarkAttachClasses 15
+#define OUT1(v) hout1(h->g, (v))
+#define OUT2(v) hotOut2(h->g, (v))
+#define OUT3(v) hotOut3(h->g, (v))
+#define OUT4(v) hotOut4(h->g, (v))
+
+class hotVarWriter : public VarWriter {
+ public:
+    hotVarWriter() = delete;
+    explicit hotVarWriter(hotCtx g) : g(g) {}
+    void w1(char o) override { hout1(g, o); }
+    void w2(int16_t o) override { hotOut2(g, o); }
+    void w4(int32_t o) override { hotOut4(g, o); }
+    hotCtx g;
+};
 
 /* Standard functions */
 void GDEFNew(hotCtx g);
@@ -107,7 +122,8 @@ class GDEF {
                 };
                 virtual LOffset size(const VarTrackVec &values) = 0;
                 virtual uint16_t format(const VarTrackVec &values) = 0;
-                virtual void write(GDEF *h, const VarTrackVec &values) = 0;
+                virtual void write(GDEF *h, const VarTrackVec &values,
+                                   VarWriter *vw) = 0;
                 virtual int16_t sortValue(const VarTrackVec &values) {
                     return 0;
                 }
@@ -117,17 +133,26 @@ class GDEF {
                 CoordCaretTable() = delete;
                 explicit CoordCaretTable(uint32_t vi) : valueIndex(vi) {}
                 LOffset size(const VarTrackVec &values) override {
-                    return sizeof(uint16_t) + sizeof(int16_t);
+                    if (values[valueIndex].isVariable()) {
+                        return sizeof(uint16_t) * 5 + sizeof(int16_t);
+                    } else {
+                        return sizeof(uint16_t) + sizeof(int16_t);
+                    }
                 }
                 int16_t sortValue(const VarTrackVec &values) override {
                     return values[valueIndex].getDefault();
                 }
                 uint16_t format(const VarTrackVec &values) override {
-                    return 1;
+                    return values[valueIndex].isVariable() ? 3 : 1;
                 }
-                void write(GDEF *h, const VarTrackVec &values) override {
+                void write(GDEF *h, const VarTrackVec &values,
+                           VarWriter *vw) override {
                     OUT2(format(values));
                     OUT2((int16_t) values[valueIndex].getDefault());
+                    if (values[valueIndex].isVariable()) {
+                        OUT2(6);
+                        values[valueIndex].writeVariationIndex(vw);
+                    }
                 }
                 uint32_t valueIndex;
             };
@@ -141,7 +166,8 @@ class GDEF {
                 uint16_t format(const VarTrackVec &values) override {
                     return 2;
                 }
-                void write(GDEF *h, const VarTrackVec &values) override {
+                void write(GDEF *h, const VarTrackVec &values,
+                           VarWriter *vw) override {
                     OUT2(format(values));
                     OUT2(point);
                 }
@@ -169,7 +195,7 @@ class GDEF {
         void addCoords(GID gid, std::vector<uint32_t> valIndexes);
         void addPoints(GID gid, std::vector<uint16_t> &points);
         Offset fill(Offset offset);
-        void write(GDEF *h);
+        void write(GDEF *h, VarWriter *vw);
 
         Offset offset {0};
         Offset Coverage {0};
@@ -211,11 +237,13 @@ class GDEF {
     int Fill();
     void Write();
 
-    static LOffset headerSize(uint16_t markSetClassCnt) {
-        if (markSetClassCnt > 0)
+    LOffset headerSize() {
+        if (version == 0x00010003)
+            return sizeof(Fixed) + 5 * sizeof(Offset) + 4;
+        else if (version == 0x00010002)
             return sizeof(Fixed) + 5 * sizeof(Offset);
-        else
-            return sizeof(Fixed) + 4 * sizeof(Offset);
+        assert(version == 0x00010000);
+        return sizeof(Fixed) + 4 * sizeof(Offset);
     }
     void setGlyphClass(GPat::ClassRec &simpl, GPat::ClassRec &ligature,
                        GPat::ClassRec &mark, GPat::ClassRec &component) {
@@ -253,6 +281,7 @@ class GDEF {
     MarkAttachClassTable markAttachClassTable;
     MarkSetFilteringTable markSetClassTable;
 
+    uint32_t ivsOffset {0};
     itemVariationStore ivs;
 };
 

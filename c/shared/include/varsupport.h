@@ -11,6 +11,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <tuple>
 #include <vector>
 #include <utility>
 #include <variant>
@@ -113,6 +114,7 @@ class var_axes {
     */
     int findInstance(float *userCoords, uint16_t axisCount, uint16_t &subfamilyID,
                      uint16_t &postscriptID);
+
  private:
     bool load_avar(sfrCtx sfr, ctlSharedStmCallbacks *sscb);
     bool load_fvar(sfrCtx sfr, ctlSharedStmCallbacks *sscb);
@@ -220,6 +222,7 @@ class VarLocationMap {
             std::cerr << std::endl;
         }
     }
+
  private:
     uint16_t axis_count;
     std::map<std::shared_ptr<VarLocation>, uint32_t, VarLocation::cmpSP> locmap;
@@ -268,6 +271,7 @@ class VarValueRecord {
             return defaultValue;
         return f->second;
     }
+
  private:
      bool seenDefault {false};
      int16_t defaultValue {0};
@@ -292,8 +296,18 @@ class itemVariationStore {
         explicit ValueTracker(int32_t v, uint16_t outer, uint16_t inner) :
             defaultValue(v), pair(outer, inner) {}
         int32_t getDefault() const { return defaultValue; }
+        bool isVariable() const { return pair.outerIndex != 0xFFFF; }
+        uint16_t getOuterIndex() const { return pair.outerIndex; }
+        uint16_t getInnerIndex() const { return pair.innerIndex; }
+        void writeVariationIndex(VarWriter *vw) const {
+            std::cerr << "outer, inner: " << pair.outerIndex << " " << pair.innerIndex << std::endl;
+            vw->w2(pair.outerIndex);
+            vw->w2(pair.innerIndex);
+            vw->w2(0x8000);
+        }
+     private:
         int32_t defaultValue;
-        var_indexPair pair;
+        var_indexPair pair {0xFFFF, 0xFFFF};
     };
 
     /* Parses the Item Variation Store (IVS) sub-table.
@@ -324,10 +338,10 @@ class itemVariationStore {
         i = -1;
         for (auto &v : values) {
             i++;
-            if (v.pair.outerIndex == 0xFFFF)
+            if (v.getOuterIndex() == 0xFFFF)
                 continue;
-            std::cerr << std::endl << "Value " << i++ << " (subtable " << v.pair.outerIndex << "):  " << v.getDefault();
-            auto &dv = subtables[v.pair.outerIndex].deltaValues[v.pair.innerIndex];
+            std::cerr << std::endl << "Value " << i++ << " (subtable " << v.getOuterIndex() << "):  " << v.getDefault();
+            auto &dv = subtables[v.getOuterIndex()].deltaValues[v.getInnerIndex()];
             for (auto d : dv)
                 std::cerr << " " << d;
             std::cerr << std::endl;
@@ -462,7 +476,7 @@ class VarModel {
     explicit VarModel(VarModel &&vm) : subtableIndex(vm.subtableIndex),
                                        sortedLocations(std::move(vm.sortedLocations)),
                                        deltaWeights(std::move(vm.deltaWeights)),
-                                       ivs (vm.ivs) {}
+                                       ivs(vm.ivs) {}
     static std::vector<std::set<var_F2dot14>> getAxisPoints(VarLocationMap &vlm, std::vector<uint32_t> locationList);
     struct cmpLocation {
         cmpLocation() = delete;

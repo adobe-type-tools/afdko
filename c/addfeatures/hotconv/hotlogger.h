@@ -2,8 +2,10 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#ifndef ADDFEATURES_HOTCONF_HOTLOGGER_H_
-#define ADDFEATURES_HOTCONF_HOTLOGGER_H_
+#ifndef ADDFEATURES_HOTCONV_HOTLOGGER_H_
+#define ADDFEATURES_HOTCONV_HOTLOGGER_H_
+
+#include <memory>
 
 #include "slogger.h"
 #include "common.h"
@@ -24,9 +26,10 @@ class hotlogger : public slogger {
     int clear_context(const char *key) override {
         return wrapped->clear_context(key);
     }
+
  private:
     hotCtx g;
     std::shared_ptr<slogger> wrapped;
 };
 
-#endif  // ADDFEATURES_HOTCONF_HOTLOGGER_H_
+#endif  // ADDFEATURES_HOTCONV_HOTLOGGER_H_
