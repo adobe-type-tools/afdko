@@ -151,7 +151,7 @@ EQUALS                  : '=' ;
 MARKER                  : '\'' ;
 COMMA                   : ',' ;
 COLON                   : ':' ;
-QUOTE                   : '"' -> pushMode(String) ;
+STRVAL                  : '"' ( '\\"' | ~["] )* '"' ;
 
 fragment GNST           : 'A' .. 'Z' | 'a' .. 'z' | '_' ;
 fragment LCHR           : GNST | '0' .. '9' | '.' ;
@@ -168,10 +168,6 @@ POINTNUM                : '-'? ( '0' .. '9' )+ '.' ( '0' .. '9' )+ ;
 NUMEXT                  : '0x' ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )+ ;
 NUMOCT                  : '0' ( '0' .. '7' )+ ;
 NUM                     : '-'? ( '1' .. '9' ( '0' .. '9' )* | '0' ) ;
-fragment TSTART         :  '!' | '$' | '%' | '&' | '*' | '+' | '.' | ':' | '?' |
-                           'A' .. 'Z' | '^' .. 'z' | '|' | '~' ;
-fragment TCHR           : TSTART | '0' .. '9' | '-' ;
-CATCHTAG                : TSTART TCHR? ;
 
 mode Include;
 
@@ -182,8 +178,3 @@ mode Ifile;
 
 IFILE                   : ~')'+ ;
 I_LPAREN                : ')' -> popMode ;
-
-mode String;
-
-STRVAL                  : ~'"'* ;
-EQUOTE                  : '"' -> popMode ;
