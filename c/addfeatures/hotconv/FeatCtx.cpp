@@ -579,18 +579,58 @@ void FeatCtx::dumpPattern(const GPat &pat, int ch, bool print) {
 
 // ----------------------------------- Tags ------------------------------------
 
+std::string FeatCtx::unescString(const std::string &s) {
+    if (s.length() < 2 || s[0] != '"' || s.back() != '"') {
+        featMsg(sERROR, "Malformed quoted string '%s'", s.c_str());
+        return "";
+    }
+    return s.substr(1, s.length() - 2);
+/*
+    std::string r;
+    if (s.length() < 2 || s[0] != '"' || s.back() != '"') {
+        featMsg(sERROR, "Malformed quoted string '%s'", s.c_str());
+        return "";
+    }
+
+    r.reserve(s.length() - 2);
+    bool escaping = false;
+    auto e = s.end() - 1;
+    for (auto i = s.begin() + 1; i != e; i++) {
+        if (*i != '\\' || escaping) {
+            r.push_back(*i);
+            escaping = false;
+        } else {
+            escaping = true;
+        }
+    }
+    return r;
+*/
+}
+
 Tag FeatCtx::str2tag(const std::string &tagName) {
+    if (tagName.length() == 0) {
+        featMsg(sERROR, "Empty tag");
+        return 0;
+    }
+
     if ( tagName.length() > 4 )
         featMsg(sERROR, "Tag %s exceeds 4 characters", tagName.c_str());
     if ( tagName == "dflt" ) {
         return dflt_;
     } else {
-        int i;
-        char buf[5];
-        memset(buf, 0, sizeof(buf));
-        STRCPY_S(buf, sizeof(buf), tagName.c_str());
-        for (i = 3; buf[i] == '\0'; i--)
-            buf[i] = ' ';
+        char buf[4];
+        size_t l = tagName.length();
+        for (size_t i = 0; i < 4; i++) {
+            char c {' '};
+            if (i < l) {
+                c = tagName[i];
+                if (c < 0x20 || c > 0x7E) {
+                    featMsg(sERROR, "Invalid character value %hhx in tag string", c);
+                    c = 0;
+                }
+            }
+            buf[i] = c;
+        }
         return TAG(buf[0], buf[1], buf[2], buf[3]);
     }
 }

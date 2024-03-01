@@ -40,11 +40,11 @@ public:
     VERT_TYPO_LINE_GAP = 112, VMTX = 113, VERT_ORIGIN_Y = 114, VERT_ADVANCE_Y = 115, 
     LCBRACE = 116, RCBRACE = 117, LBRACKET = 118, RBRACKET = 119, LPAREN = 120, 
     RPAREN = 121, HYPHEN = 122, SEMI = 123, EQUALS = 124, MARKER = 125, 
-    COMMA = 126, COLON = 127, QUOTE = 128, GCLASS = 129, AXISUNIT = 130, 
+    COMMA = 126, COLON = 127, STRVAL = 128, GCLASS = 129, AXISUNIT = 130, 
     CID = 131, ESCGNAME = 132, NAMELABEL = 133, EXTNAME = 134, POINTNUM = 135, 
-    NUMEXT = 136, NUMOCT = 137, NUM = 138, CATCHTAG = 139, A_WHITESPACE = 140, 
-    A_LABEL = 141, A_LBRACE = 142, A_CLOSE = 143, A_LINE = 144, I_WHITESPACE = 145, 
-    I_RPAREN = 146, IFILE = 147, I_LPAREN = 148, STRVAL = 149, EQUOTE = 150
+    NUMEXT = 136, NUMOCT = 137, NUM = 138, A_WHITESPACE = 139, A_LABEL = 140, 
+    A_LBRACE = 141, A_CLOSE = 142, A_LINE = 143, I_WHITESPACE = 144, I_RPAREN = 145, 
+    IFILE = 146, I_LPAREN = 147
   };
 
   enum {
@@ -978,9 +978,7 @@ public:
     SizemenunameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *SIZEMENUNAME();
-    antlr4::tree::TerminalNode *QUOTE();
     antlr4::tree::TerminalNode *STRVAL();
-    antlr4::tree::TerminalNode *EQUOTE();
     std::vector<GenNumContext *> genNum();
     GenNumContext* genNum(size_t i);
 
@@ -1402,9 +1400,7 @@ public:
     NameIDContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NAMEID();
-    antlr4::tree::TerminalNode *QUOTE();
     antlr4::tree::TerminalNode *STRVAL();
-    antlr4::tree::TerminalNode *EQUOTE();
     std::vector<GenNumContext *> genNum();
     GenNumContext* genNum(size_t i);
 
@@ -1474,9 +1470,7 @@ public:
     antlr4::tree::TerminalNode *FAMILY_CLASS();
     GenNumContext *genNum();
     antlr4::tree::TerminalNode *VENDOR();
-    antlr4::tree::TerminalNode *QUOTE();
     antlr4::tree::TerminalNode *STRVAL();
-    antlr4::tree::TerminalNode *EQUOTE();
     antlr4::tree::TerminalNode *PANOSE();
     antlr4::tree::TerminalNode *UNICODE_RANGE();
     antlr4::tree::TerminalNode *CODE_PAGE_RANGE();
@@ -1662,9 +1656,7 @@ public:
     NameEntryContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NAME();
-    antlr4::tree::TerminalNode *QUOTE();
     antlr4::tree::TerminalNode *STRVAL();
-    antlr4::tree::TerminalNode *EQUOTE();
     std::vector<GenNumContext *> genNum();
     GenNumContext* genNum(size_t i);
 
@@ -1922,7 +1914,7 @@ public:
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NAMELABEL();
     antlr4::tree::TerminalNode *EXTNAME();
-    antlr4::tree::TerminalNode *CATCHTAG();
+    antlr4::tree::TerminalNode *STRVAL();
     antlr4::tree::TerminalNode *AXISUNIT();
     antlr4::tree::TerminalNode *MARK();
 

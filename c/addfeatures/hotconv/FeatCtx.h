@@ -387,6 +387,7 @@ class FeatCtx {
 
     // Utility
     Tag str2tag(const std::string &tagName);
+    std::string unescString(const std::string &s);
 
 #if HOT_DEBUG
     void tagDump(Tag);

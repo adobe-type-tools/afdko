@@ -187,6 +187,8 @@ class FeatVisitor : public FeatParserBaseVisitor {
                                   bool dontcopy);
     void addGCLiteralToCurrentGC(FeatParser::GcLiteralContext *ctx);
     Tag checkTag(FeatParser::TagContext *start, FeatParser::TagContext *end);
+    Tag getTag(FeatParser::TagContext *t);
+    Tag getTag(antlr4::tree::TerminalNode *t);
     void checkLabel(FeatParser::LabelContext *start, FeatParser::LabelContext *end);
 
     template <typename T> T getNum(const std::string &str, int base = 0);

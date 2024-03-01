@@ -247,7 +247,7 @@ parameters:
 ;
 
 sizemenuname:
-    SIZEMENUNAME ( genNum ( genNum genNum )? )? QUOTE STRVAL EQUOTE
+    SIZEMENUNAME ( genNum ( genNum genNum )? )? STRVAL
 ;
 
 featureNames:
@@ -380,7 +380,7 @@ nameStatement:
 ;
 
 nameID:
-    NAMEID id=genNum ( plat=genNum ( spec=genNum lang=genNum )? )? QUOTE STRVAL EQUOTE
+    NAMEID id=genNum ( plat=genNum ( spec=genNum lang=genNum )? )? STRVAL
 ;
 
 table_OS_2:
@@ -402,7 +402,7 @@ os_2:
       ( FS_TYPE | FS_TYPE_v | WEIGHT_CLASS | WIDTH_CLASS
       | OS2_LOWER_OP_SIZE | OS2_UPPER_OP_SIZE ) unum=NUM
     | FAMILY_CLASS gnum=genNum
-    | VENDOR QUOTE STRVAL EQUOTE
+    | VENDOR STRVAL
     | PANOSE NUM NUM NUM NUM NUM NUM NUM NUM NUM NUM
     | ( UNICODE_RANGE | CODE_PAGE_RANGE ) NUM+
 ;
@@ -468,7 +468,7 @@ elidedFallbackNameID:
 ;
 
 nameEntry:
-    NAME ( genNum ( genNum genNum )? )? QUOTE STRVAL EQUOTE
+    NAME ( genNum ( genNum genNum )? )? STRVAL
 ;
 
 table_vmtx:
@@ -542,7 +542,7 @@ label:
 ;
 
 tag:
-    NAMELABEL | EXTNAME | CATCHTAG | AXISUNIT | MARK     // MARK included for "feature mark"
+    NAMELABEL | EXTNAME | STRVAL | AXISUNIT | MARK     // MARK included for "feature mark"
 ;
 
 fixedNum:
