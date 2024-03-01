@@ -261,7 +261,7 @@ antlrcpp::Any FeatVisitor::visitAnonBlock(FeatParser::AnonBlockContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
 
-    Tag tag = fc->str2tag(TOK(ctx->A_LABEL())->getText());
+    Tag tag = getTag(ctx->A_LABEL());
     std::string buf;
     for (auto al : ctx->A_LINE())
         buf += al->getText();
@@ -329,8 +329,8 @@ antlrcpp::Any FeatVisitor::visitLangsysAssign(FeatParser::LangsysAssignContext *
     if ( stage != vExtract )
         return nullptr;
 
-    Tag stag = fc->str2tag(TOK(ctx->script)->getText());
-    Tag ltag = fc->str2tag(ctx->lang->getText());
+    Tag stag = getTag(ctx->script);
+    Tag ltag = getTag(ctx->lang);
     fc->addLangSys(stag, ltag, true, ctx->lang);
     return nullptr;
 }
@@ -389,7 +389,7 @@ antlrcpp::Any FeatVisitor::visitFeatureUse(FeatParser::FeatureUseContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
 
-    fc->aaltAddFeatureTag(fc->str2tag(TOK(ctx->tag())->getText()));
+    fc->aaltAddFeatureTag(getTag(ctx->tag()));
     return nullptr;
 }
 
@@ -397,7 +397,7 @@ antlrcpp::Any FeatVisitor::visitScriptAssign(FeatParser::ScriptAssignContext *ct
     if ( stage != vExtract )
         return nullptr;
 
-    fc->startScriptOrLang(FeatCtx::scriptTag, fc->str2tag(TOK(ctx->tag())->getText()));
+    fc->startScriptOrLang(FeatCtx::scriptTag, getTag(ctx->tag()));
     return nullptr;
 }
 
@@ -405,7 +405,7 @@ antlrcpp::Any FeatVisitor::visitLangAssign(FeatParser::LangAssignContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
 
-    int lang_change = fc->startScriptOrLang(FeatCtx::languageTag, fc->str2tag(TOK(ctx->tag())->getText()));
+    int lang_change = fc->startScriptOrLang(FeatCtx::languageTag, getTag(ctx->tag()));
 
     bool old_format = false, include_dflt = true;
     if ( ctx->EXCLUDE_dflt() || ctx->EXCLUDE_DFLT() )
@@ -688,7 +688,7 @@ antlrcpp::Any FeatVisitor::visitSizemenuname(FeatParser::SizemenunameContext *ct
                     HOT_NAME_MS_PLATFORM, HOT_NAME_MAC_PLATFORM);
     }
 
-    fc->addSizeNameString(v[0], v[1], v[2], TOK(ctx->STRVAL())->getText());
+    fc->addSizeNameString(v[0], v[1], v[2], fc->unescString(TOK(ctx->STRVAL())->getText()));
     return nullptr;
 }
 
@@ -799,7 +799,7 @@ antlrcpp::Any FeatVisitor::visitTable_BASE(FeatParser::Table_BASEContext *ctx) {
     EntryPoint tmp_ep = include_ep;
     include_ep = &FeatParser::baseFile;
     if ( stage == vExtract ) {
-        fc->startTable(fc->str2tag(TOK(ctx->BASE(0))->getText()));
+        fc->startTable(getTag(ctx->BASE(0)));
     }
 
     for (auto i : ctx->baseStatement())
@@ -846,7 +846,7 @@ antlrcpp::Any FeatVisitor::visitAxisTags(FeatParser::AxisTagsContext *ctx) {
     std::vector<Tag> tv;
     tv.reserve(fc->axistag_count);
     for (auto t : ctx->tag())
-        tv.push_back(fc->str2tag(TOK(t)->getText()));
+        tv.push_back(getTag(t));
     BASESetBaselineTags(fc->g, fc->axistag_vert, tv.size(), tv.data());
 
     return nullptr;
@@ -876,7 +876,7 @@ antlrcpp::Any FeatVisitor::visitTable_GDEF(FeatParser::Table_GDEFContext *ctx) {
     EntryPoint tmp_ep = include_ep;
     include_ep = &FeatParser::gdefFile;
     if ( stage == vExtract ) {
-        fc->startTable(fc->str2tag(TOK(ctx->GDEF(0))->getText()));
+        fc->startTable(getTag(ctx->GDEF(0)));
     }
 
     for (auto i : ctx->gdefStatement())
@@ -968,7 +968,7 @@ antlrcpp::Any FeatVisitor::visitTable_head(FeatParser::Table_headContext *ctx) {
     EntryPoint tmp_ep = include_ep;
     include_ep = &FeatParser::headFile;
     if ( stage == vExtract ) {
-        fc->startTable(fc->str2tag(TOK(ctx->HEAD(0))->getText()));
+        fc->startTable(getTag(ctx->HEAD(0)));
     }
 
     for (auto i : ctx->headStatement())
@@ -994,7 +994,7 @@ antlrcpp::Any FeatVisitor::visitTable_hhea(FeatParser::Table_hheaContext *ctx) {
     EntryPoint tmp_ep = include_ep;
     include_ep = &FeatParser::hheaFile;
     if ( stage == vExtract ) {
-        fc->startTable(fc->str2tag(TOK(ctx->HHEA(0))->getText()));
+        fc->startTable(getTag(ctx->HHEA(0)));
     }
 
     for (auto i : ctx->hheaStatement())
@@ -1027,7 +1027,7 @@ antlrcpp::Any FeatVisitor::visitTable_vhea(FeatParser::Table_vheaContext *ctx) {
     EntryPoint tmp_ep = include_ep;
     include_ep = &FeatParser::vheaFile;
     if ( stage == vExtract ) {
-        fc->startTable(fc->str2tag(TOK(ctx->VHEA(0))->getText()));
+        fc->startTable(getTag(ctx->VHEA(0)));
     }
 
     for (auto i : ctx->vheaStatement())
@@ -1058,7 +1058,7 @@ antlrcpp::Any FeatVisitor::visitTable_name(FeatParser::Table_nameContext *ctx) {
     EntryPoint tmp_ep = include_ep;
     include_ep = &FeatParser::nameFile;
     if ( stage == vExtract ) {
-        fc->startTable(fc->str2tag(TOK(ctx->NAME(0))->getText()));
+        fc->startTable(getTag(ctx->NAME(0)));
     }
 
     for (auto i : ctx->nameStatement())
@@ -1094,7 +1094,7 @@ antlrcpp::Any FeatVisitor::visitNameID(FeatParser::NameIDContext *ctx) {
         fc->featMsg(sFATAL, "platform id must be %d or %d",
                               HOT_NAME_MS_PLATFORM, HOT_NAME_MAC_PLATFORM);
     }
-    fc->addNameString(v[1], v[2], v[3], v[0], TOK(ctx->STRVAL())->getText());
+    fc->addNameString(v[1], v[2], v[3], v[0], fc->unescString(TOK(ctx->STRVAL())->getText()));
     return nullptr;
 }
 
@@ -1102,7 +1102,7 @@ antlrcpp::Any FeatVisitor::visitTable_vmtx(FeatParser::Table_vmtxContext *ctx) {
     EntryPoint tmp_ep = include_ep;
     include_ep = &FeatParser::vmtxFile;
     if ( stage == vExtract ) {
-        fc->startTable(fc->str2tag(TOK(ctx->VMTX(0))->getText()));
+        fc->startTable(getTag(ctx->VMTX(0)));
     }
 
     for (auto i : ctx->vmtxStatement())
@@ -1132,7 +1132,7 @@ antlrcpp::Any FeatVisitor::visitTable_STAT(FeatParser::Table_STATContext *ctx) {
     include_ep = &FeatParser::statFile;
     if ( stage == vExtract ) {
         fc->sawSTAT = true;
-        fc->startTable(fc->str2tag(TOK(ctx->STAT(0))->getText()));
+        fc->startTable(getTag(ctx->STAT(0)));
     }
 
     for (auto i : ctx->statStatement())
@@ -1155,7 +1155,7 @@ antlrcpp::Any FeatVisitor::visitDesignAxis(FeatParser::DesignAxisContext *ctx) {
         visitNameEntryStatement(i);
 
     if ( stage == vExtract ) {
-        STATAddDesignAxis(fc->g, fc->str2tag(TOK(ctx->tag())->getText()),
+        STATAddDesignAxis(fc->g, getTag(ctx->tag()),
                           fc->featNameID,
                           getNum<uint16_t>(TOK(ctx->NUM())->getText()));
         fc->featNameID = 0;
@@ -1183,7 +1183,7 @@ antlrcpp::Any FeatVisitor::visitNameEntry(FeatParser::NameEntryContext *ctx) {
                     HOT_NAME_MS_PLATFORM, HOT_NAME_MAC_PLATFORM);
     }
 
-    (fc->*(fc->addNameFn))(v[0], v[1], v[2], TOK(ctx->STRVAL())->getText());
+    (fc->*(fc->addNameFn))(v[0], v[1], v[2], fc->unescString(TOK(ctx->STRVAL())->getText()));
     return nullptr;
 }
 
@@ -1230,7 +1230,7 @@ antlrcpp::Any FeatVisitor::visitAxisValueLocation(FeatParser::AxisValueLocationC
     if ( stage != vExtract )
         return nullptr;
 
-    Tag t = fc->str2tag(TOK(ctx->tag())->getText());
+    Tag t = getTag(ctx->tag());
     fc->stat.format = 1;
     Fixed v = getFixed<Fixed>(ctx->fixedNum(0));
     if ( ctx->fixedNum().size() > 1 ) {
@@ -1284,7 +1284,7 @@ antlrcpp::Any FeatVisitor::visitTable_OS_2(FeatParser::Table_OS_2Context *ctx) {
     EntryPoint tmp_ep = include_ep;
     include_ep = &FeatParser::os_2File;
     if ( stage == vExtract ) {
-        fc->startTable(fc->str2tag(TOK(ctx->OS_2(0))->getText()));
+        fc->startTable(getTag(ctx->OS_2(0)));
     }
 
     for (auto i : ctx->os_2Statement())
@@ -1335,7 +1335,7 @@ antlrcpp::Any FeatVisitor::visitOs_2(FeatParser::Os_2Context *ctx) {
         OS_2FamilyClass(fc->g, getNum<uint16_t>(TOK(ctx->gnum)->getText()));
     } else if ( ctx->STRVAL() != nullptr ) {
         assert(ctx->VENDOR() != nullptr);
-        fc->addVendorString(TOK(ctx->STRVAL())->getText());
+        fc->addVendorString(fc->unescString(TOK(ctx->STRVAL())->getText()));
     } else if ( ctx->PANOSE() != nullptr ) {
         assert(ctx->NUM().size() == 10);
         uint8_t p[10];
@@ -1366,8 +1366,8 @@ antlrcpp::Any FeatVisitor::visitOs_2(FeatParser::Os_2Context *ctx) {
 
 void FeatVisitor::translateBaseScript(FeatParser::BaseScriptContext *ctx,
                                       bool vert, size_t cnt) {
-    Tag script = fc->str2tag(TOK(ctx->script)->getText());
-    Tag db = fc->str2tag(TOK(ctx->db)->getText());
+    Tag script = getTag(ctx->script);
+    Tag db = getTag(ctx->db);
 
     std::vector<int16_t> sv;
     sv.reserve(cnt);
@@ -1473,7 +1473,7 @@ uint32_t FeatVisitor::getLocationLiteral(FeatParser::LocationLiteralContext *ctx
 
 bool FeatVisitor::addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *ctx,
                                          std::vector<var_F2dot14> &l) {
-    Tag tag = fc->str2tag(TOK(ctx->tag())->getText());
+    Tag tag = getTag(ctx->tag());
     int16_t axisIndex = fc->axisTagToIndex(tag);
     if (axisIndex < 0)
         return false;
@@ -1677,9 +1677,9 @@ Tag FeatVisitor::checkTag(FeatParser::TagContext *start,
                           FeatParser::TagContext *end) {
     Tag stag = TAG_UNDEF, etag = TAG_UNDEF;
     if ( start != NULL )
-        stag = fc->str2tag(TOK(start)->getText());
+        stag = getTag(start);
     if ( end != NULL )
-        etag = fc->str2tag(TOK(end)->getText());
+        etag = getTag(end);
 
     if ( stag != etag )
         fc->featMsg(sERROR, "End tag %c%c%c%c does not match "
@@ -1687,6 +1687,17 @@ Tag FeatVisitor::checkTag(FeatParser::TagContext *start,
                     TAG_ARG(etag), TAG_ARG(stag));
 
     return stag;
+}
+
+Tag FeatVisitor::getTag(FeatParser::TagContext *t) {
+    if (t->STRVAL() != nullptr)
+        return fc->str2tag(fc->unescString(TOK(t->STRVAL())->getText()));
+    else
+        return fc->str2tag(TOK(t)->getText());
+}
+
+Tag FeatVisitor::getTag(antlr4::tree::TerminalNode *t) {
+    return fc->str2tag(TOK(t)->getText());
 }
 
 void FeatVisitor::checkLabel(FeatParser::LabelContext *start,
