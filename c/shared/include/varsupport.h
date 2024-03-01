@@ -300,7 +300,6 @@ class itemVariationStore {
         uint16_t getOuterIndex() const { return pair.outerIndex; }
         uint16_t getInnerIndex() const { return pair.innerIndex; }
         void writeVariationIndex(VarWriter *vw) const {
-            std::cerr << "outer, inner: " << pair.outerIndex << " " << pair.innerIndex << std::endl;
             vw->w2(pair.outerIndex);
             vw->w2(pair.innerIndex);
             vw->w2(0x8000);
