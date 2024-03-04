@@ -156,6 +156,7 @@ STRVAL                  : '"' ( '\\"' | ~["] )* '"' ;
 fragment GNST           : 'A' .. 'Z' | 'a' .. 'z' | '_' ;
 fragment LCHR           : GNST | '0' .. '9' | '.' ;
 fragment GCCHR          : LCHR | '-' ;
+LNAME                   : '@' GNST LCHR* ;
 GCLASS                  : '@' GNST GCCHR* ;
 
 AXISUNIT                : 'u' | 'd' | 'n' ;

@@ -351,7 +351,7 @@ antlrcpp::Any FeatVisitor::visitLocationDef(FeatParser::LocationDefContext *ctx)
         return nullptr;
 
     uint32_t loc_idx = getLocationLiteral(ctx->locationLiteral());
-    fc->addLocationDef(TOK(ctx->label())->getText(), loc_idx);
+    fc->addLocationDef(TOK(ctx->LNAME())->getText(), loc_idx);
 
     return nullptr;
 }
@@ -376,7 +376,7 @@ antlrcpp::Any FeatVisitor::visitGlyphClassAssign(FeatParser::GlyphClassAssignCon
     if ( stage != vExtract )
         return nullptr;
 
-    getGlyphClassAsCurrentGC(ctx->glyphClass(), ctx->GCLASS(), false);
+    getGlyphClassAsCurrentGC(ctx->glyphClass(), ctx->gclass(), false);
     TOK(ctx);
     fc->finishCurrentGC();
 
@@ -528,7 +528,7 @@ antlrcpp::Any FeatVisitor::visitMark_statement(FeatParser::Mark_statementContext
 
     translateAnchor(ctx->anchor(), 0);
 
-    fc->addMark(TOK(ctx->GCLASS())->getText(), cr);
+    fc->addMark(TOK(ctx->gclass())->getText(), cr);
     return nullptr;
 }
 
@@ -588,9 +588,9 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
         bool addedMark = false;
         for (auto mbe : ctx->baseToMarkElement()) {
             translateAnchor(mbe->anchor(), 0);
-            fc->addMarkClass(TOK(mbe->GCLASS())->getText());
+            fc->addMarkClass(TOK(mbe->gclass())->getText());
             if ( mbe->MARKER() != nullptr ) {
-                GPat::ClassRec cr {fc->lookupGlyphClass(mbe->GCLASS()->getText())};
+                GPat::ClassRec cr {fc->lookupGlyphClass(mbe->gclass()->getText())};
                 cr.marknode = true;
                 gp->addClass(std::move(cr));
                 addedMark = true;
@@ -609,13 +609,13 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
         for (auto lme : ctx->ligatureMarkElement()) {
             bool isNULL = translateAnchor(lme->anchor(), componentIndex);
             if ( lme->MARK() ) {
-                fc->addMarkClass(TOK(lme->GCLASS())->getText());
+                fc->addMarkClass(TOK(lme->gclass())->getText());
             } else if ( !isNULL )
                 fc->featMsg(sERROR, "In mark to ligature, non-null anchor must be followed by a mark class.");
             if ( lme->LIG_COMPONENT() != nullptr )
                 componentIndex++;
             if ( lme->MARKER() != nullptr ) {
-                GPat::ClassRec cr {fc->lookupGlyphClass(lme->GCLASS()->getText())};
+                GPat::ClassRec cr {fc->lookupGlyphClass(lme->gclass()->getText())};
                 cr.marknode = true;
                 gp->addClass(std::move(cr));
                 addedMark = true;
@@ -633,9 +633,9 @@ antlrcpp::Any FeatVisitor::visitPosition(FeatParser::PositionContext *ctx) {
         bool addedMark = false;
         for (auto mbe : ctx->baseToMarkElement()) {
             translateAnchor(mbe->anchor(), 0);
-            fc->addMarkClass(TOK(mbe->GCLASS())->getText());
+            fc->addMarkClass(TOK(mbe->gclass())->getText());
             if ( mbe->MARKER() != nullptr ) {
-                GPat::ClassRec cr {fc->lookupGlyphClass(mbe->GCLASS()->getText())};
+                GPat::ClassRec cr {fc->lookupGlyphClass(mbe->gclass()->getText())};
                 cr.marknode = true;
                 gp->addClass(std::move(cr));
                 addedMark = true;
@@ -1451,8 +1451,8 @@ void FeatVisitor::addLocationValueLiteral(FeatParser::LocationValueLiteralContex
 }
 
 uint32_t FeatVisitor::getLocationSpecifier(FeatParser::LocationSpecifierContext *ctx) {
-    if (ctx->label() != nullptr)
-        return fc->getLocationDef(TOK(ctx->label())->getText());
+    if (ctx->LNAME() != nullptr)
+        return fc->getLocationDef(TOK(ctx->LNAME())->getText());
     else
         return getLocationLiteral(ctx->locationLiteral());
 }
@@ -1601,11 +1601,11 @@ GID FeatVisitor::getGlyph(FeatParser::GlyphContext *ctx, bool allowNotDef) {
 // -------------------------------- Utility ----------------------------------
 
 void FeatVisitor::getGlyphClassAsCurrentGC(FeatParser::GlyphClassContext *ctx,
-                                           antlr4::tree::TerminalNode *target_gc,
+                                           FeatParser::GclassContext *target_gc,
                                            bool dontcopy) {
     assert(stage == vExtract);
-    if ( ctx->GCLASS() != nullptr && dontcopy ) {
-        fc->openAsCurrentGC(TOK(ctx->GCLASS())->getText());
+    if ( ctx->gclass() != nullptr && dontcopy ) {
+        fc->openAsCurrentGC(TOK(ctx->gclass())->getText());
         return;
     }
 
@@ -1618,8 +1618,8 @@ void FeatVisitor::getGlyphClassAsCurrentGC(FeatParser::GlyphClassContext *ctx,
     if ( ctx->gcLiteral() != nullptr ) {
         addGCLiteralToCurrentGC(ctx->gcLiteral());
     } else {
-        assert(ctx->GCLASS() != nullptr);
-        fc->addGlyphClassToCurrentGC(TOK(ctx->GCLASS())->getText());
+        assert(ctx->gclass() != nullptr);
+        fc->addGlyphClassToCurrentGC(TOK(ctx->gclass())->getText());
     }
     fc->curGC.gclass = true;
 }
@@ -1627,8 +1627,8 @@ void FeatVisitor::getGlyphClassAsCurrentGC(FeatParser::GlyphClassContext *ctx,
 void FeatVisitor::addGCLiteralToCurrentGC(FeatParser::GcLiteralContext *ctx) {
     assert(stage == vExtract);
     for (auto &gcle : ctx->gcLiteralElement()) {
-        if ( gcle->GCLASS() != nullptr ) {
-            fc->addGlyphClassToCurrentGC(TOK(gcle->GCLASS())->getText());
+        if ( gcle->gclass() != nullptr ) {
+            fc->addGlyphClassToCurrentGC(TOK(gcle->gclass())->getText());
         } else {
             assert(gcle->startg != nullptr);
             /* The tokenizing stage doesn't separate a hyphen from a glyph
