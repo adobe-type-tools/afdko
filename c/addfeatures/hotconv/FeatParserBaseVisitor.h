@@ -387,6 +387,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitGclass(FeatParser::GclassContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitGlyph(FeatParser::GlyphContext *ctx) override {
     return visitChildren(ctx);
   }

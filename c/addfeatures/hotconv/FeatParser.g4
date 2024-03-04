@@ -35,7 +35,7 @@ include:
 ;
 
 glyphClassAssign:
-    GCLASS EQUALS glyphClass
+    gclass EQUALS glyphClass
 ;
 
 langsysAssign:
@@ -43,7 +43,7 @@ langsysAssign:
 ;
 
 mark_statement:
-    MARK_CLASS ( glyph | glyphClass ) anchor GCLASS
+    MARK_CLASS ( glyph | glyphClass ) anchor gclass
 ;
 
 anchorDef:
@@ -55,7 +55,7 @@ valueRecordDef:
 ;
 
 locationDef:
-    LOCATION_DEF locationLiteral label
+    LOCATION_DEF LNAME locationLiteral
 ;
 
 featureBlock:
@@ -219,7 +219,7 @@ locationMultiValueLiteral:
 ;
 
 locationSpecifier:
-    locationLiteral | label
+    locationLiteral | LNAME
 ;
 
 locationLiteral:
@@ -235,11 +235,11 @@ cursiveElement:
 ;
 
 baseToMarkElement:
-    anchor MARK GCLASS MARKER?
+    anchor MARK gclass MARKER?
 ;
 
 ligatureMarkElement:
-    anchor ( MARK GCLASS )? LIG_COMPONENT? MARKER?
+    anchor ( MARK gclass )? LIG_COMPONENT? MARKER?
 ;
 
 parameters:
@@ -516,7 +516,7 @@ glyphClassOptional:
 ;
 
 glyphClass:
-    GCLASS | gcLiteral
+    gclass | gcLiteral
 ;
 
 gcLiteral:
@@ -525,7 +525,11 @@ gcLiteral:
 
 gcLiteralElement:
       startg=glyph ( HYPHEN endg=glyph )?
-    | GCLASS
+    | gclass
+;
+
+gclass:
+    LNAME | GCLASS
 ;
 
 glyph:

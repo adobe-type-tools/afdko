@@ -205,6 +205,8 @@ public:
 
     virtual std::any visitGcLiteralElement(FeatParser::GcLiteralElementContext *context) = 0;
 
+    virtual std::any visitGclass(FeatParser::GclassContext *context) = 0;
+
     virtual std::any visitGlyph(FeatParser::GlyphContext *context) = 0;
 
     virtual std::any visitGlyphName(FeatParser::GlyphNameContext *context) = 0;

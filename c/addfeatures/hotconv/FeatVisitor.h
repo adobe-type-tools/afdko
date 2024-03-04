@@ -183,7 +183,7 @@ class FeatVisitor : public FeatParserBaseVisitor {
 
     // Utility
     void getGlyphClassAsCurrentGC(FeatParser::GlyphClassContext *ctx,
-                                  antlr4::tree::TerminalNode *target_gc,
+                                  FeatParser::GclassContext *target_gc,
                                   bool dontcopy);
     void addGCLiteralToCurrentGC(FeatParser::GcLiteralContext *ctx);
     Tag checkTag(FeatParser::TagContext *start, FeatParser::TagContext *end);
