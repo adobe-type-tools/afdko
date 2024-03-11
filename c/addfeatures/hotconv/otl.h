@@ -27,10 +27,6 @@ enum {
 
 #define aalt_ TAG('a', 'a', 'l', 't')
 
-// Stores index into h->values, which is read at write time. If -1, then write 0;
-typedef int32_t ValueRecord;
-#define VAL_REC_UNDEF (-1)
-
 class CoverageAndClass {
  public:
     CoverageAndClass() = delete;
@@ -344,7 +340,8 @@ class OTL {
     virtual void incFeatParamOffset(LOffset o) { offset.featParam += o; }
     virtual void checkOverflow(const char* offsetType, long offset,
                                const char* posType);
-    virtual void writeValueRecord(uint32_t valFmt, ValueRecord i) { assert(false); }
+    virtual void writeValueRecord(uint32_t valFmt, ValueIndex i) { assert(false); }
+    virtual void writeVarSubtables(uint32_t valFmt, ValueIndex i) { assert(false); }
 
  protected:
     OTL() = delete;

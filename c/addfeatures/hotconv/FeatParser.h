@@ -22,66 +22,67 @@ public:
     SUBSTITUTE_v = 33, REVERSE = 34, REVERSE_v = 35, BY = 36, FROM = 37, 
     POSITION = 38, POSITION_v = 39, PARAMETERS = 40, FEATURE_NAMES = 41, 
     CV_PARAMETERS = 42, CV_UI_LABEL = 43, CV_TOOLTIP = 44, CV_SAMPLE_TEXT = 45, 
-    CV_PARAM_LABEL = 46, CV_CHARACTER = 47, SIZEMENUNAME = 48, CONTOURPOINT = 49, 
-    ANCHOR = 50, ANCHOR_DEF = 51, VALUE_RECORD_DEF = 52, LOCATION_DEF = 53, 
-    MARK = 54, MARK_CLASS = 55, CURSIVE = 56, MARKBASE = 57, MARKLIG = 58, 
-    MARKLIG_v = 59, LIG_COMPONENT = 60, KNULL = 61, BASE = 62, HA_BTL = 63, 
-    VA_BTL = 64, HA_BSL = 65, VA_BSL = 66, GDEF = 67, GLYPH_CLASS_DEF = 68, 
-    ATTACH = 69, LIG_CARET_BY_POS = 70, LIG_CARET_BY_IDX = 71, HEAD = 72, 
-    FONT_REVISION = 73, HHEA = 74, ASCENDER = 75, DESCENDER = 76, LINE_GAP = 77, 
-    CARET_OFFSET = 78, NAME = 79, NAMEID = 80, OS_2 = 81, FS_TYPE = 82, 
-    FS_TYPE_v = 83, OS2_LOWER_OP_SIZE = 84, OS2_UPPER_OP_SIZE = 85, PANOSE = 86, 
-    TYPO_ASCENDER = 87, TYPO_DESCENDER = 88, TYPO_LINE_GAP = 89, WIN_ASCENT = 90, 
-    WIN_DESCENT = 91, X_HEIGHT = 92, CAP_HEIGHT = 93, WEIGHT_CLASS = 94, 
-    WIDTH_CLASS = 95, VENDOR = 96, UNICODE_RANGE = 97, CODE_PAGE_RANGE = 98, 
-    FAMILY_CLASS = 99, STAT = 100, ELIDED_FALLBACK_NAME = 101, ELIDED_FALLBACK_NAME_ID = 102, 
-    DESIGN_AXIS = 103, AXIS_VALUE = 104, FLAG = 105, LOCATION = 106, AXIS_EAVN = 107, 
-    AXIS_OSFA = 108, VHEA = 109, VERT_TYPO_ASCENDER = 110, VERT_TYPO_DESCENDER = 111, 
-    VERT_TYPO_LINE_GAP = 112, VMTX = 113, VERT_ORIGIN_Y = 114, VERT_ADVANCE_Y = 115, 
-    LCBRACE = 116, RCBRACE = 117, LBRACKET = 118, RBRACKET = 119, LPAREN = 120, 
-    RPAREN = 121, HYPHEN = 122, SEMI = 123, EQUALS = 124, MARKER = 125, 
-    COMMA = 126, COLON = 127, STRVAL = 128, LNAME = 129, GCLASS = 130, AXISUNIT = 131, 
-    CID = 132, ESCGNAME = 133, NAMELABEL = 134, EXTNAME = 135, POINTNUM = 136, 
-    NUMEXT = 137, NUMOCT = 138, NUM = 139, A_WHITESPACE = 140, A_LABEL = 141, 
-    A_LBRACE = 142, A_CLOSE = 143, A_LINE = 144, I_WHITESPACE = 145, I_RPAREN = 146, 
-    IFILE = 147, I_LPAREN = 148
+    CV_PARAM_LABEL = 46, DEF_AXIS_UNIT = 47, CV_CHARACTER = 48, SIZEMENUNAME = 49, 
+    CONTOURPOINT = 50, ANCHOR = 51, ANCHOR_DEF = 52, VALUE_RECORD_DEF = 53, 
+    LOCATION_DEF = 54, MARK = 55, MARK_CLASS = 56, CURSIVE = 57, MARKBASE = 58, 
+    MARKLIG = 59, MARKLIG_v = 60, LIG_COMPONENT = 61, KNULL = 62, BASE = 63, 
+    HA_BTL = 64, VA_BTL = 65, HA_BSL = 66, VA_BSL = 67, GDEF = 68, GLYPH_CLASS_DEF = 69, 
+    ATTACH = 70, LIG_CARET_BY_POS = 71, LIG_CARET_BY_IDX = 72, HEAD = 73, 
+    FONT_REVISION = 74, HHEA = 75, ASCENDER = 76, DESCENDER = 77, LINE_GAP = 78, 
+    CARET_OFFSET = 79, NAME = 80, NAMEID = 81, OS_2 = 82, FS_TYPE = 83, 
+    FS_TYPE_v = 84, OS2_LOWER_OP_SIZE = 85, OS2_UPPER_OP_SIZE = 86, PANOSE = 87, 
+    TYPO_ASCENDER = 88, TYPO_DESCENDER = 89, TYPO_LINE_GAP = 90, WIN_ASCENT = 91, 
+    WIN_DESCENT = 92, X_HEIGHT = 93, CAP_HEIGHT = 94, WEIGHT_CLASS = 95, 
+    WIDTH_CLASS = 96, VENDOR = 97, UNICODE_RANGE = 98, CODE_PAGE_RANGE = 99, 
+    FAMILY_CLASS = 100, STAT = 101, ELIDED_FALLBACK_NAME = 102, ELIDED_FALLBACK_NAME_ID = 103, 
+    DESIGN_AXIS = 104, AXIS_VALUE = 105, FLAG = 106, LOCATION = 107, AXIS_EAVN = 108, 
+    AXIS_OSFA = 109, VHEA = 110, VERT_TYPO_ASCENDER = 111, VERT_TYPO_DESCENDER = 112, 
+    VERT_TYPO_LINE_GAP = 113, VMTX = 114, VERT_ORIGIN_Y = 115, VERT_ADVANCE_Y = 116, 
+    LCBRACE = 117, RCBRACE = 118, LBRACKET = 119, RBRACKET = 120, LPAREN = 121, 
+    RPAREN = 122, HYPHEN = 123, PLUS = 124, SEMI = 125, EQUALS = 126, MARKER = 127, 
+    COMMA = 128, COLON = 129, STRVAL = 130, LNAME = 131, GCLASS = 132, AXISUNIT = 133, 
+    CID = 134, ESCGNAME = 135, NAMELABEL = 136, EXTNAME = 137, POINTNUM = 138, 
+    NUMEXT = 139, NUMOCT = 140, NUM = 141, A_WHITESPACE = 142, A_LABEL = 143, 
+    A_LBRACE = 144, A_CLOSE = 145, A_LINE = 146, I_WHITESPACE = 147, I_RPAREN = 148, 
+    IFILE = 149, I_LPAREN = 150
   };
 
   enum {
     RuleFile = 0, RuleTopLevelStatement = 1, RuleInclude = 2, RuleGlyphClassAssign = 3, 
     RuleLangsysAssign = 4, RuleMark_statement = 5, RuleAnchorDef = 6, RuleValueRecordDef = 7, 
-    RuleLocationDef = 8, RuleFeatureBlock = 9, RuleTableBlock = 10, RuleAnonBlock = 11, 
-    RuleLookupBlockTopLevel = 12, RuleFeatureStatement = 13, RuleLookupBlockOrUse = 14, 
-    RuleCvParameterBlock = 15, RuleCvParameterStatement = 16, RuleCvParameter = 17, 
-    RuleStatement = 18, RuleFeatureUse = 19, RuleScriptAssign = 20, RuleLangAssign = 21, 
-    RuleLookupflagAssign = 22, RuleLookupflagElement = 23, RuleIgnoreSubOrPos = 24, 
-    RuleSubstitute = 25, RulePosition = 26, RuleValuePattern = 27, RuleValueRecord = 28, 
-    RuleValueLiteral = 29, RuleSingleValueLiteral = 30, RuleParenLocationValue = 31, 
-    RuleLocationValueLiteral = 32, RuleLocationMultiValueLiteral = 33, RuleLocationSpecifier = 34, 
-    RuleLocationLiteral = 35, RuleAxisLocationLiteral = 36, RuleCursiveElement = 37, 
-    RuleBaseToMarkElement = 38, RuleLigatureMarkElement = 39, RuleParameters = 40, 
-    RuleSizemenuname = 41, RuleFeatureNames = 42, RuleSubtable = 43, RuleTable_BASE = 44, 
-    RuleBaseStatement = 45, RuleAxisTags = 46, RuleAxisScripts = 47, RuleBaseScript = 48, 
-    RuleTable_GDEF = 49, RuleGdefStatement = 50, RuleGdefGlyphClass = 51, 
-    RuleGdefAttach = 52, RuleGdefLigCaretPos = 53, RuleGdefLigCaretIndex = 54, 
-    RuleTable_head = 55, RuleHeadStatement = 56, RuleHead = 57, RuleTable_hhea = 58, 
-    RuleHheaStatement = 59, RuleHhea = 60, RuleTable_vhea = 61, RuleVheaStatement = 62, 
-    RuleVhea = 63, RuleTable_name = 64, RuleNameStatement = 65, RuleNameID = 66, 
-    RuleTable_OS_2 = 67, RuleOs_2Statement = 68, RuleOs_2 = 69, RuleTable_STAT = 70, 
-    RuleStatStatement = 71, RuleDesignAxis = 72, RuleAxisValue = 73, RuleAxisValueStatement = 74, 
-    RuleAxisValueLocation = 75, RuleAxisValueFlags = 76, RuleElidedFallbackName = 77, 
-    RuleNameEntryStatement = 78, RuleElidedFallbackNameID = 79, RuleNameEntry = 80, 
-    RuleTable_vmtx = 81, RuleVmtxStatement = 82, RuleVmtx = 83, RuleAnchor = 84, 
-    RuleLookupPattern = 85, RuleLookupPatternElement = 86, RulePattern = 87, 
-    RulePatternElement = 88, RuleGlyphClassOptional = 89, RuleGlyphClass = 90, 
-    RuleGcLiteral = 91, RuleGcLiteralElement = 92, RuleGclass = 93, RuleGlyph = 94, 
-    RuleGlyphName = 95, RuleLabel = 96, RuleTag = 97, RuleFixedNum = 98, 
-    RuleGenNum = 99, RuleFeatureFile = 100, RuleStatementFile = 101, RuleCvStatementFile = 102, 
-    RuleBaseFile = 103, RuleHeadFile = 104, RuleHheaFile = 105, RuleVheaFile = 106, 
-    RuleGdefFile = 107, RuleNameFile = 108, RuleVmtxFile = 109, RuleOs_2File = 110, 
-    RuleStatFile = 111, RuleAxisValueFile = 112, RuleNameEntryFile = 113, 
-    RuleSubtok = 114, RuleRevtok = 115, RuleAnontok = 116, RuleEnumtok = 117, 
-    RulePostok = 118, RuleMarkligtok = 119
+    RuleLocationDef = 8, RuleDefaultAxisUnit = 9, RuleFeatureBlock = 10, 
+    RuleTableBlock = 11, RuleAnonBlock = 12, RuleLookupBlockTopLevel = 13, 
+    RuleFeatureStatement = 14, RuleLookupBlockOrUse = 15, RuleCvParameterBlock = 16, 
+    RuleCvParameterStatement = 17, RuleCvParameter = 18, RuleStatement = 19, 
+    RuleFeatureUse = 20, RuleScriptAssign = 21, RuleLangAssign = 22, RuleLookupflagAssign = 23, 
+    RuleLookupflagElement = 24, RuleIgnoreSubOrPos = 25, RuleSubstitute = 26, 
+    RulePosition = 27, RuleValuePattern = 28, RuleValueRecord = 29, RuleValueLiteral = 30, 
+    RuleSingleValueLiteral = 31, RuleParenLocationValue = 32, RuleLocationValueLiteral = 33, 
+    RuleLocationMultiValueLiteral = 34, RuleLocationSpecifier = 35, RuleLocationLiteral = 36, 
+    RuleAxisLocationLiteral = 37, RuleCursiveElement = 38, RuleBaseToMarkElement = 39, 
+    RuleLigatureMarkElement = 40, RuleParameters = 41, RuleSizemenuname = 42, 
+    RuleFeatureNames = 43, RuleSubtable = 44, RuleTable_BASE = 45, RuleBaseStatement = 46, 
+    RuleAxisTags = 47, RuleAxisScripts = 48, RuleBaseScript = 49, RuleTable_GDEF = 50, 
+    RuleGdefStatement = 51, RuleGdefGlyphClass = 52, RuleGdefAttach = 53, 
+    RuleGdefLigCaretPos = 54, RuleGdefLigCaretIndex = 55, RuleTable_head = 56, 
+    RuleHeadStatement = 57, RuleHead = 58, RuleTable_hhea = 59, RuleHheaStatement = 60, 
+    RuleHhea = 61, RuleTable_vhea = 62, RuleVheaStatement = 63, RuleVhea = 64, 
+    RuleTable_name = 65, RuleNameStatement = 66, RuleNameID = 67, RuleTable_OS_2 = 68, 
+    RuleOs_2Statement = 69, RuleOs_2 = 70, RuleTable_STAT = 71, RuleStatStatement = 72, 
+    RuleDesignAxis = 73, RuleAxisValue = 74, RuleAxisValueStatement = 75, 
+    RuleAxisValueLocation = 76, RuleAxisValueFlags = 77, RuleElidedFallbackName = 78, 
+    RuleNameEntryStatement = 79, RuleElidedFallbackNameID = 80, RuleNameEntry = 81, 
+    RuleTable_vmtx = 82, RuleVmtxStatement = 83, RuleVmtx = 84, RuleAnchor = 85, 
+    RuleLookupPattern = 86, RuleLookupPatternElement = 87, RulePattern = 88, 
+    RulePatternElement = 89, RuleGlyphClassOptional = 90, RuleGlyphClass = 91, 
+    RuleGcLiteral = 92, RuleGcLiteralElement = 93, RuleGclass = 94, RuleGlyph = 95, 
+    RuleGlyphName = 96, RuleLabel = 97, RuleTag = 98, RuleFixedNum = 99, 
+    RuleGenNum = 100, RuleFeatureFile = 101, RuleStatementFile = 102, RuleCvStatementFile = 103, 
+    RuleBaseFile = 104, RuleHeadFile = 105, RuleHheaFile = 106, RuleVheaFile = 107, 
+    RuleGdefFile = 108, RuleNameFile = 109, RuleVmtxFile = 110, RuleOs_2File = 111, 
+    RuleStatFile = 112, RuleAxisValueFile = 113, RuleNameEntryFile = 114, 
+    RuleSubtok = 115, RuleRevtok = 116, RuleAnontok = 117, RuleEnumtok = 118, 
+    RulePostok = 119, RuleMarkligtok = 120
   };
 
   explicit FeatParser(antlr4::TokenStream *input);
@@ -110,6 +111,7 @@ public:
   class AnchorDefContext;
   class ValueRecordDefContext;
   class LocationDefContext;
+  class DefaultAxisUnitContext;
   class FeatureBlockContext;
   class TableBlockContext;
   class AnonBlockContext;
@@ -257,6 +259,7 @@ public:
     AnchorDefContext *anchorDef();
     ValueRecordDefContext *valueRecordDef();
     LocationDefContext *locationDef();
+    DefaultAxisUnitContext *defaultAxisUnit();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -371,8 +374,8 @@ public:
     LocationDefContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *LOCATION_DEF();
-    antlr4::tree::TerminalNode *LNAME();
     LocationLiteralContext *locationLiteral();
+    antlr4::tree::TerminalNode *LNAME();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -380,6 +383,20 @@ public:
   };
 
   LocationDefContext* locationDef();
+
+  class  DefaultAxisUnitContext : public antlr4::ParserRuleContext {
+  public:
+    DefaultAxisUnitContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *DEF_AXIS_UNIT();
+    antlr4::tree::TerminalNode *AXISUNIT();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  DefaultAxisUnitContext* defaultAxisUnit();
 
   class  FeatureBlockContext : public antlr4::ParserRuleContext {
   public:
@@ -903,6 +920,8 @@ public:
     antlr4::tree::TerminalNode *EQUALS();
     FixedNumContext *fixedNum();
     antlr4::tree::TerminalNode *AXISUNIT();
+    antlr4::tree::TerminalNode *HYPHEN();
+    antlr4::tree::TerminalNode *PLUS();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

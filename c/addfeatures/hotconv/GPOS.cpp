@@ -14,18 +14,15 @@
 
 #include "hotmap.h"
 #include "name.h"
+#include "GDEF.h"
 
 #define REPORT_DUPE_KERN 1
-
-const std::array<int, 4> GPOS::MetricsRec::kernorder = {2, 3, 1, 0};
 
 #if HOT_DEBUG
 
 void GPOS::SingleRec::dump(GPOS &h) {
     h.g->ctx.feat->dumpGlyph(gid, -1, 1);
-    fprintf(stderr, "\t%4d %4d %4d %4d",
-            metricsRec.value[0], metricsRec.value[1],
-            metricsRec.value[2], metricsRec.value[3]);
+    metricsInfo.toerr();
     fprintf(stderr, " %5x ", valFmt);
     if (span.valFmt == 0) {
         fprintf(stderr, "       *");
@@ -51,15 +48,10 @@ void GPOS::dumpSingles(std::vector<SingleRec> &singles) {
 }
 
 void GPOS::KernRec::dumpStats(hotCtx g) {
-    fprintf(stderr, "<");
-    for (int i = 0; i < 4; i++) {
-        fprintf(stderr, "%hd ", metricsRec1.value[i]);
-    }
-    fprintf(stderr, "> <\n");
-    for (int i = 0; i < 4; i++) {
-        fprintf(stderr, "%hd ", metricsRec2.value[i]);
-    }
-    fprintf(stderr, ">\n");
+    metricsInfo1.toerr();
+    fprintf(stderr, " ");
+    metricsInfo2.toerr();
+    fprintf(stderr, "\n");
 }
 
 void GPOS::KernRec::dump(hotCtx g) {
@@ -111,6 +103,18 @@ void GPOSFree(hotCtx g) {
 }
 
 /* ------------------------ Supplementary Functions ------------------------ */
+
+ValueIndex GPOS::addValue(const VarValueRecord &vvr) {
+    return g->ctx.GDEFp->addValue(vvr);
+}
+
+void GPOS::setDevOffset(ValueIndex vi, LOffset o) {
+    g->ctx.GDEFp->setDevOffset(vi, o);
+}
+
+ValueIndex GPOS::nextValueIndex() {
+    return g->ctx.GDEFp->nextValueIndex();
+}
 
 void GPOS::FeatureBegin(Tag script, Tag language, Tag feature) {
     DF(2, (stderr, "\n"));
@@ -224,77 +228,71 @@ void GPOS::FeatureEnd() {
 
 /* -------------------------- Shared Declarations -------------------------- */
 
-/* --- ValueFormat and ValueRecord utility functions --- */
+/* --- ValueFormat and ValueIndex utility functions --- */
 
 static bool isVertFeature(Tag featTag) {
     return (featTag == vkrn_) || (featTag == vpal_) ||
            (featTag == vhal_) || (featTag == valt_);
 }
 
-uint32_t GPOS::makeValueFormat(SubtableInfo &si, int32_t xPla, int32_t yPla,
-                               int32_t xAdv, int32_t yAdv) {
-    uint32_t val = 0;
-
-    if (xPla) {
-        val |= ValueXPlacement;
+LOffset GPOS::recordValues(uint32_t valFmt, MetricsInfo &mi, LOffset o) {
+    // Iterate through ValueXPlacement, ValueYPlacement, ValueXAdvance,
+    // and ValueYAdvance in order, also checking associated offset
+    // flags (valueBit << 4)
+    for (uint16_t b = 1; b < 16; b *= 2) {
+        if (valFmt & b) {
+            auto &vvr = mi.getRecordByFlag(b);
+            auto t = addValue(vvr);
+            if (valFmt & (b << 4)) {
+                if (vvr.isVariable()) {
+                    setDevOffset(t, o);
+                    o += sizeof(uint16) * 3;
+                } else {
+                    setDevOffset(t, 0);
+                }
+            } else {
+                assert(!vvr.isVariable());
+            }
+        }
     }
-    if (yPla) {
-        val |= ValueYPlacement;
-    }
-    if (yAdv) {
-        val |= ValueYAdvance;
-    }
-
-    if (xAdv) {
-        if ((val == 0) && (isVertFeature(si.feature)))
-            val = ValueYAdvance;
-        else
-            val |= ValueXAdvance;
-    }
-
-    return val;
+    return o;
 }
 
-uint32_t GPOS::recordValues(uint32_t valFmt, MetricsRec &r) {
-    uint32_t t = values.size(), ret = VAL_REC_UNDEF;
-    if (valFmt & ValueXPlacement) {
-        ret = t;
-        values.push_back(r.value[0]);
-    }
-    if (valFmt & ValueYPlacement) {
-        ret = t;
-        values.push_back(r.value[1]);
-    }
-    if (valFmt & ValueXAdvance) {
-        ret = t;
-        values.push_back(r.value[2]);
-    }
-    if (valFmt & ValueYAdvance) {
-        ret = t;
-        values.push_back(r.value[3]);
-    }
-    return ret;
-}
-
-/* Counts bits set in valFmt */
-
-static int numValues(uint32_t valFmt) {
-    int i = 0;
-    while (valFmt) {
-        i++;
-        valFmt &= valFmt - 1; /* Remove least significant set bit */
-    }
-    return i;
-}
-
-void GPOS::writeValueRecord(uint32_t valFmt, ValueRecord i) {
+void GPOS::writeValueRecord(uint32_t valFmt, ValueIndex vi) {
     GPOS *h = this;  // XXX for OUT2
-    while (valFmt) {
-        /* Write 1 field per valFmt bit, if index is valid */
-        OUT2((int16_t)((i == VAL_REC_UNDEF) ? 0 : values[i++]));
-        valFmt &= valFmt - 1; /* Remove least significant set bit */
+    auto values = g->ctx.GDEFp->getValues();
+    auto numVals = MetricsInfo::numValues(valFmt);
+    // Write 1 field per valFmt bit, if index is valid
+    assert(vi == VAL_REC_UNDEF || vi + numVals <= values.size());
+    for (int i = 0; i < numVals; i++)
+        OUT2((int16_t)((vi == VAL_REC_UNDEF) ? 0 : (values[vi + i].getDefault())));
+    if (vi == VAL_REC_UNDEF)
+        return;
+    for (int i = 0; i < numVals; i++) {
+        auto o = values[vi + i].getDevOffset();
+        if (o != 0xFFFFFFFF)
+            OUT2((uint16_t)o);
     }
 }
+
+void GPOS::writeVarSubtables(uint32_t valFmt, ValueIndex vi) {
+    if (vi == VAL_REC_UNDEF)
+        return;
+    GPOS *h = this;  // XXX for OUT2
+    auto values = g->ctx.GDEFp->getValues();
+    auto numVals = MetricsInfo::numValues(valFmt);
+    for (int i = 0; i < numVals; i++) {
+        auto &v = values[vi + i];
+        auto o = v.getDevOffset();
+        if (o != 0 && o != 0xFFFFFFFF) {
+            // XXX refactor
+            OUT2(v.getOuterIndex());
+            OUT2(v.getInnerIndex());
+            OUT2(0x8000);
+        }
+    }
+}
+
 
 /* The input vector has either 2 or 4 elements ( 2 if the second is 0, else 4),
  * and the output array has 5 elements. The first 2 are in the same order
@@ -365,12 +363,12 @@ void GPOS::FeatureParameters::write(OTL *h) {
 
 GPOS::SinglePos::SinglePos(GPOS &h, SubtableInfo &si) : Subtable(h, si) {}
 
-LOffset GPOS::SinglePos::pos1Size(SubtableInfo &si, int iStart, int iEnd) {
-    return single1Size(numValues(si.singles[iStart].valFmt));
+LOffset GPOS::SinglePos::pos1Size(SubtableInfo &si, int iStart) {
+    return single1Size(si.singles[iStart].valFmt);
 }
 
 LOffset GPOS::SinglePos::pos2Size(SubtableInfo &si, int iStart, int iEnd) {
-    return single2Size(iEnd - iStart, numValues(si.singles[iStart].valFmt));
+    return single2Size(iEnd - iStart, si.singles[iStart].valFmt);
 }
 
 LOffset GPOS::SinglePos::allPos2Size(SubtableInfo &si, int &nsub) {
@@ -393,7 +391,7 @@ LOffset GPOS::SinglePos::allPos1Size(SubtableInfo &si, int &nsub) {
     for (uint32_t iFmt = 0; iFmt < si.singles.size(); iFmt = si.singles[iFmt].span.valFmt) {
         for (int iRec = iFmt; iRec < si.singles[iFmt].span.valFmt; iRec = si.singles[iRec].span.valRec) {
             nsub++;
-            r += pos1Size(si, iRec, si.singles[iRec].span.valRec);
+            r += pos1Size(si, iRec);
         }
     }
     return r;
@@ -406,8 +404,10 @@ void GPOS::SetSizeMenuNameID(uint16_t nameID) {
 /* Compare valfmt, then gid */
 
 bool GPOS::SingleRec::cmp(const GPOS::SingleRec &a, const GPOS::SingleRec &b) {
-    if (!(a.metricsRec == b.metricsRec))
-        return a.metricsRec < b.metricsRec;
+    if (a.valFmt != b.valFmt)
+        return a.valFmt < b.valFmt;
+    if (!(a.metricsInfo == b.metricsInfo))
+        return a.metricsInfo < b.metricsInfo;
     else
         return a.gid < b.gid;
 }
@@ -415,30 +415,22 @@ bool GPOS::SingleRec::cmp(const GPOS::SingleRec &a, const GPOS::SingleRec &b) {
 /* Compare gid, then valfmt */
 
 bool GPOS::SingleRec::cmpGID(const GPOS::SingleRec &a, const GPOS::SingleRec &b) {
-    if (a.gid != b.gid)
-        return a.gid < b.gid;
-    else
-        return a.metricsRec < b.metricsRec;
+    assert(a.valFmt == b.valFmt);
+    return a.gid < b.gid;
 }
 
 void GPOS::AddSingle(SubtableInfo &si, GPat::ClassRec &cr,
-                     std::unordered_set<GID> &found,
-                     int xPla, int yPla, int xAdv, int yAdv) {
-    uint32_t valFmt;
-
-    valFmt = makeValueFormat(si, xPla, yPla, xAdv, yAdv);
-
+                     std::unordered_set<GID> &found, MetricsInfo &mi) {
     if (g->hadError)
         return;
+
+    mi.normalize(isVertFeature(si.feature));
+    uint32_t valFmt = mi.valueFormat();
 
     for (GID gid : cr.glyphs) {
         if (found.find(gid) != found.end())
             continue;
-        SingleRec single {gid, valFmt};
-        if (isVertFeature(si.feature) && (valFmt == ValueYAdvance) && (yAdv == 0))
-            single.metricsRec.set(xPla, yPla, 0, xAdv);
-        else
-            single.metricsRec.set(xPla, yPla, xAdv, yAdv);
+        SingleRec single {gid, valFmt, mi};
 
         auto [i, b] = si.glyphsSeen.insert({std::pair<GID, GID>{single.gid, GID_UNDEF},
                                            (uint32_t) si.singles.size()});
@@ -462,7 +454,8 @@ void GPOS::AddSingle(SubtableInfo &si, GPat::ClassRec &cr,
             if (DF_LEVEL(g) >= 2) {
                 fprintf(stderr, "  * GPOSSingle ");
                 g->ctx.feat->dumpGlyph(gid, ' ', 1);
-                fprintf(stderr, " %d %d %d %d\n", xPla, yPla, xAdv, yAdv);
+                mi.toerr();
+                fprintf(stderr, "\n");
             }
 #endif
             si.singles.emplace_back(std::move(single));
@@ -486,7 +479,7 @@ void GPOS::prepSinglePos(SubtableInfo &si) {
                 SingleRec &r = si.singles[rec];
                 SingleRec &R = si.singles[Rec];
 
-                if (rec == fmt || !(r.metricsRec == R.metricsRec)) {
+                if (rec == fmt || !(r.metricsInfo == R.metricsInfo)) {
                     /* val rec change */
                     R.span.valRec = rec;
                     Rec = rec;
@@ -504,47 +497,51 @@ GPOS::SinglePos::Format1::Format1(GPOS &h, GPOS::SubtableInfo &si,
                                   int iStart, int iEnd) : SinglePos(h, si) {
     auto &s = si.singles[iStart];
     ValueFormat = s.valFmt;
-    LOffset size = single1Size(numValues(ValueFormat));
+    LOffset sz = single1DevOffset(s.valFmt);
+
 
     cac->coverageBegin();
 
     for (int i = iStart; i < iEnd; i++)
         cac->coverageAddGlyph(si.singles[i].gid);
 
-    Value = h.recordValues(ValueFormat, s.metricsRec);
+    valueIndex = h.nextValueIndex();
+    sz = h.recordValues(ValueFormat, s.metricsInfo, sz);
 
     Coverage = cac->coverageEnd(); /* Adjusted later */
 
     if (isExt()) {
-        Coverage += size; /* Final value */
-        h.incExtOffset(size + cac->coverageSize());
+        Coverage += sz; /* Final value */
+        h.incExtOffset(sz + cac->coverageSize());
     } else {
-        h.incSubOffset(size);
+        h.incSubOffset(sz);
     }
 }
 
 GPOS::SinglePos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si,
                                   int iStart, int iEnd) : SinglePos(h, si) {
     ValueFormat = si.singles[iStart].valFmt;
-    LOffset size = pos2Size(si, iStart, iEnd);
+    valueCount = iEnd - iStart;
+    LOffset sz = single2DevOffset(valueCount, si.singles[iStart].valFmt);
 
     /* Sort subrange by GID */
     std::sort(si.singles.begin() + iStart, si.singles.begin() + iEnd, SingleRec::cmpGID);
     cac->coverageBegin();
-    Values.reserve(iEnd - iStart);
+
+    valueIndex = h.nextValueIndex();
 
     for (int i = iStart; i < iEnd; i++) {
         auto &s = si.singles[i];
         cac->coverageAddGlyph(s.gid);
-        Values.push_back(h.recordValues(s.valFmt, s.metricsRec));
+        sz = h.recordValues(s.valFmt, s.metricsInfo, sz);
     }
 
     Coverage = cac->coverageEnd(); /* Adjusted later */
     if (useExtension) {
-        Coverage += size; /* Final value */
-        h.incExtOffset(size + cac->coverageSize());
+        Coverage += sz; /* Final value */
+        h.incExtOffset(sz + cac->coverageSize());
     } else {
-        h.incSubOffset(size);
+        h.incSubOffset(sz);
     }
 }
 
@@ -621,7 +618,8 @@ void GPOS::SinglePos::Format1::write(OTL *h) {
     OUT2(subformat());
     OUT2((Offset)Coverage);
     OUT2(ValueFormat);
-    h->writeValueRecord(ValueFormat, Value);
+    h->writeValueRecord(ValueFormat, valueIndex);
+    h->writeVarSubtables(ValueFormat, valueIndex);
 
     if (isExt())
         cac->coverageWrite();
@@ -636,9 +634,19 @@ void GPOS::SinglePos::Format2::write(OTL *h) {
     OUT2(subformat());
     OUT2((Offset)Coverage);
     OUT2(ValueFormat);
-    OUT2((uint16_t)Values.size());
-    for (auto v : Values)
-        h->writeValueRecord(ValueFormat, v);
+    OUT2(valueCount);
+
+    auto vi = valueIndex;
+    auto numVals = MetricsInfo::numValues(ValueFormat);
+    for (int32_t i = 0; i < valueCount; i++) {
+        h->writeValueRecord(ValueFormat, vi);
+        vi += numVals;
+    }
+    vi = valueIndex;
+    for (int32_t i = 0; i < valueCount; i++) {
+        h->writeVarSubtables(ValueFormat, vi);
+        vi += numVals;
+    }
 
     if (isExt())
         cac->coverageWrite();
@@ -667,9 +675,9 @@ bool GPOS::validInClassDef(int classDefInx, GPat::ClassRec &cr,
     assert(cr.glyphs.size() > 0);
     auto i = cdef.classInfo.find(cr.glyphs[0]);
     if (i != cdef.classInfo.end()) {
+        /* First glyph matches. Check to see if rest match. */
         if (!(cr == i->second.cr))
             return false;
-        /* First glyph matches. Check to see if rest match. */
         cls = i->second.cls; /* gc already exists */
     } else {
         /* First glyph does not match.                                */
@@ -697,14 +705,9 @@ void GPOS::insertInClassDef(ClassDef &cdef, GPat::ClassRec &cr, uint32_t cls) {
 }
 
 void GPOS::addSpecPair(SubtableInfo &si, GID first, GID second,
-                       MetricsRec &metricsRec1, MetricsRec &metricsRec2) {
-    KernRec pair;
+                       MetricsInfo &mi1, MetricsInfo &mi2) {
+    KernRec pair {first, second, mi1, mi2};
 
-    pair.first = first;
-    pair.second = second;
-    /* metricsCnt is either 1 or 4 */
-    pair.metricsRec1 = metricsRec1;
-    pair.metricsRec2 = metricsRec2;
 #if HOT_DEBUG
     if (DF_LEVEL(g) >= 2) {
         fprintf(stderr, "  * GPOSPair ");
@@ -717,8 +720,8 @@ void GPOS::addSpecPair(SubtableInfo &si, GID first, GID second,
         {}
 #if REPORT_DUPE_KERN
         KernRec &prev = si.pairs[i->second];
-        printKernPair(first, second, pair.metricsRec1.value[0], pair.metricsRec1.value[0], true);
-        if (pair.metricsRec1 == prev.metricsRec1 && pair.metricsRec2 == prev.metricsRec2) {
+        printKernPair(first, second, pair.metricsInfo1, pair.metricsInfo2, true);
+        if (pair.metricsInfo1 == prev.metricsInfo1 && pair.metricsInfo2 == prev.metricsInfo2) {
             g->logger->log(sINFO,
                            "Removing duplicate pair positioning in %s: %s",
                            g->error_id_text.c_str(),
@@ -738,77 +741,24 @@ void GPOS::addSpecPair(SubtableInfo &si, GID first, GID second,
 
 void GPOS::AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
                    bool enumerate, std::string &locDesc) {
-    int8_t pairFmt;
-    uint32_t valFmt1 = 0;
-    uint32_t valFmt2 = 0;
-    MetricsRec metricsRec1;
-    MetricsRec metricsRec2;
-
-    if (cr1.metricsInfo.metrics.size() == 0) {
+    if (cr1.metricsInfo.size() == 0) {
         /* If the only metrics record is applied to the second glyph, then */
         /* this is shorthand for applying a single kern value to the first  */
         /* glyph. The parser enforces that if first->metricsInfo == null,   */
         /* then the second value record must exist.                         */
-        assert(cr2.metricsInfo.metrics.size() > 0);
-        cr1.metricsInfo.metrics.swap(cr2.metricsInfo.metrics);
+        assert(cr2.metricsInfo.size() > 0);
+        cr1.metricsInfo.swap(cr2.metricsInfo);
     }
-    auto &m1 = cr1.metricsInfo.metrics;
-    auto &m2 = cr2.metricsInfo.metrics;
+
+    cr1.metricsInfo.normalize(isVertFeature(si.feature), true);
+    cr2.metricsInfo.normalize(isVertFeature(si.feature), cr2.metricsInfo.size() != 0);
+
+    uint32_t valFmt1 = cr1.metricsInfo.valueFormat();
+    uint32_t valFmt2 = cr2.metricsInfo.valueFormat();
 
     /* The FEAT_GCLASS is essential for identifying a singleton gclass */
-    pairFmt = ((cr1.is_class() || cr2.is_class()) && !enumerate) ? 2 : 1;
+    uint8_t pairFmt = ((cr1.is_class() || cr2.is_class()) && !enumerate) ? 2 : 1;
 
-    if (m1.size() == 1) {
-        if (isVertFeature(si.feature)) {
-            valFmt1 = (uint16_t) ValueYAdvance;
-            metricsRec1.value[3] = m1[0];
-        } else {
-            valFmt1 = (uint16_t) ValueXAdvance;
-            metricsRec1.value[2] = m1[0];
-        }
-    } else {
-        assert(m1.size() == 4);
-        metricsRec1.set(m1[0], m1[1], m1[2], m1[3]);
-        valFmt1 = makeValueFormat(si, m1[0], m1[1], m1[2], m1[3]);
-        if (valFmt1 == 0) {
-            /* If someone has specified a value of <0 0 0 0>, then valFmt   */
-            /* is 0. This will cause a subtable break, since the valFmt     */
-            /* will differ from any non-zero record. Set the val fmt to the */
-            /* default value.                                               */
-            if (isVertFeature(si.feature)) {
-                valFmt1 = (uint16_t) ValueYAdvance;
-            } else {
-                valFmt1 = (uint16_t) ValueXAdvance;
-            }
-        }
-    }
-
-    if (m2.size() != 0) {
-        if (m2.size() == 1) {
-            if (isVertFeature(si.feature)) {
-                valFmt2 = (uint16_t) ValueYAdvance;
-                metricsRec2.value[3] = m2[0];
-            } else {
-                valFmt2 = (uint16_t) ValueXAdvance;
-                metricsRec2.value[2] = m2[0];
-            }
-        } else {
-            assert(m2.size() == 4);
-            metricsRec2.set(m2[0], m2[1], m2[2], m2[3]);
-            valFmt2 = makeValueFormat(si, m2[0], m2[1], m2[2], m2[3]);
-            if (valFmt2 == 0) {
-                /* If someone has specified a value of <0 0 0 0>, then      */
-                /* valFmt is 0. This will cause a subtable break, since the */
-                /* valFmt will differ from any non-zero record. Set the val  */
-                /* fmt to the default value.                                */
-                if (isVertFeature(si.feature)) {
-                    valFmt2 = (uint16_t) ValueYAdvance;
-                } else {
-                    valFmt2 = (uint16_t) ValueXAdvance;
-                }
-            }
-        }
-    }
     /* Changing valFmt causes a sub-table break. If the current valFmt  */
     /* can be represented by the previous valFmt, then use the previous */
     /* valFmt.                                                          */
@@ -852,7 +802,7 @@ void GPOS::AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
         std::vector<GID> gids;
         while (cpi.next(gids)) {
             assert(gids.size() == 2);
-            addSpecPair(si, gids[0], gids[1], metricsRec1, metricsRec2);
+            addSpecPair(si, gids[0], gids[1], cr1.metricsInfo, cr2.metricsInfo);
         }
     } else {
         assert(pairFmt == 2);
@@ -861,15 +811,10 @@ void GPOS::AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
         uint32_t cl2;
         bool insert1;
         bool insert2;
-        KernRec pair;
 
         if ((validInClassDef(0, cr1, cl1, insert1)) &&
             (validInClassDef(1, cr2, cl2, insert2))) {
-            /* Add pair to current kern pair accumulator */
-            pair.first = cl1; /* Store classes */
-            pair.second = cl2;
-            pair.metricsRec1 = metricsRec1;
-            pair.metricsRec2 = metricsRec2;
+            KernRec pair {(GID)cl1, (GID)cl2, cr1.metricsInfo, cr2.metricsInfo};
 #if HOT_DEBUG
             if (DF_LEVEL(g) >= 2) {
                 fprintf(stderr, "  * GPOSPair ");
@@ -881,8 +826,9 @@ void GPOS::AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
                 {}
 #if REPORT_DUPE_KERN
                 KernRec &prev = si.pairs[i->second];
-                printKernPair(cl1, cl2, pair.metricsRec1.value[0], pair.metricsRec1.value[0], false);
-                if (pair.metricsRec1 == prev.metricsRec1 && pair.metricsRec2 == prev.metricsRec2) {
+                printKernPair(cl1, cl2, pair.metricsInfo1, pair.metricsInfo1, false);
+                if (pair.metricsInfo1 == prev.metricsInfo1 &&
+                    pair.metricsInfo2 == prev.metricsInfo2) {
                     g->logger->log(sINFO,
                                    "Removing duplicate pair positioning in %s: %s",
                                    g->error_id_text.c_str(),
@@ -949,15 +895,7 @@ void GPOS::addPosRule(SubtableInfo &si, GPat::SP targ, std::string &locDesc,
                     continue;
 
                 SubtableInfo &anon_si = addAnonPosRuleSing(si, cr, found);
-                if (cr.metricsInfo.metrics.size() == 1) {
-                    /* assume it is an xAdvance adjustment */
-                    AddSingle(anon_si, cr, found, 0, 0, cr.metricsInfo.metrics[0], 0);
-                } else {
-                    assert(cr.metricsInfo.metrics.size() == 4);
-                    auto &metrics = cr.metricsInfo.metrics;
-                    AddSingle(anon_si, cr, found, metrics[0], metrics[1],
-                              metrics[2], metrics[3]);
-                }
+                AddSingle(anon_si, cr, found, cr.metricsInfo);
 
                 if (cr.lookupLabels.size() > 255)
                     g->logger->log(sFATAL, "Anonymous lookup in chain caused overflow.");
@@ -968,15 +906,7 @@ void GPOS::addPosRule(SubtableInfo &si, GPat::SP targ, std::string &locDesc,
             si.rules.emplace_back(std::move(targ));
         } else {
             auto &cr = targ->classes[0];
-            if (cr.metricsInfo.metrics.size() == 1) {
-                /* assume it is an xAdvance adjustment */
-                AddSingle(si, cr, found, 0, 0, cr.metricsInfo.metrics[0], 0);
-            } else {
-                assert(cr.metricsInfo.metrics.size() == 4);
-                auto &metrics = cr.metricsInfo.metrics;
-                AddSingle(si, cr, found, metrics[0], metrics[1],
-                          metrics[2], metrics[3]);
-            }
+            AddSingle(si, cr, found, cr.metricsInfo);
         }
         return;
     } else if (lkpType == GPOSPair) {
@@ -1077,7 +1007,7 @@ GPat::ClassRec &GPOS::getCR(uint32_t cls, int classDefInx) {
     return cr;
 }
 
-void GPOS::printKernPair(GID gid1, GID gid2, int val1, int val2, bool fmt1) {
+void GPOS::printKernPair(GID gid1, GID gid2, MetricsInfo &mi1, MetricsInfo &mi2, bool fmt1) {
     if (fmt1) {
         g->ctx.feat->dumpGlyph(gid1, ' ', 0);
         g->ctx.feat->dumpGlyph(gid2, '\0', 0);
@@ -1090,45 +1020,47 @@ void GPOS::printKernPair(GID gid1, GID gid2, int val1, int val2, bool fmt1) {
 GPOS::PairPos::PairPos(GPOS &h, SubtableInfo &si) : Subtable(h, si) {}
 
 GPOS::PairPos::Format1::Format1(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si) {
+    assert(si.pairs.size() > 0);
     std::sort(si.pairs.begin(), si.pairs.end());
-    // Count pair sets and build coverage table
-    cac->coverageBegin();
-    int nPairSets = 0;
-    GID prev = -1;
-    for (auto &p : si.pairs) {
-        if (p.first != prev) {
-            cac->coverageAddGlyph(p.first);
-            nPairSets++;
-            prev = p.first;
-        }
-    }
 
     ValueFormat1 = si.pairValFmt1;
     ValueFormat2 = si.pairValFmt2;
 
-    PairSets.reserve(nPairSets);
+    auto nvals = MetricsInfo::numValues(ValueFormat1) + MetricsInfo::numValues(ValueFormat2);
+    auto nvars = MetricsInfo::numVariables(ValueFormat1) + MetricsInfo::numVariables(ValueFormat2);
+
+    // Map pair sets and build coverage table
+    LOffset offst = 0;
+    auto previ = si.pairs.begin();
+    std::vector<std::pair<decltype(previ), LOffset>> pairSetInfo;
+    cac->coverageBegin();
+    for (auto i = previ + 1; i <= si.pairs.end(); i++) {
+        if (i == si.pairs.end() || i->first != previ->first) {
+            cac->coverageAddGlyph(previ->first);
+            pairSetInfo.emplace_back(i, offst);
+            offst += pairSetSize(i - previ, nvals, nvars);
+            previ = i;
+        }
+    }
+
+    LOffset pairSetOffset = pair1Size(pairSetInfo.size());
+    offst += pairSetOffset;
+    PairSets.reserve(pairSetInfo.size());
+    valueIndex = h.nextValueIndex();
 
     /* Fill pair sets */
-    int iFirst = 0;
-    LOffset offst = pair1Size(nPairSets);
-    for (uint32_t i = 1; i <= si.pairs.size(); i++) {
-        if (i == si.pairs.size() || si.pairs[i].first != si.pairs[iFirst].first) {
-            int valueCount = i - iFirst;
-            PairSet curr;
-            curr.offset = offst;
-            curr.values.reserve(valueCount);
-            for (int k = 0; k < valueCount; k++) {
-                GPOS::KernRec &src = si.pairs[iFirst + k];
-                PairValueRecord pvr;
-                pvr.SecondGlyph = src.second;
-                pvr.Value1 = h.recordValues(ValueFormat1, src.metricsRec1);
-                pvr.Value2 = h.recordValues(ValueFormat2, src.metricsRec2);
-                curr.values.emplace_back(std::move(pvr));
-            }
-            PairSets.emplace_back(std::move(curr));
-            offst += pairSetSize(valueCount, numValues(ValueFormat1), numValues(ValueFormat2));
-            iFirst = i;
+    auto i = si.pairs.begin();
+    for (auto [e, o] : pairSetInfo) {
+        PairSet curr;
+        curr.offset = o + pairSetOffset;
+        curr.secondGlyphs.reserve(e - i);
+        for (auto k = i; k < e; k++) {
+            curr.secondGlyphs.push_back(k->second);
+            offst = h.recordValues(ValueFormat1, k->metricsInfo1, offst);
+            offst = h.recordValues(ValueFormat2, k->metricsInfo2, offst);
         }
+        PairSets.emplace_back(std::move(curr));
+        i = e;
     }
 
     Coverage = cac->coverageEnd(); /* Adjusted later */
@@ -1170,40 +1102,34 @@ Offset GPOS::classDefMake(std::shared_ptr<CoverageAndClass> &cac,
 }
 
 GPOS::PairPos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si) {
-#if HOT_DEBUG
-    int nFilled = 0;
-#endif
-    uint16_t class1Count, class2Count;
     std::sort(si.pairs.begin(), si.pairs.end());
 
-    ValueFormat1 = si.pairValFmt1;
-    ValueFormat2 = si.pairValFmt2;
-
+    uint16_t class1Count, class2Count;
     /* (ClassDef offsets adjusted later) */
     ClassDef1 = h.classDefMake(cac, 0, &Coverage, class1Count);
     ClassDef2 = h.classDefMake(cac, 1, NULL, class2Count);
 
-    /* --- Allocate and initialize 2-dimensional array Class1Record */
-    ClassRecords.resize(class1Count);
-    for (auto &cr : ClassRecords)
-        cr.resize(class2Count);
+    ValueFormat1 = si.pairValFmt1;
+    ValueFormat2 = si.pairValFmt2;
+
+    LOffset offst = pair2Size(class1Count, class2Count,
+                              MetricsInfo::numValues(ValueFormat1) +
+                              MetricsInfo::numValues(ValueFormat2),
+                              MetricsInfo::numVariables(ValueFormat1) +
+                              MetricsInfo::numVariables(ValueFormat2));
+
+    classRecords.resize(class1Count, std::vector<ValueIndex>(class2Count, VAL_REC_UNDEF));
 
     /* --- Fill in Class1Record */
-    for (auto p : si.pairs) {
-        uint32_t cl1 = p.first;
-        uint32_t cl2 = p.second;
-        Class2Record &dst = ClassRecords[cl1][cl2];
-        dst.Value1 = h.recordValues(ValueFormat1, p.metricsRec1);
-        dst.Value2 = h.recordValues(ValueFormat2, p.metricsRec2);
-#if HOT_DEBUG
-        nFilled++;
-#endif
+    for (auto &p : si.pairs) {
+        assert(p.first < classRecords.size() && p.second < classRecords[p.first].size());
+        classRecords[p.first][p.second] = h.nextValueIndex();
+        offst = h.recordValues(ValueFormat1, p.metricsInfo1, offst);
+        offst = h.recordValues(ValueFormat2, p.metricsInfo2, offst);
     }
 
-    LOffset size = pair2Size(class1Count, class2Count,
-                             numValues(ValueFormat1) +
-                             numValues(ValueFormat2));
 #if HOT_DEBUG
+    int nFilled = (int) si.pairs.size();
     auto g = h.g;
     DF(1, (stderr,
            "#Cl kern: %d of %u(%hux%u) array is filled "
@@ -1213,16 +1139,16 @@ GPOS::PairPos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
            class1Count,
            class2Count - 1,
            nFilled * 100.00 / (class1Count * (class2Count - 1)),
-           size));
+           offst));
 #endif
 
     if (isExt()) {
-        Coverage += size;                         // Final value
-        ClassDef1 += size + cac->coverageSize();  // Final value
-        ClassDef2 += size + cac->coverageSize();  // Final value
-        h.incExtOffset(size + cac->coverageSize() + cac->classSize());
+        Coverage += offst;                         // Final value
+        ClassDef1 += offst + cac->coverageSize();  // Final value
+        ClassDef2 += offst + cac->coverageSize();  // Final value
+        h.incExtOffset(offst + cac->coverageSize() + cac->classSize());
     } else {
-        h.incSubOffset(size);
+        h.incSubOffset(offst);
     }
 }
 
@@ -1255,12 +1181,28 @@ void GPOS::PairPos::Format1::write(OTL *h) {
     for (auto &ps : PairSets)
         OUT2((Offset)ps.offset);
 
+    auto nvals1 = MetricsInfo::numValues(ValueFormat1);
+    auto nvals2 = MetricsInfo::numValues(ValueFormat2);
+    auto v = valueIndex;
+
     for (auto &ps : PairSets) {
-        OUT2((uint16_t)ps.values.size());
-        for (auto &pvr : ps.values) {
-            OUT2(pvr.SecondGlyph);
-            h->writeValueRecord(ValueFormat1, pvr.Value1);
-            h->writeValueRecord(ValueFormat2, pvr.Value2);
+        OUT2((uint16_t)ps.secondGlyphs.size());
+        for (auto g : ps.secondGlyphs) {
+            OUT2(g);
+            h->writeValueRecord(ValueFormat1, v);
+            v += nvals1;
+            h->writeValueRecord(ValueFormat2, v);
+            v += nvals2;
+        }
+    }
+
+    v = valueIndex;
+    for (auto &ps : PairSets) {
+        for (auto g : ps.secondGlyphs) {
+            h->writeVarSubtables(ValueFormat1, v);
+            v += nvals1;
+            h->writeVarSubtables(ValueFormat2, v);
+            v += nvals2;
         }
     }
 
@@ -1289,13 +1231,25 @@ void GPOS::PairPos::Format2::write(OTL *h) {
     OUT2(ValueFormat2);
     OUT2((uint16_t)ClassDef1);
     OUT2((uint16_t)ClassDef2);
-    OUT2((uint16_t)ClassRecords.size());
-    OUT2((uint16_t)ClassRecords[0].size());
+    OUT2((uint16_t)classRecords.size());
+    OUT2((uint16_t)classRecords[0].size());
 
-    for (auto cr1 : ClassRecords) {
-        for (auto cr2 : cr1) {
-            h->writeValueRecord(ValueFormat1, cr2.Value1);
-            h->writeValueRecord(ValueFormat2, cr2.Value2);
+    auto nvals1 = MetricsInfo::numValues(ValueFormat1);
+    for (auto cr2 : classRecords) {
+        for (auto vi : cr2) {
+            h->writeValueRecord(ValueFormat1, vi);
+            if (vi != VAL_REC_UNDEF)
+                vi += nvals1;
+            h->writeValueRecord(ValueFormat2, vi);
+        }
+    }
+
+    for (auto cr2 : classRecords) {
+        for (auto vi : cr2) {
+            if (vi == VAL_REC_UNDEF)
+                continue;
+            h->writeVarSubtables(ValueFormat1, vi);
+            h->writeVarSubtables(ValueFormat2, vi + nvals1);
         }
     }
 
@@ -1308,41 +1262,16 @@ void GPOS::PairPos::Format2::write(OTL *h) {
 /* ------------------ Chaining Contextual Substitution --------------------- */
 
 bool GPOS::SingleRec::cmpWithRule(GPat::ClassRec &cr, std::unordered_set<GID> &found) {
-    auto &metrics1 = cr.metricsInfo.metrics;
-    int16_t metricsCnt1 = metrics1.size();
-    int16_t metricsCnt2;
-    int16_t metrics2[4];
+    bool equalMetrics = (metricsInfo == cr.metricsInfo);
 
-    if (valFmt == GPOS::ValueXAdvance) {
-        metricsCnt2 = 1;
-        metrics2[0] = metricsRec.value[2];
-    } else {
-        metricsCnt2 = 4;
-        metrics2[0] = metricsRec.value[0];
-        metrics2[1] = metricsRec.value[1];
-        metrics2[2] = metricsRec.value[2];
-        metrics2[3] = metricsRec.value[3];
-    }
-
-    assert(metricsCnt1 != 0);
-
-    bool checkedMetrics {false};
-
-    for (GID cgid : cr.glyphs) {
+    for (GID cgid : cr.glyphs)
         if (cgid == gid) {
-            if (!checkedMetrics) {
-                /* a test so that we only check the metrics for the head node of the class */
-                if (metricsCnt1 != metricsCnt2)
-                    return false;
-                for (int i = 0; i < metricsCnt1; i++) {
-                    if (metrics1[i] != metrics2[i])
-                        return false;
-                }
-                checkedMetrics = true;
-            }
-            found.insert(cgid);
+            if (!equalMetrics)
+                return false;
+            else
+                found.insert(cgid);
         }
-    }
+
     return true;
 }
 
@@ -1380,6 +1309,7 @@ GPOS::SubtableInfo &GPOS::newAnonSubtable(SubtableInfo &cur_si, uint16_t lkpType
 GPOS::SubtableInfo &GPOS::addAnonPosRuleSing(SubtableInfo &cur_si,
                                              GPat::ClassRec &cr,
                                              std::unordered_set<GID> &found) {
+    cr.metricsInfo.normalize(isVertFeature(cur_si.feature));
     /* For GPOSSingle lookups only, we check if the rule can be added to    */
     /* the most current subtable in the anonymous list, and if not, look to */
     /* see if it can be added to earlier subtables. For all others, we      */

@@ -7,6 +7,7 @@
 #define ADDFEATURES_HOTCONV_FEATCTX_H_
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <map>
 #include <memory>
@@ -87,15 +88,189 @@ inline int DF_LEVEL(hotCtx g) {
 typedef uint16_t Label;
 
 struct MetricsInfo {
+    static const std::array<int, 4> kernorder;
+
+    enum ValueRecordFlag {
+        ValueXPlacement = (1 << 0),
+        ValueYPlacement = (1 << 1),
+        ValueXAdvance = (1 << 2),
+        ValueYAdvance = (1 << 3),
+        ValueMask = 15,
+        DeviceXPlacement = (1 << 4),
+        DeviceYPlacement = (1 << 5),
+        DeviceXAdvance = (1 << 6),
+        DeviceYAdvance = (1 << 7)
+    };
+
     MetricsInfo() {}
-    MetricsInfo(const MetricsInfo &o) : metrics(o.metrics) {}
-    MetricsInfo(MetricsInfo &&o) : metrics(std::move(o.metrics)) {}
+    explicit MetricsInfo(const MetricsInfo &o) : vertical(o.vertical),
+                                                 force(o.force),
+                                                 normalized(o.normalized),
+                                                 metrics(o.metrics) {}
+    explicit MetricsInfo(MetricsInfo &&o) : vertical(o.vertical),
+                                            force(o.force),
+                                            normalized(o.normalized),
+                                            metrics(std::move(o.metrics)) {}
+    MetricsInfo & operator=(MetricsInfo &&o) {
+        vertical = o.vertical;
+        force = o.force;
+        normalized = o.normalized;
+        metrics = std::move(o.metrics);
+        return *this;
+    }
+    void swap(MetricsInfo &o) {
+        std::swap(normalized, o.normalized);
+        metrics.swap(o.metrics);
+    }
     MetricsInfo & operator=(const MetricsInfo &o) {
+        normalized = o.normalized;
         metrics = o.metrics;
         return *this;
     }
-    void reset() { metrics.clear(); }
-    std::vector<int16_t> metrics;
+#if HOT_DEBUG
+    void toerr() {
+        bool first = true;
+        if (metrics.size() > 1)
+            std::cerr << '<';
+        for (auto &m : metrics) {
+            if (first)
+                first = false;
+            else
+                std::cerr << ' ';
+            m.toerr();
+        }
+        if (metrics.size() > 1)
+            std::cerr << '>';
+    }
+#endif  // HOt_DEBUG
+    void normalize(bool v = false, bool f = false) {
+        if (normalized)
+            return;
+        vertical = v;
+        force = f;
+        assert(!normalized);
+        for (auto &m : metrics)
+            m.normalize();
+        if (metrics.size() != 4) {
+            ValueVector nmv {4};
+            if (metrics.size() > 0) {
+                assert(metrics.size() == 1);
+                if (vertical)
+                    nmv[3].swap(metrics[0]);
+                else
+                    nmv[2].swap(metrics[0]);
+            }
+            metrics.swap(nmv);
+        }
+        normalized = true;
+    }
+    bool operator==(const MetricsInfo &rhs) const {
+        assert(normalized && rhs.normalized);
+        assert(metrics.size() == 4 && rhs.metrics.size() == 4);
+        for (int i = 3; i >= 0; i--)
+            if (!(metrics[i] == rhs.metrics[i]))
+                return false;
+        return true;
+    }
+    bool operator<(const MetricsInfo &rhs) const {
+        assert(normalized && rhs.normalized);
+        assert(metrics.size() == 4 && rhs.metrics.size() == 4);
+        for (int i = 3; i >= 0; i--)
+            if (!(metrics[i] == rhs.metrics[i]))
+                return metrics[i] < rhs.metrics[i];
+        return false;
+    }
+    bool kernlt(const MetricsInfo &o) const {
+        for (const auto i : kernorder) {
+            if (!metrics[i].nonZero() && o.metrics[i].nonZero())
+                return true;
+            if (metrics[i].nonZero() && !o.metrics[i].nonZero())
+                return false;
+            auto adv = ABS(metrics[i].getDefault());
+            auto aodv = ABS(o.metrics[i].getDefault());
+            if (adv != aodv)
+                return adv < aodv;
+            if (!(metrics[i] == o.metrics[i]))
+                return metrics[i] < o.metrics[i];
+        }
+        return false;
+    }
+
+    uint32_t size() { return metrics.size(); }
+
+    bool hasMetrics() const {
+        for (auto &m : metrics)
+            if (m.nonZero())
+                return true;
+    }
+
+    uint32_t valueFormat() {
+        uint32_t r {0};
+
+        assert(normalized);
+
+        if (metrics[0].nonZero()) {
+            r |= ValueXPlacement;
+            if (metrics[0].isVariable())
+                r |= DeviceXPlacement;
+        }
+        if (metrics[1].nonZero()) {
+            r |= ValueYPlacement;
+            if (metrics[1].isVariable())
+                r |= DeviceYPlacement;
+        }
+        if (metrics[2].nonZero()) {
+            r |= ValueXAdvance;
+            if (metrics[2].isVariable())
+                r |= DeviceXAdvance;
+        }
+        if (metrics[3].nonZero()) {
+            r |= ValueYAdvance;
+            if (metrics[3].isVariable())
+                r |= DeviceYAdvance;
+        }
+        if (r == 0 && force)
+            r = vertical ? ValueYAdvance : ValueXAdvance;
+        return r;
+    }
+
+    void reset() { metrics.clear(); normalized = false; }
+    const VarValueRecord &getRecordByFlag(uint16_t f) {
+        assert(f == ValueXPlacement || f == ValueYPlacement ||
+               f == ValueXAdvance || f == ValueYAdvance);
+        assert(normalized);
+        switch (f) {
+            case ValueXPlacement:
+                return metrics[0];
+                break;
+            case ValueYPlacement:
+                return metrics[1];
+                break;
+            case ValueXAdvance:
+                return metrics[2];
+                break;
+            case ValueYAdvance:
+                return metrics[3];
+                break;
+        }
+        return metrics[0];
+    }
+    static ValueIndex numValues(uint32_t valFmt) {
+        ValueIndex i = 0;
+        valFmt &= ValueMask;
+        while (valFmt) {
+            i++;
+            valFmt &= valFmt - 1; /* Remove least significant set bit */
+        }
+        return i;
+    }
+    static ValueIndex numVariables(uint32_t valFmt) {
+        return numValues(valFmt >> 4);
+    }
+    bool vertical {false};
+    bool force {false};
+    bool normalized {false};
+    ValueVector metrics;
 };
 
 struct AnchorMarkInfo {
@@ -149,6 +324,11 @@ struct GPat {
         }
         GlyphRec(GlyphRec &&gr) : gid(gr.gid),
                      markClassAnchorInfo(std::move(gr.markClassAnchorInfo)) {}
+        GlyphRec &operator=(GlyphRec &&o) {
+            gid = o.gid;
+            markClassAnchorInfo = std::move(o.markClassAnchorInfo);
+            return *this;
+        }
         GlyphRec &operator=(const GlyphRec &o) {
             gid = o.gid;
             if (o.markClassAnchorInfo != nullptr)
@@ -604,7 +784,7 @@ class FeatCtx {
 
     // Metrics
     std::map<std::string, MetricsInfo> valueDefs;
-    void addValueDef(const std::string &name, const MetricsInfo &mi);
+    void addValueDef(const std::string &name, const MetricsInfo &&mi);
     void getValueDef(const std::string &name, MetricsInfo &mi);
 
     // Substitutions
@@ -683,8 +863,9 @@ class FeatCtx {
 
     // Variable
     std::unordered_map<std::string, uint32_t> locationDefs;
+    std::string defAxisUnit {"u"};
 
-    var_F2dot14 validAxisLocation(var_F2dot14 v);
+    var_F2dot14 validAxisLocation(var_F2dot14 v, int8_t adjustment = 0);
     int16_t axisTagToIndex(Tag tag);
     uint32_t locationToIndex(std::shared_ptr<VarLocation> vl);
     bool addLocationDef(const std::string &name, uint32_t loc_idx);
