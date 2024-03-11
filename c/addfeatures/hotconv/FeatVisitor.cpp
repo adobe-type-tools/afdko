@@ -341,7 +341,7 @@ antlrcpp::Any FeatVisitor::visitValueRecordDef(FeatParser::ValueRecordDefContext
 
     MetricsInfo mi;
     getValueLiteral(ctx->valueLiteral(), mi);
-    fc->addValueDef(TOK(ctx->label())->getText(), mi);
+    fc->addValueDef(TOK(ctx->label())->getText(), std::move(mi));
 
     return nullptr;
 }
@@ -352,6 +352,19 @@ antlrcpp::Any FeatVisitor::visitLocationDef(FeatParser::LocationDefContext *ctx)
 
     uint32_t loc_idx = getLocationLiteral(ctx->locationLiteral());
     fc->addLocationDef(TOK(ctx->LNAME())->getText(), loc_idx);
+
+    return nullptr;
+}
+
+antlrcpp::Any FeatVisitor::visitDefaultAxisUnit(FeatParser::DefaultAxisUnitContext *ctx) {
+    if ( stage != vExtract )
+        return nullptr;
+
+    fc->defAxisUnit = TOK(ctx->AXISUNIT())->getText();
+    if (!(fc->defAxisUnit == "u" || fc->defAxisUnit == "d" ||
+          fc->defAxisUnit == "n")) {
+        fc->featMsg(sERROR, "Invalid axis unit %s", fc->defAxisUnit.c_str());
+    }
 
     return nullptr;
 }
@@ -1423,7 +1436,7 @@ void FeatVisitor::getValueLiteral(FeatParser::ValueLiteralContext *ctx,
     int cnt = ctx->NUM().size();
     assert(cnt == 1 || cnt == 4);
     for (int16_t i = 0; i < cnt; ++i)
-        mi.metrics.push_back(getNum<int16_t>(TOK(ctx->NUM(i))->getText(), 10));
+        mi.metrics.emplace_back(getNum<int16_t>(TOK(ctx->NUM(i))->getText(), 10));
 }
 
 void FeatVisitor::getSingleValueLiteral(FeatParser::SingleValueLiteralContext *ctx,
@@ -1479,7 +1492,7 @@ bool FeatVisitor::addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext 
         return false;
     assert(axisIndex < l.size());
 
-    std::string unit = TOK(ctx->AXISUNIT())->getText();
+    std::string unit = ctx->AXISUNIT() ? TOK(ctx->AXISUNIT())->getText() : fc->defAxisUnit;
     if (unit == "d") {
         fc->featMsg(sFATAL, "XXX No support for design units yet.");
         return false;
@@ -1493,7 +1506,15 @@ bool FeatVisitor::addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext 
     }
 
     var_F2dot14 f2v = FIXED_TO_F2DOT14(v);
-    f2v = fc->validAxisLocation(f2v);
+    int8_t ladjust {0};
+    assert(ctx->HYPHEN() == nullptr || ctx->PLUS() == nullptr);
+    if (ctx->HYPHEN())
+        ladjust = -1;
+    else if (ctx->PLUS())
+        ladjust = 1;
+    f2v += ladjust;
+
+    f2v = fc->validAxisLocation(f2v, ladjust);
     if (l[axisIndex] != 0) {
         TOK(ctx->tag());
         fc->featMsg(sERROR, "Already set location for axis '%c%c%c%c'.", TAG_ARG(tag));

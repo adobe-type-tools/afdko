@@ -26,6 +26,7 @@ topLevelStatement:
     | anchorDef
     | valueRecordDef
     | locationDef
+    | defaultAxisUnit
     )
     SEMI
 ;
@@ -55,7 +56,11 @@ valueRecordDef:
 ;
 
 locationDef:
-    LOCATION_DEF LNAME locationLiteral
+    LOCATION_DEF locationLiteral LNAME
+;
+
+defaultAxisUnit:
+    DEF_AXIS_UNIT AXISUNIT
 ;
 
 featureBlock:
@@ -227,7 +232,7 @@ locationLiteral:
 ;
 
 axisLocationLiteral:
-    tag EQUALS fixedNum AXISUNIT
+    tag EQUALS fixedNum ( HYPHEN | PLUS)? AXISUNIT?
 ;
 
 cursiveElement:

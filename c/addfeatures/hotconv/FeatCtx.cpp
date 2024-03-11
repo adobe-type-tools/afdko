@@ -29,6 +29,8 @@
 #define kDEFAULT_MARKCLASS_NAME "FDK_DEFAULT_MARK_CLASS"
 #define kDEFAULT_COMPONENTCLASS_NAME "FDK_DEFAULT_COMPONENT_CLASS"
 
+const std::array<int, 4> MetricsInfo::kernorder = {2, 3, 1, 0};
+
 const int FeatCtx::kMaxCodePageValue {32};
 const int FeatCtx::kCodePageUnSet {-1};
 
@@ -1459,11 +1461,11 @@ void FeatCtx::addMark(const std::string &name, GPat::ClassRec &cr) {
 
 // --------------------------------- Metrics -----------------------------------
 
-void FeatCtx::addValueDef(const std::string &name, const MetricsInfo &mi) {
-    auto ret = valueDefs.insert(std::make_pair(name, mi));
+void FeatCtx::addValueDef(const std::string &name, const MetricsInfo &&mi) {
+    auto ret = valueDefs.insert(std::make_pair(name, std::move(mi)));
 
     if ( !ret.second )
-        featMsg(sERROR, "Named value record definition '%s' is a a duplicate of an earlier named value record definition.", name.c_str());
+        featMsg(sERROR, "Named value record definition '%s' is a duplicate of an earlier named value record definition.", name.c_str());
 }
 
 void FeatCtx::getValueDef(const std::string &name, MetricsInfo &mi) {
@@ -2754,13 +2756,21 @@ uint16_t FeatCtx::getAxisCount() {
     return g->ctx.axes->getAxisCount();
 }
 
-var_F2dot14 FeatCtx::validAxisLocation(var_F2dot14 v) {
+var_F2dot14 FeatCtx::validAxisLocation(var_F2dot14 v, int8_t adjustment) {
     if (v > F2DOT14_ONE) {
-        featMsg(sWARNING, "Normalized axis value > 1, will be rounded down.");
-        v = F2DOT14_ONE;
+        if (adjustment > 0) {
+            featMsg(sERROR, "Cannot increase location value above maximum.");
+        } else {
+            featMsg(sWARNING, "Normalized axis value > 1, will be rounded down.");
+            v = F2DOT14_ONE;
+        }
     } else if (v < F2DOT14_MINUS_ONE) {
-        featMsg(sWARNING, "Normalized axis value < -1, will be rounded up.");
-        v = F2DOT14_MINUS_ONE;
+        if (adjustment < 0) {
+            featMsg(sERROR, "Cannot decrease location value below minumum.");
+        } else {
+            featMsg(sWARNING, "Normalized axis value < -1, will be rounded up.");
+            v = F2DOT14_MINUS_ONE;
+        }
     }
     return v;
 }

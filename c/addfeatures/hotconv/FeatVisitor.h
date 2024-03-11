@@ -92,6 +92,7 @@ class FeatVisitor : public FeatParserBaseVisitor {
     antlrcpp::Any visitValueRecordDef(FeatParser::ValueRecordDefContext *ctx) override;
     antlrcpp::Any visitLocationDef(FeatParser::LocationDefContext *ctx) override;
     antlrcpp::Any visitAnchorDef(FeatParser::AnchorDefContext *ctx) override;
+    antlrcpp::Any visitDefaultAxisUnit(FeatParser::DefaultAxisUnitContext *ctx) override;
     antlrcpp::Any visitGlyphClassAssign(FeatParser::GlyphClassAssignContext *ctx) override;
 
     // Statements (in feature and lookup blocks)

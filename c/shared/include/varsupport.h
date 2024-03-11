@@ -25,6 +25,13 @@
    This library parses tables common tables used by variable OpenType fonts.
 */
 
+/* In some otf tables an Offset is a byte offset of data relative to some
+   format component, normally the beginning of the record it belongs to. The
+   OFFSET macros allow a simple declaration of both the byte offset field and a
+   structure containing the data for that offset. (In header definitions the
+   symbol |-> is used as a shorthand for "relative to".) */
+typedef uint32_t LOffset;
+
 #define VARSUPPORT_VERSION CTL_MAKE_VERSION(2, 0, 8)
 #define F2DOT14_TO_FIXED(v) (((Fixed)(v)) << 2)
 #define FIXED_TO_F2DOT14(v) ((var_F2dot14)(((Fixed)(v) + 0x00000002) >> 2))
@@ -32,6 +39,10 @@
 #define F2DOT14_ZERO 0
 #define F2DOT14_ONE (1 << 14)
 #define F2DOT14_MINUS_ONE (-F2DOT14_ONE)
+
+// Stores index into h->values, which is read at write time. If -1, then write 0;
+typedef int32_t ValueIndex;
+#define VAL_REC_UNDEF (-1)
 
 typedef int16_t var_F2dot14; /* 2.14 fixed point number */
 
@@ -231,10 +242,41 @@ class VarLocationMap {
 
 class VarValueRecord {
  public:
+    VarValueRecord() {}
+    explicit VarValueRecord(int32_t value) : defaultValue(value), seenDefault(true) {}
+    VarValueRecord(const VarValueRecord &vvr) : defaultValue(vvr.defaultValue),
+                                                seenDefault(vvr.seenDefault),
+                                                locationValues(vvr.locationValues) {}
+    VarValueRecord(VarValueRecord &&vvr) : defaultValue(vvr.defaultValue),
+                                           seenDefault(vvr.seenDefault),
+                                           locationValues(std::move(vvr.locationValues)) {}
+    VarValueRecord &operator=(const VarValueRecord &o) {
+        defaultValue = o.defaultValue;
+        seenDefault = o.seenDefault;
+        locationValues = o.locationValues;
+        return *this;
+    }
     void addValue(int32_t value) {
         assert(!seenDefault);
         seenDefault = true;
         defaultValue = value;
+    }
+#if HOT_DEBUG
+    void toerr() {
+        if (isVariable()) {
+            std::cerr << '(' << defaultValue;
+            for (auto i : locationValues)
+                std::cerr << ' ' << i.first << ':' << i.second;
+            std::cerr << ')';
+        } else {
+            std::cerr << defaultValue;
+        }
+    }
+#endif
+    void swap(VarValueRecord &o) {
+        std::swap(defaultValue, o.defaultValue);
+        std::swap(seenDefault, o.seenDefault);
+        locationValues.swap(o.locationValues);
     }
     bool addLocationValue(uint32_t locIndex, int32_t value, std::shared_ptr<slogger> logger) {
         if (locIndex == 0) {
@@ -259,22 +301,40 @@ class VarValueRecord {
     }
     int32_t getDefault() const { return defaultValue; }
     bool isVariable() const { return locationValues.size() > 0; }
-    std::vector<uint32_t> getLocations() {
+    bool nonZero() const { return isVariable() || defaultValue != 0; }
+    std::vector<uint32_t> getLocations() const {
         std::vector<uint32_t> r;
         for (auto i : locationValues)
             r.push_back(i.first);
         return r;
     }
-    int16_t getLocationValue(uint32_t locationIndex) {
+    bool operator==(const VarValueRecord &rhs) const {
+        return defaultValue == rhs.defaultValue &&
+               locationValues == rhs.locationValues;
+    }
+    bool operator<(const VarValueRecord &rhs) const {
+        if (defaultValue != rhs.defaultValue)
+            return defaultValue < rhs.defaultValue;
+        return locationValues < rhs.locationValues;
+    }
+    int16_t getLocationValue(uint32_t locationIndex) const {
         auto f = locationValues.find(locationIndex);
         if (f == locationValues.end())
             return defaultValue;
         return f->second;
     }
+    void normalize() {
+        bool locationDiffers {false};
+        for (auto i : locationValues)
+            if (i.second != defaultValue)
+                locationDiffers = true;
+        if (!locationDiffers)
+            locationValues.clear();
+    }
 
  private:
-     bool seenDefault {false};
      int16_t defaultValue {0};
+     bool seenDefault {false};
      std::map<uint32_t, int32_t> locationValues;
 };
 
@@ -296,6 +356,8 @@ class itemVariationStore {
         explicit ValueTracker(int32_t v, uint16_t outer, uint16_t inner) :
             defaultValue(v), pair(outer, inner) {}
         int32_t getDefault() const { return defaultValue; }
+        LOffset getDevOffset() const { return devOffset; }
+        void setDevOffset(LOffset o) { devOffset = o; }
         bool isVariable() const { return pair.outerIndex != 0xFFFF; }
         uint16_t getOuterIndex() const { return pair.outerIndex; }
         uint16_t getInnerIndex() const { return pair.innerIndex; }
@@ -305,7 +367,8 @@ class itemVariationStore {
             vw->w2(0x8000);
         }
      private:
-        int32_t defaultValue;
+        int32_t defaultValue {0};
+        LOffset devOffset {0xFFFFFFFF};
         var_indexPair pair {0xFFFF, 0xFFFF};
     };
 
@@ -391,8 +454,13 @@ class itemVariationStore {
                             uint16_t gid, float *scalars,
                             int32_t regionListCount);
 
-    uint32_t addValue(VarLocationMap &vlm, VarValueRecord &vvr,
+    uint32_t addValue(VarLocationMap &vlm, const VarValueRecord &vvr,
                       std::shared_ptr<slogger> logger);
+
+    void setDevOffset(ValueIndex vi, LOffset o) {
+        assert(vi < values.size());
+        values[vi].setDevOffset(o);
+    }
 
     const std::vector<ValueTracker> &getValues() { return values; }
 
@@ -471,7 +539,7 @@ class VarModel {
  public:
     VarModel() = delete;
     VarModel(itemVariationStore &ivs, VarLocationMap &vlm, std::vector<uint32_t> locationList);
-    uint16_t addValue(VarValueRecord &vvr, std::shared_ptr<slogger> logger);
+    uint16_t addValue(const VarValueRecord &vvr, std::shared_ptr<slogger> logger);
     explicit VarModel(VarModel &&vm) : subtableIndex(vm.subtableIndex),
                                        sortedLocations(std::move(vm.sortedLocations)),
                                        deltaWeights(std::move(vm.deltaWeights)),
