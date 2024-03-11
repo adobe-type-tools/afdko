@@ -131,7 +131,7 @@ class GDEF {
             };
             struct CoordCaretTable : public CaretTable {
                 CoordCaretTable() = delete;
-                explicit CoordCaretTable(uint32_t vi) : valueIndex(vi) {}
+                explicit CoordCaretTable(ValueIndex vi) : valueIndex(vi) {}
                 LOffset size(const VarTrackVec &values) override {
                     if (values[valueIndex].isVariable()) {
                         return sizeof(uint16_t) * 5 + sizeof(int16_t);
@@ -154,7 +154,7 @@ class GDEF {
                         values[valueIndex].writeVariationIndex(vw);
                     }
                 }
-                uint32_t valueIndex;
+                ValueIndex valueIndex;
             };
             struct PointCaretTable : public CaretTable {
                 // Don't sort point records
@@ -192,7 +192,7 @@ class GDEF {
             return sizeof(uint16_t) * (2 + glyphCount);
         }
         bool warnGid(GID gid);
-        void addCoords(GID gid, std::vector<uint32_t> valIndexes);
+        void addCoords(GID gid, std::vector<ValueIndex> valIndexes);
         void addPoints(GID gid, std::vector<uint16_t> &points);
         Offset fill(Offset offset);
         void write(GDEF *h, VarWriter *vw);
@@ -253,9 +253,9 @@ class GDEF {
         return attachTable.add(gid, contour);
     }
     void addLigCaretCoords(GID gid, ValueVector &coords) {
-        std::vector<uint32_t> valIndices;
+        std::vector<ValueIndex> valIndices;
         for (auto &vvr : coords)
-            valIndices.push_back(ivs.addValue(*(g->ctx.locMap), vvr, g->logger));
+            valIndices.push_back(addValue(vvr));
         ligCaretTable.addCoords(gid, valIndices);
     }
     void addLigCaretPoints(GID gid, std::vector<uint16_t> &points) {
@@ -267,6 +267,13 @@ class GDEF {
     uint16_t addMarkSetClass(GPat::ClassRec &&markClass) {
         return markSetClassTable.add(std::move(markClass));
     }
+    ValueIndex addValue(const VarValueRecord &vvr) {
+        return ivs.addValue(*(g->ctx.locMap), vvr, g->logger);
+    }
+    void setDevOffset(ValueIndex vi, LOffset o) { ivs.setDevOffset(vi, o); }
+    ValueIndex nextValueIndex() { return ivs.getValues().size(); }
+
+    const std::vector<itemVariationStore::ValueTracker> &getValues() { return ivs.getValues(); }
 
     void validateGlyphClasses(std::vector<GPat::ClassRec> &glyphClasses);
 

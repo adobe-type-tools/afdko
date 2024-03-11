@@ -467,7 +467,7 @@ bool VarModel::cmpLocation::operator()(uint32_t &a, uint32_t &b) {
     return false;
 }
 
-uint16_t VarModel::addValue(VarValueRecord &vvr, std::shared_ptr<slogger> logger) {
+uint16_t VarModel::addValue(const VarValueRecord &vvr, std::shared_ptr<slogger> logger) {
     auto &subtable = ivs.subtables[subtableIndex];
     // XXX deal with exceeding length
     std::vector<Fixed> deltas;
@@ -824,7 +824,8 @@ void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
     return;
 }
 
-uint32_t itemVariationStore::addValue(VarLocationMap &vlm, VarValueRecord &vvr,
+uint32_t itemVariationStore::addValue(VarLocationMap &vlm,
+                                      const VarValueRecord &vvr,
                                       std::shared_ptr<slogger> logger) {
     uint32_t index = values.size();
     uint16_t outer = 0xFFFF, inner = 0xFFFF;

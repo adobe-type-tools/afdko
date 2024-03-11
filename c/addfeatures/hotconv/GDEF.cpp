@@ -216,13 +216,13 @@ bool GDEF::LigCaretTable::warnGid(GID gid) {
     return false;
 }
 
-void GDEF::LigCaretTable::addCoords(GID gid, std::vector<uint32_t> valCoords) {
+void GDEF::LigCaretTable::addCoords(GID gid, std::vector<ValueIndex> valIndexes) {
     if (warnGid(gid))
         return;
 
     LigGlyphEntry lge {gid};
 
-    for (auto i : valCoords) {
+    for (auto i : valIndexes) {
         auto cctp = std::make_unique<LigGlyphEntry::CoordCaretTable>(i);
         lge.caretTables.emplace_back(std::move(cctp));
     }

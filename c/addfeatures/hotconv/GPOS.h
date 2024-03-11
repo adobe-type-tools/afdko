@@ -45,13 +45,6 @@ enum {
 
 class GPOS : public OTL {
  public:
-    enum ValueRecordFlag {
-        ValueXPlacement = (1 << 0),
-        ValueYPlacement = (1 << 1),
-        ValueXAdvance = (1 << 2),
-        ValueYAdvance = (1 << 3)
-    };
-
     enum ParamFlag {
         ParamOpticalSize,
         ParamSubFamilyID,
@@ -61,44 +54,14 @@ class GPOS : public OTL {
     };
 
  private:
-    struct MetricsRec {
-        void set(int16_t xPla, int16_t yPla, int16_t xAdv, int16_t yAdv) {
-            value[0] = xPla;
-            value[1] = yPla;
-            value[2] = xAdv;
-            value[3] = yAdv;
-        }
-        bool operator < (const MetricsRec &rhs) const {
-            for (int i = 3; i >= 0; i--)
-                if (value[i] != rhs.value[i])
-                    return value[i] < rhs.value[i];
-            return false;
-        }
-        bool kernlt(const MetricsRec &o) const {
-            for (auto i : kernorder) {
-                if (value[i] == 0 && o.value[i] != 0)
-                    return true;
-                if (value[i] != 0 && o.value[i] == 0)
-                    return false;
-                if (ABS(value[i]) != ABS(o.value[i]))
-                    return ABS(value[i]) < ABS(o.value[i]);
-                else if (value[i] != o.value[i])
-                    return value[i] < o.value[i];
-            }
-            return false;
-        }
-        bool operator == (const MetricsRec &rhs) const {
-            for (int i = 3; i >= 0; i--)
-                if (value[i] != rhs.value[i])
-                    return false;
-            return true;
-        }
-        int16_t value[4] {0};
-        static const std::array<int, 4> kernorder;
-    };
-
     struct SingleRec {
         SingleRec(GID gid, uint32_t valFmt) : gid(gid), valFmt(valFmt) {}
+        SingleRec(GID gid, uint32_t valFmt, const MetricsInfo &mi) : gid(gid),
+             valFmt(valFmt), metricsInfo(mi) {}
+        SingleRec(const SingleRec &o) = delete;
+        SingleRec(SingleRec &&o) = default;
+        SingleRec &operator=(SingleRec &&o) = default;
+        SingleRec &operator=(const SingleRec &o) = delete;
         static bool cmp(const GPOS::SingleRec &a, const GPOS::SingleRec &b);
         static bool cmpGID(const GPOS::SingleRec &a, const GPOS::SingleRec &b);
         bool cmpWithRule(GPat::ClassRec &cr, std::unordered_set<GID> &found);
@@ -106,8 +69,8 @@ class GPOS : public OTL {
         void dump(GPOS &h);
 #endif
         GID gid {0};
-        MetricsRec metricsRec;
         uint32_t valFmt {0};
+        MetricsInfo metricsInfo;
         struct {
             int16_t valFmt {0};
             int16_t valRec {0};
@@ -121,6 +84,11 @@ class GPOS : public OTL {
     };
 
     struct BaseGlyphRec {
+        BaseGlyphRec() = default;
+        BaseGlyphRec(const BaseGlyphRec &o) = delete;
+        BaseGlyphRec(BaseGlyphRec &&o) = default;
+        BaseGlyphRec &operator=(BaseGlyphRec &&o) = default;
+        BaseGlyphRec &operator=(const BaseGlyphRec &o) = delete;
         bool operator < (const BaseGlyphRec &rhs) const {
             if (gid != rhs.gid)
                 return gid < rhs.gid;
@@ -140,14 +108,21 @@ class GPOS : public OTL {
     };
 
     struct KernRec {
+        KernRec() = delete;
+        KernRec(GID first, GID second, MetricsInfo &mi1, MetricsInfo &mi2) : first(first),
+                second(second), metricsInfo1(mi1), metricsInfo2(mi2) {}
+        KernRec(const KernRec &kr) = delete;
+        KernRec(KernRec &&kr) = default;
+        KernRec & operator=(KernRec &&kr) = default;
+        KernRec & operator=(const KernRec &kr) = delete;
         bool operator < (const KernRec &rhs) const {
             if (first != rhs.first)
                 return first < rhs.first;
             else if (second != rhs.second)
                 return second < rhs.second;
-            else if (!(metricsRec1 == rhs.metricsRec1))
-                return metricsRec1.kernlt(rhs.metricsRec1);
-            return metricsRec2.kernlt(rhs.metricsRec2);
+            else if (!(metricsInfo1 == rhs.metricsInfo1))
+                return metricsInfo1.kernlt(rhs.metricsInfo1);
+            return metricsInfo2.kernlt(rhs.metricsInfo2);
         }
 #if HOT_DEBUG
         void dumpStats(hotCtx g);
@@ -156,8 +131,8 @@ class GPOS : public OTL {
 #endif
         GID first {GID_UNDEF};
         GID second {GID_UNDEF};
-        MetricsRec metricsRec1;
-        MetricsRec metricsRec2;
+        MetricsInfo metricsInfo1;
+        MetricsInfo metricsInfo2;
     };
 
     struct PosRule {
@@ -252,33 +227,40 @@ class GPOS : public OTL {
         SinglePos() = delete;
         SinglePos(GPOS &h, SubtableInfo &si);
         virtual ~SinglePos() {}
-        static LOffset single1Size(uint32_t nval) {
-            return sizeof(uint16_t) * 3 + sizeof(int16_t) * nval;
+        static LOffset single1DevOffset(uint32_t valFmt) {
+            auto nval = MetricsInfo::numValues(valFmt);
+            auto nvar = MetricsInfo::numVariables(valFmt);
+            return sizeof(uint16_t) * 3 + sizeof(int16_t) * nval +
+                   sizeof(int16_t) * nvar;
         }
-        static LOffset single2Size(uint32_t valCnt, uint32_t nval) {
-            return sizeof(uint16_t) * 4 + sizeof(int16_t) * nval * valCnt;
+        static LOffset single1Size(uint32_t valFmt) {
+            auto nvar = MetricsInfo::numVariables(valFmt);
+            return single1DevOffset(valFmt) + sizeof(uint16_t) * 3 * nvar;
         }
-        static LOffset pos1Size(SubtableInfo &si, int iStart, int iEnd);
+        static LOffset single2DevOffset(uint32_t valCnt, uint32_t valFmt) {
+            auto nval = MetricsInfo::numValues(valFmt);
+            auto nvar = MetricsInfo::numVariables(valFmt);
+            return sizeof(uint16_t) * 4 +
+                   (sizeof(int16_t) * nval + sizeof(uint16_t) * nvar) * valCnt;
+        }
+        static LOffset single2Size(uint32_t valCnt, uint32_t valFmt) {
+            auto nvar = MetricsInfo::numVariables(valFmt);
+            return single2DevOffset(valCnt, valFmt) + sizeof(uint16_t) * 3 * nvar;
+        }
+        static LOffset pos1Size(SubtableInfo &si, int iStart);
         static LOffset pos2Size(SubtableInfo &si, int iStart, int iEnd);
         static LOffset allPos1Size(SubtableInfo &si, int &nsub);
         static LOffset allPos2Size(SubtableInfo &si, int &nsub);
         static void fill(GPOS &h, SubtableInfo &si);
-    };
 
-    struct PairValueRecord {
-        GID SecondGlyph {GID_UNDEF};
-        ValueRecord Value1 {VAL_REC_UNDEF};
-        ValueRecord Value2 {VAL_REC_UNDEF};
+        LOffset Coverage {0};         /* 32-bit for overflow check */
+        uint16_t ValueFormat {0};
+        ValueIndex valueIndex {VAL_REC_UNDEF};
     };
 
     struct PairSet {
         LOffset offset {0};
-        std::vector<PairValueRecord> values;
-    };
-
-    struct Class2Record {
-        ValueRecord Value1 {VAL_REC_UNDEF};
-        ValueRecord Value2 {VAL_REC_UNDEF};
+        std::vector<GID> secondGlyphs;
     };
 
     struct PairPos : public Subtable {
@@ -287,18 +269,20 @@ class GPOS : public OTL {
         PairPos() = delete;
         PairPos(GPOS &h, SubtableInfo &si);
         virtual ~PairPos() {}
-        static LOffset pairSetSize(uint32_t nRecs, uint32_t nvals1,
-                                   uint32_t nvals2) {
-            return sizeof(uint16_t) * (1 + (1 + nvals1 + nvals2) * nRecs);
+        static LOffset pairSetSize(uint32_t nRecs, uint32_t nvals,
+                                   uint32_t nvars) {
+            return sizeof(uint16_t) * (1 + (1 + nvals + nvars) * nRecs);
         }
         static LOffset pair1Size(uint32_t nPairSets) {
             return sizeof(uint16_t) * (5 + nPairSets);
         }
         static LOffset pair2Size(uint32_t class1cnt, uint32_t class2cnt,
-                                 uint32_t nval) {
-            return sizeof(uint16_t) * (8 + class1cnt * class2cnt * nval);
+                                 uint32_t nval, uint32_t nvar) {
+            return sizeof(uint16_t) * (8 + class1cnt * class2cnt * (nval + nvar));
         }
         static void fill(GPOS &h, SubtableInfo &si);
+        uint16_t ValueFormat1 {0}, ValueFormat2 {0};
+        LOffset Coverage {0};         /* 32-bit for overflow check */
     };
 
     struct ChainContextPos : public Subtable {
@@ -341,7 +325,6 @@ class GPOS : public OTL {
         std::vector<AnchorRec> anchorList;
         LOffset endArrays;                 /* not part of font data */
     };
-
 
     struct CursivePos : public GPOS::AnchorPosBase {
         CursivePos() = delete;
@@ -429,23 +412,26 @@ class GPOS : public OTL {
     bool SubtableBreak();
 
  private:
+    ValueIndex addValue(const VarValueRecord &vvr);
+    void setDevOffset(ValueIndex vi, LOffset o);
+    ValueIndex nextValueIndex();
     void reuseClassDefs();
-    uint32_t makeValueFormat(SubtableInfo &si, int32_t xPla, int32_t yPla,
-                             int32_t xAdv, int32_t yAdv);
-    uint32_t recordValues(uint32_t valFmt, MetricsRec &r);
-    void writeValueRecord(uint32_t valFmt, ValueRecord i) override;
+    LOffset recordValues(uint32_t valFmt, MetricsInfo &mi, LOffset o);
+    void writeValueRecord(uint32_t valFmt, ValueIndex i) override;
+    void writeVarSubtables(uint32_t valFmt, ValueIndex i) override;
     void prepSinglePos(SubtableInfo &si);
     void AddSubtable(std::unique_ptr<OTL::Subtable> s) override;
     bool validInClassDef(int classDefInx, GPat::ClassRec &cr, uint32_t &cls, bool &insert);
     void insertInClassDef(ClassDef &cdef, GPat::ClassRec &cr, uint32_t cls);
     void addSpecPair(SubtableInfo &si, GID first, GID second,
-                     MetricsRec &metricsRec1, MetricsRec &metricsRec2);
+                     MetricsInfo &mi1, MetricsInfo &mi2);
     void AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
                  bool enumerate, std::string &locDesc);
     void addPosRule(SubtableInfo &si, GPat::SP targ, std::string &locDesc,
                     std::vector<AnchorMarkInfo> &anchorMarkInfo);
     GPat::ClassRec &getCR(uint32_t cls, int classDefInx);
-    void printKernPair(GID gid1, GID gid2, int val1, int val2, bool fmt1);
+    void printKernPair(GID gid1, GID gid2, MetricsInfo &mi1, MetricsInfo &mi2,
+                       bool fmt1);
     Offset classDefMake(std::shared_ptr<CoverageAndClass> &cac, int classDefInx,
                         LOffset *coverage, uint16_t &count);
 
@@ -462,14 +448,12 @@ class GPOS : public OTL {
                                      std::unordered_set<GID> &found);
     SubtableInfo &addAnonPosRule(SubtableInfo &cur_si, uint16_t lkpType);
     void AddSingle(SubtableInfo &si, GPat::ClassRec &cr,
-                   std::unordered_set<GID> &found, int32_t xPlacement,
-                   int32_t yPlacement, int32_t xAdvance, int32_t yAdvance);
+                   std::unordered_set<GID> &found, MetricsInfo &mi);
 #if HOT_DEBUG
     void dumpSingles(std::vector<SingleRec> &singles);
     void rulesDump(SubtableInfo &si);
 #endif
     SubtableInfo nw;
-    std::vector<int16_t> values;    /* Concatenated value record fields */
     uint16_t featNameID {0};          /* user name ID for sub-family name for 'size' feature.            */
                                   /* needed in order to set the FeatureParam subtable on writing it. */
     bool startNewPairPosSubtbl {false};
@@ -486,10 +470,6 @@ struct GPOS::SinglePos::Format1 : public GPOS::SinglePos {
     uint16_t subformat() override { return 1; }
     static void fill(GPOS &h, SubtableInfo &si);
     static void fillOne(GPOS &h, SubtableInfo &si);
-
-    LOffset Coverage {0};         /* 32-bit for overflow check */
-    uint16_t ValueFormat {0};
-    ValueRecord Value {VAL_REC_UNDEF};
 };
 
 struct GPOS::SinglePos::Format2 : public GPOS::SinglePos {
@@ -500,9 +480,7 @@ struct GPOS::SinglePos::Format2 : public GPOS::SinglePos {
     static void fill(GPOS &h, SubtableInfo &si);
     static void fillOne(GPOS &h, SubtableInfo &si, int iStart, int iEnd);
 
-    LOffset Coverage {0};         /* 32-bit for overflow check */
-    uint16_t ValueFormat {0};
-    std::vector<ValueRecord> Values;
+    uint16_t valueCount {0};
 };
 
 struct GPOS::PairPos::Format1 : public GPOS::PairPos {
@@ -511,8 +489,7 @@ struct GPOS::PairPos::Format1 : public GPOS::PairPos {
     void write(OTL *h) override;
     uint16_t subformat() override { return 1; }
 
-    LOffset Coverage {0};         /* 32-bit for overflow check */
-    uint16_t ValueFormat1 {0}, ValueFormat2 {0};
+    ValueIndex valueIndex {VAL_REC_UNDEF};
     std::vector<PairSet> PairSets;
 };
 
@@ -522,12 +499,9 @@ struct GPOS::PairPos::Format2 : public GPOS::PairPos {
     void write(OTL *h) override;
     uint16_t subformat() override { return 2; }
 
-    LOffset Coverage {0};         /* 32-bit for overflow check */
-    uint16_t ValueFormat1 {0};
-    uint16_t ValueFormat2 {0};
     LOffset ClassDef1 {0};
     LOffset ClassDef2 {0};
-    std::vector<std::vector<Class2Record>> ClassRecords;
+    std::vector<std::vector<ValueIndex>> classRecords;
 };
 
 #endif  // ADDFEATURES_HOTCONV_GPOS_H_
