@@ -3350,7 +3350,7 @@ For example:
 table hhea {
     CaretOffset -50;
     Ascender 800;
-    Descender 200;
+    Descender -200; # Note that Descender is negative for descent below the baseline.
     LineGap 200;
 } hhea;
 ```
