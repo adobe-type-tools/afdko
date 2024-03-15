@@ -259,6 +259,7 @@ class GPOS : public OTL {
     };
 
     struct PairSet {
+        explicit PairSet(LOffset o) : offset(o) {}
         LOffset offset {0};
         std::vector<GID> secondGlyphs;
     };
