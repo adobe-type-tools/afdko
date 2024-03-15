@@ -198,17 +198,14 @@ valueRecord:
 ;
 
 valueLiteral:
-      NUM
-    | parenLocationValue
-    | ( BEGINVALUE NUM NUM NUM NUM ENDVALUE )
+      singleValueLiteral
+    | ( BEGINVALUE singleValueLiteral singleValueLiteral
+                   singleValueLiteral singleValueLiteral ENDVALUE )
     | ( LPAREN locationMultiValueLiteral+ RPAREN )
-    | ( BEGINVALUE parenLocationValue parenLocationValue
-                   parenLocationValue parenLocationValue ENDVALUE )
 ;
 
 singleValueLiteral:
-      NUM
-    | parenLocationValue
+      NUM | parenLocationValue
 ;
 
 parenLocationValue:
@@ -216,11 +213,11 @@ parenLocationValue:
 ;
 
 locationValueLiteral:
-    locationSpecifier COLON NUM
+    (locationSpecifier COLON)? NUM
 ;
 
 locationMultiValueLiteral:
-    locationSpecifier COLON BEGINVALUE NUM NUM NUM NUM ENDVALUE
+    (locationSpecifier COLON)? BEGINVALUE NUM NUM NUM NUM ENDVALUE
 ;
 
 locationSpecifier:

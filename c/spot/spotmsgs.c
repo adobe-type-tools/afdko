@@ -111,6 +111,7 @@ const int8_t *SpotEnglishMessages[] =
         "proof and feature file format dumps do not support recursive calls to contextual lookups. context format %d.\n",  /* SPOT_MSG_CNTX_RECURSION */
         "Duplicate glyph in coverage Type1. gid: '%d'.\n",                                                                 /* SPOT_MSG_DUP_IN_COV */
         "Cannot proof multiple inputs with more than one group greater than 1. Not all substitutions may be displayed.\n", /* SPOT_MSG_GSUBMULTIPLEINPUTS */
+        "Proofing %s.",                                                                                                    /* SPOT_MSG_PROOFING */
 };
 
 const int8_t *spotMsg(int msgId) {

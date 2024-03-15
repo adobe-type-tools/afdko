@@ -801,10 +801,8 @@ public:
   public:
     ValueLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
-    std::vector<ParenLocationValueContext *> parenLocationValue();
-    ParenLocationValueContext* parenLocationValue(size_t i);
+    std::vector<SingleValueLiteralContext *> singleValueLiteral();
+    SingleValueLiteralContext* singleValueLiteral(size_t i);
     antlr4::tree::TerminalNode *BEGINVALUE();
     antlr4::tree::TerminalNode *ENDVALUE();
     antlr4::tree::TerminalNode *LPAREN();
@@ -853,9 +851,9 @@ public:
   public:
     LocationValueLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *NUM();
     LocationSpecifierContext *locationSpecifier();
     antlr4::tree::TerminalNode *COLON();
-    antlr4::tree::TerminalNode *NUM();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -868,12 +866,12 @@ public:
   public:
     LocationMultiValueLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    LocationSpecifierContext *locationSpecifier();
-    antlr4::tree::TerminalNode *COLON();
     antlr4::tree::TerminalNode *BEGINVALUE();
     std::vector<antlr4::tree::TerminalNode *> NUM();
     antlr4::tree::TerminalNode* NUM(size_t i);
     antlr4::tree::TerminalNode *ENDVALUE();
+    LocationSpecifierContext *locationSpecifier();
+    antlr4::tree::TerminalNode *COLON();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
