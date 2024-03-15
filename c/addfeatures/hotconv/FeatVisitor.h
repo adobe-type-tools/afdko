@@ -167,7 +167,9 @@ class FeatVisitor : public FeatParserBaseVisitor {
                                VarValueRecord &vvr);
     void addLocationValueLiteral(FeatParser::LocationValueLiteralContext *ctx,
                                  VarValueRecord &vvr);
-    uint32_t getLocationSpecifier(FeatParser::LocationSpecifierContext *ctx);
+    void addLocationMultiValue(FeatParser::LocationMultiValueLiteralContext *ctx,
+                               MetricsInfo &mi);
+    uint32_t getLocationSpecifier(FeatParser::LocationSpecifierContext *ctx, bool errorOnNull = false);
     uint32_t getLocationLiteral(FeatParser::LocationLiteralContext *ctx);
     bool addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *ctx,
                                 std::vector<var_F2dot14> &l);
@@ -207,6 +209,11 @@ class FeatVisitor : public FeatParserBaseVisitor {
     antlrcpp::Any visitValueRecord(FeatParser::ValueRecordContext *) override { DEBSTOP }
     antlrcpp::Any visitValueLiteral(FeatParser::ValueLiteralContext *) override { DEBSTOP }
     antlrcpp::Any visitLocationLiteral(FeatParser::LocationLiteralContext *) override { DEBSTOP }
+    antlrcpp::Any visitParenLocationValue(FeatParser::ParenLocationValueContext *) override { DEBSTOP }
+    antlrcpp::Any visitSingleValueLiteral(FeatParser::SingleValueLiteralContext *) override { DEBSTOP }
+    antlrcpp::Any visitLocationValueLiteral(FeatParser::LocationValueLiteralContext *) override { DEBSTOP }
+    antlrcpp::Any visitLocationMultiValueLiteral(FeatParser::LocationMultiValueLiteralContext *) override { DEBSTOP }
+    antlrcpp::Any visitLocationSpecifier(FeatParser::LocationSpecifierContext *) override { DEBSTOP }
     antlrcpp::Any visitAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *) override { DEBSTOP }
     antlrcpp::Any visitAnchor(FeatParser::AnchorContext *) override { DEBSTOP }
     antlrcpp::Any visitLookupPattern(FeatParser::LookupPatternContext *) override { DEBSTOP }

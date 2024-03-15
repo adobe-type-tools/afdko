@@ -246,7 +246,7 @@ LOffset GPOS::recordValues(uint32_t valFmt, MetricsInfo &mi, LOffset o) {
             if (valFmt & (b << 4)) {
                 if (vvr.isVariable()) {
                     setDevOffset(t, o);
-                    o += sizeof(uint16) * 3;
+                    o += sizeof(uint16_t) * 3;
                 } else {
                     setDevOffset(t, 0);
                 }
@@ -288,7 +288,7 @@ void GPOS::writeVarSubtables(uint32_t valFmt, ValueIndex vi) {
             // XXX refactor
             OUT2(v.getOuterIndex());
             OUT2(v.getInnerIndex());
-            OUT2(0x8000);
+            OUT2((uint16_t)0x8000);
         }
     }
 }
@@ -1026,40 +1026,38 @@ GPOS::PairPos::Format1::Format1(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
     ValueFormat1 = si.pairValFmt1;
     ValueFormat2 = si.pairValFmt2;
 
-    auto nvals = MetricsInfo::numValues(ValueFormat1) + MetricsInfo::numValues(ValueFormat2);
-    auto nvars = MetricsInfo::numVariables(ValueFormat1) + MetricsInfo::numVariables(ValueFormat2);
-
     // Map pair sets and build coverage table
-    LOffset offst = 0;
     auto previ = si.pairs.begin();
-    std::vector<std::pair<decltype(previ), LOffset>> pairSetInfo;
+    std::vector<decltype(previ)> pairSetEnds;
     cac->coverageBegin();
     for (auto i = previ + 1; i <= si.pairs.end(); i++) {
         if (i == si.pairs.end() || i->first != previ->first) {
             cac->coverageAddGlyph(previ->first);
-            pairSetInfo.emplace_back(i, offst);
-            offst += pairSetSize(i - previ, nvals, nvars);
+            pairSetEnds.emplace_back(i);
             previ = i;
         }
     }
 
-    LOffset pairSetOffset = pair1Size(pairSetInfo.size());
-    offst += pairSetOffset;
-    PairSets.reserve(pairSetInfo.size());
+    auto nvals = MetricsInfo::numValues(ValueFormat1) + MetricsInfo::numValues(ValueFormat2);
+    auto nvars = MetricsInfo::numVariables(ValueFormat1) + MetricsInfo::numVariables(ValueFormat2);
+
+    LOffset offst = pair1Size(pairSetEnds.size());
     valueIndex = h.nextValueIndex();
+    PairSets.reserve(pairSetEnds.size());
 
     /* Fill pair sets */
     auto i = si.pairs.begin();
-    for (auto [e, o] : pairSetInfo) {
-        PairSet curr;
-        curr.offset = o + pairSetOffset;
+    for (auto e : pairSetEnds) {
+        PairSet curr {offst};
         curr.secondGlyphs.reserve(e - i);
-        for (auto k = i; k < e; k++) {
+        LOffset doff = pairSetSize(e - i, nvals, nvars);
+        for (auto k = i; k != e; k++) {
             curr.secondGlyphs.push_back(k->second);
-            offst = h.recordValues(ValueFormat1, k->metricsInfo1, offst);
-            offst = h.recordValues(ValueFormat2, k->metricsInfo2, offst);
+            doff = h.recordValues(ValueFormat1, k->metricsInfo1, doff);
+            doff = h.recordValues(ValueFormat2, k->metricsInfo2, doff);
         }
         PairSets.emplace_back(std::move(curr));
+        offst += doff;
         i = e;
     }
 
@@ -1187,22 +1185,20 @@ void GPOS::PairPos::Format1::write(OTL *h) {
 
     for (auto &ps : PairSets) {
         OUT2((uint16_t)ps.secondGlyphs.size());
+        auto vcopy = v;
         for (auto g : ps.secondGlyphs) {
             OUT2(g);
+            auto vcopy = v;
             h->writeValueRecord(ValueFormat1, v);
             v += nvals1;
             h->writeValueRecord(ValueFormat2, v);
             v += nvals2;
         }
-    }
-
-    v = valueIndex;
-    for (auto &ps : PairSets) {
         for (auto g : ps.secondGlyphs) {
-            h->writeVarSubtables(ValueFormat1, v);
-            v += nvals1;
-            h->writeVarSubtables(ValueFormat2, v);
-            v += nvals2;
+            h->writeVarSubtables(ValueFormat1, vcopy);
+            vcopy += nvals1;
+            h->writeVarSubtables(ValueFormat2, vcopy);
+            vcopy += nvals2;
         }
     }
 
@@ -1214,8 +1210,7 @@ void GPOS::PairPos::Format1::write(OTL *h) {
 void GPOS::PairPos::Format2::write(OTL *h) {
     if (!isExt()) {
         /* Adjust coverage and class offsets */
-        LOffset classAdjust = h->subOffset() - offset +
-                              cac->coverageSize();
+        LOffset classAdjust = h->subOffset() - offset + cac->coverageSize();
         Coverage += h->subOffset() - offset;
         ClassDef1 += classAdjust;
         ClassDef2 += classAdjust;

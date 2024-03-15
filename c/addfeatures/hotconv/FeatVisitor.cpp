@@ -1433,10 +1433,19 @@ void FeatVisitor::getValueRecord(FeatParser::ValueRecordContext *ctx,
 
 void FeatVisitor::getValueLiteral(FeatParser::ValueLiteralContext *ctx,
                                   MetricsInfo &mi) {
-    int cnt = ctx->NUM().size();
-    assert(cnt == 1 || cnt == 4);
-    for (int16_t i = 0; i < cnt; ++i)
-        mi.metrics.emplace_back(getNum<int16_t>(TOK(ctx->NUM(i))->getText(), 10));
+    if (ctx->singleValueLiteral().size() != 0) {
+        assert(ctx->singleValueLiteral().size() == 1 ||
+               ctx->singleValueLiteral().size() == 4);
+        for (auto svl : ctx->singleValueLiteral()) {
+            VarValueRecord vvr;
+            getSingleValueLiteral(svl, vvr);
+            mi.metrics.emplace_back(std::move(vvr));
+        }
+    } else {
+        assert(ctx->locationMultiValueLiteral().size() != 0);
+        for (auto lmvl : ctx->locationMultiValueLiteral())
+            addLocationMultiValue(lmvl, mi);
+    }
 }
 
 void FeatVisitor::getSingleValueLiteral(FeatParser::SingleValueLiteralContext *ctx,
@@ -1463,7 +1472,25 @@ void FeatVisitor::addLocationValueLiteral(FeatParser::LocationValueLiteralContex
     vvr.addLocationValue(locIndex, num, fc->g->logger);
 }
 
-uint32_t FeatVisitor::getLocationSpecifier(FeatParser::LocationSpecifierContext *ctx) {
+void FeatVisitor::addLocationMultiValue(FeatParser::LocationMultiValueLiteralContext *ctx,
+                                        MetricsInfo &mi) {
+    if (mi.metrics.size() == 0)
+        mi.metrics.resize(4);
+    assert(mi.metrics.size() == 4);
+    assert(ctx->NUM().size() == 4);
+    uint32_t locIndex = getLocationSpecifier(ctx->locationSpecifier());
+    for (size_t i = 0; i < 4; i++) {
+        int16_t num = getNum<int16_t>(TOK(ctx->NUM(i))->getText(), 10);
+        mi.metrics[i].addLocationValue(locIndex, num, fc->g->logger);
+    }
+}
+
+uint32_t FeatVisitor::getLocationSpecifier(FeatParser::LocationSpecifierContext *ctx, bool errorOnNull) {
+    if (ctx == nullptr) {
+        if (errorOnNull)
+            fc->featMsg(sERROR, "Missing location specifier");
+        return 0;   // default location
+    }
     if (ctx->LNAME() != nullptr)
         return fc->getLocationDef(TOK(ctx->LNAME())->getText());
     else

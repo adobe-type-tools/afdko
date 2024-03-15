@@ -506,7 +506,7 @@ int main__spot(int argc, int8_t *argv[]) {
             filename = argv[argi];
 
             if (files > 1) {
-                spotInform("Proofing %s.", filename);
+                spotInform(SPOT_MSG_PROOFING, filename);
             }
 
             if (outputfilebase == NULL)
@@ -594,7 +594,7 @@ int main__spot(int argc, int8_t *argv[]) {
                 fileOpen(filename);
                 if (outputfilebase == NULL)
                     outputfilebase = filename;
-                spotInform("Proofing %s.", filename);
+                spotInform(SPOT_MSG_PROOFING, filename);
                 goodFileCount++;
 
                 if (readFile(filename)) {
