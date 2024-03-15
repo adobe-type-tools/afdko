@@ -264,14 +264,19 @@ void GPOS::writeValueRecord(uint32_t valFmt, ValueIndex vi) {
     auto numVals = MetricsInfo::numValues(valFmt);
     // Write 1 field per valFmt bit, if index is valid
     assert(vi == VAL_REC_UNDEF || vi + numVals <= values.size());
-    for (int i = 0; i < numVals; i++)
+    int i;
+    for (i = 0; i < numVals; i++)
         OUT2((int16_t)((vi == VAL_REC_UNDEF) ? 0 : (values[vi + i].getDefault())));
-    if (vi == VAL_REC_UNDEF)
-        return;
-    for (int i = 0; i < numVals; i++) {
-        auto o = values[vi + i].getDevOffset();
-        if (o != 0xFFFFFFFF)
-            OUT2((uint16_t)o);
+    if (vi == VAL_REC_UNDEF) {
+        auto numVars = MetricsInfo::numVariables(valFmt);
+        for (i = 0; i < numVars; i++)
+            OUT2(0);
+    } else {
+        for (i = 0; i < numVals; i++) {
+            auto o = values[vi + i].getDevOffset();
+            if (o != 0xFFFFFFFF)
+                OUT2((uint16_t)o);
+        }
     }
 }
 
@@ -772,8 +777,10 @@ void GPOS::AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
     if (g->hadError)
         return;
 
-    if (pairFmt != si.pairFmt /* First subtable in this lookup */
-        || valFmt1 != si.pairValFmt1 || valFmt2 != si.pairValFmt2 || startNewPairPosSubtbl /* Automatic or explicit break */) {
+    if (pairFmt != si.pairFmt ||  // First subtable in this lookup
+        valFmt1 != si.pairValFmt1 ||
+        valFmt2 != si.pairValFmt2 ||
+        startNewPairPosSubtbl /* Automatic or explicit break */) {
         startNewPairPosSubtbl = false;
 
         if (si.pairFmt != 0) {
@@ -1210,10 +1217,10 @@ void GPOS::PairPos::Format1::write(OTL *h) {
 void GPOS::PairPos::Format2::write(OTL *h) {
     if (!isExt()) {
         /* Adjust coverage and class offsets */
-        LOffset classAdjust = h->subOffset() - offset + cac->coverageSize();
-        Coverage += h->subOffset() - offset;
-        ClassDef1 += classAdjust;
-        ClassDef2 += classAdjust;
+        LOffset adjust = h->subOffset() - offset;
+        Coverage += adjust;
+        ClassDef1 += adjust + cac->coverageSize();
+        ClassDef2 += adjust + cac->coverageSize();
     }
     h->checkOverflow("coverage table", Coverage, "pair positioning");
     h->checkOverflow("class 1 definition table", ClassDef1, "pair positioning");
