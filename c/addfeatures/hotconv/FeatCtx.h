@@ -274,6 +274,14 @@ struct MetricsInfo {
 };
 
 struct AnchorMarkInfo {
+    AnchorMarkInfo() {}
+    explicit AnchorMarkInfo(int32_t ci) : componentIndex(ci) {}
+    AnchorMarkInfo(int32_t ci, int16_t x, int16_t y) : componentIndex(ci),
+                                                       x(x), y(y), format(1) {}
+    void setContourPoint(uint16_t cp) {
+        contourpoint = cp;
+        format = 2;
+    }
     bool operator < (const AnchorMarkInfo &rhs) const {
         if (componentIndex != rhs.componentIndex)
             return componentIndex < rhs.componentIndex;
@@ -303,12 +311,12 @@ struct AnchorMarkInfo {
         contourpoint = 0;
         markClassName.clear();
     }
-    uint32_t format {0};
-    int32_t markClassIndex {0};
     int32_t componentIndex {0};
     int16_t x {0};
     int16_t y {0};
+    uint32_t format {0};
     uint16_t contourpoint {0};
+    int32_t markClassIndex {0};
     std::string markClassName;
 };
 
@@ -768,18 +776,21 @@ class FeatCtx {
     void addVendorString(std::string str);
 
     // Anchors
-    struct AnchorDef {
-        short x {0};
-        short y {0};
-        unsigned int contourpoint {0};
+    struct AnchorValue {
+        AnchorValue() {}
+        AnchorValue(const AnchorValue &) = delete;
+        AnchorValue(AnchorValue &&) = default;
+        int16_t x {0};
+        int16_t y {0};
+        uint16_t contourpoint {0};
         bool hasContour {false};
     };
-    std::map<std::string, AnchorDef> anchorDefs;
+    std::map<std::string, AnchorValue> anchorDefs;
     std::vector<AnchorMarkInfo> anchorMarkInfo;
-    void addAnchorDef(const std::string &name, const AnchorDef &a);
+    void addAnchorDef(const std::string &name, AnchorValue &&a);
+    void addNullAnchor(int componentIndex);
     void addAnchorByName(const std::string &name, int componentIndex);
-    void addAnchorByValue(const AnchorDef &a, bool isNull,
-                          int componentIndex);
+    void addAnchorByValue(const AnchorValue &a, int componentIndex);
     void addMark(const std::string &name, GPat::ClassRec &cr);
 
     // Metrics

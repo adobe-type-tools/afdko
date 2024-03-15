@@ -1195,7 +1195,6 @@ void GPOS::PairPos::Format1::write(OTL *h) {
         auto vcopy = v;
         for (auto g : ps.secondGlyphs) {
             OUT2(g);
-            auto vcopy = v;
             h->writeValueRecord(ValueFormat1, v);
             v += nvals1;
             h->writeValueRecord(ValueFormat2, v);

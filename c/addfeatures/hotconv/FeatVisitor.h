@@ -159,6 +159,7 @@ class FeatVisitor : public FeatParserBaseVisitor {
 
 
     // Retrieval visitors
+    void getAnchorLiteral(FeatParser::AnchorLiteralContext *ctx, FeatCtx::AnchorValue &a);
     void getValueRecord(FeatParser::ValueRecordContext *ctx, MetricsInfo &mi);
     void getValueLiteral(FeatParser::ValueLiteralContext *ctx, MetricsInfo &mi);
     void getSingleValueLiteral(FeatParser::SingleValueLiteralContext *ctx,
@@ -216,6 +217,7 @@ class FeatVisitor : public FeatParserBaseVisitor {
     antlrcpp::Any visitLocationSpecifier(FeatParser::LocationSpecifierContext *) override { DEBSTOP }
     antlrcpp::Any visitAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *) override { DEBSTOP }
     antlrcpp::Any visitAnchor(FeatParser::AnchorContext *) override { DEBSTOP }
+    antlrcpp::Any visitAnchorLiteral(FeatParser::AnchorLiteralContext *) override { DEBSTOP }
     antlrcpp::Any visitLookupPattern(FeatParser::LookupPatternContext *) override { DEBSTOP }
     antlrcpp::Any visitLookupPatternElement(FeatParser::LookupPatternElementContext *) override { DEBSTOP }
     antlrcpp::Any visitPattern(FeatParser::PatternContext *) override { DEBSTOP }
