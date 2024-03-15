@@ -191,6 +191,8 @@ public:
 
     virtual std::any visitAnchor(FeatParser::AnchorContext *context) = 0;
 
+    virtual std::any visitAnchorLiteral(FeatParser::AnchorLiteralContext *context) = 0;
+
     virtual std::any visitLookupPattern(FeatParser::LookupPatternContext *context) = 0;
 
     virtual std::any visitLookupPatternElement(FeatParser::LookupPatternElementContext *context) = 0;

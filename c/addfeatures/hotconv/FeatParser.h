@@ -73,16 +73,17 @@ public:
     RuleAxisValueLocation = 76, RuleAxisValueFlags = 77, RuleElidedFallbackName = 78, 
     RuleNameEntryStatement = 79, RuleElidedFallbackNameID = 80, RuleNameEntry = 81, 
     RuleTable_vmtx = 82, RuleVmtxStatement = 83, RuleVmtx = 84, RuleAnchor = 85, 
-    RuleLookupPattern = 86, RuleLookupPatternElement = 87, RulePattern = 88, 
-    RulePatternElement = 89, RuleGlyphClassOptional = 90, RuleGlyphClass = 91, 
-    RuleGcLiteral = 92, RuleGcLiteralElement = 93, RuleGclass = 94, RuleGlyph = 95, 
-    RuleGlyphName = 96, RuleLabel = 97, RuleTag = 98, RuleFixedNum = 99, 
-    RuleGenNum = 100, RuleFeatureFile = 101, RuleStatementFile = 102, RuleCvStatementFile = 103, 
-    RuleBaseFile = 104, RuleHeadFile = 105, RuleHheaFile = 106, RuleVheaFile = 107, 
-    RuleGdefFile = 108, RuleNameFile = 109, RuleVmtxFile = 110, RuleOs_2File = 111, 
-    RuleStatFile = 112, RuleAxisValueFile = 113, RuleNameEntryFile = 114, 
-    RuleSubtok = 115, RuleRevtok = 116, RuleAnontok = 117, RuleEnumtok = 118, 
-    RulePostok = 119, RuleMarkligtok = 120
+    RuleAnchorLiteral = 86, RuleLookupPattern = 87, RuleLookupPatternElement = 88, 
+    RulePattern = 89, RulePatternElement = 90, RuleGlyphClassOptional = 91, 
+    RuleGlyphClass = 92, RuleGcLiteral = 93, RuleGcLiteralElement = 94, 
+    RuleGclass = 95, RuleGlyph = 96, RuleGlyphName = 97, RuleLabel = 98, 
+    RuleTag = 99, RuleFixedNum = 100, RuleGenNum = 101, RuleFeatureFile = 102, 
+    RuleStatementFile = 103, RuleCvStatementFile = 104, RuleBaseFile = 105, 
+    RuleHeadFile = 106, RuleHheaFile = 107, RuleVheaFile = 108, RuleGdefFile = 109, 
+    RuleNameFile = 110, RuleVmtxFile = 111, RuleOs_2File = 112, RuleStatFile = 113, 
+    RuleAxisValueFile = 114, RuleNameEntryFile = 115, RuleSubtok = 116, 
+    RuleRevtok = 117, RuleAnontok = 118, RuleEnumtok = 119, RulePostok = 120, 
+    RuleMarkligtok = 121
   };
 
   explicit FeatParser(antlr4::TokenStream *input);
@@ -188,6 +189,7 @@ public:
   class VmtxStatementContext;
   class VmtxContext;
   class AnchorContext;
+  class AnchorLiteralContext;
   class LookupPatternContext;
   class LookupPatternElementContext;
   class PatternContext;
@@ -335,17 +337,12 @@ public:
 
   class  AnchorDefContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *xval = nullptr;
-    antlr4::Token *yval = nullptr;
-    antlr4::Token *cp = nullptr;
     FeatParser::LabelContext *name = nullptr;
     AnchorDefContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *ANCHOR_DEF();
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
+    AnchorLiteralContext *anchorLiteral();
     LabelContext *label();
-    antlr4::tree::TerminalNode *CONTOURPOINT();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1737,17 +1734,30 @@ public:
 
   class  AnchorContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *xval = nullptr;
-    antlr4::Token *yval = nullptr;
-    antlr4::Token *cp = nullptr;
     FeatParser::LabelContext *name = nullptr;
     AnchorContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *BEGINVALUE();
     antlr4::tree::TerminalNode *ANCHOR();
     antlr4::tree::TerminalNode *ENDVALUE();
+    AnchorLiteralContext *anchorLiteral();
     antlr4::tree::TerminalNode *KNULL();
     LabelContext *label();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  AnchorContext* anchor();
+
+  class  AnchorLiteralContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *xval = nullptr;
+    antlr4::Token *yval = nullptr;
+    antlr4::Token *cp = nullptr;
+    AnchorLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
     std::vector<antlr4::tree::TerminalNode *> NUM();
     antlr4::tree::TerminalNode* NUM(size_t i);
     antlr4::tree::TerminalNode *CONTOURPOINT();
@@ -1757,7 +1767,7 @@ public:
    
   };
 
-  AnchorContext* anchor();
+  AnchorLiteralContext* anchorLiteral();
 
   class  LookupPatternContext : public antlr4::ParserRuleContext {
   public:

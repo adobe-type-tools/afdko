@@ -359,6 +359,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitAnchorLiteral(FeatParser::AnchorLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitLookupPattern(FeatParser::LookupPatternContext *ctx) override {
     return visitChildren(ctx);
   }

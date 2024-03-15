@@ -1403,11 +1403,15 @@ void FeatCtx::addVendorString(std::string str) {
 
 // --------------------------------- Anchors -----------------------------------
 
-void FeatCtx::addAnchorDef(const std::string &name, const AnchorDef &a) {
-    auto ret = anchorDefs.insert(std::make_pair(name, a));
+void FeatCtx::addAnchorDef(const std::string &name, AnchorValue &&a) {
+    auto ret = anchorDefs.insert(std::make_pair(name, std::move(a)));
 
     if ( !ret.second )
         featMsg(sFATAL, "Named anchor definition '%s' is a a duplicate of an earlier named anchor definition.", name.c_str());
+}
+
+void FeatCtx::addNullAnchor(int componentIndex) {
+    anchorMarkInfo.emplace_back(componentIndex);
 }
 
 void FeatCtx::addAnchorByName(const std::string &name, int componentIndex) {
@@ -1417,23 +1421,14 @@ void FeatCtx::addAnchorByName(const std::string &name, int componentIndex) {
         return;
     }
 
-    addAnchorByValue(search->second, false, componentIndex);
+    addAnchorByValue(search->second, componentIndex);
 }
 
-void FeatCtx::addAnchorByValue(const AnchorDef &a, bool isNull, int componentIndex) {
-    AnchorMarkInfo am;
-    am.x = a.x;
-    am.y = a.y;
-    if ( isNull ) {
-        am.format = 0;
-    } else if ( a.hasContour ) {
-        am.format = 2;
-        am.contourpoint = a.contourpoint;
-    } else {
-        am.format = 1;
-    }
-    am.componentIndex = componentIndex;
-    anchorMarkInfo.push_back(am);
+void FeatCtx::addAnchorByValue(const AnchorValue &a, int componentIndex) {
+    AnchorMarkInfo am {componentIndex, a.x, a.y};
+    if (a.hasContour)
+        am.setContourPoint(a.contourpoint);
+    anchorMarkInfo.emplace_back(std::move(am));
 }
 
 /* Add new mark class definition */
