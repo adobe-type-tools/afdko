@@ -48,7 +48,7 @@ mark_statement:
 ;
 
 anchorDef:
-    ANCHOR_DEF xval=NUM yval=NUM ( CONTOURPOINT cp=NUM )? name=label
+    ANCHOR_DEF anchorLiteral name=label
 ;
 
 valueRecordDef:
@@ -491,10 +491,14 @@ vmtx:
 
 anchor:
     BEGINVALUE ANCHOR
-    (   ( xval=NUM yval=NUM ( CONTOURPOINT cp=NUM )? )
+    (   anchorLiteral
       | KNULL
       | name=label
     ) ENDVALUE
+;
+
+anchorLiteral:
+    xval=NUM yval=NUM ( CONTOURPOINT cp=NUM )?
 ;
 
 lookupPattern:
