@@ -95,14 +95,14 @@ class GPOS : public OTL {
             if (anchorMarkInfo.size() != rhs.anchorMarkInfo.size())
                 return anchorMarkInfo.size() < rhs.anchorMarkInfo.size();
             for (uint64_t i = 0; i < anchorMarkInfo.size(); i++) {
-                if (!(anchorMarkInfo[i] == rhs.anchorMarkInfo[i]))
-                    return anchorMarkInfo[i] < rhs.anchorMarkInfo[i];
+                if (!(*anchorMarkInfo[i] == *rhs.anchorMarkInfo[i]))
+                    return *anchorMarkInfo[i] < *rhs.anchorMarkInfo[i];
             }
             return false;
         }
         static bool cmpLig(const GPOS::BaseGlyphRec &a, const GPOS::BaseGlyphRec &b);
         GID gid {0};
-        std::vector<AnchorMarkInfo> anchorMarkInfo;
+        std::vector<std::shared_ptr<AnchorMarkInfo>> anchorMarkInfo;
         int32_t componentIndex {0};
         std::string locDesc;
     };
@@ -312,16 +312,16 @@ class GPOS : public OTL {
     };
 
     struct AnchorRec {
-        AnchorRec(LOffset o, AnchorMarkInfo a) : offset(o), anchor(a) {}
+        AnchorRec(LOffset o, std::shared_ptr<AnchorMarkInfo> &a) : offset(o), anchor(a) {}
         LOffset offset;
-        AnchorMarkInfo anchor;
+        std::shared_ptr<AnchorMarkInfo> anchor;
     };
 
     struct AnchorPosBase : public Subtable {
         AnchorPosBase() = delete;
         AnchorPosBase(GPOS &h, SubtableInfo &si);
         virtual ~AnchorPosBase() {}
-        virtual LOffset getAnchorOffset(const AnchorMarkInfo &anchor);
+        virtual LOffset getAnchorOffset(std::shared_ptr<AnchorMarkInfo> &anchor);
 
         std::vector<AnchorRec> anchorList;
         LOffset endArrays;                 /* not part of font data */
@@ -404,7 +404,7 @@ class GPOS : public OTL {
     void FeatureBegin(Tag script, Tag language, Tag feature);
     void FeatureEnd();
     void RuleAdd(int lkpType, GPat::SP targ, std::string &locDesc,
-                 std::vector<AnchorMarkInfo> &anchorMarkInfo);
+                 std::vector<std::shared_ptr<AnchorMarkInfo>> &anchorMarkInfo);
     void LookupBegin(uint32_t lkpType, uint32_t lkpFlag, Label label,
                      bool useExtension, uint16_t useMarkSetIndex);
     void LookupEnd(SubtableInfo *si = nullptr);
@@ -429,7 +429,7 @@ class GPOS : public OTL {
     void AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
                  bool enumerate, std::string &locDesc);
     void addPosRule(SubtableInfo &si, GPat::SP targ, std::string &locDesc,
-                    std::vector<AnchorMarkInfo> &anchorMarkInfo);
+                    std::vector<std::shared_ptr<AnchorMarkInfo>> &anchorMarkInfo);
     GPat::ClassRec &getCR(uint32_t cls, int classDefInx);
     void printKernPair(GID gid1, GID gid2, MetricsInfo &mi1, MetricsInfo &mi2,
                        bool fmt1);
@@ -440,9 +440,11 @@ class GPOS : public OTL {
     void checkBaseLigatureConflict(std::vector<BaseGlyphRec> &baselist);
     int32_t addMarkClass(SubtableInfo &si, std::string &name, GPat::ClassRec &ncr);
     void addCursive(SubtableInfo &si, GPat::ClassRec &cr,
-                    std::vector<AnchorMarkInfo> &anchorMarkInfo, std::string &locDesc);
+                    std::vector<std::shared_ptr<AnchorMarkInfo>> &anchorMarkInfo,
+                    std::string &locDesc);
     void addMark(SubtableInfo &si, GPat::ClassRec &cr,
-                 std::vector<AnchorMarkInfo> &anchorMarkInfo, std::string &locDesc);
+                 std::vector<std::shared_ptr<AnchorMarkInfo>> &anchorMarkInfo,
+                 std::string &locDesc);
     void createAnonLookups() override;
     SubtableInfo &newAnonSubtable(SubtableInfo &cur_si, uint16_t lkpType);
     SubtableInfo &addAnonPosRuleSing(SubtableInfo &cur_si, GPat::ClassRec &cr,

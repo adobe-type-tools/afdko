@@ -373,10 +373,8 @@ antlrcpp::Any FeatVisitor::visitAnchorDef(FeatParser::AnchorDefContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
 
-    FeatCtx::AnchorValue a;
     assert(ctx->anchorLiteral() != nullptr);
-    getAnchorLiteral(ctx->anchorLiteral(), a);
-    fc->addAnchorDef(TOK(ctx->name)->getText(), std::move(a));
+    fc->addAnchorDef(TOK(ctx->name)->getText(), std::move(getAnchorLiteral(ctx->anchorLiteral())));
     return nullptr;
 }
 
@@ -1396,32 +1394,29 @@ void FeatVisitor::translateBaseScript(FeatParser::BaseScriptContext *ctx,
 
 bool FeatVisitor::translateAnchor(FeatParser::AnchorContext *ctx,
                                   int componentIndex) {
-    FeatCtx::AnchorValue a;
 
     if ( ctx->KNULL() != nullptr ) {
-        fc->addNullAnchor(componentIndex);
+        fc->addAnchorByValue(std::make_shared<AnchorMarkInfo>(), componentIndex);
         return true;
     } else if ( ctx->name != NULL ) {
         fc->addAnchorByName(TOK(ctx->name)->getText(), componentIndex);
     } else {
         assert(ctx->anchorLiteral() != nullptr);
-        getAnchorLiteral(ctx->anchorLiteral(), a);
-        fc->addAnchorByValue(a, componentIndex);
+        fc->addAnchorByValue(std::make_shared<AnchorMarkInfo>(std::move(getAnchorLiteral(ctx->anchorLiteral()))), componentIndex);
     }
     return false;
 }
 
 // --------------------------- Retrieval Visitors -----------------------------
 
-void FeatVisitor::getAnchorLiteral(FeatParser::AnchorLiteralContext *ctx,
-                                   FeatCtx::AnchorValue &a) {
+AnchorMarkInfo FeatVisitor::getAnchorLiteral(FeatParser::AnchorLiteralContext *ctx) {
     assert(ctx->xval != nullptr && ctx->yval != nullptr);
-    a.x = getNum<int16_t>(TOK(ctx->xval)->getText(), 10);
-    a.y = getNum<int16_t>(TOK(ctx->yval)->getText(), 10);
-    if ( ctx->cp != nullptr ) {
-        a.contourpoint = getNum<uint16_t>(TOK(ctx->cp)->getText(), 10);
-        a.hasContour = true;
-    }
+    AnchorMarkInfo am;
+    am.getXValueRecord().addValue(getNum<int16_t>(TOK(ctx->xval)->getText(), 10));
+    am.getYValueRecord().addValue(getNum<int16_t>(TOK(ctx->yval)->getText(), 10));
+    if ( ctx->cp != nullptr )
+        am.setContourpoint(getNum<uint16_t>(TOK(ctx->cp)->getText(), 10));
+    return am;
 }
 
 void FeatVisitor::getValueRecord(FeatParser::ValueRecordContext *ctx,
