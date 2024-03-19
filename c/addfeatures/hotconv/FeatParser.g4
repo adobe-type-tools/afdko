@@ -498,7 +498,16 @@ anchor:
 ;
 
 anchorLiteral:
-    xval=NUM yval=NUM ( CONTOURPOINT cp=NUM )?
+    anchorLiteralXY ( CONTOURPOINT cp=NUM )?
+;
+
+anchorLiteralXY:
+      (xval=singleValueLiteral yval=singleValueLiteral)
+    | (LPAREN anchorMultiValueLiteral+ RPAREN)
+;
+
+anchorMultiValueLiteral:
+    (locationSpecifier COLON)? BEGINVALUE NUM NUM ENDVALUE
 ;
 
 lookupPattern:

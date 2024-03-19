@@ -159,7 +159,7 @@ class FeatVisitor : public FeatParserBaseVisitor {
 
 
     // Retrieval visitors
-    void getAnchorLiteral(FeatParser::AnchorLiteralContext *ctx, FeatCtx::AnchorValue &a);
+    AnchorMarkInfo getAnchorLiteral(FeatParser::AnchorLiteralContext *ctx);
     void getValueRecord(FeatParser::ValueRecordContext *ctx, MetricsInfo &mi);
     void getValueLiteral(FeatParser::ValueLiteralContext *ctx, MetricsInfo &mi);
     void getSingleValueLiteral(FeatParser::SingleValueLiteralContext *ctx,

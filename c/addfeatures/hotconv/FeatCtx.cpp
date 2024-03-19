@@ -1403,15 +1403,11 @@ void FeatCtx::addVendorString(std::string str) {
 
 // --------------------------------- Anchors -----------------------------------
 
-void FeatCtx::addAnchorDef(const std::string &name, AnchorValue &&a) {
-    auto ret = anchorDefs.insert(std::make_pair(name, std::move(a)));
+void FeatCtx::addAnchorDef(const std::string &name, AnchorMarkInfo &&a) {
+    auto ret = anchorDefs.insert({name, std::move(a)});
 
     if ( !ret.second )
         featMsg(sFATAL, "Named anchor definition '%s' is a a duplicate of an earlier named anchor definition.", name.c_str());
-}
-
-void FeatCtx::addNullAnchor(int componentIndex) {
-    anchorMarkInfo.emplace_back(componentIndex);
 }
 
 void FeatCtx::addAnchorByName(const std::string &name, int componentIndex) {
@@ -1420,15 +1416,14 @@ void FeatCtx::addAnchorByName(const std::string &name, int componentIndex) {
         featMsg(sERROR, "Named anchor reference '%s' is not in list of named anchors.", name.c_str());
         return;
     }
-
-    addAnchorByValue(search->second, componentIndex);
+    
+    addAnchorByValue(std::make_shared<AnchorMarkInfo>(search->second), componentIndex);
 }
 
-void FeatCtx::addAnchorByValue(const AnchorValue &a, int componentIndex) {
-    AnchorMarkInfo am {componentIndex, a.x, a.y};
-    if (a.hasContour)
-        am.setContourPoint(a.contourpoint);
-    anchorMarkInfo.emplace_back(std::move(am));
+void FeatCtx::addAnchorByValue(std::shared_ptr<AnchorMarkInfo> a, int componentIndex) {
+    assert(a != nullptr);
+    a->setComponentIndex(componentIndex);
+    anchorMarkInfo.emplace_back(a);
 }
 
 /* Add new mark class definition */
@@ -1436,7 +1431,7 @@ void FeatCtx::addMark(const std::string &name, GPat::ClassRec &cr) {
     cr.markClassName = name;
     assert(anchorMarkInfo.size() > 0);
     for (auto &gr : cr.glyphs)
-        gr.markClassAnchorInfo = std::make_unique<AnchorMarkInfo>(anchorMarkInfo.back());
+        gr.markClassAnchorInfo = anchorMarkInfo.back();
 
     bool found = openAsCurrentGC(name);
     addGlyphClassToCurrentGC(cr, !found);
@@ -2052,7 +2047,8 @@ void FeatCtx::addMarkClass(const std::string &markClassName) {
         return;
     }
     curGC.used_mark_class = true;
-    anchorMarkInfo.back().markClassName = markClassName;
+    assert(anchorMarkInfo.size() > 0);
+    anchorMarkInfo.back()->markClassName = markClassName;
     finishCurrentGC();
 }
 

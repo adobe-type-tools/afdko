@@ -872,7 +872,7 @@ void GPOS::AddPair(SubtableInfo &si, GPat::ClassRec &cr1, GPat::ClassRec &cr2,
 }
 
 void GPOS::addPosRule(SubtableInfo &si, GPat::SP targ, std::string &locDesc,
-                      std::vector<AnchorMarkInfo> &anchorMarkInfo) {
+                      std::vector<std::shared_ptr<AnchorMarkInfo>> &anchorMarkInfo) {
     uint16_t lkpType;
 
     if (si.parentLkpType == 0)
@@ -989,7 +989,7 @@ void GPOS::addPosRule(SubtableInfo &si, GPat::SP targ, std::string &locDesc,
 /* Add rule (enumerating if necessary) to subtable si */
 
 void GPOS::RuleAdd(int lkpType, GPat::SP targ, std::string &locDesc,
-                   std::vector<AnchorMarkInfo> &anchorMarkInfo) {
+                   std::vector<std::shared_ptr<AnchorMarkInfo>> &anchorMarkInfo) {
     if (g->hadError)
         return;
 
@@ -1471,7 +1471,7 @@ void GPOS::ChainContextPos::write(OTL *h) {
 bool GPOS::BaseGlyphRec::cmpLig(const GPOS::BaseGlyphRec &a, const GPOS::BaseGlyphRec &b) {
     if (a.gid != b.gid)
         return a.gid < b.gid;
-    return a.anchorMarkInfo[0].componentIndex < b.anchorMarkInfo[0].componentIndex;
+    return a.anchorMarkInfo[0]->componentIndex < b.anchorMarkInfo[0]->componentIndex;
 }
 
 void GPOS::checkBaseAnchorConflict(std::vector<BaseGlyphRec> &baseList) {
@@ -1505,7 +1505,7 @@ void GPOS::checkBaseLigatureConflict(std::vector<BaseGlyphRec> &baseList) {
     /* Now step through, and report if for any entry, the previous entry with the same GID has  the same component index. */
     while (++cur != baseList.end()) {
         if (cur->gid == prev->gid &&
-            cur->anchorMarkInfo[0].componentIndex == prev->anchorMarkInfo[0].componentIndex) {
+            cur->anchorMarkInfo[0]->componentIndex == prev->anchorMarkInfo[0]->componentIndex) {
             g->ctx.feat->dumpGlyph(cur->gid, '\0', 0);
             g->logger->log(sERROR,
                            "MarkToLigature error in %s. Two different statements referencing the ligature glyph '%s' have assigned the same mark class to the same ligature component. [current at %s, previous at %s]",
@@ -1560,28 +1560,23 @@ int32_t GPOS::addMarkClass(SubtableInfo &si, std::string &name,
 
 GPOS::AnchorPosBase::AnchorPosBase(GPOS &h, SubtableInfo &si) : Subtable(h, si) {}
 
-LOffset GPOS::AnchorPosBase::getAnchorOffset(const AnchorMarkInfo &anchor) {
-    uint32_t lastFormat = 0;
-    LOffset offst = 0;
+LOffset GPOS::AnchorPosBase::getAnchorOffset(std::shared_ptr<AnchorMarkInfo> &anchor) {
+    LOffset offst {0}, lastSize {0};
 
     for (auto &ar : anchorList) {
-        if (ar.anchor == anchor)
+        if (*ar.anchor == *anchor)
             return ar.offset;
-        lastFormat = ar.anchor.format;
+        lastSize = ar.anchor->size();
         offst = ar.offset;
     }
 
-    if (lastFormat == 2)
-        offst += sizeof(uint16_t) * 4;
-    else if (lastFormat != 0)
-        offst += sizeof(uint16_t) * 3;
-
+    offst += lastSize;
     anchorList.emplace_back(offst, anchor);
     return offst;
 }
 
 void GPOS::addMark(SubtableInfo &si, GPat::ClassRec &cr,
-                   std::vector<AnchorMarkInfo> &anchorMarkInfo,
+                   std::vector<std::shared_ptr<AnchorMarkInfo>> &anchorMarkInfo,
                    std::string &locDesc) {
     /* Ligatures have multiple components. We can tell when we hit a new    */
     /* component, as the anchorMarkInfo componentIndex increases. For       */
@@ -1592,22 +1587,22 @@ void GPOS::addMark(SubtableInfo &si, GPat::ClassRec &cr,
         baseRec.componentIndex = -1;
 
         for (auto am : anchorMarkInfo) {
-            if (baseRec.componentIndex != am.componentIndex) {
+            if (baseRec.componentIndex != am->componentIndex) {
                 if (baseRec.componentIndex != -1)
                     si.baseList.push_back(std::move(baseRec));
                 baseRec.gid = gid;
                 baseRec.locDesc = locDesc;
-                baseRec.componentIndex = am.componentIndex;
+                baseRec.componentIndex = am->componentIndex;
             }
-            AnchorMarkInfo nam = am;
-            if (!nam.markClassName.empty()) {
-                nam.markClassIndex = si.findMarkClassIndex(nam.markClassName);
-                if (nam.markClassIndex < 0) {
-                    auto cr = g->ctx.feat->lookupGlyphClass(nam.markClassName);
-                    nam.markClassIndex = addMarkClass(si, nam.markClassName, cr);
+            auto nam = std::make_shared<AnchorMarkInfo>(*am);
+            if (!nam->markClassName.empty()) {
+                nam->markClassIndex = si.findMarkClassIndex(nam->markClassName);
+                if (nam->markClassIndex < 0) {
+                    auto cr = g->ctx.feat->lookupGlyphClass(nam->markClassName);
+                    nam->markClassIndex = addMarkClass(si, nam->markClassName, cr);
                 }
             }
-            baseRec.anchorMarkInfo.push_back(nam);
+            baseRec.anchorMarkInfo.emplace_back(nam);
         }
         if (baseRec.componentIndex != -1)
             si.baseList.push_back(std::move(baseRec));
@@ -1644,7 +1639,7 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
     for (auto mc : si.markClassList) {
         for (auto &gr : mc.cr.glyphs) {
             assert(gr.markClassAnchorInfo != nullptr);
-            MarkRecords.emplace_back(gr.gid, getAnchorOffset(*gr.markClassAnchorInfo), i);
+            MarkRecords.emplace_back(gr.gid, getAnchorOffset(gr.markClassAnchorInfo), i);
         }
         i++;
     }
@@ -1673,14 +1668,14 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
         prevGID = baseRec.gid;
 
         /* Check uniqueness of anchor vs mark class*/
-        for (auto am : baseRec.anchorMarkInfo) {
-            if (br[am.markClassIndex] != 0xFFFFFFFFL) {
+        for (auto &am : baseRec.anchorMarkInfo) {
+            if (br[am->markClassIndex] != 0xFFFFFFFFL) {
                 /*it has already been filled in !*/
                 h.g->ctx.feat->dumpGlyph(prevGID, '\0', 0);
                 h.g->logger->log(sERROR, "MarkToBase or MarkToMark error in %s. Another statement has already assigned the current mark class to another anchor point on glyph '%s'. [previous at %s]",
                                  h.g->error_id_text.c_str(), h.g->getNote(), baseRec.locDesc.c_str());
             } else {
-                br[am.markClassIndex] = getAnchorOffset(am); /* offset from start of anchor list */
+                br[am->markClassIndex] = getAnchorOffset(am); /* offset from start of anchor list */
             }
         }
         BaseRecords.emplace_back(std::move(br));
@@ -1708,12 +1703,7 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
 
     /* Now add the size of the anchor list*/
     auto &anchorRec = anchorList.back();
-    size += anchorRec.offset;
-    if (anchorRec.anchor.format == 2) {
-        size += sizeof(uint16_t) * 4;
-    } else {
-        size += sizeof(uint16_t) * 3;
-    }
+    size += anchorRec.offset + anchorRec.anchor->size();
 
     if (isExt()) {
         MarkCoverage += size; /* Adjust offset */
@@ -1769,19 +1759,9 @@ void GPOS::MarkBasePos::write(OTL *h) {
     }
 
     /* Now write out the  anchor list */
-    for (auto &an : anchorList) {
-        auto &anchorRec = an.anchor;
-        if (anchorRec.format == 0) {
-            anchorRec.format = 1; /* This is an anchor record that never got filled in, or was specified as a NULL anchor. */
-                                   /* In either case, it is written as a default anchor with x=y =0                         */
-        }
-        OUT2(anchorRec.format); /*offset to anchor */
-        OUT2(anchorRec.x);      /*offset to anchor */
-        OUT2(anchorRec.y);      /*offset to anchor */
-        if (anchorRec.format == 2) {
-            OUT2(anchorRec.contourpoint); /*offset to anchor */
-        }
-    }
+    hotVarWriter vw {h->g};
+    for (auto &an : anchorList)
+        an.anchor->write(vw, true);
 
     if (isExt())
         cac->coverageWrite();
@@ -1817,7 +1797,7 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
     for (auto mc : si.markClassList) {
         for (auto &gr : mc.cr.glyphs) {
             assert(gr.markClassAnchorInfo != nullptr);
-            MarkRecords.emplace_back(gr.gid, getAnchorOffset(*gr.markClassAnchorInfo), i);
+            MarkRecords.emplace_back(gr.gid, getAnchorOffset(gr.markClassAnchorInfo), i);
         }
         i++;
     }
@@ -1853,15 +1833,15 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
 
         /* Check uniqueness of anchors in the baseRec, and fill in the ligature attach table */
         for (auto &am : baseRec.anchorMarkInfo) {
-            if (clo[am.markClassIndex] != 0xFFFFFFFFL) {
+            if (clo[am->markClassIndex] != 0xFFFFFFFFL) {
                 /*it has already been filled in !*/
                 h.g->ctx.feat->dumpGlyph(baseRec.gid, '\0', 0);
                 h.g->logger->log(sERROR, "MarkToLigature statement error in %s. Glyph '%s' contains a duplicate mark class assignment for one of the ligature components. [previous at %s]",
                                  h.g->error_id_text.c_str(), h.g->getNote(), baseRec.locDesc.c_str());
             } else {
-                if (am.format != 0) {
+                if (am->format() != 0) {
                     /* Skip anchor if the format is 0 aka NULL anchor */
-                    clo[am.markClassIndex] = getAnchorOffset(am);
+                    clo[am->markClassIndex] = getAnchorOffset(am);
                 }
             }
         }
@@ -1879,12 +1859,7 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
 
     /* Now add the size of the anchor list*/
     auto &anchorRec = anchorList.back();
-    size += anchorRec.offset;
-    if (anchorRec.anchor.format == 2) {
-        size += sizeof(uint16_t) * 4;
-    } else {
-        size += sizeof(uint16_t) * 3;
-    }
+    size += anchorRec.offset + anchorRec.anchor->size();
 
     if (isExt()) {
         MarkCoverage += size;     /* Adjust offset */
@@ -1959,18 +1934,10 @@ void GPOS::MarkLigaturePos::write(OTL *h) {
     }
 
     /* Now write out the  anchor list */
+    hotVarWriter vw {h->g};
     for (auto &an : anchorList) {
-        auto &anchorRec = an.anchor;
-//        if (anchorRec.format == 0) {
-//            anchorRec.format = 1; /* This is an anchor record that never got filled in, or was specified as a NULL anchor. */
-//                                   /* In either case, it is written as a default anchor with x=y =0                         */
-//        }
-        OUT2(anchorRec.format); /*offset to anchor */
-        OUT2(anchorRec.x);      /*offset to anchor */
-        OUT2(anchorRec.y);      /*offset to anchor */
-        if (anchorRec.format == 2) {
-            OUT2(anchorRec.contourpoint); /*offset to anchor */
-        }
+        assert(an.anchor->format() != 0);
+        an.anchor->write(vw);
     }
 
     if (isExt())
@@ -1980,14 +1947,14 @@ void GPOS::MarkLigaturePos::write(OTL *h) {
 /* ------------------------ Cursive Attachment ------------------------ */
 
 void GPOS::addCursive(SubtableInfo &si, GPat::ClassRec &cr,
-                     std::vector<AnchorMarkInfo> &anchorMarkInfo,
+                     std::vector<std::shared_ptr<AnchorMarkInfo>> &anchorMarkInfo,
                      std::string &locDesc) {
     for (GID gid : cr.glyphs) {
         BaseGlyphRec baseRec;
         baseRec.gid = gid;
 
-        for (auto am : anchorMarkInfo)
-            baseRec.anchorMarkInfo.push_back(am);
+        for (auto &am : anchorMarkInfo)
+            baseRec.anchorMarkInfo.emplace_back(am);
         baseRec.locDesc = locDesc;
         si.baseList.emplace_back(std::move(baseRec));
     }
@@ -2008,12 +1975,12 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
         } else {
             EntryExitRecord eeRec;
             cac->coverageAddGlyph(baseRec.gid);
-            if (baseRec.anchorMarkInfo[0].format == 0) {
+            if (baseRec.anchorMarkInfo[0]->format() == 0) {
                 eeRec.EntryAnchor = 0xFFFF; /* Can't use 0 as a flag, as 0 is the offset to the first anchor record */
             } else {
                 eeRec.EntryAnchor = getAnchorOffset(baseRec.anchorMarkInfo[0]); /* this returns the offset from the start of the anchor list. To be adjusted later*/
             }
-            if (baseRec.anchorMarkInfo[1].format == 0) {
+            if (baseRec.anchorMarkInfo[1]->format() == 0) {
                 eeRec.ExitAnchor = 0xFFFF; /* Can't use 0 as a flag, as 0 is he offset to the first anchor record */
             } else {
                 eeRec.ExitAnchor = getAnchorOffset(baseRec.anchorMarkInfo[1]);
@@ -2028,12 +1995,7 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
 
     /* Now add the size of the anchor list*/
     auto &anchorRec = anchorList.back();
-    size += anchorRec.offset;
-    if (anchorRec.anchor.format == 2) {
-        size += sizeof(uint16_t) * 4;
-    } else {
-        size += sizeof(uint16_t) * 3;
-    }
+    size += anchorRec.offset + anchorRec.anchor->size();
 
     if (isExt()) {
         Coverage += size; /* Adjust offset */
@@ -2078,17 +2040,9 @@ void GPOS::CursivePos::write(OTL *h) {
     }
 
     /* Now write out the anchor list */
-    for (auto &an : anchorList) {
-        auto &anchorRec = an.anchor;
-        if (anchorRec.format == 0)
-            continue; /* This is an anchor record that never got filled in, or was specified as a NULL anchor. */
-        OUT2(anchorRec.format);
-        OUT2(anchorRec.x);
-        OUT2(anchorRec.y);
-        if (anchorRec.format == 2) {
-            OUT2(anchorRec.contourpoint);
-        }
-    }
+    hotVarWriter vw {h->g};
+    for (auto &an : anchorList)
+        an.anchor->write(vw);
 
     if (isExt())
         cac->coverageWrite();

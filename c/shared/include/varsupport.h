@@ -302,6 +302,7 @@ class VarValueRecord {
     int32_t getDefault() const { return defaultValue; }
     bool isVariable() const { return locationValues.size() > 0; }
     bool nonZero() const { return isVariable() || defaultValue != 0; }
+    bool isInitialized() const { return isVariable() || seenDefault; }
     std::vector<uint32_t> getLocations() const {
         std::vector<uint32_t> r;
         for (auto i : locationValues)
