@@ -274,48 +274,78 @@ struct MetricsInfo {
 };
 
 struct AnchorMarkInfo {
+    enum { CONTOUR_POINT_UNDEF = 0xFFFF };
     AnchorMarkInfo() {}
     explicit AnchorMarkInfo(int32_t ci) : componentIndex(ci) {}
-    AnchorMarkInfo(int32_t ci, int16_t x, int16_t y) : componentIndex(ci),
-                                                       x(x), y(y), format(1) {}
-    void setContourPoint(uint16_t cp) {
-        contourpoint = cp;
-        format = 2;
+    AnchorMarkInfo(const AnchorMarkInfo &o) : x(o.x), y(o.y),
+                                              contourpoint(o.contourpoint),
+                                              componentIndex(o.componentIndex),
+                                              markClassIndex(o.markClassIndex),
+                                              markClassName(o.markClassName) {}
+    AnchorMarkInfo(AnchorMarkInfo &&o) : x(std::move(o.x)), y(std::move(o.y)),
+                                         contourpoint(o.contourpoint),
+                                         componentIndex(o.componentIndex),
+                                         markClassIndex(o.markClassIndex),
+                                         markClassName(std::move(o.markClassName)) {}
+    VarValueRecord &getXValueRecord() { return x; }
+    VarValueRecord &getYValueRecord() { return y; }
+    void setContourpoint(uint16_t cp) { contourpoint = cp; }
+    void setComponentIndex(int16_t ci) {
+        assert(componentIndex == -1);
+        componentIndex = ci;
     }
-    bool operator < (const AnchorMarkInfo &rhs) const {
+    bool operator< (const AnchorMarkInfo &rhs) const {
         if (componentIndex != rhs.componentIndex)
             return componentIndex < rhs.componentIndex;
         if (markClassIndex != rhs.markClassIndex)
             return markClassIndex < rhs.markClassIndex;
-        if (format != rhs.format)
-            return format < rhs.format;
-        if (x != rhs.x)
+        if (format() != rhs.format())
+            return format() < rhs.format();
+        if (!(x == rhs.x))
             return x < rhs.x;
-        if (y != rhs.y)
+        if (!(y == rhs.y))
             return y < rhs.y;
-        if (format == 2 && contourpoint != rhs.contourpoint)
+        if (contourpoint != rhs.contourpoint)
             return contourpoint < rhs.contourpoint;
         return false;
     }
-    bool operator == (const AnchorMarkInfo &rhs) const {
+    bool operator== (const AnchorMarkInfo &rhs) const {
         return componentIndex == rhs.componentIndex &&
                markClassIndex == rhs.markClassIndex &&
-               format == rhs.format &&
+               format() == rhs.format() &&
                x == rhs.x && y == rhs.y &&
-               (format != 2 || contourpoint == rhs.contourpoint);
+               (contourpoint == rhs.contourpoint);
     }
-    void reset() {
-        format = 0;
-        markClassIndex = componentIndex = 0;
-        x = y = 0;
-        contourpoint = 0;
-        markClassName.clear();
+    bool isInitialized() const {
+        return x.isInitialized() || y.isInitialized();
     }
-    int32_t componentIndex {0};
-    int16_t x {0};
-    int16_t y {0};
-    uint32_t format {0};
-    uint16_t contourpoint {0};
+    uint16_t format() const {
+        return (!isInitialized()) ? 0 : (contourpoint == 0xFFFF) ? 1 : 2;
+    }
+    LOffset size(bool force = false) {
+        if (format() == 0)
+            return force ? sizeof(uint16_t) * 3 : 0;
+        return format() == 2 ? sizeof(uint16_t) * 4 : sizeof(uint16_t) * 3;
+    }
+    void write(VarWriter &vw, bool force = false) {
+        if (format() == 0) {
+            if (!force)
+                return;
+            else {
+                x.addValue(0);   // Initialize X to change format
+                assert(format() != 0);
+            }
+        }
+        vw.w2(format());
+        vw.w2(x.getDefault());
+        vw.w2(y.getDefault());
+        if (format() == 2)
+            vw.w2(contourpoint);
+    }
+    VarValueRecord x;
+    VarValueRecord y;
+    uint16_t contourpoint {CONTOUR_POINT_UNDEF};
+    int32_t componentIndex {-1};
     int32_t markClassIndex {0};
     std::string markClassName;
 };
@@ -326,29 +356,13 @@ struct GPat {
     typedef std::unique_ptr<GPat> SP;
     struct GlyphRec {
         explicit GlyphRec(GID g) : gid(g) {}
-        GlyphRec(const GlyphRec &gr) : gid(gr.gid) {
-            if (gr.markClassAnchorInfo != nullptr)
-                markClassAnchorInfo = std::make_unique<AnchorMarkInfo>(*gr.markClassAnchorInfo);
-        }
-        GlyphRec(GlyphRec &&gr) : gid(gr.gid),
-                     markClassAnchorInfo(std::move(gr.markClassAnchorInfo)) {}
-        GlyphRec &operator=(GlyphRec &&o) {
-            gid = o.gid;
-            markClassAnchorInfo = std::move(o.markClassAnchorInfo);
-            return *this;
-        }
-        GlyphRec &operator=(const GlyphRec &o) {
-            gid = o.gid;
-            if (o.markClassAnchorInfo != nullptr)
-                markClassAnchorInfo = std::make_unique<AnchorMarkInfo>(*o.markClassAnchorInfo);
-            return *this;
-        }
+        GlyphRec(const GlyphRec &gr) = default;
         operator GID() const { return gid; }
         bool operator<(const GlyphRec &gr) const { return gid < gr.gid; }
         bool operator==(const GlyphRec &gr) const { return gid == gr.gid; }
         bool operator==(GID g) const { return g == gid; }
         GID gid {GID_UNDEF};
-        std::unique_ptr<AnchorMarkInfo> markClassAnchorInfo;
+        std::shared_ptr<AnchorMarkInfo> markClassAnchorInfo;
     };
     struct ClassRec {
         ClassRec() : marked(false), gclass(false), backtrack(false), input(false),
@@ -776,21 +790,11 @@ class FeatCtx {
     void addVendorString(std::string str);
 
     // Anchors
-    struct AnchorValue {
-        AnchorValue() {}
-        AnchorValue(const AnchorValue &) = delete;
-        AnchorValue(AnchorValue &&) = default;
-        int16_t x {0};
-        int16_t y {0};
-        uint16_t contourpoint {0};
-        bool hasContour {false};
-    };
-    std::map<std::string, AnchorValue> anchorDefs;
-    std::vector<AnchorMarkInfo> anchorMarkInfo;
-    void addAnchorDef(const std::string &name, AnchorValue &&a);
-    void addNullAnchor(int componentIndex);
+    std::map<std::string, AnchorMarkInfo> anchorDefs;
+    std::vector<std::shared_ptr<AnchorMarkInfo>> anchorMarkInfo;
+    void addAnchorDef(const std::string &name, AnchorMarkInfo &&a);
     void addAnchorByName(const std::string &name, int componentIndex);
-    void addAnchorByValue(const AnchorValue &a, int componentIndex);
+    void addAnchorByValue(std::shared_ptr<AnchorMarkInfo> a, int componentIndex);
     void addMark(const std::string &name, GPat::ClassRec &cr);
 
     // Metrics
