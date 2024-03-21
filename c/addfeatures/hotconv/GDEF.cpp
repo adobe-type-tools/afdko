@@ -94,11 +94,11 @@ void GDEF::Write() {
 
     glyphClassTable.write();
     attachTable.write(h);
-    ligCaretTable.write(h, &vw);
+    ligCaretTable.write(h, vw);
     markAttachClassTable.write();
     markSetClassTable.write(h);
     if (ivs.getRegionCount() > 0)
-        ivs.write(&vw);
+        ivs.write(vw);
 }
 
 void GDEFReuse(hotCtx g) {
@@ -420,7 +420,7 @@ void GDEF::AttachTable::write(GDEF *h) {
     cac.coverageWrite();
 }
 
-void GDEF::LigCaretTable::write(GDEF *h, VarWriter *vw) {
+void GDEF::LigCaretTable::write(GDEF *h, VarWriter &vw) {
     if (!offset)
         return;
     OUT2(Coverage);

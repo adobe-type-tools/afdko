@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "OS_2.h"
+#include "GDEF.h"
 
 CoverageAndClass::CoverageRecord::CoverageRecord(Offset o, std::set<GID> &gl) : offset(o) {
     glyphs.swap(gl);
@@ -1004,6 +1005,23 @@ void OTL::AddSubtable(typename std::unique_ptr<Subtable> s) {
     else if (sub->isParam())
         nFeatParams++;
 }
+
+const VarTrackVec &OTL::getValues() {
+    return g->ctx.GDEFp->getValues();
+}
+
+ValueIndex OTL::nextValueIndex() {
+    return getValues().size();
+}
+
+ValueIndex OTL::addValue(const VarValueRecord &vvr) {
+    return g->ctx.GDEFp->addValue(vvr);
+}
+
+void OTL::setDevOffset(ValueIndex vi, LOffset o) {
+    g->ctx.GDEFp->setDevOffset(vi, o);
+}
+
 
 void OTL::setCoverages(std::vector<LOffset> &covs,
                        std::shared_ptr<CoverageAndClass> &cac,
