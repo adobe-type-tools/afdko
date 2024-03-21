@@ -123,7 +123,7 @@ class GDEF {
                 virtual LOffset size(const VarTrackVec &values) = 0;
                 virtual uint16_t format(const VarTrackVec &values) = 0;
                 virtual void write(GDEF *h, const VarTrackVec &values,
-                                   VarWriter *vw) = 0;
+                                   VarWriter &vw) = 0;
                 virtual int16_t sortValue(const VarTrackVec &values) {
                     return 0;
                 }
@@ -146,7 +146,7 @@ class GDEF {
                     return values[valueIndex].isVariable() ? 3 : 1;
                 }
                 void write(GDEF *h, const VarTrackVec &values,
-                           VarWriter *vw) override {
+                           VarWriter &vw) override {
                     OUT2(format(values));
                     OUT2((int16_t) values[valueIndex].getDefault());
                     if (values[valueIndex].isVariable()) {
@@ -167,7 +167,7 @@ class GDEF {
                     return 2;
                 }
                 void write(GDEF *h, const VarTrackVec &values,
-                           VarWriter *vw) override {
+                           VarWriter &vw) override {
                     OUT2(format(values));
                     OUT2(point);
                 }
@@ -195,7 +195,7 @@ class GDEF {
         void addCoords(GID gid, std::vector<ValueIndex> valIndexes);
         void addPoints(GID gid, std::vector<uint16_t> &points);
         Offset fill(Offset offset);
-        void write(GDEF *h, VarWriter *vw);
+        void write(GDEF *h, VarWriter &vw);
 
         Offset offset {0};
         Offset Coverage {0};
@@ -271,9 +271,7 @@ class GDEF {
         return ivs.addValue(*(g->ctx.locMap), vvr, g->logger);
     }
     void setDevOffset(ValueIndex vi, LOffset o) { ivs.setDevOffset(vi, o); }
-    ValueIndex nextValueIndex() { return ivs.getValues().size(); }
-
-    const std::vector<itemVariationStore::ValueTracker> &getValues() { return ivs.getValues(); }
+    const VarTrackVec &getValues() { return ivs.getValues(); }
 
     void validateGlyphClasses(std::vector<GPat::ClassRec> &glyphClasses);
 

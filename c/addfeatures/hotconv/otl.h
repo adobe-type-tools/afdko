@@ -342,6 +342,10 @@ class OTL {
                                const char* posType);
     virtual void writeValueRecord(uint32_t valFmt, ValueIndex i) { assert(false); }
     virtual void writeVarSubtables(uint32_t valFmt, ValueIndex i) { assert(false); }
+    virtual const VarTrackVec &getValues();
+    virtual ValueIndex nextValueIndex();
+    virtual ValueIndex addValue(const VarValueRecord &vvr);
+    virtual void setDevOffset(ValueIndex vi, LOffset o);
 
  protected:
     OTL() = delete;
@@ -356,6 +360,7 @@ class OTL {
 #endif
     virtual const char *objName() = 0;
     virtual void createAnonLookups() = 0;
+
     static void setCoverages(std::vector<LOffset> &covs,
                              std::shared_ptr<CoverageAndClass> &cac,
                              std::vector<GPat::ClassRec*> classes, LOffset o);
