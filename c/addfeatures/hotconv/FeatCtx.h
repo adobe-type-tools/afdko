@@ -289,58 +289,17 @@ struct AnchorMarkInfo {
                                          markClassName(std::move(o.markClassName)) {}
     VarValueRecord &getXValueRecord() { return x; }
     VarValueRecord &getYValueRecord() { return y; }
+    uint16_t &getContourpoint() { return contourpoint; }
     void setContourpoint(uint16_t cp) { contourpoint = cp; }
     void setComponentIndex(int16_t ci) {
         assert(componentIndex == -1);
         componentIndex = ci;
     }
-    bool operator< (const AnchorMarkInfo &rhs) const {
-        if (componentIndex != rhs.componentIndex)
-            return componentIndex < rhs.componentIndex;
-        if (markClassIndex != rhs.markClassIndex)
-            return markClassIndex < rhs.markClassIndex;
-        if (format() != rhs.format())
-            return format() < rhs.format();
-        if (!(x == rhs.x))
-            return x < rhs.x;
-        if (!(y == rhs.y))
-            return y < rhs.y;
-        if (contourpoint != rhs.contourpoint)
-            return contourpoint < rhs.contourpoint;
-        return false;
-    }
     bool operator== (const AnchorMarkInfo &rhs) const {
-        return componentIndex == rhs.componentIndex &&
-               markClassIndex == rhs.markClassIndex &&
-               format() == rhs.format() &&
-               x == rhs.x && y == rhs.y &&
-               (contourpoint == rhs.contourpoint);
+        return x == rhs.x && y == rhs.y && contourpoint == rhs.contourpoint;
     }
     bool isInitialized() const {
         return x.isInitialized() || y.isInitialized();
-    }
-    uint16_t format() const {
-        return (!isInitialized()) ? 0 : (contourpoint == 0xFFFF) ? 1 : 2;
-    }
-    LOffset size(bool force = false) {
-        if (format() == 0)
-            return force ? sizeof(uint16_t) * 3 : 0;
-        return format() == 2 ? sizeof(uint16_t) * 4 : sizeof(uint16_t) * 3;
-    }
-    void write(VarWriter &vw, bool force = false) {
-        if (format() == 0) {
-            if (!force)
-                return;
-            else {
-                x.addValue(0);   // Initialize X to change format
-                assert(format() != 0);
-            }
-        }
-        vw.w2(format());
-        vw.w2(x.getDefault());
-        vw.w2(y.getDefault());
-        if (format() == 2)
-            vw.w2(contourpoint);
     }
     VarValueRecord x;
     VarValueRecord y;

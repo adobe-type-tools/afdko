@@ -41,5 +41,5 @@ void cfwDictFillVarStore(cfwCtx g, DICT *dst, abfTopDict *top) {
     cfwVarWriter vw {dst};
 
     vw.w2((uint16_t)top->varStore->getSize());
-    top->varStore->write(&vw);
+    top->varStore->write(vw);
 }

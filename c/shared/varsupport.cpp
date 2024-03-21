@@ -992,48 +992,48 @@ uint16_t itemVariationStore::newSubtable(std::vector<VariationRegion> reg) {
     return sindex;
 }
 
-void itemVariationStore::itemVariationDataSubtable::write(VarWriter *vw) {
-    vw->w2((uint16_t) deltaValues.size());
+void itemVariationStore::itemVariationDataSubtable::write(VarWriter &vw) {
+    vw.w2((uint16_t) deltaValues.size());
     // XXX optimize word ordering later
-    vw->w2((uint16_t) (deltaValues.size() > 0 ? deltaValues[0].size() : 0));
-    vw->w2((uint16_t) regionIndices.size());
+    vw.w2((uint16_t) (deltaValues.size() > 0 ? deltaValues[0].size() : 0));
+    vw.w2((uint16_t) regionIndices.size());
 
     for (auto ri : regionIndices)
-        vw->w2(ri);
+        vw.w2(ri);
     for (auto &dvv : deltaValues)
         for (auto dv : dvv)
-            vw->w2(dv);
+            vw.w2(dv);
 }
 
-void itemVariationStore::writeRegionList(VarWriter *vw) {
-    vw->w2(axisCount);
-    vw->w2((int16_t) regions.size());
+void itemVariationStore::writeRegionList(VarWriter &vw) {
+    vw.w2(axisCount);
+    vw.w2((int16_t) regions.size());
 
     for (auto &vr : regions) {
         for (auto &ar : vr) {
-            vw->w2(std::get<0>(ar));
-            vw->w2(std::get<1>(ar));
-            vw->w2(std::get<2>(ar));
+            vw.w2(std::get<0>(ar));
+            vw.w2(std::get<1>(ar));
+            vw.w2(std::get<2>(ar));
         }
     }
 }
 
-void itemVariationStore::write(VarWriter *vw) {
+void itemVariationStore::write(VarWriter &vw) {
     // write format
-    vw->w2(1);
+    vw.w2(1);
 
     // write offset to RegionList.
     // The Region list immediately follows the IVS header and offset to the dataItems.
     uint32_t offset = 8 + subtables.size() * 4;
-    vw->w4(offset);
+    vw.w4(offset);
 
     // write ItemVariationData count
-    vw->w2(subtables.size());
+    vw.w2(subtables.size());
 
     // write the offsets to the ItemVariationData items.
     offset += getRegionListSize();
     for (auto &sub : subtables) {
-        vw->w4(offset);
+        vw.w4(offset);
         offset += sub.getSize();
     }
 

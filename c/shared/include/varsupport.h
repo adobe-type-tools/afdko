@@ -42,7 +42,7 @@ typedef uint32_t LOffset;
 
 // Stores index into h->values, which is read at write time. If -1, then write 0;
 typedef int32_t ValueIndex;
-#define VAL_REC_UNDEF (-1)
+#define VAL_INDEX_UNDEF (-1)
 
 typedef int16_t var_F2dot14; /* 2.14 fixed point number */
 
@@ -170,20 +170,22 @@ class var_axes {
     std::vector<variationInstance> instances;
 };
 
+template <typename T>
+struct cmpSP {
+    bool operator()(const std::shared_ptr<T> &a,
+                    const std::shared_ptr<T> &b) const {
+        if (a == nullptr && b == nullptr)
+            return false;
+        if (a == nullptr)
+            return true;
+        if (b == nullptr)
+            return false;
+        return *a < *b;
+    }
+};
+
 class VarLocation {
  public:
-    struct cmpSP {
-        bool operator()(const std::shared_ptr<VarLocation> &a,
-                        const std::shared_ptr<VarLocation> &b) const {
-            if (a == nullptr && b == nullptr)
-                return false;
-            if (a == nullptr)
-                return true;
-            if (b == nullptr)
-                return false;
-            return *a < *b;
-        }
-    };
     VarLocation() = delete;
     explicit VarLocation(std::vector<var_F2dot14> &l) : alocs(std::move(l)) {}
     explicit VarLocation(const std::vector<var_F2dot14> &l) : alocs(l) {}
@@ -236,7 +238,7 @@ class VarLocationMap {
 
  private:
     uint16_t axis_count;
-    std::map<std::shared_ptr<VarLocation>, uint32_t, VarLocation::cmpSP> locmap;
+    std::map<std::shared_ptr<VarLocation>, uint32_t, cmpSP<VarLocation>> locmap;
     std::vector<std::shared_ptr<VarLocation>> locvec;
 };
 
@@ -362,10 +364,10 @@ class itemVariationStore {
         bool isVariable() const { return pair.outerIndex != 0xFFFF; }
         uint16_t getOuterIndex() const { return pair.outerIndex; }
         uint16_t getInnerIndex() const { return pair.innerIndex; }
-        void writeVariationIndex(VarWriter *vw) const {
-            vw->w2(pair.outerIndex);
-            vw->w2(pair.innerIndex);
-            vw->w2(0x8000);
+        void writeVariationIndex(VarWriter &vw) const {
+            vw.w2(pair.outerIndex);
+            vw.w2(pair.innerIndex);
+            vw.w2(0x8000);
         }
      private:
         int32_t defaultValue {0};
@@ -459,7 +461,7 @@ class itemVariationStore {
                       std::shared_ptr<slogger> logger);
 
     void setDevOffset(ValueIndex vi, LOffset o) {
-        assert(vi < values.size());
+        assert(vi < (ValueIndex)values.size());
         values[vi].setDevOffset(o);
     }
 
@@ -475,7 +477,7 @@ class itemVariationStore {
         return r;
     }
 
-    void write(VarWriter *);
+    void write(VarWriter &vw);
 
     void reset() {
         axisCount = 0;
@@ -518,12 +520,12 @@ class itemVariationStore {
         uint32_t getSize() {
             return 6 + regionIndices.size() * (2 + deltaValues.size() * 2);
         }
-        void write(VarWriter *vw);
+        void write(VarWriter &vw);
         std::vector<uint16_t> regionIndices;
         std::vector<std::vector<int16_t>> deltaValues;
     };
 
-    void writeRegionList(VarWriter *vw);
+    void writeRegionList(VarWriter &vw);
 
     uint16_t axisCount;
     std::vector<VariationRegion> regions;

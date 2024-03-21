@@ -90,17 +90,14 @@ class GPOS : public OTL {
         BaseGlyphRec &operator=(BaseGlyphRec &&o) = default;
         BaseGlyphRec &operator=(const BaseGlyphRec &o) = delete;
         bool operator < (const BaseGlyphRec &rhs) const {
-            if (gid != rhs.gid)
-                return gid < rhs.gid;
-            if (anchorMarkInfo.size() != rhs.anchorMarkInfo.size())
-                return anchorMarkInfo.size() < rhs.anchorMarkInfo.size();
-            for (uint64_t i = 0; i < anchorMarkInfo.size(); i++) {
-                if (!(*anchorMarkInfo[i] == *rhs.anchorMarkInfo[i]))
-                    return *anchorMarkInfo[i] < *rhs.anchorMarkInfo[i];
-            }
-            return false;
+            return gid < rhs.gid;
         }
-        static bool cmpLig(const GPOS::BaseGlyphRec &a, const GPOS::BaseGlyphRec &b);
+        static bool cmpLig(const GPOS::BaseGlyphRec &a, const GPOS::BaseGlyphRec &b) {
+            if (a.gid != b.gid)
+                return a.gid < b.gid;
+            return a.anchorMarkInfo[0]->componentIndex <
+                   b.anchorMarkInfo[0]->componentIndex;
+        }
         GID gid {0};
         std::vector<std::shared_ptr<AnchorMarkInfo>> anchorMarkInfo;
         int32_t componentIndex {0};
@@ -255,7 +252,7 @@ class GPOS : public OTL {
 
         LOffset Coverage {0};         /* 32-bit for overflow check */
         uint16_t ValueFormat {0};
-        ValueIndex valueIndex {VAL_REC_UNDEF};
+        ValueIndex valueIndex {VAL_INDEX_UNDEF};
     };
 
     struct PairSet {
@@ -312,16 +309,84 @@ class GPOS : public OTL {
     };
 
     struct AnchorRec {
-        AnchorRec(LOffset o, std::shared_ptr<AnchorMarkInfo> &a) : offset(o), anchor(a) {}
-        LOffset offset;
+        AnchorRec() = delete;
+        AnchorRec(std::shared_ptr<AnchorMarkInfo> &anchor,
+                  LOffset o, ValueIndex xIndex, int16_t cp) :
+                  anchor(anchor), offset(o), xIndex(xIndex), contourpoint(cp) {}
+        AnchorRec(const AnchorRec &ar) = default;
+        uint16_t format(const VarTrackVec &values, bool force) {
+            if (xIndex == VAL_INDEX_UNDEF)
+                return force ? 1 : 0;
+            else
+                assert(xIndex + 1 < (ValueIndex)values.size());
+            if (values[xIndex].isVariable() || values[xIndex+1].isVariable()) {
+                assert(contourpoint == AnchorMarkInfo::CONTOUR_POINT_UNDEF);
+                return 3;
+            } else if (contourpoint != AnchorMarkInfo::CONTOUR_POINT_UNDEF)
+                return 2;
+            return 1;
+        }
+        LOffset size(const VarTrackVec &values, bool force = false) {
+            auto f = format(values, force);
+            if (f == 0)
+                return 0;
+            LOffset r = sizeof(uint16_t) * 3;
+            if (f == 1)
+                return r;
+            else if (f == 2)
+                return r + sizeof(int16_t);  // contourpoint
+            assert(f == 3);
+            r += sizeof(uint16_t) * 2;       // Device offsets
+            if (values[xIndex].isVariable())
+                r += sizeof(uint16_t) + 3;   // X variable device table
+            if (values[xIndex + 1].isVariable())
+                r += sizeof(uint16_t) + 3;   // Y variable device table
+            return r;
+        }
+        void write(VarWriter &vw, const VarTrackVec &values, bool force) {
+            auto f = format(values, force);
+            if (f == 0)
+                return;
+            vw.w2(f);
+            vw.w2(xIndex == VAL_INDEX_UNDEF ? 0 : values[xIndex].getDefault());
+            vw.w2(xIndex == VAL_INDEX_UNDEF ? 0 : values[xIndex+1].getDefault());
+            if (f == 2)
+                vw.w2(contourpoint);
+            else if (f == 3) {
+                Offset o = sizeof(uint16_t) * 5;
+                assert(xIndex != VAL_INDEX_UNDEF && xIndex + 1 < (ValueIndex)values.size());
+                if (values[xIndex].isVariable()) {
+                    vw.w2(o);
+                    o += sizeof(uint16_t) * 3;
+                } else {
+                    vw.w2(0);
+                }
+                if (values[xIndex + 1].isVariable()) {
+                    vw.w2(o);
+                } else {
+                    vw.w2(0);
+                }
+                if (values[xIndex].isVariable())
+                    values[xIndex].writeVariationIndex(vw);
+                if (values[xIndex+1].isVariable())
+                    values[xIndex+1].writeVariationIndex(vw);
+            }
+        }
         std::shared_ptr<AnchorMarkInfo> anchor;
+        LOffset offset {0};
+        ValueIndex xIndex {VAL_INDEX_UNDEF};  // yIndex == xIndex + 1;
+        uint16_t contourpoint {AnchorMarkInfo::CONTOUR_POINT_UNDEF};
     };
 
     struct AnchorPosBase : public Subtable {
         AnchorPosBase() = delete;
         AnchorPosBase(GPOS &h, SubtableInfo &si);
         virtual ~AnchorPosBase() {}
-        virtual LOffset getAnchorOffset(std::shared_ptr<AnchorMarkInfo> &anchor);
+        virtual LOffset getAnchorOffset(GPOS &h, std::shared_ptr<AnchorMarkInfo> &anchor);
+        virtual void writeAnchorList(VarWriter &vw, const VarTrackVec &values, bool force = false) {
+            for (auto &a : anchorList)
+                a.write(vw, values, force);
+        }
 
         std::vector<AnchorRec> anchorList;
         LOffset endArrays;                 /* not part of font data */
@@ -413,9 +478,6 @@ class GPOS : public OTL {
     bool SubtableBreak();
 
  private:
-    ValueIndex addValue(const VarValueRecord &vvr);
-    void setDevOffset(ValueIndex vi, LOffset o);
-    ValueIndex nextValueIndex();
     void reuseClassDefs();
     LOffset recordValues(uint32_t valFmt, MetricsInfo &mi, LOffset o);
     void writeValueRecord(uint32_t valFmt, ValueIndex i) override;
@@ -492,7 +554,7 @@ struct GPOS::PairPos::Format1 : public GPOS::PairPos {
     void write(OTL *h) override;
     uint16_t subformat() override { return 1; }
 
-    ValueIndex valueIndex {VAL_REC_UNDEF};
+    ValueIndex valueIndex {VAL_INDEX_UNDEF};
     std::vector<PairSet> PairSets;
 };
 
