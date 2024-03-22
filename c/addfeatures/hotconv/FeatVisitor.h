@@ -159,7 +159,6 @@ class FeatVisitor : public FeatParserBaseVisitor {
 
 
     // Retrieval visitors
-    AnchorMarkInfo getAnchorLiteral(FeatParser::AnchorLiteralContext *ctx);
     void getValueRecord(FeatParser::ValueRecordContext *ctx, MetricsInfo &mi);
     void getValueLiteral(FeatParser::ValueLiteralContext *ctx, MetricsInfo &mi);
     void getSingleValueLiteral(FeatParser::SingleValueLiteralContext *ctx,
@@ -170,6 +169,12 @@ class FeatVisitor : public FeatParserBaseVisitor {
                                  VarValueRecord &vvr);
     void addLocationMultiValue(FeatParser::LocationMultiValueLiteralContext *ctx,
                                MetricsInfo &mi);
+    AnchorMarkInfo getAnchorLiteral(FeatParser::AnchorLiteralContext *ctx);
+    void getAnchorLiteralXY(FeatParser::AnchorLiteralXYContext *ctx,
+                            AnchorMarkInfo &am);
+    void addAnchorMultiValue(FeatParser::AnchorMultiValueLiteralContext *ctx,
+                             AnchorMarkInfo &am);
+
     uint32_t getLocationSpecifier(FeatParser::LocationSpecifierContext *ctx, bool errorOnNull = false);
     uint32_t getLocationLiteral(FeatParser::LocationLiteralContext *ctx);
     bool addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *ctx,
