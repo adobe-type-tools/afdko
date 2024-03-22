@@ -1393,7 +1393,6 @@ void FeatCtx::addVendorString(std::string str) {
     if (tooshort) {
         featMsg(sWARNING, "Vendor name too short. Padded automatically to 4 characters.");
     }
-
     if (str.size() > 4) {
         featMsg(sERROR, "Vendor name too long. Max is 4 characters.");
     }
@@ -1416,7 +1415,7 @@ void FeatCtx::addAnchorByName(const std::string &name, int componentIndex) {
         featMsg(sERROR, "Named anchor reference '%s' is not in list of named anchors.", name.c_str());
         return;
     }
-    
+
     addAnchorByValue(std::make_shared<AnchorMarkInfo>(search->second), componentIndex);
 }
 
