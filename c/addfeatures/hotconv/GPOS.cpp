@@ -1978,6 +1978,7 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
 
     /* Now add the size of the anchor list*/
     auto &anchorRec = anchorList.back();
+    std::cerr << "anchor size: " << anchorRec.size(h.getValues()) << std::endl;
     size += anchorRec.offset + anchorRec.size(h.getValues());
 
     if (isExt()) {

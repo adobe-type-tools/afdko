@@ -338,9 +338,9 @@ class GPOS : public OTL {
             assert(f == 3);
             r += sizeof(uint16_t) * 2;       // Device offsets
             if (values[xIndex].isVariable())
-                r += sizeof(uint16_t) + 3;   // X variable device table
+                r += sizeof(uint16_t) * 3;   // X variable device table
             if (values[xIndex + 1].isVariable())
-                r += sizeof(uint16_t) + 3;   // Y variable device table
+                r += sizeof(uint16_t) * 3;   // Y variable device table
             return r;
         }
         void write(VarWriter &vw, const VarTrackVec &values, bool force) {

@@ -73,17 +73,17 @@ public:
     RuleAxisValueLocation = 76, RuleAxisValueFlags = 77, RuleElidedFallbackName = 78, 
     RuleNameEntryStatement = 79, RuleElidedFallbackNameID = 80, RuleNameEntry = 81, 
     RuleTable_vmtx = 82, RuleVmtxStatement = 83, RuleVmtx = 84, RuleAnchor = 85, 
-    RuleAnchorLiteral = 86, RuleLookupPattern = 87, RuleLookupPatternElement = 88, 
-    RulePattern = 89, RulePatternElement = 90, RuleGlyphClassOptional = 91, 
-    RuleGlyphClass = 92, RuleGcLiteral = 93, RuleGcLiteralElement = 94, 
-    RuleGclass = 95, RuleGlyph = 96, RuleGlyphName = 97, RuleLabel = 98, 
-    RuleTag = 99, RuleFixedNum = 100, RuleGenNum = 101, RuleFeatureFile = 102, 
-    RuleStatementFile = 103, RuleCvStatementFile = 104, RuleBaseFile = 105, 
-    RuleHeadFile = 106, RuleHheaFile = 107, RuleVheaFile = 108, RuleGdefFile = 109, 
-    RuleNameFile = 110, RuleVmtxFile = 111, RuleOs_2File = 112, RuleStatFile = 113, 
-    RuleAxisValueFile = 114, RuleNameEntryFile = 115, RuleSubtok = 116, 
-    RuleRevtok = 117, RuleAnontok = 118, RuleEnumtok = 119, RulePostok = 120, 
-    RuleMarkligtok = 121
+    RuleAnchorLiteral = 86, RuleAnchorLiteralXY = 87, RuleAnchorMultiValueLiteral = 88, 
+    RuleLookupPattern = 89, RuleLookupPatternElement = 90, RulePattern = 91, 
+    RulePatternElement = 92, RuleGlyphClassOptional = 93, RuleGlyphClass = 94, 
+    RuleGcLiteral = 95, RuleGcLiteralElement = 96, RuleGclass = 97, RuleGlyph = 98, 
+    RuleGlyphName = 99, RuleLabel = 100, RuleTag = 101, RuleFixedNum = 102, 
+    RuleGenNum = 103, RuleFeatureFile = 104, RuleStatementFile = 105, RuleCvStatementFile = 106, 
+    RuleBaseFile = 107, RuleHeadFile = 108, RuleHheaFile = 109, RuleVheaFile = 110, 
+    RuleGdefFile = 111, RuleNameFile = 112, RuleVmtxFile = 113, RuleOs_2File = 114, 
+    RuleStatFile = 115, RuleAxisValueFile = 116, RuleNameEntryFile = 117, 
+    RuleSubtok = 118, RuleRevtok = 119, RuleAnontok = 120, RuleEnumtok = 121, 
+    RulePostok = 122, RuleMarkligtok = 123
   };
 
   explicit FeatParser(antlr4::TokenStream *input);
@@ -190,6 +190,8 @@ public:
   class VmtxContext;
   class AnchorContext;
   class AnchorLiteralContext;
+  class AnchorLiteralXYContext;
+  class AnchorMultiValueLiteralContext;
   class LookupPatternContext;
   class LookupPatternElementContext;
   class PatternContext;
@@ -1753,14 +1755,12 @@ public:
 
   class  AnchorLiteralContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *xval = nullptr;
-    antlr4::Token *yval = nullptr;
     antlr4::Token *cp = nullptr;
     AnchorLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
+    AnchorLiteralXYContext *anchorLiteralXY();
     antlr4::tree::TerminalNode *CONTOURPOINT();
+    antlr4::tree::TerminalNode *NUM();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1768,6 +1768,44 @@ public:
   };
 
   AnchorLiteralContext* anchorLiteral();
+
+  class  AnchorLiteralXYContext : public antlr4::ParserRuleContext {
+  public:
+    FeatParser::SingleValueLiteralContext *xval = nullptr;
+    FeatParser::SingleValueLiteralContext *yval = nullptr;
+    AnchorLiteralXYContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<SingleValueLiteralContext *> singleValueLiteral();
+    SingleValueLiteralContext* singleValueLiteral(size_t i);
+    antlr4::tree::TerminalNode *LPAREN();
+    antlr4::tree::TerminalNode *RPAREN();
+    std::vector<AnchorMultiValueLiteralContext *> anchorMultiValueLiteral();
+    AnchorMultiValueLiteralContext* anchorMultiValueLiteral(size_t i);
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  AnchorLiteralXYContext* anchorLiteralXY();
+
+  class  AnchorMultiValueLiteralContext : public antlr4::ParserRuleContext {
+  public:
+    AnchorMultiValueLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *BEGINVALUE();
+    std::vector<antlr4::tree::TerminalNode *> NUM();
+    antlr4::tree::TerminalNode* NUM(size_t i);
+    antlr4::tree::TerminalNode *ENDVALUE();
+    LocationSpecifierContext *locationSpecifier();
+    antlr4::tree::TerminalNode *COLON();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  AnchorMultiValueLiteralContext* anchorMultiValueLiteral();
 
   class  LookupPatternContext : public antlr4::ParserRuleContext {
   public:

@@ -1394,7 +1394,6 @@ void FeatVisitor::translateBaseScript(FeatParser::BaseScriptContext *ctx,
 
 bool FeatVisitor::translateAnchor(FeatParser::AnchorContext *ctx,
                                   int componentIndex) {
-
     if ( ctx->KNULL() != nullptr ) {
         fc->addAnchorByValue(std::make_shared<AnchorMarkInfo>(), componentIndex);
         return true;
@@ -1408,16 +1407,6 @@ bool FeatVisitor::translateAnchor(FeatParser::AnchorContext *ctx,
 }
 
 // --------------------------- Retrieval Visitors -----------------------------
-
-AnchorMarkInfo FeatVisitor::getAnchorLiteral(FeatParser::AnchorLiteralContext *ctx) {
-    assert(ctx->xval != nullptr && ctx->yval != nullptr);
-    AnchorMarkInfo am;
-    am.getXValueRecord().addValue(getNum<int16_t>(TOK(ctx->xval)->getText(), 10));
-    am.getYValueRecord().addValue(getNum<int16_t>(TOK(ctx->yval)->getText(), 10));
-    if ( ctx->cp != nullptr )
-        am.setContourpoint(getNum<uint16_t>(TOK(ctx->cp)->getText(), 10));
-    return am;
-}
 
 void FeatVisitor::getValueRecord(FeatParser::ValueRecordContext *ctx,
                                  MetricsInfo &mi) {
@@ -1481,6 +1470,43 @@ void FeatVisitor::addLocationMultiValue(FeatParser::LocationMultiValueLiteralCon
     }
 }
 
+AnchorMarkInfo FeatVisitor::getAnchorLiteral(FeatParser::AnchorLiteralContext *ctx) {
+    AnchorMarkInfo am;
+    getAnchorLiteralXY(ctx->anchorLiteralXY(), am);
+    if ( ctx->cp != nullptr ) {
+        if (am.getXValueRecord().isVariable() || am.getYValueRecord().isVariable()) {
+            TOK(ctx->cp);
+            fc->featMsg(sERROR, "Cannot mix variable values with contour point in anchor");
+        } else {
+            am.setContourpoint(getNum<uint16_t>(TOK(ctx->cp)->getText(), 10));
+        }
+    }
+    return am;
+}
+
+void FeatVisitor::getAnchorLiteralXY(FeatParser::AnchorLiteralXYContext *ctx,
+                                     AnchorMarkInfo &am) {
+    if (ctx->xval != nullptr) {
+        assert(ctx->yval != nullptr);
+        getSingleValueLiteral(ctx->xval, am.getXValueRecord());
+        getSingleValueLiteral(ctx->yval, am.getYValueRecord());
+    } else {
+        assert(ctx->anchorMultiValueLiteral().size() != 0);
+        for (auto amvl : ctx->anchorMultiValueLiteral())
+            addAnchorMultiValue(amvl, am);
+    }
+}
+
+void FeatVisitor::addAnchorMultiValue(FeatParser::AnchorMultiValueLiteralContext *ctx,
+                                      AnchorMarkInfo &am) {
+    assert(ctx->NUM().size() == 2);
+    uint32_t locIndex = getLocationSpecifier(ctx->locationSpecifier());
+    int16_t num = getNum<int16_t>(TOK(ctx->NUM(0))->getText(), 10);
+    am.getXValueRecord().addLocationValue(locIndex, num, fc->g->logger);
+    num = getNum<int16_t>(TOK(ctx->NUM(1))->getText(), 10);
+    am.getYValueRecord().addLocationValue(locIndex, num, fc->g->logger);
+}
+
 uint32_t FeatVisitor::getLocationSpecifier(FeatParser::LocationSpecifierContext *ctx, bool errorOnNull) {
     if (ctx == nullptr) {
         if (errorOnNull)
@@ -1496,6 +1522,7 @@ uint32_t FeatVisitor::getLocationSpecifier(FeatParser::LocationSpecifierContext 
 uint32_t FeatVisitor::getLocationLiteral(FeatParser::LocationLiteralContext *ctx) {
     uint16_t ac = fc->getAxisCount();
     if (ac == 0) {
+        TOK(ctx);
         fc->featMsg(sERROR, "Location literal in non-variable font");
         return 0;
     }
@@ -1513,7 +1540,7 @@ bool FeatVisitor::addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext 
     int16_t axisIndex = fc->axisTagToIndex(tag);
     if (axisIndex < 0)
         return false;
-    assert(axisIndex < l.size());
+    assert(axisIndex < (int16_t)l.size());
 
     std::string unit = ctx->AXISUNIT() ? TOK(ctx->AXISUNIT())->getText() : fc->defAxisUnit;
     if (unit == "d") {
