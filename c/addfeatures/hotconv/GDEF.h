@@ -255,7 +255,7 @@ class GDEF {
     void addLigCaretCoords(GID gid, ValueVector &coords) {
         std::vector<ValueIndex> valIndices;
         for (auto &vvr : coords)
-            valIndices.push_back(addValue(vvr));
+            valIndices.push_back(addTrackerValue(vvr));
         ligCaretTable.addCoords(gid, valIndices);
     }
     void addLigCaretPoints(GID gid, std::vector<uint16_t> &points) {
@@ -267,8 +267,8 @@ class GDEF {
     uint16_t addMarkSetClass(GPat::ClassRec &&markClass) {
         return markSetClassTable.add(std::move(markClass));
     }
-    ValueIndex addValue(const VarValueRecord &vvr) {
-        return ivs.addValue(*(g->ctx.locMap), vvr, g->logger);
+    ValueIndex addTrackerValue(const VarValueRecord &vvr) {
+        return ivs.addTrackerValue(*(g->ctx.locMap), vvr, g->logger);
     }
     void setDevOffset(ValueIndex vi, LOffset o) { ivs.setDevOffset(vi, o); }
     const VarTrackVec &getValues() { return ivs.getValues(); }

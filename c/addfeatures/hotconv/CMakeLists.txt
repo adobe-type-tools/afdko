@@ -44,6 +44,8 @@ add_library(hotconv OBJECT
     maxp.h
     name.cpp
     name.h
+    MVAR.h
+    MVAR.cpp
     OS_2.cpp
     OS_2.h
     otl.cpp
