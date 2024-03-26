@@ -360,6 +360,7 @@ class GSUB;
 class hmtx;
 class vmtx;
 class var_axes;
+class var_MVAR;
 class VarLocationMap;
 
 #define ID_TEXT_SIZE 1024 /* Size of text buffer used to hold identifying info about the current feature for error messages. */
@@ -404,6 +405,7 @@ struct hotCtx_ {
         vheaCtx vhea;
         vmtx *vmtxp;
         var_axes *axes;
+        var_MVAR *MVAR;
         VarLocationMap *locMap;
     } ctx;
     dnaCtx DnaCTX;

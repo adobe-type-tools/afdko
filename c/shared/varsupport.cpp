@@ -824,11 +824,10 @@ void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
     return;
 }
 
-uint32_t itemVariationStore::addValue(VarLocationMap &vlm,
-                                      const VarValueRecord &vvr,
-                                      std::shared_ptr<slogger> logger) {
-    uint32_t index = values.size();
-    uint16_t outer = 0xFFFF, inner = 0xFFFF;
+var_indexPair itemVariationStore::addValue(VarLocationMap &vlm,
+                                           const VarValueRecord &vvr,
+                                           std::shared_ptr<slogger> logger) {
+    var_indexPair r {0xFFFF, 0xFFFF};
     if (vvr.isVariable()) {
         auto ls = vvr.getLocations();
         assert(ls.size() != 0);
@@ -843,11 +842,19 @@ uint32_t itemVariationStore::addValue(VarLocationMap &vlm,
             locationSetMap.emplace(std::move(ls), modelIndex);
         }
         auto &model = models[modelIndex];
-        outer = model->subtableIndex;
-        inner = model->addValue(vvr, logger);
+        r.outerIndex = model->subtableIndex;
+        r.innerIndex = model->addValue(vvr, logger);
     }
-    values.emplace_back(vvr.getDefault(), outer, inner);
-    return index;
+    return r;
+}
+
+uint32_t itemVariationStore::addTrackerValue(VarLocationMap &vlm,
+                                             const VarValueRecord &vvr,
+                                             std::shared_ptr<slogger> logger) {
+    uint32_t r = values.size();
+    auto pair = addValue(vlm, vvr, logger);
+    values.emplace_back(vvr.getDefault(), pair.outerIndex, pair.innerIndex);
+    return r;
 }
 
 static bool loadIndexMap(ctlSharedStmCallbacks *sscb, sfrTable *table,
@@ -1354,11 +1361,6 @@ bool var_vmtx::lookup(ctlSharedStmCallbacks *sscb, uint16_t axisCount,
 /* MVAR table */
 
 var_MVAR::var_MVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
-    uint32_t ivsOffset;
-    uint16_t valueRecordSize;
-    uint16_t valueRecordCount;
-    uint16_t i;
-
     sfrTable *table = sfrGetTableByTag(sfr, MVAR_TABLE_TAG);
     if (table == NULL)
         return;
@@ -1377,9 +1379,9 @@ var_MVAR::var_MVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     }
 
     axisCount = sscb->read2(sscb);
-    valueRecordSize = sscb->read2(sscb);
-    valueRecordCount = sscb->read2(sscb);
-    ivsOffset = (uint32_t)sscb->read2(sscb);
+    uint16_t valueRecordSize = sscb->read2(sscb);
+    uint16_t valueRecordCount = sscb->read2(sscb);
+    uint32_t ivsOffset = (uint32_t)sscb->read2(sscb);
 
     if (ivsOffset == 0) {
         sscb->message(sscb, "item variation store offset in MVAR is NULL");
@@ -1398,14 +1400,13 @@ var_MVAR::var_MVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
         return;
     }
 
-    for (i = 0; i < valueRecordCount; i++) {
-        MVARValueRecord mvr;
-        mvr.valueTag = sscb->read4(sscb);
-        mvr.pair.outerIndex = sscb->read2(sscb);
-        mvr.pair.innerIndex = sscb->read2(sscb);
+    for (int i = 0; i < valueRecordCount; i++) {
+        ctlTag t = sscb->read4(sscb);
+        uint16_t outerIndex = sscb->read2(sscb);
+        uint16_t innerIndex = sscb->read2(sscb);
         for (int j = MVAR_TABLE_RECORD_SIZE; j < valueRecordSize; j++)
             (void)sscb->read1(sscb);
-        values.push_back(mvr);
+        values.emplace(t, var_indexPair(outerIndex, innerIndex));
     }
 
     ivs = std::make_unique<itemVariationStore>(sscb, table->offset,
@@ -1414,43 +1415,57 @@ var_MVAR::var_MVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
 
 bool var_MVAR::lookup(ctlSharedStmCallbacks *sscb, uint16_t axisCount,
                       Fixed *instCoords, ctlTag tag, float &value) {
-    long top, bot, index;
-    MVARValueRecord *rec = NULL;
-    bool found = false;
-    float scalars[CFF2_MAX_MASTERS];
+    if (!ivs)
+        return false;
 
     if (instCoords == 0 || axisCount == 0) {
         sscb->message(sscb, "zero instCoords/axis count specified for MVAR");
         return false;
     }
 
-    bot = 0;
-    top = (long)values.size() - 1;
-    while (bot <= top) {
-        index = (top + bot) / 2;
-        rec = &values[index];
-        if (rec->valueTag == tag) {
-            found = true;
-            break;
-        }
-        if (tag < rec->valueTag)
-            top = index - 1;
-        else
-            bot = index + 1;
-    }
-
-    if (!found) {
-        /* Specified tag was not found. */
+    auto i = values.find(tag);
+    if (i == values.end())
         return false;
-    }
+
+    float scalars[CFF2_MAX_MASTERS];
 
     ivs->calcRegionScalars(sscb, axisCount, instCoords, scalars);
 
     /* Blend the metric value using the IVS table */
-    value = ivs->applyDeltasForIndexPair(sscb, rec->pair, scalars,
+    value = ivs->applyDeltasForIndexPair(sscb, i->second, scalars,
                                          ivs->getRegionCount());
 
     return true;
+}
+
+void var_MVAR::write(VarWriter &vw) {
+    if (!ivs)
+        return;
+
+    vw.w2(1);  // major version
+    vw.w2(0);  // minor version
+    vw.w2(0);  // reserved
+    uint16_t recordSize = sizeof(uint32_t) + 2 * sizeof(uint16_t);
+    vw.w2(recordSize);
+    vw.w2((uint16_t)values.size());
+    uint16_t ivsOffset = sizeof(uint16_t) * 6 + recordSize * values.size();
+    vw.w2(ivsOffset);
+    for (auto &[tag, pair] : values) {
+        vw.w4(tag);
+        vw.w2(pair.outerIndex);
+        vw.w2(pair.innerIndex);
+    }
+    ivs->write(vw);
+}
+
+void var_MVAR::addValue(ctlTag tag, VarLocationMap &vlm,
+                        const VarValueRecord &vvr,
+                        std::shared_ptr<slogger> logger) {
+    assert(ivs != nullptr);
+    auto pair = ivs->addValue(vlm, vvr, logger);
+    if (pair.outerIndex == 0xFFFF)
+        return;
+    values.insert_or_assign(tag, pair);
 }
 
 /* Get version numbers of libraries. */

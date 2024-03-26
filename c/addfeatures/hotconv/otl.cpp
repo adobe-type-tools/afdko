@@ -1014,8 +1014,8 @@ ValueIndex OTL::nextValueIndex() {
     return getValues().size();
 }
 
-ValueIndex OTL::addValue(const VarValueRecord &vvr) {
-    return g->ctx.GDEFp->addValue(vvr);
+ValueIndex OTL::addTrackerValue(const VarValueRecord &vvr) {
+    return g->ctx.GDEFp->addTrackerValue(vvr);
 }
 
 void OTL::setDevOffset(ValueIndex vi, LOffset o) {

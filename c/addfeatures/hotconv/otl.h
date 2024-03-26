@@ -344,7 +344,7 @@ class OTL {
     virtual void writeVarSubtables(uint32_t valFmt, ValueIndex i) { assert(false); }
     virtual const VarTrackVec &getValues();
     virtual ValueIndex nextValueIndex();
-    virtual ValueIndex addValue(const VarValueRecord &vvr);
+    virtual ValueIndex addTrackerValue(const VarValueRecord &vvr);
     virtual void setDevOffset(ValueIndex vi, LOffset o);
 
  protected:

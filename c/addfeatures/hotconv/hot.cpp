@@ -361,8 +361,9 @@ static void hotReadTables(hotCtx g) {
                     }
                     // temporary, will read in and write back out
                     table = sfrGetTableByTag(sfr, MVAR_);
-                    if (table != NULL)
-                        sfntOverrideTable(g, MVAR_, table->offset, table->length);
+                    if (table != NULL) {
+                        g->ctx.MVAR = new var_MVAR(sfr, &g->sscb);
+                    }
                 }
             }
             // call name function to read in extra labels
@@ -393,6 +394,8 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
 
     g->ctx.locMap = new VarLocationMap(g->ctx.feat->getAxisCount());
     g->ctx.GDEFp->setAxisCount(g->ctx.feat->getAxisCount());
+    if (g->ctx.MVAR != nullptr)
+        g->ctx.MVAR->setAxisCount(g->ctx.feat->getAxisCount());
 
     /* Copy conversion flags */
     g->font.flags = 0;
@@ -794,6 +797,8 @@ static void hotReuse(hotCtx g) {
     g->ctx.locMap = nullptr;
     delete g->ctx.axes;
     g->ctx.axes = nullptr;
+    delete g->ctx.MVAR;
+    g->ctx.MVAR = nullptr;
 
     initOverrides(g);
     sfntReuse(g);
