@@ -230,7 +230,7 @@ LOffset GPOS::recordValues(uint32_t valFmt, MetricsInfo &mi, LOffset o) {
     for (uint16_t b = 1; b < 16; b *= 2) {
         if (valFmt & b) {
             auto &vvr = mi.getRecordByFlag(b);
-            auto t = addValue(vvr);
+            auto t = addTrackerValue(vvr);
             if (valFmt & (b << 4)) {
                 if (vvr.isVariable()) {
                     setDevOffset(t, o);
@@ -1555,8 +1555,8 @@ LOffset GPOS::AnchorPosBase::getAnchorOffset(GPOS &h,
 
     ValueIndex xIndex {VAL_INDEX_UNDEF};
     if (anchor->isInitialized()) {
-        xIndex = h.addValue(anchor->getXValueRecord());
-        h.addValue(anchor->getYValueRecord());
+        xIndex = h.addTrackerValue(anchor->getXValueRecord());
+        h.addTrackerValue(anchor->getYValueRecord());
     }
     anchorList.emplace_back(anchor, offst, xIndex, anchor->getContourpoint());
     return offst;

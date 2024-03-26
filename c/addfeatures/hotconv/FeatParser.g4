@@ -399,7 +399,7 @@ os_2Statement:
 
 os_2:
       ( TYPO_ASCENDER | TYPO_DESCENDER | TYPO_LINE_GAP
-      | WIN_ASCENT | WIN_DESCENT | X_HEIGHT | CAP_HEIGHT ) num=NUM
+      | WIN_ASCENT | WIN_DESCENT | X_HEIGHT | CAP_HEIGHT ) num=singleValueLiteral
     |
       ( FS_TYPE | FS_TYPE_v | WEIGHT_CLASS | WIDTH_CLASS
       | OS2_LOWER_OP_SIZE | OS2_UPPER_OP_SIZE ) unum=NUM

@@ -457,8 +457,10 @@ class itemVariationStore {
                             uint16_t gid, float *scalars,
                             int32_t regionListCount);
 
-    uint32_t addValue(VarLocationMap &vlm, const VarValueRecord &vvr,
-                      std::shared_ptr<slogger> logger);
+    var_indexPair addValue(VarLocationMap &vlm, const VarValueRecord &vvr,
+                           std::shared_ptr<slogger> logger);
+    uint32_t addTrackerValue(VarLocationMap &vlm, const VarValueRecord &vvr,
+                             std::shared_ptr<slogger> logger);
 
     void setDevOffset(ValueIndex vi, LOffset o) {
         assert(vi < (ValueIndex)values.size());
@@ -708,6 +710,7 @@ class var_vmtx {
 
 class var_MVAR {
  public:
+    var_MVAR() {}
     var_MVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb);
 
     /* lookup font-wide metric values for a tag blended using font instance
@@ -720,15 +723,23 @@ class var_MVAR {
     value      - where the blended metric value is returned.
      */
     bool lookup(ctlSharedStmCallbacks *sscb, uint16_t axisCount, Fixed *instCoords, ctlTag tag, float &value);
- private:
-    struct MVARValueRecord {
-        ctlTag valueTag {0};
-        var_indexPair pair;
-    };
 
-    std::unique_ptr<itemVariationStore> ivs;
+    void setAxisCount(uint16_t ac) {
+        assert(axisCount == 0);
+        axisCount = ac;
+        if (ivs == nullptr) {
+            ivs = std::make_unique<itemVariationStore>();
+            ivs->setAxisCount(ac);
+        }
+    }
+    void write(VarWriter &vw);
+    void addValue(ctlTag tag, VarLocationMap &vlm, const VarValueRecord &vvr,
+                  std::shared_ptr<slogger> logger);
+    bool hasValues() { return values.size() > 0; }
+ private:
     uint16_t axisCount {0};
-    std::vector<MVARValueRecord> values;
+    std::map<ctlTag, var_indexPair> values;
+    std::unique_ptr<itemVariationStore> ivs;
 };
 
 /* returns the library version number and name via the client
