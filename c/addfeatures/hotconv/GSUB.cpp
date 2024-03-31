@@ -292,7 +292,7 @@ void GSUB::FeatureNameParam::fill(GSUB &h, SubtableInfo &si) {
         ((si.feature >> 16 & 0xFF) == (int)'s') &&
         (ssNumber <= 99)) {
         if (si.paramNameID != 0) {
-            uint16_t nameIDPresent = nameVerifyDefaultNames(h.g, si.paramNameID);
+            uint16_t nameIDPresent = verifyDefaultNames(h.g, si.paramNameID);
             if (nameIDPresent && (nameIDPresent & MISSING_WIN_DEFAULT_NAME)) {
                 h.g->logger->log(sFATAL,
                                  "Missing Windows default name for 'featureNames' nameid %i in %s.",
@@ -331,7 +331,7 @@ void GSUB::CVParam::fill(GSUB &h, SubtableInfo &si) {
         for (int i = 0; i < 4; i++) {
             uint16_t nameid = nameIDs[i];
             if (nameid != 0) {
-                uint16_t nameIDPresent = nameVerifyDefaultNames(h.g, nameid);
+                uint16_t nameIDPresent = verifyDefaultNames(h.g, nameid);
                 if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
                     h.g->logger->log(sFATAL,
                                      "Missing Windows default name for 'cvParameters' nameid %i in %s.",

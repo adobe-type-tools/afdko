@@ -261,15 +261,14 @@ void cfrFree(cfrCtx h);
 /* cfrFree() destroys the library context and all the resources allocated to
    it. */
 
-typedef long (*cfrlastResortInstanceNameCallback)(void *clientCtx, float *udv, long numAxes,
-                                                  char *prefixStr, long prefixLen,
-                                                  char *nameBuffer, long nameBufferLen);
+typedef std::string (*cfrlastResortInstanceNameCallback)(void *clientCtx, float *udv, long numAxes,
+                                                         const std::string &prefix, size_t maxLen);
 /* CFF2 variable font last resort naming callback
 
-   If successful, the function should return a positive length of the string
-   returned in nameBuffer.
+   If successful, the function should return a string representing the
+   instance of a length not greater than maxLen.
 
-   If unsuccessful, the function returns a non-positive number.
+   If unsuccessful, the function returns the empty string.
 
    clientCtx - context pointer passed to cfrSetLastResortInstanceNameCallback
 
@@ -277,15 +276,10 @@ typedef long (*cfrlastResortInstanceNameCallback)(void *clientCtx, float *udv, l
 
    numAxes - the number of axes, or the length of udv array
 
-   prefixStr - a null-terminated string of the variable font family name,
-               to be used as a prefix of the instance name
+   prefix - the variable font family name, to be used as a prefix of the
+            instance name
 
-   prefixLen - length of the prefix string
-
-   nameBuffer - string buffer where a null-terminated Postscript name of the
-                variable font instance should be returned by the client
-
-   nameBufferLen - the length of the nameBuffer (including a null-byte) */
+   maxLen - The maximum length of the string to be returned */
 
 void cfrSetLastResortInstanceNameCallback(cfrCtx h, cfrlastResortInstanceNameCallback cb, void *clientCtx);
 

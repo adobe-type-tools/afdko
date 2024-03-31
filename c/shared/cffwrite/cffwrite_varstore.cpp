@@ -8,6 +8,7 @@
 
 #include "cffwrite_varstore.h"
 
+#include <cassert>
 #include <stdio.h>
 #include <vector>
 
@@ -34,6 +35,7 @@ class cfwVarWriter : public VarWriter {
         arg[2] = (unsigned char)(o >> 8);
         arg[3] = (unsigned char)o;
     }
+    void w(size_t count, char *data) { assert(false); }
     DICT *dict;
 };
 

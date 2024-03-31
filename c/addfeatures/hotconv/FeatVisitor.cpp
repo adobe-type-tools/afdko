@@ -704,7 +704,7 @@ antlrcpp::Any FeatVisitor::visitFeatureNames(FeatParser::FeatureNamesContext *ct
 
     if ( stage == vExtract ) {
         fc->sawFeatNames = true;
-        fc->featNameID = nameReserveUserID(fc->g);
+        fc->featNameID =  fc->g->ctx.name->reserveUserID();;
         fc->addNameFn = &FeatCtx::addFeatureNameString;
     }
 

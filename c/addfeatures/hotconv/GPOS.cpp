@@ -333,7 +333,7 @@ void GPOS::FeatureParameters::fill(GPOS &h, SubtableInfo &si) {
         /* check if the default names are present, */
         /* and complain if they are not.           */
         if (nameid != 0) {
-            uint16_t nameIDPresent = nameVerifyDefaultNames(h.g, nameid);
+            uint16_t nameIDPresent = verifyDefaultNames(h.g, nameid);
             if (nameIDPresent && nameIDPresent & MISSING_WIN_DEFAULT_NAME) {
                 h.g->logger->log(sFATAL, "Missing Windows default name for 'sizemenuname' nameid %i in 'size' feature.", nameid);
             }
