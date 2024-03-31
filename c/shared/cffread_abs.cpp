@@ -23,7 +23,7 @@
 #include "txops.h"
 #include "ctutil.h"
 #include "sfntread.h"
-#include "nameread.h"
+#include "namesupport.h"
 #include "varsupport.h"
 #include "supportfp.h"
 #include "supportexcept.h"
@@ -176,7 +176,7 @@ struct cfrCtx_ {  // Context
         var_axes *axes;
         var_hmtx *hmtx;
         var_MVAR *mvar;
-        nam_name name;
+        nam_name *name;
         itemVariationStore *varStore;
         void *lastResortInstanceNameClientCtx;
         cfrlastResortInstanceNameCallback lastResortInstanceNameCallback;
@@ -2418,58 +2418,51 @@ static void resetStringPtrs(cfrCtx h, strPtrArray *ptrs) {
     }
 }
 
-static long generateInstancePSName(cfrCtx h, char *nameBuffer, long nameBufferLen) {
-    long nameLen;
+static std::string generateInstancePSName(cfrCtx h, size_t nameLimit) {
+    std::string s;
 
     /* Get a named-instance name from the fvar table, if it is preferred and one is available */
     if (!(h->flags & CFR_UNUSE_VF_NAMED_INSTANCE)) {
-        nameLen = nam_getNamedInstancePSName(h->cff2.name, h->cff2.axes, &h->cb.shstm,
-                                             h->cff2.UDV, h->cff2.axisCount, -1,
-                                             nameBuffer, nameBufferLen);
-        if (nameLen > 0)
-            return nameLen;
+        s = h->cff2.name->getNamedInstancePSName(h->cff2.axes, h->cff2.UDV,
+                                                 h->cff2.axisCount, -1);
+        if (s.size() > 0 && s.size() < nameLimit)
+            return s;
     }
 
     /* Generate an instance name from the design vector */
-    nameLen = nam_generateArbitraryInstancePSName(h->cff2.name, h->cff2.axes, &h->cb.shstm,
-                                                  h->cff2.UDV, h->cff2.axisCount,
-                                                  nameBuffer, nameBufferLen);
-    if (nameLen > 0)
-        return nameLen;
+    s = h->cff2.name->generateArbitraryInstancePSName(h->cff2.axes, h->cff2.UDV,
+                                                      h->cff2.axisCount, &h->cb.shstm);
+    if (s.size() > 0 && s.size() < nameLimit)
+        return s;
 
     /* If above attempts failed, generate a last-resort name. If a naming callback
        is provided, try it first. */
     if (h->cff2.lastResortInstanceNameCallback) {
-        char prefixBuffer[LONG_PS_NAME_LIMIT + 1];
-        long prefixLen;
+        auto prefix = h->cff2.name->getFamilyNamePrefix();
+        if (prefix.size() == 0);
+            return "";
 
-        prefixLen = nam_getFamilyNamePrefix(h->cff2.name, &h->cb.shstm, prefixBuffer, LONG_PS_NAME_LIMIT + 1);
-        if (prefixLen <= 0)
-            return prefixLen;
+        s = (*h->cff2.lastResortInstanceNameCallback)(h->cff2.lastResortInstanceNameClientCtx, h->cff2.UDV,
+                                                      h->cff2.axisCount, prefix, nameLimit);
 
-        nameLen = (*h->cff2.lastResortInstanceNameCallback)(h->cff2.lastResortInstanceNameClientCtx, h->cff2.UDV, h->cff2.axisCount, prefixBuffer, prefixLen, nameBuffer, nameBufferLen);
-
-        if (nameLen > 0)
-            return nameLen;
+        if (s.size() > 0 && s.size() < nameLimit)
+            return s;
     }
 
     /* Use our own last resort name */
-    nameLen = nam_generateLastResortInstancePSName(h->cff2.name, h->cff2.axes, &h->cb.shstm,
-                                                   h->cff2.UDV, h->cff2.axisCount,
-                                                   nameBuffer, nameBufferLen);
+    s = h->cff2.name->generateLastResortInstancePSName(h->cff2.axes, h->cff2.UDV,
+                                                       h->cff2.axisCount, &h->cb.shstm, nameLimit);
 
-    return nameLen;
+    return s;
 }
 
 static void makeupCFF2Info(cfrCtx h) {
     abfTopDict *top = &h->top;
     sfrTable *table;
-    long lenFontName;
     char postscriptName[LONG_PS_NAME_LIMIT + 1];
     char stringBuffer1[STRING_BUFFER_LIMIT + 1];
     char stringBuffer2[STRING_BUFFER_LIMIT + 1];
     unsigned long nameLengthLimit;
-    long lenTrademark;
     strPtrArray strPtrs;
 
     dnaINIT(h->ctx.dna, strPtrs, 10, 1);
@@ -2552,22 +2545,22 @@ static void makeupCFF2Info(cfrCtx h) {
     }
 
     /* read Notice, FullName, FamilyName, Copyright from name table */
-    lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_FULL, 0);
-    if (lenFontName > 0)
-        addString(h, &strPtrs, &h->top.FullName, stringBuffer1);
-    lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_FAMILY, 0);
-    if (lenFontName > 0)
-        addString(h, &strPtrs, &h->top.FamilyName, stringBuffer1);
-    lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer1, sizeof(stringBuffer1), NAME_ID_COPYRIGHT, 0);
-    if (lenFontName > 0)
-        addString(h, &strPtrs, &h->top.Copyright, stringBuffer1);
-    lenTrademark = nam_getASCIIName(h->cff2.name, &h->cb.shstm, stringBuffer2, sizeof(stringBuffer2), NAME_ID_TRADEMARK, 0);
-    if (lenFontName > 0 && lenTrademark > 0 && ((unsigned long)(lenFontName + lenTrademark) + 2 < sizeof(stringBuffer1))) { /* concatenate copyright and trademark strings */
-        STRCAT_S(stringBuffer1, STRING_BUFFER_LIMIT, " ");
-        STRCAT_S(stringBuffer1, STRING_BUFFER_LIMIT, stringBuffer2);
+    auto str = h->cff2.name->getASCIIName(nam_name::NAME_ID_FULL, 0);
+    if (str.size() > 0)
+        addString(h, &strPtrs, &h->top.FullName, str.c_str());
+    str = h->cff2.name->getASCIIName(nam_name::NAME_ID_FAMILY, 0);
+    if (str.size() > 0)
+        addString(h, &strPtrs, &h->top.FamilyName, str.c_str());
+    str = h->cff2.name->getASCIIName(nam_name::NAME_ID_COPYRIGHT, 0);
+    if (str.size() > 0)
+        addString(h, &strPtrs, &h->top.Copyright, str.c_str());
+    auto tradestr = h->cff2.name->getASCIIName(nam_name::NAME_ID_TRADEMARK, 0);
+    if (str.size() > 0 && tradestr.size() > 0) {
+        str += " ";
+        str += tradestr;
     }
-    if (lenFontName > 0)
-        addString(h, &strPtrs, &h->top.Notice, stringBuffer1);
+    if (str.size() > 0)
+        addString(h, &strPtrs, &h->top.Notice, str.c_str());
 
     /* generate PostScript name for the instance */
     if (h->flags & CFR_SHORT_VF_NAME)
@@ -2576,20 +2569,18 @@ static void makeupCFF2Info(cfrCtx h) {
         nameLengthLimit = LONG_PS_NAME_LIMIT;
 
     /* generate an instance PostScript name */
-    lenFontName = generateInstancePSName(h, postscriptName, nameLengthLimit + 1);
+    str = generateInstancePSName(h, nameLengthLimit);
 
-    if (lenFontName > 0) {
-        addString(h, &strPtrs, &h->fdicts.array[0].FontName, postscriptName);
-    }
+    if (str.size() > 0)
+        addString(h, &strPtrs, &h->fdicts.array[0].FontName, str.c_str());
 
     /* Load CIDFontName from name table and make up CID font ROS */
     if (h->flags & CID_FONT) {
-        lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_CIDFONTNAME, 1);
-        if (lenFontName <= 0) /* if no CID font name in the name table, put PS name instead */
-            lenFontName = nam_getASCIIName(h->cff2.name, &h->cb.shstm, postscriptName, sizeof(postscriptName), NAME_ID_POSTSCRIPT, 1);
-
-        if (lenFontName > 0)
-            addString(h, &strPtrs, &h->top.cid.CIDFontName, postscriptName);
+        str = h->cff2.name->getASCIIName(nam_name::NAME_ID_CIDFONTNAME, 1);
+        if (str.size() == 0)
+            str = h->cff2.name->getASCIIName(nam_name::NAME_ID_POSTSCRIPT, 1);
+        if (str.size() > 0)
+            addString(h, &strPtrs, &h->top.cid.CIDFontName, str.c_str());
         addString(h, &strPtrs, &h->top.cid.Registry, "Adobe");
         addString(h, &strPtrs, &h->top.cid.Ordering, "Identity");
         h->top.cid.Supplement = 1;
@@ -2719,7 +2710,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
             }
 
             /* name table */
-            h->cff2.name = nam_loadname(h->ctx.sfr, &h->cb.shstm);
+            h->cff2.name = new nam_name(h->ctx.sfr, &h->cb.shstm);
         }
     }
 
@@ -3108,7 +3099,7 @@ int cfrEndFont(cfrCtx h) {
         delete h->cff2.axes;
         delete h->cff2.hmtx;
         delete h->cff2.mvar;
-        nam_freename(&h->cb.shstm, h->cff2.name);
+        delete h->cff2.name;
     }
 
     return cfrSuccess;

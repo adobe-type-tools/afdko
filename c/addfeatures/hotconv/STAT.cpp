@@ -130,7 +130,7 @@ int STATFill(hotCtx g) {
         return 0;
     }
 
-    if (!nameVerifyIDExists(g, h->elidedFallbackNameID))
+    if (!g->ctx.name->verifyIDExists(h->elidedFallbackNameID))
         g->logger->log(sFATAL, "[STAT] ElidedFallbackNameID points to a nameID that "
                        "does not exist in \"name\" table.");
 

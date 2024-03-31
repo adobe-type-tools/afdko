@@ -728,24 +728,24 @@ class FeatCtx {
     size_t axistag_count {0};
     antlr4::Token *axistag_token {nullptr};
     FeatVisitor *axistag_visitor {nullptr};
-    void (FeatCtx::*addNameFn)(long platformId, long platspecId,
-                               long languageId, const std::string &str);
+    void (FeatCtx::*addNameFn)(int32_t platformId, int32_t platspecId,
+                               int32_t languageId, const std::string &str);
 
     void startTable(Tag tag);
     void setGDEFGlyphClassDef(GPat::ClassRec &simple, GPat::ClassRec &ligature,
                               GPat::ClassRec &mark, GPat::ClassRec &component);
     void createDefaultGDEFClasses();
     void setFontRev(const std::string &rev);
-    void addNameString(long platformId, long platspecId,
-                       long languageId, long nameId,
+    void addNameString(int32_t platformId, int32_t platspecId,
+                       int32_t languageId, int32_t nameId,
                        const std::string &str);
-    void addSizeNameString(long platformId, long platspecId,
-                           long languageId, const std::string &str);
-    void addFeatureNameString(long platformId, long platspecId,
-                              long languageId, const std::string &str);
+    void addSizeNameString(int32_t platformId, int32_t platspecId,
+                           int32_t languageId, const std::string &str);
+    void addFeatureNameString(int32_t platformId, int32_t platspecId,
+                              int32_t languageId, const std::string &str);
     void addFeatureNameParam();
-    void addUserNameString(long platformId, long platspecId,
-                           long languageId, const std::string &str);
+    void addUserNameString(int32_t platformId, int32_t platspecId,
+                           int32_t languageId, const std::string &str);
     void addVendorString(std::string str);
 
     // Anchors

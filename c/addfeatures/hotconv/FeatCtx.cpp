@@ -1276,8 +1276,9 @@ void FeatCtx::setFontRev(const std::string &rev) {
 
 /* Add name string to name table. */
 
-void FeatCtx::addNameString(long platformId, long platspecId,
-                            long languageId, long nameId, const std::string &str) {
+void FeatCtx::addNameString(int32_t platformId, int32_t platspecId,
+                            int32_t languageId, int32_t nameId,
+                            const std::string &str) {
     bool nameError = false;
     if ((nameId == 2) || (nameId == 6) || ((nameId >= 26) && (nameId <= 255)))
         nameError = true;
@@ -1312,8 +1313,8 @@ void FeatCtx::addNameString(long platformId, long platspecId,
     }
 
     if (hotAddName(g,
-                   (unsigned short)platformId, (unsigned short)platspecId,
-                   (unsigned short)languageId, (unsigned short)nameId,
+                   (uint16_t)platformId, (uint16_t)platspecId,
+                   (uint16_t)languageId, (uint16_t)nameId,
                    str.c_str())) {
         featMsg(sERROR, "Bad string");
     }
@@ -1321,14 +1322,14 @@ void FeatCtx::addNameString(long platformId, long platspecId,
 
 /* Add 'size' feature submenuname name string to name table. */
 
-void FeatCtx::addSizeNameString(long platformId, long platspecId,
-                                long languageId, const std::string &str) {
-    unsigned short nameID;
+void FeatCtx::addSizeNameString(int32_t platformId, int32_t platspecId,
+                                int32_t languageId, const std::string &str) {
+    uint16_t nameID;
 
     /* We only need to reserve a name ID *once*; after the first time, */
     /* all subsequent sizemenunames will share the same nameID.        */
     if (featNameID == 0) {
-        nameID = nameReserveUserID(g);
+        nameID = g->ctx.name->reserveUserID();
         g->ctx.GPOSp->SetSizeMenuNameID(nameID);
         featNameID = nameID;
     } else {
@@ -1340,14 +1341,14 @@ void FeatCtx::addSizeNameString(long platformId, long platspecId,
 
 /* Add 'name for feature string to name table. */
 
-void FeatCtx::addFeatureNameString(long platformId, long platspecId,
-                                   long languageId, const std::string &str) {
-    unsigned short nameID;
+void FeatCtx::addFeatureNameString(int32_t platformId, int32_t platspecId,
+                                   int32_t languageId, const std::string &str) {
+    uint16_t nameID;
 
     /* We only need to reserve a name ID *once*; after the first time, */
     /* all subsequent sizemenunames will share the same nameID.        */
     if (featNameID == 0) {
-        nameID = nameReserveUserID(g);
+        nameID = g->ctx.name->reserveUserID();
         g->ctx.GSUBp->SetFeatureNameID(curr.feature, nameID);
         featNameID = nameID;
     } else {
@@ -1365,13 +1366,13 @@ void FeatCtx::addFeatureNameParam() {
     wrapUpRule();
 }
 
-void FeatCtx::addUserNameString(long platformId, long platspecId,
-                                long languageId, const std::string &str) {
-    unsigned short nameID;
+void FeatCtx::addUserNameString(int32_t platformId, int32_t platspecId,
+                                int32_t languageId, const std::string &str) {
+    uint16_t nameID;
 
     /* We only need to reserve a name ID *once*. */
     if (featNameID == 0) {
-        nameID = nameReserveUserID(g);
+        nameID = g->ctx.name->reserveUserID();
         featNameID = nameID;
     } else {
         nameID = featNameID;

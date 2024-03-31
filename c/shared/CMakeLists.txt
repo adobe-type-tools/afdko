@@ -34,7 +34,7 @@ add_library(shared OBJECT
     goadb.cpp
     support/except.c
     support/fixed.c
-    nameread.cpp
+    namesupport.cpp
     pdfwrite.cpp
     pstoken.cpp
     sfile.cpp
@@ -78,7 +78,7 @@ add_library(shared OBJECT
     include/da.h
     include/dynarr.h
     include/goadb.h
-    include/nameread.h
+    include/namesupport.h
     include/pdfwrite.h
     include/pdwerr.h
     include/psterr.h

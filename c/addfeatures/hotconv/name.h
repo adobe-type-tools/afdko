@@ -7,6 +7,8 @@
 
 #include "common.h"
 
+#include "namesupport.h"
+
 #define name_ TAG('n', 'a', 'm', 'e')
 
 #define MISSING_MAC_DEFAULT_NAME 0x0002
@@ -19,18 +21,9 @@ void nameWrite(hotCtx g);
 void nameReuse(hotCtx g);
 void nameFree(hotCtx g);
 
-/* Supplementary functions */
-void nameRead(hotCtx g, int offset, int length);
-void nameAddReg(hotCtx g,
-                unsigned short platformId,
-                unsigned short platspecId,
-                unsigned short languageId,
-                unsigned short nameId, const char *str);
-unsigned short nameAddUser(hotCtx g, const char *str);
+void nameAdd(hotCtx g, uint16_t platformId, uint16_t platspecId,
+             uint16_t languageId, uint16_t nameId, const std::string &str);
 
-unsigned short nameReserveUserID(hotCtx g);
-
-int nameVerifyDefaultNames(hotCtx g, unsigned short nameId);
-bool nameVerifyIDExists(hotCtx g, unsigned short nameId);
+int verifyDefaultNames(hotCtx g, uint16_t nameId);
 
 #endif  // ADDFEATURES_HOTCONV_NAME_H_
