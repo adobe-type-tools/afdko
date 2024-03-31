@@ -462,8 +462,8 @@ Blank lines, and characters following the comment char "#" on a line, are ignore
 */
 
 int hotAddName(hotCtx g,
-               unsigned short platformId, unsigned short platspecId,
-               unsigned short languageId, unsigned short nameId,
+               uint16_t platformId, uint16_t platspecId,
+               uint16_t languageId, uint16_t nameId,
                const char *str);
 
 /* hotAddName() is called to add menu names. This name will be directly stored

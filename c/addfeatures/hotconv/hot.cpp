@@ -189,7 +189,7 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->ctx.head = NULL;
     g->ctx.hhea = NULL;
     g->ctx.hmtxp = nullptr;
-    g->ctx.name = NULL;
+    g->ctx.name = nullptr;
     g->ctx.post = NULL;
     g->ctx.sfnt = NULL;
     g->ctx.vhea = NULL;
@@ -339,7 +339,7 @@ static void hotReadTables(hotCtx g) {
                     table = sfrGetTableByTag(sfr, name_);
                     if (table == NULL)
                         g->logger->log(sFATAL, "CFF2 sfnt must contain name table");
-                    nameRead(g, table->offset, table->length);
+                    g->ctx.name = new nam_name(sfr, &g->sscb);
                     table = sfrGetTableByTag(sfr, post_);
                     if (table != NULL) {
                         postRead(g, table->offset, table->length);
@@ -914,7 +914,7 @@ void hotAddMiscData(hotCtx g,
 
 /* Prepare Windows name by converting \-format numbers to UTF-8. Return 1 on
    syntax error else 0. */
-static int prepWinName(hotCtx g, const char *src) {
+static bool prepWinName(std::string &s, const char *src) {
     /* Next state table */
     static unsigned char next[5][6] = {
         /*  \       0-9     a-f     A-F     *       \0       index */
@@ -937,14 +937,13 @@ static int prepWinName(hotCtx g, const char *src) {
     static unsigned char action[5][6] = {
         /*  \       0-9     a-f     A-F     *       \0       index */
         /* -------- ------- ------- ------- ------- -------- ----- */
-        {   0,      B_,     B_,     B_,     B_,     B_|Q_ },/* [0] */
+        {   0,      B_,     B_,     B_,     B_,     Q_ },   /* [0] */
         {   E_,     A_,     A_,     A_,     E_,     E_ },   /* [1] */
         {   E_,     A_,     A_,     A_,     E_,     E_ },   /* [2] */
         {   E_,     A_,     A_,     A_,     E_,     E_ },   /* [3] */
         {   E_,     A_|H_,  A_|H_,  A_|H_,  E_,     E_ },   /* [4] */
     };
 
-    g->tmp.clear();
     int state = 0;
     unsigned value = 0;
 
@@ -1010,10 +1009,10 @@ static int prepWinName(hotCtx g, const char *src) {
             continue;
         }
         if (actn & E_) {
-            return 1; /* Syntax error */
+            return false; /* Syntax error */
         }
         if (actn & B_) {
-            g->tmp.push_back(c);
+            s.push_back(c);
         }
         if (actn & A_) {
             value = value << 4 | hexdig;
@@ -1021,21 +1020,21 @@ static int prepWinName(hotCtx g, const char *src) {
         if (actn & H_) {
             /* Save 16-bit value in UTF-8 format */
             if (value == 0) {
-                return 1; /* Syntax error */
+                return false; /* Syntax error */
             } else if (value < 0x80) {
-                g->tmp.push_back(value);
+                s.push_back(value);
             } else if (value < 0x800) {
-                g->tmp.push_back(0xc0 | value >> 6);
-                g->tmp.push_back(0x80 | (value & 0x3f));
+                s.push_back(0xc0 | value >> 6);
+                s.push_back(0x80 | (value & 0x3f));
             } else {
-                g->tmp.push_back(0xe0 | value >> 12);
-                g->tmp.push_back(0x80 | (value >> 6 & 0x3f));
-                g->tmp.push_back(0x80 | (value & 0x3f));
+                s.push_back(0xe0 | value >> 12);
+                s.push_back(0x80 | (value >> 6 & 0x3f));
+                s.push_back(0x80 | (value & 0x3f));
             }
             value = 0;
         }
         if (actn & Q_) {
-            return 0;
+            return true;
         }
     }
 #undef E_
@@ -1047,7 +1046,7 @@ static int prepWinName(hotCtx g, const char *src) {
 
 /* Prepare Macintosh name by converting \-format numbers to bytes. Return 1 on
    syntax error else 0. */
-static int prepMacName(hotCtx g, const char *src) {
+static bool prepMacName(std::string &s, const char *src) {
     /* Next state table */
     static unsigned char next[3][6] = {
         /*  \       0-9     a-f     A-F     *       \0       index */
@@ -1068,12 +1067,11 @@ static int prepMacName(hotCtx g, const char *src) {
     static unsigned char action[3][6] = {
         /*  \       0-9     a-f     A-F     *       \0       index */
         /* -------- ------- ------- ------- ------- -------- ----- */
-        {   0,      B_,     B_,     B_,     B_,     B_|Q_ },/* [0] */
+        {   0,      B_,     B_,     B_,     B_,     Q_ },   /* [0] */
         {   E_,     A_,     A_,     A_,     E_,     E_ },   /* [1] */
         {   E_,     A_|H_,  A_|H_,  A_|H_,  E_,     E_ },   /* [2] */
     };
 
-    g->tmp.clear();
     int state = 0;
     unsigned value = 0;
 
@@ -1085,7 +1083,7 @@ static int prepMacName(hotCtx g, const char *src) {
 
         /* Direct UTF-8 input is not supported. */
         if (c < 0)
-            return 1;
+            return false;
 
         switch (c) {
             case '\\':
@@ -1143,23 +1141,23 @@ static int prepMacName(hotCtx g, const char *src) {
             continue;
         }
         if (actn & E_) {
-            return 1; /* Syntax error */
+            return false; /* Syntax error */
         }
         if (actn & B_) {
-            g->tmp.push_back(c);
+            s.push_back(c);
         }
         if (actn & A_) {
             value = value << 4 | hexdig;
         }
         if (actn & H_) {
             if (value == 0) {
-                return 1; /* Syntax error */
+                return false; /* Syntax error */
             }
-            g->tmp.push_back(value);
+            s.push_back(value);
             value = 0;
         }
         if (actn & Q_) {
-            return 0;
+            return true;
         }
     }
 #undef E_
@@ -1174,10 +1172,15 @@ int hotAddName(hotCtx g,
                unsigned short platformId, unsigned short platspecId,
                unsigned short languageId, unsigned short nameId,
                const char *str) {
-    if ((platformId == HOT_NAME_MS_PLATFORM) ? prepWinName(g, str) : prepMacName(g, str)) {
-        return 1;
+    std::string tmp;
+    if (platformId == HOT_NAME_MS_PLATFORM) {
+        if (!prepWinName(tmp, str))
+            return 1;
+    } else {
+        if (!prepMacName(tmp, str))
+            return 1;
     }
-    nameAddReg(g, platformId, platspecId, languageId, nameId, g->tmp.c_str());
+    nameAdd(g, platformId, platspecId, languageId, nameId, tmp);
     return 0;
 }
 

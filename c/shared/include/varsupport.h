@@ -70,6 +70,7 @@ class VarWriter {
     virtual void w1(char o) = 0;
     virtual void w2(int16_t o) = 0;
     virtual void w4(int32_t o) = 0;
+    virtual void w(size_t count, char *data) = 0;
 };
 
 /* convert 2.14 fixed value to float */

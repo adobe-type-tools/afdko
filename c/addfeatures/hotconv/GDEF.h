@@ -30,6 +30,9 @@ class hotVarWriter : public VarWriter {
     void w1(char o) override { hout1(g, o); }
     void w2(int16_t o) override { hotOut2(g, o); }
     void w4(int32_t o) override { hotOut4(g, o); }
+    void w(size_t count, char *data) {
+        g->cb.stm.write(&g->cb.stm, g->out_stream, count, data);
+    }
     hotCtx g;
 };
 
