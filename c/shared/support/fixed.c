@@ -22,6 +22,7 @@ fixmul and fixdiv do rounding.
 #define fixedScale 65536.0     /* i=15, f=16, range [-32768, 32768) */
 #define fracScale 1073741824.0 /* i=1, f=30 , range [-2, 2) */
 
+// XXX Consider using int64_t instead of double
 Fixed FIXEDFUNC fixmul(Fixed x, Fixed y) {  // returns x*y
     double d = (double)x * (double)y / fixedScale;
     if (d >= (double)0.0) {

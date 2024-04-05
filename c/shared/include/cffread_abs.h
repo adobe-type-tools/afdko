@@ -14,6 +14,11 @@
 
 #include "absfont.h"
 
+class var_axes;
+class var_hmtx;
+class var_MVAR;
+class nam_name;
+
 /* Compact Font Format (CFF) Parser Library
    ========================================
    This library parses information in CFF FontSets containing only one single
@@ -55,6 +60,9 @@ cfrCtx cfrNew(ctlMemoryCallbacks *mem_cb, ctlStreamCallbacks *stm_cb,
    The debug stream provides more detailed error and warning messages than is
    available via cfrErrStr(). If the client doesn't require the debug data
    stream, NULL should be returned from its stream open call. */
+
+void cfrSetTablePointers(cfrCtx h, var_axes *axes, var_hmtx *hmtx,
+                         var_MVAR *mvar, nam_name *name);
 
 int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top, float *UDV);
 

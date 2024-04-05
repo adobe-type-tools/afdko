@@ -167,16 +167,17 @@ struct cfrCtx_ {  // Context
     postTbl post;                   /* post table */
     struct {                        /* CFF2 font tables */
         float *UDV;                                     /* From client */
-        Fixed ndv[CFF2_MAX_AXES];                       /* normalized weight vector */
-        float scalars[CFF2_MAX_MASTERS];                /* scalar values for regions */
+        std::vector<Fixed> *ndv;
+        std::vector<Fixed> *scalars;                /* scalar values for regions */
         unsigned short regionListCount;                 /* number of all regions */
-        unsigned short regionIndices[CFF2_MAX_MASTERS]; /* region indices for the current vsindex */
+        std::vector<uint16_t> *regionIndices; /* region indices for the current vsindex */
 
         unsigned short axisCount;
         var_axes *axes;
         var_hmtx *hmtx;
         var_MVAR *mvar;
         nam_name *name;
+        bool made_axes, made_hmtx, made_mvar, made_name;
         itemVariationStore *varStore;
         void *lastResortInstanceNameClientCtx;
         cfrlastResortInstanceNameCallback lastResortInstanceNameCallback;
@@ -769,12 +770,12 @@ static void handleBlend(cfrCtx h) {
         /* Blend values on the stack and replace the default values with the results.
          */
         for (i = 0; i < numBlends; i++) {
-            float val = INDEX_REAL(firstItemIndex + i);
-            int r;
+            float val = INDEX_REAL(firstItemIndex + i), fsc;
 
-            for (r = 0; r < h->stack.numRegions; r++) {
+            for (int r = 0; r < h->stack.numRegions; r++) {
+                fixtopflt(h->cff2.scalars->at(h->cff2.regionIndices->at(r)), &fsc);
                 int index = (i * h->stack.numRegions) + r + (h->stack.cnt - numDeltaBlends);
-                val += INDEX_REAL(index) * h->cff2.scalars[h->cff2.regionIndices[r]];
+                val += INDEX_REAL(index) * fsc;
             }
 
             firstItem[i].is_int = 0;
@@ -966,7 +967,9 @@ static int setNumMasters(cfrCtx h, unsigned short vsindex) {
 
     int numMasters = h->stack.numRegions = h->cff2.varStore->getDRegionCountForIndex(vsindex);
 
-    if (!h->cff2.varStore->getRegionIndices(vsindex, h->cff2.regionIndices, h->cff2.regionListCount)) {
+    if (h->cff2.regionIndices == nullptr)
+        h->cff2.regionIndices = new std::vector<uint16_t>();
+    if (!h->cff2.varStore->getRegionIndices(vsindex, *h->cff2.regionIndices)) {
         h->logger->log(sWARNING, "inconsistent region indices detected in item variation store subtable %d", vsindex);
         numMasters = 0;
     }
@@ -994,7 +997,7 @@ static void readVarStore(cfrCtx h) {
         fatal(h, cfrErrGeometry);
     h->top.varStore = h->cff2.varStore;
     /* pre-calculate scalars for all regions for the current weight vector */
-    h->cff2.varStore->calcRegionScalars(&h->cb.shstm, h->cff2.axisCount, h->cff2.ndv, h->cff2.scalars);
+    h->cff2.varStore->calcRegionScalars(&h->cb.shstm, *h->cff2.ndv, *h->cff2.scalars);
 }
 
 /* Save PostScript operator string. */
@@ -2013,15 +2016,15 @@ parseError:
 /* Read MVAR table for font wide variable metrics. */
 static void MVARread(cfrCtx h) {
     abfTopDict *top = &h->top;
-    float thickness, position;
+    Fixed thickness, position;
 
     assert(h->cff2.mvar != NULL);
-    if (h->cff2.mvar->lookup(&h->cb.shstm, h->cff2.axisCount, h->cff2.ndv, MVAR_unds_tag, thickness)) {
-        top->UnderlineThickness += thickness;
-        top->UnderlinePosition -= thickness / 2;
+    if (h->cff2.mvar->valueAdjust(&h->cb.shstm, *h->cff2.ndv, MVAR_unds_tag, thickness)) {
+        top->UnderlineThickness += FRound(thickness);
+        top->UnderlinePosition -= FRound(thickness / 2);
     }
-    if (h->cff2.mvar->lookup(&h->cb.shstm, h->cff2.axisCount, h->cff2.ndv, MVAR_undo_tag, position)) {
-        top->UnderlinePosition += position;
+    if (h->cff2.mvar->valueAdjust(&h->cb.shstm, *h->cff2.ndv, MVAR_undo_tag, position)) {
+        top->UnderlinePosition += FRound(position);
     }
 }
 
@@ -2383,14 +2386,14 @@ static void readFDSelect(cfrCtx h) {
 
 static float cff2GetWidth(cff2GlyphCallbacks *cb, unsigned short gid) {
     cfrCtx h = (cfrCtx)cb->direct_ctx;
-    var_glyphMetrics metrics;
+    float r {.0f};
+    Fixed width, lsb;
 
     assert(h->cff2.hmtx != NULL);
-    if (h->cff2.hmtx->lookup(&h->cb.shstm, h->cff2.axisCount, h->cff2.ndv, gid, metrics)) {
-        return metrics.width;
-    }
+    if (h->cff2.hmtx->lookup(&h->cb.shstm, *h->cff2.ndv, gid, width, lsb))
+        fixtopflt(width, &r);
 
-    return .0f;
+    return r;
 }
 
 /* ------------------------------- make up info missing from CFF2 ------------------------------- */
@@ -2610,6 +2613,14 @@ static void report_error(abfErrCallbacks *cb, int err_code, int iFD) {
         h->logger->log(sWARNING, "%s FD[%d] (ignored)", abfErrStr(err_code), iFD);
 }
 
+void cfrSetTablePointers(cfrCtx h, var_axes *axes, var_hmtx *hmtx,
+                         var_MVAR *mvar, nam_name *name) {
+    h->cff2.axes = axes;
+    h->cff2.hmtx = hmtx;
+    h->cff2.mvar = mvar;
+    h->cff2.name = name;
+}
+
 /* Begin reading new font. */
 int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top, float *UDV) {
     long i;
@@ -2682,21 +2693,35 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
 
         /* Load CFF2 font tables */
         if (!(flags & CFR_SHALLOW_READ)) {
-            unsigned short axis;
+            uint16_t axis;
 
-            h->cff2.axes = new var_axes(h->ctx.sfr, &h->cb.shstm);
-            h->cff2.hmtx = new var_hmtx(h->ctx.sfr, &h->cb.shstm);
-            h->cff2.mvar = new var_MVAR(h->ctx.sfr, &h->cb.shstm);
+            if (h->cff2.axes == nullptr) {
+                h->cff2.axes = new var_axes(h->ctx.sfr, &h->cb.shstm);
+                h->cff2.made_axes = true;
+            }
+            if (h->cff2.hmtx == nullptr) {
+                h->cff2.hmtx = new var_hmtx(h->ctx.sfr, &h->cb.shstm);
+                h->cff2.made_hmtx = true;
+            }
+            if (h->cff2.mvar == nullptr) {
+                h->cff2.mvar = new var_MVAR(h->ctx.sfr, &h->cb.shstm);
+                h->cff2.made_mvar = true;
+            }
             h->cff2.axisCount = h->cff2.axes->getAxisCount();
             if (h->cff2.axisCount > CFF2_MAX_AXES)
                 fatal(h, cfrErrGeometry);
 
             h->cff2.UDV = UDV;
 
-            /* normalize the variable font design vector */
-            for (axis = 0; axis < h->cff2.axisCount; axis++) {
-                h->cff2.ndv[axis] = 0;
-            }
+            if (h->cff2.ndv == nullptr)
+                h->cff2.ndv = new std::vector<Fixed>();
+            else
+                h->cff2.ndv->clear();
+            if (h->cff2.scalars == nullptr)
+                h->cff2.scalars = new std::vector<Fixed>();
+            else
+                h->cff2.scalars->clear();
+
             if (h->cff2.UDV != NULL) {
                 Fixed userCoords[CFF2_MAX_AXES];
 
@@ -2704,13 +2729,17 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
                     userCoords[axis] = pflttofix(&h->cff2.UDV[axis]);
                 }
 
-                if (!h->cff2.axes->normalizeCoords(&h->cb.shstm, userCoords, h->cff2.ndv)) {
+                if (!h->cff2.axes->normalizeCoords(&h->cb.shstm, userCoords, *h->cff2.ndv)) {
                     fatal(h, cfrErrGeometry);
                 }
-            }
+            } else
+                h->cff2.ndv->resize(h->cff2.axisCount, 0);  // FIXED_ZERO
 
             /* name table */
-            h->cff2.name = new nam_name(h->ctx.sfr, &h->cb.shstm);
+            if (h->cff2.name == nullptr) {
+                h->cff2.name = new nam_name(h->ctx.sfr, &h->cb.shstm);
+                h->cff2.made_name = true;
+            }
         }
     }
 
@@ -3096,11 +3125,34 @@ int cfrEndFont(cfrCtx h) {
     encListReuse(h);
 
     if (h->header.major != 1) {
-        delete h->cff2.axes;
-        delete h->cff2.hmtx;
-        delete h->cff2.mvar;
-        delete h->cff2.name;
+        if (h->cff2.made_axes)
+            delete h->cff2.axes;
+        h->cff2.made_axes = false;
+        h->cff2.axes = nullptr;
+
+        if (h->cff2.made_hmtx)
+            delete h->cff2.hmtx;
+        h->cff2.made_hmtx = false;
+        h->cff2.hmtx = nullptr;
+
+        if (h->cff2.made_mvar)
+            delete h->cff2.mvar;
+        h->cff2.made_mvar = false;
+        h->cff2.mvar = nullptr;
+
+        if (h->cff2.made_name)
+            delete h->cff2.name;
+        h->cff2.made_name = false;
+        h->cff2.name = nullptr;
+
+        delete h->cff2.ndv;
+        h->cff2.ndv = nullptr;
+        delete h->cff2.scalars;
+        h->cff2.scalars = nullptr;
     }
+
+    delete h->cff2.regionIndices;
+    h->cff2.regionIndices = nullptr;
 
     return cfrSuccess;
 }

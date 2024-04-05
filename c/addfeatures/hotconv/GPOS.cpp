@@ -1747,8 +1747,7 @@ void GPOS::MarkBasePos::write(OTL *h) {
         }
     }
 
-    hotVarWriter vw {h->g};
-    writeAnchorList(vw, h->getValues(), true);
+    writeAnchorList(h->g->vw, h->getValues(), true);
 
     if (isExt())
         cac->coverageWrite();
@@ -1920,8 +1919,7 @@ void GPOS::MarkLigaturePos::write(OTL *h) {
         }
     }
 
-    hotVarWriter vw {h->g};
-    writeAnchorList(vw, h->getValues());
+    writeAnchorList(h->g->vw, h->getValues());
 
     if (isExt())
         cac->coverageWrite();
@@ -2023,8 +2021,7 @@ void GPOS::CursivePos::write(OTL *h) {
         }
     }
 
-    hotVarWriter vw {h->g};
-    writeAnchorList(vw, h->getValues());
+    writeAnchorList(h->g->vw, h->getValues());
 
     if (isExt())
         cac->coverageWrite();

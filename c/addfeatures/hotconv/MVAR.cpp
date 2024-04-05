@@ -7,9 +7,10 @@
 #include "GDEF.h"
 
 // mvar pointer is managed by hot.cpp
-void MVARNew(hotCtx g) {}
-void MVARReuse(hotCtx g) {}
-void MVARFree(hotCtx g) {}
+void MVARNew(hotCtx g) {
+    if (g->ctx.axes != nullptr && g->ctx.MVAR == nullptr)
+        g->ctx.MVAR = new var_MVAR();
+}
 
 int MVARFill(hotCtx g) {
     return (g->ctx.MVAR != nullptr && g->ctx.MVAR->hasValues()) ? 1 : 0;
@@ -18,10 +19,19 @@ int MVARFill(hotCtx g) {
 void MVARWrite(hotCtx g) {
     if (g->ctx.MVAR == nullptr || !g->ctx.MVAR->hasValues())
         return;
-    hotVarWriter vw {g};
-    g->ctx.MVAR->write(vw);
+    g->ctx.MVAR->write(g->vw);
 }
 
 void MVARAddValue(hotCtx g, ctlTag tag, const VarValueRecord &vvr) {
     g->ctx.MVAR->addValue(tag, *(g->ctx.locMap), vvr, g->logger);
+}
+
+void MVARReuse(hotCtx g) {
+    delete g->ctx.MVAR;
+    g->ctx.MVAR = nullptr;
+}
+
+void MVARFree(hotCtx g) {
+    delete g->ctx.MVAR;
+    g->ctx.MVAR = nullptr;
 }

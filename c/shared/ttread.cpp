@@ -393,7 +393,7 @@ struct ttrCtx_ {
         #define VF_FLAG_HMETRICS (1 << 1)
         long            flags;
         float           *UDV;   /* From client */
-        Fixed           ndv[VF_MAX_AXES];               /* normalized weight vector */
+        std::vector<Fixed> *ndv;   /* normalized weight vector */
         uint16_t        axisCount;
         var_axes        *axes;
         var_hmtx        *hmtx;
@@ -1041,34 +1041,36 @@ static Fixed calculateScalar(ttrCtx h, uint16_t tupleIndex, Fixed *peakTuple, Fi
     Fixed result = 0x10000L;
     uint16_t i;
 
+    auto &ndv = *h->vf.ndv;
+
     if (!peakTuple)
         return result;
     for (i = 0; i < h->vf.axisCount; i++) {
         if (peakTuple[i] == 0) /* ignore if peak tuple value for this axis is zero. */
             continue;
-        if (h->vf.ndv[i] == 0) { /* axis coordinate is zero. */
+        if (ndv[i] == 0) { /* axis coordinate is zero. */
             result = 0; break;
         }
-        if (peakTuple[i] == h->vf.ndv[i]) /* means no change in scalar value. */
+        if (peakTuple[i] == ndv[i]) /* means no change in scalar value. */
             continue;
         if (tupleIndex & gvar_FLAG_INTERMEDIATE_TUPLE) { /* check if its an intermediate tuple. */
-            if (h->vf.ndv[i] < imStart[i] ||  h->vf.ndv[i] > imEnd[i]) {
+            if (ndv[i] < imStart[i] ||  ndv[i] > imEnd[i]) {
                 result = 0; break;
             } else if (imStart[i] > peakTuple[i] || peakTuple[i] > imEnd[i])
                 continue;
             else if (imStart[i] < 0 && imEnd[i] > 0 && peakTuple[i] != 0)
                 continue;
-            else if (h->vf.ndv[i] < peakTuple[i]) {
+            else if (ndv[i] < peakTuple[i]) {
                 if (peakTuple[i] != imStart[i])
-                    result = fixmul(result, fixdiv((h->vf.ndv[i] - imStart[i]), (peakTuple[i] - imStart[i])));
+                    result = fixmul(result, fixdiv((ndv[i] - imStart[i]), (peakTuple[i] - imStart[i])));
             } else if (peakTuple[i] != imEnd[i])
-                result = fixmul(result, fixdiv((imEnd[i] - h->vf.ndv[i]), (imEnd[i] - peakTuple[i])));
+                result = fixmul(result, fixdiv((imEnd[i] - ndv[i]), (imEnd[i] - peakTuple[i])));
         } else { /* not an intermediate tuple. */
             /* if selected instance is out of range on any axis, then the overall scalar for that delta will be 0. */
-            if (h->vf.ndv[i] < MIN(0, peakTuple[i]) || h->vf.ndv[i] > MAX(0, peakTuple[i])) {
+            if (ndv[i] < MIN(0, peakTuple[i]) || ndv[i] > MAX(0, peakTuple[i])) {
                 result = 0; break;
             }
-            result = fixmul(result, fixdiv(h->vf.ndv[i], peakTuple[i])); /* peakTuple[i] cannot be zero here. */
+            result = fixmul(result, fixdiv(ndv[i], peakTuple[i])); /* peakTuple[i] cannot be zero here. */
         }
     }
 
@@ -2534,6 +2536,7 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top, fl
         h->vf.axes = new var_axes(h->ctx.sfr, &h->cb.shstm);
         h->vf.hmtx = new var_hmtx(h->ctx.sfr, &h->cb.shstm);
         h->vf.mvar = new var_MVAR(h->ctx.sfr, &h->cb.shstm);
+        h->vf.ndv = new std::vector<Fixed>();
         h->vf.axisCount = h->vf.axes->getAxisCount();
 
         if (h->vf.axisCount > 0) {
@@ -2545,14 +2548,10 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top, fl
             if (h->vf.axisCount != h->gvar.axisCount)
                 fatal(h, ttrErrGeometry, "fvar.axisCount %hu != gvar.axisCount %hu", h->vf.axisCount, h->gvar.axisCount);
 
-            /* normalize the variable font design vector */
-            for (axis = 0; axis < h->vf.axisCount; axis++)
-                h->vf.ndv[axis] = 0;
-
             for (axis = 0; axis < h->vf.axisCount; axis++)
                 userCoords[axis] = pflttofix(&h->vf.UDV[axis]);
 
-            if (!h->vf.axes->normalizeCoords(&h->cb.shstm, userCoords, h->vf.ndv))
+            if (!h->vf.axes->normalizeCoords(&h->cb.shstm, userCoords, *h->vf.ndv))
                 fatal(h, ttrErrGeometry, "failed to normalize design vector");
 
             /* check HVAR table's availability */
@@ -2570,11 +2569,12 @@ int ttrBegFont(ttrCtx h, long flags, long origin, int iTTC, abfTopDict **top, fl
         abfInitGlyphInfo(info);
         info->tag = (unsigned short)i;
         if (h->vf.UDV && h->vf.axisCount > 0 && !(h->vf.flags & VF_FLAG_HMETRICS)) {
-            var_glyphMetrics    metrics;
-            if (h->vf.hmtx->lookup(&h->cb.shstm, h->vf.axisCount, h->vf.ndv, (uint16_t)i, metrics)) {
+            Fixed width;
+            Fixed lsb;
+            if (h->vf.hmtx->lookup(&h->cb.shstm, *h->vf.ndv, (uint16_t)i, width, lsb)) {
                 glyph->flags |= GLYPH_MTX_SET;
-                glyph->hAdv = (uFWord)round(metrics.width);
-                glyph->lsb = (FWord)round(metrics.sideBearing);
+                glyph->hAdv = (uFWord)FRound(width);
+                glyph->lsb = (FWord)FRound(lsb);
             }
         }
     }
@@ -3335,6 +3335,7 @@ int ttrEndFont(ttrCtx h) {
         delete h->vf.axes;
         delete h->vf.hmtx;
         delete h->vf.mvar;
+        delete h->vf.ndv;
     }
 
     /* Close source stream */

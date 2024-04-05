@@ -31,8 +31,6 @@ add_library(hotconv OBJECT
     GSUB.h
     head.cpp
     head.h
-    hhea.cpp
-    hhea.h
     hmtx.cpp
     hmtx.h
     hot.cpp

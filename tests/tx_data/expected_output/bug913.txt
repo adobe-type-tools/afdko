@@ -1,11 +1,11 @@
-## Filename AdobeVFPrototype_mod.otf
+## Filename /home/skef/src/afdko4/tests/tx_data/input/AdobeVFPrototype_mod.otf
 ## Top Dict
 version             "1.0"
 Notice              "Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). Adobe is either a registered trademark or a trademark of Adobe Systems Incorporated in the United States and/or other countries."
 Copyright           "Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/)."
 FullName            "Adobe Variable Font Prototype"
 FamilyName          "Adobe Variable Font Prototype"
-UnderlinePosition   -73.5
+UnderlinePosition   -74
 UnderlineThickness  63
 FontBBox            {-178,-250,1135,908}
 FSType              0

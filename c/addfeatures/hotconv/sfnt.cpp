@@ -23,10 +23,10 @@
 #include "anon.h"
 #include "cmap.h"
 #include "head.h"
-#include "hhea.h"
 #include "hmtx.h"
 #include "maxp.h"
 #include "name.h"
+#include "MVAR.h"
 #include "post.h"
 #include "sfnt.h"
 #include "vhea.h"
@@ -66,9 +66,9 @@ static Funcs g_funcs[] = {
     {GDEF_, GDEFNew, GDEFFill, GDEFWrite, GDEFReuse, GDEFFree, 1, 12, 0},
     {GSUB_, GSUBNew, GSUBFill, GSUBWrite, GSUBReuse, GSUBFree, 1, 13, 0},
     {GPOS_, GPOSNew, GPOSFill, GPOSWrite, GPOSReuse, GPOSFree, 1, 14, 0},
-    {HVAR_, NULL,    NULL,     NULL,      NULL,      NULL,     1, 15, 0},
+    {HVAR_, HVARNew, HVARFill, HVARWrite, HVARReuse, HVARFree, 1, 15, 0},
     {VVAR_, NULL,    NULL,     NULL,      NULL,      NULL,     1, 16, 0},
-    {MVAR_, NULL,    NULL,     NULL,      NULL,      NULL,     1, 17, 0},
+    {MVAR_, MVARNew, MVARFill, MVARWrite, MVARReuse, MVARFree, 1, 17, 0},
     {BASE_, BASENew, BASEFill, BASEWrite, BASEReuse, BASEFree, 1, 18, 0},
     {VORG_, VORGNew, VORGFill, VORGWrite, VORGReuse, VORGFree, 1, 19, 0},
     {STAT_, STATNew, STATFill, STATWrite, STATReuse, STATFree, 1, 20, 0},
