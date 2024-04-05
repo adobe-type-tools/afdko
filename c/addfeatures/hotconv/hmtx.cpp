@@ -26,7 +26,7 @@ int hmtxFill(hotCtx g) {
     // If there is already data it's because we read the tables
     // from the file already
     if (g->ctx.hmtx->lsb.size() > 0)
-        return 1;
+        return g->ctx.hmtx->Fill();
 
     auto &hmtx = *g->ctx.hmtx;
     /* Fill table */

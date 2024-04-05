@@ -519,11 +519,19 @@ uint16_t VarModel::addValue(const VarValueRecord &vvr, std::shared_ptr<slogger> 
         deltas.push_back(delta);
     }
     uint16_t r = subtable.deltaValues.size();
-    std::vector<int16_t> rdeltas;
-    rdeltas.reserve(r);
+    std::vector<int16_t> ideltas;
+    ideltas.reserve(deltas.size());
     for (auto d : deltas)
-        rdeltas.push_back(FRound(d));
-    subtable.deltaValues.emplace_back(std::move(rdeltas));
+        ideltas.push_back(FRound(d));
+    auto k = subtable.deltaTrackKey(ideltas);
+    auto range = subtable.deltaTracker.equal_range(k);
+    for (auto i = range.first; i != range.second; i++) {
+        assert(i->second < subtable.deltaValues.size());
+        if (ideltas == subtable.deltaValues[i->second])
+            return i->second;
+    }
+    subtable.deltaTracker.emplace(k, r);
+    subtable.deltaValues.emplace_back(std::move(ideltas));
     return r;
 }
 
@@ -744,6 +752,7 @@ itemVariationStore::itemVariationStore(ctlSharedStmCallbacks *sscb,
             for (r = 0; r < subtableRegionCount; r++) {
                 dvv.push_back((int16_t)((r < shortDeltaCount) ? sscb->read2(sscb) : (char)sscb->read1(sscb)));
             }
+            ivd.deltaTracker.emplace(ivd.deltaTrackKey(dvv), (uint16_t)t);
             ivd.deltaValues.emplace_back(std::move(dvv));
         }
         subtables.push_back(std::move(ivd));
@@ -995,17 +1004,77 @@ uint16_t itemVariationStore::newSubtable(std::vector<VariationRegion> reg) {
     return sindex;
 }
 
+void itemVariationStore::itemVariationDataSubtable::preWriteOptimize(bool reorder) {
+    uint16_t s = regionIndices.size(), i;
+    if (s == 0 || deltaValues.size() == 0)
+        return;
+
+    std::set<uint16_t> shorts;
+
+    using NL = std::numeric_limits<int8_t>;
+
+    for (auto &d : deltaValues) {
+        for (i = 0; i < s; i++)
+            if ( d[i] < NL::min() || d[i] > NL::max() )
+                shorts.insert(i);
+    }
+    if (reorder) {
+        std::vector<uint16_t> remap;
+        remap.reserve(s);
+        for (i = 0; i < s; i++)
+            if (shorts.find(i) != shorts.end())
+                remap.push_back(i);
+        for (i = 0; i < s; i++)
+            if (shorts.find(i) == shorts.end())
+                remap.push_back(i);
+        assert(remap.size() == s);
+        std::vector<uint16_t> tmpIdx;
+        tmpIdx.resize(s);
+        for (i = 0; i < s; i++)
+            tmpIdx[i] = regionIndices[remap[i]];
+        regionIndices.swap(tmpIdx);
+        std::vector<int16_t> tmpDel;
+        tmpDel.resize(s);
+        for (auto &d : deltaValues) {
+            for (i = 0; i < s; i++)
+                tmpDel[i] = d[remap[i]];
+            d.swap(tmpDel);
+        }
+        numBytes = s - shorts.size();
+    } else {
+        if (shorts.size() > 0)
+            numBytes = s - *shorts.rbegin() - 1;
+        else
+            numBytes = s;
+        if (shorts.size())
+            std::cerr << "*shorts.rbegin(): " << *shorts.rbegin() << std::endl;
+        std::cerr << "shorts.size(): " << shorts.size() << ", s: " << s << std::endl;
+        std::cerr << "numBytes: " << numBytes << std::endl;
+    }
+}
+
 void itemVariationStore::itemVariationDataSubtable::write(VarWriter &vw) {
     vw.w2((uint16_t) deltaValues.size());
-    // XXX optimize word ordering later
-    vw.w2((uint16_t) (deltaValues.size() > 0 ? deltaValues[0].size() : 0));
+    uint16_t numShorts = regionIndices.size() - numBytes;
+    std::cerr << "numBytes: " << numBytes << std::endl;
+    vw.w2((uint16_t) (deltaValues.size() > 0 ? numShorts : 0));
     vw.w2((uint16_t) regionIndices.size());
+
+    using NL = std::numeric_limits<int8_t>;
 
     for (auto ri : regionIndices)
         vw.w2(ri);
-    for (auto &dvv : deltaValues)
-        for (auto dv : dvv)
-            vw.w2(dv);
+    for (auto &dvv : deltaValues) {
+        int i = 0;
+        for (auto dv : dvv) {
+            if (i++ < numShorts)
+                vw.w2(dv);
+            else {
+                assert(dv >= NL::min() && dv <= NL::max());
+                vw.w1(dv);
+            }
+        }
+    }
 }
 
 void itemVariationStore::writeRegionList(VarWriter &vw) {
@@ -1153,6 +1222,8 @@ var_hmtx::var_hmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
 
 bool var_hmtx::Fill() {
     header.numberOfHMetrics = advanceWidth.size();
+    if (ivs != nullptr)
+        ivs->preWriteOptimize(true);
     return lsb.size() > 0;
 }
 

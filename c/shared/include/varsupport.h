@@ -13,6 +13,7 @@
 #include <set>
 #include <tuple>
 #include <vector>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 
@@ -405,6 +406,11 @@ class itemVariationStore {
                 mc = s.deltaValues.size();
         return mc;
     }
+    // ideally called before write() and after any new values
+    void preWriteOptimize(bool reorder = true) {
+        for (auto &s : subtables)
+            s.preWriteOptimize(reorder);
+    }
 
 #if HOT_DEBUG
     void toerr() {
@@ -534,13 +540,22 @@ class itemVariationStore {
                 std::cerr << std::endl;
             }
         }
+        void preWriteOptimize(bool reorder);
         uint32_t getSize() {
-            return 6 + regionIndices.size() * (2 + deltaValues.size() * 2);
+            uint16_t s = regionIndices.size();
+            return 6 + s * 2 + deltaValues.size() * ((s - numBytes) * 2 + numBytes);
         }
         void write(VarWriter &vw);
+        uint32_t deltaTrackKey(std::vector<int16_t> &deltas) {
+            auto t = deltas.size();
+            uint16_t zeroth = t > 0 ? (uint16_t)deltas[0] : 0;
+            uint16_t first = t > 1 ? (uint16_t)deltas[1] : 0;
+            return (zeroth << 16) + first;
+        }
         uint16_t numBytes {0};
         std::vector<uint16_t> regionIndices;
         std::vector<std::vector<int16_t>> deltaValues;
+        std::unordered_multimap<uint32_t,uint16_t> deltaTracker;
     };
 
     void writeRegionList(VarWriter &vw);

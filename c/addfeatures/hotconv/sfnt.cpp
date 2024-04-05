@@ -63,7 +63,7 @@ static Funcs g_funcs[] = {
     {hmtx_, hmtxNew, hmtxFill, hmtxWrite, hmtxReuse, hmtxFree, 1, 9, 0},
     {vhea_, vheaNew, vheaFill, vheaWrite, vheaReuse, vheaFree, 2, 10, 0},
     {vmtx_, vmtxNew, vmtxFill, vmtxWrite, vmtxReuse, vmtxFree, 1, 11, 0},
-    {GDEF_, GDEFNew, GDEFFill, GDEFWrite, GDEFReuse, GDEFFree, 1, 12, 0},
+    {GDEF_, GDEFNew, GDEFFill, GDEFWrite, GDEFReuse, GDEFFree, 3, 12, 0},
     {GSUB_, GSUBNew, GSUBFill, GSUBWrite, GSUBReuse, GSUBFree, 1, 13, 0},
     {GPOS_, GPOSNew, GPOSFill, GPOSWrite, GPOSReuse, GPOSFree, 1, 14, 0},
     {HVAR_, HVARNew, HVARFill, HVARWrite, HVARReuse, HVARFree, 1, 15, 0},

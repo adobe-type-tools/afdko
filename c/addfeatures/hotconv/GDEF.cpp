@@ -67,6 +67,7 @@ int GDEF::Fill() {
     if (ivs.getRegionCount() > 0) {
         ivsOffset = offset;
         haveData = true;
+        ivs.preWriteOptimize(true);
     }
 
     return haveData ? 1 : 0;
