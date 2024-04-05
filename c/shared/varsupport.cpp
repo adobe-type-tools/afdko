@@ -77,6 +77,38 @@
 
 /* avar table */
 
+uint8_t var_indexMap::entryFormat(uint8_t entryBytes, uint8_t deltaBits) {
+    assert(entryBytes <= 4);
+    assert(deltaBits <= 16);
+    return ((entryBytes - 1) << MAP_ENTRY_SIZE_SHIFT) + (deltaBits - 1);
+}
+
+void var_indexMap::write(VarWriter &vw, uint8_t entryBytes, uint8_t deltaBits) {
+    if (map.size() == 0)
+        return;
+
+    uint8_t format = map.size() > 0xFFFF ? 1 : 0;
+    vw.w1(format);
+    vw.w1(entryFormat(entryBytes, deltaBits));
+    if (format == 1)
+        vw.w4(map.size());
+    else
+        vw.w2(map.size());
+    for (auto &p : map) {
+        uint32_t e = (p.outerIndex << deltaBits) | p.innerIndex;
+        if (entryBytes == 4)
+            vw.w4(e);
+        else if (entryBytes == 3)
+            vw.w3(e);
+        else if (entryBytes == 2)
+            vw.w2(e);
+        else {
+            assert(entryBytes == 1);
+            vw.w1(e);
+        }
+    }
+}
+
 bool var_axes::load_avar(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     bool success = true;
     uint16_t i;
@@ -335,17 +367,22 @@ bool var_axes::normalizeCoord(uint16_t index, Fixed userCoord, Fixed &normCoord)
     return true;
 }
 
-bool var_axes::normalizeCoords(ctlSharedStmCallbacks *sscb, Fixed *userCoords, Fixed *normCoords) {
+bool var_axes::normalizeCoords(ctlSharedStmCallbacks *sscb, Fixed *userCoords, std::vector<Fixed> &normCoords) {
     if (axes.size() < 1) {
         sscb->message(sscb, "var_normalizeCoords: invalid axis table");
         return false;
     }
 
+    normCoords.clear();
+    normCoords.reserve(axes.size());
+
     for (size_t i = 0; i < axes.size(); i++) {
-        if (!normalizeCoord(i, userCoords[i], normCoords[i])) {
+        Fixed f;
+        if (!normalizeCoord(i, userCoords[i], f)) {
             sscb->message(sscb, "var_normalizeCoords: invalid axis %d", i);
             return false;
         }
+        normCoords.push_back(f);
     }
     return true;
 }
@@ -713,51 +750,35 @@ itemVariationStore::itemVariationStore(ctlSharedStmCallbacks *sscb,
     }
 }
 
-int32_t itemVariationStore::getRegionIndices(uint16_t vsIndex,
-                                             uint16_t *regionIndices,
-                                             int32_t regionListCount) {
-    long i;
-
+bool itemVariationStore::getRegionIndices(uint16_t vsIndex,
+                                          std::vector<uint16_t> &regionIndices) {
     if (vsIndex >= subtables.size())
-        return 0;
+        return false;
 
-    auto &subtable = subtables[vsIndex];
-
-    if (regionListCount < subtable.regionIndices.size())
-        return 0;
-
-    for (i = 0; i < subtable.regionIndices.size(); i++) {
-        uint16_t index = subtable.regionIndices[i];
-        if (index >= regionListCount) {  // XXX why?
-            return 0;
-        }
-        regionIndices[i] = index;
-    }
-
-    return subtable.regionIndices.size();
+    regionIndices = subtables[vsIndex].regionIndices;
+    return true;
 }
 
 /* calculate scalars for all regions given a normalized design vector. */
 
-Fixed itemVariationStore::calcRegionScalar(uint16_t refRegionIndex, uint16_t locRegionIndex) {
+Fixed itemVariationStore::calcRegionScalar(uint16_t refRegionIndex, const std::vector<Fixed> &alocs) {
     Fixed r {FIXED_ONE};
 
     auto &rr = regions[refRegionIndex];
-    auto &lr = regions[locRegionIndex];
+    assert(rr.size() == alocs.size());
 
     for (uint16_t a = 0; a < rr.size(); a++) {
         float axisScalar;
         auto &arr = rr[a];
-        auto &alr = lr[a];
-        var_F2dot14 aloc = std::get<1>(alr);
-        var_F2dot14 startCoord = std::get<0>(arr);
-        var_F2dot14 peakCoord = std::get<1>(arr);
-        var_F2dot14 endCoord = std::get<2>(arr);
+        Fixed aloc = alocs[a];
+        Fixed startCoord = F2DOT14_TO_FIXED(std::get<0>(arr));
+        Fixed peakCoord = F2DOT14_TO_FIXED(std::get<1>(arr));
+        Fixed endCoord = F2DOT14_TO_FIXED(std::get<2>(arr));
         if (startCoord > peakCoord || peakCoord > endCoord)
             axisScalar = FIXED_ONE;
-        else if (startCoord < F2DOT14_ZERO && endCoord > F2DOT14_ZERO && peakCoord != F2DOT14_ZERO)
+        else if (startCoord < FIXED_ZERO && endCoord > FIXED_ZERO && peakCoord != FIXED_ZERO)
             axisScalar = FIXED_ONE;
-        else if (peakCoord == F2DOT14_ZERO)
+        else if (peakCoord == FIXED_ZERO)
             axisScalar = FIXED_ONE;
         else if (aloc < startCoord || aloc > endCoord)
             axisScalar = FIXED_ZERO;
@@ -765,63 +786,39 @@ Fixed itemVariationStore::calcRegionScalar(uint16_t refRegionIndex, uint16_t loc
             if (aloc == peakCoord)
                 axisScalar = FIXED_ONE;
             else if (aloc < peakCoord)
-                axisScalar = fixdiv(F2DOT14_TO_FIXED(aloc - startCoord),
-                                    F2DOT14_TO_FIXED(peakCoord - startCoord));
+                axisScalar = fixdiv(aloc - startCoord, peakCoord - startCoord);
             else /* aloc > peakCoord */
-                axisScalar = fixdiv(F2DOT14_TO_FIXED(endCoord - aloc),
-                                    F2DOT14_TO_FIXED(endCoord - peakCoord));
+                axisScalar = fixdiv(endCoord - aloc, endCoord - peakCoord);
         }
         r = fixmul(r, axisScalar);
     }
     return r;
 }
 
+Fixed itemVariationStore::calcRegionScalar(uint16_t refRegionIndex, uint16_t locRegionIndex) {
+    std::vector<Fixed> alocs;
+
+    for (auto &ar : regions[locRegionIndex])
+        alocs.push_back(F2DOT14_TO_FIXED(std::get<1>(ar)));
+
+    return calcRegionScalar(refRegionIndex, alocs);
+}
+
 void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
-                                           uint16_t &fvarAxisCount,
-                                           Fixed *instCoords, float *scalars) {
-    int32_t i;
+                                           const std::vector<Fixed> &instCoords,
+                                           std::vector<Fixed> &scalars) {
+    scalars.clear();
+    scalars.reserve(regions.size());
 
-    if (fvarAxisCount != axisCount) {
+    if (instCoords.size() != axisCount) {
         sscb->message(sscb, "axis count in variation font region list does not match axis count in fvar table");
-        fvarAxisCount = axisCount;
-        for (i = 0; i < regions.size(); i++)
-            scalars[i] = .0f;
+        for (size_t i = 0; i < regions.size(); i++)
+            scalars.push_back(0);
         return;
+    } else {
+        for (size_t i = 0; i < regions.size(); i++)
+            scalars.push_back(calcRegionScalar(i, instCoords));
     }
-
-    i = 0;
-    for (auto &vr : regions) {
-        float scalar = 1.0f;
-
-        uint16_t axis {0};
-        for (auto &ar : vr) {
-            float axisScalar;
-            Fixed startCoord = F2DOT14_TO_FIXED(std::get<0>(ar));
-            Fixed peakCoord = F2DOT14_TO_FIXED(std::get<1>(ar));
-            Fixed endCoord = F2DOT14_TO_FIXED(std::get<2>(ar));
-            if (startCoord > peakCoord || peakCoord > endCoord)
-                axisScalar = 1.0f;
-            else if (startCoord < FIXED_ZERO && endCoord > FIXED_ZERO && peakCoord != FIXED_ZERO)
-                axisScalar = 1.0f;
-            else if (peakCoord == FIXED_ZERO)
-                axisScalar = 1.0f;
-            else if (instCoords[axis] < startCoord || instCoords[axis] > endCoord)
-                axisScalar = .0f;
-            else {
-                if (instCoords[axis] == peakCoord)
-                    axisScalar = 1.0f;
-                else if (instCoords[axis] < peakCoord)
-                    axisScalar = (float)(instCoords[axis] - startCoord) / (peakCoord - startCoord);
-                else /* instCoords[axis] > peakCoord */
-                    axisScalar = (float)(endCoord - instCoords[axis]) / (endCoord - peakCoord);
-            }
-            scalar = scalar * axisScalar;
-            axis++;
-        }
-
-        scalars[i++] = scalar;
-    }
-    return;
 }
 
 var_indexPair itemVariationStore::addValue(VarLocationMap &vlm,
@@ -920,11 +917,10 @@ static void lookupIndexMap(const var_indexMap &map, uint16_t gid,
     }
 }
 
-float itemVariationStore::applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
+Fixed itemVariationStore::applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
                                                   const var_indexPair &pair,
-                                                  float *scalars,
-                                                  int32_t regionListCount) {
-    float netAdjustment = .0f;
+                                                  const std::vector<Fixed> &scalars) {
+    Fixed netAdjustment = FIXED_ZERO;
 
     if (pair.outerIndex >= subtables.size()) {
         sscb->message(sscb, "invalid outer index in index map");
@@ -941,7 +937,7 @@ float itemVariationStore::applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
     if (srSize == 0)
         return netAdjustment;
 
-    if (srSize > regionListCount) {
+    if (srSize > scalars.size()) {
         sscb->message(sscb, "out of range region count in item variation store subtable");
         return netAdjustment;
     }
@@ -955,16 +951,16 @@ float itemVariationStore::applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
     for (int32_t i = 0; i < subtable.regionIndices.size(); i++) {
         auto regionIndex = subtable.regionIndices[i];
         if (scalars[regionIndex])
+            // A Fixed times a normal int is a Fixed
             netAdjustment += scalars[regionIndex] * deltaValues[i];
     }
 
     return netAdjustment;
 }
 
-float itemVariationStore::applyDeltasForGid(ctlSharedStmCallbacks *sscb,
+Fixed itemVariationStore::applyDeltasForGid(ctlSharedStmCallbacks *sscb,
                                             var_indexMap &map, uint16_t gid,
-                                            float *scalars,
-                                            int32_t regionListCount) {
+                                            const std::vector<Fixed> &scalars) {
     var_indexPair pair;
 
     /* Use (0,gid) as the default index pair if the index map table is missing */
@@ -974,7 +970,7 @@ float itemVariationStore::applyDeltasForGid(ctlSharedStmCallbacks *sscb,
     } else
         lookupIndexMap(map, gid, pair);
 
-    return applyDeltasForIndexPair(sscb, pair, scalars, regionListCount);
+    return applyDeltasForIndexPair(sscb, pair, scalars);
 }
 
 uint16_t itemVariationStore::newSubtable(std::vector<VariationRegion> reg) {
@@ -1086,7 +1082,7 @@ var_hmtx::var_hmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     header.caretSlopeRise = (int16_t)sscb->read2(sscb);
     header.caretSlopeRun = (int16_t)sscb->read2(sscb);
     header.caretOffset = (int16_t)sscb->read2(sscb);
-    for (i = 0; i < 4; i++) header.reserved[i] = (int16_t)sscb->read2(sscb);
+    for (i = 0; i < 4; i++) sscb->read2(sscb);
     header.metricDataFormat = (int16_t)sscb->read2(sscb);
     header.numberOfHMetrics = (uint16_t)sscb->read2(sscb);
     if (header.numberOfHMetrics == 0) {
@@ -1108,17 +1104,15 @@ var_hmtx::var_hmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
 
     sscb->seek(sscb, table->offset);
 
-    var_glyphMetrics gm;
+    advanceWidth.reserve(header.numberOfHMetrics);
+    lsb.reserve(numGlyphs);
     for (i = 0; i < header.numberOfHMetrics; i++) {
-        gm.width = (uint16_t)sscb->read2(sscb);
-        gm.sideBearing = (int16_t) sscb->read2(sscb);
-        defaultMetrics.push_back(gm);
+        advanceWidth.push_back((uint16_t)sscb->read2(sscb));
+        lsb.push_back((int16_t) sscb->read2(sscb));
     }
     // gm still has width of last entry
-    for (; i < numGlyphs; i++) {
-        gm.sideBearing = (int16_t)sscb->read2(sscb);
-        defaultMetrics.push_back(gm);
-    }
+    for (; i < numGlyphs; i++) 
+        lsb.push_back((int16_t)sscb->read2(sscb));
 
     table = sfrGetTableByTag(sfr, HVAR_TABLE_TAG);
     if (table == NULL) { /* HVAR table is optional */
@@ -1157,31 +1151,108 @@ var_hmtx::var_hmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     loadIndexMap(sscb, table, rsbMapOffset, rsbMap);
 }
 
-bool var_hmtx::lookup(ctlSharedStmCallbacks *sscb, uint16_t axisCount,
-                      Fixed *instCoords, uint16_t gid,
-                      var_glyphMetrics &metrics) {
-    if (gid >= defaultMetrics.size()) {
+bool var_hmtx::Fill() {
+    header.numberOfHMetrics = advanceWidth.size();
+    return lsb.size() > 0;
+}
+
+bool var_hmtx::lookup(ctlSharedStmCallbacks *sscb,
+                      const std::vector<Fixed> &instCoords,
+                      uint16_t gid, Fixed &width, Fixed &sb) {
+    if (gid >= lsb.size()) {
         sscb->message(sscb, "var_lookuphmtx: invalid glyph ID");
         return false;
     }
 
-    metrics = defaultMetrics[gid];
+    width = FixInt(gid < advanceWidth.size() ? advanceWidth[gid] : advanceWidth.back());
+    sb = FixInt(lsb[gid]);
 
     /* modify the default metrics if the font has variable font tables */
-    if (instCoords && (axisCount > 0) && ivs) {
-        long regionListCount = ivs->getRegionCount();
-        float scalars[CFF2_MAX_MASTERS];
-
-        ivs->calcRegionScalars(sscb, axisCount, instCoords, scalars);
-        metrics.width += ivs->applyDeltasForGid(sscb, widthMap, gid, scalars,
-                                                regionListCount);
+    if (instCoords.size() > 0 && ivs) {
+        std::vector<Fixed> scalars;
+        ivs->calcRegionScalars(sscb, instCoords, scalars);
+        width += ivs->applyDeltasForGid(sscb, widthMap, gid, scalars);
         if (lsbMap.offset > 0) /* if side bearing variation data are provided, index map must exist */
-            metrics.sideBearing += ivs->applyDeltasForGid(sscb, lsbMap, gid,
-                                                          scalars,
-                                                          regionListCount);
+            sb += ivs->applyDeltasForGid(sscb, lsbMap, gid, scalars);
     }
 
     return true;
+}
+
+void var_hmtx::write_hhea(VarWriter &vw) {
+    vw.w4(header.version);
+    vw.w2(header.ascender);
+    vw.w2(header.descender);
+    vw.w2(header.lineGap);
+    vw.w2(header.advanceWidthMax);
+    vw.w2(header.minLeftSideBearing);
+    vw.w2(header.minRightSideBearing);
+    vw.w2(header.xMaxExtent);
+    vw.w2(header.caretSlopeRise);
+    vw.w2(header.caretSlopeRun);
+    vw.w2(header.caretOffset);
+    vw.w2(0);
+    vw.w2(0);
+    vw.w2(0);
+    vw.w2(0);
+    vw.w2(header.metricDataFormat);
+    vw.w2(header.numberOfHMetrics);
+}
+
+void var_hmtx::write(VarWriter &vw) {
+    auto lsbl = lsb.size();
+    auto awl = advanceWidth.size();
+
+    assert(awl <= lsbl);
+    for (size_t i = 0; i < lsbl; i++) {
+        if (i < awl)
+            vw.w2(advanceWidth[i]);
+        vw.w2(lsb[i]);
+    }
+}
+
+void var_hmtx::write_HVAR(VarWriter &vw) {
+    assert(ivs != nullptr);
+
+    uint16_t mcBits = 1, subtableBits = 1;
+
+    auto t = ivs->maxDeltaSetCount();
+    while (t >>= 1)
+        mcBits++;
+
+    t = ivs->numSubtables();
+    while (t >>= 1)
+        subtableBits++;
+
+    assert(mcBits <= 16 && subtableBits <= 16);
+    uint8_t dsBytes = 4;
+    if (mcBits + subtableBits <= 8)
+        dsBytes = 1;
+    else if (mcBits + subtableBits <= 16)
+        dsBytes = 2;
+    else if (mcBits + subtableBits <= 24)
+        dsBytes = 3;
+
+    uint32_t widthSize = widthMap.size(dsBytes);
+    uint32_t lsbSize = lsbMap.size(dsBytes);
+    uint32_t rsbSize = rsbMap.size(dsBytes);
+
+    LOffset o = 20;
+
+    vw.w2(1);   // Major version
+    vw.w2(0);   // Minor version
+    vw.w4(o);
+    o += ivs->getSize();
+    vw.w4(widthSize > 0 ? o : 0);
+    o += widthSize;
+    vw.w4(lsbSize > 0 ? o : 0);
+    o += lsbSize;
+    vw.w4(rsbSize > 0 ? o : 0);
+
+    ivs->write(vw);
+    widthMap.write(vw, dsBytes, mcBits);
+    lsbMap.write(vw, dsBytes, mcBits);
+    rsbMap.write(vw, dsBytes, mcBits);
 }
 
 var_vmtx::var_vmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
@@ -1241,16 +1312,15 @@ var_vmtx::var_vmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
 
     sscb->seek(sscb, table->offset);
 
-    var_glyphMetrics gm;
+    advanceVWidth.reserve(header.numOfLongVertMetrics);
+    tsb.reserve(numGlyphs);
     for (i = 0; i < header.numOfLongVertMetrics; i++) {
-        gm.width = (uint16_t)sscb->read2(sscb);
-        gm.sideBearing = (int16_t)sscb->read2(sscb);
-        defaultMetrics.push_back(gm);
+        advanceVWidth.push_back((uint16_t)sscb->read2(sscb));
+        tsb.push_back((int16_t)sscb->read2(sscb));
     }
     // gm.width still has last value
     for (; i < numGlyphs; i++) {
-        gm.sideBearing = (int16_t)sscb->read2(sscb);
-        defaultMetrics.push_back(gm);
+        tsb.push_back((int16_t)sscb->read2(sscb));
     }
 
     /* read optional VORG table */
@@ -1332,29 +1402,26 @@ var_vmtx::var_vmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     loadIndexMap(sscb, table, vorgMapOffset, vorgMap);
 }
 
-bool var_vmtx::lookup(ctlSharedStmCallbacks *sscb, uint16_t axisCount,
-                      Fixed *instCoords, uint16_t gid,
-                      var_glyphMetrics &metrics) {
-    if (gid >= defaultMetrics.size()) {
+bool var_vmtx::lookup(ctlSharedStmCallbacks *sscb,
+                      const std::vector<Fixed> &instCoords, uint16_t gid,
+                      Fixed &width, Fixed &sb) {
+    if (gid >= tsb.size()) {
         sscb->message(sscb, "var_lookupvmtx: invalid glyph ID");
         return false;
     }
 
-    metrics = defaultMetrics[gid];
+    width = FixInt(gid < advanceVWidth.size() ? advanceVWidth[gid] : advanceVWidth.back());
+    sb = FixInt(tsb[gid]);
 
     /* modify the default metrics if the font has variable font tables */
-    if (instCoords && (axisCount > 0)) {
-        long regionListCount = ivs->getRegionCount();
-        float scalars[CFF2_MAX_MASTERS];
-
-        ivs->calcRegionScalars(sscb, axisCount, instCoords, scalars);
-        metrics.width += ivs->applyDeltasForGid(sscb, widthMap, gid,
-                                                scalars, regionListCount);
+    if (instCoords.size() > 0 && ivs) {
+        std::vector<Fixed> scalars;
+        ivs->calcRegionScalars(sscb, instCoords, scalars);
+        width += ivs->applyDeltasForGid(sscb, widthMap, gid, scalars);
         if (tsbMap.offset > 0) /* if side bearing variation data are provided, index map must exist */
-            metrics.sideBearing += ivs->applyDeltasForGid(sscb, tsbMap, gid,
-                                                          scalars,
-                                                          regionListCount);
+            sb += ivs->applyDeltasForGid(sscb, tsbMap, gid, scalars);
     }
+
     return true;
 }
 
@@ -1413,27 +1480,27 @@ var_MVAR::var_MVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
                                                table->length, ivsOffset);
 }
 
-bool var_MVAR::lookup(ctlSharedStmCallbacks *sscb, uint16_t axisCount,
-                      Fixed *instCoords, ctlTag tag, float &value) {
+bool var_MVAR::valueAdjust(ctlSharedStmCallbacks *sscb,
+                           const std::vector<Fixed> &instCoords,
+                           ctlTag tag, Fixed &adjust) {
     if (!ivs)
         return false;
 
-    if (instCoords == 0 || axisCount == 0) {
+    if (instCoords.size() == 0) {
         sscb->message(sscb, "zero instCoords/axis count specified for MVAR");
         return false;
     }
+
+    /* modify the default metrics if the font has variable font tables */
+    std::vector<Fixed> scalars;
+    ivs->calcRegionScalars(sscb, instCoords, scalars);
 
     auto i = values.find(tag);
     if (i == values.end())
         return false;
 
-    float scalars[CFF2_MAX_MASTERS];
-
-    ivs->calcRegionScalars(sscb, axisCount, instCoords, scalars);
-
     /* Blend the metric value using the IVS table */
-    value = ivs->applyDeltasForIndexPair(sscb, i->second, scalars,
-                                         ivs->getRegionCount());
+    adjust = ivs->applyDeltasForIndexPair(sscb, i->second, scalars);
 
     return true;
 }

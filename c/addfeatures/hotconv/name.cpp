@@ -16,8 +16,7 @@ void nameNew(hotCtx g) {
 }
 
 void nameWrite(hotCtx g) {
-    hotVarWriter vw {g};
-    g->ctx.name->Write(vw);
+    g->ctx.name->Write(g->vw);
 }   
 
 void nameReuse(hotCtx g) {
@@ -240,8 +239,8 @@ int nameFill(hotCtx g) {
     /* Only one  Windows Preferred Family is guaranteed to be defined (name ID 16); the rest may have to be */
     /* derived from these two values. This call is about deriving the missing names                         */
 
-    bool doWarning = nam->noName(nam_name::MATCH_ANY, nam_name::MATCH_ANY,
-                                 nam_name::MATCH_ANY, nam_name::NAME_ID_FAMILY);
+    bool doWarning = !nam->noName(nam_name::MATCH_ANY, nam_name::MATCH_ANY,
+                                  nam_name::MATCH_ANY, nam_name::NAME_ID_FAMILY);
 
     /* Copy nam_name::NAME_PREF_FAMILY entries to nam_name::NAME_FAMILY. */
     /* We need to add a compatible family name for each Preferred Family name which does not already have a nam_name::NAME_FAMILY name. */

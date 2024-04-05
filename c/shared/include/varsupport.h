@@ -48,9 +48,13 @@ typedef int16_t var_F2dot14; /* 2.14 fixed point number */
 
 /* glyph width and side-bearing */
 
-struct var_glyphMetrics {
-    float width {0};
-    float sideBearing {0};
+class VarWriter {
+ public:
+    virtual void w1(char o) = 0;
+    virtual void w2(int16_t o) = 0;
+    virtual void w3(int32_t o) = 0;
+    virtual void w4(int32_t o) = 0;
+    virtual void w(size_t count, char *data) = 0;
 };
 
 struct var_indexPair {
@@ -61,16 +65,15 @@ struct var_indexPair {
 };
 
 struct var_indexMap {
+    LOffset size(uint8_t entryBytes) {
+        if (map.size() == 0)
+            return 0;
+        return sizeof(uint8_t) * (2 + entryBytes * map.size()) + sizeof(uint32_t);
+    }
+    uint8_t entryFormat(uint8_t entryBytes, uint8_t deltaBits);
+    void write(VarWriter &vw, uint8_t entryBytes, uint8_t deltaBits);
     uint32_t offset {0};
     std::vector<var_indexPair> map;
-};
-
-class VarWriter {
- public:
-    virtual void w1(char o) = 0;
-    virtual void w2(int16_t o) = 0;
-    virtual void w4(int32_t o) = 0;
-    virtual void w(size_t count, char *data) = 0;
 };
 
 /* convert 2.14 fixed value to float */
@@ -109,8 +112,8 @@ class var_axes {
     userCoords - user coordinates to be normalized.
     normCoords - where the resulting normalized coordinates are returned as 2.14 fixed point values.
     */
-    bool normalizeCoords(ctlSharedStmCallbacks *sscb, Fixed *userCoords, Fixed *normCoords);
     bool normalizeCoord(uint16_t index, Fixed userCoord, Fixed &normCoord);
+    bool normalizeCoords(ctlSharedStmCallbacks *sscb, Fixed *userCoords, std::vector<Fixed> &normCoords);
 
     // Returns the number of named instances from the axes table data.
     uint16_t getInstanceCount() { return instances.size(); }
@@ -393,6 +396,15 @@ class itemVariationStore {
     void setAxisCount(uint16_t ac) { axisCount = ac; }
     // Returns the number of regions in the region list in the IVS data.
     uint16_t getRegionCount() { return regions.size(); }
+    bool isEmpty() { return models.size() == 0; }
+    uint16_t numSubtables() { return subtables.size(); }
+    uint16_t maxDeltaSetCount() {
+        uint16_t mc {0};
+        for (auto &s : subtables)
+            if (mc < s.deltaValues.size())
+                mc = s.deltaValues.size();
+        return mc;
+    }
 
 #if HOT_DEBUG
     void toerr() {
@@ -433,8 +445,8 @@ class itemVariationStore {
     regionCount   - the length of regionIndices array.
     */
 
-    int32_t getRegionIndices(uint16_t vsIndex, uint16_t *regionIndices,
-                             int32_t regionCount);
+    bool getRegionIndices(uint16_t vsIndex,
+                          std::vector<uint16_t> &regionIndices);
 
     /* Calculates scalars for all regions given a normalized design vector for
        an instance.
@@ -446,17 +458,18 @@ class itemVariationStore {
     instCoords - a pointer to normalized design vector of a font instance.
     scalars    - where scalars are returned as float values.
     */
-    void calcRegionScalars(ctlSharedStmCallbacks *sscb, uint16_t &axisCount,
-                           Fixed *instCoords, float *scalars);
-
+    Fixed calcRegionScalar(uint16_t refRegionIndex, const std::vector<Fixed> &alocs);
     Fixed calcRegionScalar(uint16_t refRegionIndex, uint16_t locRegionIndex);
 
-    float applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
-                                  const var_indexPair &pair, float *scalars,
-                                  int32_t regionListCount);
-    float applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_indexMap &map,
-                            uint16_t gid, float *scalars,
-                            int32_t regionListCount);
+    void calcRegionScalars(ctlSharedStmCallbacks *sscb,
+                           const std::vector<Fixed> &instCoords,
+                           std::vector<Fixed> &scalars);
+
+    Fixed applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
+                                  const var_indexPair &pair,
+                                  const std::vector<Fixed> &scalars);
+    Fixed applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_indexMap &map,
+                            uint16_t gid, const std::vector<Fixed> &scalars);
 
     var_indexPair addValue(VarLocationMap &vlm, const VarValueRecord &vvr,
                            std::shared_ptr<slogger> logger);
@@ -467,6 +480,7 @@ class itemVariationStore {
         assert(vi < (ValueIndex)values.size());
         values[vi].setDevOffset(o);
     }
+
 
     const std::vector<ValueTracker> &getValues() { return values; }
 
@@ -524,6 +538,7 @@ class itemVariationStore {
             return 6 + regionIndices.size() * (2 + deltaValues.size() * 2);
         }
         void write(VarWriter &vw);
+        uint16_t numBytes {0};
         std::vector<uint16_t> regionIndices;
         std::vector<std::vector<int16_t>> deltaValues;
     };
@@ -579,6 +594,7 @@ class VarModel {
 
 class var_hmtx {
  public:
+    var_hmtx() {}
     var_hmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb);
 
     /* lookup horizontal metrics for a glyph optionally blended using font
@@ -591,12 +607,16 @@ class var_hmtx {
     gid        - the glyph ID to be looked up.
     metrics    - where the horizontal glyph metrics are returned.
     */
-    bool lookup(ctlSharedStmCallbacks *sscb, uint16_t axisCount,
-                Fixed *instCoords, uint16_t gid, var_glyphMetrics &metrics);
+    bool lookup(ctlSharedStmCallbacks *sscb, const std::vector<Fixed> &instCoords,
+                uint16_t gid, Fixed &width, Fixed &lsb);
 
- private:
+    bool Fill();
+    void write_hhea(VarWriter &vw);
+    void write(VarWriter &vw);
+    void write_HVAR(VarWriter &vw);
+
     struct var_hhea {
-        Fixed version {0};
+        Fixed version {0x00010000};
         int16_t ascender {0};
         int16_t descender {0};
         int16_t lineGap {0};
@@ -607,11 +627,11 @@ class var_hmtx {
         int16_t caretSlopeRise {0};
         int16_t caretSlopeRun {0};
         int16_t caretOffset {0};
-        int16_t reserved[4] {0, 0, 0, 0};
         int16_t metricDataFormat {0};
         uint16_t numberOfHMetrics {0};
     } header;
-    std::vector<var_glyphMetrics> defaultMetrics;
+    std::vector<uint16_t> advanceWidth;
+    std::vector<int16_t> lsb;
 
     /* HHVAR */
     std::unique_ptr<itemVariationStore> ivs;
@@ -636,8 +656,8 @@ class var_vmtx {
     gid        - the glyph ID to be looked up.
     metrics    - where the vertical glyph metrics are returned.
     */
-    bool lookup(ctlSharedStmCallbacks *sscb, uint16_t axisCount,
-                Fixed *instCoords, uint16_t gid, var_glyphMetrics &metrics);
+    bool lookup(ctlSharedStmCallbacks *sscb, const std::vector<Fixed> &instCoords,
+                uint16_t gid, Fixed &width, Fixed &tsb);
 
  private:
     struct var_vhea_ {
@@ -656,7 +676,8 @@ class var_vmtx {
         int16_t metricDataFormat {0};
         uint16_t numOfLongVertMetrics {0};
     } header;
-    std::vector<var_glyphMetrics> defaultMetrics;
+    std::vector<uint16_t> advanceVWidth;
+    std::vector<int16_t> tsb;
     std::vector<int16_t> vertOriginY;
 
     std::unique_ptr<itemVariationStore> ivs;
@@ -723,7 +744,9 @@ class var_MVAR {
     tag        - the tag of the metric value to be looked up.
     value      - where the blended metric value is returned.
      */
-    bool lookup(ctlSharedStmCallbacks *sscb, uint16_t axisCount, Fixed *instCoords, ctlTag tag, float &value);
+    bool valueAdjust(ctlSharedStmCallbacks *sscb,
+                     const std::vector<Fixed> &instCoords,
+                     ctlTag tag, Fixed &value);
 
     void setAxisCount(uint16_t ac) {
         assert(axisCount == 0);

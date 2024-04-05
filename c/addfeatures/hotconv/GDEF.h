@@ -14,7 +14,6 @@
 #include "common.h"
 #include "FeatCtx.h"
 #include "otl.h"
-#include "varsupport.h"
 
 #define GDEF_ TAG('G', 'D', 'E', 'F')
 #define kMaxMarkAttachClasses 15
@@ -22,19 +21,6 @@
 #define OUT2(v) hotOut2(h->g, (v))
 #define OUT3(v) hotOut3(h->g, (v))
 #define OUT4(v) hotOut4(h->g, (v))
-
-class hotVarWriter : public VarWriter {
- public:
-    hotVarWriter() = delete;
-    explicit hotVarWriter(hotCtx g) : g(g) {}
-    void w1(char o) override { hout1(g, o); }
-    void w2(int16_t o) override { hotOut2(g, o); }
-    void w4(int32_t o) override { hotOut4(g, o); }
-    void w(size_t count, char *data) {
-        g->cb.stm.write(&g->cb.stm, g->out_stream, count, data);
-    }
-    hotCtx g;
-};
 
 /* Standard functions */
 void GDEFNew(hotCtx g);

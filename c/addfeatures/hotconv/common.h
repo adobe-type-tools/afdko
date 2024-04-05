@@ -25,6 +25,7 @@
 #include "dynarr.h"
 #include "cffread_abs.h"
 #include "ctutil.h"
+#include "varsupport.h"
 
 #if WIN32
 #define SAFE_LOCALTIME(x, y) localtime_s(y, x)
@@ -357,7 +358,7 @@ class GDEF;
 class GPOS;
 class GSUB;
 class nam_name;
-class hmtx;
+class var_hmtx;
 class vmtx;
 class var_axes;
 class var_MVAR;
@@ -365,8 +366,20 @@ class VarLocationMap;
 
 #define ID_TEXT_SIZE 1024 /* Size of text buffer used to hold identifying info about the current feature for error messages. */
 
+class hotVarWriter : public VarWriter {
+ public:
+    hotVarWriter() = delete;
+    explicit hotVarWriter(hotCtx g) : g(g) {}
+    void w1(char o) override;
+    void w2(int16_t o) override;
+    void w3(int32_t o) override;
+    void w4(int32_t o) override;
+    void w(size_t count, char *data) override;
+    hotCtx g;
+};
 
 struct hotCtx_ {
+    hotCtx_() : vw(this) {}
     const char *getNote() {
         if (note.size() > 1024) {
             note.resize(1024);
@@ -381,6 +394,7 @@ struct hotCtx_ {
     FontInfo_ font;  /* Font information */
     std::vector<hotGlyphInfo> glyphs;
     hotCallbacks cb; /* Client callbacks */
+    hotVarWriter vw;
     ctlSharedStmCallbacks sscb;
     struct {         /* --- Package contexts */
         mapCtx map;
@@ -397,7 +411,7 @@ struct hotCtx_ {
         cmapCtx cmap;
         headCtx head;
         hheaCtx hhea;
-        hmtx *hmtxp;
+        var_hmtx *hmtx;
         maxpCtx maxp;
         nam_name *name;
         postCtx post;
@@ -440,7 +454,7 @@ inline char hin1(hotCtx g) {
 }
 short hotIn2(hotCtx g);
 int32_t hotIn4(hotCtx g);
-
+void hotInN(hotCtx g, size_t count, char *ptr);
 
 void hotCalcSearchParams(unsigned unitSize, long nUnits,
                          unsigned short *searchRange,

@@ -79,7 +79,6 @@ void GDEFWrite(hotCtx g) {
 void GDEF::Write() {
     /* Perform checksum adjustment */
     auto h = this;
-    hotVarWriter vw(g);
     OUT4(version);
     OUT2(glyphClassTable.offset);
     OUT2(attachTable.offset);
@@ -94,11 +93,11 @@ void GDEF::Write() {
 
     glyphClassTable.write();
     attachTable.write(h);
-    ligCaretTable.write(h, vw);
+    ligCaretTable.write(h, g->vw);
     markAttachClassTable.write();
     markSetClassTable.write(h);
     if (ivs.getRegionCount() > 0)
-        ivs.write(vw);
+        ivs.write(g->vw);
 }
 
 void GDEFReuse(hotCtx g) {

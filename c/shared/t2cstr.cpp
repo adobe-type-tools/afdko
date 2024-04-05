@@ -101,7 +101,7 @@ struct _t2cCtx {
     short LanguageGroup;
     t2cAuxData *aux;                                /* Auxiliary parse data */
     unsigned short gid;                             /* glyph ID */
-    unsigned short regionIndices[CFF2_MAX_MASTERS]; /* variable font region indices */
+    std::vector<uint16_t> *regionIndices;
     cff2GlyphCallbacks *cff2;                       /* CFF2 font callbacks */
     abfGlyphCallbacks *glyph;                       /* Glyph callbacks */
     ctlMemoryCallbacks *mem;                        /* Glyph callbacks */
@@ -815,12 +815,12 @@ static int handleBlend(t2cCtx h) {
         /* Blend values on the blend stack and replace the default values on the regular stack with the results.
          */
         for (i = 0; i < numBlends; i++) {
-            float val = opEntry[i].value;
-            int r;
+            float val = opEntry[i].value, fsc;
 
-            for (r = 0; r < h->stack.numRegions; r++) {
+            for (int r = 0; r < h->stack.numRegions; r++) {
+                fixtopflt(h->aux->scalars->at(h->regionIndices->at(r)), &fsc);
                 int index = (i * h->stack.numRegions) + r + (h->stack.blendCnt - numDeltaBlends);
-                val += INDEX_BLEND(index).value * h->aux->scalars[h->regionIndices[r]];
+                val += INDEX_BLEND(index).value * fsc;
             }
 
             h->stack.array[i + h->stack.cnt - (numBlends + numDeltaBlends)] = val;
@@ -941,9 +941,9 @@ static void setNumMasters(t2cCtx h) {
     else
         h->stack.numRegions = 0;
     h->glyph->info->blendInfo.numRegions = h->stack.numRegions;
-    if (h->aux->varStore && !h->aux->varStore->getRegionIndices(vsindex,
-                                                                h->regionIndices,
-                                                                h->aux->varStore->getRegionCount())) {
+    if (h->regionIndices == nullptr)
+        h->regionIndices = new std::vector<uint16_t>();
+    if (h->aux->varStore && !h->aux->varStore->getRegionIndices(vsindex, *h->regionIndices)) {
         message(h, "inconsistent region indices detected in item variation store subtable %d", vsindex);
         h->stack.numRegions = 0;
     }
@@ -1842,6 +1842,8 @@ int t2cParse(long offset, long endOffset, t2cAuxData *aux, unsigned short gid, c
     HANDLER
     retVal = Exception.Code;
     END_HANDLER
+
+    delete h->regionIndices;
 
     sMemFree(h);
 
