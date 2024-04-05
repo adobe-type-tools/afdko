@@ -10,6 +10,8 @@
 #include "common.h"
 
 #define hmtx_ TAG('h', 'm', 't', 'x')
+#define hhea_ TAG('h', 'h', 'e', 'a')
+#define HVAR_ TAG('H', 'V', 'A', 'R')
 
 /* Standard functions */
 void hmtxNew(hotCtx g);
@@ -18,19 +20,18 @@ void hmtxWrite(hotCtx g);
 void hmtxReuse(hotCtx g);
 void hmtxFree(hotCtx g);
 
-/* Supplementary Functions */
-class hmtx {
- public:
-    hmtx() = delete;
-    explicit hmtx(hotCtx g) : g(g) {}
-    int getNLongMetrics() { return filled ? advanceWidth.size() : -1; }
-    int Fill();
-    void Write();
- private:
-    std::vector<uFWord> advanceWidth;
-    std::vector<FWord> lsb;
-    bool filled {false};
-    hotCtx g {nullptr};
-};
+void hheaNew(hotCtx g);
+int hheaFill(hotCtx g);
+void hheaWrite(hotCtx g);
+void hheaReuse(hotCtx g);
+void hheaFree(hotCtx g);
+
+void hheaSetCaretOffset(hotCtx g, int16_t caretOffset);
+
+void HVARNew(hotCtx g);
+int HVARFill(hotCtx g);
+void HVARWrite(hotCtx g);
+void HVARReuse(hotCtx g);
+void HVARFree(hotCtx g);
 
 #endif  // ADDFEATURES_HOTCONV_HMTX_H_

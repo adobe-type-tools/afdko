@@ -7,8 +7,6 @@
 
 #include "common.h"
 
-#include "varsupport.h"
-
 /* Standard functions */
 void MVARNew(hotCtx g);
 int MVARFill(hotCtx g);

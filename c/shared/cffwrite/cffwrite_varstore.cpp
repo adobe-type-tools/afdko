@@ -28,6 +28,7 @@ class cfwVarWriter : public VarWriter {
         arg[0] = (unsigned char)(o >> 8);
         arg[1] = (unsigned char)o;
     }
+    void w3(int32_t o) override { assert(false); }
     void w4(int32_t o) override {
         char *arg = dnaEXTEND(*dict, 4);
         arg[0] = (unsigned char)(o >> 24);

@@ -16,7 +16,6 @@
 
 #include "head.h"
 #include "hotlogger.h"
-#include "hhea.h"
 #include "hmtx.h"
 #include "post.h"
 #include "sfnt.h"
@@ -29,12 +28,19 @@
 #include "GDEF.h"
 #include "OS_2.h"
 #include "dictops.h"
-#include "varsupport.h"
 
 /* Windows-specific macros */
 #define FAMILY_UNSET 255 /* Flags unset Windows Family field */
 #define ANSI_CHARSET 0
 #define SYMBOL_CHARSET 2
+
+void hotVarWriter::w1(char o) { hout1(g, o); }
+void hotVarWriter::w2(int16_t o) { hotOut2(g, o); }
+void hotVarWriter::w3(int32_t o) { hotOut3(g, o); }
+void hotVarWriter::w4(int32_t o) { hotOut4(g, o); }
+void hotVarWriter::w(size_t count, char *data) {
+    g->cb.stm.write(&g->cb.stm, g->out_stream, count, data);
+}
 
 void hotAddAnonTable(hotCtx g, unsigned long tag, hotAnonRefill refill);
 
@@ -104,8 +110,7 @@ static long sscbTell(ctlSharedStmCallbacks *h) {
 }
 
 static void sscbRead(ctlSharedStmCallbacks *h, size_t count, char *ptr) {
-    hotCtx g = (hotCtx) h->direct_ctx;
-    g->logger->log(sFATAL, "General reads not supported");
+    hotInN((hotCtx) h->direct_ctx, count, ptr);
 }
 
 static uint8_t sscbRead1(ctlSharedStmCallbacks *h) {
@@ -145,7 +150,7 @@ void hotMakeSSC(hotCtx g, ctlSharedStmCallbacks &c) {
 hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
               std::shared_ptr<slogger> logger) {
     time_t now;
-    hotCtx g = new hotCtx_;
+    hotCtx g = new hotCtx_();
 
     if (g == NULL) {
         if (logger)
@@ -187,8 +192,7 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->ctx.OS_2 = NULL;
     g->ctx.cmap = NULL;
     g->ctx.head = NULL;
-    g->ctx.hhea = NULL;
-    g->ctx.hmtxp = nullptr;
+    g->ctx.hmtx = nullptr;
     g->ctx.name = nullptr;
     g->ctx.post = NULL;
     g->ctx.sfnt = NULL;
@@ -196,6 +200,7 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->ctx.vmtxp = nullptr;
     g->ctx.VORG = NULL;
     g->ctx.axes = nullptr;
+    g->ctx.MVAR = nullptr;
     g->ctx.locMap = nullptr;
 
     g->DnaCTX = dnaNew(&hot_memcb, DNA_CHECK_ARGS);
@@ -331,11 +336,10 @@ static void hotReadTables(hotCtx g) {
                     table = sfrGetTableByTag(sfr, hhea_);
                     if (table == NULL)
                         g->logger->log(sFATAL, "CFF2 sfnt must contain hhea table");
-                    hheaRead(g, table->offset, table->length);
                     table = sfrGetTableByTag(sfr, hmtx_);
                     if (table == NULL)
                         g->logger->log(sFATAL, "CFF2 sfnt must contain hmtx table");
-                    sfntOverrideTable(g, hmtx_, table->offset, table->length);
+                    g->ctx.hmtx = new var_hmtx(sfr, &g->sscb);
                     table = sfrGetTableByTag(sfr, name_);
                     if (table == NULL)
                         g->logger->log(sFATAL, "CFF2 sfnt must contain name table");
@@ -355,15 +359,10 @@ static void hotReadTables(hotCtx g) {
                     if (table != NULL) {
                         sfntOverrideTable(g, avar_, table->offset, table->length);
                     }
-                    table = sfrGetTableByTag(sfr, HVAR_);
-                    if (table != NULL) {
-                        sfntOverrideTable(g, HVAR_, table->offset, table->length);
-                    }
                     // temporary, will read in and write back out
                     table = sfrGetTableByTag(sfr, MVAR_);
-                    if (table != NULL) {
+                    if (table != NULL)
                         g->ctx.MVAR = new var_MVAR(sfr, &g->sscb);
-                    }
                 }
             }
             // call name function to read in extra labels
@@ -405,6 +404,7 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
 
     /* Parse CFF data and get global font information */
     g->ctx.cfr = cfrNew(&hot_memcb, &g->cb.stm, CFR_CHECK_ARGS, g->logger);
+    cfrSetTablePointers(g->ctx.cfr, g->ctx.axes, g->ctx.hmtx, g->ctx.MVAR, g->ctx.name);
     cfrBegFont(g->ctx.cfr, 0, 0, 0, &top, NULL);
 
     /* Create and copy font strings */
@@ -834,6 +834,7 @@ void hotConvert(hotCtx g) {
 
     g->out_stream = g->cb.stm.open(&g->cb.stm, OTF_DST_STREAM_ID, 0);
     sfntFill(g);
+    cfrEndFont(g->ctx.cfr);
     cfrFree(g->ctx.cfr);
     sfntWrite(g);
 
@@ -1301,6 +1302,12 @@ int32_t hotIn4(hotCtx g) {
     result |= (uint8_t)hin1(g) << 8;
     result |= (uint8_t)hin1(g);
     return (int32_t)result;
+}
+
+// XXX Optimize later
+void hotInN(hotCtx g, size_t count, char *ptr) {
+    for (size_t i = 0; i < count; i++)
+        *ptr++ = hin1(g);
 }
 
 /* Output OTF data as 2-byte number in big-endian order */

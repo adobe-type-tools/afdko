@@ -39,7 +39,7 @@ typedef struct {
     float WV[4];
     unsigned short default_vsIndex; /* this is the vsindex set in the private dict. */
     itemVariationStore *varStore;
-    float *scalars;
+    std::vector<Fixed> *scalars;
     std::shared_ptr<slogger> logger;
 } t2cAuxData;
 

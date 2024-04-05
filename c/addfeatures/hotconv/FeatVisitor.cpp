@@ -16,7 +16,7 @@
 #include "GDEF.h"
 #include "GPOS.h"
 #include "GSUB.h"
-#include "hhea.h"
+#include "hmtx.h"
 #include "name.h"
 #include "OS_2.h"
 #include "otl.h"
