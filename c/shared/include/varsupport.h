@@ -659,6 +659,7 @@ class var_hmtx {
 
 class var_vmtx {
  public:
+    var_vmtx() {}
     var_vmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb);
 
     /* lookup vertical metrics for a glyph optionally blended usingx
@@ -674,9 +675,14 @@ class var_vmtx {
     bool lookup(ctlSharedStmCallbacks *sscb, const std::vector<Fixed> &instCoords,
                 uint16_t gid, Fixed &width, Fixed &tsb);
 
- private:
+    bool Fill();
+    void write_vhea(VarWriter &vw);
+    void write(VarWriter &vw);
+    void write_VORG(VarWriter &vw);
+    void write_VVAR(VarWriter &vw);
+
     struct var_vhea_ {
-        Fixed version {0};
+        Fixed version {0x00010001};
         int16_t vertTypoAscender {0};
         int16_t vertTypoDescender {0};
         int16_t vertTypoLineGap {0};
@@ -687,13 +693,13 @@ class var_vmtx {
         int16_t caretSlopeRise {0};
         int16_t caretSlopeRun {0};
         int16_t caretOffset {0};
-        int16_t reserved[4] {0, 0, 0, 0};
         int16_t metricDataFormat {0};
         uint16_t numOfLongVertMetrics {0};
     } header;
     std::vector<uint16_t> advanceVWidth;
     std::vector<int16_t> tsb;
-    std::vector<int16_t> vertOriginY;
+    int16_t defaultVertOrigin {0};
+    std::map<uint16_t,int16_t> vertOriginY;
 
     std::unique_ptr<itemVariationStore> ivs;
     var_indexMap widthMap;

@@ -11,64 +11,145 @@
 #include <cassert>
 
 void vmtxNew(hotCtx g) {
-    g->ctx.vmtxp = new vmtx(g);
 }
 
 int vmtxFill(hotCtx g) {
-    return g->ctx.vmtxp->Fill();
-}
-
-int vmtx::Fill() {
-    uint32_t glyphCount = g->glyphs.size();
-
-    if ((!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) && (!IS_CID(g)))
+    if (g->ctx.vmtx == nullptr)
         return 0;
 
-    advanceHeight.reserve(glyphCount);
-    tsb.reserve(glyphCount);
+    auto &vmtx = *g->ctx.vmtx;
 
-    for (auto &g : g->glyphs) {
-        advanceHeight.push_back(-g.vAdv);
-        tsb.push_back(g.vOrigY - g.bbox.top);
+    if ((!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) && (!IS_CID(g)))
+        return vmtx.Fill();
+
+    uint32_t glyphCount = g->glyphs.size();
+
+    vmtx.advanceVWidth.reserve(glyphCount);
+    vmtx.tsb.reserve(glyphCount);
+
+    for (auto &gl : g->glyphs) {
+        vmtx.advanceVWidth.push_back(-gl.vAdv);
+        vmtx.tsb.push_back(gl.vOrigY - gl.bbox.top);
     }
 
     /* Optimize metrics */
-    FWord height = advanceHeight.back();
+    FWord vWidth = vmtx.advanceVWidth.back();
     int64_t i;
-    for (i = (int64_t)advanceHeight.size() - 2; i >= 0; i--) {
-        if (advanceHeight[i] != height)
+    for (i = vmtx.advanceVWidth.size() - 2; i >= 0; i--) {
+        if (vmtx.advanceVWidth[i] != vWidth)
             break;
     }
-    if (i + 2 != (int64_t)advanceHeight.size())
-        advanceHeight.resize(i+2);
+    if (i + 2 != vmtx.advanceVWidth.size())
+        vmtx.advanceVWidth.resize(i+2);
 
-    filled = true;
-    return 1;
+    return vmtx.Fill();
 }
 
 void vmtxWrite(hotCtx g) {
-    g->ctx.vmtxp->Write();
-}
-
-void vmtx::Write() {
-    auto h = this;
-    auto tsbl = tsb.size();
-    auto ahl = advanceHeight.size();
-
-    assert(ahl <= tsbl);
-    for (size_t i = 0; i < tsbl; i++) {
-        if (i < ahl)
-            OUT2(advanceHeight[i]);
-        OUT2(tsb[i]);
-    }
+    g->ctx.vmtx->write(g->vw);
 }
 
 void vmtxReuse(hotCtx g) {
-    delete g->ctx.vmtxp;
-    g->ctx.vmtxp = new vmtx(g);
+    delete g->ctx.vmtx;
+    g->ctx.vmtx = nullptr;
 }
 
 void vmtxFree(hotCtx g) {
-    delete g->ctx.vmtxp;
-    g->ctx.vmtxp = nullptr;
+    delete g->ctx.vmtx;
+    g->ctx.vmtx = nullptr;
 }
+
+void vheaNew(hotCtx g) { }
+
+int vheaFill(hotCtx g) {
+    if (g->ctx.vmtx == nullptr) {
+        if ((g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE) || IS_CID(g))
+            g->ctx.vmtx = new var_vmtx();
+        else
+            return 0;
+    }
+
+    auto &header = g->ctx.vmtx->header;
+
+    header.version = VERSION(1, 1);
+    header.vertTypoAscender = g->font.VertTypoAscender;
+    header.vertTypoDescender = g->font.VertTypoDescender;
+    header.vertTypoLineGap = g->font.VertTypoLineGap;
+
+    header.advanceHeightMax = g->font.maxAdv.v;
+    header.minTop = g->font.minBearing.top;
+    header.minBottom = g->font.minBearing.bottom;
+    header.yMaxExtent = g->font.maxExtent.v;
+
+    /* Always set a horizontal caret for vertical writing */
+    header.caretSlopeRise = 0;
+    header.caretSlopeRun = 1;
+    header.caretOffset = 0;
+
+    return 1;
+}
+
+void vheaWrite(hotCtx g) {
+    assert(g->ctx.vmtx != nullptr);
+    g->ctx.vmtx->write_vhea(g->vw);
+}
+
+void vheaReuse(hotCtx g) { }
+
+void vheaFree(hotCtx g) { }
+
+void VORGNew(hotCtx g) { }
+
+int VORGFill(hotCtx g) {
+    if ((!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) && (!IS_CID(g))) {
+        if (g->ctx.vmtx == nullptr)
+            return 0;
+        else
+            return !g->ctx.vmtx->vertOriginY.empty();
+    }
+
+    assert(g->ctx.vmtx != nullptr);
+
+    auto &vmtx = *g->ctx.vmtx;
+
+    int16_t dflt;
+    vmtx.defaultVertOrigin = dflt = g->font.TypoAscender;
+    vmtx.vertOriginY.clear();
+
+    for (size_t i = 0; i < g->glyphs.size(); i++) {
+        auto &gl = g->glyphs[i];
+        if (gl.vOrigY != dflt)
+            vmtx.vertOriginY.emplace((uint16_t) i, gl.vOrigY);
+    }
+
+    return 1;
+}
+
+void VORGWrite(hotCtx g) {
+    assert(g->ctx.vmtx != nullptr);
+    g->ctx.vmtx->write_VORG(g->vw);
+}
+
+void VORGReuse(hotCtx g) { }
+
+void VORGFree(hotCtx g) { }
+
+// hhea data is part of the var_hmtx object
+void VVARNew(hotCtx g) { }
+
+int VVARFill(hotCtx g) {
+    if (g->ctx.vmtx == nullptr)
+        return 0;
+    else
+        return g->ctx.vmtx->ivs != nullptr && g->ctx.vmtx->ivs->numSubtables() > 0;
+}
+
+void VVARWrite(hotCtx g) {
+    assert(g->ctx.vmtx != nullptr);
+    g->ctx.vmtx->write_VVAR(g->vw);
+}
+
+void VVARReuse(hotCtx g) { }
+
+void VVARFree(hotCtx g) { }
+
