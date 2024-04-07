@@ -17,6 +17,7 @@
 #include "head.h"
 #include "hotlogger.h"
 #include "hmtx.h"
+#include "vmtx.h"
 #include "post.h"
 #include "sfnt.h"
 #include "sfntread.h"
@@ -196,9 +197,7 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->ctx.name = nullptr;
     g->ctx.post = NULL;
     g->ctx.sfnt = NULL;
-    g->ctx.vhea = NULL;
-    g->ctx.vmtxp = nullptr;
-    g->ctx.VORG = NULL;
+    g->ctx.vmtx = nullptr;
     g->ctx.axes = nullptr;
     g->ctx.MVAR = nullptr;
     g->ctx.locMap = nullptr;
@@ -363,6 +362,10 @@ static void hotReadTables(hotCtx g) {
                     table = sfrGetTableByTag(sfr, MVAR_);
                     if (table != NULL)
                         g->ctx.MVAR = new var_MVAR(sfr, &g->sscb);
+                    table = sfrGetTableByTag(sfr, vmtx_);
+                    // Thsi will also open vhea, VORG, and VVAR if present
+                    if (table != NULL)
+                        g->ctx.vmtx = new var_vmtx(sfr, &g->sscb);
                 }
             }
             // call name function to read in extra labels

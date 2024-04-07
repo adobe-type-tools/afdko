@@ -42,6 +42,7 @@ TIMEOUT = 240  # seconds
 allow_skip_console = os.getenv('AFDKO_TEST_SKIP_CONSOLE',
                                'False').lower() in ('true', '1', 't')
 
+last_command = ["blah"]
 
 def _write_file(file_path, data):
     with open(file_path, "wb") as f:
@@ -95,6 +96,8 @@ def run_tool(opts):
         args.insert(2, f'import sys; import afdko.{mod}; ' +
                        f'sys.exit(afdko.{mod}.{fcn}())')
 
+    global last_command
+    last_command[0] = ' '.join(args)
     logger.debug(
         f"About to run the command below\n==>{' '.join(args)}<==")
     try:

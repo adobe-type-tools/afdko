@@ -19,7 +19,6 @@
 #include "GSUB.h"
 #include "OS_2.h"
 #include "STAT.h"
-#include "VORG.h"
 #include "anon.h"
 #include "cmap.h"
 #include "head.h"
@@ -29,7 +28,6 @@
 #include "MVAR.h"
 #include "post.h"
 #include "sfnt.h"
-#include "vhea.h"
 #include "vmtx.h"
 
 typedef struct {
@@ -52,7 +50,7 @@ typedef struct {
    ordered by tag. */
 static Funcs g_funcs[] = {
     {head_, headNew, headFill, headWrite, headReuse, headFree, 1, 1, 0},
-    {hhea_, hheaNew, hheaFill, hheaWrite, hheaReuse, hheaFree, 2, 2, 0},
+    {hhea_, hheaNew, hheaFill, hheaWrite, hheaReuse, hheaFree, 1, 2, 0},
     {maxp_, maxpNew, maxpFill, maxpWrite, maxpReuse, maxpFree, 1, 3, 0},
     {OS_2_, OS_2New, OS_2Fill, OS_2Write, OS_2Reuse, OS_2Free, 1, 4, 0},
     {name_, nameNew, nameFill, nameWrite, nameReuse, nameFree, 3, 5, 0},
@@ -60,17 +58,17 @@ static Funcs g_funcs[] = {
     {post_, postNew, postFill, postWrite, postReuse, postFree, 1, 7, 0},
     {CFF__, NULL,    NULL,     NULL,      NULL,      NULL,     1, 8, 0},
     {CFF2_, NULL,    NULL,     NULL,      NULL,      NULL,     1, 8, 0},
-    {hmtx_, hmtxNew, hmtxFill, hmtxWrite, hmtxReuse, hmtxFree, 1, 9, 0},
-    {vhea_, vheaNew, vheaFill, vheaWrite, vheaReuse, vheaFree, 2, 10, 0},
-    {vmtx_, vmtxNew, vmtxFill, vmtxWrite, vmtxReuse, vmtxFree, 1, 11, 0},
+    {hmtx_, hmtxNew, hmtxFill, hmtxWrite, hmtxReuse, hmtxFree, 2, 9, 0},
+    {vhea_, vheaNew, vheaFill, vheaWrite, vheaReuse, vheaFree, 1, 10, 0},
+    {vmtx_, vmtxNew, vmtxFill, vmtxWrite, vmtxReuse, vmtxFree, 2, 11, 0},
     {GDEF_, GDEFNew, GDEFFill, GDEFWrite, GDEFReuse, GDEFFree, 3, 12, 0},
     {GSUB_, GSUBNew, GSUBFill, GSUBWrite, GSUBReuse, GSUBFree, 1, 13, 0},
     {GPOS_, GPOSNew, GPOSFill, GPOSWrite, GPOSReuse, GPOSFree, 1, 14, 0},
-    {HVAR_, HVARNew, HVARFill, HVARWrite, HVARReuse, HVARFree, 1, 15, 0},
-    {VVAR_, NULL,    NULL,     NULL,      NULL,      NULL,     1, 16, 0},
-    {MVAR_, MVARNew, MVARFill, MVARWrite, MVARReuse, MVARFree, 1, 17, 0},
+    {HVAR_, HVARNew, HVARFill, HVARWrite, HVARReuse, HVARFree, 3, 15, 0},
+    {VVAR_, VVARNew, VVARFill, VVARWrite, VVARReuse, VVARFree, 3, 16, 0},
+    {MVAR_, MVARNew, MVARFill, MVARWrite, MVARReuse, MVARFree, 2, 17, 0},
     {BASE_, BASENew, BASEFill, BASEWrite, BASEReuse, BASEFree, 1, 18, 0},
-    {VORG_, VORGNew, VORGFill, VORGWrite, VORGReuse, VORGFree, 1, 19, 0},
+    {VORG_, VORGNew, VORGFill, VORGWrite, VORGReuse, VORGFree, 2, 19, 0},
     {STAT_, STATNew, STATFill, STATWrite, STATReuse, STATFree, 1, 20, 0},
     {avar_, NULL,    NULL,     NULL,      NULL,      NULL,     1, 21, 0},
     {fvar_, NULL,    NULL,     NULL,      NULL,      NULL,     1, 22, 0},
