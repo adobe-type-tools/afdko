@@ -21,7 +21,6 @@
 #include "OS_2.h"
 #include "otl.h"
 #include "STAT.h"
-#include "vhea.h"
 
 extern "C" const char *curdir();
 extern "C" const char *sep();

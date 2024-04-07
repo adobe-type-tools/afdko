@@ -35,9 +35,9 @@ int hmtxFill(hotCtx g) {
     hmtx.advanceWidth.reserve(glyphCount);
     hmtx.lsb.reserve(glyphCount);
 
-    for (auto &g : g->glyphs) {
-        hmtx.advanceWidth.push_back(g.hAdv);
-        hmtx.lsb.push_back(g.bbox.left);
+    for (auto &gl : g->glyphs) {
+        hmtx.advanceWidth.push_back(gl.hAdv);
+        hmtx.lsb.push_back(gl.bbox.left);
     }
 
     /* Optimize metrics */
@@ -50,7 +50,7 @@ int hmtxFill(hotCtx g) {
     if (i + 2 != hmtx.advanceWidth.size())
         hmtx.advanceWidth.resize(i+2);
 
-    return g->ctx.hmtx->Fill();
+    return hmtx.Fill();
 }
 
 void hmtxWrite(hotCtx g) {

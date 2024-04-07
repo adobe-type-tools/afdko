@@ -56,12 +56,8 @@ add_library(hotconv OBJECT
     STAT.cpp
     STAT.h
     uniblock.h
-    vhea.cpp
-    vhea.h
     vmtx.cpp
     vmtx.h
-    VORG.cpp
-    VORG.h
     winansi.h
 )
 

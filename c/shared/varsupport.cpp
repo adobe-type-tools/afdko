@@ -1122,7 +1122,6 @@ var_hmtx::var_hmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     uint32_t widthMapOffset;
     uint32_t lsbMapOffset;
     uint32_t rsbMapOffset;
-    float defaultWidth;
     int32_t i;
     int32_t numGlyphs;
 
@@ -1333,7 +1332,6 @@ var_vmtx::var_vmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     uint32_t tsbMapOffset;
     uint32_t bsbMapOffset;
     uint32_t vorgMapOffset;
-    float defaultWidth;
     int32_t i;
     int32_t numGlyphs;
 
@@ -1361,7 +1359,7 @@ var_vmtx::var_vmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     header.caretSlopeRise = (int16_t)sscb->read2(sscb);
     header.caretSlopeRun = (int16_t)sscb->read2(sscb);
     header.caretOffset = (int16_t)sscb->read2(sscb);
-    for (i = 0; i < 4; i++) header.reserved[i] = (int16_t)sscb->read2(sscb);
+    for (i = 0; i < 4; i++) (int16_t)sscb->read2(sscb);
     header.metricDataFormat = (int16_t)sscb->read2(sscb);
     header.numOfLongVertMetrics = (uint16_t)sscb->read2(sscb);
     if (header.numOfLongVertMetrics == 0) {
@@ -1390,14 +1388,12 @@ var_vmtx::var_vmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
         tsb.push_back((int16_t)sscb->read2(sscb));
     }
     // gm.width still has last value
-    for (; i < numGlyphs; i++) {
+    for (; i < numGlyphs; i++)
         tsb.push_back((int16_t)sscb->read2(sscb));
-    }
 
     /* read optional VORG table */
     table = sfrGetTableByTag(sfr, VORG_TABLE_TAG);
     if (table != NULL) {
-        int16_t defaultVertOriginY;
         uint16_t numVertOriginYMetrics;
 
         sscb->seek(sscb, table->offset);
@@ -1412,15 +1408,12 @@ var_vmtx::var_vmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
             return;
         }
 
-        defaultVertOriginY = (int16_t)sscb->read2(sscb);
+        defaultVertOrigin = (int16_t)sscb->read2(sscb);
         numVertOriginYMetrics = (uint16_t)sscb->read2(sscb);
         if (table->length < (uint32_t)(VORG_TABLE_HEADER_SIZE + 4 * numVertOriginYMetrics)) {
             sscb->message(sscb, "invalid VORG table size");
             return;
         }
-
-        for (i = 0; i < numGlyphs; i++)
-            vertOriginY.push_back(defaultVertOriginY);
 
         for (i = 0; i < numVertOriginYMetrics; i++) {
             uint16_t glyphIndex = (uint16_t)sscb->read2(sscb);
@@ -1430,14 +1423,13 @@ var_vmtx::var_vmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
                 sscb->message(sscb, "invalid glyph index in VORG table");
                 return;
             }
-            vertOriginY[glyphIndex] = glyphVertOriginY;
+            vertOriginY.emplace(glyphIndex, glyphVertOriginY);
         }
     }
 
     table = sfrGetTableByTag(sfr, VVAR_TABLE_TAG);
-    if (table == NULL) { /* VVAR table is optional */
+    if (table == NULL)  // VVAR table is optional
         return;
-    }
 
     sscb->seek(sscb, table->offset);
 
@@ -1473,6 +1465,13 @@ var_vmtx::var_vmtx(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
     loadIndexMap(sscb, table, vorgMapOffset, vorgMap);
 }
 
+bool var_vmtx::Fill() {
+    header.numOfLongVertMetrics = advanceVWidth.size();
+    if (ivs != nullptr)
+        ivs->preWriteOptimize(true);
+    return tsb.size() > 0;
+}
+
 bool var_vmtx::lookup(ctlSharedStmCallbacks *sscb,
                       const std::vector<Fixed> &instCoords, uint16_t gid,
                       Fixed &width, Fixed &sb) {
@@ -1496,6 +1495,96 @@ bool var_vmtx::lookup(ctlSharedStmCallbacks *sscb,
     return true;
 }
 
+void var_vmtx::write_vhea(VarWriter &vw) {
+    vw.w4(header.version);
+    vw.w2(header.vertTypoAscender);
+    vw.w2(header.vertTypoDescender);
+    vw.w2(header.vertTypoLineGap);
+    vw.w2(header.advanceHeightMax);
+    vw.w2(header.minTop);
+    vw.w2(header.minBottom);
+    vw.w2(header.yMaxExtent);
+    vw.w2(header.caretSlopeRise);
+    vw.w2(header.caretSlopeRun);
+    vw.w2(header.caretOffset);
+    vw.w2(0);
+    vw.w2(0);
+    vw.w2(0);
+    vw.w2(0);
+    vw.w2(header.metricDataFormat);
+    vw.w2(header.numOfLongVertMetrics);
+}
+
+void var_vmtx::write_VORG(VarWriter &vw) {
+    vw.w2(1);  // major version
+    vw.w2(0);  // minor version
+    vw.w2(defaultVertOrigin);
+    vw.w2((uint16_t) vertOriginY.size());
+    for (auto [gid, metric] : vertOriginY) {
+        vw.w2(gid);
+        vw.w2(metric);
+    }
+}
+
+void var_vmtx::write(VarWriter &vw) {
+    auto tsbl = tsb.size();
+    auto avwl = advanceVWidth.size();
+
+    assert(avwl <= tsbl);
+    for (size_t i = 0; i < tsbl; i++) {
+        if (i < avwl)
+            vw.w2(advanceVWidth[i]);
+        vw.w2(tsb[i]);
+    }
+}
+
+void var_vmtx::write_VVAR(VarWriter &vw) {
+    assert(ivs != nullptr);
+
+    uint16_t mcBits = 1, subtableBits = 1;
+
+    auto t = ivs->maxDeltaSetCount();
+    while (t >>= 1)
+        mcBits++;
+
+    t = ivs->numSubtables();
+    while (t >>= 1)
+        subtableBits++;
+
+    assert(mcBits <= 16 && subtableBits <= 16);
+    uint8_t dsBytes = 4;
+    if (mcBits + subtableBits <= 8)
+        dsBytes = 1;
+    else if (mcBits + subtableBits <= 16)
+        dsBytes = 2;
+    else if (mcBits + subtableBits <= 24)
+        dsBytes = 3;
+
+    uint32_t widthSize = widthMap.size(dsBytes);
+    uint32_t tsbSize = tsbMap.size(dsBytes);
+    uint32_t bsbSize = bsbMap.size(dsBytes);
+    uint32_t vorgSize = vorgMap.size(dsBytes);
+
+    LOffset o = 24;
+
+    vw.w2(1);   // Major version
+    vw.w2(0);   // Minor version
+    vw.w4(o);
+    o += ivs->getSize();
+    vw.w4(widthSize > 0 ? o : 0);
+    o += widthSize;
+    vw.w4(tsbSize > 0 ? o : 0);
+    o += tsbSize;
+    vw.w4(bsbSize > 0 ? o : 0);
+    o += bsbSize;
+    vw.w4(vorgSize > 0 ? o : 0);
+
+    ivs->write(vw);
+    widthMap.write(vw, dsBytes, mcBits);
+    tsbMap.write(vw, dsBytes, mcBits);
+    bsbMap.write(vw, dsBytes, mcBits);
+    vorgMap.write(vw, dsBytes, mcBits);
+}
 /* MVAR table */
 
 var_MVAR::var_MVAR(sfrCtx sfr, ctlSharedStmCallbacks *sscb) {
