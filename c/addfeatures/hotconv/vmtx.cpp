@@ -23,13 +23,21 @@ int vmtxFill(hotCtx g) {
         return vmtx.Fill();
 
     uint32_t glyphCount = g->glyphs.size();
+    int16_t dfltVAdv = g->font.TypoAscender - g->font.TypoDescender;
+    int16_t dfltVOrigY = g->font.TypoAscender;
 
     vmtx.advanceVWidth.reserve(glyphCount);
     vmtx.tsb.reserve(glyphCount);
 
     for (auto &gl : g->glyphs) {
-        vmtx.advanceVWidth.push_back(-gl.vAdv);
-        vmtx.tsb.push_back(gl.vOrigY - gl.bbox.top);
+        int16_t vAdv {dfltVAdv};
+        if (gl.vAdv.isInitialized())
+            vAdv = gl.vAdv.getDefault();
+        int16_t vOrigY {dfltVOrigY};
+        if (gl.vOrigY.isInitialized())
+            vOrigY = gl.vOrigY.getDefault();
+        vmtx.advanceVWidth.push_back(vAdv);
+        vmtx.tsb.push_back(vOrigY - gl.bbox.top);
     }
 
     /* Optimize metrics */
@@ -118,8 +126,9 @@ int VORGFill(hotCtx g) {
 
     for (size_t i = 0; i < g->glyphs.size(); i++) {
         auto &gl = g->glyphs[i];
-        if (gl.vOrigY != dflt)
-            vmtx.vertOriginY.emplace((uint16_t) i, gl.vOrigY);
+        
+        if (gl.vOrigY.isInitialized() && gl.vOrigY.getDefault() != dflt)
+            vmtx.vertOriginY.emplace((uint16_t) i, gl.vOrigY.getDefault());
     }
 
     return 1;

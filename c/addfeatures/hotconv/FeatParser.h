@@ -1464,7 +1464,7 @@ public:
 
   class  Os_2Context : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *num = nullptr;
+    FeatParser::SingleValueLiteralContext *num = nullptr;
     antlr4::Token *unum = nullptr;
     FeatParser::GenNumContext *gnum = nullptr;
     Os_2Context(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -1476,14 +1476,15 @@ public:
     antlr4::tree::TerminalNode *WIN_DESCENT();
     antlr4::tree::TerminalNode *X_HEIGHT();
     antlr4::tree::TerminalNode *CAP_HEIGHT();
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
+    SingleValueLiteralContext *singleValueLiteral();
     antlr4::tree::TerminalNode *FS_TYPE();
     antlr4::tree::TerminalNode *FS_TYPE_v();
     antlr4::tree::TerminalNode *WEIGHT_CLASS();
     antlr4::tree::TerminalNode *WIDTH_CLASS();
     antlr4::tree::TerminalNode *OS2_LOWER_OP_SIZE();
     antlr4::tree::TerminalNode *OS2_UPPER_OP_SIZE();
+    std::vector<antlr4::tree::TerminalNode *> NUM();
+    antlr4::tree::TerminalNode* NUM(size_t i);
     antlr4::tree::TerminalNode *FAMILY_CLASS();
     GenNumContext *genNum();
     antlr4::tree::TerminalNode *VENDOR();
@@ -1723,7 +1724,7 @@ public:
     VmtxContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     GlyphContext *glyph();
-    antlr4::tree::TerminalNode *NUM();
+    SingleValueLiteralContext *singleValueLiteral();
     antlr4::tree::TerminalNode *VERT_ORIGIN_Y();
     antlr4::tree::TerminalNode *VERT_ADVANCE_Y();
 

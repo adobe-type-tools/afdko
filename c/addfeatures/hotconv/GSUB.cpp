@@ -418,9 +418,10 @@ void GSUB::SingleSubst::fill(GSUB &h, SubtableInfo &si) {
 
         for (auto [t, r] : si.singles) {
             auto &hotgi = h.g->glyphs[r];
-            if (hotgi.vAdv == SHRT_MAX) {
+            if (!hotgi.vAdv.isInitialized()) {
                 /* don't set it if it has already been set, as with vmtx overrides */
-                hotgi.vAdv = -(h.g->glyphs[t].hAdv);
+                // XXX this is wrong -- need the whole hAdv here from hmtx.
+                hotgi.vAdv.addValue(h.g->glyphs[t].hAdv);
             }
         }
     }

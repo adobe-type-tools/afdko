@@ -472,7 +472,7 @@ void featparserParserInitialize() {
   	1,0,0,0,886,887,1,0,0,0,887,888,1,0,0,0,888,889,5,118,0,0,889,890,5,82,
   	0,0,890,891,5,125,0,0,891,137,1,0,0,0,892,895,3,140,70,0,893,895,3,4,
   	2,0,894,892,1,0,0,0,894,893,1,0,0,0,895,896,1,0,0,0,896,897,5,125,0,0,
-  	897,139,1,0,0,0,898,899,7,8,0,0,899,924,5,141,0,0,900,901,7,9,0,0,901,
+  	897,139,1,0,0,0,898,899,7,8,0,0,899,924,3,62,31,0,900,901,7,9,0,0,901,
   	924,5,141,0,0,902,903,5,100,0,0,903,924,3,206,103,0,904,905,5,97,0,0,
   	905,924,5,130,0,0,906,907,5,87,0,0,907,908,5,141,0,0,908,909,5,141,0,
   	0,909,910,5,141,0,0,910,911,5,141,0,0,911,912,5,141,0,0,912,913,5,141,
@@ -513,7 +513,7 @@ void featparserParserInitialize() {
   	0,1026,1027,5,125,0,0,1027,165,1,0,0,0,1028,1031,3,168,84,0,1029,1031,
   	3,4,2,0,1030,1028,1,0,0,0,1030,1029,1,0,0,0,1031,1032,1,0,0,0,1032,1033,
   	5,125,0,0,1033,167,1,0,0,0,1034,1035,7,12,0,0,1035,1036,3,196,98,0,1036,
-  	1037,5,141,0,0,1037,169,1,0,0,0,1038,1039,5,26,0,0,1039,1043,5,51,0,0,
+  	1037,3,62,31,0,1037,169,1,0,0,0,1038,1039,5,26,0,0,1039,1043,5,51,0,0,
   	1040,1044,3,172,86,0,1041,1044,5,62,0,0,1042,1044,3,200,100,0,1043,1040,
   	1,0,0,0,1043,1041,1,0,0,0,1043,1042,1,0,0,0,1044,1045,1,0,0,0,1045,1046,
   	5,27,0,0,1046,171,1,0,0,0,1047,1050,3,174,87,0,1048,1049,5,50,0,0,1049,
@@ -7114,12 +7114,8 @@ tree::TerminalNode* FeatParser::Os_2Context::CAP_HEIGHT() {
   return getToken(FeatParser::CAP_HEIGHT, 0);
 }
 
-std::vector<tree::TerminalNode *> FeatParser::Os_2Context::NUM() {
-  return getTokens(FeatParser::NUM);
-}
-
-tree::TerminalNode* FeatParser::Os_2Context::NUM(size_t i) {
-  return getToken(FeatParser::NUM, i);
+FeatParser::SingleValueLiteralContext* FeatParser::Os_2Context::singleValueLiteral() {
+  return getRuleContext<FeatParser::SingleValueLiteralContext>(0);
 }
 
 tree::TerminalNode* FeatParser::Os_2Context::FS_TYPE() {
@@ -7144,6 +7140,14 @@ tree::TerminalNode* FeatParser::Os_2Context::OS2_LOWER_OP_SIZE() {
 
 tree::TerminalNode* FeatParser::Os_2Context::OS2_UPPER_OP_SIZE() {
   return getToken(FeatParser::OS2_UPPER_OP_SIZE, 0);
+}
+
+std::vector<tree::TerminalNode *> FeatParser::Os_2Context::NUM() {
+  return getTokens(FeatParser::NUM);
+}
+
+tree::TerminalNode* FeatParser::Os_2Context::NUM(size_t i) {
+  return getToken(FeatParser::NUM, i);
 }
 
 tree::TerminalNode* FeatParser::Os_2Context::FAMILY_CLASS() {
@@ -7222,7 +7226,7 @@ FeatParser::Os_2Context* FeatParser::os_2() {
           consume();
         }
         setState(899);
-        antlrcpp::downCast<Os_2Context *>(_localctx)->num = match(FeatParser::NUM);
+        antlrcpp::downCast<Os_2Context *>(_localctx)->num = singleValueLiteral();
         break;
       }
 
@@ -8447,8 +8451,8 @@ FeatParser::GlyphContext* FeatParser::VmtxContext::glyph() {
   return getRuleContext<FeatParser::GlyphContext>(0);
 }
 
-tree::TerminalNode* FeatParser::VmtxContext::NUM() {
-  return getToken(FeatParser::NUM, 0);
+FeatParser::SingleValueLiteralContext* FeatParser::VmtxContext::singleValueLiteral() {
+  return getRuleContext<FeatParser::SingleValueLiteralContext>(0);
 }
 
 tree::TerminalNode* FeatParser::VmtxContext::VERT_ORIGIN_Y() {
@@ -8500,7 +8504,7 @@ FeatParser::VmtxContext* FeatParser::vmtx() {
     setState(1035);
     glyph();
     setState(1036);
-    match(FeatParser::NUM);
+    singleValueLiteral();
    
   }
   catch (RecognitionException &e) {

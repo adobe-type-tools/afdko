@@ -830,6 +830,27 @@ void itemVariationStore::calcRegionScalars(ctlSharedStmCallbacks *sscb,
     }
 }
 
+void itemVariationStore::calcRegionScalars(std::shared_ptr<slogger> &logger,
+                                           const std::vector<var_F2dot14> &alocs,
+                                           std::vector<Fixed> &scalars) {
+    scalars.clear();
+    scalars.reserve(regions.size());
+
+    if (alocs.size() != axisCount) {
+        logger->log(sERROR, "axis count in variation font region list does not match axis count in fvar table");
+        for (size_t i = 0; i < regions.size(); i++)
+            scalars.push_back(0);
+        return;
+    } else {
+        std::vector<Fixed> instCoords;
+        instCoords.reserve(axisCount);
+        for (auto a : alocs)
+            instCoords.push_back(F2DOT14_TO_FIXED(a));
+        for (size_t i = 0; i < regions.size(); i++)
+            scalars.push_back(calcRegionScalar(i, instCoords));
+    }
+}
+
 var_indexPair itemVariationStore::addValue(VarLocationMap &vlm,
                                            const VarValueRecord &vvr,
                                            std::shared_ptr<slogger> logger) {
@@ -981,6 +1002,34 @@ Fixed itemVariationStore::applyDeltasForGid(ctlSharedStmCallbacks *sscb,
 
     return applyDeltasForIndexPair(sscb, pair, scalars);
 }
+
+itemVariationStore::VariationRegion itemVariationStore::sampleVariationRegion() {
+    AxisRegion ar {F2DOT14_ZERO, F2DOT14_ONE, F2DOT14_ONE};
+    VariationRegion vr;
+    for (size_t i = 0; i < axisCount; i++)
+        vr.push_back(ar);
+    return vr;
+}
+
+var_indexPair itemVariationStore::getStaticPair() {
+    if (staticPair.outerIndex == 0xFFFF && staticPair.innerIndex == 0xFFFF) {
+        VariationRegion vr;
+        if (regions.size() > 0)
+            vr = regions[0];
+        else
+            vr = sampleVariationRegion();
+        std::vector<VariationRegion> vrv;
+        vrv.push_back(std::move(vr));
+        staticPair.outerIndex = newSubtable(vrv);
+        auto &sub = subtables[staticPair.outerIndex];
+        std::vector<int16_t> dv = {0};
+        sub.deltaValues.push_back(std::move(dv));
+        staticPair.innerIndex = 0;
+    }
+
+    return staticPair;
+}
+
 
 uint16_t itemVariationStore::newSubtable(std::vector<VariationRegion> reg) {
     uint16_t r = subtables.size();
