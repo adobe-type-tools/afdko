@@ -290,12 +290,10 @@ static void hotGlyphEnd(abfGlyphCallbacks *cb) {
         e = e->next;
     }
     glyph.hAdv = (FWord) h->int_mtx.hAdv;
-    glyph.vAdv = SHRT_MAX;
     glyph.bbox.left = h->int_mtx.left;
     glyph.bbox.bottom = h->int_mtx.bottom;
     glyph.bbox.right = h->int_mtx.right;
     glyph.bbox.top = h->int_mtx.top;
-    glyph.vOrigY = SHRT_MAX;
     if (glyph.bbox.left != 0 || glyph.bbox.right != 0 ||
         glyph.bbox.bottom != 0 || glyph.bbox.top != 0) {
         if (g->font.maxAdv.h < glyph.hAdv)
@@ -488,16 +486,16 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
 }
 
 /* Add glyph's vertical origin y-value to glyph info. (Not an API.) */
-void hotAddVertOriginY(hotCtx g, GID gid, short value) {
-    hotGlyphInfo *hotgi = &g->glyphs[gid]; /* gid already validated */
+void hotAddVertOriginY(hotCtx g, GID gid, VarValueRecord &vvr) {
+    hotGlyphInfo &hotgi = g->glyphs[gid]; /* gid already validated */
 
     if (!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) {
         g->convertFlags |= HOT_SEEN_VERT_ORIGIN_OVERRIDE;
     }
 
-    if (hotgi->vOrigY != SHRT_MAX) {
+    if (hotgi.vOrigY.isInitialized()) {
         g->ctx.feat->dumpGlyph(gid, '\0', 0);
-        if (hotgi->vOrigY == value) {
+        if (hotgi.vOrigY == vvr) {
             g->logger->log(sINFO,
                            "Ignoring duplicate VertOriginY entry for "
                            "glyph %s", g->getNote());
@@ -507,20 +505,21 @@ void hotAddVertOriginY(hotCtx g, GID gid, short value) {
                            "glyph %s", g->getNote());
         }
     } else {
-        hotgi->vOrigY = value;
+        hotgi.vOrigY = std::move(vvr);
     }
 }
 
 /* Add glyph's vertical advance width to the  glyph info. (Not an API.) */
-void hotAddVertAdvanceY(hotCtx g, GID gid, short value) {
+void hotAddVertAdvanceY(hotCtx g, GID gid, VarValueRecord &vvr) {
     hotGlyphInfo &hotgi = g->glyphs[gid]; /* gid already validated */
+
     if (!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) {
         g->convertFlags |= HOT_SEEN_VERT_ORIGIN_OVERRIDE;
     }
 
-    if (hotgi.vAdv != SHRT_MAX) {
+    if (hotgi.vAdv.isInitialized()) {
         g->ctx.feat->dumpGlyph(gid, '\0', 0);
-        if (hotgi.vAdv == value) {
+        if (hotgi.vAdv == vvr) {
             g->logger->log(sINFO,
                            "Ignoring duplicate VertAdvanceY entry for "
                            "glyph %s", g->getNote());
@@ -530,7 +529,7 @@ void hotAddVertAdvanceY(hotCtx g, GID gid, short value) {
                            "glyph %s", g->getNote());
         }
     } else {
-        hotgi.vAdv = -value;
+        hotgi.vAdv = std::move(vvr);
     }
 }
 
@@ -724,62 +723,62 @@ static void prepWinData(hotCtx g) {
 /* Must be called after FeatCtx::fill(), since TypoAscender/TypoDescender could have
    been overwritten */
 static void setVBounds(hotCtx g) {
-    FontInfo_ *font = &g->font;
-    BBox *minBearing = &font->minBearing;
-    hvMetric *maxAdv = &font->maxAdv;
-    hvMetric *maxExtent = &font->maxExtent;
-    short dfltVAdv = -font->TypoAscender + font->TypoDescender;
-    short dfltVOrigY = font->TypoAscender;
+    FontInfo_ &font = g->font;
+    BBox &minBearing = font.minBearing;
+    hvMetric &maxAdv = font.maxAdv;
+    hvMetric &maxExtent = font.maxExtent;
+    int16_t dfltVAdv = -font.TypoAscender + font.TypoDescender;
+    int16_t dfltVOrigY = font.TypoAscender;
 
-    if (!OVERRIDE(font->VertTypoAscender)) {
-        font->VertTypoAscender = font->unitsPerEm / 2;
+    if (!OVERRIDE(font.VertTypoAscender)) {
+        font.VertTypoAscender = font.unitsPerEm / 2;
     }
-    if (!OVERRIDE(font->VertTypoDescender)) {
-        font->VertTypoDescender = -font->VertTypoAscender;
+    if (!OVERRIDE(font.VertTypoDescender)) {
+        font.VertTypoDescender = -font.VertTypoAscender;
     }
-    if (!OVERRIDE(font->VertTypoLineGap)) {
-        font->VertTypoLineGap = font->VertTypoAscender -
-                                font->VertTypoDescender;
+    if (!OVERRIDE(font.VertTypoLineGap)) {
+        font.VertTypoLineGap = font.VertTypoAscender -
+                               font.VertTypoDescender;
     }
 
     /* Initialize */
-    minBearing->bottom = minBearing->top = SHRT_MAX;
-    maxAdv->v = 0;
-    maxExtent->v = 0;
+    minBearing.bottom = minBearing.top = SHRT_MAX;
+    maxAdv.v = 0;
+    maxExtent.v = 0;
 
     /* Compute vertical extents */
     for (size_t i = 0; i < g->glyphs.size(); i++) {
-        hotGlyphInfo *glyph = &g->glyphs[i];
+        hotGlyphInfo &glyph = g->glyphs[i];
         /* If glyph is a repl in the 'vrt2' feature, its vAdv has already been
            set appropriately from the GSUB module */
-        if (glyph->vAdv == SHRT_MAX) {
-            glyph->vAdv = dfltVAdv;
-        }
-        if (glyph->vOrigY == SHRT_MAX) {
-            glyph->vOrigY = dfltVOrigY;
-        }
+        int16_t vAdv {dfltVAdv};
+        if (glyph.vAdv.isInitialized())
+            vAdv = (int16_t) glyph.vAdv.getDefault() * -1;
 
-        if (glyph->bbox.left != 0 && glyph->bbox.bottom != 0 &&
-            glyph->bbox.right != 0 && glyph->bbox.top != 0) {
+        int16_t vOrigY {dfltVOrigY};
+        if (glyph.vOrigY.isInitialized())
+            vOrigY = (int16_t) glyph.vOrigY.getDefault();
+
+        if (glyph.bbox.left != 0 && glyph.bbox.bottom != 0 &&
+            glyph.bbox.right != 0 && glyph.bbox.top != 0) {
             /* Marking glyph; compute bounds. */
-            FWord tsb = glyph->vOrigY - glyph->bbox.top;
-            FWord bsb = glyph->bbox.bottom -
-                        (glyph->vOrigY + glyph->vAdv);
+            FWord tsb = vOrigY - glyph.bbox.top;
+            FWord bsb = glyph.bbox.bottom - (vOrigY + vAdv);
 
-            if (maxAdv->v < -glyph->vAdv) {
-                maxAdv->v = -glyph->vAdv;
+            if (maxAdv.v < -vAdv) {
+                maxAdv.v = -vAdv;
             }
 
-            if (tsb < minBearing->top) {
-                minBearing->top = tsb;
+            if (tsb < minBearing.top) {
+                minBearing.top = tsb;
             }
 
-            if (bsb < minBearing->bottom) {
-                minBearing->bottom = bsb;
+            if (bsb < minBearing.bottom) {
+                minBearing.bottom = bsb;
             }
 
-            if (glyph->vOrigY - glyph->bbox.bottom > maxExtent->v) {
-                maxExtent->v = glyph->vOrigY - glyph->bbox.bottom;
+            if (vOrigY - glyph.bbox.bottom > maxExtent.v) {
+                maxExtent.v = vOrigY - glyph.bbox.bottom;
             }
         }
     }

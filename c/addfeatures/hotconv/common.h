@@ -192,14 +192,12 @@ typedef unsigned short UV_BMP;            /* Unicode BMP value */
 
 #define UV_NBSPACE ((unsigned)0x00A0)
 
-typedef struct { /* Bounding box */
+struct BBox { /* Bounding box */
     FWord left;
     FWord bottom;
     FWord right;
     FWord top;
-} BBox;
-#define BBOX_WIDTH(b) ((b).right - (b).left)
-#define BBOX_HEIGHT(b) ((b).top - (b).bottom)
+};
 
 /* Kerning pair. Bit 15 in each field determines field interpretation:
    set- bits 14-0 are unencoded char index, clear- bits 7-0 are char code */
@@ -227,8 +225,9 @@ struct hotGlyphInfo { /* Glyph information */
     /* --- Same as cffGlyphInfo: */
     unsigned short id; /* SID/CID */
     uint32_t code;        /* Encoding */
-    FWord hAdv;     /* Horizontal advance width */
-    FWord vAdv;     /* Vertical advance width */
+    FWord hAdv;              /* (default) Horizontal advance width */
+    VarValueRecord vAdv;     /* Vertical advance width */
+    VarValueRecord vOrigY;   /* Y coordinate of the glyph's vertical origin */
     BBox bbox;      /* Bounding box */
     std::vector<uint32_t> sup;   /* Supplementary encodings */
 
@@ -245,7 +244,6 @@ struct hotGlyphInfo { /* Glyph information */
 
     UV uv;          /* Primary UV */
     std::vector<UV> addlUV; /* Additional UVs */
-    short vOrigY;   /* Y coordinate of the glyph's vertical origin */
 };
 
 struct FontInfo_ { /* Font information */
@@ -456,8 +454,8 @@ void hotCalcSearchParams(unsigned unitSize, long nUnits,
                          unsigned short *rangeShift);
 void hotWritePString(hotCtx g, const char *string);
 
-void hotAddVertOriginY(hotCtx g, GID gid, short value);
-void hotAddVertAdvanceY(hotCtx g, GID gid, short value);
+void hotAddVertOriginY(hotCtx g, GID gid, VarValueRecord &vvr);
+void hotAddVertAdvanceY(hotCtx g, GID gid, VarValueRecord &vvr);
 
 void setVendId_str(hotCtx g, const char *vend);
 

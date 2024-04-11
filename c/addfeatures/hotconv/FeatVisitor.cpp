@@ -1121,13 +1121,14 @@ antlrcpp::Any FeatVisitor::visitVmtx(FeatParser::VmtxContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
     GID gid = getGlyph(ctx->glyph(), false);
-    int16_t v = getNum<int16_t>(TOK(ctx->NUM())->getText(), 10);
+    VarValueRecord vvr;
+    getSingleValueLiteral(ctx->singleValueLiteral(), vvr);
     TOK(ctx);
     if ( ctx->VERT_ORIGIN_Y() != nullptr )
-        hotAddVertOriginY(fc->g, gid, v);
+        hotAddVertOriginY(fc->g, gid, vvr);
     else {
         assert(ctx->VERT_ADVANCE_Y() != nullptr);
-        hotAddVertAdvanceY(fc->g, gid, v);
+        hotAddVertAdvanceY(fc->g, gid, vvr);
     }
     return nullptr;
 }

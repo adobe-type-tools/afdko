@@ -3157,6 +3157,10 @@ int cfrEndFont(cfrCtx h) {
     return cfrSuccess;
 }
 
+itemVariationStore *cfrGetItemVariationStore(cfrCtx h) {
+    return h->cff2.varStore;
+}
+
 /* --------------------------- Shared source stream  -------------------------- */
 
 static void *sharedSrcMemNew(ctlSharedStmCallbacks *h, size_t size) {
