@@ -486,7 +486,7 @@ vmtxStatement:
 ;
 
 vmtx:
-    ( VERT_ORIGIN_Y | VERT_ADVANCE_Y ) glyph NUM
+    ( VERT_ORIGIN_Y | VERT_ADVANCE_Y ) glyph singleValueLiteral
 ;
 
 anchor:

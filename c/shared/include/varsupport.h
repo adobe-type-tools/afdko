@@ -339,6 +339,12 @@ class VarValueRecord {
         if (!locationDiffers)
             locationValues.clear();
     }
+/*    void negate() {
+        assert(isInitialized());
+        defaultValue = -defaultValue();
+        for (auto &[k, v] : locationValues)
+            v = -v;
+    }*/
 
  private:
      int16_t defaultValue {0};
@@ -471,6 +477,10 @@ class itemVariationStore {
                            const std::vector<Fixed> &instCoords,
                            std::vector<Fixed> &scalars);
 
+    void calcRegionScalars(std::shared_ptr<slogger> &logger,
+                           const std::vector<var_F2dot14> &alocs,
+                           std::vector<Fixed> &scalars);
+
     Fixed applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
                                   const var_indexPair &pair,
                                   const std::vector<Fixed> &scalars);
@@ -487,6 +497,13 @@ class itemVariationStore {
         values[vi].setDevOffset(o);
     }
 
+    VariationRegion sampleVariationRegion();
+
+    // The pair values 0xFFFF,0xFFFF indicate that a value doesn't
+    // vary from its default. Unfortunately those values are the
+    // worst case for packing into a var_indexMap. So instead when
+    // needed we allocate a model slot with all zeros when needed.
+    var_indexPair getStaticPair();
 
     const std::vector<ValueTracker> &getValues() { return values; }
 
@@ -516,8 +533,6 @@ class itemVariationStore {
     uint32_t getRegionListSize() {
         return 4 + regions.size() * axisCount * 6;
     }
-
-// private:  (Can't make private until cffwrite_varstore restructuring
 
     struct itemVariationDataSubtable {
         itemVariationDataSubtable() {}
@@ -567,6 +582,7 @@ class itemVariationStore {
     std::vector<ValueTracker> values;
     std::vector<std::unique_ptr<VarModel>> models;
     std::map<std::vector<uint32_t>, uint32_t> locationSetMap;
+    var_indexPair staticPair {0xFFFF, 0xFFFF};
 };
 
 typedef std::vector<itemVariationStore::ValueTracker> VarTrackVec;
