@@ -366,7 +366,7 @@ vheaStatement:
 ;
 
 vhea:
-    ( VERT_TYPO_ASCENDER | VERT_TYPO_DESCENDER | VERT_TYPO_LINE_GAP ) NUM
+    ( VERT_TYPO_ASCENDER | VERT_TYPO_DESCENDER | VERT_TYPO_LINE_GAP ) singleValueLiteral
 ;
 
 table_name:

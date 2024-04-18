@@ -13,10 +13,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <cassert>
 #include <algorithm>
 #include <string>
 
 #include "hotmap.h"
+#include "varsupport.h"
 
 /* ---------------------------- Table Definition --------------------------- */
 
@@ -375,16 +377,25 @@ int OS_2Fill(hotCtx g) {
         h->tbl.version = 3;
     }
 
-    h->tbl.sTypoAscender = font->TypoAscender;
-    h->tbl.sTypoDescender = font->TypoDescender;
-    h->tbl.sTypoLineGap = font->TypoLineGap;
+    assert(g->ctx.MVAR != nullptr && g->ctx.locMap != nullptr);
 
-    h->tbl.usWinAscent = font->win.ascent;
-    h->tbl.usWinDescent = font->win.descent;
+    h->tbl.sTypoAscender = font->TypoAscender.getDefault();
+    g->ctx.MVAR->addValue(MVAR_hasc_tag, *g->ctx.locMap, font->TypoAscender, g->logger);
+    h->tbl.sTypoDescender = font->TypoDescender.getDefault();
+    g->ctx.MVAR->addValue(MVAR_hdsc_tag, *g->ctx.locMap, font->TypoDescender, g->logger);
+    h->tbl.sTypoLineGap = font->TypoLineGap.getDefault();
+    g->ctx.MVAR->addValue(MVAR_hlgp_tag, *g->ctx.locMap, font->TypoLineGap, g->logger);
+
+    h->tbl.usWinAscent = font->win.ascent.getDefault();
+    g->ctx.MVAR->addValue(MVAR_hcla_tag, *g->ctx.locMap, font->win.ascent, g->logger);
+    h->tbl.usWinDescent = font->win.descent.getDefault();
+    g->ctx.MVAR->addValue(MVAR_hcld_tag, *g->ctx.locMap, font->win.descent, g->logger);
 
     /* Version 2 fields */
-    h->tbl.sXHeight = font->win.XHeight;
-    h->tbl.sCapHeight = font->win.CapHeight;
+    h->tbl.sXHeight = font->win.XHeight.getDefault();
+    g->ctx.MVAR->addValue(MVAR_xhgt_tag, *g->ctx.locMap, font->win.XHeight, g->logger);
+    h->tbl.sCapHeight = font->win.CapHeight.getDefault();
+    g->ctx.MVAR->addValue(MVAR_cpht_tag, *g->ctx.locMap, font->win.CapHeight, g->logger);
     h->tbl.usDefaultChar = font->win.DefaultChar;
     h->tbl.usBreakChar = font->win.BreakChar;
 

@@ -1046,15 +1046,16 @@ antlrcpp::Any FeatVisitor::visitVhea(FeatParser::VheaContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
 
-    assert(ctx->NUM() != nullptr);
-    int16_t v = getNum<int16_t>(TOK(ctx->NUM())->getText(), 10);
+    assert(ctx->singleValueLiteral() != nullptr);
+    VarValueRecord vvr;
+    getSingleValueLiteral(ctx->singleValueLiteral(), vvr);
     if ( TOK(ctx->VERT_TYPO_ASCENDER()) != nullptr )
-        fc->g->font.VertTypoAscender = v;
+        fc->g->font.VertTypoAscender = std::move(vvr);
     else if ( TOK(ctx->VERT_TYPO_DESCENDER()) != nullptr )
-        fc->g->font.VertTypoDescender = v;
+        fc->g->font.VertTypoDescender = std::move(vvr);
     else {
         assert(TOK(ctx->VERT_TYPO_LINE_GAP()) != nullptr);
-        fc->g->font.VertTypoLineGap = v;
+        fc->g->font.VertTypoLineGap = std::move(vvr);
     }
     return nullptr;
 }
@@ -1305,22 +1306,23 @@ antlrcpp::Any FeatVisitor::visitOs_2(FeatParser::Os_2Context *ctx) {
         return nullptr;
 
     if ( ctx->num != nullptr ) {
-        int16_t v = getNum<int16_t>(TOK(ctx->num)->getText(), 10);
+        VarValueRecord vvr;
+        getSingleValueLiteral(ctx->num, vvr);
         if ( ctx->TYPO_ASCENDER() != nullptr )
-            fc->g->font.TypoAscender = v;
+            fc->g->font.TypoAscender = std::move(vvr);
         else if ( ctx->TYPO_DESCENDER() != nullptr )
-            fc->g->font.TypoDescender = v;
+            fc->g->font.TypoDescender = std::move(vvr);
         else if ( ctx->TYPO_LINE_GAP() != nullptr )
-            fc->g->font.TypoLineGap = v;
+            fc->g->font.TypoLineGap = std::move(vvr);
         else if ( ctx->WIN_ASCENT() != nullptr )
-            fc->g->font.winAscent = v;
+            fc->g->font.winAscent = std::move(vvr);
         else if ( ctx->WIN_DESCENT() != nullptr )
-            fc->g->font.winDescent = v;
+            fc->g->font.winDescent = std::move(vvr);
         else if ( ctx->X_HEIGHT() != nullptr )
-            fc->g->font.win.XHeight = v;
+            fc->g->font.win.XHeight = std::move(vvr);
         else {
             assert(ctx->CAP_HEIGHT() != nullptr);
-            fc->g->font.win.CapHeight = v;
+            fc->g->font.win.CapHeight = std::move(vvr);
         }
     } else if ( ctx->unum != nullptr ) {
         uint16_t v = getNum<uint16_t>(TOK(ctx->unum)->getText(), 10);

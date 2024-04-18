@@ -278,14 +278,14 @@ struct FontInfo_ { /* Font information */
     short hheaAscender;
     short hheaDescender;
     short hheaLineGap;
-    short TypoAscender;        /* In OS/2 */
-    short TypoDescender;       /* In OS/2 */
-    short TypoLineGap;         /* In OS/2 */
-    unsigned short winAscent;  /* In OS/2 */
-    unsigned short winDescent; /* In OS/2 */
-    short VertTypoAscender;    /* In vhea */
-    short VertTypoDescender;   /* In vhea */
-    short VertTypoLineGap;     /* In vhea */
+    VarValueRecord TypoAscender;        /* In OS/2 */
+    VarValueRecord TypoDescender;       /* In OS/2 */
+    VarValueRecord TypoLineGap;         /* In OS/2 */
+    VarValueRecord winAscent;  /* In OS/2 */
+    VarValueRecord winDescent; /* In OS/2 */
+    VarValueRecord VertTypoAscender;    /* In vhea */
+    VarValueRecord VertTypoDescender;   /* In vhea */
+    VarValueRecord VertTypoLineGap;     /* In vhea */
     short Encoding;            /* Encoding id */
 #define FI_STD_ENC 0           /* Standard */
 #define FI_EXP_ENC 1           /* Expert */
@@ -299,8 +299,8 @@ struct FontInfo_ { /* Font information */
         FWord AvgWidth;
         unsigned short ascent;
         unsigned short descent;
-        uFWord XHeight;
-        uFWord CapHeight;
+        VarValueRecord XHeight;
+        VarValueRecord CapHeight;
         FWord SubscriptXSize;
         FWord SubscriptYSize;
         FWord SubscriptXOffset;
@@ -358,6 +358,7 @@ class var_vmtx;
 class var_axes;
 class var_MVAR;
 class VarLocationMap;
+class VarMetrics;
 
 #define ID_TEXT_SIZE 1024 /* Size of text buffer used to hold identifying info about the current feature for error messages. */
 
@@ -413,6 +414,7 @@ struct hotCtx_ {
         var_axes *axes;
         var_MVAR *MVAR;
         VarLocationMap *locMap;
+        VarMetrics *vm;
     } ctx;
     dnaCtx DnaCTX;
     std::string note;
