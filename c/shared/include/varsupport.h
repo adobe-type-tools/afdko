@@ -263,6 +263,12 @@ class VarValueRecord {
         locationValues = o.locationValues;
         return *this;
     }
+    VarValueRecord &operator=(VarValueRecord &&o) {
+        defaultValue = o.defaultValue;
+        seenDefault = o.seenDefault;
+        locationValues.swap(o.locationValues);
+        return *this;
+    }
     void addValue(int32_t value) {
         assert(!seenDefault);
         seenDefault = true;

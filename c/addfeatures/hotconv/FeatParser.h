@@ -1203,7 +1203,7 @@ public:
   public:
     VheaContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *NUM();
+    SingleValueLiteralContext *singleValueLiteral();
     antlr4::tree::TerminalNode *VERT_TYPO_ASCENDER();
     antlr4::tree::TerminalNode *VERT_TYPO_DESCENDER();
     antlr4::tree::TerminalNode *VERT_TYPO_LINE_GAP();
