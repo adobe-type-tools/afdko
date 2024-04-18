@@ -22,9 +22,13 @@ class VarMetrics {
     struct GlyphInstMetrics {
         BBox bbox;
     };
-    void prepGlyphData(GID gid, const std::vector<uint32_t> locations, VarLocationMap &vlm);
+    void prepGlyphData(GID gid, const std::vector<uint32_t> &locations, VarLocationMap &vlm);
     void prepGlyphData(GID gid, uint32_t location, VarLocationMap &vlm) {
         std::vector<uint32_t> locations = {location};
+        prepGlyphData(gid, locations, vlm);
+    }
+    void prepGlyphData(GID gid, VarValueRecord &vvr, VarLocationMap &vlm) {
+        auto locations = vvr.getLocations();
         prepGlyphData(gid, locations, vlm);
     }
     GlyphInstMetrics &getGlyphData(GID gid, uint32_t location, VarLocationMap &vlm, bool onRetry = false);

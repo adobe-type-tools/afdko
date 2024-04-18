@@ -112,7 +112,7 @@ static void vmetricsEnd(abfGlyphCallbacks *cb) {
     cb->direct_ctx = (void *) vm;
 }
 
-void VarMetrics::prepGlyphData(GID gid, const std::vector<uint32_t> locations,
+void VarMetrics::prepGlyphData(GID gid, const std::vector<uint32_t> &locations,
                                VarLocationMap &vlm) {
     auto gi = glyphData.find(gid);
     if (gi == glyphData.end())

@@ -29,6 +29,7 @@
 #include "GDEF.h"
 #include "OS_2.h"
 #include "dictops.h"
+#include "VarMetrics.h"
 
 /* Windows-specific macros */
 #define FAMILY_UNSET 255 /* Flags unset Windows Family field */
@@ -394,8 +395,9 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
 
     g->ctx.locMap = new VarLocationMap(g->ctx.feat->getAxisCount());
     g->ctx.GDEFp->setAxisCount(g->ctx.feat->getAxisCount());
-    if (g->ctx.MVAR != nullptr)
-        g->ctx.MVAR->setAxisCount(g->ctx.feat->getAxisCount());
+    if (g->ctx.MVAR == nullptr)
+        g->ctx.MVAR = new var_MVAR {};
+    g->ctx.MVAR->setAxisCount(g->ctx.feat->getAxisCount());
 
     /* Copy conversion flags */
     g->font.flags = 0;
@@ -407,6 +409,7 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
     g->ctx.cfr = cfrNew(&hot_memcb, &g->cb.stm, CFR_CHECK_ARGS, g->logger);
     cfrSetTablePointers(g->ctx.cfr, g->ctx.axes, g->ctx.hmtx, g->ctx.MVAR, g->ctx.name);
     cfrBegFont(g->ctx.cfr, 0, 0, 0, &top, NULL);
+    g->ctx.vm = new VarMetrics(cfr, g->logger);
 
     /* Create and copy font strings */
     if ((top->sup.flags & ABF_CID_FONT) && top->cid.CIDFontName.ptr) {
@@ -836,6 +839,8 @@ void hotConvert(hotCtx g) {
 
     g->out_stream = g->cb.stm.open(&g->cb.stm, OTF_DST_STREAM_ID, 0);
     sfntFill(g);
+    delete g->ctx.vm;
+    g->ctx.vm = nullptr;
     cfrEndFont(g->ctx.cfr);
     cfrFree(g->ctx.cfr);
     sfntWrite(g);

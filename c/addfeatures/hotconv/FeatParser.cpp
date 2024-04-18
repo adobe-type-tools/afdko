@@ -459,7 +459,7 @@ void featparserParserInitialize() {
   	0,838,836,1,0,0,0,839,840,5,118,0,0,840,841,5,110,0,0,841,842,5,125,0,
   	0,842,125,1,0,0,0,843,846,3,128,64,0,844,846,3,4,2,0,845,843,1,0,0,0,
   	845,844,1,0,0,0,846,847,1,0,0,0,847,848,5,125,0,0,848,127,1,0,0,0,849,
-  	850,7,7,0,0,850,851,5,141,0,0,851,129,1,0,0,0,852,853,5,80,0,0,853,855,
+  	850,7,7,0,0,850,851,3,62,31,0,851,129,1,0,0,0,852,853,5,80,0,0,853,855,
   	5,117,0,0,854,856,3,132,66,0,855,854,1,0,0,0,856,857,1,0,0,0,857,855,
   	1,0,0,0,857,858,1,0,0,0,858,859,1,0,0,0,859,860,5,118,0,0,860,861,5,80,
   	0,0,861,862,5,125,0,0,862,131,1,0,0,0,863,866,3,134,67,0,864,866,3,4,
@@ -6576,8 +6576,8 @@ FeatParser::VheaContext::VheaContext(ParserRuleContext *parent, size_t invokingS
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* FeatParser::VheaContext::NUM() {
-  return getToken(FeatParser::NUM, 0);
+FeatParser::SingleValueLiteralContext* FeatParser::VheaContext::singleValueLiteral() {
+  return getRuleContext<FeatParser::SingleValueLiteralContext>(0);
 }
 
 tree::TerminalNode* FeatParser::VheaContext::VERT_TYPO_ASCENDER() {
@@ -6630,7 +6630,7 @@ FeatParser::VheaContext* FeatParser::vhea() {
       consume();
     }
     setState(850);
-    match(FeatParser::NUM);
+    singleValueLiteral();
    
   }
   catch (RecognitionException &e) {
