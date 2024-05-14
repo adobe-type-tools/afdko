@@ -71,21 +71,29 @@ Note for Linux users (and users of other platforms that are not macOS or Windows
 
 - Create a virtual environment:
 
-        python -m venv afdko_env
+    ```sh
+    python -m venv afdko_env
+    ```
 
 - Activate the virtual environment:
 
     - macOS & Linux
 
-            source afdko_env/bin/activate
+        ```sh
+        source afdko_env/bin/activate
+        ```
 
     - Windows
 
-            afdko_env\Scripts\activate.bat
+        ```sh
+        afdko_env\Scripts\activate.bat
+        ```
 
 - Install [afdko](https://pypi.python.org/pypi/afdko):
 
-        python -m pip install afdko
+    ```sh
+    python -m pip install afdko
+    ```
 
 Installing the **afdko** inside a virtual environment prevents conflicts
 between its dependencies and other modules installed globally.
