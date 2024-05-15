@@ -5,8 +5,9 @@
 #ifndef ADDFEATURES_HOTCONV_NAME_H_
 #define ADDFEATURES_HOTCONV_NAME_H_
 
-#include "common.h"
+#include <string>
 
+#include "common.h"
 #include "namesupport.h"
 
 #define name_ TAG('n', 'a', 'm', 'e')

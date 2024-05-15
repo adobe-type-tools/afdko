@@ -63,8 +63,8 @@ static void addDumpTable(uint32_t tag);
 typedef struct
 {
     uint32_t tag;                  /* Table tag */
-    void (*read)(long, uint32_t); /* Reads table data structures */
-    void (*dump)(int, long);   /* Dumps table data structures */
+    void (*read)(int32_t, uint32_t); /* Reads table data structures */
+    void (*dump)(int, int);   /* Dumps table data structures */
     void (*free)(void);          /* Frees table data structures */
     void (*usage)(void);         /* Prints table usage */
 } Function;
@@ -676,7 +676,7 @@ static Entry *findEntry(uint32_t tag) {
 
     for (i = 0; i < sfnt.numTables; i++) {
         if (currEntry->tag < prevTag)
-            spotWarning("OTFproof: sfnt table is out of order.\n");
+            spotWarning(SPOT_MSG_ORDER);
         if (tag == currEntry->tag)
             return currEntry;
         prevTag = currEntry->tag;

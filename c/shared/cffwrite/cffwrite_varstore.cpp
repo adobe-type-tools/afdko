@@ -8,8 +8,9 @@
 
 #include "cffwrite_varstore.h"
 
-#include <cassert>
 #include <stdio.h>
+
+#include <cassert>
 #include <vector>
 
 #include "ctutil.h"

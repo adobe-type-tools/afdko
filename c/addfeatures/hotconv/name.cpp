@@ -8,6 +8,9 @@
 
 #include "name.h"
 
+#include <tuple>
+#include <vector>
+
 #include "GDEF.h"
 
 void nameNew(hotCtx g) {
@@ -17,7 +20,7 @@ void nameNew(hotCtx g) {
 
 void nameWrite(hotCtx g) {
     g->ctx.name->Write(g->vw);
-}   
+}
 
 void nameReuse(hotCtx g) {
     delete g->ctx.name;
@@ -52,7 +55,7 @@ static void addStdNamePair(hotCtx g, bool win, bool mac,
         addWinDfltName(g, nameId, str);
     if (mac)
         addMacDfltName(g, nameId, str);
-} 
+}
 
 /* Add standard Windows and Macintosh default names. */
 static void addStdNames(hotCtx g, bool win, bool mac) {
@@ -88,7 +91,7 @@ static void addStdNames(hotCtx g, bool win, bool mac) {
         /* xxx is this really needed or just a waste of space? */
         int sz;
         if (!g->font.licenseID.empty()) {
-            sz = snprintf(buf.data(), buf.size(), 
+            sz = snprintf(buf.data(), buf.size(),
                           "%.3f;%s;%s;%s",
                           dFontVersion,
                           g->font.vendId.c_str(),
@@ -252,7 +255,7 @@ int nameFill(hotCtx g) {
     // We copy the fields because the pointers could be invalidated by the adds
     for (auto nrp : mv)
         matchrecs.emplace_back(nrp->platspecId, nrp->languageId, nrp->content);
-    for (auto &[platspec, language, content]: matchrecs) {
+    for (auto &[platspec, language, content] : matchrecs) {
         if (nam->noName(nam_name::NAME_WIN_PLATFORM, platspec, language, nam_name::NAME_ID_FAMILY)) {
             nam->addName(nam_name::NAME_WIN_PLATFORM, platspec, language, nam_name::NAME_ID_FAMILY, content);
             if (doWarning) {
@@ -282,15 +285,15 @@ int nameFill(hotCtx g) {
         /* add Windows name ID 4 with the PS name as the value. */
         addWinDfltName(g, nam_name::NAME_ID_FULL, g->font.FontName);
     } else {
-        if (nam->noName(nam_name::NAME_WIN_PLATFORM, nam_name::NAME_WIN_UGL, 
+        if (nam->noName(nam_name::NAME_WIN_PLATFORM, nam_name::NAME_WIN_UGL,
                                  nam_name::MATCH_ANY, nam_name::NAME_ID_FULL)) {
             mv.clear();
-            mv = nam->allMatches(nam_name::NAME_WIN_PLATFORM, nam_name::NAME_WIN_UGL, 
+            mv = nam->allMatches(nam_name::NAME_WIN_PLATFORM, nam_name::NAME_WIN_UGL,
                                  nam_name::MATCH_ANY, nam_name::NAME_ID_FAMILY);
             matchrecs.clear();
             for (auto nrp : mv)
                 matchrecs.emplace_back(nrp->platspecId, nrp->languageId, nrp->content);
-            for (auto &[platspec, language, family]: matchrecs) {
+            for (auto &[platspec, language, family] : matchrecs) {
                 /* See if we can get a  subfamily name with the same script/language settings */
                 auto subfamily = nam->getName(nam_name::NAME_WIN_PLATFORM, platspec, language, nam_name::NAME_ID_SUBFAMILY);
 
@@ -347,7 +350,7 @@ int nameFill(hotCtx g) {
         matchrecs.clear();
         for (auto nrp : mv)
             matchrecs.emplace_back(nrp->platspecId, nrp->languageId, nrp->content);
-        for (auto &[platspec, language, family]: matchrecs) {
+        for (auto &[platspec, language, family] : matchrecs) {
             if (nam->noName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_FAMILY)) {
                 nam->addName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_FAMILY, family);
                 if (doWarning && !doV1Names) {
@@ -385,7 +388,7 @@ int nameFill(hotCtx g) {
             matchrecs.clear();
             for (auto nrp : mv)
                 matchrecs.emplace_back(nrp->platspecId, nrp->languageId, nrp->content);
-            for (auto &[platspec, language, subfamily]: matchrecs) {
+            for (auto &[platspec, language, subfamily] : matchrecs) {
                 if (nam->noName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_SUBFAMILY))
                     nam->addName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_SUBFAMILY, subfamily);
             }
@@ -402,7 +405,7 @@ int nameFill(hotCtx g) {
         matchrecs.clear();
         for (auto nrp : mv)
             matchrecs.emplace_back(nrp->platspecId, nrp->languageId, nrp->content);
-        for (auto &[platspec, language, subfamily]: matchrecs) {
+        for (auto &[platspec, language, subfamily] : matchrecs) {
             if (nam->noName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_SUBFAMILY))
                 nam->addName(nam_name::NAME_MAC_PLATFORM, platspec, language,
                              nam_name::NAME_ID_SUBFAMILY, style);

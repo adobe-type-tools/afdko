@@ -371,7 +371,7 @@ static void drawText(GlyphId glyphId, int lsb, int rsb, int width) {
             "gsave\n"
             "newpath 72 745 moveto 504 0 rlineto 2 setlinewidth stroke\n"
             "grestore\n",
-            fileName(), (name[0] == '@') ? "--no name--" : name, glyphId);
+            fileName(), (name[0] == '@') ? "--no name--" : (char *)name, glyphId);
     proofPSOUT(cffproofctx, workstr);
 
     workstr[0] = '\0';

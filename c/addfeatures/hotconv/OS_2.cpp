@@ -386,10 +386,8 @@ int OS_2Fill(hotCtx g) {
     h->tbl.sTypoLineGap = font->TypoLineGap.getDefault();
     g->ctx.MVAR->addValue(MVAR_hlgp_tag, *g->ctx.locMap, font->TypoLineGap, g->logger);
 
-    h->tbl.usWinAscent = font->win.ascent.getDefault();
-    g->ctx.MVAR->addValue(MVAR_hcla_tag, *g->ctx.locMap, font->win.ascent, g->logger);
-    h->tbl.usWinDescent = font->win.descent.getDefault();
-    g->ctx.MVAR->addValue(MVAR_hcld_tag, *g->ctx.locMap, font->win.descent, g->logger);
+    h->tbl.usWinAscent = font->win.ascent;
+    h->tbl.usWinDescent = font->win.descent;
 
     /* Version 2 fields */
     h->tbl.sXHeight = font->win.XHeight.getDefault();
