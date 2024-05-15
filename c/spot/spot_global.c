@@ -346,7 +346,7 @@ char *spotOurtime(void) {
         time(&seconds_since_epoch);
         SAFE_LOCALTIME(&seconds_since_epoch, &local_time);
         if (strftime(ourtday, sizeof(ourtday), dateFormat, &local_time) == 0) {
-            spotFatal("strftime returned 0");
+            spotFatal(SPOT_MSG_STRFTIME0);
         }
         ourtday[24] = '\0';
         done = 1;

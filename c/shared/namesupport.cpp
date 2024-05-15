@@ -364,7 +364,7 @@ void nam_name::deleteDuplicates(uint16_t platformId, uint16_t targetId, uint16_t
 /* Translate UTF-8 strings to target platform. */
 static std::string translate(uint16_t platformId, std::string &s) {
     switch (platformId) {
-        case nam_name::NAME_WIN_PLATFORM: { // Convert UTF-8 to 16-bit
+        case nam_name::NAME_WIN_PLATFORM: {  // Convert UTF-8 to 16-bit
             std::string dst;
             auto src = s.begin();
             auto end = s.end();

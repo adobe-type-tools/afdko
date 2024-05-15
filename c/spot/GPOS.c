@@ -4723,7 +4723,7 @@ void GPOSDump(int level, int32_t start) {
                         kernEntry->kernValue2 = val2;
                         kernEntry->isClass = val3;
                     } else {
-                        spotWarning(" Bad scan line! < %s >", inLine);
+                        spotWarning(SPOT_MSG_SCANLINE, inLine);
                     }
                     lineCount++;
                 } else {
@@ -4772,7 +4772,7 @@ void GPOSDump(int level, int32_t start) {
                     } else {
                         fputs("Comment End Script\n", OUTPUTBUFF);
                         if (!feof(AFMout))
-                            spotWarning("Error - %s  failed to read from AFM temporary file for reason other than end of file.", spotGlobal.progname);
+                            spotWarning(SPOT_MSG_BADAFM, spotGlobal.progname);
                     }
                 }
             }

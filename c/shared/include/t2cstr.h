@@ -6,6 +6,7 @@
 #define SHARED_INCLUDE_T2CSTR_H_
 
 #include <memory>
+#include <vector>
 
 #include "ctlshare.h"
 #include "slogger.h"

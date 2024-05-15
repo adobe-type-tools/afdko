@@ -310,7 +310,7 @@ void resRead(long origin) {
             fprintf(OUTPUTBUFF, "%c%c%c%c %5hu  %02hx  %08x %7u (%08x) %s\n",
                     TAG_ARG(res->type),
                     res->id, (uint16_t)res->attrs, res->offset, res->length, res->length,
-                    (res->name == NULL) ? "--none--" : res->name);
+                    (res->name == NULL) ? "--none--" : (char *)res->name);
         }
     }
 

@@ -29,7 +29,6 @@
 #include "GDEF.h"
 #include "OS_2.h"
 #include "dictops.h"
-#include "VarMetrics.h"
 
 /* Windows-specific macros */
 #define FAMILY_UNSET 255 /* Flags unset Windows Family field */
@@ -60,11 +59,7 @@ static void initCharName(void *ctx, long count, CharName *charname) {
 static void initOverrides(hotCtx g) {
     FontInfo_ *font = &g->font;
 
-    font->TypoAscender = font->hheaAscender = font->hheaDescender
-        = font->hheaLineGap = font->TypoDescender = font->TypoLineGap
-        = font->VertTypoAscender = font->VertTypoDescender
-        = font->VertTypoLineGap = font->winAscent = font->winDescent
-        = font->win.XHeight = font->win.CapHeight
+    font->hheaAscender = font->hheaDescender = font->hheaLineGap
         = SHRT_MAX;
 }
 
@@ -284,6 +279,8 @@ static void hotGlyphEnd(abfGlyphCallbacks *cb) {
         glyph.id = cb->info->cid;
     else
         glyph.id = cb->info->gname.impl;  // The SID (when CFF 1)
+
+    glyph.vsindex = cb->info->blendInfo.vsindex;
     glyph.code = cb->info->encoding.code;
     abfEncoding *e = cb->info->encoding.next;
     while (e != NULL) {
@@ -409,7 +406,7 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
     g->ctx.cfr = cfrNew(&hot_memcb, &g->cb.stm, CFR_CHECK_ARGS, g->logger);
     cfrSetTablePointers(g->ctx.cfr, g->ctx.axes, g->ctx.hmtx, g->ctx.MVAR, g->ctx.name);
     cfrBegFont(g->ctx.cfr, 0, 0, 0, &top, NULL);
-    g->ctx.vm = new VarMetrics(cfr, g->logger);
+    g->ctx.vm = new VarMetrics(g->ctx.cfr, *g->ctx.locMap, g->logger);
 
     /* Create and copy font strings */
     if ((top->sup.flags & ABF_CID_FONT) && top->cid.CIDFontName.ptr) {
@@ -593,25 +590,29 @@ static void prepWinData(hotCtx g) {
         /* Use o-height and O-height (adjusted for overshoot) for x-height and
            cap-height, respectively, since this should give better results for
            italic and swash fonts as well as handling Roman */
-        if (!OVERRIDE(font->win.XHeight)) {
+        if (!font->win.XHeight.isInitialized()) {
             gi = mapUV2Glyph(g, UV_PRO_X_HEIGHT_1 /* o */);
             if (gi == NULL) {
                 gi = mapUV2Glyph(g, UV_PRO_X_HEIGHT_2 /* Osmall */);
             }
-            font->win.XHeight =
-                (gi != NULL) ? gi->bbox.top + gi->bbox.bottom : 0;
+            // XXX update for variable bounding box
+            font->win.XHeight.addValue(
+                (gi != NULL) ? gi->bbox.top + gi->bbox.bottom : 0);
         }
-        if (!OVERRIDE(font->win.CapHeight)) {
+        if (!font->win.CapHeight.isInitialized()) {
             gi = mapUV2Glyph(g, UV_PRO_CAP_HEIGHT /* O */);
-            font->win.CapHeight =
-                (gi != NULL) ? gi->bbox.top + gi->bbox.bottom : 0;
+            // XXX update for variable bounding box
+            font->win.CapHeight.addValue(
+                (gi != NULL) ? gi->bbox.top + gi->bbox.bottom : 0);
         }
 
         /* Set strikeout size to underline thickness and position it at 60% of
            x-height, if non-zero, else 22% of em.  */
         font->win.StrikeOutSize = font->UnderlineThickness;
+        // XXX decide
         font->win.StrikeOutPosition =
-            (font->win.XHeight != 0) ? font->win.XHeight * 6L / 10
+            (font->win.XHeight.getDefault() != 0)
+                                     ? font->win.XHeight.getDefault() * 6L / 10
                                      : (FWord)EM_SCALE(220);
     }
 
@@ -628,16 +629,16 @@ static void prepWinData(hotCtx g) {
     }
 
     /* Set win ascent/descent */
-    if (OVERRIDE(font->winAscent)) {
-        font->win.ascent = font->winAscent;
+    if (font->winAscent.isInitialized()) {
+        font->win.ascent = font->winAscent.getDefault();
     } else {
         font->win.ascent = 0;
         if (font->bbox.top > 0) {
             font->win.ascent = font->bbox.top;
         }
     }
-    if (OVERRIDE(font->winDescent)) {
-        font->win.descent = font->winDescent;
+    if (font->winDescent.isInitialized()) {
+        font->win.descent = font->winDescent.getDefault();
     } else {
         font->win.descent = 0;
         if (font->bbox.bottom < 0) {
@@ -652,57 +653,61 @@ static void prepWinData(hotCtx g) {
 
     /* Set typo ascender/descender/linegap */
     if (IS_CID(g)) {
-        if (!OVERRIDE(font->TypoAscender) || !OVERRIDE(font->TypoDescender)) {
+        if (!font->TypoAscender.isInitialized() || !font->TypoDescender.isInitialized()) {
             hotGlyphInfo *gi = mapUV2Glyph(g, UV_VERT_BOUNDS);
-            if (!OVERRIDE(font->TypoAscender)) {
-                font->TypoAscender = (gi != NULL) ? gi->bbox.top : (short)EM_SCALE(880);
+            if (!font->TypoAscender.isInitialized()) {
+                // XXX fix for bounding box
+                font->TypoAscender.addValue((gi != NULL) ? gi->bbox.top : (short)EM_SCALE(880));
             }
-            if (!OVERRIDE(font->TypoDescender)) {
-                font->TypoDescender = (gi != NULL) ? gi->bbox.bottom : (short)EM_SCALE(-120);
+            if (!font->TypoDescender.isInitialized()) {
+                font->TypoDescender.addValue((gi != NULL) ? gi->bbox.bottom : (short)EM_SCALE(-120));
             }
         }
     } else {
-        if (!OVERRIDE(font->TypoAscender)) {
+        if (!font->TypoAscender.isInitialized()) {
             /* try to use larger of height of lowercase d ascender, or CapHeight. */
             /* Fall back to font bbox top, but make sure it is not greater than embox height */
 
             hotGlyphInfo *gi = mapUV2Glyph(g, UV_ASCENT); /* gi for lower-case d */
             short dHeight = (gi == NULL) ? 0 : gi->bbox.top;
 
-            if (dHeight > font->win.CapHeight) {
-                font->TypoAscender = dHeight;
+            // XXX fix for variable
+            if (dHeight > font->win.CapHeight.getDefault()) {
+                font->TypoAscender.addValue(dHeight);
             } else {
                 font->TypoAscender = font->win.CapHeight;
             }
 
-            if (font->TypoAscender == 0) {
-                font->TypoAscender = ABS(font->bbox.top);
+            // XXX fail out for variable?
+            if (font->TypoAscender.getDefault() == 0) {
+                font->TypoAscender.addValue(ABS(font->bbox.top), true);
             }
 
-            if (font->TypoAscender > font->unitsPerEm) {
-                font->TypoAscender = font->unitsPerEm;
+            if (font->TypoAscender.getDefault() > font->unitsPerEm) {
+                font->TypoAscender.addValue(font->unitsPerEm, true);
             }
         }
 
-        if (!OVERRIDE(font->TypoDescender)) {
-            font->TypoDescender = font->TypoAscender - font->unitsPerEm;
+        if (!font->TypoDescender.isInitialized()) {
+            // XXX fix for variable
+            font->TypoDescender.addValue(font->TypoAscender.getDefault() - font->unitsPerEm);
         }
     }
 
     /* warn if the override values don't sum correctly. */
-    if ((font->TypoAscender - font->TypoDescender) != font->unitsPerEm) {
+    if ((font->TypoAscender.getDefault() - font->TypoDescender.getDefault()) != font->unitsPerEm) {
         /* can happen only if overrides are used */
         g->logger->log(sWARNING, "The feature file OS/2 overrides TypoAscender and TypoDescender do not sum to the font em-square.");
     }
 
-    if (!OVERRIDE(font->TypoLineGap)) {
-        font->TypoLineGap = IS_CID(g)
-                                ? font->TypoAscender - font->TypoDescender
-                                : EM_SCALE(1200) - font->TypoAscender + font->TypoDescender;
+    if (!font->TypoLineGap.isInitialized()) {
+        font->TypoLineGap.addValue(IS_CID(g)
+                                   ? font->TypoAscender.getDefault() - font->TypoDescender.getDefault()
+                                   : EM_SCALE(1200) - font->TypoAscender.getDefault() + font->TypoDescender.getDefault());
     }
 
     /* warn if the line gap is negative. */
-    if (font->TypoLineGap < 0) {
+    if (font->TypoLineGap.getDefault() < 0) {
         g->logger->log(sWARNING, "The feature file OS/2 override TypoLineGap value is negative!");
     }
 
@@ -730,18 +735,19 @@ static void setVBounds(hotCtx g) {
     BBox &minBearing = font.minBearing;
     hvMetric &maxAdv = font.maxAdv;
     hvMetric &maxExtent = font.maxExtent;
-    int16_t dfltVAdv = -font.TypoAscender + font.TypoDescender;
-    int16_t dfltVOrigY = font.TypoAscender;
+    // XXX fix for variable
+    int16_t dfltVAdv = -font.TypoAscender.getDefault() + font.TypoDescender.getDefault();
+    int16_t dfltVOrigY = font.TypoAscender.getDefault();
 
-    if (!OVERRIDE(font.VertTypoAscender)) {
-        font.VertTypoAscender = font.unitsPerEm / 2;
+    if (!font.VertTypoAscender.isInitialized()) {
+        font.VertTypoAscender.addValue(font.unitsPerEm / 2);
     }
-    if (!OVERRIDE(font.VertTypoDescender)) {
-        font.VertTypoDescender = -font.VertTypoAscender;
+    if (!font.VertTypoDescender.isInitialized()) {
+        font.VertTypoDescender.addValue(-font.VertTypoAscender.getDefault());
     }
-    if (!OVERRIDE(font.VertTypoLineGap)) {
-        font.VertTypoLineGap = font.VertTypoAscender -
-                               font.VertTypoDescender;
+    if (!font.VertTypoLineGap.isInitialized()) {
+        font.VertTypoLineGap.addValue(font.VertTypoAscender.getDefault() -
+                                      font.VertTypoDescender.getDefault());
     }
 
     /* Initialize */

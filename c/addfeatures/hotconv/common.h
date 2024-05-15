@@ -228,6 +228,7 @@ struct hotGlyphInfo { /* Glyph information */
     FWord hAdv;              /* (default) Horizontal advance width */
     VarValueRecord vAdv;     /* Vertical advance width */
     VarValueRecord vOrigY;   /* Y coordinate of the glyph's vertical origin */
+    uint16_t vsindex;        /* For CFF2 the vsindex of the glyph */
     BBox bbox;      /* Bounding box */
     std::vector<uint32_t> sup;   /* Supplementary encodings */
 

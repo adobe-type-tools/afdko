@@ -81,7 +81,7 @@ static void showHelp(void) {
 }
 
 /* Main program */
-int main__sfntdiff(int argc, int8_t *argv[]) {
+int main__sfntdiff(int argc, char *argv[]) {
     static opt_Option opt[] = {
             {"-u", opt_Call, showUsage},
             {"-h", opt_Call, showHelp},
@@ -93,10 +93,10 @@ int main__sfntdiff(int argc, int8_t *argv[]) {
 
     int argi;
     bool supported, supported2;
-    int8_t *filename1;
-    int8_t *filename2;
+    char *filename1;
+    char *filename2;
     int name1isDir, name2isDir;
-    int8_t **SimpleNameList;
+    char **SimpleNameList;
     int NumSimpleNames = 0;
 
     da_SetMemFuncs(sMemNew, sMemResize, sMemFree);
@@ -204,7 +204,7 @@ int main__sfntdiff(int argc, int8_t *argv[]) {
 
         STRCPY_S(fil2, sizeof(fil2), filename2);
         STRCAT_S(fil2, sizeof(fil2), "/");
-        c = strrchr(filename1, "/");
+        c = strrchr(filename1, '/');
         if (c == NULL)
             STRCAT_S(fil2, sizeof(fil2), filename1);
         else

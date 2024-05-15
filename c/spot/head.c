@@ -129,7 +129,7 @@ char *headGetCreatedDate(uint32_t client) {
     }
     LongDateTime2ANSITime(&tmp, head->created);
     if (strftime(tday, sizeof(tday), dateFormat, &tmp) == 0) {
-        spotFatal("strftime returned 0");
+        spotFatal(SPOT_MSG_STRFTIME0);
     }
     tday[24] = '\0';
     return tday;
@@ -147,7 +147,7 @@ char *headGetModifiedDate(uint32_t client) {
     }
     LongDateTime2ANSITime(&tmp, head->modified);
     if (strftime(tday, sizeof(tday), dateFormat, &tmp) == 0) {
-        spotFatal("strftime returned 0");
+        spotFatal(SPOT_MSG_STRFTIME0);
     }
     tday[24] = '\0';
     return tday;

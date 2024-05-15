@@ -112,6 +112,10 @@ const int8_t *SpotEnglishMessages[] =
         "Duplicate glyph in coverage Type1. gid: '%d'.\n",                                                                 /* SPOT_MSG_DUP_IN_COV */
         "Cannot proof multiple inputs with more than one group greater than 1. Not all substitutions may be displayed.\n", /* SPOT_MSG_GSUBMULTIPLEINPUTS */
         "Proofing %s.",                                                                                                    /* SPOT_MSG_PROOFING */
+        "Bad scan line! < %s >",                                                                                           /* SPOT_MSG_SCANLINE */
+        "Error - %s  failed to read from AFM temporary file for reason other than end of file.",                           /* SPOT_MSG_BADAFM */
+        "OTFproof: sfnt table is out of order.\n",                                                                         /* SPOT_MSG_ORDER */
+        "strftime returned 0",                                                                                             /* SPOT_MSG_STRFTIME0 */
 };
 
 const int8_t *spotMsg(int msgId) {

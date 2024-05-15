@@ -2442,7 +2442,7 @@ static std::string generateInstancePSName(cfrCtx h, size_t nameLimit) {
        is provided, try it first. */
     if (h->cff2.lastResortInstanceNameCallback) {
         auto prefix = h->cff2.name->getFamilyNamePrefix();
-        if (prefix.size() == 0);
+        if (prefix.size() == 0)
             return "";
 
         s = (*h->cff2.lastResortInstanceNameCallback)(h->cff2.lastResortInstanceNameClientCtx, h->cff2.UDV,

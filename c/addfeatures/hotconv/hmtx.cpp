@@ -85,19 +85,22 @@ int hheaFill(hotCtx g) {
     if (OVERRIDE(g->font.hheaAscender)) {
         header.ascender = g->font.hheaAscender;
     } else {
-        header.ascender = g->font.TypoAscender;
+        // XXX maybe just override if not read in from CFF2 otf
+        header.ascender = g->font.TypoAscender.getDefault();
     }
 
     if (OVERRIDE(g->font.hheaDescender)) {
         header.descender = g->font.hheaDescender;
     } else {
-        header.descender = g->font.TypoDescender;
+        // XXX maybe just override if not read in from CFF2 otf
+        header.descender = g->font.TypoDescender.getDefault();
     }
 
     if (OVERRIDE(g->font.hheaLineGap)) {
         header.lineGap = g->font.hheaLineGap;
     } else {
-        header.lineGap = g->font.TypoLineGap;
+        // XXX maybe just override if not read in from CFF2 otf
+        header.lineGap = g->font.TypoLineGap.getDefault();
     }
 
     header.advanceWidthMax = g->font.maxAdv.h;
