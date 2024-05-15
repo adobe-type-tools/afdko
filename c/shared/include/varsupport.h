@@ -18,6 +18,7 @@
 #include <variant>
 
 #include "sfntread.h"
+#include "cffread_abs.h"
 #include "supportfp.h"
 #include "absfont.h"
 
@@ -65,6 +66,9 @@ struct var_indexPair {
     uint16_t innerIndex {0};
 };
 
+class VarValueRecord;
+class VarLocationMap;
+
 struct var_indexMap {
     LOffset size(uint8_t entryBytes) {
         if (map.size() == 0)
@@ -74,6 +78,13 @@ struct var_indexMap {
     uint8_t entryFormat(uint8_t entryBytes, uint8_t deltaBits);
     void write(VarWriter &vw, uint8_t entryBytes, uint8_t deltaBits);
     uint32_t offset {0};
+    void addValue(VarValueRecord &v, VarLocationMap &vlm, uint16_t gid,
+                  std::unique_ptr<itemVariationStore> &ivs,
+                  std::shared_ptr<slogger> logger);
+    void clear() {
+        offset = 0;
+        map.clear();
+    }
     std::vector<var_indexPair> map;
 };
 
@@ -269,8 +280,9 @@ class VarValueRecord {
         locationValues.swap(o.locationValues);
         return *this;
     }
-    void addValue(int32_t value) {
-        assert(!seenDefault);
+    void addValue(int32_t value, bool overwriteOK = false) {
+        if (!overwriteOK)
+            assert(!seenDefault);
         seenDefault = true;
         defaultValue = value;
     }
@@ -316,10 +328,43 @@ class VarValueRecord {
     bool isVariable() const { return locationValues.size() > 0; }
     bool nonZero() const { return isVariable() || defaultValue != 0; }
     bool isInitialized() const { return isVariable() || seenDefault; }
-    std::vector<uint32_t> getLocations() const {
-        std::vector<uint32_t> r;
+    std::set<uint32_t> getLocations() const {
+        std::set<uint32_t> r;
         for (auto i : locationValues)
-            r.push_back(i.first);
+            r.insert(i.first);
+        return r;
+    }
+    bool hasLocation(uint32_t l) const {
+        if (!isInitialized())
+            return false;
+        if (l == 0)
+            return seenDefault;
+        return locationValues.find(l) != locationValues.end();
+    }
+    VarValueRecord addSame(const VarValueRecord &o) {
+        assert(isInitialized() && o.isInitialized());
+        assert(locationValues.size() == o.locationValues.size());
+        auto i = locationValues.begin();
+        auto oi = o.locationValues.begin();
+        VarValueRecord r;
+        r.addValue(defaultValue + o.defaultValue);
+        for ( ; i != locationValues.end() && oi != o.locationValues.end(); i++, oi++) {
+            assert(i->first == oi->first);
+            r.locationValues.emplace(i->first, i->second + oi->second);
+        }
+        return r;
+    }
+    VarValueRecord subSame(const VarValueRecord &o) {
+        assert(isInitialized() && o.isInitialized());
+        assert(locationValues.size() == o.locationValues.size());
+        auto i = locationValues.begin();
+        auto oi = o.locationValues.begin();
+        VarValueRecord r;
+        r.addValue(defaultValue - o.defaultValue);
+        for ( ; i != locationValues.end() && oi != o.locationValues.end(); i++, oi++) {
+            assert(i->first == oi->first);
+            r.locationValues.emplace(i->first, i->second - oi->second);
+        }
         return r;
     }
     bool operator==(const VarValueRecord &rhs) const {
@@ -407,6 +452,7 @@ class itemVariationStore {
                        uint32_t tableLength, uint32_t ivsOffset);
 
     void setAxisCount(uint16_t ac) { axisCount = ac; }
+    uint16_t getAxisCount() { return axisCount; }
     // Returns the number of regions in the region list in the IVS data.
     uint16_t getRegionCount() { return regions.size(); }
     bool isEmpty() { return models.size() == 0; }
@@ -466,6 +512,8 @@ class itemVariationStore {
     bool getRegionIndices(uint16_t vsIndex,
                           std::vector<uint16_t> &regionIndices);
 
+    bool getLocationIndices(uint16_t vsIndex, VarLocationMap &vlm,
+                            std::set<uint32_t> &locations);
     /* Calculates scalars for all regions given a normalized design vector for
        an instance.
 
@@ -490,6 +538,11 @@ class itemVariationStore {
     Fixed applyDeltasForIndexPair(ctlSharedStmCallbacks *sscb,
                                   const var_indexPair &pair,
                                   const std::vector<Fixed> &scalars);
+
+    // XXX recombine later
+    Fixed applyDeltasForIndexPair(const var_indexPair &pair,
+                                  const std::vector<Fixed> &scalars,
+                                  std::shared_ptr<slogger> logger);
     Fixed applyDeltasForGid(ctlSharedStmCallbacks *sscb, var_indexMap &map,
                             uint16_t gid, const std::vector<Fixed> &scalars);
 
@@ -525,8 +578,9 @@ class itemVariationStore {
 
     void write(VarWriter &vw);
 
-    void reset() {
-        axisCount = 0;
+    void reset(bool clearAxisCount = false) {
+        if (clearAxisCount)
+            axisCount = 0;
         regions.clear();
         regionMap.clear();
         subtables.clear();
@@ -576,7 +630,7 @@ class itemVariationStore {
         uint16_t numBytes {0};
         std::vector<uint16_t> regionIndices;
         std::vector<std::vector<int16_t>> deltaValues;
-        std::unordered_multimap<uint32_t,uint16_t> deltaTracker;
+        std::unordered_multimap<uint32_t, uint16_t> deltaTracker;
     };
 
     void writeRegionList(VarWriter &vw);
@@ -587,7 +641,7 @@ class itemVariationStore {
     std::vector<itemVariationDataSubtable> subtables;
     std::vector<ValueTracker> values;
     std::vector<std::unique_ptr<VarModel>> models;
-    std::map<std::vector<uint32_t>, uint32_t> locationSetMap;
+    std::map<std::set<uint32_t>, uint32_t> locationSetMap;
     var_indexPair staticPair {0xFFFF, 0xFFFF};
 };
 
@@ -596,7 +650,7 @@ typedef std::vector<itemVariationStore::ValueTracker> VarTrackVec;
 class VarModel {
  public:
     VarModel() = delete;
-    VarModel(itemVariationStore &ivs, VarLocationMap &vlm, std::vector<uint32_t> locationList);
+    VarModel(itemVariationStore &ivs, VarLocationMap &vlm, std::set<uint32_t> locationSet);
     uint16_t addValue(const VarValueRecord &vvr, std::shared_ptr<slogger> logger);
     explicit VarModel(VarModel &&vm) : subtableIndex(vm.subtableIndex),
                                        sortedLocations(std::move(vm.sortedLocations)),
@@ -612,9 +666,11 @@ class VarModel {
         std::vector<std::set<var_F2dot14>> axisPoints;
         VarLocationMap &vlm;
     };
-    void sortLocations(VarLocationMap &vlm, std::vector<uint32_t> locationList) {
-        sortedLocations = locationList;
-        cmpLocation cl(vlm, locationList);
+    void sortLocations(VarLocationMap &vlm, std::set<uint32_t> locationSet) {
+        sortedLocations.reserve(locationSet.size());
+        for (auto l : locationSet)
+            sortedLocations.push_back(l);
+        cmpLocation cl(vlm, sortedLocations);
         std::sort(sortedLocations.begin(), sortedLocations.end(), cl);
     }
     std::vector<itemVariationStore::VariationRegion> locationsToInitialRegions(VarLocationMap &vlm,
@@ -697,6 +753,26 @@ class var_vmtx {
     bool lookup(ctlSharedStmCallbacks *sscb, const std::vector<Fixed> &instCoords,
                 uint16_t gid, Fixed &width, Fixed &tsb);
 
+    void vmtxClear(bool clearIvs = true) {
+        if (clearIvs)
+            ivs = nullptr;
+        advanceVWidth.clear();
+        tsb.clear();
+        widthMap.clear();
+        tsbMap.clear();
+        bsbMap.clear();
+    }
+    void VORGClear() {
+        defaultVertOrigin = 0;
+        vertOriginY.clear();
+        vorgMap.clear();
+    }
+
+    void nextVAdv(VarValueRecord &v, VarLocationMap &vlm, std::shared_ptr<slogger> logger);
+    void nextTsb(VarValueRecord &v, VarLocationMap &vlm, std::shared_ptr<slogger> logger);
+    void nextVOrig(uint16_t gid, VarValueRecord &v, VarLocationMap &vlm,
+                   std::shared_ptr<slogger> logger);
+
     bool Fill();
     void write_vhea(VarWriter &vw);
     void write(VarWriter &vw);
@@ -721,7 +797,7 @@ class var_vmtx {
     std::vector<uint16_t> advanceVWidth;
     std::vector<int16_t> tsb;
     int16_t defaultVertOrigin {0};
-    std::map<uint16_t,int16_t> vertOriginY;
+    std::map<uint16_t, int16_t> vertOriginY;
 
     std::unique_ptr<itemVariationStore> ivs;
     var_indexMap widthMap;
@@ -803,10 +879,71 @@ class var_MVAR {
     void addValue(ctlTag tag, VarLocationMap &vlm, const VarValueRecord &vvr,
                   std::shared_ptr<slogger> logger);
     bool hasValues() { return values.size() > 0; }
+
  private:
     uint16_t axisCount {0};
     std::map<ctlTag, var_indexPair> values;
     std::unique_ptr<itemVariationStore> ivs;
+};
+
+class VarMetrics {
+ public:
+    VarMetrics() = delete;
+    explicit VarMetrics(cfrCtx cfr, VarLocationMap &vlm, std::shared_ptr<slogger> logger) :
+        cfr(cfr), vlm(vlm), logger(logger) {
+        assert(cfr != nullptr);
+        cfrIvs = cfrGetItemVariationStore(cfr);
+        if (cfrIvs == nullptr)
+            return;
+        scratchIvs.setAxisCount(cfrIvs->getAxisCount());
+    }
+    struct GlyphInstMetrics {
+        int32_t left;
+        int32_t bottom;
+        int32_t right;
+        int32_t top;
+        bool peak_glyph_region;
+    };
+    void prepGlyphData(uint16_t gid, uint16_t vsindex, const std::set<uint32_t> &locations);
+    void prepGlyphData(uint16_t gid, uint16_t vsindex, uint32_t location) {
+        std::set<uint32_t> locations;
+        locations.insert(location);
+        prepGlyphData(gid, vsindex, locations);
+    }
+    void prepGlyphData(uint16_t gid, uint16_t vsindex, const VarValueRecord &vvr) {
+        auto locations = vvr.getLocations();
+        prepGlyphData(gid, vsindex, locations);
+    }
+    VarValueRecord addVVR(const VarValueRecord &a, const VarValueRecord &b) {
+        return ensureLocations(a, b.getLocations()).addSame(ensureLocations(b, a.getLocations()));
+    }
+
+    VarValueRecord subVVR(const VarValueRecord &a, const VarValueRecord &b) {
+        return ensureLocations(a, b.getLocations()).subSame(ensureLocations(b, a.getLocations()));
+    }
+    VarValueRecord subTop(const VarValueRecord &v, uint16_t gid, uint16_t vsindex);
+    GlyphInstMetrics &getGlyphData(uint16_t gid, uint16_t vsindex,
+                                   uint32_t location, bool onRetry = false);
+    float blendCurrent(uint16_t curIndex, abfBlendArg *v);
+    std::vector<abfMetricsCtx_> currentInstState;
+    std::vector<uint32_t> currentLocations;
+    uint16_t currentVsindex {0};
+
+ private:
+    VarValueRecord ensureLocations(const VarValueRecord &v, const std::set<uint32_t> &locations);
+    std::vector<Fixed> &getLocationScalars(uint32_t location);
+    std::vector<uint16_t> &getRegionIndices();
+
+    std::unordered_map<uint16_t, std::unordered_map<uint32_t, GlyphInstMetrics>> glyphData;
+    std::unordered_map<uint32_t, std::vector<Fixed>> locationScalars;
+    std::unordered_map<uint16_t, std::vector<uint16_t>> regionsForVsindex;
+
+    cfrCtx cfr;
+    VarLocationMap &vlm;
+    std::shared_ptr<slogger> logger;
+
+    itemVariationStore *cfrIvs {nullptr};
+    itemVariationStore scratchIvs;
 };
 
 /* returns the library version number and name via the client

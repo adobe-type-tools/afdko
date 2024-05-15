@@ -5,6 +5,12 @@
 #ifndef SHARED_INCLUDE_NAMESUPPORT_H_
 #define SHARED_INCLUDE_NAMESUPPORT_H_
 
+#include <map>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
+
 #include "ctlshare.h"
 #include "sfntread.h"
 #include "varsupport.h"
@@ -216,6 +222,7 @@ class nam_name {
         return noName(NAME_MAC_PLATFORM, NAME_MAC_ROMAN, NAME_MAC_ENGLISH, nameId);
     }
     void deleteDuplicates(uint16_t platformId, uint16_t targetId, uint16_t referenceId);
+
  private:
     bool checkNameChar(unsigned char ch, bool isPS) {
         if (isPS) {

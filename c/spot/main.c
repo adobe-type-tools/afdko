@@ -381,7 +381,7 @@ static void makeArgs(char *filename) {
 #endif
 
 /* Main program */
-int main__spot(int argc, int8_t *argv[]) {
+int main__spot(int argc, char *argv[]) {
     int value = 0;
     static double glyphptsize = STDPAGE_GLYPH_PTSIZE;
     static opt_Option opt[] =
@@ -428,7 +428,7 @@ int main__spot(int argc, int8_t *argv[]) {
 
     int files, goodFileCount = 0;
     int argi;
-    int8_t *filename = NULL;
+    char *filename = NULL;
     volatile int i = 0;
 #if AUTOSCRIPT
     cmdlinetype *cmdl;

@@ -113,6 +113,10 @@ extern const int8_t *spotMsg(int msgId);
 #define SPOT_MSG_DUP_IN_COV         103
 #define SPOT_MSG_GSUBMULTIPLEINPUTS 104
 #define SPOT_MSG_PROOFING           105
+#define SPOT_MSG_SCANLINE           106
+#define SPOT_MSG_BADAFM             107
+#define SPOT_MSG_ORDER              108
+#define SPOT_MSG_STRFTIME0          109
 
 #define SPOT_MSG_ENDSENTINEL SPOT_MSG_PROOFING
 #endif

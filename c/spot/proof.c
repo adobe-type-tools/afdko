@@ -866,12 +866,12 @@ ProofContextPtr proofInitContext(proofOutputType where,
         ctx->title = sMemNew(len * sizeof(int8_t));
         if (strcmp(fullname, psname) == 0)
             sprintf(ctx->title, fmt1,
-                    (fullname) ? fullname : "",
+                    (fullname) ? (char *)fullname : "",
                     fontRevision);
         else
             sprintf(ctx->title, fmt2,
-                    (fullname) ? fullname : "",
-                    (psname) ? psname : "",
+                    (fullname) ? (char *)fullname : "",
+                    (psname) ? (char *)psname : "",
                     fontRevision);
 
         if (fullname && fullname[0] != '\0')
@@ -888,7 +888,7 @@ ProofContextPtr proofInitContext(proofOutputType where,
 
     ctx->title2 = sMemNew(len * sizeof(int8_t));
     /*  sprintf(ctx->title2, fmt3, mydate,  (pageTitle)?pageTitle : ""); */
-    sprintf(ctx->title2, fmt3, (pageTitle) ? pageTitle : "");
+    sprintf(ctx->title2, fmt3, (pageTitle) ? (char *)pageTitle : "");
 
     ctx->currx = ctx->curry = 0.0;
     ctx->glyphSize = glyphSize;

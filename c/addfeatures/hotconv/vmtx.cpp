@@ -23,34 +23,38 @@ int vmtxFill(hotCtx g) {
         return vmtx.Fill();
 
     uint32_t glyphCount = g->glyphs.size();
-    VarValueRecord dfltVAdv = g->font.TypoAscender - g->font.TypoDescender;
+    VarValueRecord dfltVAdv = g->ctx.vm->subVVR(g->font.TypoAscender, g->font.TypoDescender);
     VarValueRecord dfltVOrigY = g->font.TypoAscender;
 
     vmtx.advanceVWidth.reserve(glyphCount);
     vmtx.tsb.reserve(glyphCount);
 
+    vmtx.vmtxClear();
+
+    int32_t gid = 0;
     for (auto &gl : g->glyphs) {
-        VarValueRecord vAdv {dfltVAdv};
         if (gl.vAdv.isInitialized())
-            vmtx.nextVAdv(vAdv);
+            vmtx.nextVAdv(gl.vAdv, *g->ctx.locMap, g->logger);
         else
-            vmtx.nextVAdv(dfltVAdv);
-        if (gl.vOrigY.isInitialized())
-            vmtx.nextTsb(vOrig, *g->ctx.vm);
-        VarValueRecord vOrigY {dfltVOrigY};
-            vOrigY = gl.vOrigY;
-        vmtx.tsb.push_back(vOrigY - gl.bbox.top);
+            vmtx.nextVAdv(dfltVAdv, *g->ctx.locMap, g->logger);
+        VarValueRecord cv;
+        auto &VO = gl.vOrigY.isInitialized() ? gl.vOrigY : dfltVOrigY;
+        if (g->ctx.axes != nullptr)
+            cv = g->ctx.vm->subTop(VO, gid, g->glyphs[gid].vsindex);
+        else
+            cv.addValue(VO.getDefault() - gl.bbox.top);
+        vmtx.nextTsb(cv, *g->ctx.locMap, g->logger);
+        gid++;
     }
 
     /* Optimize metrics */
     FWord vWidth = vmtx.advanceVWidth.back();
-    int64_t i;
-    for (i = vmtx.advanceVWidth.size() - 2; i >= 0; i--) {
-        if (vmtx.advanceVWidth[i] != vWidth)
+    for (gid = vmtx.advanceVWidth.size() - 2; gid >= 0; gid--) {
+        if (vmtx.advanceVWidth[gid] != vWidth)
             break;
     }
-    if (i + 2 != vmtx.advanceVWidth.size())
-        vmtx.advanceVWidth.resize(i+2);
+    if (gid + 2 != vmtx.advanceVWidth.size())
+        vmtx.advanceVWidth.resize(gid+2);
 
     return vmtx.Fill();
 }
@@ -83,11 +87,11 @@ int vheaFill(hotCtx g) {
 
     header.version = VERSION(1, 1);
     header.vertTypoAscender = g->font.VertTypoAscender.getDefault();
-    g->ctx.MVAR->addValue(MVAR_vasc_tag, *g->ctx.locMap, font->VertTypoAscender, g->logger);
+    g->ctx.MVAR->addValue(MVAR_vasc_tag, *g->ctx.locMap, g->font.VertTypoAscender, g->logger);
     header.vertTypoDescender = g->font.VertTypoDescender.getDefault();
-    g->ctx.MVAR->addValue(MVAR_vdsc_tag, *g->ctx.locMap, font->VertTypoDescender, g->logger);
+    g->ctx.MVAR->addValue(MVAR_vdsc_tag, *g->ctx.locMap, g->font.VertTypoDescender, g->logger);
     header.vertTypoLineGap = g->font.VertTypoLineGap.getDefault();
-    g->ctx.MVAR->addValue(MVAR_vlgp_tag, *g->ctx.locMap, font->VertTypoLineGap, g->logger);
+    g->ctx.MVAR->addValue(MVAR_vlgp_tag, *g->ctx.locMap, g->font.VertTypoLineGap, g->logger);
 
     header.advanceHeightMax = g->font.maxAdv.v;
     header.minTop = g->font.minBearing.top;
@@ -125,15 +129,15 @@ int VORGFill(hotCtx g) {
 
     auto &vmtx = *g->ctx.vmtx;
 
-    int16_t dflt;
-    vmtx.defaultVertOrigin = dflt = g->font.TypoAscender;
-    vmtx.vertOriginY.clear();
+    vmtx.VORGClear();
 
-    for (size_t i = 0; i < g->glyphs.size(); i++) {
-        auto &gl = g->glyphs[i];
-        
-        if (gl.vOrigY.isInitialized() && gl.vOrigY.getDefault() != dflt)
-            vmtx.vertOriginY.emplace((uint16_t) i, gl.vOrigY.getDefault());
+    int16_t dflt;
+    vmtx.defaultVertOrigin = dflt = g->font.TypoAscender.getDefault();
+
+    int32_t gid = 0;
+    for (auto &gl : g->glyphs) {
+        vmtx.nextVOrig(gid, gl.vOrigY, *g->ctx.locMap, g->logger);
+        gid++;
     }
 
     return 1;

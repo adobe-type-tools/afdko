@@ -6,6 +6,7 @@
 #define SHARED_INCLUDE_CFFREAD_ABS_H_
 
 #include <memory>
+#include <string>
 
 #include "ctlshare.h"
 #include "slogger.h"
