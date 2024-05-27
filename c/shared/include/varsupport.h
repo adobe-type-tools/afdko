@@ -73,7 +73,12 @@ struct var_indexMap {
     LOffset size(uint8_t entryBytes) {
         if (map.size() == 0)
             return 0;
-        return sizeof(uint8_t) * (2 + entryBytes * map.size()) + sizeof(uint32_t);
+        LOffset r = 2 * sizeof(uint8_t);
+        if (map.size() > 0xFFFF)
+            r += sizeof(uint32_t);
+        else
+            r += sizeof(uint16_t);
+        return r + entryBytes * map.size();
     }
     uint8_t entryFormat(uint8_t entryBytes, uint8_t deltaBits);
     void write(VarWriter &vw, uint8_t entryBytes, uint8_t deltaBits);
@@ -330,6 +335,8 @@ class VarValueRecord {
     bool isInitialized() const { return isVariable() || seenDefault; }
     std::set<uint32_t> getLocations() const {
         std::set<uint32_t> r;
+        if (seenDefault)
+            r.insert(0);
         for (auto i : locationValues)
             r.insert(i.first);
         return r;
@@ -625,7 +632,7 @@ class itemVariationStore {
             auto t = deltas.size();
             uint16_t zeroth = t > 0 ? (uint16_t)deltas[0] : 0;
             uint16_t first = t > 1 ? (uint16_t)deltas[1] : 0;
-            return (zeroth << 16) + first;
+            return ((uint32_t) zeroth << 16) + first;
         }
         uint16_t numBytes {0};
         std::vector<uint16_t> regionIndices;

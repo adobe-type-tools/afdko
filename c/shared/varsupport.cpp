@@ -119,7 +119,7 @@ void var_indexMap::write(VarWriter &vw, uint8_t entryBytes, uint8_t deltaBits) {
 void var_indexMap::addValue(VarValueRecord &v, VarLocationMap &vlm, uint16_t gid,
                             std::unique_ptr<itemVariationStore> &ivs,
                             std::shared_ptr<slogger> logger) {
-    assert(map.size() == 0 || map.size() == gid - 1);
+    assert(map.size() == 0 || map.size() == gid);
     assert(map.size() == 0 || ivs != nullptr);
 
     if (map.size() == 0 && !v.isVariable())
@@ -133,7 +133,7 @@ void var_indexMap::addValue(VarValueRecord &v, VarLocationMap &vlm, uint16_t gid
             map.push_back(ivs->getStaticPair());
     }
 
-    assert(map.size() == gid - 1);
+    assert(map.size() == gid);
     if (v.isVariable())
         map.push_back(ivs->addValue(vlm, v, logger));
     else
@@ -1043,6 +1043,9 @@ Fixed itemVariationStore::applyDeltasForIndexPair(const var_indexPair &pair,
                                                   std::shared_ptr<slogger> logger) {
     Fixed netAdjustment = FIXED_ZERO;
 
+    if (pair.outerIndex == 0xFFFF && pair.innerIndex == 0xFFFF)
+        return netAdjustment;
+
     if (pair.outerIndex >= subtables.size()) {
         logger->log(sERROR, "invalid outer index in index map");
         return netAdjustment;
@@ -1186,17 +1189,12 @@ void itemVariationStore::itemVariationDataSubtable::preWriteOptimize(bool reorde
             numBytes = s - *shorts.rbegin() - 1;
         else
             numBytes = s;
-        if (shorts.size())
-            std::cerr << "*shorts.rbegin(): " << *shorts.rbegin() << std::endl;
-        std::cerr << "shorts.size(): " << shorts.size() << ", s: " << s << std::endl;
-        std::cerr << "numBytes: " << numBytes << std::endl;
     }
 }
 
 void itemVariationStore::itemVariationDataSubtable::write(VarWriter &vw) {
     vw.w2((uint16_t) deltaValues.size());
     uint16_t numShorts = regionIndices.size() - numBytes;
-    std::cerr << "numBytes: " << numBytes << std::endl;
     vw.w2((uint16_t) (deltaValues.size() > 0 ? numShorts : 0));
     vw.w2((uint16_t) regionIndices.size());
 
@@ -1914,6 +1912,8 @@ static int vmetricsBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     return ABF_CONT_RET;
 }
 
+static void vmetricsWidth(abfGlyphCallbacks *cb, float w) {}
+
 static void vmetricsMoveVF(abfGlyphCallbacks *cb, abfBlendArg *x0, abfBlendArg *y0) {
     VarMetrics *vm = (VarMetrics *)cb->direct_ctx;
     for (size_t i = 0; i < vm->currentInstState.size(); i++) {
@@ -1990,7 +1990,7 @@ void VarMetrics::prepGlyphData(uint16_t gid, uint16_t vsindex,
         NULL,
         NULL,
         vmetricsBeg,
-        NULL,
+        vmetricsWidth,
         NULL,
         NULL,
         NULL,
@@ -2055,12 +2055,12 @@ VarValueRecord VarMetrics::subTop(const VarValueRecord &v, uint16_t gid, uint16_
     auto gi = glyphData.find(gid);
     assert(gi != glyphData.end());
     for (auto &[l, gim] : gi->second) {
-        if (!gim.peak_glyph_region || v.hasLocation(l))
-            continue;
-        if (l == 0)
-            top.addValue(gim.top);
-        else
-            top.addLocationValue(l, gim.top, logger);
+        if (gim.peak_glyph_region || v.hasLocation(l)) {
+            if (l == 0)
+                top.addValue(gim.top);
+            else
+                top.addLocationValue(l, gim.top, logger);
+        }
     }
     return ensureLocations(v, top.getLocations()).subSame(top);
 }
