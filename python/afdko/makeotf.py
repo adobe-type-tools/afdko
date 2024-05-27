@@ -1449,6 +1449,10 @@ def getOptions(makeOTFParams, args):
     if error:
         raise MakeOTFOptionsError
 
+    if (getattr(makeOTFParams, kFileOptPrefix + kRelease) != None and
+            getattr(makeOTFParams, kFileOptPrefix + kUseSuppliedCFF) != None):
+        setattr(makeOTFParams, kFileOptPrefix + kDoSubr, None)
+
 
 def checkInputFile(makeOTFParams):
     # The path to the original src font file
@@ -1881,15 +1885,18 @@ def convertFontIfNeeded(makeOTFParams):
         if rename is None:
             params.append('-gr')
         else:
-            foundOpt = True
             params.append('-go')
+
+    useSupplied = getattr(makeOTFParams, kFileOptPrefix + kUseSuppliedCFF,
+                          False)
 
     for k in kTXOptions.keys():
         v = getattr(makeOTFParams, kFileOptPrefix + k, None)
         if v is None:
             continue
         optionEntry = kMOTFOptions[k]
-        foundOpt = True
+        if not (useSupplied and k == kDoAlias):
+            foundOpt = True
         if k == kDoSubr:
             params.append('+S')
         elif k == kSuppressWidthOptimization:
@@ -1901,12 +1908,10 @@ def convertFontIfNeeded(makeOTFParams):
         if v != 'true':
             params.append(v)
 
-    useSupplied = getattr(makeOTFParams, kFileOptPrefix + kUseSuppliedCFF,
-                          False)
     if useSupplied:
         if foundOpt:
             print("makeotf [Error] -dr not compatible with -r, -S, " +
-                  "-maxs, -ga, -gs, or -swo")
+                  "-maxs, -gs, or -swo")
             raise MakeOTFRunError
         return
 
