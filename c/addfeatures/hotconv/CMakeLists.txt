@@ -56,6 +56,8 @@ add_library(hotconv OBJECT
     STAT.cpp
     STAT.h
     uniblock.h
+    varmetrics.h
+    varmetrics.cpp
     vmtx.cpp
     vmtx.h
     winansi.h
