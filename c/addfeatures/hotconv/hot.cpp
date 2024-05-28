@@ -29,6 +29,7 @@
 #include "GDEF.h"
 #include "OS_2.h"
 #include "dictops.h"
+#include "varmetrics.h"
 
 /* Windows-specific macros */
 #define FAMILY_UNSET 255 /* Flags unset Windows Family field */
