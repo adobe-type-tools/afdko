@@ -10,6 +10,8 @@
 
 #include <cassert>
 
+#include "varmetrics.h"
+
 void vmtxNew(hotCtx g) {
 }
 
