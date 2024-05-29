@@ -1540,7 +1540,7 @@ def checkROS(makeOTFParams):
     # and we can only assume that the current directory is the starting
     # point for all relative paths.
     Reg, Ord, Sup = getROS(inputFontPath)
-    if Reg:
+    if Reg and not (Reg == 'Adobe' and Ord == 'Identity'):
         makeOTFParams.ROS = (Reg, Ord, Sup)
         featPath = getattr(makeOTFParams, kFileOptPrefix + kFeature)
         foundVert = checkIfVertInFeature(featPath)
