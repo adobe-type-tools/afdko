@@ -223,19 +223,17 @@ struct AddlUV_ { /* Additional UV */
 
 struct hotGlyphInfo { /* Glyph information */
     /* --- Same as cffGlyphInfo: */
-    unsigned short id; /* SID/CID */
-    uint32_t code;        /* Encoding */
-    FWord hAdv;              /* (default) Horizontal advance width */
-    VarValueRecord vAdv;     /* Vertical advance width */
-    VarValueRecord vOrigY;   /* Y coordinate of the glyph's vertical origin */
-    uint16_t vsindex;        /* For CFF2 the vsindex of the glyph */
-    BBox bbox;      /* Bounding box */
+    unsigned short id {0};  /* SID/CID */
+    uint32_t code {0};      /* Encoding */
+    FWord hAdv {0};         /* hAdv (of default, if variable) */
+    VarValueRecord vAdv;    /* Vertical advance width */
+    VarValueRecord vOrigY;  /* Y coordinate of the glyph's vertical origin */
     std::vector<uint32_t> sup;   /* Supplementary encodings */
 
     /* --- Additional fields: */
     std::string gname;
     std::string srcName; /* Actual pointer to development glyph name */
-    short flags;
+    short flags {0};
 #define GNAME_UNI (1 << 0)            /* Has uni<CODE> or u<CODE> name e.g. "u102345" */
 #define GNAME_UNREC (1 << 1)          /* Unrecognized name e.g. "A.swash" */
 #define GNAME_UNREC_HAS_SUPP (1 << 2) /* Name contains a base supp UV e.g. "u102345.alt" */
@@ -243,7 +241,7 @@ struct hotGlyphInfo { /* Glyph information */
 #define GNAME_UNENC (1 << 4)          /* Unenc (uni<CODE> override or EUS overflow) */
 #define GNAME_UNI_OVERRIDE (1 << 5)   /* Has user supplied (uni<CODE> */
 
-    UV uv;          /* Primary UV */
+    UV uv {0};       /* Primary UV */
     std::vector<UV> addlUV; /* Additional UVs */
 };
 
@@ -359,7 +357,7 @@ class var_vmtx;
 class var_axes;
 class var_MVAR;
 class VarLocationMap;
-class VarMetrics;
+class GlyphMetrics;
 
 #define ID_TEXT_SIZE 1024 /* Size of text buffer used to hold identifying info about the current feature for error messages. */
 
@@ -415,7 +413,7 @@ struct hotCtx_ {
         var_axes *axes;
         var_MVAR *MVAR;
         VarLocationMap *locMap;
-        VarMetrics *vm;
+        GlyphMetrics *gm;
     } ctx;
     dnaCtx DnaCTX;
     std::string note;
@@ -451,6 +449,7 @@ short hotIn2(hotCtx g);
 int32_t hotIn4(hotCtx g);
 void hotInN(hotCtx g, size_t count, char *ptr);
 
+BBox hotDefaultGlyphBBox(hotCtx g, GID gid);
 void hotCalcSearchParams(unsigned unitSize, long nUnits,
                          unsigned short *searchRange,
                          unsigned short *entrySelector,

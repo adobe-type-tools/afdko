@@ -29,7 +29,7 @@
 #include "GDEF.h"
 #include "OS_2.h"
 #include "dictops.h"
-#include "varmetrics.h"
+#include "glyphmetrics.h"
 
 /* Windows-specific macros */
 #define FAMILY_UNSET 255 /* Flags unset Windows Family field */
@@ -265,50 +265,6 @@ static void setVendId(hotCtx g) {
     g->font.vendId = "UKWN"; /* xxx Is this correct? */
 }
 
-static void hotGlyphEnd(abfGlyphCallbacks *cb) {
-    hotCtx g = (hotCtx)cb->indirect_ctx;
-    abfMetricsCtx h = (abfMetricsCtx)cb->direct_ctx;
-
-    abfGlyphMetricsCallbacks.end(cb);
-
-    uint16_t gid = cb->info->tag;
-    auto &glyph = g->glyphs[gid];
-
-    if (cb->info->gname.ptr != NULL)
-        glyph.gname = cb->info->gname.ptr;
-    if (IS_CID(g))
-        glyph.id = cb->info->cid;
-    else
-        glyph.id = cb->info->gname.impl;  // The SID (when CFF 1)
-
-    glyph.vsindex = cb->info->blendInfo.vsindex;
-    glyph.code = cb->info->encoding.code;
-    abfEncoding *e = cb->info->encoding.next;
-    while (e != NULL) {
-        glyph.sup.push_back(e->code);
-        e = e->next;
-    }
-    glyph.hAdv = (FWord) h->int_mtx.hAdv;
-    glyph.bbox.left = h->int_mtx.left;
-    glyph.bbox.bottom = h->int_mtx.bottom;
-    glyph.bbox.right = h->int_mtx.right;
-    glyph.bbox.top = h->int_mtx.top;
-    if (glyph.bbox.left != 0 || glyph.bbox.right != 0 ||
-        glyph.bbox.bottom != 0 || glyph.bbox.top != 0) {
-        if (g->font.maxAdv.h < glyph.hAdv)
-            g->font.maxAdv.h = glyph.hAdv;
-
-        if (glyph.bbox.left < g->font.minBearing.left)
-            g->font.minBearing.left = glyph.bbox.left;
-
-        if (glyph.hAdv - glyph.bbox.right < g->font.minBearing.right)
-            g->font.minBearing.right = glyph.hAdv - glyph.bbox.right;
-
-        if (glyph.bbox.right > g->font.maxExtent.h)
-            g->font.maxExtent.h = glyph.bbox.right;
-    }
-}
-
 static void hotReadTables(hotCtx g) {
     g->in_stream = g->cb.stm.open(&g->cb.stm, CFR_SRC_STREAM_ID, 0);
 
@@ -407,7 +363,7 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
     g->ctx.cfr = cfrNew(&hot_memcb, &g->cb.stm, CFR_CHECK_ARGS, g->logger);
     cfrSetTablePointers(g->ctx.cfr, g->ctx.axes, g->ctx.hmtx, g->ctx.MVAR, g->ctx.name);
     cfrBegFont(g->ctx.cfr, 0, 0, 0, &top, NULL);
-    g->ctx.vm = new VarMetrics(g->ctx.cfr, *g->ctx.locMap, g->logger);
+    g->ctx.gm = new GlyphMetrics(g->ctx.cfr, *g->ctx.locMap, g->logger);
 
     /* Create and copy font strings */
     if ((top->sup.flags & ABF_CID_FONT) && top->cid.CIDFontName.ptr) {
@@ -434,6 +390,8 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
     g->font.bbox.bottom = top->FontBBox[1];
     g->font.bbox.right = top->FontBBox[2];
     g->font.bbox.top = top->FontBBox[3];
+
+    // Calculated by GlyphMetrics
     g->font.minBearing.left = g->font.minBearing.right = SHRT_MAX;
     g->font.maxAdv.h = g->font.maxAdv.v = 0;
     g->font.maxExtent.h = g->font.maxExtent.v = 0;
@@ -466,13 +424,7 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
 
     g->glyphs.resize(top->sup.nGlyphs);
 
-    abfGlyphCallbacks cb = abfGlyphMetricsCallbacks;
-    struct abfMetricsCtx_ metricsCtx;
-    memset(&metricsCtx, 0, sizeof(metricsCtx));
-    cb.direct_ctx = &metricsCtx;
-    cb.indirect_ctx = g;
-    cb.end = hotGlyphEnd;
-    cfrIterateGlyphs(g->ctx.cfr, &cb);
+    g->ctx.gm->initialProcessingRun(g);
 
     if (g->font.minBearing.left == SHRT_MAX)
         g->font.minBearing.left = 0;
@@ -549,7 +501,8 @@ static UV pfmChar2UV(hotCtx g, int code) {
 
 /* Prepare Windows-specific data. */
 static void prepWinData(hotCtx g) {
-    hotGlyphInfo *gi;
+    GID gid;
+    BBox bbox;
     long i;
     long sum;
     long count;
@@ -592,19 +545,23 @@ static void prepWinData(hotCtx g) {
            cap-height, respectively, since this should give better results for
            italic and swash fonts as well as handling Roman */
         if (!font->win.XHeight.isInitialized()) {
-            gi = mapUV2Glyph(g, UV_PRO_X_HEIGHT_1 /* o */);
-            if (gi == NULL) {
-                gi = mapUV2Glyph(g, UV_PRO_X_HEIGHT_2 /* Osmall */);
+            gid = mapUV2GID(g, UV_PRO_X_HEIGHT_1 /* o */);
+            if (gid == GID_UNDEF) {
+                gid = mapUV2GID(g, UV_PRO_X_HEIGHT_2 /* Osmall */);
             }
+            if (gid != GID_UNDEF)
+                bbox = hotDefaultGlyphBBox(g, gid);
             // XXX update for variable bounding box
             font->win.XHeight.addValue(
-                (gi != NULL) ? gi->bbox.top + gi->bbox.bottom : 0);
+                (gid != GID_UNDEF) ? bbox.top + bbox.bottom : 0);
         }
         if (!font->win.CapHeight.isInitialized()) {
-            gi = mapUV2Glyph(g, UV_PRO_CAP_HEIGHT /* O */);
+            gid = mapUV2GID(g, UV_PRO_CAP_HEIGHT /* O */);
             // XXX update for variable bounding box
+            if (gid != GID_UNDEF)
+                bbox = hotDefaultGlyphBBox(g, gid);
             font->win.CapHeight.addValue(
-                (gi != NULL) ? gi->bbox.top + gi->bbox.bottom : 0);
+                (gid != GID_UNDEF) ? bbox.top + bbox.bottom : 0);
         }
 
         /* Set strikeout size to underline thickness and position it at 60% of
@@ -655,13 +612,15 @@ static void prepWinData(hotCtx g) {
     /* Set typo ascender/descender/linegap */
     if (IS_CID(g)) {
         if (!font->TypoAscender.isInitialized() || !font->TypoDescender.isInitialized()) {
-            hotGlyphInfo *gi = mapUV2Glyph(g, UV_VERT_BOUNDS);
+            gid = mapUV2GID(g, UV_VERT_BOUNDS);
+            if (gid != GID_UNDEF)
+                bbox = hotDefaultGlyphBBox(g, gid);
             if (!font->TypoAscender.isInitialized()) {
                 // XXX fix for bounding box
-                font->TypoAscender.addValue((gi != NULL) ? gi->bbox.top : (short)EM_SCALE(880));
+                font->TypoAscender.addValue((gid != GID_UNDEF) ? bbox.top : (short)EM_SCALE(880));
             }
             if (!font->TypoDescender.isInitialized()) {
-                font->TypoDescender.addValue((gi != NULL) ? gi->bbox.bottom : (short)EM_SCALE(-120));
+                font->TypoDescender.addValue((gid != GID_UNDEF) ? bbox.bottom : (short)EM_SCALE(-120));
             }
         }
     } else {
@@ -669,8 +628,10 @@ static void prepWinData(hotCtx g) {
             /* try to use larger of height of lowercase d ascender, or CapHeight. */
             /* Fall back to font bbox top, but make sure it is not greater than embox height */
 
-            hotGlyphInfo *gi = mapUV2Glyph(g, UV_ASCENT); /* gi for lower-case d */
-            short dHeight = (gi == NULL) ? 0 : gi->bbox.top;
+            gid = mapUV2GID(g, UV_ASCENT); /* gi for lower-case d */
+            if (gid != GID_UNDEF)
+                bbox = hotDefaultGlyphBBox(g, gid);
+            short dHeight = (gid == GID_UNDEF) ? 0 : bbox.top;
 
             // XXX fix for variable
             if (dHeight > font->win.CapHeight.getDefault()) {
@@ -769,11 +730,12 @@ static void setVBounds(hotCtx g) {
         if (glyph.vOrigY.isInitialized())
             vOrigY = (int16_t) glyph.vOrigY.getDefault();
 
-        if (glyph.bbox.left != 0 && glyph.bbox.bottom != 0 &&
-            glyph.bbox.right != 0 && glyph.bbox.top != 0) {
+        auto bbox = hotDefaultGlyphBBox(g, i);
+        if (bbox.left != 0 && bbox.bottom != 0 &&
+            bbox.right != 0 && bbox.top != 0) {
             /* Marking glyph; compute bounds. */
-            FWord tsb = vOrigY - glyph.bbox.top;
-            FWord bsb = glyph.bbox.bottom - (vOrigY + vAdv);
+            FWord tsb = vOrigY - bbox.top;
+            FWord bsb = bbox.bottom - (vOrigY + vAdv);
 
             if (maxAdv.v < -vAdv) {
                 maxAdv.v = -vAdv;
@@ -787,8 +749,8 @@ static void setVBounds(hotCtx g) {
                 minBearing.bottom = bsb;
             }
 
-            if (vOrigY - glyph.bbox.bottom > maxExtent.v) {
-                maxExtent.v = vOrigY - glyph.bbox.bottom;
+            if (vOrigY - bbox.bottom > maxExtent.v) {
+                maxExtent.v = vOrigY - bbox.bottom;
             }
         }
     }
@@ -846,8 +808,8 @@ void hotConvert(hotCtx g) {
 
     g->out_stream = g->cb.stm.open(&g->cb.stm, OTF_DST_STREAM_ID, 0);
     sfntFill(g);
-    delete g->ctx.vm;
-    g->ctx.vm = nullptr;
+    delete g->ctx.gm;
+    g->ctx.gm = nullptr;
     cfrEndFont(g->ctx.cfr);
     cfrFree(g->ctx.cfr);
     sfntWrite(g);
@@ -1373,4 +1335,15 @@ void hotWritePString(hotCtx g, char *string) {
     }
     hout1(g, length);
     g->cb.stm.write(&g->cb.stm, g->out_stream, length, string);
+}
+
+BBox hotDefaultGlyphBBox(hotCtx g, GID gid) {
+    assert(g->ctx.gm != nullptr);
+    BBox bbox;
+    auto gdm = g->ctx.gm->defaultMetrics(gid);
+    bbox.left = gdm.left;
+    bbox.right = gdm.right;
+    bbox.top = gdm.top;
+    bbox.bottom = gdm.bottom;
+    return bbox;
 }
