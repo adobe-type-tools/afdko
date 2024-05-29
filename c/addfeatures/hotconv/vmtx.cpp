@@ -10,7 +10,7 @@
 
 #include <cassert>
 
-#include "varmetrics.h"
+#include "glyphmetrics.h"
 
 void vmtxNew(hotCtx g) {
 }
@@ -25,7 +25,7 @@ int vmtxFill(hotCtx g) {
         return vmtx.Fill();
 
     uint32_t glyphCount = g->glyphs.size();
-    VarValueRecord dfltVAdv = g->ctx.vm->subVVR(g->font.TypoAscender, g->font.TypoDescender);
+    VarValueRecord dfltVAdv = g->ctx.gm->subVVR(g->font.TypoAscender, g->font.TypoDescender);
     VarValueRecord dfltVOrigY = g->font.TypoAscender;
 
     vmtx.advanceVWidth.reserve(glyphCount);
@@ -41,10 +41,7 @@ int vmtxFill(hotCtx g) {
             vmtx.nextVAdv(dfltVAdv, *g->ctx.locMap, g->logger);
         VarValueRecord cv;
         auto &VO = gl.vOrigY.isInitialized() ? gl.vOrigY : dfltVOrigY;
-        if (g->ctx.axes != nullptr)
-            cv = g->ctx.vm->subTop(VO, gid, g->glyphs[gid].vsindex);
-        else
-            cv.addValue(VO.getDefault() - gl.bbox.top);
+        cv = g->ctx.gm->subTop(VO, gid);
         vmtx.nextTsb(cv, *g->ctx.locMap, g->logger);
         gid++;
     }

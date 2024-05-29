@@ -2221,10 +2221,11 @@ static void AFMPrintCharMetrics(hotCtx g) {
         printf("StartCharMetrics %ld\n", h->sort.gname.cnt);
         for (i = 0; i < h->sort.gname.cnt; i++) {
             hotGlyphInfo *gi = h->sort.gname.array[i];
+            auto bbox = hotDefaultGlyphBBox(g, GET_GID(gi));
             printf("C %d ; W0X %hd ; N %hu ; B %hd %hd %hd %hd ;\n",
                    gi->code, gi->hAdv, gi->id,
-                   gi->bbox.left, gi->bbox.bottom,
-                   gi->bbox.right, gi->bbox.top);
+                   bbox.left, bbox.bottom,
+                   bbox.right, bbox.top);
         }
         printf("EndCharMetrics\n");
     } else {
@@ -2259,9 +2260,10 @@ static void AFMPrintCharMetrics(hotCtx g) {
             } else {
                 printf("N %s ; ", gi->gname.c_str());
             }
+            auto bbox = hotDefaultGlyphBBox(g, GET_GID(gi));
             printf("B %hd %hd %hd %hd ;",
-                   gi->bbox.left, gi->bbox.bottom,
-                   gi->bbox.right, gi->bbox.top);
+                   bbox.left, bbox.bottom,
+                   bbox.right, bbox.top);
             if (g->font.Encoding == FI_STD_ENC &&
                 strcmp(gi->gname.c_str(), "f") == 0) {
                 if (mapName2Glyph(g, "fi", NULL) != NULL) {

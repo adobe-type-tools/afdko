@@ -23,6 +23,8 @@ add_library(hotconv OBJECT
     ${GENERATED_SOURCES}
     FeatVisitor.cpp
     FeatVisitor.h
+    glyphmetrics.h
+    glyphmetrics.cpp
     GDEF.cpp
     GDEF.h
     GPOS.cpp
@@ -56,8 +58,6 @@ add_library(hotconv OBJECT
     STAT.cpp
     STAT.h
     uniblock.h
-    varmetrics.h
-    varmetrics.cpp
     vmtx.cpp
     vmtx.h
     winansi.h
