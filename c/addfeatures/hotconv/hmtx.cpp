@@ -35,9 +35,13 @@ int hmtxFill(hotCtx g) {
     hmtx.advanceWidth.reserve(glyphCount);
     hmtx.lsb.reserve(glyphCount);
 
-    for (auto &gl : g->glyphs) {
+    BBox bbox;
+    for (size_t i = 0; i < g->glyphs.size(); i++) {
+        auto &gl = g->glyphs[i];
         hmtx.advanceWidth.push_back(gl.hAdv);
-        hmtx.lsb.push_back(gl.bbox.left);
+        // This should only execute for non-variable fonts
+        bbox = hotDefaultGlyphBBox(g, i);
+        hmtx.lsb.push_back(bbox.left);
     }
 
     /* Optimize metrics */
