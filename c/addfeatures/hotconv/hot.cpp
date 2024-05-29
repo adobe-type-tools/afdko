@@ -409,7 +409,9 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
         if (top->cid.Ordering.ptr)
             g->font.cid.ordering = top->cid.Ordering.ptr;
         g->font.cid.supplement = top->cid.Supplement;
-        g->font.flags |= FI_CID;
+        if (!(g->font.cid.registry == "Adobe" &&
+              g->font.cid.ordering == "Identity"))
+            g->font.flags |= FI_CID;
     }
 
     g->font.unitsPerEm = top->sup.UnitsPerEm;

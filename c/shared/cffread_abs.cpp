@@ -1273,7 +1273,9 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                         top->cid.Registry.ptr = sid2str(h, (SID)INDEX_INT(0));
                         top->cid.Ordering.ptr = sid2str(h, (SID)INDEX_INT(1));
                         top->cid.Supplement = INDEX_INT(2);
-                        h->flags |= CID_FONT;
+                        if (!(strcmp(top->cid.Registry.ptr, "Adobe") == 0 &&
+                              strcmp(top->cid.Ordering.ptr, "Identity") == 0))
+                            h->flags |= CID_FONT;
                         break;
                     case cff_CIDFontVersion:
                         CHKUFLOW(1);
@@ -1304,7 +1306,6 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                     case cff_FDSelect:
                         CHKUFLOW(1);
                         h->region.FDSelect.begin = h->src.origin + INDEX_INT(0);
-                        h->flags |= CID_FONT;
                         break;
                     case cff_FontName:
                         CHKUFLOW(1);
