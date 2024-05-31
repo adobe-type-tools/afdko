@@ -1,4 +1,4 @@
-## Filename tx_data/input/cidfont-noPSname.ps
+## Filename /home/skef/src/afdko4/tests/tx_data/input/cidfont-noPSname.ps
 ## Top Dict
 Notice              "Copyright 2014-2018 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'. Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries."
 FullName            "Source Han Sans AJ16 Regular"
@@ -12,7 +12,7 @@ cid.Ordering        "Japan1"
 cid.Supplement      0
 cid.CIDFontVersion  1.000
 cid.CIDCount        1144
-sup.flags           0x00000001 (ABF_CID_FONT)
+sup.flags           0x00000001 (ABF_ROS_FONT)
 sup.srcFontType     Type 1 (cid-keyed)
 sup.nGlyphs         4
 ## FontDict[0]

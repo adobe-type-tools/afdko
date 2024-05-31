@@ -261,7 +261,7 @@ struct FontInfo_ { /* Font information */
     unsigned short flags;
 #define FI_MISC_FLAGS_MASK 0x01ff /* Flags from client via hotAddMiscData()*/
 #define FI_FIXED_PITCH (1 << 13)  /* Fixed pitch font */
-#define FI_CID (1 << 15)          /* CID font */
+#define FI_ROS (1 << 15)          /* ROS font */
     std::string FontName;
     std::string Notice;
     std::string FamilyName;
@@ -321,7 +321,7 @@ struct FontInfo_ { /* Font information */
         dnaDCL(short, values); /* [nPairs] */
     } kern;
     dnaDCL(CharName, unenc);       /* Unencoded chars */
-    struct { /* --- CID-specific data */
+    struct { /* --- ROS-specific data */
         std::string registry;
         std::string ordering;
         unsigned short supplement;
@@ -332,7 +332,7 @@ struct FontInfo_ { /* Font information */
 /* The Mac pollutes my namespace with FontInfo already, hence the underscore */
 
 /* Convenience macros */
-#define IS_CID(g) ((g)->font.flags & FI_CID)
+#define IS_ROS(g) ((g)->font.flags & FI_ROS)
 
 /* -------------------------------- Contexts ------------------------------- */
 typedef struct mapCtx_ *mapCtx;

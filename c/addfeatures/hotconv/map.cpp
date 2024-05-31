@@ -245,7 +245,7 @@ typedef struct {
 /* --------------------------- Context Definition -------------------------- */
 
 struct mapCtx_ {
-    /* ---- CID ---- flagged by IS_CID(g) */
+    /* ---- CID ---- flagged by IS_ROS(g) */
     struct {
         psCtx ctx;      /* PostScript parser context */
         psBuf buf;      /* PostScript input buffer */
@@ -369,7 +369,7 @@ hotGlyphInfo *mapCID2Glyph(hotCtx g, CID cid) {
     mapCtx h = g->ctx.map;
     hotGlyphInfo **found;
 
-    if (!IS_CID(g)) {
+    if (!IS_ROS(g)) {
         g->logger->log(sFATAL, "Not a CID font");
     }
     found =
@@ -428,7 +428,7 @@ hotGlyphInfo *mapName2Glyph(hotCtx g, const char *gname, const char **useAliasDB
     const char *realName = gname;
     hotGlyphInfo **found;
 
-    if (IS_CID(g) && useAliasDB == NULL) {
+    if (IS_ROS(g) && useAliasDB == NULL) {
         g->logger->log(sFATAL, "Not a non-CID font");
     }
 
@@ -440,7 +440,7 @@ hotGlyphInfo *mapName2Glyph(hotCtx g, const char *gname, const char **useAliasDB
             realName = *useAliasDB;
     }
 
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         CID cid = 0;
         sscanf(realName, "cid%hd", &cid);
         if (cid == 0)
@@ -480,7 +480,7 @@ GID mapName2GID(hotCtx g, const char *gname, const char **useAliasDB) {
 static int mapName2UVOverrideName(hotCtx g, const char *gname,
                                   const char **uvOverrideName) {
     const char *uvName = NULL;
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         g->logger->log(sFATAL, "Not a non-CID font");
     }
 
@@ -574,7 +574,7 @@ GID mapWinANSI2GID(hotCtx g, int code) {
 hotGlyphInfo *mapPlatEnc2Glyph(hotCtx g, int code) {
     mapCtx h = g->ctx.map;
 
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         g->logger->log(sFATAL, "Not a non-CID font");
     }
     return h->sort.platEnc[code];
@@ -1263,7 +1263,7 @@ void mapAddUVS(hotCtx g, const char *uvsName) {
     long lineLen = 0;
     UVSEntry *uvsEntry = NULL;
     mapCtx h = g->ctx.map;
-    int isCID = IS_CID(g);
+    int isROS = IS_ROS(g);
 
     dnaSET_CNT(h->uvs.entries, 0);
     g->cb.uvsOpen(g->cb.ctx, uvsName); /*jumps to fatal error if not opened successfully */
@@ -1327,7 +1327,7 @@ void mapAddUVS(hotCtx g, const char *uvsName) {
         glyphTag = p2 = p;
         p = gnameScan(g, glyphTag);
         if (p == NULL || !isspace(*p)) {
-            if (isCID) {
+            if (isROS) {
                 gnameError(g, "For CID fonts, UVS file line must contain 'UV IVS; R-O-S; CID+<cid number>'.", buf, "", lineno);
                 continue;
             } else {
@@ -2144,7 +2144,7 @@ static void makeUVScmap(hotCtx g) {
             uvsFlags |= UVS_IS_SUPPLEMENT;
         }
 
-        if (IS_CID(g)) {
+        if (IS_ROS(g)) {
             gi_id = mapCID2Glyph(g, uve->cid);
             if (gi_id == NULL) {
                 g->logger->log(sWARNING, "Skipping UVS entry for CID '%d': not found in source font.", uve->cid);
@@ -2215,7 +2215,7 @@ static void AFMPrintCharMetrics(hotCtx g) {
     mapCtx h = g->ctx.map;
     long i;
 
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         /* Print CID glyphs in CID order */
 
         printf("StartCharMetrics %ld\n", h->sort.gname.cnt);
@@ -2255,7 +2255,7 @@ static void AFMPrintCharMetrics(hotCtx g) {
             hotGlyphInfo *gi = afmchar->gi;
 
             printf("C %d ; WX %hd ; ", afmchar->code, gi->hAdv);
-            if (IS_CID(g)) {
+            if (IS_ROS(g)) {
                 printf("N %hu ; ", gi->id);
             } else {
                 printf("N %s ; ", gi->gname.c_str());
@@ -2301,7 +2301,7 @@ static void AFMPrintKernData(hotCtx g) {
 
     if (nPairs == 0) {
         return;
-    } else if (IS_CID(g)) {
+    } else if (IS_ROS(g)) {
         g->logger->log(sWARNING, "can't print AFM KernData for CID");
         return;
     }
@@ -2355,7 +2355,7 @@ void mapPrintAFM(hotCtx g) {
     printf("FontBBox %hd %hd %hd %hd\n",
            g->font.bbox.left, g->font.bbox.bottom,
            g->font.bbox.right, g->font.bbox.top);
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         printf("CharacterSet %s-%s-%hu\n", g->font.cid.registry.c_str(),
                g->font.cid.ordering.c_str(), g->font.cid.supplement);
     }
@@ -2396,7 +2396,7 @@ static void dbgPrintInfo(hotCtx g) {
     uint32_t nGlyphs = g->glyphs.size();
 #define SUBSET_MAX 1000 /* Heuristic for printing */
 
-    if (!IS_CID(g)) {
+    if (!IS_ROS(g)) {
         fprintf(stderr, "dfCharSet     = %02x (%d)\n", g->font.win.CharSet,
                 g->font.win.CharSet);
     }
@@ -2415,7 +2415,7 @@ static void dbgPrintInfo(hotCtx g) {
 
     /* dbgUniBlock(g); */
 
-    if (IS_CID(h->g)) {
+    if (IS_ROS(h->g)) {
         fprintf(stderr,
                 "------------------------------\n"
                 "gid        cid        uv   ... %s"
@@ -2518,7 +2518,7 @@ static void CTL_CDECL dbgUse(int arg, ...) {
 int mapFill(hotCtx g) {
     mapCtx h = g->ctx.map;
 
-    if (IS_CID(g) && h->cid.hor.name == SINX_UNDEF) {
+    if (IS_ROS(g) && h->cid.hor.name == SINX_UNDEF) {
         g->logger->log(sFATAL, "H Unicode CMap not seen");
     }
 
@@ -2526,7 +2526,7 @@ int mapFill(hotCtx g) {
     makeUnicodecmaps(g);
 
     setOS_2Fields(g);
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         makeCIDMaccmap(g); /* will make a Mac cmap with only a not def, if Macintosh Adobe CMap is not provided.*/
         if (h->cid.mac.name == SINX_UNDEF) {
             g->logger->log(sWARNING, "Macintosh Adobe CMap not seen");
@@ -2559,7 +2559,7 @@ static void initGlyphs(hotCtx g) {
 
     dnaSET_CNT(h->sort.gname, nGlyphs); /* Includes .notdef/CID 0 */
 
-    if (!IS_CID(g)) {
+    if (!IS_ROS(g)) {
         for (i = 0; i < 256; i++) {
             h->sort.platEnc[i] = NULL;
         }
@@ -2572,7 +2572,7 @@ static void initGlyphs(hotCtx g) {
         gi->uv = UV_UNDEF;
         h->sort.gname.array[i] = gi; /* Init sort ptrs to array elements */
 
-        if (!IS_CID(g)) {
+        if (!IS_ROS(g)) {
             if (gi->code != ABF_GLYPH_UNENC) {
                 h->sort.platEnc[gi->code] = gi; /* PS encoding */
                 for (auto code : gi->sup) {
@@ -2582,7 +2582,7 @@ static void initGlyphs(hotCtx g) {
         }
     }
 
-    if (!IS_CID(g)) {
+    if (!IS_ROS(g)) {
         /* Store gnames as char * instead of SInx */
         for (i = 0; i < nGlyphs; i++) {
             const char *srcName;
@@ -2596,11 +2596,11 @@ static void initGlyphs(hotCtx g) {
 
     /* Sort by glyph name/CID */
     qsort(h->sort.gname.array, h->sort.gname.cnt, sizeof(hotGlyphInfo *),
-          IS_CID(g) ? cmpCID : cmpGlyphName);
+          IS_ROS(g) ? cmpCID : cmpGlyphName);
 
     /* Make custom cmap, if applicable */
     /*
-    if (!IS_CID(g) && g->font.Encoding != FI_STD_ENC)
+    if (!IS_ROS(g) && g->font.Encoding != FI_STD_ENC)
         makeCustomcmap(g);
     */
 }
@@ -2608,7 +2608,7 @@ static void initGlyphs(hotCtx g) {
 /* Initialize both CID and non-CID fonts */
 static void mapInit(hotCtx g) {
     initGlyphs(g);
-    if (!IS_CID(g)) {
+    if (!IS_ROS(g)) {
         assignUVs(g);
         setCodePages(g);
     }
@@ -2626,7 +2626,7 @@ void mapApplyReencoding(hotCtx g, hotEncoding *comEncoding,
     hotEncoding *reenc = NULL;
     int i;
 
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         return;
     }
 
@@ -2667,7 +2667,7 @@ void mapReuse(hotCtx g) {
         unicodeBlock[i].numFound = unicodeBlock[i].isSupported = 0;
     }
 
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         h->ps.buf.cnt = 0;
         h->cid.hor.range.cnt = 0;
         h->cid.ver.map.cnt = 0;
@@ -2702,7 +2702,7 @@ void mapFree(hotCtx g) {
     mapCtx h = g->ctx.map;
 
     /* Free da's, context */
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         dnaFREE(h->ps.buf);
         dnaFREE(h->cid.hor.range);
         dnaFREE(h->cid.ver.map);

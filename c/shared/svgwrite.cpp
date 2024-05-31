@@ -429,7 +429,7 @@ int svwEndFont(svwCtx h, abfTopDict *top) {
     }
 
     writeStr(h, "<font-face font-family=\"");
-    if (h->top->sup.flags & ABF_CID_FONT) {
+    if (h->top->sup.flags & ABF_ROS_FONT) {
         if (h->top->cid.CIDFontName.ptr == NULL) {
             fatal(h, svwErrFontName);
         } else {

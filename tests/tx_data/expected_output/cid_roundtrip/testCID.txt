@@ -1,4 +1,4 @@
-## Filename /Users/scheuren/code/gitsource/adobe/afdko/tests/tx_data/input/cid_roundtrip/testCID.ufo
+## Filename /home/skef/src/afdko4/tests/tx_data/input/cid_roundtrip/testCID.ufo
 ## Top Dict
 version             "2.3"
 Notice              "Copyright 2014-2020 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'. Source is a trademark of Adobe in the United States and/or other countries."
@@ -13,7 +13,7 @@ cid.Ordering        "Identity"
 cid.Supplement      0
 cid.CIDFontVersion  2.003
 cid.CIDCount        34468
-sup.flags           0x00000001 (ABF_CID_FONT)
+sup.flags           0x00000001 (ABF_ROS_FONT)
 sup.srcFontType     UFO (cid-keyed)
 sup.nGlyphs         135
 ## FontDict[0]

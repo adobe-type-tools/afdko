@@ -1,4 +1,4 @@
-## Filename fdselect4.otf
+## Filename /home/skef/src/afdko4/tests/tx_data/input/fdselect4.otf
 ## Top Dict
 version             "1.0"
 FullName            "SourceSans"
@@ -6,12 +6,7 @@ FamilyName          "SourceSans"
 UnderlinePosition   -150
 FontBBox            {37,-120,971,880}
 FSType              4
-cid.CIDFontName     "SourceSans-Test"
-cid.Registry        "Adobe"
-cid.Ordering        "Identity"
-cid.Supplement      1
-sup.flags           0x00000001 (ABF_CID_FONT)
-sup.srcFontType     CFF (cid-keyed)
+sup.srcFontType     CFF (name-keyed)
 sup.nGlyphs         5
 ## FontDict[0]
 FontName            "SourceSans-Test"
@@ -36,9 +31,9 @@ StdHW               69
 StdVW               85
 StemSnapH           {69,79,88}
 StemSnapV           {85,95,111}
-## glyph[tag] {cid,iFD}
-glyph[0] {0,0}
-glyph[1] {1,2}
-glyph[2] {2,1}
-glyph[3] {3,1}
-glyph[4] {4,2}
+## glyph[tag] {name,encoding}
+glyph[0] {.notdef,-}
+glyph[1] {gid00001,U+0000}
+glyph[2] {gid00002,U+4E9C}
+glyph[3] {gid00003,U+9BF5}
+glyph[4] {gid00004,-}

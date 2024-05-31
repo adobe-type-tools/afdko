@@ -525,7 +525,7 @@ void cfwAddGlyph(cfwCtx g,
     SeenGlyph *seenGlyph = NULL;
     long index = 0;
 
-    if (info->flags & ABF_CID_FONT) {
+    if (info->flags & ABF_GLYPH_CID) {
         /* CID-keyed font */
         if (info->cid == 0) {
             /* Force CID 0 to GID 0 */
@@ -1683,16 +1683,23 @@ static void orderNameKeyedGlyphs(controlCtx h) {
         }
     }
     cfwCharsetBeg(g, 0);
+    if (h->_new->FDArray.cnt > 1)
+        cfwFdselectBeg(g);
     if (!predef) {
         cfwEncodingBeg(g);
     }
 
+    if (h->_new->FDArray.cnt > 1 && has_notdef)
+        cfwFdselectAddIndex(g, glyphs[0].iFD);
     for (i = 1; i < nGlyphs; i++) {
         abfGlyphInfo *info = glyphs[i].info;
         abfString *gname = &info->gname;
 
         /* Add glyph to charset */
         cfwCharsetAddGlyph(g, (uint16_t)gname->impl);
+        if (h->_new->FDArray.cnt > 1)
+            cfwFdselectAddIndex(g, info->iFD);
+
 
         if (!predef) {
             abfEncoding *enc = &info->encoding;
@@ -1708,10 +1715,14 @@ static void orderNameKeyedGlyphs(controlCtx h) {
     }
 
     h->_new->iObject.charset = cfwCharsetEnd(g);
+    if (h->_new->FDArray.cnt > 1)
+        h->_new->iObject.FDSelect = cfwFdselectEnd(g);
+    else
+        h->_new->iObject.FDSelect = 0;
+
     if (!predef) {
         h->_new->iObject.Encoding = cfwEncodingEnd(g);
     }
-    h->_new->iObject.FDSelect = 0;
 }
 
 /* Assign the default and nominal widths (see comment at head of file). */
@@ -1890,7 +1901,7 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
 
     /* Set font-wide flags */
     h->_new->flags = 0;
-    if (top->sup.flags & ABF_CID_FONT) {
+    if (top->sup.flags & ABF_ROS_FONT) {
         /* Validate CID data */
         if (cfwSindexInvalidString(top->cid.Registry.ptr) ||
             cfwSindexInvalidString(top->cid.Ordering.ptr) ||
@@ -1909,9 +1920,6 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
     } else {
         if (h->flags & SEEN_CID_KEYED_GLYPH) {
             return cfwErrGlyphType;
-        }
-        if (top->FDArray.cnt != 1) {
-            return cfwErrBadFDArray;
         }
 
         if (top->sup.flags & ABF_SYN_FONT) {

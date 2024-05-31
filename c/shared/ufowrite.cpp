@@ -722,7 +722,7 @@ static void writeLibPlist(ufwCtx h) {
     writeLine(h, "<plist version=\"1.0\">");
     writeLine(h, "<dict>");
 
-    if (h->top->sup.flags & ABF_CID_FONT) {
+    if (h->top->sup.flags & ABF_ROS_FONT) {
         if (h->top->cid.CIDFontName.ptr != NULL) {
             writeLine(h, "\t<key>com.adobe.type.CIDFontName</key>");
             snprintf(buffer, buflen, "\t<string>%s</string>", h->top->cid.CIDFontName.ptr);
@@ -948,7 +948,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
 
     /* This is what I care about the most. Add the rest in the order of the
      UFO 3 spec. */
-    if (top->sup.flags & ABF_CID_FONT) {
+    if (top->sup.flags & ABF_ROS_FONT) {
         if (top->cid.CIDFontName.ptr != NULL) {
             writeLine(h, "\t<key>postscriptFontName</key>");
             snprintf(buffer, sizeof(buffer),
@@ -979,7 +979,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
         writeLine(h, buffer);
     }
 
-    if (top->sup.flags & ABF_CID_FONT) {
+    if (top->sup.flags & ABF_ROS_FONT) {
         if (top->cid.CIDFontVersion != 0) {
             char versionStr[32];
             snprintf(versionStr, sizeof(versionStr),
@@ -1076,7 +1076,7 @@ static int writeFontInfo(ufwCtx h, abfTopDict *top) {
         writeLine(h, "\t<true/>");
     }
 
-    if (top->sup.flags != ABF_CID_FONT) {
+    if (top->FDArray.cnt == 1) {
         privateDict = &(fontDict0->Private);
         writeBlueValues(h, privateDict);
     }
@@ -1115,7 +1115,7 @@ int ufwEndFont(ufwCtx h, abfTopDict *top) {
 
     writeContents(h);
     writeLibPlist(h);
-    if (h->top->sup.flags & ABF_CID_FONT || top->FDArray.cnt > 1)  // for now, only write if CID font. Revisit in next PR adding multi-fddict support to non-cidkeyed fonts.
+    if (top->FDArray.cnt > 1)  // for now, only write if CID font. Revisit in next PR adding multi-fddict support to non-cidkeyed fonts.
         writeGroups(h, top);
     writeMetaInfo(h);
     h->state = 0; /* Indicates writing to temp stream */

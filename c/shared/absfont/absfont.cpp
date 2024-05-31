@@ -155,7 +155,7 @@ static void checkTopDict(abfErrCallbacks *cb, abfTopDict *top) {
 
     /* Check UniqueID ranges */
     checkUniqueID(cb, top->UniqueID, abfErrBadUniqueID);
-    if (top->sup.flags & ABF_CID_FONT)
+    if (top->sup.flags & ABF_ROS_FONT)
         checkUniqueID(cb, top->cid.UIDBase, abfErrBadUIDBase);
 
     /* Check UnderlinePosition and UnderlineThickness */

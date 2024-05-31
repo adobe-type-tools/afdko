@@ -2985,7 +2985,7 @@ static void prepClientData(t1rCtx h) {
 
     if (h->flags & CID_FONT) {
         /* CID-keyed font */
-        h->top.sup.flags |= ABF_CID_FONT;
+        h->top.sup.flags |= ABF_ROS_FONT;
         h->top.sup.srcFontType = abfSrcFontTypeType1CID;
 
         /* We pre-multiplied the FontMatrix's in the FDArray with the one in
@@ -3334,7 +3334,7 @@ int t1rResetGlyphs(t1rCtx h) {
     for (i = 0; i < h->chars.index.cnt; i++)
         h->chars.index.array[i].flags &= ~ABF_GLYPH_SEEN;
 
-    if (h->top.sup.flags & ABF_CID_FONT) {
+    if (h->top.sup.flags & ABF_ROS_FONT) {
         /* If the font is a Type1 CID font, the charstrings must be read
          when building a subset, in order to get the FD index. When a CID
          charstring is read, it is decrypted in place in the src buffer.

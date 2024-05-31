@@ -342,7 +342,7 @@ static void hotReadTables(hotCtx g) {
 }
 
 /* Convert PostScript font to CFF and read result */
-const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
+const char *hotReadFont(hotCtx g, int flags, bool &isROS) {
     abfTopDict *top;
 
     hotReadTables(g);
@@ -366,7 +366,7 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
     g->ctx.gm = new GlyphMetrics(g->ctx.cfr, *g->ctx.locMap, g->logger);
 
     /* Create and copy font strings */
-    if ((top->sup.flags & ABF_CID_FONT) && top->cid.CIDFontName.ptr) {
+    if ((top->sup.flags & ABF_ROS_FONT) && top->cid.CIDFontName.ptr) {
         g->font.FontName = top->cid.CIDFontName.ptr;
     } else if (top->FDArray.cnt > 0 && top->FDArray.array[0].FontName.ptr) {
         // XXX what about CID?
@@ -402,16 +402,14 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
     g->font.UnderlinePosition = top->UnderlinePosition;
     g->font.UnderlineThickness = top->UnderlineThickness;
 
-    if (top->sup.flags & ABF_CID_FONT) {
+    if (top->sup.flags & ABF_ROS_FONT) {
         /* Copy CIDFont data */
         if (top->cid.Registry.ptr)
             g->font.cid.registry = top->cid.Registry.ptr;
         if (top->cid.Ordering.ptr)
             g->font.cid.ordering = top->cid.Ordering.ptr;
         g->font.cid.supplement = top->cid.Supplement;
-        if (!(g->font.cid.registry == "Adobe" &&
-              g->font.cid.ordering == "Identity"))
-            g->font.flags |= FI_CID;
+        g->font.flags |= FI_ROS;
     }
 
     g->font.unitsPerEm = top->sup.UnitsPerEm;
@@ -435,7 +433,7 @@ const char *hotReadFont(hotCtx g, int flags, bool &isCID) {
 
     setVendId(g);
 
-    isCID = IS_CID(g);
+    isROS = IS_ROS(g);
 
     return g->font.FontName.c_str();
 }
@@ -490,7 +488,7 @@ void hotAddVertAdvanceY(hotCtx g, GID gid, VarValueRecord &vvr) {
 
 /* Check if encoded on platform; else use WinANSI */
 static UV pfmChar2UV(hotCtx g, int code) {
-    hotGlyphInfo *gi = (IS_CID(g)) ? NULL : mapPlatEnc2Glyph(g, code);
+    hotGlyphInfo *gi = (IS_ROS(g)) ? NULL : mapPlatEnc2Glyph(g, code);
 
     if (gi != NULL && gi->uv != UV_UNDEF) {
         return gi->uv;
@@ -612,7 +610,7 @@ static void prepWinData(hotCtx g) {
     }
 
     /* Set typo ascender/descender/linegap */
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         if (!font->TypoAscender.isInitialized() || !font->TypoDescender.isInitialized()) {
             gid = mapUV2GID(g, UV_VERT_BOUNDS);
             if (gid != GID_UNDEF)
@@ -665,7 +663,7 @@ static void prepWinData(hotCtx g) {
     }
 
     if (!font->TypoLineGap.isInitialized()) {
-        font->TypoLineGap.addValue(IS_CID(g)
+        font->TypoLineGap.addValue(IS_ROS(g)
                                    ? font->TypoAscender.getDefault() - font->TypoDescender.getDefault()
                                    : EM_SCALE(1200) - font->TypoAscender.getDefault() + font->TypoDescender.getDefault());
     }
