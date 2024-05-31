@@ -88,7 +88,7 @@ static void pageBeg(abfDrawCtx h, abfGlyphInfo *info) {
     float y;
     const char *fontname;
 
-    if (h->top->sup.flags & ABF_CID_FONT)
+    if (h->top->sup.flags & ABF_ROS_FONT)
         fontname = h->top->cid.CIDFontName.ptr;
     else
         fontname = h->top->FDArray.array[0].FontName.ptr;
@@ -148,7 +148,7 @@ static void pageBeg(abfDrawCtx h, abfGlyphInfo *info) {
         fprintf(h->fp,
                 "/%s findfont %g scalefont setfont\n",
                 TILE_TEXT_FONT, TILE_TEXT_SIZE);
-        if (info->flags & ABF_CID_FONT)
+        if (info->flags & ABF_ROS_FONT)
             drawTile(h, (TILE_COLS - 3) * TILE_SIZE, PAGE_TOP,
                      "tag,fd", "hAdv", "cid");
         else

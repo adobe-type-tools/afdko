@@ -110,7 +110,7 @@ typedef struct {  // post table
 
 struct cfrCtx_ {  // Context
     long flags;                    /* Status flags */
-#define CID_FONT       (1UL << 31) /* CID Font */
+#define ROS_FONT       (1UL << 31) /* CID-keyed Font */
 #define FREE_ENCODINGS (1UL << 30) /* Return encoding nodes to free list */
 #define CFR_SEEN_BLEND   (1 << 29)
 #define CFR_IS_CFF2      (1 << 28)
@@ -621,7 +621,7 @@ static void saveMatrix(cfrCtx h, int topdict) {
     array[4] = INDEX_REAL(4);
     array[5] = INDEX_REAL(5);
 
-    if (topdict && h->flags & CID_FONT) {
+    if (topdict && h->flags & ROS_FONT) {
         /* Top-level CIDFont matrix */
         if (array[0] != 1.0 ||
             array[1] != 0.0 ||
@@ -1273,9 +1273,7 @@ static void readDICT(cfrCtx h, ctlRegion *region, int topdict) {
                         top->cid.Registry.ptr = sid2str(h, (SID)INDEX_INT(0));
                         top->cid.Ordering.ptr = sid2str(h, (SID)INDEX_INT(1));
                         top->cid.Supplement = INDEX_INT(2);
-                        if (!(strcmp(top->cid.Registry.ptr, "Adobe") == 0 &&
-                              strcmp(top->cid.Ordering.ptr, "Identity") == 0))
-                            h->flags |= CID_FONT;
+                        h->flags |= ROS_FONT;
                         break;
                     case cff_CIDFontVersion:
                         CHKUFLOW(1);
@@ -1825,7 +1823,7 @@ static void addID(cfrCtx h, long gid, unsigned short id) {
     if (gid >= h->glyphs.cnt)
         fatal(h, cfrErrNoGlyph);
     info = &h->glyphs.array[gid];
-    if (h->flags & CID_FONT)
+    if (h->flags & ROS_FONT)
         /* Save CID */
         info->cid = id;
     else {
@@ -1940,7 +1938,7 @@ static void postRead(cfrCtx h) {
     h->post.minMemType1 = read4(h);
     h->post.maxMemType1 = read4(h);
 
-    if (h->flags & CID_FONT)
+    if (h->flags & ROS_FONT)
         return; /* Don't read glyph names for CID fonts */
 
     if (h->post.format != 0x00020000) {
@@ -2121,7 +2119,7 @@ static void readCharset(cfrCtx h) {
         postRead(h);
         if (h->cff2.mvar)
             MVARread(h);
-        if (!(h->flags & CID_FONT))
+        if (!(h->flags & ROS_FONT))
             readCharSetFromPost(h);
         else {
             long gid;
@@ -2335,7 +2333,7 @@ static void readFDSelect(cfrCtx h) {
     uint32_t gid;
 
     if (h->region.FDSelect.begin == -1)
-        fatal(h, cfrErrNoFDSelect);
+        return;
 
     srcSeek(h, h->region.FDSelect.begin);
     switch (read1(h)) {
@@ -2579,7 +2577,7 @@ static void makeupCFF2Info(cfrCtx h) {
         addString(h, &strPtrs, &h->fdicts.array[0].FontName, str.c_str());
 
     /* Load CIDFontName from name table and make up CID font ROS */
-    if (h->flags & CID_FONT) {
+    if (h->flags & ROS_FONT) {
         str = h->cff2.name->getASCIIName(nam_name::NAME_ID_CIDFONTNAME, 1);
         if (str.size() == 0)
             str = h->cff2.name->getASCIIName(nam_name::NAME_ID_POSTSCRIPT, 1);
@@ -2778,7 +2776,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
     }
 
     gi_flags = 0;
-    if (h->flags & CID_FONT) {
+    if (h->flags & ROS_FONT) {
         if (!(flags & CFR_SHALLOW_READ))
             readFDArray(h);
         if (h->header.major == 1)
@@ -2786,7 +2784,7 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
         else
             makeupCFF2Info(h);
         h->top.sup.srcFontType = abfSrcFontTypeCFFCID;
-        h->top.sup.flags |= ABF_CID_FONT;
+        h->top.sup.flags |= ABF_ROS_FONT;
         gi_flags |= ABF_GLYPH_CID;
     } else {
         if (h->header.major == 1) {
@@ -2819,9 +2817,8 @@ int cfrBegFont(cfrCtx h, long flags, long origin, int ttcIndex, abfTopDict **top
     /* Fill glyphs array */
     if (!(flags & CFR_SHALLOW_READ)) {
         readCharset(h);
-        if (h->flags & CID_FONT) {
-            readFDSelect(h);
-
+        readFDSelect(h);
+        if (h->flags & ROS_FONT) {
             /* Mark LanguageGroup 1 glyphs */
             for (i = 0; i < h->glyphs.cnt; i++) {
                 abfGlyphInfo *info = &h->glyphs.array[i];
@@ -2960,7 +2957,7 @@ static int CTL_CDECL matchName(const void *key, const void *value, void *ctx) {
 int cfrGetGlyphByName(cfrCtx h, const char *gname, abfGlyphCallbacks *glyph_cb) {
     size_t index;
 
-    if (h->flags & CID_FONT)
+    if (h->flags & ROS_FONT)
         return cfrErrNoGlyph;
 
     if (h->glyphsByName.cnt == 0) {
@@ -3020,7 +3017,7 @@ int cfrGetGlyphByCID(cfrCtx h, unsigned short cid, abfGlyphCallbacks *glyph_cb) 
     volatile unsigned short gid; /* volatile suppresses optimizer warning */
     size_t index;
 
-    if (!(h->flags & CID_FONT))
+    if (!(h->flags & ROS_FONT))
         return cfrErrNoGlyph;
 
     if (h->glyphs.array[h->glyphs.cnt - 1].cid == h->glyphs.cnt - 1) {

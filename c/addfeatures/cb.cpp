@@ -670,7 +670,7 @@ void cbConvert(cbCtx h, int flags, const char *clientVers, const char *infile,
     char outpath[FILENAME_MAX + 1];
     int freeFeatName = 0;
     unsigned long hotConvertFlags = 0;
-    bool isCID;
+    bool isROS;
 
     if (otherflags & OTHERFLAGS_DO_ID2_GSUB_CHAIN_CONXT) {
         hotConvertFlags |= HOT_ID2_CHAIN_CONTXT3;
@@ -727,7 +727,7 @@ void cbConvert(cbCtx h, int flags, const char *clientVers, const char *infile,
 
     /* Read in font file */
     sFileOpen(&h->in.file, inpath, "rb");
-    FontName = hotReadFont(h->hot.ctx, flags, isCID);
+    FontName = hotReadFont(h->hot.ctx, flags, isROS);
 
     if (uvsFile != NULL) {
         hotAddUVSMap(h->hot.ctx, uvsFile);
@@ -736,7 +736,7 @@ void cbConvert(cbCtx h, int flags, const char *clientVers, const char *infile,
     /* Determine dir that feature file's in */
     h->feat.mainFile = featurefile;
 
-    if (isCID) {
+    if (isROS) {
         if (hcmapfile == NULL) {
             cbFatal(h, "no CMaps specified [%s]\n", inpath);
         }

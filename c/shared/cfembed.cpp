@@ -1194,7 +1194,7 @@ static void t1Parse(cefCtx h) {
                    T1R_UPDATE_OPS, h->src.origin, &h->top, h->spec->UDV))
         fatal(h, cefErrT1Parse);
 
-    if (h->top->sup.flags & ABF_CID_FONT) {
+    if (h->top->sup.flags & ABF_ROS_FONT) {
         /* CID font; check name override */
         if (h->spec->newFontName != NULL)
             h->top->cid.CIDFontName.ptr = h->spec->newFontName;
@@ -1239,7 +1239,7 @@ static void cffParse(cefCtx h) {
     if (cfrBegFont(h->ctx.cfr, CFR_UPDATE_OPS, h->src.origin, 0, &h->top, NULL))
         fatal(h, cefErrCFFParse);
 
-    if (h->top->sup.flags & ABF_CID_FONT) {
+    if (h->top->sup.flags & ABF_ROS_FONT) {
         /* CID font; check name override */
         if (h->spec->newFontName != NULL)
             h->top->cid.CIDFontName.ptr = h->spec->newFontName;
@@ -1312,7 +1312,7 @@ static void glyphmap(cfwMapCallback *cb,
     if (h->spec->subset.names == NULL) {
         /* Match cid or tag to subset id */
         unsigned short key =
-            (info->flags & ABF_CID_FONT) ? info->cid : info->tag;
+            (info->flags & ABF_ROS_FONT) ? info->cid : info->tag;
         map = (GlyphMap *)bsearch(&key, h->subset.array, h->subset.cnt,
                                   sizeof(GlyphMap), matchId);
     } else
@@ -1848,7 +1848,7 @@ static int svg_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     if (h->spec->subset.names == NULL) {
         /* Match cid or tag to subset id */
         unsigned short key =
-            (info->flags & ABF_CID_FONT) ? info->cid : info->tag;
+            (info->flags & ABF_ROS_FONT) ? info->cid : info->tag;
         map = (GlyphMap *)bsearch(&key, h->subset.array, h->subset.cnt,
                                   sizeof(GlyphMap), matchId);
     } else

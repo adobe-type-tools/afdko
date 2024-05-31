@@ -490,7 +490,7 @@ static void dstFileSetAutoName(txCtx h, abfTopDict *top) {
             *p = '\0';
         filename = buf;
     } else if (h->flags & AUTO_FILE_FROM_FONT)
-        filename = (top->sup.flags & ABF_CID_FONT) ? top->cid.CIDFontName.ptr : top->FDArray.array[0].FontName.ptr;
+        filename = (top->sup.flags & ABF_ROS_FONT) ? top->cid.CIDFontName.ptr : top->FDArray.array[0].FontName.ptr;
     else
         return;
 
@@ -1450,7 +1450,7 @@ static void selectGlyph(txCtx h, int type, unsigned short id, const char *gname)
                 dnaNEXT(h->cef.subset)->id = id;
             break;
         case sel_by_cid:
-            if (h->top->sup.flags & ABF_CID_FONT) {
+            if (h->top->sup.flags & ABF_ROS_FONT) {
                 if (h->cef.lookup.cnt == 0)
                     /* Make CID lookup list */
                     makeGlyphLookup(h, cef_cmpByCID);
@@ -1458,7 +1458,7 @@ static void selectGlyph(txCtx h, int type, unsigned short id, const char *gname)
             }
             break;
         case sel_by_name:
-            if (!(h->top->sup.flags & ABF_CID_FONT)) {
+            if (!(h->top->sup.flags & ABF_ROS_FONT)) {
                 if (h->cef.lookup.cnt == 0)
                     /* Make glyph name lookup list */
                     makeGlyphLookup(h, cef_cmpByName);
@@ -1544,10 +1544,10 @@ static void printSpec(txCtx h, cefEmbedSpec *spec) {
         h->cef.src.filename, h->src.glyphs.cnt,
         h->dst.stm.filename, spec->subset.cnt);
 
-    p = (h->top->sup.flags & ABF_CID_FONT) ? "/" : "";
+    p = (h->top->sup.flags & ABF_ROS_FONT) ? "/" : "";
     for (i = 0; i < spec->subset.cnt; i++) {
         printf("%s%hu", p, spec->subset.array[i].id);
-        p = (h->top->sup.flags & ABF_CID_FONT) ? ",/" : ",";
+        p = (h->top->sup.flags & ABF_ROS_FONT) ? ",/" : ",";
     }
     printf("\n");
 
@@ -1607,7 +1607,7 @@ static void cef_EndFont(txCtx h) {
     h->cef.gnames.cnt = 0;
     unrec = 0xE000; /* Start of Private Use Area */
 
-    if (h->top->sup.flags & ABF_CID_FONT) {
+    if (h->top->sup.flags & ABF_ROS_FONT) {
         /* Make CID subset, encoding all glyphs in PUA */
         for (i = 0; i < h->cef.subset.cnt; i++) {
             cefSubsetGlyph *dst = &h->cef.subset.array[i];
@@ -1951,7 +1951,7 @@ static void mtx_BegFont(txCtx h, abfTopDict *top) {
     h->mtx.bbox.right = 0;
     h->mtx.bbox.top = 0;
 
-    if (top->sup.flags & ABF_CID_FONT)
+    if (top->sup.flags & ABF_ROS_FONT)
         fprintf(h->dst.stm.fp,
                 "### glyph[tag] {cid,fd,width,{left,bottom,right,top}}\n");
     else
@@ -1983,7 +1983,7 @@ static void mtx_EndFont(txCtx h) {
                     h->mtx.bbox.setby.bottom->tag,
                     h->mtx.bbox.setby.right->tag,
                     h->mtx.bbox.setby.top->tag);
-            if (h->top->sup.flags & ABF_CID_FONT)
+            if (h->top->sup.flags & ABF_ROS_FONT)
                 fprintf(h->dst.stm.fp, "cid   {%hu,%hu,%hu,%hu}\n",
                         h->mtx.bbox.setby.left->cid,
                         h->mtx.bbox.setby.bottom->cid,
@@ -2114,7 +2114,7 @@ static void t1_BegFont(txCtx h, abfTopDict *top) {
     }
     if (h->t1w.options & T1W_DECID) {
         /* Convert cid-keyed font to name-keyed font */
-        if (!(top->sup.flags & ABF_CID_FONT))
+        if (!(top->sup.flags & ABF_ROS_FONT))
             fatal(h, "-decid specified for non-CID font");
 
         /* Initialize */
@@ -2132,7 +2132,7 @@ static void t1_BegFont(txCtx h, abfTopDict *top) {
         top->WasEmbedded = 1;
 
     if (h->t1w.flags & T1W_TYPE_BASE)
-        h->t1w.maxGlyphs = (top->sup.flags & ABF_CID_FONT) ? top->cid.CIDCount : top->sup.nGlyphs;
+        h->t1w.maxGlyphs = (top->sup.flags & ABF_ROS_FONT) ? top->cid.CIDCount : top->sup.nGlyphs;
 
     dstFileSetAutoName(h, top);
 
@@ -2471,7 +2471,7 @@ static void t1_EndFont(txCtx h) {
             (void)ufoGetGlyphByCID(h->ufr.ctx, 0, &h->cb.glyph);
 
         /* Convert to name-keyed font */
-        h->top->sup.flags &= ~ABF_CID_FONT;
+        h->top->sup.flags &= ~ABF_ROS_FONT;
         abfFontDict* selectedFD = &h->top->FDArray.array[h->t1w.fd];
 
         abfFontDict* temp = (abfFontDict *) sMemNew( sizeof(abfFontDict));
@@ -2621,7 +2621,7 @@ static int svg_GlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 
     /* Determine (or fabricate) Unicode value for glyph. */
     info->flags |= ABF_GLYPH_UNICODE;
-    if (h->top->sup.flags & ABF_CID_FONT) {
+    if (h->top->sup.flags & ABF_ROS_FONT) {
         if (info->encoding.code == ABF_GLYPH_UNENC) {
             info->encoding.code = h->svw.unrec;
             h->svw.unrec++;
@@ -3569,7 +3569,7 @@ static void dcf_DumpEncoding(txCtx h, const ctlRegion *region) {
 
     if (!(h->dcf.flags & DCF_Encoding) ||
         region->begin == -1 ||
-        h->top->sup.flags & ABF_CID_FONT)
+        h->top->sup.flags & ABF_ROS_FONT)
         return;
 
     switch (region->begin) {
@@ -3662,7 +3662,7 @@ static void dcf_DumpCharset(txCtx h, const ctlRegion *region) {
 
                 switch (fmt) {
                     case 0:
-                        flowTitle(h, (h->top->sup.flags & ABF_CID_FONT) ? "glyph[gid]=cid" : "glyph[gid]=sid");
+                        flowTitle(h, (h->top->sup.flags & ABF_ROS_FONT) ? "glyph[gid]=cid" : "glyph[gid]=sid");
                         for (; gid < h->top->sup.nGlyphs; gid++)
                             flowBreak(h, "[%ld]=%hu", gid, read2(h));
                         flowEnd(h);
@@ -3909,7 +3909,7 @@ static void dcf_DumpCharStringsINDEX(txCtx h, const ctlRegion *region) {
             return;
         flowBeg(h);
         fprintf(h->dst.stm.fp, "--- glyph[tag]={%s,path}\n",
-                (h->top->sup.flags & ABF_CID_FONT) ? "cid" : "name");
+                (h->top->sup.flags & ABF_ROS_FONT) ? "cid" : "name");
         h->dcf.flags |= DCF_Flatten;
         callbackSubset(h);
         flowEnd(h);
@@ -4268,9 +4268,6 @@ static void makeRandSubset(txCtx h, const char *opt, char *arg) {
 static void makeFDSubset(txCtx h) {
     long i, j;
 
-    if (!(h->top->sup.flags & ABF_CID_FONT))
-        fatal(h, "-fd specified for non-CID font");
-
     getGlyphList(h);
 
     for (i = 0; i < h->src.glyphs.cnt; i++) {
@@ -4313,7 +4310,7 @@ static int renameGlyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
 }
 
 static void makeGOADBSubset(txCtx h) {
-    if (h->top->sup.flags & ABF_CID_FONT)
+    if (h->top->sup.flags & ABF_ROS_FONT)
         fatal(h, "-gs specified for CID font");
 
     getGlyphList(h);
@@ -4420,7 +4417,7 @@ void prepSubset(txCtx h) {
        then proceeds to build the glyph list arg in makeSubsetArgList() */
     if (h->flags & SHOW_NAMES) {
         fflush(stdout);
-        if (h->top->sup.flags & ABF_CID_FONT)
+        if (h->top->sup.flags & ABF_ROS_FONT)
             h->logger->log(sINFO, "--- CIDFontName: %s",
                            h->top->cid.CIDFontName.ptr);
         else
@@ -4571,7 +4568,7 @@ void callbackGlyph(txCtx h, int type, unsigned short id, const char *name) {
 
 /* Add .notdef glyph to destination font. If it's already added it will be skipped. */
 static void addNotdef(txCtx h) {
-    if (((h->src.type == src_Type1) || (h->src.type == src_SVG) || (h->src.type == src_UFO)) && !(h->top->sup.flags & ABF_CID_FONT))
+    if (((h->src.type == src_Type1) || (h->src.type == src_SVG) || (h->src.type == src_UFO)) && !(h->top->sup.flags & ABF_ROS_FONT))
         callbackGlyph(h, sel_by_name, 0, ".notdef");
     else
         callbackGlyph(h, sel_by_tag, 0, NULL);

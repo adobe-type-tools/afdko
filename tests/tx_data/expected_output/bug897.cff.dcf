@@ -6,55 +6,34 @@ offSize=2
 ### Name INDEX (00000004-00000017)
 --- object[index]={value}
 [0]={SourceSans-Test}
-### Top DICT INDEX (00000018-00000049)
+### Top DICT INDEX (00000018-0000003b)
 --- object[index]={value}
 [0]={
-  391 392 1 ROS
-  393 version
-  394 FullName
-  394 FamilyName
+  395 version
+  396 FullName
+  396 FamilyName
   -150 UnderlinePosition
   37 -120 971 880 FontBBox
-  5 CIDCount
-  126 charset
-  136 CharStrings
-  130 FDIndex
-  706 FDArray
+  117 charset
+  127 CharStrings
+  75 697 Private
 }
-### String INDEX (0000004a-0000007b)
+### String INDEX (0000003c-00000072)
 --- object[index]={value}
-[391]={Adobe}
-[392]={Identity}
-[393]={1.0}
-[394]={SourceSans}
-[395]={SourceSans-Test}
-### GlobalSubrINDEX (0000007c-0000007d)
+[391]={gid00001}
+[392]={gid00002}
+[393]={gid00003}
+[394]={gid00004}
+[395]={1.0}
+[396]={SourceSans}
+### GlobalSubrINDEX (00000073-00000074)
 empty
-### Charset (0000007e-00000081)
+### Encoding ........ (Standard)
+### Charset (00000075-00000078)
 format=1
 --- Range1[index]={first,nLeft}
-[0]={1,3}
-### FDSelect (00000082-00000087)
-format =0
---- glyph[gid]=fd
-[0]=0
-[1]=2
-[2]=1
-[3]=1
-[4]=2
-### FDArray INDEX (000002c2-000002d8)
---- object[index]={value}
-[0]={
-  395 FontName
-  23 729 Private
-}
-[1]={
-  25 752 Private
-}
-[2]={
-  27 777 Private
-}
-### CharStrings INDEX (00000088-000002c1)
+[0]={391,3}
+### CharStrings INDEX (0000007f-000002b8)
 --- object[index]={value}
 [0]={
   100 -120 rmoveto
@@ -146,24 +125,19 @@ format =0
 [4]={
   endchar
 }
---- FD[0]
-### Private DICT (000002d9-000002ef)
+### Private DICT (000002b9-00000303)
   -250 0 1350 0 BlueValues
   40 StdHW
   40 StdVW
   40 80 StemSnapH
   40 80 StemSnapV
   1000 defaultWidthX
---- FD[1]
-### Private DICT (000002f0-00000308)
   -250 0 1350 0 BlueValues
   58 StdHW
   63 StdVW
   58 7 19 StemSnapH
   63 10 16 StemSnapV
   1000 defaultWidthX
---- FD[2]
-### Private DICT (00000309-00000323)
   -13 13 543 14 176 14 BlueValues
   -250 21 OtherBlues
   69 StdHW

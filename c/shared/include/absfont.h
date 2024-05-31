@@ -68,7 +68,7 @@ enum {  // srcFontType values
 
 typedef struct {
     long flags;                /* 0 */
-#define ABF_CID_FONT  (1 << 0) /* CID-keyed font */
+#define ABF_ROS_FONT  (1 << 0) /* Font contains ROS */
 #define ABF_SYN_FONT  (1 << 1) /* Synthetic font */
 #define ABF_SING_FONT (1 << 2) /* SING glyphlet font */
     long srcFontType;          /* ABF_UNSET_INT */
@@ -86,8 +86,8 @@ typedef struct {
    clients shouldn't rely on these values but are free to use these fields as
    they see fit.
 
-   CID-keyed fonts are indicated by setting the ABF_CID_FONT flag bit to 1
-   and specifying CID-specific data via the abfTopDict.cid fields.
+   CID-keyed fonts are indicated by setting the ABF_ROS_FONT flag bit to 1
+   and specifying the data via the abfTopDict.cid fields.
 
    Synthetic fonts are indicated by setting the ABF_SYN_FONT flag bit to 1
    and the SynBaseFontName field records the FontName of the font that the
@@ -243,6 +243,18 @@ struct abfFontDict_ {
    PostScript name-keyed        C-struct name-keyed
    ---------------------        -------------------
    font dict                    abfTopDict fields (excluding cid fields)
+
+   PostScript CID-keyed         C-struct CID-keyed
+   --------------------         ------------------
+   CIDFont dict                 abfTopDict fields (including cid fields)
+
+   CID fonts always have FDArray and FDSelect structures, but as of
+   CFF2 non-CID fonts have these as well. When there is a single 
+   private dictionary it is represnted as FDArray[0] with no FDSelect.
+   Otherwise there is an FDSelect and multiple FDArray entries:
+
+   PostScript name-keyed        C-struct name-keyed
+   ---------------------        -------------------
                                 FDArray[0].FontName
                                 FDArray[0].PaintType
                                 FDArray[0].FontMatrix
@@ -250,7 +262,6 @@ struct abfFontDict_ {
 
    PostScript CID-keyed         C-struct CID-keyed
    --------------------         ------------------
-   CIDFont dict                 abfTopDict fields (including cid fields)
        FDArray[0]                   FDArray[0]
            font dict
                Private dict
@@ -262,9 +273,7 @@ struct abfFontDict_ {
            font dict
                Private dict
 
-   It can be seen that there is a direct mapping for CID-keyed fonts but the
-   name-keyed fonts are represented using a single element FDArray whose font
-   dict fields are treated as an extension of the font dict. */
+   */
 
 void abfInitAllDicts(abfTopDict *top);
 void abfInitTopDict(abfTopDict *top);
@@ -273,8 +282,8 @@ void abfInitFontDict(abfFontDict *font);
 /* The client is responsible for allocating the font dictionary data structures
    in memory and correctly initializing the abfTopDict.FDArray.cnt fields to
    specify the number of element allocated in the abfTopDict.FDArray.array.
-   This will be 1 for name-keyed fonts and >=1 (the number being dependent on
-   the complexity of the font) for CID-keyed fonts. Once this has been done
+   This will be 1 for fonts without FDSelect and >=1 (the number being dependent
+   on the complexity of the font) for fonts with FDSelect. Once this has been done
    abfInitAllDicts() may be called to initialize the entire data structure to
    the values shown in the comments. Alternatively, the abfInitTopDict() and
    abfInitFontDict() may be called to selectively initialize the top dictionary
@@ -288,7 +297,7 @@ void abfInitFontDict(abfFontDict *font);
    top->FDArray.array = malloc(top->FDArray.cnt * sizeof(abfFontDict));
    abfInitAllDicts(top);
 
-   CID fonts may be similarly handled except that the font dictionary array
+   FDSelect fonts may be similarly handled except that the font dictionary array
    will typically have more than one element. */
 
 typedef struct abfErrCallbacks_ abfErrCallbacks;
@@ -342,8 +351,7 @@ int abfCompareFontDicts(const abfFontDict *font1, const abfFontDict *font2);
    BlueValues.
 
    abfCompareFontDicts() is used in the destination font writing module to
-   compare FDArrays of fonts with more than one element in the FDArray,
-   CID fonts. */
+   compare FDArrays of fonts with more than one element in the FDArray. */
 
 /* ---------------------------- Glyph Callbacks ---------------------------- */
 
@@ -367,7 +375,7 @@ typedef struct {  // Glyph information
     abfString gname;                  /* Name-keyed: glyph name */
     abfEncoding encoding;             /* Name-keyed: encoding list */
     unsigned short cid;               /* CID-keyed: CID */
-    uint16_t iFD;                     /* CID-keyed: FD index */
+    uint16_t iFD;                     /* FD index */
     ctlRegion sup;                    /* Supplementary data */
     struct {
         unsigned short vsindex;
@@ -396,7 +404,7 @@ typedef struct {  // Glyph information
    is updated or subset.
 
    If the font is CID-keyed the ABF_GLYPH_CID bit in the "flags" field is set
-   and the "cid" and "iFD" fields specify the CID and FD index, respectively.
+   and the "cid" field specifies the CID index.
 
    If the font is name-keyed the ABF_GLYPH_CID bit is clear and the "gname" and
    "encoding" fields specify the glyph name and encoding, respectively. The

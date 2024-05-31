@@ -1,5 +1,5 @@
-## glyph[tag] {cid,iFD,path}
-glyph[21847] {21847,3,
+## glyph[tag] {name,encoding,path}
+glyph[21847] {(missing),-,
   0 width
   252 31 move
   100 23 line

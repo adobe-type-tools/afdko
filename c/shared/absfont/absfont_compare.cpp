@@ -126,8 +126,8 @@ static int comparePrivateDicts(const abfPrivateDict *private1,
 /* Compare two top dicts to see if they are similar enough to merge.
    Assume client has assured that they are valid before call. */
 int abfCompareTopDicts(const abfTopDict *top1, const abfTopDict *top2) {
-    int firstIsCID = (top1->sup.flags & ABF_CID_FONT) != 0;
-    int secondIsCID = (top2->sup.flags & ABF_CID_FONT) != 0;
+    int firstIsCID = (top1->sup.flags & ABF_ROS_FONT) != 0;
+    int secondIsCID = (top2->sup.flags & ABF_ROS_FONT) != 0;
 
     if (firstIsCID != secondIsCID)
         return 1;
