@@ -42,7 +42,7 @@ void abfAFMEndFont(abfAFMCtx h, abfTopDict *top) {
     top->FontBBox[2] = (float)h->font_bbox.right;
     top->FontBBox[3] = (float)h->font_bbox.top;
 
-    if (top->sup.flags & ABF_CID_FONT)
+    if (top->sup.flags & ABF_ROS_FONT)
         fprintf(h->fp, "StartFontMetrics 4.1\n");
     else
         fprintf(h->fp, "StartFontMetrics 2.0\n");
@@ -59,7 +59,7 @@ void abfAFMEndFont(abfAFMCtx h, abfTopDict *top) {
     if (top->sup.UnitsPerEm != 1000)
         fprintf(h->fp, "Comment UnitsPerEm %ld\n", top->sup.UnitsPerEm);
 
-    if (top->sup.flags & ABF_CID_FONT) {
+    if (top->sup.flags & ABF_ROS_FONT) {
         /* Write header for cid-keyed font */
         fprintf(h->fp, "MetricsSets 2\n");
         writeString(h, "FontName", &top->cid.CIDFontName);

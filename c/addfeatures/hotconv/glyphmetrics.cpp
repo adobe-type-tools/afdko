@@ -4,6 +4,9 @@
 
 #include "glyphmetrics.h"
 
+#include <limits>
+#include <algorithm>
+
 #include "common.h"
 
 std::vector<Fixed> &GlyphMetrics::getLocationScalars(uint32_t location) {
@@ -64,20 +67,20 @@ void GlyphMetrics::beginGlyph(abfGlyphInfo *info) {
             getLocationScalars(0);
         if (hctxptr != nullptr) {
             auto &glyph = hctxptr->glyphs[currentGID];
-                        
+
             if (info->gname.ptr != NULL)
                 glyph.gname = info->gname.ptr;
-            if (IS_CID(hctxptr))  
+            if (IS_ROS(hctxptr))
                 glyph.id = info->cid;
             else
                 glyph.id = info->gname.impl;  // The SID (when CFF 1)
-            
+
             glyph.code = info->encoding.code;
             abfEncoding *e = info->encoding.next;
-            while (e != NULL) { 
+            while (e != NULL) {
                 glyph.sup.push_back(e->code);
                 e = e->next;
-            }               
+            }
         }
     }
     for (auto l : neededLocations) {
@@ -249,14 +252,14 @@ void GlyphMetrics::finishInstanceState(uint16_t gid, size_t i) {
         if (im.left < hctxptr->font.minBearing.left)
             hctxptr->font.minBearing.left = im.left;
 
-        auto hAdv = hctxptr->glyphs[gid].hAdv; 
+        auto hAdv = hctxptr->glyphs[gid].hAdv;
         if (hAdv - im.right < hctxptr->font.minBearing.right)
             hctxptr->font.minBearing.right = hAdv - im.right;
-        
+
         if (im.right > hctxptr->font.maxExtent.h)
             hctxptr->font.maxExtent.h = im.right;
-    }       
-}   
+    }
+}
 
 void GlyphMetrics::initialProcessingRun(hotCtx g) {
     neededLocations.clear();

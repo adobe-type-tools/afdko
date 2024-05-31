@@ -119,7 +119,7 @@ static void saveOrigFontType(cfwCtx g, abfTopDict *dst) {
             switch (dst->sup.srcFontType) {
                 case abfSrcFontTypeType1Name:
                 case abfSrcFontTypeCFFName:
-                    if (!(dst->sup.flags & ABF_CID_FONT)) {
+                    if (!(dst->sup.flags & ABF_ROS_FONT)) {
                         return; /* Nothing to save */
                     }
                     OrigFontType = "Type1"; /* Name-keyed to cid-keyed conversion */
@@ -127,7 +127,7 @@ static void saveOrigFontType(cfwCtx g, abfTopDict *dst) {
 
                 case abfSrcFontTypeType1CID:
                 case abfSrcFontTypeCFFCID:
-                    if (dst->sup.flags & ABF_CID_FONT) {
+                    if (dst->sup.flags & ABF_ROS_FONT) {
                         return; /* Nothing to save */
                     }
                     OrigFontType = "CID"; /* CID-keyed to name-keyed conversion */
@@ -478,7 +478,7 @@ void cfwDictFillTop(cfwCtx g, DICT *dst,
         return;
     }
 
-    if (top->sup.flags & ABF_CID_FONT) {
+    if (top->sup.flags & ABF_ROS_FONT) {
         /* FontMatrix; note default values are different from font dict */
         abfFontMatrix *fm = &(top->cid.FontMatrix);
         if (fm->cnt != ABF_EMPTY_ARRAY &&
@@ -515,7 +515,7 @@ void cfwDictFillTop(cfwCtx g, DICT *dst,
     }
 
     /* ROS */
-    if (top->sup.flags & ABF_CID_FONT) {
+    if (top->sup.flags & ABF_ROS_FONT) {
         cfwDictSaveInt(dst,
                        cfwSindexAssignSID(g, (SRI)top->cid.Registry.impl));
         cfwDictSaveInt(dst,
@@ -618,7 +618,7 @@ void cfwDictFillTop(cfwCtx g, DICT *dst,
         cfwDictSaveRealOp(dst, top->StrokeWidth, cff_StrokeWidth);
     }
 
-    if (top->sup.flags & ABF_CID_FONT) {
+    if (top->sup.flags & ABF_ROS_FONT) {
         /* CIDFontVersion */
         if (top->cid.CIDFontVersion != cff_DFLT_CIDFontVersion) {
             cfwDictSaveRealOp(dst, top->cid.CIDFontVersion, cff_CIDFontVersion);

@@ -221,7 +221,7 @@ struct hotCallbacks_ {
 
 void hotSetConvertFlags(hotCtx g, unsigned long hotConvFlags);  // set flags before any hot unctions are called.
 
-const char *hotReadFont(hotCtx g, int flags, bool &isCID);
+const char *hotReadFont(hotCtx g, int flags, bool &isROS);
 
 /* hotReadFont() is called to read the input font. The flags
    argument debugging and font processing: */

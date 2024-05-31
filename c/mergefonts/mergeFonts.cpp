@@ -136,7 +136,7 @@ static bool applyCIDFontInfo(txCtx h, bool fontisCID) {
     MergeInfo *mergeInfo = (MergeInfo *)h->ext->extData;
     if (mergeInfo->cidinfo.CIDFontName[0] != 0) {  // if the users has specified a cidfontinfo file, override the first font's cid info.
         fontisCID = 1;
-        h->top->sup.flags |= ABF_CID_FONT;
+        h->top->sup.flags |= ABF_ROS_FONT;
         h->top->cid.CIDFontName.ptr = mergeInfo->cidinfo.CIDFontName;
         h->top->FullName.ptr = mergeInfo->cidinfo.FullName;
         h->top->FamilyName.ptr = mergeInfo->cidinfo.FamilyName;
@@ -296,7 +296,7 @@ static void t1rMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
         if (t1rBegFont(h->t1r.ctx, h->t1r.flags, origin, &h->top, getUDV(h)))
             fatal(h, NULL);
 
-        parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+        parentIsCID = h->top->sup.flags & ABF_ROS_FONT;
         if (mergeInfo->hintsOnly && parentIsCID)
             fatal(h, "Error. The -hints option cannot be used with CID fonts.");
 
@@ -342,7 +342,7 @@ static void t1rMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
         t1rCtx local_t1r_ctx;
         abfTopDict *local_top = NULL;
         bool localFontIsCID = 0;
-        parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+        parentIsCID = h->top->sup.flags & ABF_ROS_FONT;
 
         local_t1r_ctx = t1rNew(&h->cb.mem, &h->cb.stm, T1R_CHECK_ARGS);
 
@@ -361,7 +361,7 @@ static void t1rMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
         if (t1rBegFont(local_t1r_ctx, h->t1r.flags, origin, &local_top, getUDV(h)))
             fatal(h, NULL);
 
-        localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
+        localFontIsCID = local_top->sup.flags & ABF_ROS_FONT;
         if (mergeInfo->hintsOnly) {
             int k;
             if (fileIndex > 1)
@@ -416,7 +416,7 @@ static void svrMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
     else {
         svrCtx local_svr_ctx;
         abfTopDict *local_top = NULL;
-        bool parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+        bool parentIsCID = h->top->sup.flags & ABF_ROS_FONT;
         bool localFontIsCID = 0;
         MergeInfo *mergeInfo = (MergeInfo *)h->ext->extData;
 
@@ -433,7 +433,7 @@ static void svrMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
         if (svrBegFont(local_svr_ctx, h->svr.flags, &local_top))
             fatal(h, NULL);
 
-        localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
+        localFontIsCID = local_top->sup.flags & ABF_ROS_FONT;
         /* If there is a glyph alias file for the first font, make sure it is the right type, or that both fonts are name keyed or CID. */
         gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
 
@@ -493,7 +493,7 @@ static void ufoMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
         if (ufoBegFont(h->ufr.ctx, h->ufr.flags, &h->top, h->ufr.altLayerDir))
             fatal(h, NULL);
 
-        parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+        parentIsCID = h->top->sup.flags & ABF_ROS_FONT;
 
         /* Apply the CIDFontInfo file, if one was specified. */
         parentIsCID = applyCIDFontInfo(h, parentIsCID); /* can set parentIsCID true, if it was false */
@@ -533,7 +533,7 @@ static void ufoMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
     } else {
         ufoCtx local_ufr_ctx;
         abfTopDict *local_top = NULL;
-        bool parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+        bool parentIsCID = h->top->sup.flags & ABF_ROS_FONT;
         bool localFontIsCID;
 
         local_ufr_ctx = ufoNew(&h->cb.mem, &h->cb.stm, UFO_CHECK_ARGS);
@@ -548,7 +548,7 @@ static void ufoMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
         if (ufoBegFont(local_ufr_ctx, h->ufr.flags, &local_top, h->ufr.altLayerDir))
             fatal(h, NULL);
 
-        localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
+        localFontIsCID = local_top->sup.flags & ABF_ROS_FONT;
         /* If there is a glyph alias file for the first font, make sure it is the right type, or that both fonts are name keyed or CID. */
         gaf = checkIFParentCIDCompatible(h, local_top, parentIsCID, localFontIsCID);
 
@@ -616,7 +616,7 @@ static void cfrMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
         if (cfrBegFont(h->cfr.ctx, h->cfr.flags, origin, 0, &h->top, NULL))
             fatal(h, NULL);
 
-        parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+        parentIsCID = h->top->sup.flags & ABF_ROS_FONT;
         /* Apply the CIDFontInfo file, if one was specified. */
         parentIsCID = applyCIDFontInfo(h, parentIsCID); /* can set parentIsCID true, if it was false */
 
@@ -656,7 +656,7 @@ static void cfrMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
         abfTopDict *local_top = NULL;
         bool localFontIsCID = 0;
 
-        parentIsCID = h->top->sup.flags & ABF_CID_FONT;
+        parentIsCID = h->top->sup.flags & ABF_ROS_FONT;
         local_cfr_ctx = cfrNew(&h->cb.mem, &h->cb.stm, CFR_CHECK_ARGS);
         if (local_cfr_ctx == NULL)
             fatal(h, "(cfr) can't init lib");
@@ -670,7 +670,7 @@ static void cfrMergeFont(txCtx h, long origin, bool isFirstFont, sourceCtx *srcC
         if (cfrBegFont(local_cfr_ctx, h->cfr.flags, origin, 0, &local_top, NULL))
             fatal(h, NULL);
 
-        localFontIsCID = local_top->sup.flags & ABF_CID_FONT;
+        localFontIsCID = local_top->sup.flags & ABF_ROS_FONT;
 
         /* provide data for mergeGlyphBegin function,
         which is patched over the &h->cb.glyph.beg() function ptr */

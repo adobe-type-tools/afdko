@@ -498,7 +498,7 @@ static void writeCstr(t1wCtx h, int col, Cstr *cstr, int put) {
 
     if (h->arg.flags & (T1W_ENCODE_BINARY | T1W_TYPE_HOST)) {
         /* Write binary charstring */
-        if (h->top->sup.flags & ABF_CID_FONT)
+        if (h->top->sup.flags & ABF_ROS_FONT)
             writeFmt(h, " %ld : ", length);
         else
             writeFmt(h, " %ld -| ", length);
@@ -774,13 +774,13 @@ static const char *getOrigFontTypeValue(t1wCtx h) {
     switch (h->top->sup.srcFontType) {
         case abfSrcFontTypeType1Name:
         case abfSrcFontTypeCFFName:
-            if (h->top->sup.flags & ABF_CID_FONT)
+            if (h->top->sup.flags & ABF_ROS_FONT)
                 return "Type1"; /* Name-keyed to cid-keyed conversion */
             else
                 break;
         case abfSrcFontTypeType1CID:
         case abfSrcFontTypeCFFCID:
-            if (h->top->sup.flags & ABF_CID_FONT)
+            if (h->top->sup.flags & ABF_ROS_FONT)
                 break;
             else
                 return "CID"; /* CID-keyed to name-keyed conversion */
@@ -992,7 +992,7 @@ static void writeOtherSubrs(t1wCtx h, abfPrivateDict *priv) {
 
     if (h->arg.flags & T1W_OTHERSUBRS_PRIVATE) {
         /* Private OtherSubrs */
-        if (h->top->sup.flags & ABF_CID_FONT) {
+        if (h->top->sup.flags & ABF_ROS_FONT) {
             /* CID-keyed */
             if (priv->LanguageGroup == 1)
                 writeTextArray(h, ARRAY_LEN(gcothers), gcothers);
@@ -1012,7 +1012,7 @@ static void writeOtherSubrs(t1wCtx h, abfPrivateDict *priv) {
 
 /* Write Private dict. */
 static void writePrivateDict(t1wCtx h, abfPrivateDict *priv, long SDBytes) {
-    int cid = (h->top->sup.flags & ABF_CID_FONT) != 0;
+    int cid = (h->top->sup.flags & ABF_ROS_FONT) != 0;
     int size =
         (1 /* BlueValues */ +
          (priv->OtherBlues.cnt != ABF_EMPTY_ARRAY) +
@@ -2140,7 +2140,7 @@ int t1wEndFont(t1wCtx h, abfTopDict *top) {
     /* Write out font */
     h->top = top;
     h->dst.cnt = 0;
-    if (top->sup.flags & ABF_CID_FONT)
+    if (top->sup.flags & ABF_ROS_FONT)
         writeCIDKeyedFont(h);
     else
         writeNameKeyedFont(h);

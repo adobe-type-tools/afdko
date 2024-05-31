@@ -232,7 +232,7 @@ GID FeatCtx::mapGName2GID(const char *gname, bool allowNotdef) {
     GID gid;
     const char *realname;
 
-    // if (IS_CID(g)) {
+    // if (IS_ROS(g)) {
     //     zzerr("glyph name specified for a CID font");
     // }
     if ( gname[0] == '\\' )
@@ -258,7 +258,7 @@ GID FeatCtx::mapGName2GID(const char *gname, bool allowNotdef) {
 
 GID FeatCtx::cid2gid(const std::string &cidstr) {
     GID gid = 0; /* Suppress optimizer warning */
-    if (!IS_CID(g)) {
+    if (!IS_ROS(g)) {
         featMsg(sERROR, "CID specified for a non-CID font");
     } else {
         int t = strtoll(cidstr.c_str() + 1, NULL, 10); /* Skip initial '\' */
@@ -416,7 +416,7 @@ void FeatCtx::addRangeToCurrentGC(GID first, GID last, const std::string &firstN
                                   const std::string &lastName) {
 #define INVALID_RANGE featMsg(sFATAL, "Invalid glyph range [%s-%s]", \
                               firstName.c_str(), lastName.c_str())
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         if (first <= last) {
             for (GID i = first; i <= last; i++) {
                 addGlyphToCurrentGC(i);
@@ -514,7 +514,7 @@ bool FeatCtx::compareGlyphClassCount(int targc, int replc, bool isSubrule) {
 void FeatCtx::dumpGlyph(GID gid, int ch, bool print) {
     char msg[512];
     int len;
-    if (IS_CID(g)) {
+    if (IS_ROS(g)) {
         len = snprintf(msg, sizeof(msg), "\\%hd", mapGID2CID(gid));
     } else {
         mapGID2Name(g, gid, msg, sizeof(msg));

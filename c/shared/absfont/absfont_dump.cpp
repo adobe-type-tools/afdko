@@ -196,8 +196,8 @@ static void dumpTopDict(abfDumpCtx h, abfTopDict *top) {
             FPRINTF_S(h->fp, "%sABF_SYN_FONT", sep);
             sep = ",";
         }
-        if (top->sup.flags & ABF_CID_FONT) {
-            FPRINTF_S(h->fp, "%sABF_CID_FONT", sep);
+        if (top->sup.flags & ABF_ROS_FONT) {
+            FPRINTF_S(h->fp, "%sABF_ROS_FONT", sep);
             sep = ",";
         }
         if (sep[0] == ',')
@@ -345,7 +345,7 @@ void abfDumpBegFont(abfDumpCtx h, abfTopDict *top) {
     }
 
     /* Print glyph comment */
-    if (top->sup.flags & ABF_CID_FONT)
+    if (top->sup.flags & ABF_ROS_FONT)
         /* UFO can store names even when CID-keyed */
         if (top->sup.srcFontType == abfSrcFontTypeUFOCID) {
             FPRINTF_S(h->fp, "## glyph[tag] {name,cid,iFD");

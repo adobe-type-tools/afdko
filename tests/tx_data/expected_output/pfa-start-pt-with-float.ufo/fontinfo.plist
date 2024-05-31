@@ -22,5 +22,26 @@
 	<string>Regular</string>
 	<key>postscriptUnderlinePosition</key>
 	<integer>-125</integer>
+	<key>postscriptBlueValues</key>
+	<array>
+		<integer>0</integer>
+		<integer>0</integer>
+	</array>
+	<key>postscriptStdHW</key>
+	<array>
+		<integer>0</integer>
+	</array>
+	<key>postscriptStdVW</key>
+	<array>
+		<integer>0</integer>
+	</array>
+	<key>postscriptBlueScale</key>
+	<real>0.037</real>
+	<key>postscriptBlueShift</key>
+	<integer>7</integer>
+	<key>postscriptBlueFuzz</key>
+	<integer>0</integer>
+	<key>ExpansionFactor</key>
+	<real>0.06</real>
 </dict>
 </plist>

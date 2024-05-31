@@ -392,7 +392,7 @@ int pdwBegFont(pdwCtx h, long flags, long level, abfTopDict *top) {
     settime(h);
 
     /* Set FontName */
-    if (h->top->sup.flags & ABF_CID_FONT)
+    if (h->top->sup.flags & ABF_ROS_FONT)
         h->FontName = h->top->cid.CIDFontName.ptr;
     else
         h->FontName = h->top->FDArray.array[0].FontName.ptr;
@@ -1255,7 +1255,7 @@ static long writeInfoObj(pdwCtx h) {
     OBJ num;
 
     /* Make font version */
-    if (h->top->sup.flags & ABF_CID_FONT)
+    if (h->top->sup.flags & ABF_ROS_FONT)
         snprintf(version, sizeof(version), "%g", h->top->cid.CIDFontVersion);
     else if (h->top->version.ptr != ABF_UNSET_PTR) {
         char format[20];
@@ -1349,7 +1349,7 @@ static long writeTileKeyObj(pdwCtx h) {
     float x = (TILE_COLS - 3) * TILE_SIZE;
     float y = PAGE_TOP;
 
-    if (h->top->sup.flags & ABF_CID_FONT)
+    if (h->top->sup.flags & ABF_ROS_FONT)
         drawTile(h, STM_MISC, x, y, "tag,fd", "hAdv", "cid");
     else
         drawTile(h, STM_MISC, x, y, "tag,enc", "hAdv", "gname");

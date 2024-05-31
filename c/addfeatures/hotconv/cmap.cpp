@@ -280,7 +280,7 @@ void cmapBeginEncoding(hotCtx g, unsigned platformId, unsigned scriptId,
     h->mapping.cnt = 0;
     h->codespace.cnt = 0;
 
-    if (h->platformId == cmap_MAC && !IS_CID(g)) {
+    if (h->platformId == cmap_MAC && !IS_ROS(g)) {
         addMacControlChars(g, h);
     }
 }
@@ -1104,7 +1104,7 @@ int cmapEndEncoding(hotCtx g) {
         if (h->platformId == cmap_MAC) {
             /* Mac cmap is required; the space wasn't present, so: */
             cmapAddMapping(g, 0, GID_NOTDEF, 1);
-        } else if (!((IS_CID(g)) && (h->platformId == cmap_MS) && (h->scriptId == cmap_MS_UGL))) {
+        } else if (!((IS_ROS(g)) && (h->platformId == cmap_MS) && (h->scriptId == cmap_MS_UGL))) {
             /* Ms cmap is required; the space wasn't present, so: */
             return 0;
         }

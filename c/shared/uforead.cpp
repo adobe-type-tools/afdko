@@ -1287,9 +1287,8 @@ static int parseGroups(ufoCtx h) {
     h->cb.stm.clientFileName = "groups.plist";
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
-        if (h->top.sup.flags == ABF_CID_FONT)
-            h->logger->log(sWARNING, "FDArraySelect not defined for cid-keyed font");
-        return ufoSuccess;
+       if (h->top.sup.flags == ABF_ROS_FONT)
+           h->logger->log(sWARNING, "FDArraySelect not defined for cid-keyed font");        return ufoSuccess;
     }
 
     dnaSET_CNT(h->valueArray, 0);
@@ -1407,7 +1406,7 @@ static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec,
                     fatal(h, ufoErrParse, "Glyph '%s' missing FDArray index in <lib> dict", glyphName);
             }
             chr->iFD = glifRec->iFD;
-        } else if (h->top.sup.flags & ABF_CID_FONT) {
+        } else if (h->top.sup.flags & ABF_ROS_FONT) {
             fatal(h, ufoErrParse, "Glyph '%s' missing CID number in <lib> dict", glyphName);
         }
         chr->gname.ptr = glyphName;
@@ -1791,7 +1790,7 @@ static int parseXMLPlistFile(ufoCtx h, xmlNodePtr cur) {
     /* lib.plist: preparse set CID Font flags if has CID-keyed UFO required keys */
     if (h->parseState.UFOFile == parsingLib) {
         if (validCIDKeyedFont(h, cur)) {
-            h->top.sup.flags |= ABF_CID_FONT;
+            h->top.sup.flags |= ABF_ROS_FONT;
             h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
         }
     }
@@ -1875,7 +1874,7 @@ static bool setLibKey(ufoCtx h, char* keyName, xmlNodePtr cur) {
         return false;
     }
 
-    if ((h->top.sup.flags & ABF_CID_FONT) &&
+    if ((h->top.sup.flags & ABF_ROS_FONT) &&
         top->cid.CIDFontName.ptr == NULL &&
         h->top.FDArray.array[0].FontName.ptr != NULL) {
         /* derive name from fontinfo.plist familyName-styleName */
@@ -3096,7 +3095,7 @@ static int readGlyph(ufoCtx h, unsigned short tag, abfGlyphCallbacks* glyph_cb) 
 
     /* note that gname.ptr is not stable: it is a pointer into the h->string->buf array, which moves when it gets resized. */
     gi->gname.ptr = getString(h, (STI)gi->tag);
-    if (h->top.sup.flags & ABF_CID_FONT) {
+    if (h->top.sup.flags & ABF_ROS_FONT) {
         gi->flags |= ABF_GLYPH_CID;
         if (h->top.FDArray.array[gi->iFD].Private.LanguageGroup == 1)
             gi->flags |= ABF_GLYPH_LANG_1;
@@ -3325,8 +3324,8 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
         (h->top.cid.Ordering.ptr != NULL) &&        /* required com.adobe.type.ROS key */
         (h->top.cid.Supplement >= 0) &&             /* required com.adobe.type.ROS key */
         (h->requiredCIDKeyFlag & CIDKEY_CIDMAP)) {  /* required com.adobe.type.postscriptCIDMap key */
-        if (!(h->top.sup.flags & ABF_CID_FONT)) {
-            h->top.sup.flags |= ABF_CID_FONT;
+        if (!(h->top.sup.flags & ABF_ROS_FONT)) {
+            h->top.sup.flags |= ABF_ROS_FONT;
             h->top.sup.srcFontType = abfSrcFontTypeUFOCID;
         }
     }
@@ -3427,7 +3426,7 @@ static int CTL_CDECL matchCID(const void *key, const void *value) {
 int ufoGetGlyphByCID(ufoCtx h, unsigned short cid, abfGlyphCallbacks *glyph_cb) {
     volatile unsigned short tag; /* volatile suppresses optimizer warning */
 
-    if (!(h->flags & ABF_CID_FONT))
+    if (!(h->flags & ABF_ROS_FONT))
         return ufoErrNoGlyph;
 
     if (h->chars.index.array[h->chars.index.cnt - 1].cid ==

@@ -21,7 +21,7 @@ int vmtxFill(hotCtx g) {
 
     auto &vmtx = *g->ctx.vmtx;
 
-    if ((!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) && (!IS_CID(g)))
+    if ((!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) && (!IS_ROS(g)))
         return vmtx.Fill();
 
     uint32_t glyphCount = g->glyphs.size();
@@ -76,7 +76,7 @@ void vheaNew(hotCtx g) { }
 
 int vheaFill(hotCtx g) {
     if (g->ctx.vmtx == nullptr) {
-        if ((g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE) || IS_CID(g))
+        if ((g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE) || IS_ROS(g))
             g->ctx.vmtx = new var_vmtx();
         else
             return 0;
@@ -117,7 +117,7 @@ void vheaFree(hotCtx g) { }
 void VORGNew(hotCtx g) { }
 
 int VORGFill(hotCtx g) {
-    if ((!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) && (!IS_CID(g))) {
+    if ((!(g->convertFlags & HOT_SEEN_VERT_ORIGIN_OVERRIDE)) && (!IS_ROS(g))) {
         if (g->ctx.vmtx == nullptr)
             return 0;
         else
