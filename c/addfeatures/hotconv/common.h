@@ -427,6 +427,7 @@ struct hotCtx_ {
 
     std::shared_ptr<slogger> logger;
     std::shared_ptr<GOADB> goadb;
+    std::shared_ptr<Designspace> ds;
 };
 
 /* Functions */

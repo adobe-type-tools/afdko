@@ -98,6 +98,7 @@ inline float var_F2dot14ToFloat(var_F2dot14 v) { return (float)v / (1 << 14); }
 
 /* variable font axis tables */
 class var_axes {
+    friend class Designspace;
  public:
     var_axes(sfrCtx sfr, ctlSharedStmCallbacks *sscb);
 

@@ -1540,17 +1540,20 @@ bool FeatVisitor::addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext 
                                          std::vector<var_F2dot14> &l) {
     Tag tag = getTag(ctx->tag());
     int16_t axisIndex = fc->axisTagToIndex(tag);
-    if (axisIndex < 0)
+    if (axisIndex < 0) {
+        fc->featMsg(sERROR, "Axis not found in font");
         return false;
+    }
     assert(axisIndex < (int16_t)l.size());
 
     std::string unit = ctx->AXISUNIT() ? TOK(ctx->AXISUNIT())->getText() : fc->defAxisUnit;
-    if (unit == "d") {
-        fc->featMsg(sFATAL, "XXX No support for design units yet.");
-        return false;
-    }
     Fixed v = getFixed<Fixed>(ctx->fixedNum());
-    if (unit == "u") {
+    if (unit == "d") {
+        assert(fc->g->ds != nullptr);
+        v = fc->g->ds->userizeCoord(axisIndex, v);
+        assert(fc->g->ctx.axes != nullptr);
+        fc->g->ctx.axes->normalizeCoord(axisIndex, v, v);
+    } else if (unit == "u") {
         assert(fc->g->ctx.axes != nullptr);
         fc->g->ctx.axes->normalizeCoord(axisIndex, v, v);
     } else {
