@@ -82,6 +82,8 @@ static void printUsage(void) {
         "-mf <path> : Specify path for the FontMenuNameDB file.\n"
         "-gf <path> : Specify path for the GlyphOrderAndAliasDB file. This is only\n"
         "    used as a source for unicode mappings\n"
+        "-ds <path> : Specify path to a Designspace file. This is only used as a\n"
+        "    source for mappings of user to design units\n"
         "-lookupFinal : Look for final GlyphOrderAndAliasDB names when determining\n"
         "    Unicode values\n"
         "-showFinal : Display final GlyphOrderAndAliasDB names even when not\n"
@@ -297,6 +299,13 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                                     convert.otherflags |= OTHERFLAGS_DOUBLE_MAP_GLYPHS;
                                 }
                                 break;
+                            case 's':
+                                if (arg[3] != '\0' || argsleft == 0) {
+                                    showUsage();
+                                }
+                                cbDesignspaceRead(cbctx, argv[++i]);
+                                break;
+
 
                             default:
                                 cbFatal(cbctx, "unrecognized option (%s)", arg);
@@ -345,7 +354,7 @@ static void parseArgs(int argc, char *argv[], int inScript) {
 
                     case 'g': /* Glyph name alias database */
                         switch (arg[2]) {
-                            case 'f': /* [-c] CMap directory */
+                            case 'f':
                                 if (arg[3] != '\0' || argsleft == 0) {
                                     showUsage();
                                 }
