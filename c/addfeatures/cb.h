@@ -32,6 +32,7 @@ void cbConvert(cbCtx h, int flags, const char *clientVers,
 
 void cbFCDBRead(cbCtx h, const char *filename);
 void cbAliasDBRead(cbCtx h, const char *filename);
+void cbDesignspaceRead(cbCtx h, const char *filename);
 void cbFree(cbCtx h);
 
 /* --- Utility functions --- */

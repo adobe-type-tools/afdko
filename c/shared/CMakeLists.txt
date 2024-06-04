@@ -30,6 +30,7 @@ add_library(shared OBJECT
     cffwrite/cffwrite_varstore.h
     ctutil.c
     da.c
+    designspace.cpp
     dynarr.c
     goadb.cpp
     support/except.c
@@ -76,6 +77,7 @@ add_library(shared OBJECT
     include/ctlshare.h
     include/ctutil.h
     include/da.h
+    include/designspace.h
     include/dynarr.h
     include/goadb.h
     include/namesupport.h

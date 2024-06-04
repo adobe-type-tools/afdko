@@ -8,6 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <memory>
 
 #include "ctlshare.h"
+#include "designspace.h"
 #include "goadb.h"
 #include "slogger.h"
 
@@ -142,6 +143,7 @@ typedef struct hotCtx_ *hotCtx; /* Opaque library context */
 typedef struct hotCallbacks_ hotCallbacks;
 
 hotCtx hotNew(hotCallbacks *cb, std::shared_ptr<GOADB> goadb = {},
+              std::shared_ptr<Designspace> ds = {},
               std::shared_ptr<slogger> logger = {});
 
 /* hotNew() initializes the library and returns an opaque context that is

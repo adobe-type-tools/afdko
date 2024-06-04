@@ -103,6 +103,10 @@ __usage__ = __version__ + """
                     assignments from the third column of the GOADB
                     file without renaming the glyphs.
 
+-ds <designspace>   Specify path to variable font designspace file.
+                    This is currently only used to interpret axis
+                    location values specified in design units.
+
 -r                  Set release mode. This turns on subroutinization
                     and applies the GlyphOrderAndAliasDB file
 
@@ -315,6 +319,7 @@ kFMB = "FontMenuDBPath"
 # path to DB file for glyph order and alias DB file.
 # Example: "../../GlyphOrderAndAliasDB"
 kGOADB = "GlyphAliasDBPath"
+kDesignspace = "DesignspacePath"
 kNoNotdefOK = "AllowMissingNotdef"
 # Boolean: turns on subroutinization and aliasing,
 # and omits "Development" from name table Version string
@@ -387,6 +392,7 @@ kDefaultFeaturesList = ["features", "features.fea"]
 kDefaultOptionsFile = "current.fpr"
 kDefaultFMNDBPath = "FontMenuNameDB"
 GOADB_NAME = "GlyphOrderAndAliasDB"
+DESIGN_NAME = ".designspace"
 kAddStubDSIG = "AddStubDSIG"
 kShowFinalNames = "ShowFinalNames"
 kVerboseWarnings = "VerboseWarnings"
@@ -403,6 +409,7 @@ kMOTFOptions = {
     kGSUBStub: [kOptionNotSeen, "-fs", "-nfs"],
     kFMB: [kOptionNotSeen, "-mf", None],
     kGOADB: [kOptionNotSeen, "-gf", None],
+    kDesignspace: [kOptionNotSeen, "-ds", None],
     kRelease: [kOptionNotSeen, "-r", "-nr"],
     kUseSuppliedCFF: [kOptionNotSeen, "-dr", None],
     kDoSubr: [kOptionNotSeen, "-S", "-nS"],
@@ -460,7 +467,7 @@ kSkipOptions = {
 # the current dir to being relative to the fpr directory, and the
 # reverse when being read.
 kFileOptList = [kInputFont, kOutputFont, kFeature, kFMB, kGOADB, kMacCMAPPath,
-                kHUniCMAPPath, kUVSPath]
+                kHUniCMAPPath, kUVSPath, kDesignspace]
 
 # The prefix appended to option keys from the options file, so I
 # can differentiate the fields in MakeOTFParams which derived from
@@ -1091,6 +1098,26 @@ def getOptions(makeOTFParams, args):
                       "%s at '%s'." % (GOADB_NAME, file_path))
                 continue
             setattr(makeOTFParams, kFileOptPrefix + kGOADB, file_path)
+
+        # -ds
+        elif arg == kMOTFOptions[kDesignspace][1]:
+            kMOTFOptions[kDesignspace][0] = i + optionIndex
+            try:
+                file_path = args[i]
+            except IndexError:
+                file_path = None
+            if (file_path is None) or (file_path[0] == "-"):
+                error = 1
+                print("makeotf [Error] The '%s' option must be followed by "
+                      "the path to the %s file." % (arg, DESIGN_NAME))
+                continue
+            i += 1
+            if not os.path.exists(file_path):
+                error = 1
+                print("makeotf [Error] Could not find the "
+                      "%s file at '%s'." % (DESIGN_NAME, file_path))
+                continue
+            setattr(makeOTFParams, kFileOptPrefix + kDesignspace, file_path)
 
         # -r
         elif arg == kMOTFOptions[kRelease][1]:

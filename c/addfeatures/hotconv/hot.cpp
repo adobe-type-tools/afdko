@@ -146,6 +146,7 @@ void hotMakeSSC(hotCtx g, ctlSharedStmCallbacks &c) {
 }
 
 hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
+              std::shared_ptr<Designspace> ds,
               std::shared_ptr<slogger> logger) {
     time_t now;
     hotCtx g = new hotCtx_();
@@ -227,6 +228,9 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
 
     g->logger = std::make_shared<hotlogger>(g, logger);
     g->goadb = goadb;
+    g->ds = ds;
+    if (g->ds != nullptr)
+        g->ds->setLogger(g->logger);
 
     return g;
 }
@@ -352,6 +356,8 @@ const char *hotReadFont(hotCtx g, int flags, bool &isROS) {
     if (g->ctx.MVAR == nullptr)
         g->ctx.MVAR = new var_MVAR {};
     g->ctx.MVAR->setAxisCount(g->ctx.feat->getAxisCount());
+    if (g->ctx.axes != nullptr && g->ds != nullptr)
+        g->ds->checkAxes(*g->ctx.axes);
 
     /* Copy conversion flags */
     g->font.flags = 0;
@@ -759,11 +765,13 @@ static void setVBounds(hotCtx g) {
 static unsigned int dsigCnt = 0;
 
 static void hotReuse(hotCtx g) {
+    /*
     g->ctx.feat->dumpLocationDefs();
     if (g->ctx.locMap != nullptr)
         g->ctx.locMap->toerr();
     if (g->ctx.GDEFp != nullptr)
         g->ctx.GDEFp->ivs.toerr();
+    */
 
     g->hadError = false;
     g->convertFlags = 0;

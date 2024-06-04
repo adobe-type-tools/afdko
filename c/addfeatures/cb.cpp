@@ -89,6 +89,7 @@ struct cbCtx_ {
     hotMacData mac;       /* Mac-specific data from database */
 
     std::shared_ptr<GOADB> goadb;
+    std::shared_ptr<Designspace> ds;
     std::shared_ptr<slogger> logger;
 };
 
@@ -375,6 +376,11 @@ void cbAliasDBRead(cbCtx h, const char *filename) {
         cbFatal(h, "Problem reading GlyphOrderAndAliasDB file");
 }
 
+void cbDesignspaceRead(cbCtx h, const char *filename) {
+    if (!h->ds->read(filename))
+        cbFatal(h, "Problem reading Designspace file");
+}
+
 // ------------------------ Font Conversion Database -----------------------
 
 // [fcdb callback] Refill current database input file buffer.
@@ -474,7 +480,8 @@ cbCtx cbNew(const char *progname, const char *indir, const char *outdir,
     fcdbCallbacks fcdbcb;
 
     h->logger = slogger::getLogger("addfeatures");
-    h->goadb = std::make_shared<GOADB>(h->logger);  // XXX use final names?
+    h->goadb = std::make_shared<GOADB>(h->logger);
+    h->ds = std::make_shared<Designspace>(h->logger);
 
     /* Initialize context */
     h->progname = progname;
@@ -484,7 +491,7 @@ cbCtx cbNew(const char *progname, const char *indir, const char *outdir,
 
     h->dnactx = mainDnaCtx;
 
-    h->hot.ctx = hotNew(&h->hot.cb, h->goadb, h->logger);
+    h->hot.ctx = hotNew(&h->hot.cb, h->goadb, h->ds, h->logger);
     dnaINIT(mainDnaCtx, h->tmpbuf, 32, 32);
     h->mac.encoding = NULL;
     h->mac.cmapScript = HOT_CMAP_UNKNOWN;
