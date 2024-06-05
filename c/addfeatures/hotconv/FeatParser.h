@@ -1996,7 +1996,6 @@ public:
     antlr4::tree::TerminalNode *NAMELABEL();
     antlr4::tree::TerminalNode *EXTNAME();
     antlr4::tree::TerminalNode *STRVAL();
-    antlr4::tree::TerminalNode *AXISUNIT();
     antlr4::tree::TerminalNode *MARK();
 
 

@@ -35,10 +35,10 @@ ANON_v                      : 'anonymous' -> pushMode(Anon) ;
 mode Anon;
 
 A_WHITESPACE                : [ \t\r\n]+ -> skip ;
-A_LABEL                     : (NAMELABEL | EXTNAME | STRVAL | AXISUNIT | MARK) { anon_tag = getText(); } ;
+A_LABEL                     : (NAMELABEL | EXTNAME | STRVAL | MARK) { anon_tag = getText(); } ;
 A_LBRACE                    : '{' -> mode(AnonContent) ;
 
 mode AnonContent;
 
-A_CLOSE                     : '\r'? '\n}' [ \t]* (NAMELABEL | EXTNAME | STRVAL | AXISUNIT | MARK) [ \t]* ';' { verify_anon(getText()) }? -> popMode ;
+A_CLOSE                     : '\r'? '\n}' [ \t]* (NAMELABEL | EXTNAME | STRVAL | MARK) [ \t]* ';' { verify_anon(getText()) }? -> popMode ;
 A_LINE                      : '\r'? '\n' ~[\r\n]* ;
