@@ -561,7 +561,7 @@ label:
 ;
 
 tag:
-    NAMELABEL | EXTNAME | STRVAL | AXISUNIT | MARK     // MARK included for "feature mark"
+    NAMELABEL | EXTNAME | STRVAL | MARK     // MARK included for "feature mark"
 ;
 
 fixedNum:
