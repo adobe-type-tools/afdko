@@ -76,5 +76,6 @@ void CTL_CDECL cbWarning(cbCtx h, const char *fmt, ...);
 #define OTHERFLAGS_VERBOSE (1 << 15)
 #define OTHERFLAGS_FINAL_NAMES (1 << 16)
 #define OTHERFLAGS_LOOKUP_FINAL_NAMES (1 << 17)
+#define OTHERFLAGS_KEEP_MVAR (1 << 18)
 
 #endif  // ADDFEATURES_CB_H_

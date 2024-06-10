@@ -309,10 +309,11 @@ class VarValueRecord {
         std::swap(seenDefault, o.seenDefault);
         locationValues.swap(o.locationValues);
     }
-    bool addLocationValue(uint32_t locIndex, int32_t value, std::shared_ptr<slogger> logger) {
+    bool addLocationValue(uint32_t locIndex, int32_t value, std::shared_ptr<slogger> logger = nullptr) {
         if (locIndex == 0) {
             if (seenDefault) {
-                logger->msg(sERROR, "Duplicate values for default location");
+                if (logger != nullptr)
+                    logger->msg(sERROR, "Duplicate values for default location");
                 return false;
             } else {
                 defaultValue = value;
@@ -321,7 +322,7 @@ class VarValueRecord {
             }
         } else {
             const auto [it, success] = locationValues.emplace(locIndex, value);
-            if (!success)
+            if (!success && logger != nullptr)
                 logger->msg(sERROR, "Duplicate values for location");
             return success;
         }
@@ -334,9 +335,9 @@ class VarValueRecord {
     bool isVariable() const { return locationValues.size() > 0; }
     bool nonZero() const { return isVariable() || defaultValue != 0; }
     bool isInitialized() const { return isVariable() || seenDefault; }
-    std::set<uint32_t> getLocations() const {
+    std::set<uint32_t> getLocations(bool includeDefault = false) const {
         std::set<uint32_t> r;
-        if (seenDefault)
+        if (seenDefault && includeDefault)
             r.insert(0);
         for (auto i : locationValues)
             r.insert(i.first);
@@ -373,6 +374,13 @@ class VarValueRecord {
             assert(i->first == oi->first);
             r.locationValues.emplace(i->first, i->second - oi->second);
         }
+        return r;
+    }
+    VarValueRecord scaleBy(float s) {
+        VarValueRecord r;
+        r.addValue(roundf((float) defaultValue * s));
+        for (auto &[l, v] : locationValues)
+            r.addLocationValue(l, roundf((float) v * s));
         return r;
     }
     bool operator==(const VarValueRecord &rhs) const {
@@ -887,6 +895,11 @@ class var_MVAR {
     void addValue(ctlTag tag, VarLocationMap &vlm, const VarValueRecord &vvr,
                   std::shared_ptr<slogger> logger);
     bool hasValues() { return values.size() > 0; }
+    void reset() {
+        if (ivs != nullptr)
+            ivs->reset();
+        values.clear();
+    }
 
  private:
     uint16_t axisCount {0};

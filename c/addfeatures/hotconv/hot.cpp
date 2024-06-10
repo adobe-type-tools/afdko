@@ -405,8 +405,9 @@ const char *hotReadFont(hotCtx g, int flags, bool &isROS) {
         g->font.flags |= FI_FIXED_PITCH;
     }
     g->font.ItalicAngle = pflttofix(&top->ItalicAngle);
-    g->font.UnderlinePosition = top->UnderlinePosition;
-    g->font.UnderlineThickness = top->UnderlineThickness;
+    // XXX fix for variable
+    g->font.UnderlinePosition.addValue(top->UnderlinePosition);
+    g->font.UnderlineThickness.addValue(top->UnderlineThickness);
 
     if (top->sup.flags & ABF_ROS_FONT) {
         /* Copy CIDFont data */
@@ -538,84 +539,97 @@ static void prepWinData(hotCtx g) {
         /* Production font; synthesize Windows values using ideal algorithm */
 
         /* Set subscript scale to x=65% and y=60% lowered by 7.5% of em */
-        font->win.SubscriptXSize = (FWord)EM_SCALE(650);
-        font->win.SubscriptYSize = (FWord)EM_SCALE(600);
-        font->win.SubscriptYOffset = (FWord)EM_SCALE(75);
+        if (!font->win.SubscriptXSize.isInitialized())
+            font->win.SubscriptXSize.addValue(EM_SCALE(650));
+        if (!font->win.SubscriptYSize.isInitialized())
+            font->win.SubscriptYSize.addValue(EM_SCALE(600));
+        if (!font->win.SubscriptYOffset.isInitialized())
+            font->win.SubscriptYOffset.addValue(EM_SCALE(75));
 
         /* Set superscript scale to x=65% and y=60% raised by 35% of em */
-        font->win.SuperscriptXSize = font->win.SubscriptXSize;
-        font->win.SuperscriptYSize = font->win.SubscriptYSize;
-        font->win.SuperscriptYOffset = (FWord)EM_SCALE(350);
+        if (!font->win.SuperscriptXSize.isInitialized())
+            font->win.SuperscriptXSize = font->win.SubscriptXSize;
+        if (!font->win.SuperscriptYSize.isInitialized())
+            font->win.SuperscriptYSize = font->win.SubscriptYSize;
+        if (!font->win.SuperscriptYOffset.isInitialized())
+            font->win.SuperscriptYOffset.addValue(EM_SCALE(350));
 
         /* Use o-height and O-height (adjusted for overshoot) for x-height and
            cap-height, respectively, since this should give better results for
            italic and swash fonts as well as handling Roman */
         if (!font->win.XHeight.isInitialized()) {
-            gid = mapUV2GID(g, UV_PRO_X_HEIGHT_1 /* o */);
-            if (gid == GID_UNDEF) {
-                gid = mapUV2GID(g, UV_PRO_X_HEIGHT_2 /* Osmall */);
+            gid = mapUV2GID(g, UV_PRO_X_HEIGHT /* o */);
+            if (gid != GID_UNDEF) {
+                auto &gm = *g->ctx.gm;
+                font->win.XHeight = std::move(gm.addVVR(gm.getBBoxTop(gid), gm.getBBoxBottom(gid)));
+            } else {
+                font->win.XHeight.addValue(0);
             }
-            if (gid != GID_UNDEF)
-                bbox = hotDefaultGlyphBBox(g, gid);
-            // XXX update for variable bounding box
-            font->win.XHeight.addValue(
-                (gid != GID_UNDEF) ? bbox.top + bbox.bottom : 0);
         }
         if (!font->win.CapHeight.isInitialized()) {
             gid = mapUV2GID(g, UV_PRO_CAP_HEIGHT /* O */);
-            // XXX update for variable bounding box
-            if (gid != GID_UNDEF)
-                bbox = hotDefaultGlyphBBox(g, gid);
-            font->win.CapHeight.addValue(
-                (gid != GID_UNDEF) ? bbox.top + bbox.bottom : 0);
+            if (gid != GID_UNDEF) {
+                auto &gm = *g->ctx.gm;
+                font->win.CapHeight = std::move(gm.addVVR(gm.getBBoxTop(gid), gm.getBBoxBottom(gid)));
+            } else {
+                font->win.CapHeight.addValue(0);
+            }
         }
 
         /* Set strikeout size to underline thickness and position it at 60% of
            x-height, if non-zero, else 22% of em.  */
-        font->win.StrikeOutSize = font->UnderlineThickness;
-        // XXX decide
-        font->win.StrikeOutPosition =
-            (font->win.XHeight.getDefault() != 0)
-                                     ? font->win.XHeight.getDefault() * 6L / 10
-                                     : (FWord)EM_SCALE(220);
+        if (!font->win.StrikeoutSize.isInitialized())
+            font->win.StrikeoutSize = font->UnderlineThickness;
+        if (!font->win.StrikeoutPosition.isInitialized()) {
+            if (font->win.XHeight.getDefault() != 0) {
+                font->win.StrikeoutPosition = std::move(font->win.XHeight.scaleBy(0.6));
+            } else {
+                font->win.StrikeoutPosition.addValue((FWord)EM_SCALE(220));
+            }
+        }
     }
 
     if (font->ItalicAngle == 0) {
-        font->win.SubscriptXOffset = 0;
-        font->win.SuperscriptXOffset = 0;
+        if (!font->win.SubscriptXOffset.isInitialized())
+            font->win.SubscriptXOffset.addValue(0);
+        if (!font->win.SuperscriptXOffset.isInitialized())
+            font->win.SuperscriptXOffset.addValue(0);
     } else {
         /* Adjust position for italic angle */
-        double tangent = tan(FIX2DBL(-font->ItalicAngle) / RAD_DEG);
-        font->win.SubscriptXOffset =
-            (short)RND(-font->win.SubscriptYOffset * tangent);
-        font->win.SuperscriptXOffset =
-            (short)RND(font->win.SuperscriptYOffset * tangent);
+        float tangent = tan(FIX2DBL(-font->ItalicAngle) / RAD_DEG);
+        if (!font->win.SubscriptXOffset.isInitialized())
+            font->win.SubscriptXOffset = std::move(font->win.SubscriptYOffset.scaleBy(-tangent));
+        if (!font->win.SuperscriptXOffset.isInitialized())
+            font->win.SuperscriptXOffset = std::move(font->win.SuperscriptYOffset.scaleBy(tangent));
     }
 
     /* Set win ascent/descent */
-    if (font->winAscent.isInitialized()) {
-        font->win.ascent = font->winAscent.getDefault();
-    } else {
-        font->win.ascent = 0;
-        if (font->bbox.top > 0) {
-            font->win.ascent = font->bbox.top;
+    if (!font->win.ascent.isInitialized()) {
+        if (g->ctx.feat->getAxisCount() == 0 && font->bbox.top > 0) {
+            font->win.ascent.addValue(font->bbox.top);
+        } else {
+            font->win.ascent = std::move(g->ctx.gm->getBBoxTop());
         }
     }
-    if (font->winDescent.isInitialized()) {
-        font->win.descent = font->winDescent.getDefault();
-    } else {
-        font->win.descent = 0;
-        if (font->bbox.bottom < 0) {
-            font->win.descent = -font->bbox.bottom;
+    if (!font->win.descent.isInitialized()) {
+        if (g->ctx.feat->getAxisCount() == 0 && font->bbox.bottom < 0) {
+            font->win.descent.addValue(-font->bbox.bottom);
+        } else {
+            font->win.descent = std::move(g->ctx.gm->getBBoxBottom().scaleBy(-1.0));
         }
     }
-    intLeading = font->win.ascent + font->win.descent - font->unitsPerEm;
+    intLeading = font->win.ascent.getDefault() + font->win.descent.getDefault() - font->unitsPerEm;
     if (intLeading < 0) {
         /* Warn about negative internal leading */
         g->logger->log(sWARNING, "Negative internal leading: win.ascent + win.descent < unitsPerEm");
     }
 
-    /* Set typo ascender/descender/linegap */
+    /* Set typo ascender/descender/linegap
+     * This code intentionally uses metrics from the default instance only
+     * when choosing values for a variable font. It was felt that differing
+     * line spacing for different instances should be a conscious choice on
+     * the part of the designer.
+     */
     if (IS_ROS(g)) {
         if (!font->TypoAscender.isInitialized() || !font->TypoDescender.isInitialized()) {
             gid = mapUV2GID(g, UV_VERT_BOUNDS);
@@ -639,14 +653,12 @@ static void prepWinData(hotCtx g) {
                 bbox = hotDefaultGlyphBBox(g, gid);
             short dHeight = (gid == GID_UNDEF) ? 0 : bbox.top;
 
-            // XXX fix for variable
             if (dHeight > font->win.CapHeight.getDefault()) {
                 font->TypoAscender.addValue(dHeight);
             } else {
                 font->TypoAscender = font->win.CapHeight;
             }
 
-            // XXX fail out for variable?
             if (font->TypoAscender.getDefault() == 0) {
                 font->TypoAscender.addValue(ABS(font->bbox.top), true);
             }
@@ -723,7 +735,10 @@ static void setVBounds(hotCtx g) {
     maxAdv.v = 0;
     maxExtent.v = 0;
 
-    /* Compute vertical extents */
+    /* Compute vertical extents
+     * These values in vhea do not have MVAR keys, so we just compute
+     * them for the default instance
+     */
     for (size_t i = 0; i < g->glyphs.size(); i++) {
         hotGlyphInfo &glyph = g->glyphs[i];
         /* If glyph is a repl in the 'vrt2' feature, its vAdv has already been
@@ -804,6 +819,9 @@ char *refillDSIG(void *ctx, long *count, unsigned long tag) {
 
 /* Convert to OTF */
 void hotConvert(hotCtx g) {
+    if (!(g->convertFlags & HOT_KEEP_MVAR) && g->ctx.MVAR != nullptr)
+        g->ctx.MVAR->reset();
+
     mapFill(g);
     g->ctx.feat->fill();
 

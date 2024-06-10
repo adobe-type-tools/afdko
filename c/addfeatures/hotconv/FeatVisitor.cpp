@@ -1013,17 +1013,28 @@ antlrcpp::Any FeatVisitor::visitHhea(FeatParser::HheaContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
 
-    assert(ctx->NUM() != nullptr);
-    int16_t v = getNum<int16_t>(TOK(ctx->NUM())->getText(), 10);
-    if ( TOK(ctx->CARET_OFFSET()) != nullptr )
-        hheaSetCaretOffset(fc->g, v);
-    else if ( TOK(ctx->ASCENDER()) != nullptr )
-        fc->g->font.hheaAscender = v;
-    else if ( TOK(ctx->DESCENDER()) != nullptr )
-        fc->g->font.hheaDescender = v;
-    else {
-        assert(TOK(ctx->LINE_GAP()) != nullptr);
-        fc->g->font.hheaLineGap = v;
+    if (ctx->NUM() != nullptr) {
+        int16_t v = getNum<int16_t>(TOK(ctx->NUM())->getText(), 10);
+        if ( TOK(ctx->ASCENDER()) != nullptr )
+            fc->g->font.hheaAscender = v;
+        else if ( TOK(ctx->DESCENDER()) != nullptr )
+            fc->g->font.hheaDescender = v;
+        else {
+            assert(TOK(ctx->LINE_GAP()) != nullptr);
+            fc->g->font.hheaLineGap = v;
+        }
+    } else {
+        assert(ctx->singleValueLiteral() != nullptr);
+        VarValueRecord vvr;
+        getSingleValueLiteral(ctx->singleValueLiteral(), vvr);
+        if ( TOK(ctx->CARET_OFFSET()) != nullptr )
+            fc->g->font.hheaCaretOffset = std::move(vvr);
+        else if ( TOK(ctx->CARET_SLOPE_RISE()) != nullptr )
+            fc->g->font.hheaCaretSlopeRise = std::move(vvr);
+        else {
+            assert(ctx->CARET_SLOPE_RUN() != nullptr);
+            fc->g->font.hheaCaretSlopeRun = std::move(vvr);
+        }
     }
     return nullptr;
 }
@@ -1053,9 +1064,15 @@ antlrcpp::Any FeatVisitor::visitVhea(FeatParser::VheaContext *ctx) {
         fc->g->font.VertTypoAscender = std::move(vvr);
     else if ( TOK(ctx->VERT_TYPO_DESCENDER()) != nullptr )
         fc->g->font.VertTypoDescender = std::move(vvr);
-    else {
-        assert(TOK(ctx->VERT_TYPO_LINE_GAP()) != nullptr);
+    else if (TOK(ctx->VERT_TYPO_LINE_GAP()) != nullptr)
         fc->g->font.VertTypoLineGap = std::move(vvr);
+    else if (TOK(ctx->CARET_OFFSET()) != nullptr)
+        fc->g->font.vheaCaretOffset = std::move(vvr);
+    else if (TOK(ctx->CARET_SLOPE_RISE()) != nullptr)
+        fc->g->font.vheaCaretSlopeRise = std::move(vvr);
+    else {
+        assert(TOK(ctx->CARET_SLOPE_RUN()) != nullptr);
+        fc->g->font.vheaCaretSlopeRun = std::move(vvr);
     }
     return nullptr;
 }
@@ -1315,14 +1332,34 @@ antlrcpp::Any FeatVisitor::visitOs_2(FeatParser::Os_2Context *ctx) {
         else if ( ctx->TYPO_LINE_GAP() != nullptr )
             fc->g->font.TypoLineGap = std::move(vvr);
         else if ( ctx->WIN_ASCENT() != nullptr )
-            fc->g->font.winAscent = std::move(vvr);
+            fc->g->font.win.ascent = std::move(vvr);
         else if ( ctx->WIN_DESCENT() != nullptr )
-            fc->g->font.winDescent = std::move(vvr);
+            fc->g->font.win.descent = std::move(vvr);
         else if ( ctx->X_HEIGHT() != nullptr )
             fc->g->font.win.XHeight = std::move(vvr);
-        else {
-            assert(ctx->CAP_HEIGHT() != nullptr);
+        else if ( ctx->CAP_HEIGHT() != nullptr )
             fc->g->font.win.CapHeight = std::move(vvr);
+        else if ( ctx->SUBSCRIPT_X_SIZE() != nullptr )
+            fc->g->font.win.SubscriptXSize = std::move(vvr);
+        else if ( ctx->SUBSCRIPT_X_OFFSET() != nullptr )
+            fc->g->font.win.SubscriptXOffset = std::move(vvr);
+        else if ( ctx->SUBSCRIPT_Y_SIZE() != nullptr )
+            fc->g->font.win.SubscriptYSize = std::move(vvr);
+        else if ( ctx->SUBSCRIPT_Y_OFFSET() != nullptr )
+            fc->g->font.win.SubscriptYOffset = std::move(vvr);
+        else if ( ctx->SUPERSCRIPT_X_SIZE() != nullptr )
+            fc->g->font.win.SuperscriptXSize = std::move(vvr);
+        else if ( ctx->SUPERSCRIPT_X_OFFSET() != nullptr )
+            fc->g->font.win.SuperscriptXOffset = std::move(vvr);
+        else if ( ctx->SUPERSCRIPT_Y_SIZE() != nullptr )
+            fc->g->font.win.SuperscriptYSize = std::move(vvr);
+        else if ( ctx->SUPERSCRIPT_Y_OFFSET() != nullptr )
+            fc->g->font.win.SuperscriptYOffset = std::move(vvr);
+        else if ( ctx->STRIKEOUT_SIZE() != nullptr )
+            fc->g->font.win.StrikeoutSize = std::move(vvr);
+        else {
+            assert(ctx->STRIKEOUT_POSITION() != nullptr);
+            fc->g->font.win.StrikeoutPosition = std::move(vvr);
         }
     } else if ( ctx->unum != nullptr ) {
         uint16_t v = getNum<uint16_t>(TOK(ctx->unum)->getText(), 10);

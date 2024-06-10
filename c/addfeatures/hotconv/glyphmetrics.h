@@ -45,6 +45,7 @@ class GlyphMetrics {
         auto locations = vvr.getLocations();
         processGlyphs(gids, locations);
     }
+
     InstMetrics defaultMetrics(uint16_t gid) {
         auto gi = glyphData.find(gid);
         assert(gi != glyphData.end());
@@ -52,6 +53,37 @@ class GlyphMetrics {
         assert(li != gi->second.end());
         return li->second;
     }
+
+    VarValueRecord getBBoxTop(uint16_t gid) {
+        auto gi = glyphData.find(gid);
+        assert(gi != glyphData.end());
+        VarValueRecord r;
+        for (auto &[l, im] : gi->second)
+            r.addLocationValue(l, im.top);
+        return r;
+    }
+    VarValueRecord getBBoxTop() {
+        VarValueRecord r;
+        for (auto &[l, im] : fontData)
+            r.addLocationValue(l, im.top);
+        return r;
+    }
+
+    VarValueRecord getBBoxBottom(uint16_t gid) {
+        auto gi = glyphData.find(gid);
+        assert(gi != glyphData.end());
+        VarValueRecord r;
+        for (auto &[l, im] : gi->second)
+            r.addLocationValue(l, im.bottom);
+        return r;
+    }
+    VarValueRecord getBBoxBottom() {
+        VarValueRecord r;
+        for (auto &[l, im] : fontData)
+            r.addLocationValue(l, im.bottom);
+        return r;
+    }
+
     VarValueRecord addVVR(const VarValueRecord &a, const VarValueRecord &b) {
         return ensureLocations(a, b.getLocations()).addSame(ensureLocations(b, a.getLocations()));
     }

@@ -22,10 +22,6 @@ void MVARWrite(hotCtx g) {
     g->ctx.MVAR->write(g->vw);
 }
 
-void MVARAddValue(hotCtx g, ctlTag tag, const VarValueRecord &vvr) {
-    g->ctx.MVAR->addValue(tag, *(g->ctx.locMap), vvr, g->logger);
-}
-
 void MVARReuse(hotCtx g) {
     delete g->ctx.MVAR;
     g->ctx.MVAR = nullptr;

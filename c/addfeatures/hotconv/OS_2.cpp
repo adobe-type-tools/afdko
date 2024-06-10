@@ -327,18 +327,28 @@ int OS_2Fill(hotCtx g) {
             h->tbl.fsType = EMBED_PRINT_AND_VIEW;
         }
     }
-    h->tbl.ySubscriptXSize = font->win.SubscriptXSize;
-    h->tbl.ySubscriptYSize = font->win.SubscriptYSize;
-    h->tbl.ySubscriptXOffset = font->win.SubscriptXOffset;
-    h->tbl.ySubscriptYOffset = font->win.SubscriptYOffset;
+    h->tbl.ySubscriptXSize = font->win.SubscriptXSize.getDefault();
+    g->ctx.MVAR->addValue(MVAR_sbxs_tag, *g->ctx.locMap, font->win.SubscriptXSize, g->logger);
+    h->tbl.ySubscriptYSize = font->win.SubscriptYSize.getDefault();
+    g->ctx.MVAR->addValue(MVAR_sbys_tag, *g->ctx.locMap, font->win.SubscriptYSize, g->logger);
+    h->tbl.ySubscriptXOffset = font->win.SubscriptXOffset.getDefault();
+    g->ctx.MVAR->addValue(MVAR_sbxo_tag, *g->ctx.locMap, font->win.SubscriptXOffset, g->logger);
+    h->tbl.ySubscriptYOffset = font->win.SubscriptYOffset.getDefault();
+    g->ctx.MVAR->addValue(MVAR_sbyo_tag, *g->ctx.locMap, font->win.SubscriptYOffset, g->logger);
 
-    h->tbl.ySuperscriptXSize = font->win.SuperscriptXSize;
-    h->tbl.ySuperscriptYSize = font->win.SuperscriptYSize;
-    h->tbl.ySuperscriptXOffset = font->win.SuperscriptXOffset;
-    h->tbl.ySuperscriptYOffset = font->win.SuperscriptYOffset;
+    h->tbl.ySuperscriptXSize = font->win.SuperscriptXSize.getDefault();
+    g->ctx.MVAR->addValue(MVAR_spxs_tag, *g->ctx.locMap, font->win.SuperscriptXSize, g->logger);
+    h->tbl.ySuperscriptYSize = font->win.SuperscriptYSize.getDefault();
+    g->ctx.MVAR->addValue(MVAR_spys_tag, *g->ctx.locMap, font->win.SuperscriptYSize, g->logger);
+    h->tbl.ySuperscriptXOffset = font->win.SuperscriptXOffset.getDefault();
+    g->ctx.MVAR->addValue(MVAR_spxo_tag, *g->ctx.locMap, font->win.SuperscriptXOffset, g->logger);
+    h->tbl.ySuperscriptYOffset = font->win.SuperscriptYOffset.getDefault();
+    g->ctx.MVAR->addValue(MVAR_spyo_tag, *g->ctx.locMap, font->win.SuperscriptYOffset, g->logger);
 
-    h->tbl.yStrikeoutSize = font->win.StrikeOutSize;
-    h->tbl.yStrikeoutPosition = font->win.StrikeOutPosition;
+    h->tbl.yStrikeoutSize = font->win.StrikeoutSize.getDefault();
+    g->ctx.MVAR->addValue(MVAR_strs_tag, *g->ctx.locMap, font->win.StrikeoutSize, g->logger);
+    h->tbl.yStrikeoutPosition = font->win.StrikeoutPosition.getDefault();
+    g->ctx.MVAR->addValue(MVAR_stro_tag, *g->ctx.locMap, font->win.StrikeoutPosition, g->logger);
 
     if (!h->seen[kPanose]) {
         setPanose(g, h);
@@ -386,8 +396,10 @@ int OS_2Fill(hotCtx g) {
     h->tbl.sTypoLineGap = font->TypoLineGap.getDefault();
     g->ctx.MVAR->addValue(MVAR_hlgp_tag, *g->ctx.locMap, font->TypoLineGap, g->logger);
 
-    h->tbl.usWinAscent = font->win.ascent;
-    h->tbl.usWinDescent = font->win.descent;
+    h->tbl.usWinAscent = font->win.ascent.getDefault();
+    g->ctx.MVAR->addValue(MVAR_hcla_tag, *g->ctx.locMap, font->win.ascent, g->logger);
+    h->tbl.usWinDescent = font->win.descent.getDefault();
+    g->ctx.MVAR->addValue(MVAR_hcld_tag, *g->ctx.locMap, font->win.descent, g->logger);
 
     /* Version 2 fields */
     h->tbl.sXHeight = font->win.XHeight.getDefault();
