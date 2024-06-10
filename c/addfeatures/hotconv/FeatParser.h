@@ -29,22 +29,26 @@ public:
     HA_BTL = 64, VA_BTL = 65, HA_BSL = 66, VA_BSL = 67, GDEF = 68, GLYPH_CLASS_DEF = 69, 
     ATTACH = 70, LIG_CARET_BY_POS = 71, LIG_CARET_BY_IDX = 72, HEAD = 73, 
     FONT_REVISION = 74, HHEA = 75, ASCENDER = 76, DESCENDER = 77, LINE_GAP = 78, 
-    CARET_OFFSET = 79, NAME = 80, NAMEID = 81, OS_2 = 82, FS_TYPE = 83, 
-    FS_TYPE_v = 84, OS2_LOWER_OP_SIZE = 85, OS2_UPPER_OP_SIZE = 86, PANOSE = 87, 
-    TYPO_ASCENDER = 88, TYPO_DESCENDER = 89, TYPO_LINE_GAP = 90, WIN_ASCENT = 91, 
-    WIN_DESCENT = 92, X_HEIGHT = 93, CAP_HEIGHT = 94, WEIGHT_CLASS = 95, 
-    WIDTH_CLASS = 96, VENDOR = 97, UNICODE_RANGE = 98, CODE_PAGE_RANGE = 99, 
-    FAMILY_CLASS = 100, STAT = 101, ELIDED_FALLBACK_NAME = 102, ELIDED_FALLBACK_NAME_ID = 103, 
-    DESIGN_AXIS = 104, AXIS_VALUE = 105, FLAG = 106, LOCATION = 107, AXIS_EAVN = 108, 
-    AXIS_OSFA = 109, VHEA = 110, VERT_TYPO_ASCENDER = 111, VERT_TYPO_DESCENDER = 112, 
-    VERT_TYPO_LINE_GAP = 113, VMTX = 114, VERT_ORIGIN_Y = 115, VERT_ADVANCE_Y = 116, 
-    LCBRACE = 117, RCBRACE = 118, LBRACKET = 119, RBRACKET = 120, LPAREN = 121, 
-    RPAREN = 122, HYPHEN = 123, PLUS = 124, SEMI = 125, EQUALS = 126, MARKER = 127, 
-    COMMA = 128, COLON = 129, STRVAL = 130, LNAME = 131, GCLASS = 132, AXISUNIT = 133, 
-    CID = 134, ESCGNAME = 135, NAMELABEL = 136, EXTNAME = 137, POINTNUM = 138, 
-    NUMEXT = 139, NUMOCT = 140, NUM = 141, A_WHITESPACE = 142, A_LABEL = 143, 
-    A_LBRACE = 144, A_CLOSE = 145, A_LINE = 146, I_WHITESPACE = 147, I_RPAREN = 148, 
-    IFILE = 149, I_LPAREN = 150
+    CARET_OFFSET = 79, CARET_SLOPE_RISE = 80, CARET_SLOPE_RUN = 81, NAME = 82, 
+    NAMEID = 83, OS_2 = 84, FS_TYPE = 85, FS_TYPE_v = 86, OS2_LOWER_OP_SIZE = 87, 
+    OS2_UPPER_OP_SIZE = 88, PANOSE = 89, TYPO_ASCENDER = 90, TYPO_DESCENDER = 91, 
+    TYPO_LINE_GAP = 92, WIN_ASCENT = 93, WIN_DESCENT = 94, X_HEIGHT = 95, 
+    CAP_HEIGHT = 96, SUBSCRIPT_X_SIZE = 97, SUBSCRIPT_X_OFFSET = 98, SUBSCRIPT_Y_SIZE = 99, 
+    SUBSCRIPT_Y_OFFSET = 100, SUPERSCRIPT_X_SIZE = 101, SUPERSCRIPT_X_OFFSET = 102, 
+    SUPERSCRIPT_Y_SIZE = 103, SUPERSCRIPT_Y_OFFSET = 104, STRIKEOUT_SIZE = 105, 
+    STRIKEOUT_POSITION = 106, WEIGHT_CLASS = 107, WIDTH_CLASS = 108, VENDOR = 109, 
+    UNICODE_RANGE = 110, CODE_PAGE_RANGE = 111, FAMILY_CLASS = 112, STAT = 113, 
+    ELIDED_FALLBACK_NAME = 114, ELIDED_FALLBACK_NAME_ID = 115, DESIGN_AXIS = 116, 
+    AXIS_VALUE = 117, FLAG = 118, LOCATION = 119, AXIS_EAVN = 120, AXIS_OSFA = 121, 
+    VHEA = 122, VERT_TYPO_ASCENDER = 123, VERT_TYPO_DESCENDER = 124, VERT_TYPO_LINE_GAP = 125, 
+    VMTX = 126, VERT_ORIGIN_Y = 127, VERT_ADVANCE_Y = 128, LCBRACE = 129, 
+    RCBRACE = 130, LBRACKET = 131, RBRACKET = 132, LPAREN = 133, RPAREN = 134, 
+    HYPHEN = 135, PLUS = 136, SEMI = 137, EQUALS = 138, MARKER = 139, COMMA = 140, 
+    COLON = 141, STRVAL = 142, LNAME = 143, GCLASS = 144, AXISUNIT = 145, 
+    CID = 146, ESCGNAME = 147, NAMELABEL = 148, EXTNAME = 149, POINTNUM = 150, 
+    NUMEXT = 151, NUMOCT = 152, NUM = 153, A_WHITESPACE = 154, A_LABEL = 155, 
+    A_LBRACE = 156, A_CLOSE = 157, A_LINE = 158, I_WHITESPACE = 159, I_RPAREN = 160, 
+    IFILE = 161, I_LPAREN = 162
   };
 
   enum {
@@ -1312,10 +1316,13 @@ public:
     HheaContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NUM();
-    antlr4::tree::TerminalNode *CARET_OFFSET();
     antlr4::tree::TerminalNode *ASCENDER();
     antlr4::tree::TerminalNode *DESCENDER();
     antlr4::tree::TerminalNode *LINE_GAP();
+    SingleValueLiteralContext *singleValueLiteral();
+    antlr4::tree::TerminalNode *CARET_OFFSET();
+    antlr4::tree::TerminalNode *CARET_SLOPE_RISE();
+    antlr4::tree::TerminalNode *CARET_SLOPE_RUN();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1366,6 +1373,9 @@ public:
     antlr4::tree::TerminalNode *VERT_TYPO_ASCENDER();
     antlr4::tree::TerminalNode *VERT_TYPO_DESCENDER();
     antlr4::tree::TerminalNode *VERT_TYPO_LINE_GAP();
+    antlr4::tree::TerminalNode *CARET_OFFSET();
+    antlr4::tree::TerminalNode *CARET_SLOPE_RISE();
+    antlr4::tree::TerminalNode *CARET_SLOPE_RUN();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1476,6 +1486,16 @@ public:
     antlr4::tree::TerminalNode *WIN_DESCENT();
     antlr4::tree::TerminalNode *X_HEIGHT();
     antlr4::tree::TerminalNode *CAP_HEIGHT();
+    antlr4::tree::TerminalNode *SUBSCRIPT_X_SIZE();
+    antlr4::tree::TerminalNode *SUBSCRIPT_X_OFFSET();
+    antlr4::tree::TerminalNode *SUBSCRIPT_Y_SIZE();
+    antlr4::tree::TerminalNode *SUBSCRIPT_Y_OFFSET();
+    antlr4::tree::TerminalNode *SUPERSCRIPT_X_SIZE();
+    antlr4::tree::TerminalNode *SUPERSCRIPT_X_OFFSET();
+    antlr4::tree::TerminalNode *SUPERSCRIPT_Y_SIZE();
+    antlr4::tree::TerminalNode *SUPERSCRIPT_Y_OFFSET();
+    antlr4::tree::TerminalNode *STRIKEOUT_SIZE();
+    antlr4::tree::TerminalNode *STRIKEOUT_POSITION();
     SingleValueLiteralContext *singleValueLiteral();
     antlr4::tree::TerminalNode *FS_TYPE();
     antlr4::tree::TerminalNode *FS_TYPE_v();

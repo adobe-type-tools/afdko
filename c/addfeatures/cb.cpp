@@ -717,6 +717,9 @@ void cbConvert(cbCtx h, int flags, const char *clientVers, const char *infile,
     if (otherflags & OTHERFLAGS_LOOKUP_FINAL_NAMES) {
         hotConvertFlags |= HOT_LOOKUP_FINAL_NAMES;
     }
+    if (otherflags & OTHERFLAGS_KEEP_MVAR) {
+        hotConvertFlags |= HOT_KEEP_MVAR;
+    }
 
     hotSetConvertFlags(h->hot.ctx, hotConvertFlags);
 

@@ -26,8 +26,6 @@ void hheaWrite(hotCtx g);
 void hheaReuse(hotCtx g);
 void hheaFree(hotCtx g);
 
-void hheaSetCaretOffset(hotCtx g, int16_t caretOffset);
-
 void HVARNew(hotCtx g);
 int HVARFill(hotCtx g);
 void HVARWrite(hotCtx g);

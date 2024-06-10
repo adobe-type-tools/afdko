@@ -579,7 +579,8 @@ void hotConvert(hotCtx g);
 #define HOT_DO_NOT_OPTIMIZE_KERN      (1 << 9) /* Do not use left side kern class 0 for non-zero kern values. Saves a a few hundred to thousand bytes, but confuses some developers. */
 #define HOT_ADD_STUB_DSIG             (1 << 10)
 #define HOT_CONVERT_FINAL_NAMES       (1 << 12) /* When showing error messages, use final names rather than source names. */
-#define HOT_LOOKUP_FINAL_NAMES       (1 << 13) /* When looking for unicode mappings in GOADB files use final names rather than source names. */
+#define HOT_LOOKUP_FINAL_NAMES        (1 << 13) /* When looking for unicode mappings in GOADB files use final names rather than source names. */
+#define HOT_KEEP_MVAR                 (1 << 14) /* When loading a pre-existing MVAR table, keep any values that aren't overridden */
 
 /* hotFree() destroys the library context and all the resources allocated to
    it. It must be the last function called by a client of the library. */

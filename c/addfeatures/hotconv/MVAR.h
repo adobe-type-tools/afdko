@@ -14,6 +14,4 @@ void MVARWrite(hotCtx g);
 void MVARReuse(hotCtx g);
 void MVARFree(hotCtx g);
 
-void MVARAddValue(hotCtx g, ctlTag tag, const VarValueRecord &vvr);
-
 #endif  // ADDFEATURES_HOTCONV_MVAR_H_

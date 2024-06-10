@@ -127,6 +127,8 @@ static void printUsage(void) {
         "    non-zero left side kern classes. Using the optimization saves hundreds\n"
         "    to thousands of bytes and is the default behavior, but causes kerning to\n"
         "    not be seen by some applications.\n"
+        "-mvar : Keep values (not otherwise overwritten) in the MVAR table of the\n"
+        "    source font.\n"
         "-V : Show warnings about common, but usually not problematic, issues such as\n"
         "    a glyph having conflicting GDEF classes because it is used in more than\n"
         "    one class type in a layout table. Example: a glyph used as a base in one\n"
@@ -375,23 +377,20 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                             convert.licenseID = argv[++i];
                         } else if (!strcmp(arg, "-lookupFinal")) {
                             convert.otherflags |= OTHERFLAGS_LOOKUP_FINAL_NAMES;
-                            break;
                         } else {
                             cbFatal(cbctx, "unrecognized option (%s)", arg);
                         }
                         break;
 
                     case 'm': /* Font conversion database */
-                        switch (arg[2]) {
-                            case 'f': /* [-c] CMap directory */
-                                if (arg[3] != '\0' || argsleft == 0) {
-                                    showUsage();
-                                }
-                                cbFCDBRead(cbctx, argv[++i]);
-                                break;
-
-                            default:
-                                cbFatal(cbctx, "unrecognized option (%s)", arg);
+                        if (!strcmp(arg, "-mf")) {
+                            if (argsleft == 0)
+                                showUsage();
+                            cbFCDBRead(cbctx, argv[++i]);
+                        } else if (!strcmp(arg, "-mvar")) {
+                            convert.otherflags |= OTHERFLAGS_KEEP_MVAR;
+                        } else {
+                            cbFatal(cbctx, "unrecognized option (%s)", arg);
                         }
                         break;
 

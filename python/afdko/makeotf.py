@@ -266,6 +266,9 @@ __usage__ = __version__ + """
 -addDSIG,-omitDSIG  Add or omit minimal empty DSIG table. This is added
                     by default in release mode.
 
+-mvar               If the source font has an MVAR table, keep any values
+                    it contains that are not otherwise overwritten.
+
 -V                  Show warnings about common, but usually not
                     problematic issues, such a glyph being unhinted,
                     or having conflicting GDEF classes because it is used in
@@ -396,6 +399,7 @@ DESIGN_NAME = ".designspace"
 kAddStubDSIG = "AddStubDSIG"
 kShowFinalNames = "ShowFinalNames"
 kVerboseWarnings = "VerboseWarnings"
+kMVAR = "MVAR"
 kOptionNotSeen = 99
 
 kMOTFOptions = {
@@ -440,6 +444,7 @@ kMOTFOptions = {
     kAddStubDSIG: [kOptionNotSeen, "-addDSIG", "-omitDSIG"],
     kShowFinalNames: [kOptionNotSeen, "-showFinal", None],
     kVerboseWarnings: [kOptionNotSeen, "-V", "-nV"],
+    kMVAR: [kOptionNotSeen, "-mvar", None],
 }
 
 # The options which should ONLY be passed to tx
@@ -1401,6 +1406,11 @@ def getOptions(makeOTFParams, args):
                     kFileOptPrefix + kSuppressKernOptimization,
                     None)
 
+        elif arg == kMOTFOptions[kMVAR][1]:
+            kMOTFOptions[kMVAR][0] = i + optionIndex
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kMVAR, 'true')
+
         elif arg == kMOTFOptions[kLicenseCode][1]:
             kMOTFOptions[kLicenseCode][0] = i + optionIndex
             try:
@@ -2312,6 +2322,11 @@ def adjustPaths(makeOTFParams):
     if goadbFilePath:
         goadbFilePath = os.path.abspath(goadbFilePath)
         setattr(makeOTFParams, kFileOptPrefix + kGOADB, goadbFilePath)
+
+    dsFilePath = getattr(makeOTFParams, kFileOptPrefix + kDesignspace)
+    if dsFilePath:
+        dsFilePath = os.path.abspath(dsFilePath)
+        setattr(makeOTFParams, kFileOptPrefix + kDesignspace, dsFilePath)
 
     maccmapFilePath = getattr(makeOTFParams, kFileOptPrefix + kMacCMAPPath)
     if maccmapFilePath:
