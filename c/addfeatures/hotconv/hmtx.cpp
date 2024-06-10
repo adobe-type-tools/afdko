@@ -112,16 +112,25 @@ int hheaFill(hotCtx g) {
     header.minRightSideBearing = g->font.minBearing.right;
     header.xMaxExtent = g->font.maxExtent.h;
 
-    if (g->font.ItalicAngle == 0) {
-        header.caretSlopeRise = 1;
-        header.caretSlopeRun = 0;
+    if (g->font.hheaCaretOffset.isInitialized()) {
+        header.caretOffset = g->font.hheaCaretOffset.getDefault();
+        g->ctx.MVAR->addValue(MVAR_hcof_tag, *g->ctx.locMap, g->font.hheaCaretOffset, g->logger);
     } else {
-        header.caretSlopeRise = 1000;
-        header.caretSlopeRun =
-            (short)RND(tan(FIX2DBL(-g->font.ItalicAngle) / RAD_DEG) * 1000);
-    }
-    if (header.caretOffset == SHRT_MAX) {
         header.caretOffset = (g->font.ItalicAngle == 0) ? 0 : calcCaretOffset(g);
+    }
+
+    if (g->font.hheaCaretSlopeRise.isInitialized()) {
+        header.caretSlopeRise = g->font.hheaCaretSlopeRise.getDefault();
+        g->ctx.MVAR->addValue(MVAR_hcrs_tag, *g->ctx.locMap, g->font.hheaCaretSlopeRise, g->logger);
+    } else {
+        header.caretSlopeRise = (g->font.ItalicAngle == 0) ? 1 : 1000;
+    }
+
+    if (g->font.hheaCaretSlopeRun.isInitialized()) {
+        header.caretSlopeRun = g->font.hheaCaretSlopeRun.getDefault();
+        g->ctx.MVAR->addValue(MVAR_hcrn_tag, *g->ctx.locMap, g->font.hheaCaretSlopeRun, g->logger);
+    } else {
+        header.caretSlopeRun = (g->font.ItalicAngle == 0) ? 0 : (int16_t)RND(tan(FIX2DBL(-g->font.ItalicAngle) / RAD_DEG) * 1000);
     }
 
     return 1;

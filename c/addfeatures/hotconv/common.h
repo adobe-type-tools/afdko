@@ -180,8 +180,7 @@ typedef unsigned short UV_BMP;            /* Unicode BMP value */
 #define UV_DESCENT ((unsigned)0x0070)        /* "p" */
 #define UV_X_HEIGHT_1 ((unsigned)0x0078)     /* "x" */
 #define UV_X_HEIGHT_2 ((unsigned)0xF778)     /* "Xsmall" */
-#define UV_PRO_X_HEIGHT_1 ((unsigned)0x006F) /* "o" */
-#define UV_PRO_X_HEIGHT_2 ((unsigned)0xF76F) /* "Osmall" */
+#define UV_PRO_X_HEIGHT ((unsigned)0x006F) /* "o" */
 #define UV_SPACE ((unsigned)0x0020)          /* "space" */
 #define UV_BULLET ((unsigned)0x2022)         /* "bullet" */
 #define UV_VERT_BOUNDS ((unsigned)0x253C)    /* BOX DRAWINGS LIGHT VERTICAL & HORIZONTAL*/
@@ -272,16 +271,20 @@ struct FontInfo_ { /* Font information */
     hvMetric maxAdv;
     hvMetric maxExtent;
     Fixed ItalicAngle;
-    FWord UnderlinePosition;
-    FWord UnderlineThickness;
+    VarValueRecord UnderlinePosition;
+    VarValueRecord UnderlineThickness;
     short hheaAscender;
     short hheaDescender;
     short hheaLineGap;
+    VarValueRecord hheaCaretOffset;
+    VarValueRecord hheaCaretSlopeRise;
+    VarValueRecord hheaCaretSlopeRun;
+    VarValueRecord vheaCaretOffset;
+    VarValueRecord vheaCaretSlopeRise;
+    VarValueRecord vheaCaretSlopeRun;
     VarValueRecord TypoAscender;        /* In OS/2 */
     VarValueRecord TypoDescender;       /* In OS/2 */
     VarValueRecord TypoLineGap;         /* In OS/2 */
-    VarValueRecord winAscent;  /* In OS/2 */
-    VarValueRecord winDescent; /* In OS/2 */
     VarValueRecord VertTypoAscender;    /* In vhea */
     VarValueRecord VertTypoDescender;   /* In vhea */
     VarValueRecord VertTypoLineGap;     /* In vhea */
@@ -296,20 +299,20 @@ struct FontInfo_ { /* Font information */
         UV_BMP DefaultChar;
         UV_BMP BreakChar;
         FWord AvgWidth;
-        unsigned short ascent;
-        unsigned short descent;
+        VarValueRecord ascent;
+        VarValueRecord descent;
         VarValueRecord XHeight;
         VarValueRecord CapHeight;
-        FWord SubscriptXSize;
-        FWord SubscriptYSize;
-        FWord SubscriptXOffset;
-        FWord SubscriptYOffset;
-        FWord SuperscriptXSize;
-        FWord SuperscriptYSize;
-        FWord SuperscriptXOffset;
-        FWord SuperscriptYOffset;
-        FWord StrikeOutSize;
-        FWord StrikeOutPosition;
+        VarValueRecord SubscriptXSize;
+        VarValueRecord SubscriptYSize;
+        VarValueRecord SubscriptXOffset;
+        VarValueRecord SubscriptYOffset;
+        VarValueRecord SuperscriptXSize;
+        VarValueRecord SuperscriptYSize;
+        VarValueRecord SuperscriptXOffset;
+        VarValueRecord SuperscriptYOffset;
+        VarValueRecord StrikeoutSize;
+        VarValueRecord StrikeoutPosition;
     } win;
     struct {
         /* Mac-specific data */

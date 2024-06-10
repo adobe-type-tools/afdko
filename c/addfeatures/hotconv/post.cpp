@@ -88,9 +88,9 @@ int postFill(hotCtx g) {
     postCtx h = g->ctx.post;
 
     h->tbl.italicAngle = g->font.ItalicAngle;
-    h->tbl.underlinePosition = g->font.UnderlinePosition +
-                               g->font.UnderlineThickness / 2;
-    h->tbl.underlineThickness = g->font.UnderlineThickness;
+    h->tbl.underlinePosition = g->font.UnderlinePosition.getDefault() +
+                               g->font.UnderlineThickness.getDefault() / 2;
+    h->tbl.underlineThickness = g->font.UnderlineThickness.getDefault();
     h->tbl.isFixedPitch = (g->font.flags & FI_FIXED_PITCH) != 0;
     h->tbl.minMemType42 = 0;
     h->tbl.maxMemType42 = 0;

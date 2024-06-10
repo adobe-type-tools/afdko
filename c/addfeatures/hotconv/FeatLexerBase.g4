@@ -97,6 +97,8 @@ DESCENDER               : 'Descender' ;
 LINE_GAP                : 'LineGap' ;
 
 CARET_OFFSET            : 'CaretOffset' ;
+CARET_SLOPE_RISE        : 'CaretSlopeRise' ;
+CARET_SLOPE_RUN         : 'CaretSlopeRun' ;
 
 NAME                    : 'name' ;
 NAMEID                  : 'nameid' ;
@@ -114,6 +116,16 @@ WIN_ASCENT              : 'winAscent' ;
 WIN_DESCENT             : 'winDescent' ;
 X_HEIGHT                : 'XHeight' ;
 CAP_HEIGHT              : 'CapHeight' ;
+SUBSCRIPT_X_SIZE        : 'SubscriptXSize' ;
+SUBSCRIPT_X_OFFSET      : 'SubscriptXOffset' ;
+SUBSCRIPT_Y_SIZE        : 'SubscriptYSize' ;
+SUBSCRIPT_Y_OFFSET      : 'SubscriptYOffset' ;
+SUPERSCRIPT_X_SIZE      : 'SuperscriptXSize' ;
+SUPERSCRIPT_X_OFFSET    : 'SuperscriptXOffset' ;
+SUPERSCRIPT_Y_SIZE      : 'SuperscriptYSize' ;
+SUPERSCRIPT_Y_OFFSET    : 'SuperscriptYOffset' ;
+STRIKEOUT_SIZE          : 'StrikeoutSize' ;
+STRIKEOUT_POSITION      : 'StrikeoutPosition' ;
 WEIGHT_CLASS            : 'WeightClass' ;
 WIDTH_CLASS             : 'WidthClass' ;
 VENDOR                  : 'Vendor' ;

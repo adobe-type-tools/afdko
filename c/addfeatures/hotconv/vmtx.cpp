@@ -97,10 +97,26 @@ int vheaFill(hotCtx g) {
     header.minBottom = g->font.minBearing.bottom;
     header.yMaxExtent = g->font.maxExtent.v;
 
-    /* Always set a horizontal caret for vertical writing */
-    header.caretSlopeRise = 0;
-    header.caretSlopeRun = 1;
-    header.caretOffset = 0;
+    if (g->font.vheaCaretOffset.isInitialized()) {
+        header.caretOffset = g->font.vheaCaretOffset.getDefault();
+        g->ctx.MVAR->addValue(MVAR_vcof_tag, *g->ctx.locMap, g->font.vheaCaretOffset, g->logger);
+    } else {
+        header.caretOffset = 0;
+    }
+
+    if (g->font.vheaCaretSlopeRise.isInitialized()) {
+        header.caretSlopeRise = g->font.vheaCaretSlopeRise.getDefault();
+        g->ctx.MVAR->addValue(MVAR_vcrs_tag, *g->ctx.locMap, g->font.vheaCaretSlopeRise, g->logger);
+    } else {
+        header.caretSlopeRise = 0;
+    }
+
+    if (g->font.vheaCaretSlopeRun.isInitialized()) {
+        header.caretSlopeRun = g->font.vheaCaretSlopeRun.getDefault();
+        g->ctx.MVAR->addValue(MVAR_vcrn_tag, *g->ctx.locMap, g->font.vheaCaretSlopeRun, g->logger);
+    } else {
+        header.caretSlopeRun = 1;
+    }
 
     return 1;
 }
@@ -130,8 +146,7 @@ int VORGFill(hotCtx g) {
 
     vmtx.VORGClear();
 
-    int16_t dflt;
-    vmtx.defaultVertOrigin = dflt = g->font.TypoAscender.getDefault();
+    vmtx.defaultVertOrigin = g->font.TypoAscender.getDefault();
 
     int32_t gid = 0;
     for (auto &gl : g->glyphs) {
