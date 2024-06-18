@@ -184,7 +184,7 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->ctx.map = NULL;
     g->ctx.feat = NULL;
     g->ctx.cfr = NULL;
-    g->ctx.BASE = NULL;
+    g->ctx.BASEp = NULL;
     g->ctx.GDEFp = nullptr;
     g->ctx.GPOSp = nullptr;
     g->ctx.GSUBp = nullptr;

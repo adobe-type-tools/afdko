@@ -16,10 +16,33 @@ void BASEWrite(hotCtx g);
 void BASEReuse(hotCtx g);
 void BASEFree(hotCtx g);
 
-/* Supplementary functions */
-void BASESetBaselineTags(hotCtx g, int vert, int nTag,
-                         Tag *baselineTag); /* [nTag]. Must be sorted */
+/*
+class BASE {
+ public:
+ private:
+    struct BaseScriptInfo {
+        int16_t dfltBaselineInx {0};
+        std::vector<int16_t> coordInx;
+    };
+    struct ScriptInfo {
+        Tag script {0};
+        int16_t baseScriptInx {0};
+    };
+    struct AxisInfo {
+        std::vector<Tag> baseline;
+        std::vector<ScriptInfo> script;
+    };
+    Axis horizAxis;
+    Axis vertAxis;
+*/
 
-void BASEAddScript(hotCtx g, int vert, Tag script, Tag dfltBaseline,
-                   short *coord); /* [nTag] */
+/* Supplementary functions */
+
+// Tags in baselineTag must be sorted
+void BASESetBaselineTags(hotCtx g, bool vert, std::vector<Tag> &baselineTag);
+
+// Number of coords must match number of baselineTags from call above
+void BASEAddScript(hotCtx g, bool doVert, Tag script, Tag dfltBaseline,
+                   std::vector<int16_t> &coords);
+
 #endif  // ADDFEATURES_HOTCONV_BASE_H_

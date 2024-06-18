@@ -340,7 +340,6 @@ struct FontInfo_ { /* Font information */
 /* -------------------------------- Contexts ------------------------------- */
 typedef struct mapCtx_ *mapCtx;
 typedef struct cfrCtx_ *cfrCtx;
-typedef struct BASECtx_ *BASECtx;
 typedef struct OS_2Ctx_ *OS_2Ctx;
 typedef struct STATCtx_ *STATCtx;
 typedef struct anonCtx_ *anonCtx;
@@ -361,6 +360,7 @@ class var_axes;
 class var_MVAR;
 class VarLocationMap;
 class GlyphMetrics;
+class BASE;
 
 #define ID_TEXT_SIZE 1024 /* Size of text buffer used to hold identifying info about the current feature for error messages. */
 
@@ -398,7 +398,7 @@ struct hotCtx_ {
         mapCtx map;
         FeatCtx *feat;
         cfrCtx cfr;
-        BASECtx BASE;
+        BASE *BASEp;
         GDEF *GDEFp;
         GPOS *GPOSp;
         GSUB *GSUBp;
