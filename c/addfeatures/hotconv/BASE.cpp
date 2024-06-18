@@ -13,18 +13,16 @@
 
 /* ---------------------------- Table Definition --------------------------- */
 
-typedef struct {
-    unsigned short BaseTagCount;
-    Tag *BaselineTag; /* [BaseTagCount] */
-} BaseTagList;
-#define BASE_TAG_LIST_SIZE(nTag) (uint16 + uint32 * (nTag))
 
-typedef struct {
-    unsigned short BaseCoordFormat;
-    short Coordinate;
-} BaseCoordFormat1;
+struct BaseCoordFormat1 {
+    BaseCoordFormat1() = delete;
+    explicit BaseCoordFormat1(int16_t c) : Coordinate(c) {}
+    uint16_t BaseCoordFormat {1};
+    int16_t Coordinate;
+};
 #define BASE_COORD1_SIZE (uint16 * 2)
 
+/*
 typedef struct {
     unsigned short BaseCoordFormat;
     short Coordinate;
@@ -37,15 +35,18 @@ typedef struct {
     short Coordinate;
     DCL_OFFSET(void *, DeviceTable);
 } BaseCoordFormat3;
+*/
 
-typedef struct {
-    unsigned short DefaultIndex;
-    unsigned short BaseCoordCount;
-    long *BaseCoord; /* |-> BaseValues                            */
-                     /* long instead of Offset for temp -ve value */
-} BaseValues;
+struct BaseValues {
+    BaseValues() {}
+    BaseValues(BaseValues &&o) : DefaultIndex(o.DefaultIndex),
+                                 BaseCoord(std::move(o.BaseCoord)) {}
+    uint16_t DefaultIndex {0};
+    std::vector<int32_t> BaseCoord;  // int32_t instead of Offset for temp -ve value
+};
 #define BASE_VALUES_SIZE(nCoord) (uint16 * 2 + uint16 * (nCoord))
 
+/*
 typedef struct {
     Tag FeatureTableTag;
     DCL_OFFSET(void *, MinCoord);
@@ -56,82 +57,109 @@ typedef struct {
     DCL_OFFSET(void *, MinCoord);
     DCL_OFFSET(void *, MaxCoord);
     unsigned short FeatMinMaxCount;
-    FeatMinMaxRecord *featMinMaxRecord; /* [FeatMinMaxCount] */
+    FeatMinMaxRecord *featMinMaxRecord; // [FeatMinMaxCount]
 } MinMax;
 
 typedef struct {
     Tag BaseLangSysTag;
     DCL_OFFSET(MinMax, minMax);
 } BaseLangSysRecord;
+*/
 #define BASE_LANGSYSREC_SIZE (uint32 + uint16)
 
-typedef struct {
+struct BaseScript {
+    BaseScript() = delete;
+    explicit BaseScript(Offset bv) : BaseValues(bv) {}
     Offset BaseValues;
-    DCL_OFFSET(MinMax, DefaultMinMax);
+/*    DCL_OFFSET(MinMax, DefaultMinMax);
     unsigned short BaseLangSysCount;
-    BaseLangSysRecord *baseLangSysRecord; /* [BaseLangSysCount] */
-} BaseScript;
+    BaseLangSysRecord *baseLangSysRecord; // [BaseLangSysCount]
+*/
+};
 #define BASE_SCRIPT_SIZE(nLangSys) (uint16 * 3 + BASE_LANGSYSREC_SIZE * (nLangSys))
 
-typedef struct {
-    Tag BaseScriptTag;
-    long BaseScript; /* |-> BaseScriptList                        */
-                     /* long instead of Offset for temp -ve value */
-} BaseScriptRecord;
+struct BaseScriptRecord {
+    BaseScriptRecord(Tag t, int32_t bs) : BaseScriptTag(t), BaseScript(bs) {}
+    Tag BaseScriptTag {0};
+    int32_t BaseScript {0} ; /* |-> BaseScriptList                        */
+                             /* long instead of Offset for temp -ve value */
+};
+
+struct Axis {
+    void write(Offset shared, BASE *h);
+    std::vector<Tag> baseTagList;
+    Offset baseTagOffset;
+    std::vector<BaseScriptRecord> baseScriptList;
+    Offset baseScriptOffset;
+    Offset o;
+};
 #define BASE_SCRIPT_RECORD_SIZE (uint32 + uint16)
-
-typedef struct {
-    unsigned short BaseScriptCount;
-    BaseScriptRecord *baseScriptRecord; /* [BaseScriptCount] */
-} BaseScriptList;
 #define BASE_SCRIPT_LIST_SIZE(nRec) (uint16 + BASE_SCRIPT_RECORD_SIZE * (nRec))
-
-typedef struct {
-    DCL_OFFSET(BaseTagList, baseTagList);
-    DCL_OFFSET(BaseScriptList, baseScriptList);
-} Axis;
+#define BASE_TAG_LIST_SIZE(nTag) (uint16 + uint32 * (nTag))
 #define AXIS_SIZE (uint16 * 2)
 
 typedef struct {
     Fixed version;
-    DCL_OFFSET(Axis, HorizAxis);
-    DCL_OFFSET(Axis, VertAxis);
+    Axis HorizAxis;
+    Axis VertAxis;
 
     /* Shared data */
-    BaseScript *baseScript;  /* [h->baseScript.cnt] */
-    BaseValues *baseValues;  /* [h->baseScript.cnt] */
-    BaseCoordFormat1 *coord; /* [h->coord.cnt] */
+    std::vector<BaseScript> baseScripts;
+    std::vector<BaseValues> baseValues;
+    std::vector<BaseCoordFormat1> coord;
 } BASETbl;
 #define TBL_HDR_SIZE (int32 + uint16 * 2)
 
 /* --------------------------- Context Definition ---------------------------*/
 
-typedef struct {
-    short dfltBaselineInx;
-    dnaDCL(short, coordInx);
-} BaseScriptInfo;
+struct BaseScriptInfo {
+    explicit BaseScriptInfo(int16_t dbli) : dfltBaselineInx(dbli) {}
+    BaseScriptInfo(BaseScriptInfo &&o) : dfltBaselineInx(o.dfltBaselineInx),
+                                         coordInx(std::move(o.coordInx)) {}
+    int16_t dfltBaselineInx {0};
+    std::vector<int16_t> coordInx;
+};
 
-typedef struct {
+struct ScriptInfo {
+    bool operator < (const ScriptInfo &rhs) const { return script < rhs.script; }
     Tag script;
-    short baseScriptInx;
-} ScriptInfo;
+    int16_t baseScriptInx;
+};
 
-typedef struct {
-    dnaDCL(Tag, baseline);
-    dnaDCL(ScriptInfo, script);
-} AxisInfo;
+struct AxisInfo {
+    AxisInfo() = delete;
+    explicit AxisInfo(const char *desc) : desc(desc) {}
+    void prep(hotCtx g);
+    std::vector<Tag> baseline;
+    std::vector<ScriptInfo> script;
+    const char *desc;
+};
 
-struct BASECtx_ {
-    AxisInfo horiz;
-    AxisInfo vert;
+class BASE {
+ public:
+    BASE() = delete;
+    explicit BASE(hotCtx g) : g(g) {}
+    Offset fillBaseScriptList(Offset size, bool doVert);
+    Offset fillAxis(bool doVert);
+    Offset fillSharedData();
+    int Fill();
+    void writeSharedData();
+    void Write();
+    void setBaselineTags(bool doVert, std::vector<Tag> &baselineTag);
+    int32_t addCoord(int16_t c);
+    int _addScript(int dfltInx, size_t nBaseTags, std::vector<int16_t> &coords);
+    void addScript(bool doVert, Tag script, Tag dfltBaseline,
+                   std::vector<int16_t> &coords);
+    AxisInfo horiz {"horizontal"};
+    AxisInfo vert {"vertical"};
 
     /* Shared data */
-    dnaDCL(BaseScriptInfo, baseScript);
-    dnaDCL(short, coord); /* Only format 1 supported */
+    std::vector<BaseScriptInfo> baseScript;
+    std::vector<int16_t> coord;
 
     struct {
-        Offset curr;
-        Offset shared; /* Offset to start of shared area */
+        Offset curr {0};
+        Offset shared {0}; /* Offset to start of shared area */
     } offset;
 
     BASETbl tbl; /* Table data */
@@ -140,432 +168,296 @@ struct BASECtx_ {
 
 /* --------------------------- Standard Functions -------------------------- */
 
-/* Element initializer */
-static void baseScriptInit(void *ctx, long count, BaseScriptInfo *bsi) {
-    hotCtx g = (hotCtx)ctx;
-    int i;
-    for (i = 0; i < count; i++) {
-        dnaINIT(g->DnaCTX, bsi->coordInx, 5, 5);
-        bsi++;
-    }
-}
-
 void BASENew(hotCtx g) {
-    BASECtx h = (BASECtx)MEM_NEW(g, sizeof(struct BASECtx_));
-
-    dnaINIT(g->DnaCTX, h->horiz.baseline, 5, 5);
-    dnaINIT(g->DnaCTX, h->horiz.script, 10, 10);
-    dnaINIT(g->DnaCTX, h->vert.baseline, 5, 5);
-    dnaINIT(g->DnaCTX, h->vert.script, 10, 10);
-
-    dnaINIT(g->DnaCTX, h->baseScript, 10, 10);
-    h->baseScript.func = baseScriptInit;
-    dnaINIT(g->DnaCTX, h->coord, 10, 20);
-
-    /* Link contexts */
-    h->g = g;
-    g->ctx.BASE = h;
+    g->ctx.BASEp = new BASE(g);
 }
 
-static int CTL_CDECL cmpScriptInfo(const void *first, const void *second) {
-    ScriptInfo *a = (ScriptInfo *)first;
-    ScriptInfo *b = (ScriptInfo *)second;
+void AxisInfo::prep(hotCtx g) {
+    if (baseline.size() == 0)
+        return;
 
-    if (a->script < b->script) {
-        return -1;
-    } else if (a->script > b->script) {
-        return 1;
-    } else {
-        return 0;
-    }
+    if (script.size() == 0)
+        g->logger->log(sFATAL, "scripts not specified for %s baseline axis", desc);
+
+    std::sort(script.begin(), script.end());
 }
 
-static void prepAxis(BASECtx h, int vert) {
-    AxisInfo *ai = vert ? &h->vert : &h->horiz;
-    if (ai->baseline.cnt != 0) {
-        if (ai->script.cnt == 0) {
-            h->g->logger->log(sFATAL,
-                              "scripts not specified for %s baseline axis",
-                              vert ? "vertical" : "horizontal");
-        }
-        qsort(ai->script.array, ai->script.cnt, sizeof(ScriptInfo),
-              cmpScriptInfo);
-    }
+Offset BASE::fillBaseScriptList(Offset size, bool doVert) {
+    AxisInfo &ai = doVert ? vert : horiz;
+    auto &bsl = doVert ? tbl.VertAxis.baseScriptList : tbl.HorizAxis.baseScriptList;
+
+    bsl.reserve(ai.script.size());
+    for (auto &si : ai.script)
+        // Size is adjusted later
+        bsl.emplace_back(si.script, BASE_SCRIPT_SIZE(0) * si.baseScriptInx - (offset.curr + size));
+
+    return (Offset)BASE_SCRIPT_LIST_SIZE(bsl.size());
 }
 
-static Offset fillBaseScriptList(BASECtx h, Offset size, int vert) {
-    long i;
-    AxisInfo *ai = vert ? &h->vert : &h->horiz;
-    Axis *axis = vert ? &h->tbl.VertAxis_ : &h->tbl.HorizAxis_;
-    BaseScriptList *bsl = &axis->baseScriptList_;
-    long nScr = ai->script.cnt;
-
-    bsl->BaseScriptCount = (unsigned short)nScr;
-    bsl->baseScriptRecord = (BaseScriptRecord*)MEM_NEW(h->g, sizeof(BaseScriptRecord) * nScr);
-    for (i = 0; i < nScr; i++) {
-        BaseScriptRecord *bsr = &bsl->baseScriptRecord[i];
-        ScriptInfo *si = &ai->script.array[i];
-
-        bsr->BaseScriptTag = si->script;
-        bsr->BaseScript = BASE_SCRIPT_SIZE(0) * si->baseScriptInx - (h->offset.curr + size); /* adjusted at write time */
-    }
-
-    return (Offset)BASE_SCRIPT_LIST_SIZE(nScr);
-}
-
-static Offset fillAxis(BASECtx h, int vert) {
+Offset BASE::fillAxis(bool doVert) {
     Offset size = AXIS_SIZE;
-    AxisInfo *ai = vert ? &h->vert : &h->horiz;
-    Axis *axis = vert ? &h->tbl.VertAxis_ : &h->tbl.HorizAxis_;
-    unsigned nBaseTags = (unsigned)ai->baseline.cnt;
+    AxisInfo &ai = doVert ? vert : horiz;
+    Axis &axis = doVert ? tbl.VertAxis : tbl.HorizAxis;
+    auto nBaseTags = ai.baseline.size();
 
-    if (nBaseTags == 0) {
+    if (nBaseTags == 0)
         return 0;
-    }
 
-    /* Fill BaseTagList */
-    axis->baseTagList = size;
-    axis->baseTagList_.BaseTagCount = nBaseTags;
-    axis->baseTagList_.BaselineTag = (Tag *)MEM_NEW(h->g, sizeof(Tag) * nBaseTags);
-    COPY(axis->baseTagList_.BaselineTag, ai->baseline.array, nBaseTags);
+    /* Fill baseTagList */
+    axis.baseTagOffset = size;
+    std::copy(ai.baseline.begin(), ai.baseline.end(), std::back_inserter(axis.baseTagList));
     size += BASE_TAG_LIST_SIZE(nBaseTags);
 
-    /* Fill BaseScriptList */
-    axis->baseScriptList = size;
-    size += fillBaseScriptList(h, size, vert);
+    /* Fill baseScriptList */
+    axis.baseScriptOffset = size;
+    size += fillBaseScriptList(size, doVert);
 
     return size;
 }
 
-static Offset fillSharedData(BASECtx h) {
-    long i;
-    unsigned j;
-    BASETbl *fmt = &h->tbl;
-    long nBScr = h->baseScript.cnt;
+Offset BASE::fillSharedData() {
+    auto nBScr = baseScript.size();
     Offset bsSize = 0; /* Accumulator for BaseScript section */
     Offset bvSize = 0; /* Accumulator for BaseValues section */
     Offset bsTotal = (Offset)(nBScr * BASE_SCRIPT_SIZE(0));
 
     /* --- Fill BaseScript and BaseValues in parallel --- */
-    fmt->baseScript = (BaseScript *)MEM_NEW(h->g, sizeof(BaseScript) * nBScr);
-    fmt->baseValues = (BaseValues *)MEM_NEW(h->g, sizeof(BaseValues) * nBScr);
+    tbl.baseScripts.reserve(nBScr);
+    tbl.baseValues.reserve(nBScr);
 
-    for (i = 0; i < nBScr; i++) {
-        BaseScriptInfo *bsi = &h->baseScript.array[i];
-        unsigned nCoord = (unsigned)bsi->coordInx.cnt;
-        BaseScript *bs = &fmt->baseScript[i];
-        BaseValues *bv = &fmt->baseValues[i];
+    for (auto &bsi : baseScript) {
+        uint32_t nCoord = bsi.coordInx.size();
+        BaseValues bv;
 
-        bs->BaseValues = bsTotal - bsSize + bvSize;
-        bs->DefaultMinMax = NULL_OFFSET;
-        bs->BaseLangSysCount = 0;
+        bv.DefaultIndex = bsi.dfltBaselineInx;
+        bv.BaseCoord.reserve(nCoord);
+        for (auto c : bsi.coordInx)
+            bv.BaseCoord.push_back(BASE_COORD1_SIZE * c - bvSize);
 
-        bv->DefaultIndex = bsi->dfltBaselineInx;
-        bv->BaseCoordCount = nCoord;
-        bv->BaseCoord = (long *)MEM_NEW(h->g, sizeof(long) * nCoord);
-        for (j = 0; j < nCoord; j++) {
-            /* Adjusted below */
-            bv->BaseCoord[j] = BASE_COORD1_SIZE * bsi->coordInx.array[j] - bvSize;
-        }
+        tbl.baseScripts.emplace_back(bsTotal - bsSize + bvSize);
+        tbl.baseValues.emplace_back(std::move(bv));
 
         bsSize += BASE_SCRIPT_SIZE(0);
         bvSize += BASE_VALUES_SIZE(nCoord);
     }
 
     /* Adjust BaseValue coord offsets */
-    for (i = 0; i < nBScr; i++) {
-        BaseValues *bv = &fmt->baseValues[i];
-        for (j = 0; j < bv->BaseCoordCount; j++) {
-            bv->BaseCoord[j] += bvSize;
-        }
+    for (auto &bv : tbl.baseValues) {
+        for (auto &bc : bv.BaseCoord)
+            bc += bvSize;
     }
 
-    /* --- Fill coord data --- */
-    fmt->coord = (BaseCoordFormat1 *)MEM_NEW(h->g, sizeof(BaseCoordFormat1) * h->coord.cnt);
+    tbl.coord.reserve(coord.size());
+    for (auto &c : coord)
+        tbl.coord.emplace_back(c);
 
-    for (i = 0; i < h->coord.cnt; i++) {
-        BaseCoordFormat1 *coord = &fmt->coord[i];
-        coord->BaseCoordFormat = 1;
-        coord->Coordinate = h->coord.array[i];
-    }
-
-    return bsSize + bvSize + BASE_COORD1_SIZE * (unsigned)h->coord.cnt;
+    return bsSize + bvSize + BASE_COORD1_SIZE * tbl.coord.size();
 }
 
 int BASEFill(hotCtx g) {
-    BASECtx h = g->ctx.BASE;
+    BASE *h = g->ctx.BASEp;
+    return h->Fill();
+}
+
+int BASE::Fill() {
     Offset axisSize;
 
-    if (h->horiz.baseline.cnt == 0 && h->vert.baseline.cnt == 0) {
+    if (horiz.baseline.size() == 0 && vert.baseline.size() == 0)
         return 0;
-    }
-    prepAxis(h, 0);
-    prepAxis(h, 1);
 
-    h->tbl.version = VERSION(1, 0);
+    horiz.prep(g);
+    vert.prep(g);
 
-    h->offset.curr = TBL_HDR_SIZE;
+    tbl.version = VERSION(1, 0);
 
-    axisSize = fillAxis(h, 0);
-    h->tbl.HorizAxis = (axisSize == 0) ? NULL_OFFSET : h->offset.curr;
-    h->offset.curr += axisSize;
+    offset.curr = TBL_HDR_SIZE;
 
-    axisSize = fillAxis(h, 1);
-    h->tbl.VertAxis = (axisSize == 0) ? NULL_OFFSET : h->offset.curr;
-    h->offset.curr += axisSize;
+    axisSize = fillAxis(false);
+    tbl.HorizAxis.o = (axisSize == 0) ? NULL_OFFSET : offset.curr;
+    offset.curr += axisSize;
 
-    h->offset.shared = h->offset.curr; /* Indicates start of shared area */
+    axisSize = fillAxis(true);
+    tbl.VertAxis.o = (axisSize == 0) ? NULL_OFFSET : offset.curr;
+    offset.curr += axisSize;
 
-    h->offset.curr += fillSharedData(h);
+    offset.shared = offset.curr;  // Indicates start of shared area
+
+    offset.curr += fillSharedData();
 
     return 1;
 }
 
-static void writeAxis(BASECtx h, int vert) {
-    unsigned i;
-    AxisInfo *ai = vert ? &h->vert : &h->horiz;
-    Axis *axis = vert ? &h->tbl.VertAxis_ : &h->tbl.HorizAxis_;
-    BaseTagList *btl = &axis->baseTagList_;
-    BaseScriptList *bsl = &axis->baseScriptList_;
-
-    if (ai->baseline.cnt == 0) {
-        return;
-    }
-
+void Axis::write(Offset shared, BASE *h) {
     /* --- Write axis header --- */
-    OUT2(axis->baseTagList);
-    OUT2(axis->baseScriptList);
+    OUT2(baseTagOffset);
+    OUT2(baseScriptOffset);
 
-    /* --- Write BaseTagList --- */
-    OUT2(btl->BaseTagCount);
-    for (i = 0; i < btl->BaseTagCount; i++) {
-        OUT4(btl->BaselineTag[i]);
-    }
+    /* --- Write baseTagList --- */
+    OUT2((uint16_t)baseTagList.size());
+    for (auto t : baseTagList)
+        OUT4(t);
 
     /* --- Write BaseScriptList --- */
-    OUT2(bsl->BaseScriptCount);
-    for (i = 0; i < bsl->BaseScriptCount; i++) {
-        BaseScriptRecord *bsr = &bsl->baseScriptRecord[i];
-        OUT4(bsr->BaseScriptTag);
-        OUT2((Offset)(bsr->BaseScript + h->offset.shared));
+    OUT2((uint16_t)baseScriptList.size());
+    for (auto &bsr : baseScriptList) {
+        OUT4(bsr.BaseScriptTag);
+        OUT2((Offset)bsr.BaseScript + shared);
     }
 }
 
-static void writeSharedData(BASECtx h) {
-    long i;
-    BASETbl *fmt = &h->tbl;
-    long nBScr = h->baseScript.cnt;
-
-    /* --- Write BaseScript section --- */
-    for (i = 0; i < nBScr; i++) {
-        BaseScript *bs = &fmt->baseScript[i];
-
-        OUT2(bs->BaseValues);
-        OUT2(bs->DefaultMinMax);
-        OUT2(bs->BaseLangSysCount);
+void BASE::writeSharedData() {
+    auto h = this;
+    for (auto &bs : tbl.baseScripts) {
+        OUT2(bs.BaseValues);
+        OUT2(NULL_OFFSET);  // OUT2(bs->DefaultMinMax);
+        OUT2(0);            // OUT2(bs->BaseLangSysCount);
         /* DefaultMinMax_ and BaseLangSysRecord not needed */
     }
 
-    /* --- Write BaseValues section --- */
-    for (i = 0; i < nBScr; i++) {
-        unsigned j;
-        BaseValues *bv = &fmt->baseValues[i];
-
-        OUT2(bv->DefaultIndex);
-        OUT2(bv->BaseCoordCount);
-        for (j = 0; j < bv->BaseCoordCount; j++) {
-            OUT2((unsigned short)(bv->BaseCoord[j]));
-        }
+    for (auto &bv : tbl.baseValues) {
+        OUT2(bv.DefaultIndex);
+        OUT2((uint16_t)bv.BaseCoord.size());
+        for (auto &c : bv.BaseCoord)
+            OUT2((uint16_t)c);
     }
 
-    /* --- Write coord section --- */
-    for (i = 0; i < h->coord.cnt; i++) {
-        BaseCoordFormat1 *coord = &fmt->coord[i];
-
-        OUT2(coord->BaseCoordFormat);
-        OUT2(coord->Coordinate);
+    for (auto &bcf1 : tbl.coord) {
+        OUT2(bcf1.BaseCoordFormat);
+        OUT2(bcf1.Coordinate);
     }
 }
 
 void BASEWrite(hotCtx g) {
-    BASECtx h = g->ctx.BASE;
-
-    OUT4(h->tbl.version);
-    OUT2(h->tbl.HorizAxis);
-    OUT2(h->tbl.VertAxis);
-    writeAxis(h, 0);
-    writeAxis(h, 1);
-    writeSharedData(h);
+    BASE *h = g->ctx.BASEp;
+    h->Write();
 }
 
-static void freeAxis(BASECtx h, int vert) {
-    AxisInfo *ai = vert ? &h->vert : &h->horiz;
-    if (ai->baseline.cnt != 0) {
-        Axis *axis = vert ? &h->tbl.VertAxis_ : &h->tbl.HorizAxis_;
-        MEM_FREE(h->g, axis->baseTagList_.BaselineTag);
-        MEM_FREE(h->g, axis->baseScriptList_.baseScriptRecord);
-    }
-}
-
-static void reuseAxisInfo(BASECtx h, int vert) {
-    AxisInfo *ai = vert ? &h->vert : &h->horiz;
-    ai->baseline.cnt = 0;
-    ai->script.cnt = 0;
+void BASE::Write() {
+    auto h = this;
+    OUT4(tbl.version);
+    OUT2(tbl.HorizAxis.o);
+    OUT2(tbl.VertAxis.o);
+    if (horiz.baseline.size() > 0)
+        tbl.HorizAxis.write(offset.shared, this);
+    if (vert.baseline.size() > 0)
+        tbl.VertAxis.write(offset.shared, this);
+    writeSharedData();
 }
 
 void BASEReuse(hotCtx g) {
-    BASECtx h = g->ctx.BASE;
-    long i;
-    BASETbl *fmt = &h->tbl;
-
-    freeAxis(h, 0);
-    freeAxis(h, 1);
-
-    MEM_FREE(g, fmt->baseScript);
-    for (i = 0; i < h->baseScript.cnt; i++) {
-        MEM_FREE(g, fmt->baseValues[i].BaseCoord);
-    }
-    MEM_FREE(g, fmt->baseValues);
-    MEM_FREE(g, fmt->coord);
-
-    reuseAxisInfo(h, 0);
-    reuseAxisInfo(h, 1);
-
-    h->baseScript.cnt = 0;
-
-    h->coord.cnt = 0;
-}
-
-static void freeAxisInfo(AxisInfo *ai) {
-    dnaFREE(ai->baseline);
-    dnaFREE(ai->script);
+    delete g->ctx.BASEp;
+    g->ctx.BASEp = new BASE(g);
 }
 
 void BASEFree(hotCtx g) {
-    BASECtx h = g->ctx.BASE;
-    long i;
-
-    freeAxisInfo(&h->horiz);
-    freeAxisInfo(&h->vert);
-
-    for (i = 0; i < h->baseScript.size; i++) {
-        dnaFREE(h->baseScript.array[i].coordInx);
-    }
-    dnaFREE(h->baseScript);
-
-    dnaFREE(h->coord);
-
-    MEM_FREE(g, g->ctx.BASE);
+    delete g->ctx.BASEp;
+    g->ctx.BASEp = nullptr;
 }
 
 /* ------------------------ Supplementary Functions ------------------------ */
 
-void BASESetBaselineTags(hotCtx g, int vert, int nTag, Tag *baselineTag) {
-    BASECtx h = g->ctx.BASE;
-    int i;
-    AxisInfo *ai = vert ? &h->vert : &h->horiz;
+void BASESetBaselineTags(hotCtx g, bool doVert, std::vector<Tag> &baselineTag) {
+    g->ctx.BASEp->setBaselineTags(doVert, baselineTag);
+}
 
+void BASE::setBaselineTags(bool doVert, std::vector<Tag> &baselineTag) {
 #if HOT_DEBUG && 0
-    fprintf(stderr, "#BASESetBaselineTags(%d):", vert);
-    for (i = 0; i < nTag; i++) {
-        fprintf(stderr, " %c%c%c%c", TAG_ARG(baselineTag[i]));
-    }
+    fprintf(stderr, "#BASESetBaselineTags(%d):", doVert);
+    for (auto t : baselineTag)
+        fprintf(stderr, " %c%c%c%c", TAG_ARG(t));
     fprintf(stderr, "\n");
 #endif
 
-    for (i = 1; i < nTag; i++) {
-        if (baselineTag[i] < baselineTag[i - 1]) {
+    if (baselineTag.size() == 0) {
+        g->logger->log(sERROR, "empty baseline tag list");
+        return;
+    }
+
+    bool lastTag = baselineTag[0];
+    for (auto t : baselineTag) {
+        if (t < lastTag)
             g->logger->log(sFATAL, "baseline tag list not sorted for %s axis",
-                           vert ? "vertical" : "horizontal");
-        }
+                           doVert ? "vertical" : "horizontal");
+        lastTag = t;
     }
 
-    dnaSET_CNT(ai->baseline, nTag);
-    COPY(ai->baseline.array, baselineTag, nTag);
+    if (doVert)
+        vert.baseline.swap(baselineTag);
+    else
+        horiz.baseline.swap(baselineTag);
 }
 
-static int addCoord(BASECtx h, int coord) {
-    long i;
-
+int32_t BASE::addCoord(int16_t c) {
     /* See if coord can be shared */
-    for (i = 0; i < h->coord.cnt; i++) {
-        if (h->coord.array[i] == coord) {
+    for (int32_t i = 0; i < (int32_t) coord.size(); i++) {
+        if (coord[i] == c)
             return i;
-        }
     }
 
-    /* Add a coord */
-    *dnaNEXT(h->coord) = coord;
-    return h->coord.cnt - 1;
+    coord.push_back(c);
+    return coord.size() - 1;
 }
 
-static int addScript(BASECtx h, int dfltInx, int nBaseTags, short *coord) {
-    long i;
-    BaseScriptInfo *bsi;
-
+int BASE::_addScript(int dfltInx, size_t nBaseTags, std::vector<int16_t> &coords) {
     /* See if a baseScript can be shared */
-    for (i = 0; i < h->baseScript.cnt; i++) {
-        bsi = &h->baseScript.array[i];
-        if (bsi->dfltBaselineInx == dfltInx && nBaseTags == bsi->coordInx.cnt) {
-            int j;
-            for (j = 0; j < nBaseTags; j++) {
-                if (h->coord.array[bsi->coordInx.array[j]] != coord[j]) {
-                    goto nextScript;
+    for (size_t i = 0; i < baseScript.size(); i++) {
+        auto &bsi = baseScript[i];
+        if (bsi.dfltBaselineInx == dfltInx && nBaseTags == bsi.coordInx.size()) {
+            bool match = true;
+            for (size_t j = 0; j < nBaseTags; j++) {
+                if (coord[bsi.coordInx[j]] != coords[j]) {
+                    match = false;
+                    break;
                 }
             }
-            return i;
+            if (match)
+                return i;
         }
-    nextScript:
-        {}
     }
 
     /* Add a baseScript */
-    bsi = dnaNEXT(h->baseScript);
 
-    bsi->dfltBaselineInx = dfltInx;
+    BaseScriptInfo bsi {(int16_t)dfltInx};
+    bsi.coordInx.reserve(nBaseTags);
 
-    dnaSET_CNT(bsi->coordInx, nBaseTags);
-    for (i = 0; i < nBaseTags; i++) {
-        bsi->coordInx.array[i] = addCoord(h, coord[i]);
-    }
+    for (auto &c : coords)
+        bsi.coordInx.push_back(addCoord(c));
 
-    return h->baseScript.cnt - 1;
+    baseScript.emplace_back(std::move(bsi));
+
+    return baseScript.size() - 1;
 }
 
-void BASEAddScript(hotCtx g, int vert, Tag script, Tag dfltBaseline,
-                   short *coord) {
-    BASECtx h = g->ctx.BASE;
-    int i;
-    AxisInfo *ai = vert ? &h->vert : &h->horiz;
-    ScriptInfo *si = dnaNEXT(ai->script);
-    int dfltInx = -1;
-    long nBaseTags = ai->baseline.cnt;
+void BASEAddScript(hotCtx g, bool doVert, Tag script, Tag dfltBaseline,
+                   std::vector<int16_t> &coords) {
+    g->ctx.BASEp->addScript(doVert, script, dfltBaseline, coords);
+}
+        
 
-    if (ai->baseline.cnt == 0) {
+void BASE::addScript(bool doVert, Tag script, Tag dfltBaseline,
+                     std::vector<int16_t> &coord) {
+    AxisInfo &ai = doVert ? vert : horiz;
+    ScriptInfo si;
+    size_t nBaseTags = ai.baseline.size();
+
+    if (nBaseTags == 0) {
         g->logger->log(sFATAL, "baseline tags not specified for %s axis",
-                       vert ? "vertical" : "horizontal");
+                       doVert ? "vertical" : "horizontal");
     }
 
     /* Calculate dfltInx */
-    for (i = 0; i < nBaseTags; i++) {
-        if (dfltBaseline == ai->baseline.array[i]) {
-            dfltInx = i;
+    int dfltInx = -1;
+    for (size_t i = 0; i < nBaseTags; i++) {
+        if (dfltBaseline == ai.baseline[i]) {
+            dfltInx = (int) i;
         }
     }
     if (dfltInx == -1) {
         g->logger->log(sFATAL, "baseline %c%c%c%c not specified for %s axis",
-                       TAG_ARG(dfltBaseline), vert ? "vertical" : "horizontal");
+                       TAG_ARG(dfltBaseline), doVert ? "vertical" : "horizontal");
     }
 
-#if 0
-    fprintf(stderr, "#BASEAddScript(%d): (dflt:%c%c%c%c [%d])", vert,
-            TAG_ARG(dfltBaseline), dfltInx);
-    for (i = 0; i < nBaseTags; i++) {
-        fprintf(stderr, " %d", coord[i]);
-    }
-    fprintf(stderr, "\n");
-#endif
-
-    si->script = script;
-    si->baseScriptInx = addScript(h, dfltInx, nBaseTags, coord);
+    si.script = script;
+    si.baseScriptInx = _addScript(dfltInx, nBaseTags, coord);
+    ai.script.push_back(si);
 }
