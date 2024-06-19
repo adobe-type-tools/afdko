@@ -112,7 +112,7 @@ def updateInstance(fontInstancePath, options):
 
 def clearCustomLibs(dFont):
     for key in list(dFont.lib.keys()):
-        if key not in ['public.glyphOrder', 'public.postscriptNames']:
+        if not key.startswith('public.'):
             del dFont.lib[key]
 
     libGlyphs = [g for g in dFont if len(g.lib)]
