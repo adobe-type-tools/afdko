@@ -95,7 +95,6 @@ int BASE::Fill() {
     HorizAxis.prep(g);
     VertAxis.prep(g);
 
-    version = VERSION(1, 0);
 
     offset.curr = hdr_size();
 
@@ -104,6 +103,20 @@ int BASE::Fill() {
 
     offset.shared = offset.curr;  // Indicates start of shared area
     offset.curr += fillSharedData();
+
+    bool seenVariable = false;
+    for (auto &bc : baseCoords) {
+        if (bc.vvr.isVariable()) {
+            seenVariable = true;
+            bc.pair = ivs.addValue(*(g->ctx.locMap), bc.vvr, g->logger);
+        }
+    }
+    if (seenVariable) {
+        version = VERSION(1, 1);
+        ivsOffset = offset.curr;
+    } else {
+        version = VERSION(1, 0);
+    }
 
     return 1;
 }
@@ -142,10 +155,8 @@ void BASE::writeSharedData() {
             OUT2((uint16_t)c);
     }
 
-    for (auto &b : baseCoords) {
-        OUT2(b.Format);
-        OUT2(b.Coordinate);
-    }
+    for (auto &b : baseCoords)
+        b.write(this);
 }
 
 void BASEWrite(hotCtx g) {
@@ -163,6 +174,8 @@ void BASE::Write() {
     if (VertAxis.baseTagList.size() > 0)
         VertAxis.write(offset.shared, this);
     writeSharedData();
+    if (ivsOffset != 0)
+        ivs.write(g->vw);
 }
 
 void BASEReuse(hotCtx g) {
@@ -202,11 +215,11 @@ void BASE::setBaselineTags(bool doVert, std::vector<Tag> &baselineTag) {
         HorizAxis.baseTagList.swap(baselineTag);
 }
 
-int32_t BASE::addCoord(int16_t c) {
+int32_t BASE::addCoord(VarValueRecord &vvr) {
     /* See if coord can be shared */
     Offset o = 0;
     for (int32_t i = 0; i < (int32_t) baseCoords.size(); i++) {
-        if (baseCoords[i].Coordinate == c)
+        if (baseCoords[i] == vvr)
             return i;
     }
     if (!baseCoords.empty()) {
@@ -214,18 +227,18 @@ int32_t BASE::addCoord(int16_t c) {
         o = back.o + back.size();
     }
 
-    baseCoords.emplace_back(c, o);
+    baseCoords.emplace_back(std::move(vvr), o);
     return baseCoords.size() - 1;
 }
 
-int BASE::addBaseScript(int dfltInx, size_t nBaseTags, std::vector<int16_t> &coords) {
+int BASE::addBaseScript(int dfltInx, size_t nBaseTags, std::vector<VarValueRecord> &coords) {
     /* See if a baseScript can be shared */
     for (size_t i = 0; i < baseScript.size(); i++) {
         auto &bsi = baseScript[i];
         if (bsi.dfltBaselineInx == dfltInx && nBaseTags == bsi.coordInx.size()) {
             bool match = true;
             for (size_t j = 0; j < nBaseTags; j++) {
-                if (baseCoords[bsi.coordInx[j]].Coordinate != coords[j]) {
+                if (!(baseCoords[bsi.coordInx[j]] == coords[j])) {
                     match = false;
                     break;
                 }
@@ -240,8 +253,8 @@ int BASE::addBaseScript(int dfltInx, size_t nBaseTags, std::vector<int16_t> &coo
     BaseScriptInfo bsi {(int16_t)dfltInx};
     bsi.coordInx.reserve(nBaseTags);
 
-    for (auto &c : coords)
-        bsi.coordInx.push_back(addCoord(c));
+    for (auto &vvr : coords)
+        bsi.coordInx.push_back(addCoord(vvr));
 
     baseScript.emplace_back(std::move(bsi));
 
@@ -249,14 +262,14 @@ int BASE::addBaseScript(int dfltInx, size_t nBaseTags, std::vector<int16_t> &coo
 }
 
 void BASE::addScript(bool doVert, Tag script, Tag dfltBaseline,
-                     std::vector<int16_t> &coords) {
+                     std::vector<VarValueRecord> &coords) {
     if (doVert)
         VertAxis.addScript(*this, script, dfltBaseline, coords);
     else
         HorizAxis.addScript(*this, script, dfltBaseline, coords);
 }
 
-void BASE::Axis::addScript(BASE &h, Tag script, Tag dfltBaseline, std::vector<int16_t> &coords) {
+void BASE::Axis::addScript(BASE &h, Tag script, Tag dfltBaseline, std::vector<VarValueRecord> &coords) {
     size_t nBaseTags = baseTagList.size();
 
     if (nBaseTags == 0)

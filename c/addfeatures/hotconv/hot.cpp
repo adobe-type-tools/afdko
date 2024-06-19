@@ -25,6 +25,7 @@
 #include "hotmap.h"
 #include "FeatCtx.h"
 #include "name.h"
+#include "BASE.h"
 #include "GPOS.h"
 #include "GDEF.h"
 #include "OS_2.h"
@@ -351,11 +352,13 @@ const char *hotReadFont(hotCtx g, int flags, bool &isROS) {
 
     hotReadTables(g);
 
-    g->ctx.locMap = new VarLocationMap(g->ctx.feat->getAxisCount());
-    g->ctx.GDEFp->setAxisCount(g->ctx.feat->getAxisCount());
+    auto axisCount = g->ctx.feat->getAxisCount();
+    g->ctx.locMap = new VarLocationMap(axisCount);
+    g->ctx.GDEFp->setAxisCount(axisCount);
+    g->ctx.BASEp->setAxisCount(axisCount);
     if (g->ctx.MVAR == nullptr)
         g->ctx.MVAR = new var_MVAR {};
-    g->ctx.MVAR->setAxisCount(g->ctx.feat->getAxisCount());
+    g->ctx.MVAR->setAxisCount(axisCount);
     if (g->ctx.axes != nullptr && g->ds != nullptr)
         g->ds->checkAxes(*g->ctx.axes);
 
