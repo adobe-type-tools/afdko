@@ -95,15 +95,6 @@ int BASE::Fill() {
     HorizAxis.prep(g);
     VertAxis.prep(g);
 
-
-    offset.curr = hdr_size();
-
-    offset.curr += HorizAxis.fill(offset.curr);
-    offset.curr += VertAxis.fill(offset.curr);
-
-    offset.shared = offset.curr;  // Indicates start of shared area
-    offset.curr += fillSharedData();
-
     bool seenVariable = false;
     for (auto &bc : baseCoords) {
         if (bc.vvr.isVariable()) {
@@ -111,12 +102,22 @@ int BASE::Fill() {
             bc.pair = ivs.addValue(*(g->ctx.locMap), bc.vvr, g->logger);
         }
     }
-    if (seenVariable) {
+
+    if (seenVariable)
         version = VERSION(1, 1);
-        ivsOffset = offset.curr;
-    } else {
+    else
         version = VERSION(1, 0);
-    }
+
+    offset.curr = hdr_size(seenVariable);
+
+    offset.curr += HorizAxis.fill(offset.curr);
+    offset.curr += VertAxis.fill(offset.curr);
+
+    offset.shared = offset.curr;  // Indicates start of shared area
+    offset.curr += fillSharedData();
+
+    if (seenVariable)
+        ivsOffset = offset.curr;
 
     return 1;
 }
@@ -169,6 +170,8 @@ void BASE::Write() {
     OUT4(version);
     OUT2(HorizAxis.o);
     OUT2(VertAxis.o);
+    if (ivsOffset != 0)
+        OUT4(ivsOffset);
     if (HorizAxis.baseTagList.size() > 0)
         HorizAxis.write(offset.shared, this);
     if (VertAxis.baseTagList.size() > 0)
