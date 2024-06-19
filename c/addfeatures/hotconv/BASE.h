@@ -112,7 +112,12 @@ class BASE {
     void setAxisCount(uint16_t axisCount) { ivs.setAxisCount(axisCount); }
  private:
     int addBaseScript(int dfltInx, size_t nBaseTags, std::vector<VarValueRecord> &coords);
-    static Offset hdr_size() { return sizeof(int32_t) + sizeof(uint16_t) * 2; }
+    static Offset hdr_size(bool seenVariable) {
+        Offset r = sizeof(int32_t) + sizeof(uint16_t) * 2;
+        if (seenVariable)
+            r += sizeof(uint32);
+        return r;
+    }
     Offset fillAxis(bool doVert);
     Offset fillSharedData();
     void writeSharedData();
