@@ -36,7 +36,8 @@ class BASE {
         Offset tag_list_size() { return sizeof(uint16_t) + sizeof(uint32_t) * baseTagList.size(); }
         Offset script_list_size() {
             return sizeof(uint16_t) + (sizeof(uint32_t) + sizeof(uint16_t)) * baseScriptList.size(); }
-        void addScript(BASE &h, Tag script, Tag dfltBaseline, std::vector<int16_t> &coords);
+        void addScript(BASE &h, Tag script, Tag dfltBaseline,
+                       std::vector<VarValueRecord> &coords);
         void prep(hotCtx g);
         Offset fill(Offset curr);
         void write(Offset shared, BASE *h);
@@ -73,11 +74,31 @@ class BASE {
 
     struct BaseCoord {
         BaseCoord() = delete;
-        BaseCoord(int16_t c, Offset o) : Coordinate(c), o(o) {}
-        uint16_t Format {1};
-        int16_t Coordinate {0};
-        Offset o {0};
-        Offset size() { return sizeof(uint16_t) * 2; }
+        BaseCoord(VarValueRecord &&vvr, Offset o) : vvr(std::move(vvr)), o(o) {}
+        bool operator==(const BaseCoord &rhs) const { return vvr == rhs.vvr; }
+        bool operator==(const VarValueRecord &ovvr) { return vvr == ovvr; }
+        uint16_t format() { return vvr.isVariable() ? 3 : 1; }
+        LOffset size() {
+            if (vvr.isVariable()) {
+                return sizeof(uint16_t) * 5 + sizeof(int16_t);
+            } else {
+                return sizeof(uint16_t) + sizeof(int16_t);
+            }
+        }
+        void write(BASE *h) {
+            OUT2(format());
+            OUT2(vvr.getDefault());
+            if (vvr.isVariable()) {
+                assert(pair.outerIndex != 0xFFFF);
+                OUT2(6);
+                OUT2(pair.outerIndex);
+                OUT2(pair.innerIndex);
+                OUT2(0x8000);
+            }
+        }
+        VarValueRecord vvr;
+        Offset o;
+        var_indexPair pair {0xFFFF, 0xFFFF};
     };
 
  public:
@@ -85,16 +106,17 @@ class BASE {
     explicit BASE(hotCtx g) : g(g) {}
     void setBaselineTags(bool doVert, std::vector<Tag> &baselineTag);
     void addScript(bool doVert, Tag script, Tag dfltBaseline,
-                   std::vector<int16_t> &coords);
+                   std::vector<VarValueRecord> &coords);
     int Fill();
     void Write();
+    void setAxisCount(uint16_t axisCount) { ivs.setAxisCount(axisCount); }
  private:
-    int addBaseScript(int dfltInx, size_t nBaseTags, std::vector<int16_t> &coords);
+    int addBaseScript(int dfltInx, size_t nBaseTags, std::vector<VarValueRecord> &coords);
     static Offset hdr_size() { return sizeof(int32_t) + sizeof(uint16_t) * 2; }
     Offset fillAxis(bool doVert);
     Offset fillSharedData();
     void writeSharedData();
-    int32_t addCoord(int16_t c);
+    int32_t addCoord(VarValueRecord &c);
 
     std::vector<BaseScriptInfo> baseScript;
 
@@ -112,6 +134,8 @@ class BASE {
     std::vector<BaseValues> baseValues;
     std::vector<BaseCoord> baseCoords;
 
+    itemVariationStore ivs;
+    LOffset ivsOffset {0};
     hotCtx g;    /* Package context */
 };
 

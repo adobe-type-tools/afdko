@@ -1414,19 +1414,18 @@ void FeatVisitor::translateBaseScript(FeatParser::BaseScriptContext *ctx,
     Tag script = getTag(ctx->script);
     Tag db = getTag(ctx->db);
 
-    std::vector<int16_t> sv;
+    std::vector<VarValueRecord> sv;
     sv.reserve(cnt);
 
-    if ( ctx->NUM().size() != cnt ) {
-        if ( ctx->NUM().size() > cnt )
-            sv.reserve(ctx->NUM().size());
-        TOK(ctx);
+    if ( TOK(ctx)->singleValueLiteral().size() != cnt )
         fc->featMsg(sERROR, "The number of coordinates is not equal to "
-                              "the number of baseline tags");
-    }
+                            "the number of baseline tags");
 
-    for (auto n : ctx->NUM())
-        sv.push_back(getNum<int16_t>(TOK(n)->getText(), 10));
+    for (auto svl : ctx->singleValueLiteral()) {
+        VarValueRecord vvr;
+        getSingleValueLiteral(svl, vvr);
+        sv.emplace_back(std::move(vvr));
+    }
 
     fc->g->ctx.BASEp->addScript(vert, script, db, sv);
 }

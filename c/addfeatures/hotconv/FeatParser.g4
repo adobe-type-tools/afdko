@@ -284,7 +284,7 @@ axisScripts:
 ;
 
 baseScript:
-    script=tag db=tag NUM+
+    script=tag db=tag singleValueLiteral+
 ;
 
 table_GDEF:
