@@ -3322,7 +3322,7 @@ A `<script record>` is of the form:
 
 ```fea
 # Format A
-<number>
+<(v)number>
 
 # Format B
 <number> <glyph> <number>
@@ -3330,6 +3330,9 @@ A `<script record>` is of the form:
 # Format C
 <number> <device>
 ```
+
+For a variable font, the number in format A can either be plain or be a
+variable value specified according to value record format B.
 
 The baseline tags for each `BaseTagList` must be sorted in increasing ASCII
 order.

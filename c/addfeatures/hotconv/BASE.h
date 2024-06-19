@@ -5,6 +5,9 @@
 #ifndef ADDFEATURES_HOTCONV_BASE_H_
 #define ADDFEATURES_HOTCONV_BASE_H_
 
+#include <utility>
+#include <vector>
+
 #include "common.h"
 
 #define BASE_ TAG('B', 'A', 'S', 'E')
@@ -26,7 +29,7 @@ class BASE {
             }
             Tag baseScriptTag {0};
             int16_t baseScriptInx {0};
-            int32_t baseScriptOffset {0} ; // |-> BaseScriptList
+            int32_t baseScriptOffset {0};  // |-> BaseScriptList
                                            // long instead of Offset for temp -ve value
         };
 
@@ -41,7 +44,7 @@ class BASE {
         void prep(hotCtx g);
         Offset fill(Offset curr);
         void write(Offset shared, BASE *h);
-    
+
         std::vector<Tag> baseTagList;
         Offset baseTagOffset {0};
         std::vector<BaseScriptRecord> baseScriptList;
@@ -110,6 +113,7 @@ class BASE {
     int Fill();
     void Write();
     void setAxisCount(uint16_t axisCount) { ivs.setAxisCount(axisCount); }
+
  private:
     int addBaseScript(int dfltInx, size_t nBaseTags, std::vector<VarValueRecord> &coords);
     static Offset hdr_size(bool seenVariable) {
