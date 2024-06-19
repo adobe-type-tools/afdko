@@ -60,23 +60,24 @@ class BASE {
     struct BaseValues {
         BaseValues() {}
         BaseValues(BaseValues &&other) : DefaultIndex(other.DefaultIndex),
-                                         BaseCoord(std::move(other.BaseCoord)),
+                                         BaseCoordOffset(std::move(other.BaseCoordOffset)),
                                          o(other.o) {}
         static Offset script_size(uint16_t nLangSys) {
             return sizeof(uint16_t) * 3 + (sizeof(uint32_t) + sizeof(uint16_t)) * nLangSys;
         }
-        Offset size() { return sizeof(uint16_t) * (2 + BaseCoord.size()); }
+        Offset size() { return sizeof(uint16_t) * (2 + BaseCoordOffset.size()); }
         uint16_t DefaultIndex {0};
-        std::vector<int32_t> BaseCoord;  // int32_t instead of Offset for temp -ve value
+        std::vector<int32_t> BaseCoordOffset;  // int32_t instead of Offset for temp -ve value
         Offset o {0};
     };
 
-    struct BaseCoordFormat1 {
-        BaseCoordFormat1() = delete;
-        explicit BaseCoordFormat1(int16_t c) : Coordinate(c) {}
-        uint16_t BaseCoordFormat {1};
-        int16_t Coordinate;
-        static Offset size() { return sizeof(uint16_t) * 2; }
+    struct BaseCoord {
+        BaseCoord() = delete;
+        BaseCoord(int16_t c, Offset o) : Coordinate(c), o(o) {}
+        uint16_t Format {1};
+        int16_t Coordinate {0};
+        Offset o {0};
+        Offset size() { return sizeof(uint16_t) * 2; }
     };
 
  public:
@@ -95,9 +96,7 @@ class BASE {
     void writeSharedData();
     int32_t addCoord(int16_t c);
 
-    /* Shared data */
     std::vector<BaseScriptInfo> baseScript;
-    std::vector<int16_t> coord;
 
     struct {
         Offset curr {0};
@@ -111,7 +110,7 @@ class BASE {
 
     // Shared table data
     std::vector<BaseValues> baseValues;
-    std::vector<BaseCoordFormat1> bcf1;
+    std::vector<BaseCoord> baseCoords;
 
     hotCtx g;    /* Package context */
 };

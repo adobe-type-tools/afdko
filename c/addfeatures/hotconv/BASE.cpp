@@ -52,7 +52,6 @@ Offset BASE::fillSharedData() {
     Offset bvSize = 0; /* Accumulator for BaseValues section */
     Offset bsTotal = (Offset)(nBScr * BaseValues::script_size(0));
 
-    /* --- Fill BaseScript and BaseValues in parallel --- */
     baseValues.reserve(nBScr);
 
     for (auto &bsi : baseScript) {
@@ -62,9 +61,9 @@ Offset BASE::fillSharedData() {
         bv.DefaultIndex = bsi.dfltBaselineInx;
         bv.o = bsTotal - bsSize + bvSize;
 
-        bv.BaseCoord.reserve(nCoord);
+        bv.BaseCoordOffset.reserve(nCoord);
         for (auto c : bsi.coordInx)
-            bv.BaseCoord.push_back(BaseCoordFormat1::size() * c - bvSize);
+            bv.BaseCoordOffset.push_back(baseCoords[c].o - bvSize);
 
         bsSize += bv.script_size(0);
         bvSize += bv.size();
@@ -75,15 +74,13 @@ Offset BASE::fillSharedData() {
 
     /* Adjust BaseValue coord offsets */
     for (auto &bv : baseValues) {
-        for (auto &bc : bv.BaseCoord)
+        for (auto &bc : bv.BaseCoordOffset)
             bc += bvSize;
     }
 
-    bcf1.reserve(coord.size());
-    for (auto &c : coord)
-        bcf1.emplace_back(c);
+    auto &lastbc = baseCoords.back();
 
-    return bsSize + bvSize + BaseCoordFormat1::size() * bcf1.size();
+    return bsSize + bvSize + lastbc.o + lastbc.size();
 }
 
 int BASEFill(hotCtx g) {
@@ -140,13 +137,13 @@ void BASE::writeSharedData() {
 
     for (auto &bv : baseValues) {
         OUT2(bv.DefaultIndex);
-        OUT2((uint16_t)bv.BaseCoord.size());
-        for (auto &c : bv.BaseCoord)
+        OUT2((uint16_t)bv.BaseCoordOffset.size());
+        for (auto &c : bv.BaseCoordOffset)
             OUT2((uint16_t)c);
     }
 
-    for (auto &b : bcf1) {
-        OUT2(b.BaseCoordFormat);
+    for (auto &b : baseCoords) {
+        OUT2(b.Format);
         OUT2(b.Coordinate);
     }
 }
@@ -207,13 +204,18 @@ void BASE::setBaselineTags(bool doVert, std::vector<Tag> &baselineTag) {
 
 int32_t BASE::addCoord(int16_t c) {
     /* See if coord can be shared */
-    for (int32_t i = 0; i < (int32_t) coord.size(); i++) {
-        if (coord[i] == c)
+    Offset o = 0;
+    for (int32_t i = 0; i < (int32_t) baseCoords.size(); i++) {
+        if (baseCoords[i].Coordinate == c)
             return i;
     }
+    if (!baseCoords.empty()) {
+        auto &back = baseCoords.back();
+        o = back.o + back.size();
+    }
 
-    coord.push_back(c);
-    return coord.size() - 1;
+    baseCoords.emplace_back(c, o);
+    return baseCoords.size() - 1;
 }
 
 int BASE::addBaseScript(int dfltInx, size_t nBaseTags, std::vector<int16_t> &coords) {
@@ -223,7 +225,7 @@ int BASE::addBaseScript(int dfltInx, size_t nBaseTags, std::vector<int16_t> &coo
         if (bsi.dfltBaselineInx == dfltInx && nBaseTags == bsi.coordInx.size()) {
             bool match = true;
             for (size_t j = 0; j < nBaseTags; j++) {
-                if (coord[bsi.coordInx[j]] != coords[j]) {
+                if (baseCoords[bsi.coordInx[j]].Coordinate != coords[j]) {
                     match = false;
                     break;
                 }
