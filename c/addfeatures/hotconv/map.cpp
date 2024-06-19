@@ -2359,7 +2359,7 @@ void mapPrintAFM(hotCtx g) {
         printf("CharacterSet %s-%s-%hu\n", g->font.cid.registry.c_str(),
                g->font.cid.ordering.c_str(), g->font.cid.supplement);
     }
-    printf("UnderlinePosition %hd\n", g->font.UnderlinePosition);
+    printf("UnderlinePosition %hd\n", g->font.UnderlinePosition.getDefault());
     printf("UnderlineThickness %hd\n", g->font.UnderlineThickness.getDefault());
     printf("Notice %s\n", g->font.Notice.c_str());
     printf("EncodingScheme %s\n", (g->font.Encoding == FI_STD_ENC) ? "AdobeStandardEncoding" : "FontSpecific");
