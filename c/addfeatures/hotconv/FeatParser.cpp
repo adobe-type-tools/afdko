@@ -434,7 +434,7 @@ void featparserParserInitialize() {
   	95,1,0,0,0,724,725,7,5,0,0,725,730,3,98,49,0,726,727,5,140,0,0,727,729,
   	3,98,49,0,728,726,1,0,0,0,729,732,1,0,0,0,730,728,1,0,0,0,730,731,1,0,
   	0,0,731,97,1,0,0,0,732,730,1,0,0,0,733,734,3,202,101,0,734,736,3,202,
-  	101,0,735,737,5,153,0,0,736,735,1,0,0,0,737,738,1,0,0,0,738,736,1,0,0,
+  	101,0,735,737,3,62,31,0,736,735,1,0,0,0,737,738,1,0,0,0,738,736,1,0,0,
   	0,738,739,1,0,0,0,739,99,1,0,0,0,740,741,5,68,0,0,741,743,5,129,0,0,742,
   	744,3,102,51,0,743,742,1,0,0,0,744,745,1,0,0,0,745,743,1,0,0,0,745,746,
   	1,0,0,0,746,747,1,0,0,0,747,748,5,130,0,0,748,749,5,68,0,0,749,750,5,
@@ -5376,12 +5376,12 @@ FeatParser::TagContext* FeatParser::BaseScriptContext::tag(size_t i) {
   return getRuleContext<FeatParser::TagContext>(i);
 }
 
-std::vector<tree::TerminalNode *> FeatParser::BaseScriptContext::NUM() {
-  return getTokens(FeatParser::NUM);
+std::vector<FeatParser::SingleValueLiteralContext *> FeatParser::BaseScriptContext::singleValueLiteral() {
+  return getRuleContexts<FeatParser::SingleValueLiteralContext>();
 }
 
-tree::TerminalNode* FeatParser::BaseScriptContext::NUM(size_t i) {
-  return getToken(FeatParser::NUM, i);
+FeatParser::SingleValueLiteralContext* FeatParser::BaseScriptContext::singleValueLiteral(size_t i) {
+  return getRuleContext<FeatParser::SingleValueLiteralContext>(i);
 }
 
 
@@ -5420,11 +5420,13 @@ FeatParser::BaseScriptContext* FeatParser::baseScript() {
     _la = _input->LA(1);
     do {
       setState(735);
-      match(FeatParser::NUM);
+      singleValueLiteral();
       setState(738); 
       _errHandler->sync(this);
       _la = _input->LA(1);
-    } while (_la == FeatParser::NUM);
+    } while (_la == FeatParser::LPAREN
+
+    || _la == FeatParser::NUM);
    
   }
   catch (RecognitionException &e) {

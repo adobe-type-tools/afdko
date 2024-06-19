@@ -1117,8 +1117,8 @@ public:
     virtual size_t getRuleIndex() const override;
     std::vector<TagContext *> tag();
     TagContext* tag(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
+    std::vector<SingleValueLiteralContext *> singleValueLiteral();
+    SingleValueLiteralContext* singleValueLiteral(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
