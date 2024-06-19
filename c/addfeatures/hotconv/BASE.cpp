@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <algorithm>
+
 void BASENew(hotCtx g) {
     g->ctx.BASEp = new BASE(g);
 }
@@ -69,7 +71,6 @@ Offset BASE::fillSharedData() {
         bvSize += bv.size();
 
         baseValues.emplace_back(std::move(bv));
-
     }
 
     /* Adjust BaseValue coord offsets */
