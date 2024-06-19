@@ -852,7 +852,7 @@ antlrcpp::Any FeatVisitor::visitAxisTags(FeatParser::AxisTagsContext *ctx) {
     tv.reserve(fc->axistag_count);
     for (auto t : ctx->tag())
         tv.push_back(getTag(t));
-    BASESetBaselineTags(fc->g, fc->axistag_vert, tv);
+    fc->g->ctx.BASEp->setBaselineTags(fc->axistag_vert, tv);
 
     return nullptr;
 }
@@ -1428,7 +1428,7 @@ void FeatVisitor::translateBaseScript(FeatParser::BaseScriptContext *ctx,
     for (auto n : ctx->NUM())
         sv.push_back(getNum<int16_t>(TOK(n)->getText(), 10));
 
-    BASEAddScript(fc->g, vert, script, db, sv);
+    fc->g->ctx.BASEp->addScript(vert, script, db, sv);
 }
 
 bool FeatVisitor::translateAnchor(FeatParser::AnchorContext *ctx,
