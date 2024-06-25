@@ -21,16 +21,16 @@
    floor, frexp, ldexp, log, log10, modf, pow, sin, sqrt
  */
 
-#include <math.h>
-#include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "math.h"
+#include "stdint.h"
 
 #ifndef FIXEDFUNC
 #define FIXEDFUNC
 #endif /* FIXEDFUNC */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* Reals and Fixed point */
 typedef int32_t Fixed; /*  16 bits of integer, 16 bits of fraction */

@@ -636,7 +636,7 @@ void SfntEdit::readHdr() {
         default:
             srcfile.close();
             fatal("unrecognized/unsupported file type [%s]",
-                  srcfilepath.c_str());
+                  srcfilepath.string().c_str());
     }
 
     /* Read rest of header */
@@ -667,7 +667,7 @@ void SfntEdit::readHdr() {
 void SfntEdit::dumpHdr(void) {
     int i = 0;
 
-    std::printf("--- sfnt header [%s]\n", srcfilepath.c_str());
+    std::printf("--- sfnt header [%s]\n", srcfilepath.string().c_str());
     if (sfnt.version == 0x00010000)
         std::printf("version      =1.0 (00010000)\n");
     else
@@ -781,7 +781,7 @@ void SfntEdit::checkChecksums() {
         fail = 1;
     }
     logger->log(sINFO, fail ? "icheck failed [%s]" : "check passed [%s]",
-                srcfilepath.c_str());
+                srcfilepath.string().c_str());
 }
 
 /* Make extract filename from option filename or src filename plus table tag */
@@ -868,7 +868,7 @@ uint32_t SfntEdit::addTable(const Table &tbl, std::ostream &dstfile,
 
     file.open(tbl.afilename, std::ios::binary);
     if (file.fail())
-        fatal("file error <could not open> [%s]", tbl.afilename.c_str());
+        fatal("file error <could not open> [%s]", tbl.afilename.string().c_str());
     file.seekg(0, std::ios::end);
     *length = (uint32_t) file.tellg();
     checksum = tableCopy(file, dstfile, 0, *length);
@@ -1019,7 +1019,7 @@ int SfntEdit::run_prot(int argc, char *argv[]) {
             scriptfilepath = "sfntedit.scr";
 
         if (!fs::exists(scriptfilepath)) {
-            fatal("Missing script file [%s]", scriptfilepath.c_str());
+            fatal("Missing script file [%s]", scriptfilepath.string().c_str());
         }
         makeArgs(scriptfilepath, script);
         if (scriptfilepath.has_parent_path())
@@ -1059,7 +1059,7 @@ int SfntEdit::run_prot(int argc, char *argv[]) {
 
         srcfile.open(srcfilepath, std::ios::binary);
         if (srcfile.fail())
-            fatal("file error <could not open> [%s]", srcfilepath.c_str());
+            fatal("file error <could not open> [%s]", srcfilepath.string().c_str());
 
         if (!doingScripting && srcfilepath.has_parent_path())
             sourcepath = srcfilepath.parent_path();
@@ -1067,7 +1067,7 @@ int SfntEdit::run_prot(int argc, char *argv[]) {
         if (!dstfilepath.empty()) {  // Open destination file
             dstfile.open(dstfilepath, std::ios::in|std::ios::out|std::ios::binary|std::ios::trunc);
             if (dstfile.fail())
-                fatal("file error <could not open> [%s]", dstfilepath.c_str());
+                fatal("file error <could not open> [%s]", dstfilepath.string().c_str());
         }
 
         /* Read sfnt header */

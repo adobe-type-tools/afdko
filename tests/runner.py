@@ -44,6 +44,7 @@ allow_skip_console = os.getenv('AFDKO_TEST_SKIP_CONSOLE',
 
 last_command = ["blah"]
 
+
 def _write_file(file_path, data):
     with open(file_path, "wb") as f:
         f.write(data)
