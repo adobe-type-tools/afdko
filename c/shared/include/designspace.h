@@ -11,9 +11,7 @@
 #include <map>
 #include <vector>
 
-#include "ctlshare.h"
 #include "slogger.h"
-#include "supportfp.h"
 #include "varsupport.h"
 
 class Designspace {
