@@ -1486,8 +1486,9 @@ def getOptions(makeOTFParams, args):
     if error:
         raise MakeOTFOptionsError
 
-    if (getattr(makeOTFParams, kFileOptPrefix + kRelease) != None and
-            getattr(makeOTFParams, kFileOptPrefix + kUseSuppliedCFF) != None):
+    if (getattr(makeOTFParams, kFileOptPrefix + kRelease) is not None and
+            getattr(makeOTFParams, kFileOptPrefix + kUseSuppliedCFF)
+            is not None):
         setattr(makeOTFParams, kFileOptPrefix + kDoSubr, None)
 
 
