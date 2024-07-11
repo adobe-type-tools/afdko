@@ -667,8 +667,7 @@ class dimensionHinter:
         of the segment are within ExtremaDist of pe
         """
         a, b, c, d = pe.cubicParameters()
-        loc = round(extp.o) + (-self.ExtremaDist
-                               if isMn else self.ExtremaDist)
+        loc = extp.o + (-self.ExtremaDist if isMn else self.ExtremaDist)
 
         horiz = not self.isV()  # When finding vertical stems solve for x
         sl = solveCubic(a[horiz], b[horiz], c[horiz], d[horiz] - loc)
@@ -776,7 +775,8 @@ class dimensionHinter:
                 origGlyph = None
                 self.hs.overlapRemoved = False
             else:
-                self.glyph.associatePath(origGlyph)
+                self.glyph.associatePath(origGlyph,
+                                         self.options.looseOverlapMapping)
 
         self.prepForSegs()
         self.Bonus = 0
@@ -2446,11 +2446,10 @@ class glyphHinter:
                 gp = g.subpaths[si]
                 dpl, gpl = len(dp), len(gp)
                 if gpl != dpl:
-                    # XXX decide on warning message for these
                     if (gpl == dpl + 1 and gp[-1].isClose() and
                             not dp[-1].isClose()):
                         for _gi in range(i + 1):
-                            gllist[i].addNullClose(si)
+                            gllist[_gi].addNullClose(si)
                         continue
                     if (dpl == gpl + 1 and dp[-1].isClose() and
                             not gp[-1].isClose()):

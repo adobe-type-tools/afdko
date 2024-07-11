@@ -343,6 +343,7 @@ class HintOptions(ACOptions):
         self.writeToDefaultLayer = pargs.write_to_default_layer
         self.maxSegments = pargs.max_segments
         self.verbose = pargs.verbose
+        self.looseOverlapMapping = pargs.loose_overlap_mapping
         if pargs.force_overlap:
             self.overlapForcing = True
         elif pargs.force_no_overlap:
@@ -580,6 +581,14 @@ def add_common_options(parser, term, name):
         help='Do not correct for potential overlap on any glyphs (the '
              'default when hinting individual, non-variable fonts and not '
              'supplying an overlap list)'
+    )
+    overlap_parser.add_argument(
+        '--loose-overlap-mapping',
+        action='store_true',
+        help='Some fonts see high numbers of "Unable to map derived path '
+             'element from ..." warnings when processing overlap. This flag '
+             'loosens the matching heuristics and should lower (but not '
+             'eliminate) the number of those warnings'
     )
     parser.add_argument(
         '--log',
@@ -865,6 +874,7 @@ class ReportOptions(ACOptions):
         self.report_zones = pargs.alignment_zones
         self.report_all_stems = pargs.all_stems
         self.verbose = pargs.verbose
+        self.looseOverlapMapping = pargs.loose_overlap_mapping
         if pargs.force_overlap:
             self.overlapForcing = True
         elif pargs.force_no_overlap:
