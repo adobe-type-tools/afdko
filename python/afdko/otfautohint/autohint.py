@@ -37,6 +37,7 @@ class ACOptions(object):
         self.excludeGlyphList = False
         self.overlapList = []
         self.overlapForcing = None
+        self.looseOverlapMapping = False
         self.hintAll = False
         self.readHints = True
         self.allowChanges = False
