@@ -837,7 +837,6 @@ class FeatCtx {
 
     // Variable
     std::unordered_map<std::string, uint32_t> locationDefs;
-    std::string defAxisUnit {"u"};
 
     var_F2dot14 validAxisLocation(var_F2dot14 v, int8_t adjustment = 0);
     int16_t axisTagToIndex(Tag tag);
