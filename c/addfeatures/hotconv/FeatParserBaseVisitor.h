@@ -51,10 +51,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitDefaultAxisUnit(FeatParser::DefaultAxisUnitContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitFeatureBlock(FeatParser::FeatureBlockContext *ctx) override {
     return visitChildren(ctx);
   }

@@ -37,8 +37,6 @@ public:
 
     virtual std::any visitLocationDef(FeatParser::LocationDefContext *context) = 0;
 
-    virtual std::any visitDefaultAxisUnit(FeatParser::DefaultAxisUnitContext *context) = 0;
-
     virtual std::any visitFeatureBlock(FeatParser::FeatureBlockContext *context) = 0;
 
     virtual std::any visitTableBlock(FeatParser::TableBlockContext *context) = 0;
