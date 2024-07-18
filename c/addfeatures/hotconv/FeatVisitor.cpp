@@ -355,19 +355,6 @@ antlrcpp::Any FeatVisitor::visitLocationDef(FeatParser::LocationDefContext *ctx)
     return nullptr;
 }
 
-antlrcpp::Any FeatVisitor::visitDefaultAxisUnit(FeatParser::DefaultAxisUnitContext *ctx) {
-    if ( stage != vExtract )
-        return nullptr;
-
-    fc->defAxisUnit = TOK(ctx->AXISUNIT())->getText();
-    if (!(fc->defAxisUnit == "u" || fc->defAxisUnit == "d" ||
-          fc->defAxisUnit == "n")) {
-        fc->featMsg(sERROR, "Invalid axis unit %s", fc->defAxisUnit.c_str());
-    }
-
-    return nullptr;
-}
-
 antlrcpp::Any FeatVisitor::visitAnchorDef(FeatParser::AnchorDefContext *ctx) {
     if ( stage != vExtract )
         return nullptr;
@@ -1582,7 +1569,7 @@ bool FeatVisitor::addAxisLocationLiteral(FeatParser::AxisLocationLiteralContext 
     }
     assert(axisIndex < (int16_t)l.size());
 
-    std::string unit = ctx->AXISUNIT() ? TOK(ctx->AXISUNIT())->getText() : fc->defAxisUnit;
+    std::string unit = TOK(ctx->AXISUNIT())->getText();
     Fixed v = getFixed<Fixed>(ctx->fixedNum());
     if (unit == "d") {
         assert(fc->g->ds != nullptr);

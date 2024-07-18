@@ -58,7 +58,6 @@ CV_UI_LABEL             : 'FeatUILabelNameID' ;
 CV_TOOLTIP              : 'FeatUITooltipTextNameID' ;
 CV_SAMPLE_TEXT          : 'SampleTextNameID' ;
 CV_PARAM_LABEL          : 'ParamUILabelNameID' ;
-DEF_AXIS_UNIT           : 'defaultAxisUnit' ;
 CV_CHARACTER            : 'Character' ;
 SIZEMENUNAME            : 'sizemenuname' ;
 CONTOURPOINT            : 'contourpoint' ;
