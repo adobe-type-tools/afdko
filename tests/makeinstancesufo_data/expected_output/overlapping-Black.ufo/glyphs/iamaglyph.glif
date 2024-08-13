@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph name="iamaglyph" format="2">
+  <advance width="291"/>
+  <outline>
+    <contour>
+      <point x="274" y="187" type="curve" smooth="yes"/>
+      <point x="291" y="187" type="line"/>
+      <point x="291" y="309" type="line"/>
+      <point x="274" y="309" type="line" smooth="yes"/>
+      <point x="264" y="309"/>
+      <point x="262" y="312"/>
+      <point x="258" y="320" type="curve" smooth="yes"/>
+      <point x="173" y="494" type="line" smooth="yes"/>
+      <point x="170" y="499"/>
+      <point x="169" y="499"/>
+      <point x="164" y="499" type="curve" smooth="yes"/>
+      <point x="21" y="499" type="line" smooth="yes"/>
+      <point x="17" y="499"/>
+      <point x="14" y="495"/>
+      <point x="17" y="490" type="curve"/>
+      <point x="38" y="455"/>
+      <point x="145" y="283"/>
+      <point x="161" y="261" type="curve"/>
+      <point x="140" y="231"/>
+      <point x="37" y="68"/>
+      <point x="1" y="8" type="curve" smooth="yes"/>
+      <point x="-1" y="4"/>
+      <point x="0" y="0"/>
+      <point x="6" y="0" type="curve" smooth="yes"/>
+      <point x="150" y="0" type="line" smooth="yes"/>
+      <point x="158" y="0"/>
+      <point x="160" y="2"/>
+      <point x="163" y="7" type="curve" smooth="yes"/>
+      <point x="256" y="176" type="line" smooth="yes"/>
+      <point x="262" y="185"/>
+      <point x="264" y="187"/>
+    </contour>
+  </outline>
+</glyph>
