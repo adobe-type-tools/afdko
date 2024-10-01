@@ -38,8 +38,8 @@ More information can be found in [docs/otfautohint_Notes.md](docs/otfautohint_No
 Installation
 ------------
 
-The AFDKO requires [Python](http://www.python.org/download) 3.8
-or later. It should work with any Python > 3.8, but occasionally
+The AFDKO requires [Python](http://www.python.org/download) 3.9
+or later. It should work with any Python > 3.9, but occasionally
 tool-chain components and dependencies don't keep pace with major
 Python releases, so there might be some lag time while they catch up.
 
@@ -132,7 +132,7 @@ On macOS, install these with:
 
 On Linux (Ubuntu 17.10 LTS or later), install these with:
 
-    apt-get -y install python3.8
+    apt-get -y install python3.9
     apt-get -y install python-pip
     apt-get -y install python-dev
     apt-get -y install uuid-dev
