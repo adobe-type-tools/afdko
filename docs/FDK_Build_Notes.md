@@ -1,9 +1,9 @@
 # FDK Build Notes
 
-#### v1.3.1 April 2022
+#### v1.4.0 October 2024
 
 ## Overview
-These instructions are for users who wish to build the C programs in the AFDKO on their own. If you have obtained the AFDKO through [PyPI](https://pypi.org/project/afdko/) (`pip`), you can ignore this, as everything is pre-built for distribution on PyPI. These are really only for users who need to build on platforms that are not officially supported, or wish to make other custom changes.
+These instructions are for users who wish to build the C++ programs in the AFDKO on their own. If you have obtained the AFDKO through [PyPI](https://pypi.org/project/afdko/) (`pip`), you can ignore this, as everything is pre-built for distribution on PyPI. These are really only for users who need to build on platforms that are not officially supported, or wish to make other custom changes.
 
 ## FDK directory tree
 
@@ -12,28 +12,13 @@ The FDK directory tree is pretty straightforward. The basic structure is:
 afdko/
 └── c/
     └── <component>/
-        └── source/
-```
-
-When a tool uses a library there are additional directories for its include files and the library sources:
-```
-└── c/
-    └── <component>/
         └── include/
-        └── lib/<library>/source
-        └── source/
+        └── <subcomponent>
 ```
 
 ## Special cases
-`tx`, `mergefonts`, and `rotatefont` share a common set of libraries and resource files. These libraries are grouped under the shared directory in:
-```
-afdko/
-└── c/
-    └── shared/
-        └── include/
-        └── resource/
-        └── source/<library>
-```
+Files in the `shared` component are primarily used to build `tx`, but also shared with
+other program, including `addfeatures`.
 
 ## Build system
 
@@ -44,9 +29,9 @@ cmake -S . -B build
 cmake --build build
 ```
 
-Note that unless you are using macOS or Windows you must have `libuuid` and its header files installed in order to build `makeotfexe`. These will typically be part of a package named `uuid-dev`, `libuuid-devel`, or `util-linux-libs`. (`libuuid` is a dependency of the Antlr 4 Cpp runtime, which is built by `cmake/ExternalAntlr4Cpp.cmake`. If you have build trouble after installing the library the [Antlr 4 Cpp runtime documentation](https://github.com/antlr/antlr4/tree/master/runtime/Cpp) may help.)
+Note that unless you are using macOS or Windows you must have `libuuid` and its header files installed in order to build `addfeatures`. These will typically be part of a package named `uuid-dev`, `libuuid-devel`, or `util-linux-libs`. (`libuuid` is a dependency of the Antlr 4 Cpp runtime, which is built by `cmake/ExternalAntlr4Cpp.cmake`. If you have build trouble after installing the library the [Antlr 4 Cpp runtime documentation](https://github.com/antlr/antlr4/tree/master/runtime/Cpp) may help.)
 
-If the build is successful each program (e.g. makeotfexe) will be built as `build/bin/[program]`.  If you would like to install them in `/usr/local/bin` you can then run `cmake --build build -- install`.
+If the build is successful the code for each low-level program (e.g. addfeatures) will be built into a single shared library.  The code can then be run using `python` script stubs, or by linking to the library with an appropriate `main()` function to forward `argv` and `argc` to the desired function.
 
 ### LibXML2
 
@@ -70,21 +55,9 @@ These options can be added to the end of the first CMake command above:
 
 ## Tests
 
-Tests for both the C and Python programs are written in the Python `pytest` framework. If you have installed the `afdko` package using `pip` (or an equivalent) you can make `tests` your working directory and run `python -m pytest` to run the tests.
-
-You can also run the tests before installation using CMake's `ctest` program or the `test` build target, assuming that you have both Python 3 and the `pytest` package installed. (For example, if you are building with ninja you can run `ninja test`.) Using `ctest` you can run the tests for one or more individual programs but not at a finer grain.
-
-To run the tests manually/individually before installation you need to set a few environment variables. If the repository directory is `[AFDKO]` and the CMake build directory is `[AFDKO]/build` then the compiled programs will be in `[AFDKO]/build/bin`. Add this to the front of the `PATH` environment variable. Then add `[AFDKO]/python` to the front of the `PYTHONPATH` environment variable. Finally set the `AFDKO_TEST_SKIP_CONSOLE` variable to `True`. (The latter allows the tests to succeed without `console_script` wrappers for the Python EntryPoints.) The tests should now succeed or fail based on the current status of the build and python file changes.
+Tests for both the C++ and Python programs are written in the Python `pytest` framework. If you have installed the `afdko` package using `pip` (or an equivalent) you can make `tests` your working directory and run `python -m pytest` to run the tests. It is currently difficult to run the tests before installation.
 
 ## Troubleshooting
-
-### `utfcpp` Timeout
-
-The Antlr 4 build process downloads its `utfcpp` dependency using a `git` protocol URL. In some situations this action can time out. As a workaround you can substitute the more reliable `https` URL by running this command (which will modify your git configuration):
-
-```
-git config --global url.https://github.com/.insteadOf git://github.com/
-```
 
 ### Antlr 4 Cpp runtime and Windows path lengths
 
@@ -112,3 +85,4 @@ git config --system core.longpaths true
 - Version 1.2.1 - Convert to Markdown, update content - October 2019
 - Version 1.3.0 - Document switch to CMake-driven builds - June 2021
 - Version 1.3.1 - Add links to previously-opened Windows Issues - April 2022
+- Version 1.4.0 - Update for C++ ports and repackaging - October 2024

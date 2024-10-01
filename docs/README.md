@@ -2,7 +2,7 @@
 ##### • [OpenType Feature File Specification](./OpenTypeFeatureFileSpecification.md)
 ##### • [Variable Feature Style Guide](./Variable_Feature_Style_Guide.md)
 ---
-##### • [MakeOTF v2.5 User Guide](./MakeOTFUserGuide.md)
+##### • [MakeOTF User Guide](./MakeOTFUserGuide.md)
 ##### • [Command Line How-To](./CommandLineHowTo.md)
 ##### • [CID-keyed UFO Guide](./CIDKeyedUFOGuide.md)
 ---

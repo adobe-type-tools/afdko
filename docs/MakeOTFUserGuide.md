@@ -22,9 +22,9 @@ Options can be added to the `makeotf` command to set parameters that change how 
 ## **Using MakeOTF**
 
 MakeOTF comes in two parts which can actually be called independently:
-  * **`makeotfexe`** is a program written in C, and is actually the tool that builds the OpenType font file. It requires, however, that all the source files be explicitly specified with options on the command line.
+  * **`addfeatures`** is a program written in C, and is actually the tool that builds the OpenType font file. It requires, however, that all the source files be explicitly specified with options on the command line.
 
-  * **`makeotf`** is a command shell that calls the Python™ script **`makeotf.py`**. This will look for the source files in some standard locations, and fill in default values for options. It can also read the options needed from a project file (`current.fpr`), which means that for a particular font, one only needs to type-in all the options once. When **`makeotf.py`** has gathered all the source files, it will call the **`makeotfexe`** program.
+  * **`makeotf`** is a command shell that calls the Python™ script **`makeotf.py`**. This will look for the source files in some standard locations, and fill in default values for options. It can also read the options needed from a project file (`current.fpr`), which means that for a particular font, one only needs to type-in all the options once. When **`makeotf.py`** has gathered all the source files, it will call the **`addfeatures`** program.
 
 In general, one should invoke **`makeotf.py`** with the makeotf command. This way, the last set of options used will always be recorded in a project file.
 
@@ -88,7 +88,7 @@ makeotf –fp myproject.fpr
 |`–r` | | Set release mode. This option turns on subroutinization, applies the GlyphOrderAndAliasDB file, and removes the word Development from the name table Version (Name ID 5) string.|
 |`–S` | | Turn on subroutinization.|
 |`–ga` | | Apply the GlyphOrderAndAliasDB file. Use when the `–r` option is NOT specified.|
-|`-rev` | `[<number>]` | Attempts to edit the feature file before makeotfexe is run, in order to increment the head table fontRevision field. This only works if the head table override is already defined in the features file. Without the optional version number, increments the version number by 5. With an integer argument, it increments the minor version by that number. With a fractional argument, it sets the version to the fractional argument; the number must then be decimal with three decimal places, e.g. “1.045”, not ‘1.45’.|
+|`-rev` | `[<number>]` | Attempts to edit the feature file before addfeatures is run, in order to increment the head table fontRevision field. This only works if the head table override is already defined in the features file. Without the optional version number, increments the version number by 5. With an integer argument, it increments the minor version by that number. With a fractional argument, it sets the version to the fractional argument; the number must then be decimal with three decimal places, e.g. “1.045”, not ‘1.45’.|
 |`–osbOn` | `<number>` | Turn on the specified bit number(s) in the OS/2 table fsSelection field. In order to turn on more than one bit, must be used more than once. `–osbOn 7 –osbOn 8` will turn on bits 7 and 8. See section below on New OS/2 Bits.|
 |`–osbOff` | `<number>` | Turn off the specified bit number(s) in the OS/2 table fsSelection field. Can be used more than once to turn OFF more than one bit at a time. `–osbOff 7 –osbOff 8` will turn off bits 7 and 8. See section below on New OS/2 Bits.|
 |`-osv` | `<number>` | Set version number of the OS/2 table. The default value is 3 if none of the bits specified only in version 4 and later are used; otherwise, the default version is 4. See section below on New OS/2 Bits.|
