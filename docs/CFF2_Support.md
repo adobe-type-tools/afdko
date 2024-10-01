@@ -6,12 +6,12 @@ layout: default
 Support of CFF2 in AFDKO
 ---
 
-Copyright 2021 Adobe. All Rights Reserved. This software is licensed as
+Copyright 2023-4 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available
 at: http://opensource.org/licenses/Apache-2.0.
 
-Document version 0.1
-Last updated 18 January 2023
+Document version 0.2
+Last updated 1 October 2024
 
 ## 1. Workflow
 
@@ -157,3 +157,4 @@ unmodified into the output OTF.
 ## 3. Document revisions
 
 **v0.1 [18 January 2023]: First version**
+**v0.2 [1 October 2024]: Second version**
