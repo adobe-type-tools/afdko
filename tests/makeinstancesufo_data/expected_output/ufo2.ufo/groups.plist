@@ -66,5 +66,61 @@
 			<string>d</string>
 			<string>e</string>
 		</array>
+		<key>public.kern1.LAT_A</key>
+		<array>
+			<string>A</string>
+			<string>Aacute</string>
+			<string>Adieresis</string>
+			<string>Atilde</string>
+		</array>
+		<key>public.kern1.LAT_Y</key>
+		<array>
+			<string>Y</string>
+			<string>Yacute</string>
+			<string>Ydieresis</string>
+			<string>Ytilde</string>
+		</array>
+		<key>public.kern1.LAT_a</key>
+		<array>
+			<string>a</string>
+			<string>aacute</string>
+			<string>adieresis</string>
+			<string>atilde</string>
+		</array>
+		<key>public.kern1.LAT_v</key>
+		<array>
+			<string>y</string>
+			<string>yacute</string>
+			<string>ydieresis</string>
+			<string>ytilde</string>
+		</array>
+		<key>public.kern2.LAT_A</key>
+		<array>
+			<string>A</string>
+			<string>Aacute</string>
+			<string>Adieresis</string>
+			<string>Atilde</string>
+		</array>
+		<key>public.kern2.LAT_Y</key>
+		<array>
+			<string>Y</string>
+			<string>Yacute</string>
+			<string>Ydieresis</string>
+			<string>Ytilde</string>
+		</array>
+		<key>public.kern2.LAT_a</key>
+		<array>
+			<string>a</string>
+			<string>aacute</string>
+			<string>adieresis</string>
+			<string>atilde</string>
+		</array>
+		<key>public.kern2.LAT_y</key>
+		<array>
+			<string>y</string>
+			<string>yacute</string>
+			<string>ydieresis</string>
+			<string>ytilde</string>
+		</array>
 	</dict>
 </plist>

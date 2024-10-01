@@ -85,7 +85,7 @@
                 <dimension name="weight" xvalue="394" />
             </location>
         </instance>
-        <instance familyname="Source Serif Pro" filename="same_dir.ufo" postscriptfontname="SourceSerifPro-SameDir" stylename="Same Dir">
+        <instance familyname="Source Serif Pro" filename="./same_dir.ufo" postscriptfontname="SourceSerifPro-SameDir" stylename="Same Dir">
             <location>
                 <dimension name="weight" xvalue="55.5" />
             </location>

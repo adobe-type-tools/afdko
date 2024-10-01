@@ -212,3 +212,19 @@ def test_extrapolate(capfd, use_varlib):
             assert "Extrapolation is not supported with varlib (Dummy Extra Plus weight: 1500.0)" in captured.err  # noqa: E501
         else:
             assert differ([expected_path, actual_path])
+
+
+def test_strict_flag(capfd):
+    """
+    Test extrapolating, with default (MutatorMath) and with varlib.
+    Using varlib should fail (output should not be extrapolated) because
+    extrapolation is not supported by varlib.
+    """
+    runner_args = ['-t', TOOL, '-o', 'a', 'c', 'n', 's', 'd', f'_{get_input_path("OverlappingPoints.designspace")}']  # noqa: E501
+    runner(runner_args)
+
+    for ufo_filename in ("overlapping-Thin.ufo", "overlapping-Black.ufo"):
+        expected_path = _get_output_path(ufo_filename, 'expected_output')
+        actual_path = _get_output_path(ufo_filename, 'temp_output')
+
+        assert differ([expected_path, actual_path])
