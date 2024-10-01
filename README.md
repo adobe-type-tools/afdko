@@ -12,6 +12,11 @@ Adobe Font Development Kit for OpenType (AFDKO)
 The AFDKO is a set of tools for building OpenType font files from
 PostScript and TrueType font data.
 
+Note: This version of the toolkit has been restructured and what was C code has been
+partially ported to C++. For now these changes are considered experimental and
+there may be significant bugs. However, the new code can do more or less what
+the older code did and passes our test suite.
+
 This repository contains the data files, Python scripts, and sources for
 the command line programs that comprise the AFDKO. The project uses the
 [Apache 2.0 Open Source license](https://opensource.org/licenses/Apache-2.0).
@@ -160,15 +165,3 @@ If you'd like to develop & debug AFDKO using Xcode, run:
 
 For further information on building from source see
 [docs/FDK\_Build\_Notes.md](docs/FDK_Build_Notes.md).
-
-**Note**
-
-It's not possible to install the afdko in editable/develop mode using
-`python -m pip install -e .` ; this is because the toolkit includes binary C executables
-which setup.py tries to install in the bin/ (or Scripts/) folder, however
-this process was only meant to be used with text-based scripts (either
-written in Python or a shell scripting language). To work around this problem
-(which really only impacts the few core afdko developers who need to get live
-feedback as they modify the source files) you can use alternative methods like
-exporting a PYTHONPATH, using a .pth file or similar hacks.
-For further details read [this comment](https://github.com/adobe-type-tools/afdko/pull/677#issuecomment-436747212).
