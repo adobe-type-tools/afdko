@@ -329,7 +329,7 @@ the values of various table fields [§[9](#9)].
 #### 2.e.iii. Variable location specifier
 
 A `<location>` represents a position in a font's variable design space.
-variable Locations are specified by a comma-separated list of axis location specifiers,
+Variable locations are specified by a comma-separated list of axis location specifiers,
 at most one per axis. An axis is represented by its tag, and the position is specified
 by an axis value and an optional unit letter:
 
@@ -668,7 +668,7 @@ the `anchorDef` keyword.
 
 A metric pair can be specified in a number of ways that fall into two patterns.
 First, as in the examples above, each metric in the pair can be specified
-separately, with non, either, or both being a <vmetric>. For example:
+separately, with none, either, or both being a `<vmetric>`. For example:
 
 ```fea
 <anchor 120 -20>

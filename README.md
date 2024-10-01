@@ -172,25 +172,3 @@ written in Python or a shell scripting language). To work around this problem
 feedback as they modify the source files) you can use alternative methods like
 exporting a PYTHONPATH, using a .pth file or similar hacks.
 For further details read [this comment](https://github.com/adobe-type-tools/afdko/pull/677#issuecomment-436747212).
-
-Major changes from version 2.5.x
---------------------------------
-
-* The AFDKO has been restructured so that it can be installed as a Python
-package. It now depends on the user's Python interpreter, and no longer
-contains its own Python interpreter.
-
-* Two programs, **IS** and **checkoutlines** were dropped because their source
-code could not be open-sourced. These tools are available in [release version
-2.5.65322 and older](https://github.com/adobe-type-tools/afdko/releases?after=2.6.22).
-
-**Note**
-
-If you install the old AFDKO as well as the new PyPI afdko package, the tools from
-the newer version will take precedence over the older. This happens because pip
-adds the afdko's package path at the beginning of the system's PATH environment
-variable, whereas the old installer adds it at the end; this modification to PATH
-is not undone by the uninstaller. If you want to completely remove the path to the
-newer version, you will have to edit the PATH. On the Mac, this means editing the
-line in your login file that sets the PATH variable. On Windows, this means editing
-the PATH environment variable in the system's Control Panel.
