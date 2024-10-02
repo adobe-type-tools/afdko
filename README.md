@@ -143,7 +143,7 @@ On Linux (Ubuntu 17.10 LTS or later), install these with:
     apt-get -y install uuid-dev
 
 On other POSIX-like operating systems, `libuuid` and its header files
-may be in a package named `libuuid-devel` or `util-linux-libs`. The
+may be in a package named `libuuid-devel`, `util-linux-libs` or `uuid-dev`. The
 source code for `libuuid` is maintained in the
 [util-linux repository](https://github.com/karelzak/util-linux).
 
