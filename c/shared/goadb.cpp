@@ -59,11 +59,18 @@ void GOADB::parseError(const char *msg) {
 }
 
 bool GOADB::read(const char *filename) {
+#if 0
+    // std::filesystem::exists and ::status aren't availble prior to MacOS 10.15
     if (!std::filesystem::exists(std::filesystem::status(filename))) {
         logger->log(sERROR, "Glyph Name Alias Database file '%s' not found", filename);
         return false;
     }
+#endif
     std::ifstream gnamefile(filename);
+    if (gnamefile.fail()) {
+        logger->log(sERROR, "Could not open Glyph Name Alias Database file '%s'", filename);
+        return false;
+    }
     std::string buf;
     int32_t order = -1;
     char c;
