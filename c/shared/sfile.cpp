@@ -16,8 +16,7 @@
 
 #include <filesystem>
 
-// #if !defined(__cpp_lib_filesystem)
-#if 1
+#if !defined(__cpp_lib_filesystem)
 #include <dirent.h>
 #include <sys/stat.h>
 #endif
@@ -52,8 +51,7 @@ int sFileLen(sFile *f) {
 
 /* Checks whether file exists */
 int sFileExists(const char *filename) {
-// #if defined(__cpp_lib_filesystem)
-#if 0
+#if defined(__cpp_lib_filesystem)
     auto s = std::filesystem::status(filename);
     return std::filesystem::exists(s);
 #else
@@ -66,7 +64,7 @@ int sFileExists(const char *filename) {
 
 /* Checks whether file exists */
 int sFileIsDir(const char *filename) {
-#if 0
+#if defined(__cpp_lib_filesystem)
     auto s = std::filesystem::status(filename);
     return std::filesystem::is_directory(s);
 #else
@@ -213,8 +211,7 @@ void sFileWriteObject(sFile *f, int size, uint32_t value) {
 int sFileReadInputDir(const char *dirname, char ***filenamelist) {
     int fileCnt = 0;
 
-// #if defined(__cpp_lib_filesystem)
-#if 0
+#if defined(__cpp_lib_filesystem)
     const std::filesystem::path dpath{dirname};
     for (auto &file : std::filesystem::directory_iterator{dpath})
         if (!(file.path().c_str()[0] == '.'))
