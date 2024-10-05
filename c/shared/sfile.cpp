@@ -16,6 +16,12 @@
 
 #include <filesystem>
 
+// #if !defined(__cpp_lib_filesystem)
+#if 1
+#include <dirent.h>
+#include <sys/stat.h>
+#endif
+
 #include "supportdefines.h"
 #include "slogger.h"
 #include "smem.h"
@@ -46,14 +52,31 @@ int sFileLen(sFile *f) {
 
 /* Checks whether file exists */
 int sFileExists(const char *filename) {
+// #if defined(__cpp_lib_filesystem)
+#if 0
     auto s = std::filesystem::status(filename);
     return std::filesystem::exists(s);
+#else
+    struct stat statbuf;
+    if ((filename == NULL) || (filename[0] == '\0'))
+        return 0;
+    return stat(filename, &statbuf) == 0;
+#endif
 }
 
 /* Checks whether file exists */
 int sFileIsDir(const char *filename) {
+#if 0
     auto s = std::filesystem::status(filename);
     return std::filesystem::is_directory(s);
+#else
+    struct stat statbuf;
+    if ((filename == NULL) || (filename[0] == '\0'))
+        return 0;
+    if (stat(filename, &statbuf) < 0)
+        return 0;
+    return ((statbuf.st_mode & S_IFMT) == S_IFDIR);
+#endif
 }
 
 /* Read from file */
@@ -188,9 +211,11 @@ void sFileWriteObject(sFile *f, int size, uint32_t value) {
 }
 
 int sFileReadInputDir(const char *dirname, char ***filenamelist) {
-    const std::filesystem::path dpath{dirname};
     int fileCnt = 0;
 
+// #if defined(__cpp_lib_filesystem)
+#if 0
+    const std::filesystem::path dpath{dirname};
     for (auto &file : std::filesystem::directory_iterator{dpath})
         if (!(file.path().c_str()[0] == '.'))
             fileCnt++;
@@ -206,5 +231,34 @@ int sFileReadInputDir(const char *dirname, char ***filenamelist) {
             i++;
         }
     }
+#else  // Boo MacOS 10.14! Boo!
+    DIR *thedir;
+    struct dirent *entp;
+
+    if ((dirname == NULL) || (dirname[0] == '\0'))
+        return 0;
+
+    if ((thedir = opendir(dirname)) == NULL) {
+        sLog(sFATAL, "Cannot read contents of directory '%s'", dirname);
+        return 0;
+    }
+
+    for (entp = readdir(thedir); entp != NULL; entp = readdir(thedir))
+        if (entp->d_name[0] != '.')
+            fileCnt++;
+
+    *filenamelist = (char **)sMemNew((fileCnt + 1) * sizeof(char *));
+    rewinddir(thedir);
+    int i = 0;
+    for (entp = readdir(thedir); entp != NULL; entp = readdir(thedir)) {
+        if (entp->d_name[0] != '.') {
+            auto l = strlen(entp->d_name) + 1;
+            (*filenamelist)[i] = (char *)sMemNew(l);
+            STRCPY_S((*filenamelist)[i], l, entp->d_name);
+            i++;
+        }
+    }
+    closedir(thedir);
+#endif
     return fileCnt;
 }
