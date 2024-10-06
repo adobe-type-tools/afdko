@@ -11,6 +11,7 @@ import time
 from collections import namedtuple
 from threading import Thread
 from multiprocessing import Pool, Manager, current_process
+from typing import Iterator, Optional, Union
 
 from .otfFont import CFFFontData
 from .ufoFont import UFOFontData
@@ -296,6 +297,7 @@ class fontWrapper:
         pcount = self.options.process_count
         if pcount is None:
             pcount = os.cpu_count()
+        assert pcount is not None
         if pcount < 0:
             pcount = os.cpu_count() - pcount
             if pcount < 0:
@@ -311,6 +313,7 @@ class fontWrapper:
 
         pool = None
         logThread = None
+        gmap: Optional[Iterator] = None
         try:
             dictRecord = self.dictManager.getDictRecord()
             if pcount == 1:
@@ -363,6 +366,7 @@ class fontWrapper:
                 pool.close()
                 pool.join()
                 logQueue.put(None)
+                assert logThread is not None
                 logThread.join()
         finally:
             if pool is not None:
@@ -385,17 +389,15 @@ class fontWrapper:
             f.font.close()
 
 
-def openFont(path, options):
+def openFont(path, options) -> Union[UFOFontData, CFFFontData]:
     font_format = get_font_format(path)
     if font_format is None:
         raise FontParseError(f"{path} is not a supported font format")
 
     if font_format == "UFO":
-        font = UFOFontData(path, options.logOnly, options.writeToDefaultLayer)
+        return UFOFontData(path, options.logOnly, options.writeToDefaultLayer)
     else:
-        font = CFFFontData(path, font_format)
-
-    return font
+        return CFFFontData(path, font_format)
 
 
 def get_outpath(options, font_path, i):

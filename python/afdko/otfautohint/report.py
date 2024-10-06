@@ -8,37 +8,33 @@
 import logging
 import time
 from collections import defaultdict
+from typing import Dict, Tuple
+
+from . import Number
 
 log = logging.getLogger(__name__)
 
 
 class GlyphReport:
     """Class to store stem and zone data from a particular glyph"""
-    def __init__(self, name=None, all_stems=False):
+
+    def __init__(self, name: str = "", all_stems=False):
         self.name = name
-        self.hstems = {}
-        self.vstems = {}
-        self.hstems_pos = set()
-        self.vstems_pos = set()
-        self.char_zones = set()
-        self.stem_zone_stems = set()
+        self.hstems: Dict[float, int] = {}
+        self.vstems: Dict[float, int] = {}
+        self.hstems_pos: set[Tuple[Number, Number]] = set()
+        self.vstems_pos: set[Tuple[Number, Number]] = set()
+        self.char_zones: set[Tuple[Number, Number]] = set()
+        self.stem_zone_stems: set[Tuple[Number, Number]] = set()
         self.all_stems = all_stems
 
-    def clear(self):
-        self.hstems.clear()
-        self.vstems.clear()
-        self.hstems_pos.clear()
-        self.vstems_pos.clear()
-        self.char_zones.clear()
-        self.stem_zones_stems.clear()
-
-    def charZone(self, l, u):
+    def charZone(self, l: Number, u: Number):
         self.char_zones.add((l, u))
 
-    def stemZone(self, l, u):
+    def stemZone(self, l: Number, u: Number):
         self.stem_zone_stems.add((l, u))
 
-    def stem(self, l, u, isLine, isV=False):
+    def stem(self, l: Number, u: Number, isLine: bool, isV=False):
         if not isLine and not self.all_stems:
             return
         if isV:
@@ -54,22 +50,22 @@ class GlyphReport:
 
 class Report:
     def __init__(self):
-        self.glyphs = {}
+        self.glyphs: Dict[str, GlyphReport] = {}
 
     @staticmethod
-    def round_value(val):
+    def round_value(val: float) -> int:
         if val >= 0:
             return int(val + 0.5)
         else:
             return int(val - 0.5)
 
-    def parse_stem_dict(self, stem_dict):
+    def parse_stem_dict(self, stem_dict: Dict[float, int]) -> Dict[float, int]:
         """
         stem_dict: {45.5: 1, 47.0: 2}
         """
         # key: stem width
         # value: stem count
-        width_dict = defaultdict(int)
+        width_dict: Dict[float, int] = defaultdict(int)
         for width, count in stem_dict.items():
             width = self.round_value(width)
             width_dict[width] += count
@@ -80,8 +76,8 @@ class Report:
         all_zones_dict.update(stem_dict)
         # key: zone height
         # value: zone count
-        top_dict = defaultdict(int)
-        bot_dict = defaultdict(int)
+        top_dict: Dict[Number, int] = defaultdict(int)
+        bot_dict: Dict[Number, int] = defaultdict(int)
         for bot, top in all_zones_dict:
             top = self.round_value(top)
             top_dict[top] += 1
@@ -113,15 +109,15 @@ class Report:
         if not (options.report_stems or options.report_zones):
             return [], [], [], []
 
-        h_stem_items_dict = defaultdict(set)
-        h_stem_count_dict = defaultdict(int)
-        v_stem_items_dict = defaultdict(set)
-        v_stem_count_dict = defaultdict(int)
+        h_stem_items_dict: Dict[Number, set[str]] = defaultdict(set)
+        h_stem_count_dict: Dict[Number, int] = defaultdict(int)
+        v_stem_items_dict: Dict[Number, set[str]] = defaultdict(set)
+        v_stem_count_dict: Dict[Number, int] = defaultdict(int)
 
-        top_zone_items_dict = defaultdict(set)
-        top_zone_count_dict = defaultdict(int)
-        bot_zone_items_dict = defaultdict(set)
-        bot_zone_count_dict = defaultdict(int)
+        top_zone_items_dict: Dict[Number, set[str]] = defaultdict(set)
+        top_zone_count_dict: Dict[Number, int] = defaultdict(int)
+        bot_zone_items_dict: Dict[Number, set[str]] = defaultdict(set)
+        bot_zone_count_dict: Dict[Number, int] = defaultdict(int)
 
         for gName, gr in self.glyphs.items():
             if options.report_stems:

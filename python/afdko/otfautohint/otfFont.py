@@ -14,12 +14,14 @@ from fontTools.ttLib import TTFont, newTable
 from fontTools.misc.roundTools import noRound, otRound
 from fontTools.varLib.varStore import VarStoreInstancer
 from fontTools.varLib.cff import CFF2CharStringMergePen, MergeOutlineExtractor
+
 # import subset.cff is needed to load the implementation for
 # CFF.desubroutinize: the module adds this class method to the CFF and CFF2
 # classes.
 import fontTools.subset.cff
+from typing import Any, List, Dict, Optional, Tuple, Union
 
-from . import fdTools, FontParseError
+from . import Number, fdTools, FontParseError
 from .glyphData import glyphData
 
 # keep linting tools quiet about unused import
@@ -33,12 +35,14 @@ kStemLimit = 96
 
 class SEACError(Exception):
     """Raised when a charString has an obsolete 'seac' operator"""
+
     pass
 
 
 def _add_method(*clazzes):
     """Returns a decorator function that adds a new method to one or
     more classes."""
+
     def wrapper(method):
         done = []
         for clazz in clazzes:
@@ -55,7 +59,7 @@ def _add_method(*clazzes):
     return wrapper
 
 
-def hintOn(i, hintMaskBytes):
+def hintOn(i: int, hintMaskBytes: list) -> bool:
     """Used to help convert T2 hintmask bytes to a boolean array"""
     byteIndex = int(i / 8)
     byteValue = hintMaskBytes[byteIndex]
@@ -85,14 +89,15 @@ class T2ToGlyphDataExtractor(T2OutlineExtractor):
     Inherits from the fontTools Outline Extractor and adapts some of the
     operator methods to match the "hint pen" interface of the glyphData class
     """
-    def __init__(self, gd, localSubrs, globalSubrs, nominalWidthX,
+
+    def __init__(self, gd: glyphData, localSubrs, globalSubrs, nominalWidthX,
                  defaultWidthX, readStems=True, readFlex=True):
         T2OutlineExtractor.__init__(self, gd, localSubrs, globalSubrs,
                                     nominalWidthX, defaultWidthX)
         self.glyph = gd
         self.readStems = readStems
         self.readFlex = readFlex
-        self.hintMaskBytes = None
+        self.hintMaskBytes: Optional[int] = None
         self.vhintCount = 0
         self.hhintCount = 0
 
@@ -216,12 +221,14 @@ def _run_tx(args):
 
 
 class CFFFontData:
-    def __init__(self, path, font_format):
+    vsIndexMap: Dict[str, Tuple[int, bool]]
+
+    def __init__(self, path: str, font_format: str) -> None:
         self.inputPath = path
         self.font_format = font_format
         self.is_cff2 = False
         self.is_vf = False
-        self.vs_data_models = None
+        self.vs_data_models: Optional[List[VarDataModel]] = None
         self.desc = None
         if font_format == "OTF":
             # It is an OTF font, we can process it directly.
@@ -263,7 +270,7 @@ class CFFFontData:
         if 'fvar' in self.ttFont:
             # have not yet collected VF global data.
             self.is_vf = True
-            self.glyph_programs = []
+            self.glyph_programs: List[List[Any]] = []
             self.vsIndexMap = {}
             self.axes = self.ttFont['fvar'].axes
             CFF2 = self.cffTable
@@ -277,10 +284,10 @@ class CFFFontData:
             self.temp_cs_merge = copy.deepcopy(self.charStrings['.notdef'])
             self.vs_data_models = self.get_vs_data_models(topDict, self.axes)
 
-    def getGlyphList(self):
+    def getGlyphList(self) -> List[str]:
         return self.ttFont.getGlyphOrder()
 
-    def getPSName(self):
+    def getPSName(self) -> str:
         if self.is_cff2 and 'name' in self.ttFont:
             psName = next((name_rec.string for name_rec in self.ttFont[
                 'name'].names if (name_rec.nameID == 6) and (
@@ -290,7 +297,7 @@ class CFFFontData:
             psName = self.cffTable.cff.fontNames[0]
         return psName
 
-    def get_min_max(self, upm):
+    def get_min_max(self, upm: Number) -> Tuple[Number, Number]:
         if self.is_cff2 and 'hhea' in self.ttFont:
             font_max = self.ttFont['hhea'].ascent
             font_min = self.ttFont['hhea'].descent
@@ -302,8 +309,9 @@ class CFFFontData:
             font_min = -upm * 0.25
         return font_min, font_max
 
-    def convertToGlyphData(self, glyphName, readStems, readFlex,
-                           roundCoords, doAll=False):
+    def convertToGlyphData(self, glyphName: str, readStems: bool,
+                           readFlex: bool, roundCoords: bool,
+                           doAll=False) -> glyphData:
         t2CharString = self.charStrings[glyphName]
         try:
             gl = convertT2ToGlyphData(t2CharString, readStems, readFlex,
@@ -314,7 +322,7 @@ class CFFFontData:
             gl = None
         return gl
 
-    def updateFromGlyph(self, gl, glyphName):
+    def updateFromGlyph(self, gl: glyphData, glyphName):
         if gl is None:
             return
         t2Program = gl.T2()
@@ -391,8 +399,11 @@ class CFFFontData:
 
         return val
 
-    def getPrivateFDDict(self, allowNoBlues, noFlex, vCounterGlyphs,
-                         hCounterGlyphs, desc, fdIndex=0, gl_vsindex=None):
+    def getPrivateFDDict(self, allowNoBlues: bool, noFlex: bool,
+                         vCounterGlyphs, hCounterGlyphs, desc: str,
+                         fdIndex=0, gl_vsindex: Optional[int] = None) -> Union[
+        Tuple[List[fdTools.FDDict], int],  # VF
+            fdTools.FDDict]:  # non-VF
         pTopDict = self.topDict
         if hasattr(pTopDict, "FDArray"):
             pDict = pTopDict.FDArray[fdIndex]
@@ -402,9 +413,10 @@ class CFFFontData:
         privateDict = pDict.Private
 
         if self.is_vf:
-            dict_vsindex = getattr(privateDict, 'vsindex', 0)
+            dict_vsindex = getattr(privateDict, "vsindex", 0)
             if gl_vsindex is None:
                 gl_vsindex = dict_vsindex
+            assert self.vs_data_models is not None
             vs_data_model = self.vs_data_models[gl_vsindex]
             vsi_list = vs_data_model.master_vsi_list
         else:
@@ -486,8 +498,8 @@ class CFFFontData:
                     sstems = self.getPrivateDictVal(privateDict, ssnap,
                                                     [], dict_vsindex, vsi)
                 elif hasattr(privateDict, stdw):
-                    sstems = [self.getPrivateDictVal(privateDict, stdw,
-                                                     -1, dict_vsindex, vsi)]
+                    sstems = [self.getPrivateDictVal(privateDict, stdw, -1,
+                                                     dict_vsindex, vsi)]
                 else:
                     if allowNoBlues or self.is_vf:
                         # XXX adjusted for vf
@@ -526,7 +538,7 @@ class CFFFontData:
 
             fdDictArray.append(fdDict)
 
-        assert self.is_vf
+        assert self.is_vf and gl_vsindex is not None
         return fdDictArray, gl_vsindex
 
     def getfdIndex(self, name):
@@ -575,6 +587,7 @@ class CFFFontData:
 
     def get_vf_glyphs(self, glyph_name):
         charstring = self.charStrings[glyph_name]
+        assert self.vs_data_models is not None
 
         if 'vsindex' in charstring.program:
             op_index = charstring.program.index('vsindex')
@@ -621,6 +634,7 @@ class CFFFontData:
 
     def merge_hinted_glyphs(self, name):
         vsindex, addIndex = self.vsIndexMap[name]
+        assert self.vs_data_models is not None
         new_t2cs = merge_hinted_programs(self.temp_cs_merge,
                                          self.glyph_programs, name,
                                          self.vs_data_models[vsindex])
@@ -695,7 +709,7 @@ def merge_hinted_programs(charstring, t2_programs, gname, vs_data_model):
 
 
 @_add_method(VarStoreInstancer)
-def get_scalars(self, vsindex, region_idx):
+def get_scalars(self, vsindex, region_idx) -> Dict[int, float]:
     varData = self._varData
     # The index key needs to be the master value index, which includes
     # the default font value. VarRegionIndex provides the region indices.
@@ -709,12 +723,13 @@ def get_scalars(self, vsindex, region_idx):
 
 
 class VarDataModel(object):
-
     def __init__(self, var_data, vsindex, master_vsi_list):
         self.var_data = var_data
         self.master_vsi_list = master_vsi_list
         self._num_masters = len(master_vsi_list)
-        self.delta_weights = [{}]  # for default font value
+
+        # for default font value
+        self.delta_weights: List[Dict[int, float]] = [{}]
         for region_idx, vsi in enumerate(master_vsi_list[1:]):
             scalars = vsi.get_scalars(vsindex, region_idx)
             self.delta_weights.append(scalars)
@@ -723,9 +738,9 @@ class VarDataModel(object):
     def num_masters(self):
         return self._num_masters
 
-    def getDeltas(self, master_values, *, round=noRound):
+    def getDeltas(self, master_values, *, round=noRound) -> List[float]:
         assert len(master_values) == len(self.delta_weights)
-        out = []
+        out: List[float] = []
         for i, scalars in enumerate(self.delta_weights):
             delta = master_values[i]
             for j, scalar in scalars.items():
