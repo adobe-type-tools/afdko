@@ -11,7 +11,7 @@ OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
 Document version 1.27
-Last updated 9 September 2024
+Last updated 7 October 2024
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
 
@@ -4162,7 +4162,7 @@ along with the tag `sbit`.
 <a name="11"></a>
 ## 11. Document revisions
 
-**v1.27 [9 September 2024]:**
+**v1.27 [7 October 2024]:**
 *   Added syntax for specifying variable values when building
     a variable font, including [variable locations](#2.e.iii) and
     [named locations](#2.e.vi). Modified sections include
