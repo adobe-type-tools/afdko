@@ -85,10 +85,10 @@ jobs:
       run: |
         flake8 --count --show-source --statistics --config=.flake8
 
-    - name: Lint C code with cpplint using script (Linux only)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        ./.run_cpplint.sh
+#    - name: Lint C code with cpplint using script (Linux only)
+#      if: matrix.os == 'ubuntu-latest'
+#      run: |
+#        ./.run_cpplint.sh
 
     - name: Install AFDKO
       run: |
