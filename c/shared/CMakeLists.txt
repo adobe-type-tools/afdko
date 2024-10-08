@@ -125,30 +125,32 @@ set_property(TARGET shared PROPERTY CXX_STANDARD 17)
 
 target_include_directories(shared PRIVATE include resource)
 
-set_property(SOURCE absfont/absfont.cpp PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:ABF_DEBUG=1>)
-set_property(SOURCE cfembed.cpp PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:CEF_DEBUG=1>)
-set_property(SOURCE cffread_abs.cpp PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:CFR_DEBUG=1>)
-set_property(SOURCE cffwrite/cffwrite.cpp PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:CFW_DEBUG=1>)
-set_property(SOURCE dynarr.c PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DNA_DEBUG=1>)
-set_property(SOURCE pstoken.cpp PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:PST_DEBUG=1>)
-set_property(SOURCE pdfwrite.cpp PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:PDW_DEBUG=1>)
-set_property(SOURCE t1cstr.cpp PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:T1C_DEBUG=1>)
-set_property(SOURCE t2cstr.cpp PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:T1C_DEBUG=1>)
-set_property(SOURCE t1read.cpp PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:T1R_DEBUG=1>)
-set_property(SOURCE t1write/t1write.c PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:T1W_DEBUG=1>)
-set_property(SOURCE ttread.cpp PROPERTY
-             COMPILE_DEFINITIONS $<$<CONFIG:Debug>:TTR_DEBUG=1>)
+if(NOT ${CMAKE_GENERATOR} MATCHES "Xcode.*")
+  set_property(SOURCE absfont/absfont.cpp PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:ABF_DEBUG=1>)
+  set_property(SOURCE cfembed.cpp PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:CEF_DEBUG=1>)
+  set_property(SOURCE cffread_abs.cpp PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:CFR_DEBUG=1>)
+  set_property(SOURCE cffwrite/cffwrite.cpp PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:CFW_DEBUG=1>)
+  set_property(SOURCE dynarr.c PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DNA_DEBUG=1>)
+  set_property(SOURCE pstoken.cpp PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:PST_DEBUG=1>)
+  set_property(SOURCE pdfwrite.cpp PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:PDW_DEBUG=1>)
+  set_property(SOURCE t1cstr.cpp PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:T1C_DEBUG=1>)
+  set_property(SOURCE t2cstr.cpp PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:T1C_DEBUG=1>)
+  set_property(SOURCE t1read.cpp PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:T1R_DEBUG=1>)
+  set_property(SOURCE t1write/t1write.c PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:T1W_DEBUG=1>)
+  set_property(SOURCE ttread.cpp PROPERTY
+               COMPILE_DEFINITIONS $<$<CONFIG:Debug>:TTR_DEBUG=1>)
+endif()
 
 if (${NEED_LIBXML2_DEPEND})
     add_dependencies(shared ${LIBXML2_TARGET})
