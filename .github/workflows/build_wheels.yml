@@ -42,7 +42,7 @@ jobs:
       with:
         output-dir: dist
       env:
-        CIBW_BUILD: "cp311-*"
+        CIBW_SKIP: "cp36-* cp37-* cp38-* cp313-*"
         CIBW_ARCHS_MACOS: universal2
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64 -I/usr/include/libxml2' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64' MACOSX_DEPLOYMENT_TARGET='10.15'"
 
