@@ -47,13 +47,12 @@ jobs:
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64 -I/usr/include/libxml2' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64' MACOSX_DEPLOYMENT_TARGET='10.15'"
 
     - name: Build wheel (except macosx_universal2)
-      if: matrix.os != 'macos-latest'
       uses: pypa/cibuildwheel@v2.21.1
       with:
         output-dir: dist
       env:
         CIBW_BUILD: "cp311-*"
-        CIBW_ARCHS_MACOS: x86_64
+        CIBW_ARCHS_MACOS: arm64
         CIBW_ARCHS_WINDOWS: AMD64
         CIBW_ARCHS_LINUX: x86_64
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
