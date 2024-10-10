@@ -357,7 +357,7 @@ wght=1000d-, opsz=20u
 ```
 
 A trailing plus sign indicates that the normalied axis value will be calculated
-based according to the number and unit and then the minimum F2Dot14 increment
+based according to the number and unit. Then, the minimum F2Dot14 increment
 will be added to it, resulting in an axis location value that is the minimal
 amount greater than the location value without the plus. A trailing hyphen
 analogously specifies an axis location value that is the minimal amount smaller
@@ -367,19 +367,19 @@ than the value without it.
 #### 2.e.iv. Named location
 
 The `locationDef` keyword is used to define a named location. This name can
-then be used in value records instead of axis value lists. It offers the
-advantage of being able to change the location in the named location record
-definition only, and having that single edit change the locations used in all
-the rules in which the named location is used. The format is:
+then be used in a value record in place of an axis value list. Named locations
+make variable value definitions more compact and easy to read, and any edits to
+the definition of the named location record will change the location in any
+value where the name is used.  The format is:
 
 ```fea
 locationDef <location> @name;
 ```
 
-The name must always be preceded by `@` (at-sign), in both the defintion and
-wherever it is used. The character after the `@` must be alphabetic or an
-underscore, the other characters can be any of those plus digits or a period,
-but _cannot_ include a hyphen.  For example:
+The name must always be preceded by `@` (at-sign), in both its defintion and
+references. The character after the `@` must be alphabetic or an underscore,
+the other characters can be any of those plus digits or a period, but
+_cannot_ include a hyphen.  For example:
 
 ```fea
 locationDef wght=1000d @Extra_Black;
@@ -481,7 +481,7 @@ advance, and y advance, in that order. For example:
 <-80 0 -160 0>       # x placement adjustment: -80; x advance adjustment: -160
 ```
 
-With this format each adjustment can either be a plain `<metric>` or a variable
+With this format, each adjustment can either be a plain `<metric>` or a variable
 `<vmetric>` like value record format B. For example:
 
 ```fea
@@ -666,9 +666,10 @@ For example:
 An anchor name must be defined before it is used – see the following section on
 the `anchorDef` keyword.
 
-A metric pair can be specified in a number of ways that fall into two patterns.
-First, as in the examples above, each metric in the pair can be specified
-separately, with none, either, or both being a `<vmetric>`. For example:
+A metric pair can be specified in a number of ways but the options fall into
+two patterns.  First, as in the examples above, each metric in the pair can be
+specified separately, with none, either, or both being a `<vmetric>`. For
+example:
 
 ```fea
 <anchor 120 -20>
