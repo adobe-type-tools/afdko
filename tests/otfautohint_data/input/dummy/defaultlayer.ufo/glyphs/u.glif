@@ -41,7 +41,7 @@
               <string>hstem -12 71</string>
               <string>hstem 486 -20</string>
               <string>vstem 77 83</string>
-              <string>vstem 434.5 70.5</string>
+              <string>vstem 434 71</string>
             </array>
           </dict>
           <dict>
@@ -52,7 +52,7 @@
               <string>hstem 21 -21</string>
               <string>hstem 486 -20</string>
               <string>vstem 77 83</string>
-              <string>vstem 434.5 70.5</string>
+              <string>vstem 434 71</string>
             </array>
           </dict>
           <dict>
