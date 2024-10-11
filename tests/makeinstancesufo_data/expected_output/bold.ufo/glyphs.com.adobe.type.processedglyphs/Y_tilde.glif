@@ -70,8 +70,8 @@
             <string>hintRef0000</string>
             <key>stems</key>
             <array>
-              <string>hstem 0 58.5</string>
-              <string>hstem 598.5 58.5</string>
+              <string>hstem 0 58</string>
+              <string>hstem 598 59</string>
               <string>hstem 720 -20</string>
               <string>hstem 762 97</string>
               <string>vstem 415 207</string>
@@ -82,7 +82,7 @@
             <string>hintRef0001</string>
             <key>stems</key>
             <array>
-              <string>hstem 0 58.5</string>
+              <string>hstem 0 58</string>
               <string>hstem 600 57</string>
               <string>hstem 720 -20</string>
               <string>hstem 762 97</string>
@@ -94,7 +94,7 @@
             <string>hintRef0002</string>
             <key>stems</key>
             <array>
-              <string>hstem 0 58.5</string>
+              <string>hstem 0 58</string>
               <string>hstem 600 57</string>
               <string>hstem 720 -20</string>
               <string>hstem 762 97</string>
@@ -106,7 +106,7 @@
             <string>hintRef0003</string>
             <key>stems</key>
             <array>
-              <string>hstem 0 58.5</string>
+              <string>hstem 0 58</string>
               <string>hstem 600 57</string>
               <string>hstem 703 97</string>
               <string>vstem 415 207</string>
@@ -117,7 +117,7 @@
             <string>hintRef0004</string>
             <key>stems</key>
             <array>
-              <string>hstem 0 58.5</string>
+              <string>hstem 0 58</string>
               <string>hstem 600 57</string>
               <string>hstem 720 -20</string>
               <string>hstem 762 97</string>
