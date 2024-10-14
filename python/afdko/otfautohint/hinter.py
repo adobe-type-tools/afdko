@@ -456,7 +456,8 @@ class dimensionHinter:
                     not pe2.e.__eq__(ope2.e, ope2.getAssocFactor())):
                 mid2 = True
             pe2 = ope2
-
+        if self.options.roundCoords:
+            loc = round(loc)
         if not pe1 and not pe2:
             return
         self.hs.addSegment(fr, to, loc, pe1, pe2, typ, self.Bonus,
@@ -988,7 +989,7 @@ class dimensionHinter:
                     if abs(adist) < self.BendLength:
                         adist = math.copysign(adist, self.BendLength)
                     self.addSegment(aavg - adist, aavg + adist,
-                                    round(extp.o + 0.5), c, None,
+                                    extp.o, c, None,
                                     hintSegment.sType.CURVE,
                                     "curve extrema", True)
 

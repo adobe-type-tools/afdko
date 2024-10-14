@@ -79,7 +79,7 @@
             <string>hintRef0001</string>
             <key>stems</key>
             <array>
-              <string>hstem 0 55.5</string>
+              <string>hstem 0 56</string>
               <string>hstem 191 58</string>
               <string>hstem 658 -20</string>
               <string>hstem 720 -20</string>

@@ -70,8 +70,8 @@
             <string>hintRef0000</string>
             <key>stems</key>
             <array>
-              <string>hstem 0 58.5</string>
-              <string>hstem 598.5 58.5</string>
+              <string>hstem 0 58</string>
+              <string>hstem 598 59</string>
               <string>vstem 415 207</string>
             </array>
           </dict>
@@ -80,7 +80,7 @@
             <string>hintRef0001</string>
             <key>stems</key>
             <array>
-              <string>hstem 0 58.5</string>
+              <string>hstem 0 58</string>
               <string>hstem 600 57</string>
               <string>vstem 230 168</string>
             </array>
@@ -90,7 +90,7 @@
             <string>hintRef0002</string>
             <key>stems</key>
             <array>
-              <string>hstem 0 58.5</string>
+              <string>hstem 0 58</string>
               <string>hstem 600 57</string>
               <string>hstem 713 138</string>
               <string>vstem 169 147</string>
@@ -102,7 +102,7 @@
             <string>hintRef0003</string>
             <key>stems</key>
             <array>
-              <string>hstem 0 58.5</string>
+              <string>hstem 0 58</string>
               <string>hstem 600 57</string>
               <string>hstem 713 138</string>
               <string>vstem 418 147</string>

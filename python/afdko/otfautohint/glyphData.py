@@ -612,6 +612,7 @@ class pathElement:
         if eRatio is None:
             eRatio = sRatio
         self.is_line = False
+        # XXX deal with roundCoords properly
         self.cs = self.s * (1 - sRatio) + self.e * sRatio
         self.ce = self.s * eRatio + self.e * (1 - eRatio)
 
