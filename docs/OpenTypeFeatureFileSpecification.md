@@ -331,7 +331,7 @@ the values of various table fields [§[9](#9)].
 A `<location>` represents a position in a font's variable design space.
 Variable locations are specified by a comma-separated list of axis location specifiers,
 at most one per axis. An axis is represented by its tag, and the position is specified
-by an axis value and an optional unit letter:
+by an axis value and a unit letter:
 
 ```fea
 wght=800
