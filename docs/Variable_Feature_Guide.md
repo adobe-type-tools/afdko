@@ -172,7 +172,7 @@ location and the value are separated by a colon. For example (for a font with
 one `wght` axis):
 
 ```fea
-   (50 wght=0:47 wght=1000:54)
+   (50 wght=0d:47 wght=1000d:54)
 ```
 
 or this example using named locations:
