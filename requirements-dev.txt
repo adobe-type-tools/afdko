@@ -9,5 +9,5 @@ pytest-cov>=2.6.1
 pytest-xdist>=2.5.0
 scikit-build>=0.11.1
 setuptools>=40.8.0
-setuptools_scm==8.0.4
+setuptools_scm>=7.0.0
 wheel>=0.33.1
