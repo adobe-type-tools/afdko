@@ -31,10 +31,10 @@ jobs:
       with:
         fetch-depth: 0  # unshallow fetch for setuptools-scm
 
-    - name: Install Python 3.11
-      uses: actions/setup-python@v5
+    - name: Install Python 3.9
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.9'
 
     - name: Build wheel (only macosx_universal2)
       if: matrix.os == 'macos-latest'
@@ -42,7 +42,7 @@ jobs:
       with:
         output-dir: dist
       env:
-        CIBW_BUILD: "cp311-*"
+        CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: universal2
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64 -I/usr/include/libxml2' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'"
 
@@ -51,7 +51,7 @@ jobs:
       with:
         output-dir: dist
       env:
-        CIBW_BUILD: "cp311-*"
+        CIBW_BUILD: "cp39-*"
         CIBW_ARCHS_MACOS: x86_64
         CIBW_ARCHS_WINDOWS: AMD64
         CIBW_ARCHS_LINUX: x86_64
