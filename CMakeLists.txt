@@ -18,7 +18,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type is ${CMAKE_BUILD_TYPE}")
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 
 # scikit-build
 if(SKBUILD)
