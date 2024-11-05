@@ -18,7 +18,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type is ${CMAKE_BUILD_TYPE}")
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 # scikit-build
 if(SKBUILD)
@@ -39,7 +39,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 add_definitions(-DANTLR4CPP_STATIC)
 set(ANTLR4_WITH_STATIC_CRT OFF)
 # 4.9.3 is the latest ANTLR4 version
-set(ANTLR4_TAG tags/4.9.3)
+set(ANTLR4_TAG tags/4.13.2)
 include(ExternalAntlr4Cpp)
 
 
