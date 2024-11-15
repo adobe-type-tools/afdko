@@ -42,6 +42,10 @@ set(ANTLR4_WITH_STATIC_CRT OFF)
 set(ANTLR4_TAG tags/4.13.2)
 include(ExternalAntlr4Cpp)
 
+# None of AFDKO's c-sources are multithreaded, but we need to add
+# -pthreads to makeotfexe on Linux to make ANTLR happy
+set (THREADS_PREFER_PTHREAD_FLAG ON)
+find_package (Threads REQUIRED)
 
 if (DEFINED ENV{FORCE_BUILD_LIBXML2})
     set(BUILD_STATIC_LIBXML2 TRUE)
