@@ -31,6 +31,11 @@ target_link_libraries(makeotfexe PUBLIC ${CHOSEN_LIBXML2_LIBRARY})
 
 target_compile_definitions(makeotfexe PRIVATE MAKEOTFLIB_EXPORTS=1)
 
+if (PTHREAD_STATIC_WORKAROUND)
+    target_compile_definitions(makeotfexe PRIVATE PTHREAD_STATIC_WORKAROUND=1)
+endif ()
+
+
 # set_target_properties(makeotfexe PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 install(TARGETS makeotfexe DESTINATION bin)

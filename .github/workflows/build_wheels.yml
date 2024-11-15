@@ -62,7 +62,7 @@ jobs:
         # CIBW_BEFORE_ALL_LINUX: "yum install -y libuuid-devel"
         # CIBW_BEFORE_ALL_LINUX: "dnf -y install uuid-devel"
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-I/usr/include/libxml2' MACOSX_DEPLOYMENT_TARGET='10.13'"
-        CIBW_ENVIRONMENT_LINUX: "FORCE_BUILD_LIBXML2=ON"
+        CIBW_ENVIRONMENT_LINUX: "FORCE_BUILD_LIBXML2=ON PTHREAD_STATIC_WORKAROUND=1"
         CIBW_ENVIRONMENT_WINDOWS: "FORCE_BUILD_LIBXML2=ON"
 
     - name: Build sdist (Ubuntu only)
