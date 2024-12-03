@@ -18,7 +18,7 @@
       Noto Sans Mono CJK JP VF
     </namerecord>
     <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
-      Version 2.004;hotconv 1.1.0;makeotfexe 2.6.0
+      Version 2.004;hotconv 1.1.1;makeotfexe 2.6.0
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
       NotoSansMonoCJKjpVF-Regular

@@ -379,6 +379,10 @@ int GPOSFill(hotCtx g) {
 
     createAnonLookups(g, h);
 
+    if (h->otl == NULL) {
+        return 0;
+    }
+
     /* Add OTL features */
     /* See GSUB.c::GSUBFill() for an explanation of the subtable order */
 

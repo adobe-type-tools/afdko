@@ -98,3 +98,13 @@ def test_missing_table_extract_bug160():
     assert b'[WARNING]: table missing (xyz )' in output
     expected_path = get_expected_path('head_light.tb')
     assert differ([expected_path, actual_path, '-m', 'bin'])
+
+
+def test_missing_file_add_bug_1658():
+    font_path = get_input_path(ITALIC)
+    actual_path = get_temp_file_path()
+    stderr_path = runner(CMD + ['-s', '-e', '-o', 'a', '_GDEF=non_existing_GDEF_file',  # noqa: E501
+                         '-f', font_path, actual_path])
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert b'[FATAL]: file error <No such file or directory> [non_existing_GDEF_file]' in output  # noqa: E501

@@ -12,8 +12,8 @@
 			<point x="493" y="450" type="line"/>
 			<point name="hintRef0001" x="493" y="470" type="line"/>
 			<point x="310" y="470" type="line"/>
-			<point name="hintRef0002" x="310" y="450" type="line"/>
-			<point x="399" y="444" type="line"/>
+			<point x="310" y="450" type="line"/>
+			<point name="hintRef0002" x="399" y="444" type="line"/>
 			<point x="248" y="27" type="line"/>
 			<point name="hintRef0003" x="92" y="445" type="line"/>
 			<point x="180" y="450" type="line"/>
@@ -49,7 +49,7 @@
 						<key>stems</key>
 						<array>
 							<string>hstem -255 22</string>
-							<string>hstem 447.5 22.5</string>
+							<string>hstem 448 22</string>
 							<string>vstem -19 512</string>
 						</array>
 					</dict>
@@ -59,7 +59,7 @@
 						<key>stems</key>
 						<array>
 							<string>hstem -255 22</string>
-							<string>hstem 447.5 22.5</string>
+							<string>hstem 448 22</string>
 							<string>vstem 310 183</string>
 						</array>
 					</dict>
@@ -79,7 +79,7 @@
 						<key>stems</key>
 						<array>
 							<string>hstem -255 22</string>
-							<string>hstem 447.5 22.5</string>
+							<string>hstem 448 22</string>
 							<string>vstem -14 194</string>
 						</array>
 					</dict>
@@ -89,7 +89,7 @@
 						<key>stems</key>
 						<array>
 							<string>hstem -255 22</string>
-							<string>hstem 447.5 22.5</string>
+							<string>hstem 448 22</string>
 							<string>vstem -19 512</string>
 						</array>
 					</dict>

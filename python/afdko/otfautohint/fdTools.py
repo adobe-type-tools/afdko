@@ -265,7 +265,7 @@ class FDDict:
                             "zone %s with the bottom at %s." %
                             (self.DictName, prevPair[2], prevPair[0], pair[2],
                              pair[1]))
-                    elif abs(pair[1] - prevPair[0]) <= zoneBuffer:
+                    elif abs(pair[1] - prevPair[0]) < zoneBuffer:
                         raise FontInfoParseError(
                             "In FDDict %s. The top of zone %s at %s is within "
                             "the min separation limit (%s units) of zone %s "
@@ -546,7 +546,7 @@ def mergeFDDicts(prevDictList):
                 log.warning("For final FontDict, skipping zone %s in FDDict %s"
                             " because it overlaps with zone %s in FDDict %s.",
                             zoneName, fdDictName, prevZoneName, prevFDictName)
-            elif abs(zone[1] - prevZone[0]) <= zoneBuffer:
+            elif abs(zone[1] - prevZone[0]) < zoneBuffer:
                 log.warning("For final FontDict, skipping zone %s in FDDict %s"
                             " because it is within the minimum separation "
                             "allowed (%s units) of %s in FDDict %s.",
