@@ -96,7 +96,7 @@ def test_cleanUpGLIFFiles_extraneous_glyph(capsys):
     assert changed == 1
 
     out, err = capsys.readouterr()
-    assert f'Removing glif file x.glif' in out
+    assert 'Removing glif file x.glif' in out
 
 
 def test_cleanUpGLIFFiles_other_layer(capsys):
@@ -163,8 +163,8 @@ def test_validateLayers_empty_folder(capsys):
     temp_dir = Path(get_temp_dir_path())
     tmp_ufo_path = temp_dir / ufo_path.name
     copytree(ufo_path, tmp_ufo_path)
-    processed_glyphs_dir = tmp_ufo_path / 'glyphs.com.adobe.type.processedglyphs'
-    processed_glyphs_dir.mkdir()
+    processed_dir = tmp_ufo_path / 'glyphs.com.adobe.type.processedglyphs'
+    processed_dir.mkdir()
 
     ut.validateLayers(tmp_ufo_path)
     out, err = capsys.readouterr()
