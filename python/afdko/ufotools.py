@@ -606,11 +606,11 @@ class UFOFontData(object):
 
     def loadGlyphMap(self):
         # Need to both get the list of glyphs from contents.plist, and also
-        # the glyph order. The latter is take from the public.glyphOrder key
+        # the glyph order. The latter is taken from the public.glyphOrder key
         # in lib.plist, if it exists, else it is taken from the contents.plist
         # file. Any glyphs in contents.plist which are not named in the
         # public.glyphOrder are sorted after all glyphs which are named in the
-        # public.glyphOrder,, in the order that they occured in contents.plist.
+        # public.glyphOrder, in the order that they occured in contents.plist.
         contentsPath = os.path.join(self.parentPath, "glyphs", kContentsName)
         self.glyphMap, self.glyphList = parsePList(contentsPath)
         orderPath = os.path.join(self.parentPath, kLibName)
@@ -902,8 +902,14 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
     contentsFilePath = os.path.join(glyphDirPath, kContentsName)
     # maps glyph names to files.
 
-    with open(contentsFilePath, 'r', encoding='utf-8') as fp:
-        contentsDict = plistlib.load(fp)
+    if os.path.exists(contentsFilePath):
+        # contents.plist exists in glyphDirPath
+        with open(contentsFilePath, 'r', encoding='utf-8') as fp:
+            contentsDict = plistlib.load(fp)
+    else:
+        # contents.plist does not exist in glyphDirPath, load the default
+        with open(defaultContentsFilePath, 'r', encoding='utf-8') as fp:
+            contentsDict = plistlib.load(fp)
 
     # First, delete glyph files that are not in the contents.plist file in
     # the glyphDirPath. In some UFOfont files, we end up with case errors,
@@ -935,10 +941,10 @@ def cleanUpGLIFFiles(defaultContentsFilePath, glyphDirPath, doWarning=True):
         os.remove(glyphFilePath)
         if doWarning:
             print("Removing glif file %s that was not in the contents.plist "
-                  "file: %s" % (glyphDirPath, contentsFilePath))
+                  "file: %s" % (fileName, contentsFilePath))
         changed = 1
 
-    if defaultContentsFilePath == contentsFilePath:
+    if str(defaultContentsFilePath) == str(contentsFilePath):
         return changed
 
     # Now remove glyphs that are not referenced in the defaultContentsFilePath.
@@ -976,8 +982,10 @@ def cleanupContentsList(glyphDirPath, doWarning=True):
     contentsFilePath = os.path.join(glyphDirPath, kContentsName)
     # maps glyph names to files.
 
-    with open(contentsFilePath, 'r', encoding='utf-8') as fp:
-        contentsDict = plistlib.load(fp)
+    contentsDict = {}
+    if os.path.exists(contentsFilePath):
+        with open(contentsFilePath, 'r', encoding='utf-8') as fp:
+            contentsDict = plistlib.load(fp)
 
     fileDict = {}
     fileList = os.listdir(glyphDirPath)

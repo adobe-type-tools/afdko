@@ -39,7 +39,7 @@ jmp_buf mark;
 
 #endif /* SUNOS */
 
-#define VERSION "1.4.3"
+#define VERSION "1.4.4"
 
 /* Data type sizes (bytes) */
 #define uint16_ 2

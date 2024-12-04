@@ -515,6 +515,7 @@ class pathElement:
     """
     assocMatchFactor = 93
     tSlop = .005
+    middleMult = 2
 
     def __init__(self, *args, is_close=False, masks=None, flex=False,
                  position=None):
@@ -611,6 +612,7 @@ class pathElement:
         if eRatio is None:
             eRatio = sRatio
         self.is_line = False
+        # XXX deal with roundCoords properly
         self.cs = self.s * (1 - sRatio) + self.e * sRatio
         self.ce = self.s * eRatio + self.e * (1 - eRatio)
 
@@ -625,12 +627,13 @@ class pathElement:
         """Returns the fontTools cubic parameters for this pathElement"""
         return calcCubicParameters(self.s, self.cs, self.ce, self.e)
 
-    def getAssocFactor(self):
+    def getAssocFactor(self, loose=False):
         if self.is_line:
             l = sqrt(self.s.distsq(self.e))
         else:
             l = approximateCubicArcLength(self.s, self.cs, self.ce, self.e)
-        return l / self.assocMatchFactor
+        return l / (self.assocMatchFactor / 2
+                    if loose else self.assocMatchFactor)
 
     def containsPoint(self, p, factor, returnT=False):
         if self.is_line:
@@ -1264,11 +1267,12 @@ class glyphData(BasePen):
 
     # utility
 
-    def checkAssocPoint(self, segs, spe, ope, sp, op, mapEnd, factor=None):
+    def checkAssocPoint(self, segs, spe, ope, sp, op, mapEnd, loose,
+                        factor=None):
         if factor is None:
-            factor = ope.getAssocFactor()
+            factor = ope.getAssocFactor(loose)
         if sp == op or ope.containsPoint(sp, factor):
-            if not ope.containsPoint(spe.atT(.5), factor):
+            if not ope.containsPoint(spe.atT(.5), factor * ope.middleMult):
                 return False
             spe.association = ope
             return True
@@ -1276,7 +1280,8 @@ class glyphData(BasePen):
             does, t = spe.containsPoint(op, factor, True)
             if does and spe.tSlop < t < 1 - spe.tSlop:
                 midMapped = (1 - (1 - t) / 2) if mapEnd else t / 2
-                if not ope.containsPoint(spe.atT(midMapped), factor):
+                if not ope.containsPoint(spe.atT(midMapped),
+                                         factor * ope.middleMult):
                     return False
                 following = spe.splitAt(t)
                 if mapEnd:
@@ -1293,7 +1298,7 @@ class glyphData(BasePen):
                 return True
         return False
 
-    def associatePath(self, orig):
+    def associatePath(self, orig, loose=False):
         peMap = defaultdict(list)
         for oc in orig:
             peMap[tuple(oc.e.round(1))].append(oc)
@@ -1309,13 +1314,14 @@ class glyphData(BasePen):
             oepel = peMap.get(tuple(c.e.round(1)), [])
             if oepel:
                 for oepe in oepel:
-                    if self.checkAssocPoint(segs, c, oepe, c.s, oepe.s, True):
+                    if self.checkAssocPoint(segs, c, oepe, c.s, oepe.s, True,
+                                            loose):
                         done = True
                         break
                     else:
                         oepen = orig.nextInSubpath(oepe)
                         if self.checkAssocPoint(segs, c, oepen, c.s, oepen.e,
-                                                True):
+                                                True, loose):
                             done = True
                             break
                 if done:
@@ -1325,24 +1331,24 @@ class glyphData(BasePen):
                 for ospe in ospel:
                     ospen = orig.nextInSubpath(ospe)
                     if self.checkAssocPoint(segs, c, ospen, c.e, ospen.e,
-                                            False):
+                                            False, loose):
                         done = True
                         break
                     elif self.checkAssocPoint(segs, c, ospe, c.e, ospe.s,
-                                              False):
+                                              False, loose):
                         done = True
                         break
                 if done:
                     continue
             cBounds = c.getBounds()
             for oc in orig:
-                factor = oc.getAssocFactor()
+                factor = oc.getAssocFactor(loose)
                 if cBounds.intersects(oc.getBounds(), factor):
                     if (oc.containsPoint(c.s, factor) and
                             (self.checkAssocPoint(segs, c, oc, c.e, oc.e,
-                                                  False, factor) or
+                                                  False, loose, factor) or
                              self.checkAssocPoint(segs, c, oc, c.e, oc.s,
-                                                  False, factor))):
+                                                  False, loose, factor))):
                         done = True
                         break
             if done:
@@ -1351,13 +1357,13 @@ class glyphData(BasePen):
             # was very close to but not quite identical to another start point.
             # Try again from the other end.
             for oc in orig:
-                factor = oc.getAssocFactor()
+                factor = oc.getAssocFactor(loose)
                 if cBounds.intersects(oc.getBounds(), factor):
                     if (oc.containsPoint(c.e, factor) and
                             (self.checkAssocPoint(segs, c, oc, c.s, oc.s,
-                                                  True, factor) or
+                                                  True, loose, factor) or
                              self.checkAssocPoint(segs, c, oc, c.s, oc.e,
-                                                  True, factor))):
+                                                  True, loose, factor))):
                         done = True
                         break
             if done:

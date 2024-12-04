@@ -456,7 +456,8 @@ class dimensionHinter:
                     not pe2.e.__eq__(ope2.e, ope2.getAssocFactor())):
                 mid2 = True
             pe2 = ope2
-
+        if self.options.roundCoords:
+            loc = round(loc)
         if not pe1 and not pe2:
             return
         self.hs.addSegment(fr, to, loc, pe1, pe2, typ, self.Bonus,
@@ -667,8 +668,7 @@ class dimensionHinter:
         of the segment are within ExtremaDist of pe
         """
         a, b, c, d = pe.cubicParameters()
-        loc = round(extp.o) + (-self.ExtremaDist
-                               if isMn else self.ExtremaDist)
+        loc = extp.o + (-self.ExtremaDist if isMn else self.ExtremaDist)
 
         horiz = not self.isV()  # When finding vertical stems solve for x
         sl = solveCubic(a[horiz], b[horiz], c[horiz], d[horiz] - loc)
@@ -776,7 +776,8 @@ class dimensionHinter:
                 origGlyph = None
                 self.hs.overlapRemoved = False
             else:
-                self.glyph.associatePath(origGlyph)
+                self.glyph.associatePath(origGlyph,
+                                         self.options.looseOverlapMapping)
 
         self.prepForSegs()
         self.Bonus = 0
@@ -988,7 +989,7 @@ class dimensionHinter:
                     if abs(adist) < self.BendLength:
                         adist = math.copysign(adist, self.BendLength)
                     self.addSegment(aavg - adist, aavg + adist,
-                                    round(extp.o + 0.5), c, None,
+                                    extp.o, c, None,
                                     hintSegment.sType.CURVE,
                                     "curve extrema", True)
 
@@ -2446,11 +2447,10 @@ class glyphHinter:
                 gp = g.subpaths[si]
                 dpl, gpl = len(dp), len(gp)
                 if gpl != dpl:
-                    # XXX decide on warning message for these
                     if (gpl == dpl + 1 and gp[-1].isClose() and
                             not dp[-1].isClose()):
                         for _gi in range(i + 1):
-                            gllist[i].addNullClose(si)
+                            gllist[_gi].addNullClose(si)
                         continue
                     if (dpl == gpl + 1 and dp[-1].isClose() and
                             not gp[-1].isClose()):

@@ -1677,4 +1677,17 @@ def test_alt_missing_glyph():
     assert msg in output
     expected_path = generate_ps_dump(expected_path)
     output_path = generate_ps_dump(output_path)
-    assert differ([expected_path, output_path])
+    assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])
+
+
+def test_parsing_attrs_bug1673():
+    """
+    Test parsing nested attributes within an xmlNode.
+    """
+    input_path = get_input_path("ufo-advance-height-weight.ufo")
+    expected_path = get_expected_path("ufo-advance-height-weight.pfa")
+    output_path = get_temp_file_path()
+    subprocess.call([TOOL, '-t1', '-o', output_path, input_path])
+    expected_path = generate_ps_dump(expected_path)
+    output_path = generate_ps_dump(output_path)
+    assert differ([expected_path, output_path, '-s', PFA_SKIP[0]])

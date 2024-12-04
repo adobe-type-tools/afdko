@@ -38,9 +38,10 @@ More information can be found in [docs/otfautohint_Notes.md](docs/otfautohint_No
 Installation
 ------------
 
-The AFDKO requires [Python](http://www.python.org/download) 3.8
-or later.
-Regarding Python 3.11: while Python 3.11 itself is now relatively stable, we are waiting to let some known tool-chain problems resolve.
+The AFDKO requires [Python](http://www.python.org/download) 3.9
+or later. It should work with any Python > 3.9, but occasionally
+tool-chain components and dependencies don't keep pace with major
+Python releases, so there might be some lag time while they catch up.
 
 Releases are available on the [Python Package
 Index](https://pypi.python.org/pypi/afdko) (PyPI) and can be installed
@@ -70,21 +71,29 @@ Note for Linux users (and users of other platforms that are not macOS or Windows
 
 - Create a virtual environment:
 
-        python -m venv afdko_env
+    ```sh
+    python -m venv afdko_env
+    ```
 
 - Activate the virtual environment:
 
     - macOS & Linux
 
-            source afdko_env/bin/activate
+        ```sh
+        source afdko_env/bin/activate
+        ```
 
     - Windows
 
-            afdko_env\Scripts\activate.bat
+        ```sh
+        afdko_env\Scripts\activate.bat
+        ```
 
 - Install [afdko](https://pypi.python.org/pypi/afdko):
 
-        python -m pip install afdko
+    ```sh
+    python -m pip install afdko
+    ```
 
 Installing the **afdko** inside a virtual environment prevents conflicts
 between its dependencies and other modules installed globally.
@@ -123,7 +132,7 @@ On macOS, install these with:
 
 On Linux (Ubuntu 17.10 LTS or later), install these with:
 
-    apt-get -y install python3.8
+    apt-get -y install python3.9
     apt-get -y install python-pip
     apt-get -y install python-dev
     apt-get -y install uuid-dev
@@ -142,6 +151,12 @@ module is installed (`python -m pip install wheel`), then `cd` to the top-level
 directory of the afdko, and run:
 
     python -m pip install .
+
+Developing
+-----------------
+If you'd like to develop & debug AFDKO using Xcode, run:
+
+    CMake -G Xcode .
 
 For further information on building from source see
 [docs/FDK\_Build\_Notes.md](docs/FDK_Build_Notes.md).

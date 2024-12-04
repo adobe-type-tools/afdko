@@ -26,3 +26,6 @@ cov*.xml
 
 # temp output dirs created during tests
 **/temp_output
+
+# macOS cruft
+.DS_Store
