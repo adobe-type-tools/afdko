@@ -1,0 +1,11 @@
+### prefix:-1: ###
+### open prefix '' ###
+languagesystem DFLT dflt;
+### close prefix '' ###
+
+table GDEF {
+ GlyphClassDef ,# Base 
+ , # Liga 
+ , # Mark 
+ ;
+ } GDEF;

@@ -1,0 +1,14 @@
+@lat_UC_left = [ A B C D E F G H J K L M N O P R S T U V W X Y Z ];
+
+@lat_lcnew_right = [ a o l lslash b ];
+
+@punct_left = [ hyphen parenleft quotedblbase guillemotleft quotedblleft guillemotright quotedblright asterisk quotesingle comma period slash colon semicolon question backslash bullet ];
+
+@punct_right = [ hyphen parenright guillemotleft quotedblleft guillemotright quotedblright exclam quotedbl asterisk comma period slash colon semicolon question backslash bullet ];
+
+@lat_lc_right = [ a n e c f g i j lslash o p d h s t u v w x y z ];
+
+@lat_lcnew_left = [ d dcaron e c l lslash o eth s germandbls ];
+
+@lat_lc_left = [ c dcaron eth e f longs germandbls g j k lslash o b r d n a s t v w x y z ];
+
