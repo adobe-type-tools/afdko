@@ -34,7 +34,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 add_compile_definitions(ANTLR4CPP_STATIC)
 set(ANTLR4_WITH_STATIC_CRT OFF)
 # 4.9.3 is the latest ANTLR4 version
-set(ANTLR4_TAG tags/4.13.2)
+set(ANTLR4_TAG tags/4.13.1)
 include(ExternalAntlr4Cpp)
 
 # libxml2 configuration

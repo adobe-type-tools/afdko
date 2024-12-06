@@ -1,5 +1,5 @@
 
-// Generated from FeatParser.g4 by ANTLR 4.13.2
+// Generated from FeatParser.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -23,60 +23,70 @@ public:
     POSITION = 38, POSITION_v = 39, PARAMETERS = 40, FEATURE_NAMES = 41, 
     CV_PARAMETERS = 42, CV_UI_LABEL = 43, CV_TOOLTIP = 44, CV_SAMPLE_TEXT = 45, 
     CV_PARAM_LABEL = 46, CV_CHARACTER = 47, SIZEMENUNAME = 48, CONTOURPOINT = 49, 
-    ANCHOR = 50, ANCHOR_DEF = 51, VALUE_RECORD_DEF = 52, MARK = 53, MARK_CLASS = 54, 
-    CURSIVE = 55, MARKBASE = 56, MARKLIG = 57, MARKLIG_v = 58, LIG_COMPONENT = 59, 
-    KNULL = 60, BASE = 61, HA_BTL = 62, VA_BTL = 63, HA_BSL = 64, VA_BSL = 65, 
-    GDEF = 66, GLYPH_CLASS_DEF = 67, ATTACH = 68, LIG_CARET_BY_POS = 69, 
-    LIG_CARET_BY_IDX = 70, HEAD = 71, FONT_REVISION = 72, HHEA = 73, ASCENDER = 74, 
-    DESCENDER = 75, LINE_GAP = 76, CARET_OFFSET = 77, NAME = 78, NAMEID = 79, 
-    OS_2 = 80, FS_TYPE = 81, FS_TYPE_v = 82, OS2_LOWER_OP_SIZE = 83, OS2_UPPER_OP_SIZE = 84, 
-    PANOSE = 85, TYPO_ASCENDER = 86, TYPO_DESCENDER = 87, TYPO_LINE_GAP = 88, 
-    WIN_ASCENT = 89, WIN_DESCENT = 90, X_HEIGHT = 91, CAP_HEIGHT = 92, WEIGHT_CLASS = 93, 
-    WIDTH_CLASS = 94, VENDOR = 95, UNICODE_RANGE = 96, CODE_PAGE_RANGE = 97, 
-    FAMILY_CLASS = 98, STAT = 99, ELIDED_FALLBACK_NAME = 100, ELIDED_FALLBACK_NAME_ID = 101, 
-    DESIGN_AXIS = 102, AXIS_VALUE = 103, FLAG = 104, LOCATION = 105, AXIS_EAVN = 106, 
-    AXIS_OSFA = 107, VHEA = 108, VERT_TYPO_ASCENDER = 109, VERT_TYPO_DESCENDER = 110, 
-    VERT_TYPO_LINE_GAP = 111, VMTX = 112, VERT_ORIGIN_Y = 113, VERT_ADVANCE_Y = 114, 
-    LCBRACE = 115, RCBRACE = 116, LBRACKET = 117, RBRACKET = 118, HYPHEN = 119, 
-    SEMI = 120, EQUALS = 121, MARKER = 122, COMMA = 123, QUOTE = 124, GCLASS = 125, 
-    CID = 126, ESCGNAME = 127, NAMELABEL = 128, EXTNAME = 129, POINTNUM = 130, 
-    NUMEXT = 131, NUMOCT = 132, NUM = 133, CATCHTAG = 134, A_WHITESPACE = 135, 
-    A_LABEL = 136, A_LBRACE = 137, A_CLOSE = 138, A_LINE = 139, I_WHITESPACE = 140, 
-    I_RPAREN = 141, IFILE = 142, I_LPAREN = 143, STRVAL = 144, EQUOTE = 145
+    ANCHOR = 50, ANCHOR_DEF = 51, VALUE_RECORD_DEF = 52, LOCATION_DEF = 53, 
+    MARK = 54, MARK_CLASS = 55, CURSIVE = 56, MARKBASE = 57, MARKLIG = 58, 
+    MARKLIG_v = 59, LIG_COMPONENT = 60, KNULL = 61, BASE = 62, HA_BTL = 63, 
+    VA_BTL = 64, HA_BSL = 65, VA_BSL = 66, GDEF = 67, GLYPH_CLASS_DEF = 68, 
+    ATTACH = 69, LIG_CARET_BY_POS = 70, LIG_CARET_BY_IDX = 71, HEAD = 72, 
+    FONT_REVISION = 73, HHEA = 74, ASCENDER = 75, DESCENDER = 76, LINE_GAP = 77, 
+    CARET_OFFSET = 78, CARET_SLOPE_RISE = 79, CARET_SLOPE_RUN = 80, NAME = 81, 
+    NAMEID = 82, OS_2 = 83, FS_TYPE = 84, FS_TYPE_v = 85, OS2_LOWER_OP_SIZE = 86, 
+    OS2_UPPER_OP_SIZE = 87, PANOSE = 88, TYPO_ASCENDER = 89, TYPO_DESCENDER = 90, 
+    TYPO_LINE_GAP = 91, WIN_ASCENT = 92, WIN_DESCENT = 93, X_HEIGHT = 94, 
+    CAP_HEIGHT = 95, SUBSCRIPT_X_SIZE = 96, SUBSCRIPT_X_OFFSET = 97, SUBSCRIPT_Y_SIZE = 98, 
+    SUBSCRIPT_Y_OFFSET = 99, SUPERSCRIPT_X_SIZE = 100, SUPERSCRIPT_X_OFFSET = 101, 
+    SUPERSCRIPT_Y_SIZE = 102, SUPERSCRIPT_Y_OFFSET = 103, STRIKEOUT_SIZE = 104, 
+    STRIKEOUT_POSITION = 105, WEIGHT_CLASS = 106, WIDTH_CLASS = 107, VENDOR = 108, 
+    UNICODE_RANGE = 109, CODE_PAGE_RANGE = 110, FAMILY_CLASS = 111, STAT = 112, 
+    ELIDED_FALLBACK_NAME = 113, ELIDED_FALLBACK_NAME_ID = 114, DESIGN_AXIS = 115, 
+    AXIS_VALUE = 116, FLAG = 117, LOCATION = 118, AXIS_EAVN = 119, AXIS_OSFA = 120, 
+    VHEA = 121, VERT_TYPO_ASCENDER = 122, VERT_TYPO_DESCENDER = 123, VERT_TYPO_LINE_GAP = 124, 
+    VMTX = 125, VERT_ORIGIN_Y = 126, VERT_ADVANCE_Y = 127, LCBRACE = 128, 
+    RCBRACE = 129, LBRACKET = 130, RBRACKET = 131, LPAREN = 132, RPAREN = 133, 
+    HYPHEN = 134, PLUS = 135, SEMI = 136, EQUALS = 137, MARKER = 138, COMMA = 139, 
+    COLON = 140, STRVAL = 141, LNAME = 142, GCLASS = 143, AXISUNIT = 144, 
+    CID = 145, ESCGNAME = 146, NAMELABEL = 147, EXTNAME = 148, POINTNUM = 149, 
+    NUMEXT = 150, NUMOCT = 151, NUM = 152, A_WHITESPACE = 153, A_LABEL = 154, 
+    A_LBRACE = 155, A_CLOSE = 156, A_LINE = 157, I_WHITESPACE = 158, I_RPAREN = 159, 
+    IFILE = 160, I_LPAREN = 161
   };
 
   enum {
     RuleFile = 0, RuleTopLevelStatement = 1, RuleInclude = 2, RuleGlyphClassAssign = 3, 
     RuleLangsysAssign = 4, RuleMark_statement = 5, RuleAnchorDef = 6, RuleValueRecordDef = 7, 
-    RuleFeatureBlock = 8, RuleTableBlock = 9, RuleAnonBlock = 10, RuleLookupBlockTopLevel = 11, 
-    RuleFeatureStatement = 12, RuleLookupBlockOrUse = 13, RuleCvParameterBlock = 14, 
-    RuleCvParameterStatement = 15, RuleCvParameter = 16, RuleStatement = 17, 
-    RuleFeatureUse = 18, RuleScriptAssign = 19, RuleLangAssign = 20, RuleLookupflagAssign = 21, 
-    RuleLookupflagElement = 22, RuleIgnoreSubOrPos = 23, RuleSubstitute = 24, 
-    RulePosition = 25, RuleValuePattern = 26, RuleValueRecord = 27, RuleValueLiteral = 28, 
-    RuleCursiveElement = 29, RuleBaseToMarkElement = 30, RuleLigatureMarkElement = 31, 
-    RuleParameters = 32, RuleSizemenuname = 33, RuleFeatureNames = 34, RuleSubtable = 35, 
-    RuleTable_BASE = 36, RuleBaseStatement = 37, RuleAxisTags = 38, RuleAxisScripts = 39, 
-    RuleBaseScript = 40, RuleTable_GDEF = 41, RuleGdefStatement = 42, RuleGdefGlyphClass = 43, 
-    RuleGdefAttach = 44, RuleGdefLigCaretPos = 45, RuleGdefLigCaretIndex = 46, 
-    RuleTable_head = 47, RuleHeadStatement = 48, RuleHead = 49, RuleTable_hhea = 50, 
-    RuleHheaStatement = 51, RuleHhea = 52, RuleTable_vhea = 53, RuleVheaStatement = 54, 
-    RuleVhea = 55, RuleTable_name = 56, RuleNameStatement = 57, RuleNameID = 58, 
-    RuleTable_OS_2 = 59, RuleOs_2Statement = 60, RuleOs_2 = 61, RuleTable_STAT = 62, 
-    RuleStatStatement = 63, RuleDesignAxis = 64, RuleAxisValue = 65, RuleAxisValueStatement = 66, 
-    RuleAxisValueLocation = 67, RuleAxisValueFlags = 68, RuleElidedFallbackName = 69, 
-    RuleNameEntryStatement = 70, RuleElidedFallbackNameID = 71, RuleNameEntry = 72, 
-    RuleTable_vmtx = 73, RuleVmtxStatement = 74, RuleVmtx = 75, RuleAnchor = 76, 
-    RuleLookupPattern = 77, RuleLookupPatternElement = 78, RulePattern = 79, 
-    RulePatternElement = 80, RuleGlyphClassOptional = 81, RuleGlyphClass = 82, 
-    RuleGcLiteral = 83, RuleGcLiteralElement = 84, RuleGlyph = 85, RuleGlyphName = 86, 
-    RuleLabel = 87, RuleTag = 88, RuleFixedNum = 89, RuleGenNum = 90, RuleFeatureFile = 91, 
-    RuleStatementFile = 92, RuleCvStatementFile = 93, RuleBaseFile = 94, 
-    RuleHeadFile = 95, RuleHheaFile = 96, RuleVheaFile = 97, RuleGdefFile = 98, 
-    RuleNameFile = 99, RuleVmtxFile = 100, RuleOs_2File = 101, RuleStatFile = 102, 
-    RuleAxisValueFile = 103, RuleNameEntryFile = 104, RuleSubtok = 105, 
-    RuleRevtok = 106, RuleAnontok = 107, RuleEnumtok = 108, RulePostok = 109, 
-    RuleMarkligtok = 110
+    RuleLocationDef = 8, RuleFeatureBlock = 9, RuleTableBlock = 10, RuleAnonBlock = 11, 
+    RuleLookupBlockTopLevel = 12, RuleFeatureStatement = 13, RuleLookupBlockOrUse = 14, 
+    RuleCvParameterBlock = 15, RuleCvParameterStatement = 16, RuleCvParameter = 17, 
+    RuleStatement = 18, RuleFeatureUse = 19, RuleScriptAssign = 20, RuleLangAssign = 21, 
+    RuleLookupflagAssign = 22, RuleLookupflagElement = 23, RuleIgnoreSubOrPos = 24, 
+    RuleSubstitute = 25, RulePosition = 26, RuleValuePattern = 27, RuleValueRecord = 28, 
+    RuleValueLiteral = 29, RuleSingleValueLiteral = 30, RuleParenLocationValue = 31, 
+    RuleLocationValueLiteral = 32, RuleLocationMultiValueLiteral = 33, RuleLocationSpecifier = 34, 
+    RuleLocationLiteral = 35, RuleAxisLocationLiteral = 36, RuleCursiveElement = 37, 
+    RuleBaseToMarkElement = 38, RuleLigatureMarkElement = 39, RuleParameters = 40, 
+    RuleSizemenuname = 41, RuleFeatureNames = 42, RuleSubtable = 43, RuleTable_BASE = 44, 
+    RuleBaseStatement = 45, RuleAxisTags = 46, RuleAxisScripts = 47, RuleBaseScript = 48, 
+    RuleTable_GDEF = 49, RuleGdefStatement = 50, RuleGdefGlyphClass = 51, 
+    RuleGdefAttach = 52, RuleGdefLigCaretPos = 53, RuleGdefLigCaretIndex = 54, 
+    RuleTable_head = 55, RuleHeadStatement = 56, RuleHead = 57, RuleTable_hhea = 58, 
+    RuleHheaStatement = 59, RuleHhea = 60, RuleTable_vhea = 61, RuleVheaStatement = 62, 
+    RuleVhea = 63, RuleTable_name = 64, RuleNameStatement = 65, RuleNameID = 66, 
+    RuleTable_OS_2 = 67, RuleOs_2Statement = 68, RuleOs_2 = 69, RuleTable_STAT = 70, 
+    RuleStatStatement = 71, RuleDesignAxis = 72, RuleAxisValue = 73, RuleAxisValueStatement = 74, 
+    RuleAxisValueLocation = 75, RuleAxisValueFlags = 76, RuleElidedFallbackName = 77, 
+    RuleNameEntryStatement = 78, RuleElidedFallbackNameID = 79, RuleNameEntry = 80, 
+    RuleTable_vmtx = 81, RuleVmtxStatement = 82, RuleVmtx = 83, RuleAnchor = 84, 
+    RuleAnchorLiteral = 85, RuleAnchorLiteralXY = 86, RuleAnchorMultiValueLiteral = 87, 
+    RuleLookupPattern = 88, RuleLookupPatternElement = 89, RulePattern = 90, 
+    RulePatternElement = 91, RuleGlyphClassOptional = 92, RuleGlyphClass = 93, 
+    RuleGcLiteral = 94, RuleGcLiteralElement = 95, RuleGclass = 96, RuleGlyph = 97, 
+    RuleGlyphName = 98, RuleLabel = 99, RuleTag = 100, RuleFixedNum = 101, 
+    RuleGenNum = 102, RuleFeatureFile = 103, RuleStatementFile = 104, RuleCvStatementFile = 105, 
+    RuleBaseFile = 106, RuleHeadFile = 107, RuleHheaFile = 108, RuleVheaFile = 109, 
+    RuleGdefFile = 110, RuleNameFile = 111, RuleVmtxFile = 112, RuleOs_2File = 113, 
+    RuleStatFile = 114, RuleAxisValueFile = 115, RuleNameEntryFile = 116, 
+    RuleSubtok = 117, RuleRevtok = 118, RuleAnontok = 119, RuleEnumtok = 120, 
+    RulePostok = 121, RuleMarkligtok = 122
   };
 
   explicit FeatParser(antlr4::TokenStream *input);
@@ -104,6 +114,7 @@ public:
   class Mark_statementContext;
   class AnchorDefContext;
   class ValueRecordDefContext;
+  class LocationDefContext;
   class FeatureBlockContext;
   class TableBlockContext;
   class AnonBlockContext;
@@ -125,6 +136,13 @@ public:
   class ValuePatternContext;
   class ValueRecordContext;
   class ValueLiteralContext;
+  class SingleValueLiteralContext;
+  class ParenLocationValueContext;
+  class LocationValueLiteralContext;
+  class LocationMultiValueLiteralContext;
+  class LocationSpecifierContext;
+  class LocationLiteralContext;
+  class AxisLocationLiteralContext;
   class CursiveElementContext;
   class BaseToMarkElementContext;
   class LigatureMarkElementContext;
@@ -173,6 +191,9 @@ public:
   class VmtxStatementContext;
   class VmtxContext;
   class AnchorContext;
+  class AnchorLiteralContext;
+  class AnchorLiteralXYContext;
+  class AnchorMultiValueLiteralContext;
   class LookupPatternContext;
   class LookupPatternElementContext;
   class PatternContext;
@@ -181,6 +202,7 @@ public:
   class GlyphClassContext;
   class GcLiteralContext;
   class GcLiteralElementContext;
+  class GclassContext;
   class GlyphContext;
   class GlyphNameContext;
   class LabelContext;
@@ -242,6 +264,7 @@ public:
     Mark_statementContext *mark_statement();
     AnchorDefContext *anchorDef();
     ValueRecordDefContext *valueRecordDef();
+    LocationDefContext *locationDef();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -270,7 +293,7 @@ public:
   public:
     GlyphClassAssignContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *GCLASS();
+    GclassContext *gclass();
     antlr4::tree::TerminalNode *EQUALS();
     GlyphClassContext *glyphClass();
 
@@ -304,7 +327,7 @@ public:
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *MARK_CLASS();
     AnchorContext *anchor();
-    antlr4::tree::TerminalNode *GCLASS();
+    GclassContext *gclass();
     GlyphContext *glyph();
     GlyphClassContext *glyphClass();
 
@@ -317,17 +340,12 @@ public:
 
   class  AnchorDefContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *xval = nullptr;
-    antlr4::Token *yval = nullptr;
-    antlr4::Token *cp = nullptr;
     FeatParser::LabelContext *name = nullptr;
     AnchorDefContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *ANCHOR_DEF();
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
+    AnchorLiteralContext *anchorLiteral();
     LabelContext *label();
-    antlr4::tree::TerminalNode *CONTOURPOINT();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -350,6 +368,21 @@ public:
   };
 
   ValueRecordDefContext* valueRecordDef();
+
+  class  LocationDefContext : public antlr4::ParserRuleContext {
+  public:
+    LocationDefContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *LOCATION_DEF();
+    LocationLiteralContext *locationLiteral();
+    antlr4::tree::TerminalNode *LNAME();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  LocationDefContext* locationDef();
 
   class  FeatureBlockContext : public antlr4::ParserRuleContext {
   public:
@@ -754,10 +787,14 @@ public:
   public:
     ValueLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    std::vector<SingleValueLiteralContext *> singleValueLiteral();
+    SingleValueLiteralContext* singleValueLiteral(size_t i);
     antlr4::tree::TerminalNode *BEGINVALUE();
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
     antlr4::tree::TerminalNode *ENDVALUE();
+    antlr4::tree::TerminalNode *LPAREN();
+    antlr4::tree::TerminalNode *RPAREN();
+    std::vector<LocationMultiValueLiteralContext *> locationMultiValueLiteral();
+    LocationMultiValueLiteralContext* locationMultiValueLiteral(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -765,6 +802,117 @@ public:
   };
 
   ValueLiteralContext* valueLiteral();
+
+  class  SingleValueLiteralContext : public antlr4::ParserRuleContext {
+  public:
+    SingleValueLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *NUM();
+    ParenLocationValueContext *parenLocationValue();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  SingleValueLiteralContext* singleValueLiteral();
+
+  class  ParenLocationValueContext : public antlr4::ParserRuleContext {
+  public:
+    ParenLocationValueContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *LPAREN();
+    antlr4::tree::TerminalNode *RPAREN();
+    std::vector<LocationValueLiteralContext *> locationValueLiteral();
+    LocationValueLiteralContext* locationValueLiteral(size_t i);
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ParenLocationValueContext* parenLocationValue();
+
+  class  LocationValueLiteralContext : public antlr4::ParserRuleContext {
+  public:
+    LocationValueLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *NUM();
+    LocationSpecifierContext *locationSpecifier();
+    antlr4::tree::TerminalNode *COLON();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  LocationValueLiteralContext* locationValueLiteral();
+
+  class  LocationMultiValueLiteralContext : public antlr4::ParserRuleContext {
+  public:
+    LocationMultiValueLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *BEGINVALUE();
+    std::vector<antlr4::tree::TerminalNode *> NUM();
+    antlr4::tree::TerminalNode* NUM(size_t i);
+    antlr4::tree::TerminalNode *ENDVALUE();
+    LocationSpecifierContext *locationSpecifier();
+    antlr4::tree::TerminalNode *COLON();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  LocationMultiValueLiteralContext* locationMultiValueLiteral();
+
+  class  LocationSpecifierContext : public antlr4::ParserRuleContext {
+  public:
+    LocationSpecifierContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    LocationLiteralContext *locationLiteral();
+    antlr4::tree::TerminalNode *LNAME();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  LocationSpecifierContext* locationSpecifier();
+
+  class  LocationLiteralContext : public antlr4::ParserRuleContext {
+  public:
+    LocationLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<AxisLocationLiteralContext *> axisLocationLiteral();
+    AxisLocationLiteralContext* axisLocationLiteral(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  LocationLiteralContext* locationLiteral();
+
+  class  AxisLocationLiteralContext : public antlr4::ParserRuleContext {
+  public:
+    AxisLocationLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    TagContext *tag();
+    antlr4::tree::TerminalNode *EQUALS();
+    FixedNumContext *fixedNum();
+    antlr4::tree::TerminalNode *AXISUNIT();
+    antlr4::tree::TerminalNode *HYPHEN();
+    antlr4::tree::TerminalNode *PLUS();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  AxisLocationLiteralContext* axisLocationLiteral();
 
   class  CursiveElementContext : public antlr4::ParserRuleContext {
   public:
@@ -787,7 +935,7 @@ public:
     virtual size_t getRuleIndex() const override;
     AnchorContext *anchor();
     antlr4::tree::TerminalNode *MARK();
-    antlr4::tree::TerminalNode *GCLASS();
+    GclassContext *gclass();
     antlr4::tree::TerminalNode *MARKER();
 
 
@@ -803,7 +951,7 @@ public:
     virtual size_t getRuleIndex() const override;
     AnchorContext *anchor();
     antlr4::tree::TerminalNode *MARK();
-    antlr4::tree::TerminalNode *GCLASS();
+    GclassContext *gclass();
     antlr4::tree::TerminalNode *LIG_COMPONENT();
     antlr4::tree::TerminalNode *MARKER();
 
@@ -834,9 +982,7 @@ public:
     SizemenunameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *SIZEMENUNAME();
-    antlr4::tree::TerminalNode *QUOTE();
     antlr4::tree::TerminalNode *STRVAL();
-    antlr4::tree::TerminalNode *EQUOTE();
     std::vector<GenNumContext *> genNum();
     GenNumContext* genNum(size_t i);
 
@@ -1040,8 +1186,8 @@ public:
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *LIG_CARET_BY_POS();
     LookupPatternContext *lookupPattern();
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
+    std::vector<SingleValueLiteralContext *> singleValueLiteral();
+    SingleValueLiteralContext* singleValueLiteral(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1153,10 +1299,13 @@ public:
     HheaContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NUM();
-    antlr4::tree::TerminalNode *CARET_OFFSET();
     antlr4::tree::TerminalNode *ASCENDER();
     antlr4::tree::TerminalNode *DESCENDER();
     antlr4::tree::TerminalNode *LINE_GAP();
+    SingleValueLiteralContext *singleValueLiteral();
+    antlr4::tree::TerminalNode *CARET_OFFSET();
+    antlr4::tree::TerminalNode *CARET_SLOPE_RISE();
+    antlr4::tree::TerminalNode *CARET_SLOPE_RUN();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1207,6 +1356,9 @@ public:
     antlr4::tree::TerminalNode *VERT_TYPO_ASCENDER();
     antlr4::tree::TerminalNode *VERT_TYPO_DESCENDER();
     antlr4::tree::TerminalNode *VERT_TYPO_LINE_GAP();
+    antlr4::tree::TerminalNode *CARET_OFFSET();
+    antlr4::tree::TerminalNode *CARET_SLOPE_RISE();
+    antlr4::tree::TerminalNode *CARET_SLOPE_RUN();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1258,9 +1410,7 @@ public:
     NameIDContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NAMEID();
-    antlr4::tree::TerminalNode *QUOTE();
     antlr4::tree::TerminalNode *STRVAL();
-    antlr4::tree::TerminalNode *EQUOTE();
     std::vector<GenNumContext *> genNum();
     GenNumContext* genNum(size_t i);
 
@@ -1319,6 +1469,16 @@ public:
     antlr4::tree::TerminalNode *WIN_DESCENT();
     antlr4::tree::TerminalNode *X_HEIGHT();
     antlr4::tree::TerminalNode *CAP_HEIGHT();
+    antlr4::tree::TerminalNode *SUBSCRIPT_X_SIZE();
+    antlr4::tree::TerminalNode *SUBSCRIPT_X_OFFSET();
+    antlr4::tree::TerminalNode *SUBSCRIPT_Y_SIZE();
+    antlr4::tree::TerminalNode *SUBSCRIPT_Y_OFFSET();
+    antlr4::tree::TerminalNode *SUPERSCRIPT_X_SIZE();
+    antlr4::tree::TerminalNode *SUPERSCRIPT_X_OFFSET();
+    antlr4::tree::TerminalNode *SUPERSCRIPT_Y_SIZE();
+    antlr4::tree::TerminalNode *SUPERSCRIPT_Y_OFFSET();
+    antlr4::tree::TerminalNode *STRIKEOUT_SIZE();
+    antlr4::tree::TerminalNode *STRIKEOUT_POSITION();
     SingleValueLiteralContext *singleValueLiteral();
     antlr4::tree::TerminalNode *FS_TYPE();
     antlr4::tree::TerminalNode *FS_TYPE_v();
@@ -1331,9 +1491,7 @@ public:
     antlr4::tree::TerminalNode *FAMILY_CLASS();
     GenNumContext *genNum();
     antlr4::tree::TerminalNode *VENDOR();
-    antlr4::tree::TerminalNode *QUOTE();
     antlr4::tree::TerminalNode *STRVAL();
-    antlr4::tree::TerminalNode *EQUOTE();
     antlr4::tree::TerminalNode *PANOSE();
     antlr4::tree::TerminalNode *UNICODE_RANGE();
     antlr4::tree::TerminalNode *CODE_PAGE_RANGE();
@@ -1519,9 +1677,7 @@ public:
     NameEntryContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NAME();
-    antlr4::tree::TerminalNode *QUOTE();
     antlr4::tree::TerminalNode *STRVAL();
-    antlr4::tree::TerminalNode *EQUOTE();
     std::vector<GenNumContext *> genNum();
     GenNumContext* genNum(size_t i);
 
@@ -1584,20 +1740,15 @@ public:
 
   class  AnchorContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *xval = nullptr;
-    antlr4::Token *yval = nullptr;
-    antlr4::Token *cp = nullptr;
     FeatParser::LabelContext *name = nullptr;
     AnchorContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *BEGINVALUE();
     antlr4::tree::TerminalNode *ANCHOR();
     antlr4::tree::TerminalNode *ENDVALUE();
+    AnchorLiteralContext *anchorLiteral();
     antlr4::tree::TerminalNode *KNULL();
     LabelContext *label();
-    std::vector<antlr4::tree::TerminalNode *> NUM();
-    antlr4::tree::TerminalNode* NUM(size_t i);
-    antlr4::tree::TerminalNode *CONTOURPOINT();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1605,6 +1756,60 @@ public:
   };
 
   AnchorContext* anchor();
+
+  class  AnchorLiteralContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *cp = nullptr;
+    AnchorLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    AnchorLiteralXYContext *anchorLiteralXY();
+    antlr4::tree::TerminalNode *CONTOURPOINT();
+    antlr4::tree::TerminalNode *NUM();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  AnchorLiteralContext* anchorLiteral();
+
+  class  AnchorLiteralXYContext : public antlr4::ParserRuleContext {
+  public:
+    FeatParser::SingleValueLiteralContext *xval = nullptr;
+    FeatParser::SingleValueLiteralContext *yval = nullptr;
+    AnchorLiteralXYContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<SingleValueLiteralContext *> singleValueLiteral();
+    SingleValueLiteralContext* singleValueLiteral(size_t i);
+    antlr4::tree::TerminalNode *LPAREN();
+    antlr4::tree::TerminalNode *RPAREN();
+    std::vector<AnchorMultiValueLiteralContext *> anchorMultiValueLiteral();
+    AnchorMultiValueLiteralContext* anchorMultiValueLiteral(size_t i);
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  AnchorLiteralXYContext* anchorLiteralXY();
+
+  class  AnchorMultiValueLiteralContext : public antlr4::ParserRuleContext {
+  public:
+    AnchorMultiValueLiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *BEGINVALUE();
+    std::vector<antlr4::tree::TerminalNode *> NUM();
+    antlr4::tree::TerminalNode* NUM(size_t i);
+    antlr4::tree::TerminalNode *ENDVALUE();
+    LocationSpecifierContext *locationSpecifier();
+    antlr4::tree::TerminalNode *COLON();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  AnchorMultiValueLiteralContext* anchorMultiValueLiteral();
 
   class  LookupPatternContext : public antlr4::ParserRuleContext {
   public:
@@ -1683,7 +1888,7 @@ public:
   public:
     GlyphClassContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *GCLASS();
+    GclassContext *gclass();
     GcLiteralContext *gcLiteral();
 
 
@@ -1718,7 +1923,7 @@ public:
     std::vector<GlyphContext *> glyph();
     GlyphContext* glyph(size_t i);
     antlr4::tree::TerminalNode *HYPHEN();
-    antlr4::tree::TerminalNode *GCLASS();
+    GclassContext *gclass();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1726,6 +1931,20 @@ public:
   };
 
   GcLiteralElementContext* gcLiteralElement();
+
+  class  GclassContext : public antlr4::ParserRuleContext {
+  public:
+    GclassContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *LNAME();
+    antlr4::tree::TerminalNode *GCLASS();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  GclassContext* gclass();
 
   class  GlyphContext : public antlr4::ParserRuleContext {
   public:
@@ -1748,6 +1967,7 @@ public:
     antlr4::tree::TerminalNode *ESCGNAME();
     antlr4::tree::TerminalNode *NAMELABEL();
     antlr4::tree::TerminalNode *EXTNAME();
+    antlr4::tree::TerminalNode *AXISUNIT();
     antlr4::tree::TerminalNode *NOTDEF();
 
 
@@ -1763,6 +1983,7 @@ public:
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NAMELABEL();
     antlr4::tree::TerminalNode *MARK();
+    antlr4::tree::TerminalNode *AXISUNIT();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -1777,7 +1998,7 @@ public:
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NAMELABEL();
     antlr4::tree::TerminalNode *EXTNAME();
-    antlr4::tree::TerminalNode *CATCHTAG();
+    antlr4::tree::TerminalNode *STRVAL();
     antlr4::tree::TerminalNode *MARK();
 
 

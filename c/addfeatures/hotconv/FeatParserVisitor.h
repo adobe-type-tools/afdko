@@ -1,5 +1,5 @@
 
-// Generated from FeatParser.g4 by ANTLR 4.13.2
+// Generated from FeatParser.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -34,6 +34,8 @@ public:
     virtual std::any visitAnchorDef(FeatParser::AnchorDefContext *context) = 0;
 
     virtual std::any visitValueRecordDef(FeatParser::ValueRecordDefContext *context) = 0;
+
+    virtual std::any visitLocationDef(FeatParser::LocationDefContext *context) = 0;
 
     virtual std::any visitFeatureBlock(FeatParser::FeatureBlockContext *context) = 0;
 
@@ -76,6 +78,20 @@ public:
     virtual std::any visitValueRecord(FeatParser::ValueRecordContext *context) = 0;
 
     virtual std::any visitValueLiteral(FeatParser::ValueLiteralContext *context) = 0;
+
+    virtual std::any visitSingleValueLiteral(FeatParser::SingleValueLiteralContext *context) = 0;
+
+    virtual std::any visitParenLocationValue(FeatParser::ParenLocationValueContext *context) = 0;
+
+    virtual std::any visitLocationValueLiteral(FeatParser::LocationValueLiteralContext *context) = 0;
+
+    virtual std::any visitLocationMultiValueLiteral(FeatParser::LocationMultiValueLiteralContext *context) = 0;
+
+    virtual std::any visitLocationSpecifier(FeatParser::LocationSpecifierContext *context) = 0;
+
+    virtual std::any visitLocationLiteral(FeatParser::LocationLiteralContext *context) = 0;
+
+    virtual std::any visitAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *context) = 0;
 
     virtual std::any visitCursiveElement(FeatParser::CursiveElementContext *context) = 0;
 
