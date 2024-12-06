@@ -1,5 +1,5 @@
 
-// Generated from FeatParser.g4 by ANTLR 4.13.2
+// Generated from FeatParser.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -44,6 +44,10 @@ public:
   }
 
   virtual std::any visitValueRecordDef(FeatParser::ValueRecordDefContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitLocationDef(FeatParser::LocationDefContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -128,6 +132,34 @@ public:
   }
 
   virtual std::any visitValueLiteral(FeatParser::ValueLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitSingleValueLiteral(FeatParser::SingleValueLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitParenLocationValue(FeatParser::ParenLocationValueContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitLocationValueLiteral(FeatParser::LocationValueLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitLocationMultiValueLiteral(FeatParser::LocationMultiValueLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitLocationSpecifier(FeatParser::LocationSpecifierContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitLocationLiteral(FeatParser::LocationLiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitAxisLocationLiteral(FeatParser::AxisLocationLiteralContext *ctx) override {
     return visitChildren(ctx);
   }
 
