@@ -27,10 +27,15 @@ if (HAVE_M_LIB)
     target_link_libraries(makeotfexe PRIVATE m)
 endif ()
 
+if (CMAKE_USE_PTHREADS_INIT)
+    target_link_libraries(makeotfexe PRIVATE Threads::Threads)
+endif ()
+
 target_link_libraries(makeotfexe PUBLIC ${CHOSEN_LIBXML2_LIBRARY})
 
 target_compile_definitions(makeotfexe PRIVATE MAKEOTFLIB_EXPORTS=1)
 
 # set_target_properties(makeotfexe PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 
 install(TARGETS makeotfexe DESTINATION bin)
