@@ -192,6 +192,9 @@ static int caretoffBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     return ABF_CONT_RET;
 }
 
+static void caretoffWidth(abfGlyphCallbacks *cb, float hAdv) {
+}
+
 /* [cffread path callback] Add moveto to path */
 static void caretoffMoveto(abfGlyphCallbacks *cb, float x1, float y1) {
     checkPoint((costate *) cb->direct_ctx, x1, y1);
@@ -208,6 +211,9 @@ static void caretoffCurveto(abfGlyphCallbacks *cb, float x1, float y1,
     checkPoint((costate *) cb->direct_ctx, x3, y3);
 }
 
+static void caretoffEnd(abfGlyphCallbacks *cb) {
+}
+
 /* Calculate caret offset for an italic font. Shear heuristic glyph upright,
    calculate its left (a) and right (b) side-bearings. Return a-(a+b)/2 */
 static short calcCaretOffset(hotCtx g) {
@@ -222,7 +228,7 @@ static short calcCaretOffset(hotCtx g) {
         NULL,
         NULL,
         caretoffBeg,
-        NULL,
+        caretoffWidth,
         caretoffMoveto,
         caretoffLineto,
         caretoffCurveto,
@@ -230,7 +236,7 @@ static short calcCaretOffset(hotCtx g) {
         NULL,
         NULL,
         NULL,
-        NULL,
+        caretoffEnd,
         NULL,
         NULL,
         NULL
