@@ -1,6 +1,13 @@
 Changelog
 =========
 
+4.0.2 (released 2024-11-05)
+---------------------------
+- [otfautohint] Fix otfautohint bugs ([#1759](https://github.com/adobe-type-tools/afdko/pull/1759), [#1751](https://github.com/adobe-type-tools/afdko/pull/1751), [#1749](https://github.com/adobe-type-tools/afdko/pull/1749), [#1758](https://github.com/adobe-type-tools/afdko/pull/1758))
+- [ANTLR] Upgrade ANTLR to v4.13.2
+- [makeinstancesufo] keep all public lib keys in instances (thank you, @arialcrime!) ([#1747](https://github.com/adobe-type-tools/afdko/pull/1747))
+- [ci] Enable Python v3.12, drop v3.8 ([#1756](https://github.com/adobe-type-tools/afdko/pull/1756))
+
 4.0.1 (released 2024-01-16)
 ---------------------------
 - [tx] Fix build failures discovered by an upcoming gcc-14 release (thanks @trofi!)([#1730](https://github.com/adobe-type-tools/afdko/pull/1730))

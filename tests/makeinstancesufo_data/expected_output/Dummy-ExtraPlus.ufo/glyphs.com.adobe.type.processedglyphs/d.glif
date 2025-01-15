@@ -76,8 +76,8 @@
 						<string>hintRef0002</string>
 						<key>stems</key>
 						<array>
-							<string>hstem 0 183.861</string>
-							<string>hstem 523 -20</string>
+							<string>hstem 0 184</string>
+							<string>hstem 327 196</string>
 							<string>hstem 683 -20</string>
 							<string>vstem 27 248</string>
 							<string>vstem 318 243</string>

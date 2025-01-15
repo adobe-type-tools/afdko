@@ -92,7 +92,7 @@
               <string>hstem 472.8 44</string>
               <string>vstem 40.8 48</string>
               <string>vstem 199.2 52.8</string>
-              <string>vstem 394.4 39.6</string>
+              <string>vstem 394.4 39.4051</string>
               <string>vstem 590.4 46.4</string>
             </array>
           </dict>
@@ -107,7 +107,7 @@
               <string>hstem 472.8 44</string>
               <string>vstem 40.8 48</string>
               <string>vstem 199.2 52.8</string>
-              <string>vstem 394.4 39.6</string>
+              <string>vstem 394.4 39.4051</string>
               <string>vstem 590.4 46.4</string>
             </array>
           </dict>
@@ -122,7 +122,7 @@
               <string>hstem 472.8 44</string>
               <string>vstem 40.8 48</string>
               <string>vstem 199.2 52.8</string>
-              <string>vstem 394.4 39.6</string>
+              <string>vstem 394.4 39.4051</string>
               <string>vstem 590.4 46.4</string>
             </array>
           </dict>
@@ -137,7 +137,7 @@
               <string>hstem 472.8 44</string>
               <string>vstem 40.8 48</string>
               <string>vstem 199.2 52.8</string>
-              <string>vstem 394.4 39.6</string>
+              <string>vstem 394.4 39.4051</string>
               <string>vstem 590.4 46.4</string>
             </array>
           </dict>
