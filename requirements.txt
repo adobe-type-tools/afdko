@@ -10,3 +10,4 @@ fontTools[unicode,woff,lxml,ufo]==4.43.0
 tqdm==4.66.1
 ufonormalizer==0.6.1
 ufoProcessor==1.9.0
+typing-extensions==4.8.0

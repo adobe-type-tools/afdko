@@ -4,24 +4,34 @@
 Internal representation of a T2 CharString glyph with hints
 """
 
-import numbers
 import threading
 import operator
 from copy import deepcopy
 from math import sqrt
 from collections import defaultdict
 from builtins import tuple as _tuple
-from fontTools.misc.bezierTools import (solveQuadratic, solveCubic,
-                                        calcCubicParameters,
-                                        splitCubicAtT, segmentPointAtT,
-                                        approximateCubicArcLength)
+from typing import Any, List, Optional, Tuple, Union
+from typing_extensions import Self  # pytype: disable=not-supported-yet
+
+# pytype: disable=import-error
+from fontTools.misc.bezierTools import (
+    solveQuadratic,
+    solveCubic,
+    calcCubicParameters,
+    splitCubicAtT,
+    segmentPointAtT,
+    approximateCubicArcLength,
+)
 from fontTools.pens.basePen import BasePen
 
 import logging
+
+from . import Number
+
 log = logging.getLogger(__name__)
 
 
-def norm_float(value):
+def norm_float(value: float) -> Number:
     """Converts a float (whose decimal part is zero) to integer"""
     if isinstance(value, float):
         value = round(value, 4)
@@ -31,21 +41,24 @@ def norm_float(value):
     return value
 
 
-def feq(a, b, factor=1.52e-5):
+def feq(a: float, b: float, factor=1.52e-5) -> bool:
     """Returns True if a and b are close enough to be considered equal"""
     return abs(a - b) < factor
 
 
-def fne(a, b, factor=1.52e-5):
+def fne(a: float, b: float, factor=1.52e-5) -> bool:
     """Returns True if a and b are not close enough to be considered equal"""
     return abs(a - b) >= factor
 
 
-class pt(tuple):
+class pt:
     """A 2-tuple representing a point in 2D space"""
-    __slots__ = ()
+
     tl = threading.local()
     tl.align = None
+
+    x: Number
+    y: Number
 
     @classmethod
     def setAlign(cls, vertical=False):
@@ -76,7 +89,7 @@ class pt(tuple):
         """
         cls.tl.align = None
 
-    def __new__(cls, x=0, y=0, roundCoords=False):
+    def __init__(self, x: Number = 0, y: Number = 0, roundCoords=False):
         """
         Creates a new pt object initialied with x and y.
 
@@ -88,15 +101,15 @@ class pt(tuple):
         if roundCoords:
             x = round(x)
             y = round(y)
-        return _tuple.__new__(cls, (x, y))
+        self.x = x
+        self.y = y
 
-    @property
-    def x(self):
-        return self[0]
-
-    @property
-    def y(self):
-        return self[1]
+    def __getitem__(self, ix) -> Union[int, float]:
+        if ix == 0:
+            return self.x
+        if ix == 1:
+            return self.y
+        raise IndexError("pt index out of range")
 
     @property
     def a(self):
@@ -224,14 +237,14 @@ class pt(tuple):
         Returns a new pt object with this object's coordinates multiplied by
         a scalar value
         """
-        if not isinstance(other, numbers.Number):
+        if not isinstance(other, (int, float)):
             raise TypeError('One argument to pt.__mul__ must be a scalar ' +
                             'number')
         return pt(self[0] * other, self[1] * other)
 
     def __rmul__(self, other):
         """Same as __mul__ for right-multiplication"""
-        if not isinstance(other, numbers.Number):
+        if not isinstance(other, (int, float)):
             raise TypeError('One argument to pt.__rmul__ must be a scalar ' +
                             'number')
         return pt(self[0] * other, self[1] * other)
@@ -259,7 +272,7 @@ class stem(tuple):
     BandMargin = 30
     __slots__ = ()
 
-    def __new__(cls, lb=0, rt=0):
+    def __new__(cls, lb: Number = 0, rt: Number = 0):
         if isinstance(lb, tuple):
             return _tuple.__new__(cls, lb)
         return _tuple.__new__(cls, (lb, rt))
@@ -517,6 +530,11 @@ class pathElement:
     tSlop = .005
     middleMult = 2
 
+    s: pt
+    e: pt
+    cs: pt
+    ce: pt
+
     def __init__(self, *args, is_close=False, masks=None, flex=False,
                  position=None):
         self.is_line = False
@@ -541,34 +559,35 @@ class pathElement:
                             'pathElement.__init__')
         self.masks = masks
         self.flex = flex
-        self.bounds = None
-        self.position = position
+        self.bounds: Optional[boundsState] = None
+        self.position: Tuple[int, int] = position or (-1, -1)
         self.segment_sub = None
 
-    def getBounds(self):
+    def getBounds(self) -> boundsState:
         """Returns the bounds object for the object, generating it if needed"""
-        if self.bounds:
+        if self.bounds is not None:
             return self.bounds
         self.bounds = boundsState(self)
         return self.bounds
 
-    def clearTempState(self):
+    def clearTempState(self) -> None:
         self.bounds = None
         self.segment_sub = None
 
-    def isLine(self):
+    def isLine(self) -> bool:
         """Returns True if the spline is a line"""
         return self.is_line
 
-    def isClose(self):
+    def isClose(self) -> bool:
         """Returns True if this pathElement implicitly closes a subpath"""
         return self.is_close
 
-    def isStart(self):
+    def isStart(self) -> bool:
         """Returns True if this pathElement starts a subpath"""
+        assert self.position is not None
         return self.position[1] == 0
 
-    def isTiny(self):
+    def isTiny(self) -> bool:
         """
         Returns True if the start and end points of the spline are within
         two em-units in both dimensions
@@ -576,7 +595,7 @@ class pathElement:
         d = (self.e - self.s).abs()
         return d.x < 2 and d.y < 2
 
-    def isShort(self):
+    def isShort(self) -> bool:
         """
         Returns True if the start and end points of the spline are within
         about six em-units
@@ -585,7 +604,7 @@ class pathElement:
         mx, mn = sorted(tuple(d))
         return mx + mn * .336 < 6  # head.c IsShort
 
-    def convertToLine(self):
+    def convertToLine(self) -> None:
         """
         If the pathElement is not already a line, make it one with the same
         start and end points
@@ -623,7 +642,12 @@ class pathElement:
         elif not doVert and self.masks is not None:
             self.masks = [None, self.masks[1]] if self.masks[1] else None
 
-    def cubicParameters(self):
+    def cubicParameters(self) -> Tuple[
+        Tuple[float, float],
+        Tuple[float, float],
+        Tuple[float, float],
+        Tuple[float, float],
+    ]:
         """Returns the fontTools cubic parameters for this pathElement"""
         return calcCubicParameters(self.s, self.cs, self.ce, self.e)
 
@@ -761,7 +785,7 @@ class pathElement:
             return True
         return False
 
-    def splitAt(self, t):
+    def splitAt(self, t: Number) -> Self:
         if self.is_line:
             pb = self.s + (self.e - self.s) * t
             ret = pathElement(pb, self.e, position=self.position,
@@ -769,7 +793,6 @@ class pathElement:
             self.e = pb
             self.is_close = False
             self.bounds = None
-            return ret
         else:
             s, n = splitCubicAtT(self.s, self.cs, self.ce, self.e, t)
             ptsn = [pt(p) for p in n]
@@ -781,21 +804,28 @@ class pathElement:
             self.e = pt(s[3])
             self.is_close = False
             self.bounds = None
-            return ret
+        # The typing is correct but neither mypy nor pytype handle
+        # self types well yet.
+        return ret  # type: ignore
 
-    def atT(self, t):
+    def atT(self, t: Number) -> pt:
         return pt(segmentPointAtT(self.fonttoolsSegment(), t))
 
-    def fonttoolsSegment(self):
+    def fonttoolsSegment(self) -> List[Tuple[Number, Number]]:
         if self.is_line:
-            return [tuple(self.s), tuple(self.e)]
+            return [(self.s[0], self.s[1]),
+                    (self.e[0], self.e[1])]
         else:
-            return [tuple(self.s), tuple(self.cs), tuple(self.ce),
-                    tuple(self.e)]
+            return [
+                (self.s[0], self.s[1]),
+                (self.cs[0], self.cs[1]),
+                (self.ce[0], self.ce[1]),
+                (self.e[0], self.e[1])]
 
 
 class glyphData(BasePen):
     """Stores state corresponding to a T2 CharString"""
+
     def __init__(self, roundCoords, name=''):
         super().__init__()
         self.roundCoords = roundCoords
@@ -818,7 +848,8 @@ class glyphData(BasePen):
         self.pathEdited = False
         self.boundsMap = {}
 
-        self.hhs = self.vhs = None
+        self.hhs: Optional[object] = None
+        self.vhs: Optional[object] = None
 
     # pen methods:
 
@@ -1001,7 +1032,7 @@ class glyphData(BasePen):
             self.boundsMap[subpath] = b
             return b
 
-    def T2(self, version=1):
+    def T2(self, version=1) -> List[Any]:
         """Returns an array of T2 operators corresponding to the object"""
         prog = []
 
@@ -1051,7 +1082,7 @@ class glyphData(BasePen):
                 wrapi -= 1
                 w = s[wrapi]
             pen.beginPath()
-            wt = 'line' if w.isLine() else "curve"
+            wt = 'line' if w.isLine() else 'curve'
             if doHints:
                 pln, pn = ufoH(w, pln, True)
             pen.addPoint((w.e.x, w.e.y), segmentType=wt, name=pn)
@@ -1248,6 +1279,7 @@ class glyphData(BasePen):
 
     class glyphiter:
         """An iterator for a glyphData path"""
+
         __slots__ = ('gd', 'pos')
 
         def __init__(self, gd):
@@ -1413,7 +1445,7 @@ class glyphData(BasePen):
         for i in range(len(data) // 2):
             low = high + data[i * 2]
             high = low + data[i * 2 + 1]
-            sl.append(stem(low, high))
+            sl.append(stem(low, high))  # pytype: disable=wrong-arg-count
         return sl
 
     def fromStems(self, stems):

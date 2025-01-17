@@ -112,6 +112,7 @@ import os
 import shutil
 
 from types import SimpleNamespace
+from typing import Any, Dict, Optional, Tuple
 
 # from fontTools.pens.basePen import BasePen
 from fontTools.pens.pointPen import AbstractPointPen
@@ -378,8 +379,9 @@ class UFOFontData:
 
     def convertToGlyphData(self, name, readStems, readFlex, roundCoords,
                            doAll=False):
-        glyph, skip = self._get_or_skip_glyph(name, readStems, readFlex,
-                                              roundCoords, doAll)
+        glyph, skip = self._get_or_skip_glyph(
+            name, readStems, readFlex, roundCoords, doAll
+        )
         if skip:
             return None
         return glyph
@@ -395,6 +397,7 @@ class UFOFontData:
         if name in self.processedLayerGlyphMap:
             layer = PROCESSED_LAYER_NAME
         glyphset = self._get_glyphset(layer)
+        assert glyphset
 
         gdwrap = GlyphDataWrapper(glyph)
         glyphset.readGlyph(name, gdwrap)
@@ -423,7 +426,7 @@ class UFOFontData:
                            self._reader.formatVersionTuple,
                            validate=False)
 
-        layer = PROCESSED_LAYER_NAME
+        layer: Optional[str] = PROCESSED_LAYER_NAME
         if self.writeToDefaultLayer:
             layer = None
 
@@ -493,9 +496,9 @@ class UFOFontData:
             data.append("'%s': %s," % (gName, hashMap[gName]))
         data.append("}")
         data.append("")
-        data = "\n".join(data)
+        joined = "\n".join(data)
 
-        writer.writeData(HASHMAP_NAME, data.encode("utf-8"))
+        writer.writeData(HASHMAP_NAME, joined.encode("utf-8"))
 
     def updateHashEntry(self, glyphName):
         # srcHash has already been set: we are fixing the history list.
@@ -606,7 +609,9 @@ class UFOFontData:
 
     def getGlyphList(self):
         glyphOrder = self._reader.readLib().get(PUBLIC_GLYPH_ORDER, [])
-        glyphList = list(self._get_glyphset().keys())
+        glyphset = self._get_glyphset()
+        assert glyphset is not None
+        glyphList = list(glyphset.keys())
 
         # Sort the returned glyph list by the glyph order as we depend in the
         # order for expanding glyph ranges.
@@ -614,12 +619,14 @@ class UFOFontData:
             if v in glyphOrder:
                 return glyphOrder.index(v)
             return len(glyphOrder)
+
         return sorted(glyphList, key=key_fn)
 
     @property
     def glyphMap(self):
         if self._glyphmap is None:
             glyphset = self._get_glyphset()
+            assert glyphset is not None
             self._glyphmap = glyphset.contents
         return self._glyphmap
 
@@ -828,19 +835,20 @@ class GlyphDataWrapper(object):
     Wraps a glyphData object while storing the properties set by readGlyph
     to aid output of hint data in Adobe's "hint format 2" for UFO.
     """
+
     def __init__(self, glyph):
-        self._glyph = glyph
+        self._glyph: glyphData = glyph
         self.lib = {}
         if hasattr(glyph, 'width'):
             self.width = norm_float(glyph.width)
 
-    def addUfoFlex(self, uhl, pointname):
+    def addUfoFlex(self, uhl: Dict[str, Any], pointname: str):
         """Mark the named point as starting a flex hint"""
         if uhl.get(FLEX_INDEX_LIST_NAME, None) is None:
             uhl[FLEX_INDEX_LIST_NAME] = []
         uhl[FLEX_INDEX_LIST_NAME].append(pointname)
 
-    def addUfoMask(self, uhl, masks, pointname):
+    def addUfoMask(self, uhl: Dict[str, Any], masks, pointname: str):
         """Associates the hint set represented by masks with the named point"""
         if uhl.get(HINT_SET_LIST_NAME, None) is None:
             uhl[HINT_SET_LIST_NAME] = []
@@ -869,12 +877,13 @@ class GlyphDataWrapper(object):
                     p, w = s.UFOVals()
                     ustems.append("%s %s %s" % (opname[i], norm_float(p),
                                                 norm_float(w)))
-        hintset = {}
+        hintset: Dict[str, Any] = {}
         hintset[POINT_TAG] = pointname
         hintset[STEMS_NAME] = ustems
         uhl[HINT_SET_LIST_NAME].append(hintset)
 
-    def addUfoHints(self, uhl, pe, labelnum, startSubpath=False):
+    def addUfoHints(self, uhl: Optional[Dict[str, Any]], pe, labelnum: int,
+                    startSubpath=False) -> Tuple[int, Optional[str]]:
         """Adds hints to the pathElement, naming points as necessary"""
         pn = POINT_NAME_PATTERN % labelnum
         if uhl is None:
@@ -899,7 +908,7 @@ class GlyphDataWrapper(object):
         some points and building a library of hint annotations
         """
         if ufoHintLib is not None:
-            uhl = {}
+            uhl: Dict[str, Any] = {}
             ufoH = lambda pe, lm, ss=False: self.addUfoHints(uhl, pe, lm, ss)
         else:
             ufoH = None
