@@ -995,7 +995,7 @@ void FeatCtx::subtableBreak() {
     }
 
     if (retval)
-        featMsg(sWARNING, "subtable break is supported only in class kerning lookups");
+        featMsg(sWARNING, "subtable break is supported only in pair kerning lookups");
 }
 
 // --------------------------------- Lookups -----------------------------------

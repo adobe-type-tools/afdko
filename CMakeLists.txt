@@ -17,8 +17,8 @@ set(CMAKE_CXX_STANDARD 11)
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 find_program(CYTHON "cython")
 
-add_compile_definitions(HOT_DEBUG)
-add_compile_definitions(STRIP_EXTERN_C)
+# add_compile_definitions(HOT_DEBUG)
+# add_compile_definitions(STRIP_EXTERN_C)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 

@@ -652,10 +652,10 @@ void GPOS::SinglePos::Format2::write(OTL *h) {
 bool GPOS::SubtableBreak() {
     if (nw.lkpType != GPOSPair)
         /* xxx for now */
-        return false;
+        return true;
 
     startNewPairPosSubtbl = true;
-    return true;
+    return false;
 }
 
 // when returns true gc needs to be inserted by a subsequent call to insertInClassDef()

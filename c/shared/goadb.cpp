@@ -96,7 +96,7 @@ bool GOADB::read(const char *filename) {
             bufs.get(c);
 
         c = bufs.peek();
-        if (c == '\0' || c == '#')
+        if (!bufs.good() || c == '\0' || c == '#')
             continue; /* Skip blank or comment line */
 
         gr.order = ++order;
