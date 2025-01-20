@@ -131,7 +131,8 @@ void GDEF::GlyphClassTable::set(GPat::ClassRec &simple, GPat::ClassRec &ligature
             auto [seeni, b] = seen.emplace(gid, i);
             if (!b) {
                 // Don't complain if overriding mark class
-                if (seeni->second != 0) {
+                // or duplicate is part of same class
+                if (seeni->second != 0 && seeni->second != i) {
                     hadConflictingClassDef = true;
                     if (h.g->convertFlags & HOT_VERBOSE) {
                         h.g->ctx.feat->dumpGlyph(gid, 0, 0);

@@ -24,13 +24,7 @@
 #include "sfile.h"
 #include "smem.h"
 
-#define ADDFEATURES_VERSION "2.6.0"
-/* Warning: this string is now part of heuristic used by CoolType to identify the
-   first round of CoolType fonts which had the backtrack sequence of a chaining
-   contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
-   the regex:
-     "(Version|OTF) 1.+;Core 1\.0\..+;addfeatureslib1\."
-   inside the (1,0,0) nameID 5 "Version: string. */
+#define ADDFEATURES_VERSION "3.0.0"
 
 static char *progname; /* Program name */
 static cbCtx cbctx;    /* Client callback context */

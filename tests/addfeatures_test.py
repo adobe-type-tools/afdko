@@ -769,4 +769,5 @@ def test_heap_after_free_bug1349():
     runner(cmd)
     output_dump = generate_ttx_dump(output_filename, ['name'])
     assert differ([output_dump, get_expected_path("bug1349.ttx"),
-                   '-s', '<ttFont sfntVersion='])
+                   '-s', '<ttFont sfntVersion=',
+                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])

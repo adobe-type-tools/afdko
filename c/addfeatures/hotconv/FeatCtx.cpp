@@ -1096,6 +1096,11 @@ void FeatCtx::setLkpFlag(uint16_t flag) {
 void FeatCtx::callLkp(State &st) {
     Label lab = st.label;
 
+    if (st.tbl != GSUB_ && st.tbl != GPOS_) {
+        featMsg(sWARNING, "Internal: Bad table %d seen callLkp, ignoring.");
+        return;
+    }
+
 #if HOT_DEBUG
     if (g->font.debug & HOT_DB_FEAT_2) {
         if (curr.tbl == GSUB_) {
