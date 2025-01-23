@@ -1564,6 +1564,13 @@ static bool glyphLT(cfwCtx g, abfGlyphInfo *a, abfGlyphInfo *b) {
         uint32_t ob = g->goadb->getFinalAndOrder(b->gname.ptr, &_);
         if (oa != ob)
             return oa < ob;
+        if (oa == std::numeric_limits<int32_t>::max()) {
+            // Both glyphs are absent from the GOADB. We want
+            // to keep the relative order from the original
+            // source, which means returning false here because
+            // by convention a is later in the list
+            return false;
+        }
         if (a->gname.ptr == NULL && b->gname.ptr == NULL)
             return false;
         if (a->gname.ptr == NULL && b->gname.ptr != NULL)
@@ -1594,7 +1601,11 @@ static bool glyphLT(cfwCtx g, abfGlyphInfo *a, abfGlyphInfo *b) {
                 return false;
             }
         } else {
-            return strcmp(a->gname.ptr, b->gname.ptr) < 0;
+            // Both glyphs names are not standard. We want
+            // to keep the relative order from the original
+            // source, which means returning false here because
+            // by convention a is later in the list
+            return false;
         }
     }
 }
