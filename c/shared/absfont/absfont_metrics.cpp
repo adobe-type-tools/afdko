@@ -11,6 +11,8 @@
 
 #include "absfont.h"
 
+#define BBOX_INT_FUDGE 0.15
+
 /* Transform x and y coordinates by matrix. */
 #define TX(x, y) (h->matrix[0] * x + h->matrix[2] * y + h->matrix[4])
 #define TY(x, y) (h->matrix[1] * x + h->matrix[3] * y + h->matrix[5])
@@ -231,10 +233,10 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     }
 
     /* Compute integer metrics */
-    h->int_mtx.left = (long)floor(h->real_mtx.left);
-    h->int_mtx.bottom = (long)floor(h->real_mtx.bottom);
-    h->int_mtx.right = (long)ceil(h->real_mtx.right);
-    h->int_mtx.top = (long)ceil(h->real_mtx.top);
+    h->int_mtx.left = (long)floor(h->real_mtx.left + BBOX_INT_FUDGE);
+    h->int_mtx.bottom = (long)floor(h->real_mtx.bottom + BBOX_INT_FUDGE);
+    h->int_mtx.right = (long)ceil(h->real_mtx.right - BBOX_INT_FUDGE);
+    h->int_mtx.top = (long)ceil(h->real_mtx.top - BBOX_INT_FUDGE);
 
     /* Round advance away from zero. */
     if (h->real_mtx.hAdv >= 0) {
