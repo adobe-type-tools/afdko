@@ -11,7 +11,7 @@
 "-no_opt disable charstring optimizations (e.g.: x 0 rmoveto => x hmoveto)\n"
 "-go     order according to GOADB file (rather than default optimizations)\n"
 "-maxs N set the maximum number of subroutines (0 means 32765)\n"
-"-amnd   write output even when .notdef is missing\n"
+"-amnd   don't add .notdef to output if missing\n"
 "\n"
 "CFF2 mode writes a CFF2 conversion of an abstract font.\n"
 "\n"

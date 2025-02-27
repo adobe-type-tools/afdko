@@ -2552,6 +2552,52 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     updateFontBoundingBox(g);
 }
 
+void cfwAddNotdef(cfwCtx g, int isCID, int warn) {
+    if (warn)
+        g->logger->log(sWARNING, "No .notdef in input: adding glyph with generic outline");
+
+    abfGlyphCallbacks gcb = cfwGlyphCallbacks;
+    gcb.direct_ctx = g;
+
+    abfGlyphInfo info;
+    info.flags = isCID ? ABF_GLYPH_CID : 0;
+    info.tag = 0;
+    info.gname.ptr = ".notdef";
+    info.gname.impl = 0;
+    info.encoding.next = NULL;
+    info.encoding.code = ABF_GLYPH_UNENC;
+    info.cid = 0;
+    info.iFD = 0;
+    info.sup.begin = 0;
+    info.sup.end = 0;
+    info.blendInfo.vsindex = info.blendInfo.maxstack = info.blendInfo.numRegions = 0;
+    info.blendInfo.blendDeltaArgs = NULL;
+
+    glyphBeg(&gcb, &info);
+    glyphWidth(&gcb, 500);
+    glyphStem(&gcb, 0, 0, 50);
+    glyphStem(&gcb, 0, 650, 700);
+    glyphStem(&gcb, ABF_VERT_STEM, 0, 50);
+    glyphStem(&gcb, ABF_VERT_STEM, 450, 500);
+    glyphMove(&gcb, 0, 0);
+    glyphLine(&gcb, 500, 0);
+    glyphLine(&gcb, 500, 700);
+    glyphLine(&gcb, 0, 700);
+    glyphMove(&gcb, 250, 395);
+    glyphLine(&gcb, 80, 650);
+    glyphLine(&gcb, 420, 650);
+    glyphMove(&gcb, 280, 350);
+    glyphLine(&gcb, 450, 605);
+    glyphLine(&gcb, 450, 95);
+    glyphMove(&gcb, 80, 50);
+    glyphLine(&gcb, 250, 305);
+    glyphLine(&gcb, 420, 50);
+    glyphMove(&gcb, 50, 605);
+    glyphLine(&gcb, 220, 350);
+    glyphLine(&gcb, 50, 95);
+    glyphEnd(&gcb);
+}
+
 /* Public callback set */
 const abfGlyphCallbacks cfwGlyphCallbacks = {
     NULL,

@@ -1471,23 +1471,16 @@ int cfwBegFont(cfwCtx g, cfwMapCallback *map, uint32_t maxNumSubrs,
 }
 
 /* Order glyphs in CID-keyed font. */
-static void orderCIDKeyedGlyphs(controlCtx h) {
+static void orderCIDKeyedGlyphs(controlCtx h, bool has_notdef) {
     cfwCtx g = h->g;
     long i;
     long nGlyphs = h->_new->glyphs.cnt;
-    bool has_notdef = true;
     Glyph *glyphs = h->_new->glyphs.array;
     dnaDCL(uint16_t, fdmap);
 
     dnaINIT(g->ctx.dnaSafe, fdmap, 1, 1);
     dnaSET_CNT(fdmap, h->_new->FDArray.cnt);
     memset(fdmap.array, 0, sizeof(uint16_t) * h->_new->FDArray.cnt);
-
-    if (glyphs[0].info == NULL) {
-        if (!(g->flags & CFW_NO_NOTDEF_OK))
-            cfwFatal(h->g, cfwErrNoCID0, NULL);
-        has_notdef = false;
-    }
 
     if (!(g->flags & CFW_PRESERVE_GLYPH_ORDER)) {
         /* Insertion sort glyphs by CID order */
@@ -1611,23 +1604,16 @@ static bool glyphLT(cfwCtx g, abfGlyphInfo *a, abfGlyphInfo *b) {
 }
 
 /* Order glyphs in name-keyed font. */
-static void orderNameKeyedGlyphs(controlCtx h) {
+static void orderNameKeyedGlyphs(controlCtx h, bool has_notdef) {
     cfwCtx g = h->g;
     int predef;
     int id;
     long i;
     long j;
     long k;
-    bool has_notdef = true;
     Glyph tmp;
     long nGlyphs = h->_new->glyphs.cnt;
     Glyph *glyphs = h->_new->glyphs.array;
-
-    if (glyphs[0].info == NULL) {
-        if (!(g->flags & CFW_NO_NOTDEF_OK))
-            cfwFatal(h->g, cfwErrNoNotdef, NULL);
-        has_notdef = false;
-    }
 
     if (!(g->flags & CFW_PRESERVE_GLYPH_ORDER)) {
         /* Sort glyphs by encoding order using insertion sort */
@@ -1938,6 +1924,14 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
         }
     }
 
+    bool has_notdef = true;
+    if (h->_new->glyphs.array[0].info == NULL) {
+        if (!(g->flags & CFW_NO_NOTDEF_OK)) {
+            cfwAddNotdef(g, h->_new->flags & FONT_CID, true);
+        } else
+            has_notdef = false;
+    }
+
     /* if we only had empty glyphs, set bbox to zeros */
     zeroOutEmptyFontBBox(g);
 
@@ -1975,9 +1969,9 @@ int cfwEndFont(cfwCtx g, abfTopDict *top) {
          */
 
     if (h->_new->flags & FONT_CID) {
-        orderCIDKeyedGlyphs(h);
+        orderCIDKeyedGlyphs(h, has_notdef);
     } else {
-        orderNameKeyedGlyphs(h);
+        orderNameKeyedGlyphs(h, has_notdef);
     }
 
     // No .notdef but we didn't error out above so move the whole array back 1

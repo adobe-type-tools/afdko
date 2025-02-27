@@ -67,6 +67,7 @@ long cfwSeenGlyph(cfwCtx g, abfGlyphInfo *info, int *result,
                   long startNew, long endNew);
 void cfwAddGlyph(cfwCtx g, abfGlyphInfo *info, float hAdv, long length,
                  long offset, long seen_index);
+void cfwAddNotdef(cfwCtx g, int isCID, int warn);
 
 SRI cfwIsStdString(cfwCtx g, const char *str);
 
