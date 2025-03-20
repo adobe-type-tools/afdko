@@ -1174,6 +1174,10 @@ class dimensionHinter:
         if not useg:
             return
 
+        if self.options.roundCoords:
+            lloc = round(lloc)
+            uloc = round(uloc)
+
         sv = stemValue(lloc, uloc, val, spc, lseg, useg, ghst)
         self.insertStemValue(sv)
 
@@ -1721,7 +1725,9 @@ class dimensionHinter:
                                utype, 0, self.isV(), self.isV(), "u bbox")
             self.hs.getPEState(pbs.extpes[1][peidx],
                                True).m_segs.append(useg)
-            hv = stemValue(mn_pt.o, mx_pt.o, 100, 0, lseg, useg, False)
+            lloc = round(mn_pt.o) if self.options.roundCoords else mn_pt.o
+            uloc = round(mx_pt.o) if self.options.roundCoords else mx_pt.o
+            hv = stemValue(lloc, uloc, 100, 0, lseg, useg, False)
             self.insertStemValue(hv, "bboxadd")
             self.hs.mainValues.append(hv)
             self.hs.mainValues.sort(key=lambda sv: sv.compVal(self.SpcBonus),

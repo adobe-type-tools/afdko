@@ -38,8 +38,10 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 add_definitions(-DANTLR4CPP_STATIC)
 set(ANTLR4_WITH_STATIC_CRT OFF)
-# 4.9.3 is the latest ANTLR4 version
-set(ANTLR4_TAG tags/4.13.2)
+# set(ANTLR4_TAG tags/4.13.2)
+# This is a more recent commit than 4.13.2 that addresses a missing
+# include directive needed in more recent Visual Studio releases
+set(ANTLR4_TAG df4d68c09cdef73e023b8838a8bc7ca4dff1d1de)
 include(ExternalAntlr4Cpp)
 
 
