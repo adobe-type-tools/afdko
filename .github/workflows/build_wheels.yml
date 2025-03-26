@@ -71,7 +71,7 @@ jobs:
         python -m build --sdist
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: wheelstorage
         path: ./dist/*
