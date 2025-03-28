@@ -52,13 +52,13 @@ class CoverageAndClass {
      public:
         CoverageRecord() = delete;
         CoverageRecord(Offset o, std::set<GID> &gl);
-        Offset cov1size() {
+        LOffset cov1size() {
             return sizeof(uint16_t) * (2 + glyphs.size());
         }
-        Offset cov2size() {
+        LOffset cov2size() {
             return sizeof(uint16_t) * (2 + 3 * ranges.size());
         }
-        Offset size() { return ranges.size() != 0 ? cov2size() : cov1size(); }
+        LOffset size() { return ranges.size() != 0 ? cov2size() : cov1size(); }
         void write(hotCtx g);
         Offset offset;
         std::set<GID> glyphs;             // format 1
@@ -74,13 +74,13 @@ class CoverageAndClass {
      public:
         ClassRecord() = delete;
         ClassRecord(Offset o, std::map<GID, uint16_t> &gl);
-        Offset cls1size(uint16_t nvalues) {
+        LOffset cls1size(uint16_t nvalues) {
             return sizeof(uint16_t) * (3 + nvalues);
         }
-        Offset cls2size() {
+        LOffset cls2size() {
             return sizeof(uint16_t) * (2 + 3 * ranges.size());
         }
-        Offset size() {
+        LOffset size() {
             return values.size() != 0 ? cls1size(values.size()) : cls2size();
         }
         void write(hotCtx g);
