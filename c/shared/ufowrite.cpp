@@ -740,7 +740,9 @@ static void writeLibPlist(ufwCtx h) {
         writeCIDMap(h, h->top, buffer, buflen);
         orderCIDKeyedGlyphs(h);
         removeUnusedFDicts(h);
-        writeFDArray(h, h->top, buffer, buflen);
+        if (h->top->FDArray.cnt > 1) {
+            writeFDArray(h, h->top, buffer, buflen);
+        }
     }
     writeLine(h, "\t<key>public.glyphOrder</key>");
     writeLine(h, "\t<array>");

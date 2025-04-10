@@ -281,10 +281,9 @@ struct ufoCtx_ {
 
     uint8_t requiredCIDKeyFlag;
 #define CIDKEY_CIDMAP      (1 << 1)
-#define CIDKEY_FDARRAY     (1 << 2)
-#define CIDKEY_SUPPLEMENT  (1 << 3)
-#define CIDKEY_ORDERING    (1 << 4)
-#define CIDKEY_REGISTRY    (1 << 5)
+#define CIDKEY_SUPPLEMENT  (1 << 2)
+#define CIDKEY_ORDERING    (1 << 3)
+#define CIDKEY_REGISTRY    (1 << 4)
 
     struct {
         _Exc_Buf env;
@@ -1287,8 +1286,10 @@ static int parseGroups(ufoCtx h) {
     h->cb.stm.clientFileName = "groups.plist";
     h->stm.src = h->cb.stm.open(&h->cb.stm, UFO_SRC_STREAM_ID, 0);
     if (h->stm.src == NULL || h->cb.stm.seek(&h->cb.stm, h->stm.src, 0)) {
-       if (h->top.sup.flags == ABF_ROS_FONT)
-           h->logger->log(sWARNING, "FDArraySelect not defined for cid-keyed font");        return ufoSuccess;
+        if ((h->top.sup.flags == ABF_ROS_FONT) && (h->top.FDArray.cnt > 1)) {
+            h->logger->log(sWARNING, "FDArraySelect not defined for cid-keyed font");
+        }
+        return ufoSuccess;
     }
 
     dnaSET_CNT(h->valueArray, 0);
@@ -1399,11 +1400,14 @@ static void addCharFromGLIF(ufoCtx h, int tag, GLIF_Rec* glifRec,
     } else {
         chr->flags = 0;
         chr->tag = tag;
-        chr->iFD = 0;
         if (glifRec->cid >= 0) {
             chr->cid = glifRec->cid;
-            if (glifRec->iFD < 0) {
+            if (h->top.FDArray.cnt > 1) {
+                if (glifRec->iFD < 0) {
                     fatal(h, ufoErrParse, "Glyph '%s' missing FDArray index in <lib> dict", glyphName);
+                }
+            } else {
+                glifRec->iFD = 0;
             }
             chr->iFD = glifRec->iFD;
         } else if (h->top.sup.flags & ABF_ROS_FONT) {
@@ -1826,17 +1830,13 @@ static bool validCIDKeyedFont(ufoCtx h, xmlNodePtr cur) {
             h->requiredCIDKeyFlag |= CIDKEY_REGISTRY;
             h->requiredCIDKeyFlag |= CIDKEY_ORDERING;
             h->requiredCIDKeyFlag |= CIDKEY_SUPPLEMENT;
-        } else if (strEqual(keyName, "com.adobe.type.postscriptFDArray"))
-            h->requiredCIDKeyFlag |= CIDKEY_FDARRAY;
-        else if (strEqual(keyName, "postscriptFDArray"))
-            h->requiredCIDKeyFlag |= CIDKEY_FDARRAY;
-        else if (strEqual(keyName, "com.adobe.type.postscriptCIDMap"))
+        } else if (strEqual(keyName, "com.adobe.type.postscriptCIDMap"))
             h->requiredCIDKeyFlag |= CIDKEY_CIDMAP;
         cur = cur->next;
     }
 
     /* now check all required keys */
-    if (h->requiredCIDKeyFlag == 62)
+    if (h->requiredCIDKeyFlag == 30)
         return true;
     else
         return false;

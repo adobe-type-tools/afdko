@@ -31,6 +31,9 @@ The following keys are required in `lib.plist` to make a UFO CID-keyed
 
 * `com.adobe.type.ROS`
 * `com.adobe.type.postscriptCIDMap`
+
+The postscriptFDArray key is only required if you define more than one hint dictionary 
+
 * `com.adobe.type.postscriptFDArray`
 
 
@@ -57,7 +60,7 @@ or building an OTF with `makeotf` the glyphs will be rearranged into CID order.
 ### com.adobe.type.postscriptCIDMap
 
 The glyph name to CID mapping must be a dict with the UFO glyph names as keys and 
-their corresponding CID numbers as values. When converting an existing CID-keyed 
+their corresponding CID numbers as integer values. When converting an existing CID-keyed 
 source (OTF, CFF, Type1) to UFO with a command like `tx -ufo -o source.ufo source.otf` 
 the glyph names will default to `cidXXXXX` because no names can be 
 stored in those source formats. If you change the names in the UFO be sure to update 
@@ -66,7 +69,7 @@ the CID mapping and groups.plist to use the new names.
 
 ### com.adobe.type.postscriptFDArray
 
-The FDArray is a list of font dictionaries containing hinting data. All keys are
+The FDArray is a list of font dictionaries containing hinting data for groups of glyphs. All keys are
 optional and will use default values if not specified, but there must be at 
 least one dict in the array and a corresponding group in groups.plist.
 
@@ -95,9 +98,11 @@ An example of one FontDict in Python dumped from Source Han Serif JP ExtraLight
                   'postscriptStemSnapV': [28, 50, 60]}}]
 ```
 
+#### Note: If you only require one set of values for hinting data it should be provided in the fontinfo.plist as described in the [UFO Specification](https://unifiedfontobject.org/versions/ufo3/fontinfo.plist/#postscript-specific-data)
+
 ### FDArraySelect groups in groups.plist 
 
-In addition to the lib.plist keys there must be a groups.plist file 
+If `com.adobe.type.postscriptFDArray` is defined then there must be a groups.plist file 
 containing one group for each FontDict in `com.adobe.type.postscriptFDArray`. 
 Each group must be named in the following format
 
@@ -131,7 +136,9 @@ font.lib['com.adobe.type.ROS'] = 'Adobe-Japan1-7'
 # Set up a preliminary CID mapping based on the current glyph order
 font.lib['com.adobe.type.postscriptCIDMap'] = {name: i for i, name in enumerate(font.lib['public.glyphOrder'])}
 
-# Set up a basic FDArray until you are ready to add hinting data
+# ---------Optional Steps For Hint Data---------
+
+# Set up a a single FDArray until you are ready to add hinting data
 fontname = font.info.familyName.replace(" ", "")
 font.lib['com.adobe.type.postscriptFDArray'] = [{'FontName': f'{fontname}-FD0'}]
 
@@ -146,3 +153,5 @@ font.save()
 #### Document Version History
 
 Version 1.0 — April 10 2023
+
+Version 1.1 — April 10 2025
