@@ -12,7 +12,13 @@ if(NOT DEFINED ANTLR4_TAG)
   set(ANTLR4_TAG master)
 endif()
 
-set(ANTLR4_OUTPUT_DIR ${ANTLR4_ROOT}/runtime/Cpp/runtime)
+if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
+  set(ANTLR4_OUTPUT_DIR ${ANTLR4_ROOT}/runtime/Cpp/runtime/$(Configuration))
+elseif(${CMAKE_GENERATOR} MATCHES "Xcode.*")
+  set(ANTLR4_OUTPUT_DIR ${ANTLR4_ROOT}/runtime/Cpp/runtime)
+else()
+  set(ANTLR4_OUTPUT_DIR ${ANTLR4_ROOT}/runtime/Cpp/runtime)
+endif()
 
 if(MSVC)
   set(ANTLR4_STATIC_LIBRARIES
