@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>ascender</key>
+    <integer>750</integer>
+    <key>capHeight</key>
+    <integer>750</integer>
+    <key>descender</key>
+    <integer>-250</integer>
+    <key>familyName</key>
+    <string>Source Han Sans</string>
+    <key>guidelines</key>
+    <array/>
+    <key>postscriptBlueValues</key>
+    <array/>
+    <key>postscriptFamilyBlues</key>
+    <array/>
+    <key>postscriptFamilyOtherBlues</key>
+    <array/>
+    <key>postscriptFontName</key>
+    <string>SourceHanSansVF-Heavy</string>
+    <key>postscriptFullName</key>
+    <string>Source Han Sans Heavy</string>
+    <key>postscriptOtherBlues</key>
+    <array/>
+    <key>postscriptStemSnapH</key>
+    <array/>
+    <key>postscriptStemSnapV</key>
+    <array/>
+    <key>postscriptUnderlinePosition</key>
+    <integer>-150</integer>
+    <key>postscriptWeightName</key>
+    <string>Heavy</string>
+    <key>styleName</key>
+    <string>Heavy</string>
+    <key>trademark</key>
+    <string>Copyright 2014-2020 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'. Source is a trademark of Adobe in the United States and/or other countries.</string>
+    <key>unitsPerEm</key>
+    <integer>1000</integer>
+    <key>versionMajor</key>
+    <integer>2</integer>
+    <key>versionMinor</key>
+    <integer>3</integer>
+    <key>xHeight</key>
+    <integer>500</integer>
+  </dict>
+</plist>

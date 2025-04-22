@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>com.adobe.type.CIDFontName</key>
+    <string>SourceHanSansVF-Heavy</string>
+    <key>com.adobe.type.FSType</key>
+    <integer>0</integer>
+    <key>com.adobe.type.ROS</key>
+    <string>Adobe-Identity-0</string>
+    <key>com.adobe.type.postscriptCIDMap</key>
+    <dict>
+      <key>cid00000</key>
+      <integer>0</integer>
+      <key>cid17899</key>
+      <integer>17899</integer>
+      <key>cid17900</key>
+      <integer>17900</integer>
+      <key>cid17901</key>
+      <integer>17901</integer>
+   </dict>
+    <key>public.glyphOrder</key>
+    <array>
+      <string>cid00000</string>
+      <string>cid17899</string>
+      <string>cid17900</string>
+      <string>cid17901</string>
+   </array>
+  </dict>
+</plist>
