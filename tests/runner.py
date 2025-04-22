@@ -97,7 +97,6 @@ def run_tool(opts):
         args.insert(2, f'import sys; import afdko.{mod}; ' +
                        f'sys.exit(afdko.{mod}.{fcn}())')
 
-    global last_command
     last_command[0] = ' '.join(args)
     logger.debug(
         f"About to run the command below\n==>{' '.join(args)}<==")
