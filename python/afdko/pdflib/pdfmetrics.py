@@ -353,7 +353,6 @@ class FontCache:
     """Loads and caches font width information on demand.  Font names
     converted to lower case for indexing.  Public interface is stringwidth"""
     def __init__(self):
-        global FONT_WIDTHS
         self.__widtharrays = FONT_WIDTHS
 
     def loadfont(self, fontname):
