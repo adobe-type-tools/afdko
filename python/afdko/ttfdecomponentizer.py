@@ -16,9 +16,9 @@ from fontTools.ttLib import TTFont
 from fontTools.pens.recordingPen import DecomposingRecordingPen
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 
-from afdko.fdkutils import get_font_format
+from afdko.fdkutils import get_font_format, fdk_version
 
-__version__ = "0.1.1"
+__version__ = fdk_version()
 
 
 def _validate_dir_path(path):

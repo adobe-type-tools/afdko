@@ -31,10 +31,11 @@ from afdko.fdkutils import (
     run_shell_command,
     get_temp_file_path,
     validate_path,
+    fdk_version,
 )
 from afdko.makeotf import main as makeotf
 
-__version__ = '1.10.0'
+__version__ = fdk_version()
 
 logger = logging.getLogger(__name__)
 

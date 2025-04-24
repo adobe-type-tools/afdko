@@ -10,6 +10,7 @@
 
 #include <tuple>
 #include <vector>
+#include <cassert>
 
 #include "GDEF.h"
 
@@ -68,25 +69,10 @@ static void addStdNames(hotCtx g, bool win, bool mac) {
         /* Set font version string. Round to 3 decimal places. Truncated to 3 decimal places by sprintf. */
         double dFontVersion = 0.0005 + FIX2DBL(g->font.version.otf);
 
-        const char *id2Tag = "Core"; /* core library name for triggering the CoolType code                     */
-                                  /* that interprets chaining contextual subs rules per the                 */
-                                  /* incorrect way that was built into the first OpenType/CFF fonts         */
-                                  /* and InDesign 2.0.                                                      */
-                                  /* Note that the full match string is, as of 1/24/2002 and CoolType v4.5: */
-                                  /* "(Version|OTF) 1.+;Core 1\.0\..+;addfeatureslib1\."                        */
-                                  /* This must match inside the (1,0,0) nameID 5 "Version: string.          */
-        const char *id3Tag = "hotconv"; /* core library name guaranteeing that we DON'T trigger the CoolType code */
-                                  /* that interprets chaining contextual subs rules per the                 */
-                                  /* incorrect way that was built into the first OpenType/CFF fonts         */
-                                  /* and InDesign 2.0                                                       */
-
-        const char *idTag = id3Tag;
+        const char *idTag = "addfeatures";
 
         dFontVersion = ((int)(1000 * dFontVersion)) / 1000.0;
 
-        if (g->convertFlags & HOT_ID2_CHAIN_CONTXT3) {
-            idTag = id2Tag; /* use tag to trigger special case behaviors by CoolType */
-        }
         /* Add Unique name */
         /* xxx is this really needed or just a waste of space? */
         int sz;
@@ -114,18 +100,9 @@ static void addStdNames(hotCtx g, bool win, bool mac) {
         buf.erase();
         buf.resize(512);
         /* Make and add version name */
-        if (g->font.version.client == NULL) {
-            sz = snprintf(buf.data(), buf.size(), "Version %.3f;%s %ld.%ld.%ld",
-                          dFontVersion,
-                          idTag,
-                          (g->version >> 16) & 0xff, (g->version >> 8) & 0xff, g->version & 0xff);
-        } else {
-            sz = snprintf(buf.data(), buf.size(), "Version %.3f;%s %ld.%ld.%ld;%s",
-                          dFontVersion,
-                          idTag,
-                          (g->version >> 16) & 0xff, (g->version >> 8) & 0xff, g->version & 0xff,
-                          g->font.version.client);
-        }
+        assert(g->font.version.client != NULL);
+        sz = snprintf(buf.data(), buf.size(), "Version %.3f;%s %s",
+                      dFontVersion, idTag, g->font.version.client);
         buf.resize(sz);
     }
 

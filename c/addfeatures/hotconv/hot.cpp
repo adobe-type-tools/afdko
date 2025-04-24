@@ -161,12 +161,6 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->hadError = false;
     g->convertFlags = 0;
 
-    /* Set version numbers. The hot library version serves to identify the      */
-    /* software version that built an OTF font and is saved in the Version name */
-    /* in the name table. The font version serves to identify the OTF font data */
-    /* and is saved in the head table and the Unique and Version names in the   */
-    /* name table. */
-    g->version = HOT_VERSION;
     g->font.version.otf = (1 << 16); /* 1.0 in Fixed */
     g->font.vendId = "";
 

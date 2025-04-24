@@ -21,9 +21,9 @@ from fontTools.ttLib import TTFont
 from fontTools.varLib.cff import (CFF2CharStringMergePen,
                                   VarLibCFFPointTypeMergeError)
 
-from afdko.fdkutils import validate_path
+from afdko.fdkutils import validate_path, fdk_version
 
-__version__ = '2.0.3'
+__version__ = fdk_version()
 
 STAT_FILENAME = 'override.STAT.ttx'
 

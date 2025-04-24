@@ -202,6 +202,7 @@ struct MetricsInfo {
         for (auto &m : metrics)
             if (m.nonZero())
                 return true;
+        return false;
     }
 
     uint32_t valueFormat() {

@@ -16,7 +16,7 @@ from .otfautohint.ufoFont import norm_float
 
 from afdko import fdkutils
 
-__version__ = '1.35.2'
+__version__ = fdkutils.fdk_version()
 
 __doc__ = """
 ufotools.py v1.35.2 Jul 30 2020

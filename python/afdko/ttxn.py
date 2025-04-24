@@ -88,9 +88,9 @@ import platform
 import getopt
 import logging
 
-from afdko.fdkutils import get_temp_file_path
+from afdko.fdkutils import get_temp_file_path, fdk_version
 
-__version__ = "1.21.3"
+__version__ = fdk_version()
 
 log = logging.getLogger('fontTools.ttx')
 

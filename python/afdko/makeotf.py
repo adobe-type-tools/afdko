@@ -25,9 +25,7 @@ will also use the tx program to convert the input font file to a Type 1 font,
 if needed.
 """
 
-__version__ = """\
-makeotf.py v3.0.0 Dec 1 2022
-"""
+__version__ = fdkutils.fdk_version()
 
 __methods__ = """
 Methods:
@@ -63,7 +61,7 @@ Project file
   below for the fields.
 """
 
-__usage__ = __version__ + """
+__usage__ = 'makeotf.py ' + __version__ + """
 -f <input font>     Specify input font path. Default is to search
                     for 'font.ufo, 'font.pfa', and cidfont.ps, all in the
                     current directory.
@@ -379,9 +377,6 @@ kMacCMAPPath = "MacEncodingCMAPPath"
 kHUniCMAPPath = "H_UniEncodingCMAPPath"
 # path to the specification file for Unicode variation Sequences.
 kUVSPath = "UVSPath"
-# InDesign 2 and earlier expected the backtrack sequence in
-# contextual lookups to be the reverse of what is no spec'd to be.
-kWriteWrongBacktrack = "WriteWrongBackTrack"
 kDoubleMapGlyphs = "DoulbeMapGlyphs"
 # omit all Mac platform names from the name table
 kOmitMacNames = "OmitMacNames"
@@ -435,7 +430,6 @@ kMOTFOptions = {
     kOverrideMenuNames: [kOptionNotSeen, "-overrideMenuNames",
                          "-donotOverrideMenuNames"],
     kLicenseCode: [kOptionNotSeen, "-lic", None],
-    kWriteWrongBacktrack: [kOptionNotSeen, "-fc", None],
     kConvertToCID: [kOptionNotSeen, "-cn", "-ncn"],
     kSuppressHintWarnings: [kOptionNotSeen, "-shw", "-nshw"],
     kSuppressWidthOptimization: [kOptionNotSeen, "-swo", "-nswo"],
@@ -1367,12 +1361,6 @@ def getOptions(makeOTFParams, args):
                       "Sequence specification file at '%s'." % file_path)
                 continue
             setattr(makeOTFParams, kFileOptPrefix + kUVSPath, file_path)
-
-        elif arg == kMOTFOptions[kWriteWrongBacktrack][1]:
-            kMOTFOptions[kWriteWrongBacktrack][0] = i + optionIndex
-            setattr(makeOTFParams,
-                    kFileOptPrefix + kWriteWrongBacktrack,
-                    'true')
 
         elif arg == kMOTFOptions[kDoubleMapGlyphs][1]:
             kMOTFOptions[kDoubleMapGlyphs][0] = i + optionIndex

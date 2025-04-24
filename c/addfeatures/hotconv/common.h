@@ -387,7 +387,6 @@ struct hotCtx_ {
         }
         return note.c_str();
     }
-    long version;    /* Hot lib version number */
     struct tm time;  /* Local time */
     FontInfo_ font;  /* Font information */
     std::vector<hotGlyphInfo> glyphs;

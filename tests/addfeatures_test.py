@@ -54,7 +54,7 @@ def test_build_font_and_check_messages(args, ttx_fname):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
+                   '-r', r'^\s+Version.*;addfeatures *'])
     assert differ([expected_msg_path, stderr_path])
 
 
@@ -133,7 +133,7 @@ def test_DFLT_script_with_any_lang_bug438():
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
+                   '-r', r'^\s+Version.*;addfeatures *'])
 
 
 def test_glyph_not_in_font_bug492():
@@ -547,7 +547,8 @@ def test_parameter_offset_overflow_bug1017():
 
     actual_txt = generate_spot_dumptables(otf_path, ['GSUB'])
     expected_txt = get_expected_path(txt_filename)
-    assert differ([expected_txt, actual_txt])
+    assert differ([expected_txt, actual_txt,
+                   '-s', '### [GSUB] ('])
 
 
 def test_bug1178():
@@ -566,7 +567,7 @@ def test_bug1178():
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
+                   '-r', r'^\s+Version.*;addfeatures *'])
 
 
 TEST_FEATURE_FILES = [
@@ -639,7 +640,7 @@ def test_feature_file(name):
                        '    <checkSumAdjustment value=' + SPLIT_MARKER +
                        '    <created value=' + SPLIT_MARKER +
                        '    <modified value=',
-                       '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
+                       '-r', r'^\s+Version.*;addfeatures *'])
     except Exception:
         if name in TEST_FEATURE_FILES_XFAIL:
             pytest.xfail()
@@ -683,7 +684,7 @@ def test_spec(path):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
+                   '-r', r'^\s+Version.*;addfeatures *'])
 
 
 def test_negative_internal_leading_bug1227():
@@ -770,4 +771,4 @@ def test_heap_after_free_bug1349():
     output_dump = generate_ttx_dump(output_filename, ['name'])
     assert differ([output_dump, get_expected_path("bug1349.ttx"),
                    '-s', '<ttFont sfntVersion=',
-                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
+                   '-r', r'^\s+Version.*;addfeatures *'])

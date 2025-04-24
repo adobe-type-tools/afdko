@@ -24,10 +24,10 @@
 #include "sfile.h"
 #include "smem.h"
 
-#define ADDFEATURES_VERSION "3.0.0"
-
 static char *progname; /* Program name */
 static cbCtx cbctx;    /* Client callback context */
+
+extern char *FDK_VERSION;
 
 /* Conversion data */
 static struct {
@@ -128,11 +128,8 @@ static void printUsage(void) {
         "    one class type in a layout table. Example: a glyph used as a base in one\n"
         "    replacement rule, and as a mark in another.\n"
         "Build:\n"
-        "    addfeatures.lib version: %s \n"
-        "    OTF Library Version: %u\n",
-        progname,
-        ADDFEATURES_VERSION,
-        HOT_VERSION);
+        "    addfeatures version: %s \n",
+        progname, FDK_VERSION);
 }
 
 /* Show usage information */
@@ -165,7 +162,7 @@ static void dircpy(char *dst, char *src) {
 
 /* Convert font */
 static void convFont(const char *infile, const char *outfile) {
-    cbConvert(cbctx, convert.flags, "addfeatures " ADDFEATURES_VERSION,
+    cbConvert(cbctx, convert.flags, FDK_VERSION,
               infile, outfile,
               convert.features, convert.hCMap, convert.vCMap, convert.mCMap, convert.uvsFile,
               convert.otherflags, convert.macScript, convert.macLanguage,
@@ -317,11 +314,6 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                                 } else {
                                     infile = argv[++i];
                                 }
-                                break;
-
-                            case 'c':
-                                /* [-fc] Force ID2 (incorrect) reading of backtrack string in changing context substitution. */
-                                convert.otherflags |= OTHERFLAGS_DO_ID2_GSUB_CHAIN_CONXT;
                                 break;
 
                             case 'd': /* [-fd] Standard feature directory */

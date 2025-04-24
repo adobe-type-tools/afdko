@@ -4,7 +4,6 @@
 Tool that performs outline quality checks and can remove path overlaps.
 """
 
-__version__ = '2.5.0'
 
 import argparse
 from functools import cmp_to_key
@@ -32,8 +31,10 @@ from afdko.fdkutils import (
     get_font_format,
     run_shell_command,
     validate_path,
+    fdk_version,
 )
 
+__version__ = fdk_version()
 
 UFO_FONT_TYPE = 1
 TYPE1_FONT_TYPE = 2

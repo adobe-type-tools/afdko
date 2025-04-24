@@ -5819,44 +5819,11 @@ static void addArgs(txCtx h, const char *filename) {
     }
 }
 
-/* Get version callback function. */
-static void getversion(ctlVersionCallbacks *cb, int version, const char *libname) {
-    char version_buf[MAX_VERSION_SIZE];
-    printf("    %-10s%s\n", libname,
-           CTL_SPLIT_VERSION(version_buf, sizeof(version_buf), version));
-}
+extern "C" char *FDK_VERSION;
 
 /* Print library version numbers. */
-static void printVersions(txCtx h) {
-    ctlVersionCallbacks cb;
-    char version_buf[MAX_VERSION_SIZE];
-
-    printf(
-        "Versions:\n"
-        "    %s        %s\n", TX_PROGNAME(h),
-        CTL_SPLIT_VERSION(version_buf, sizeof(version_buf), TX_VERSION(h)));
-
-    cb.ctx = NULL;
-    cb.called = 0;
-    cb.getversion = getversion;
-
-    abfGetVersion(&cb);
-    cefGetVersion(&cb);
-    cfrGetVersion(&cb);
-    cfwGetVersion(&cb);
-    ctuGetVersion(&cb);
-    dnaGetVersion(&cb);
-    pdwGetVersion(&cb);
-    sfrGetVersion(&cb);
-    t1rGetVersion(&cb);
-    svrGetVersion(&cb);
-    ttrGetVersion(&cb);
-    t1wGetVersion(&cb);
-    svwGetVersion(&cb);
-    ufoGetVersion(&cb);
-    ufwGetVersion(&cb);
-    varsupportGetVersion(&cb);
-
+static void printVersion(txCtx h) {
+    printf("%s version: %s\n", TX_PROGNAME(h), FDK_VERSION);
     exit(0);
 }
 
@@ -7023,7 +6990,7 @@ static void parseArgs(txCtx h, int argc, char *argv[]) {
                 exit(0);
                 break;
             case txopt_v:
-                printVersions(h);
+                printVersion(h);
                 break;
             case txopt_y:
                 h->flags |= EVERY_FONT;
