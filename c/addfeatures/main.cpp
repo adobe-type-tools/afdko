@@ -27,7 +27,7 @@
 static char *progname; /* Program name */
 static cbCtx cbctx;    /* Client callback context */
 
-extern char *FDK_VERSION;
+char *FDK_VERSION = "unknown";  // This variable lives here
 
 /* Conversion data */
 static struct {

@@ -4,7 +4,7 @@ import cython
 from libc.stdlib cimport malloc, free
 from libc.string cimport strcpy, strcmp, strlen
 
-cdef public char *FDK_VERSION = "unknown"
+cdef extern char *FDK_VERSION
 
 try:
     from afdko.fdkutils import fdk_version
