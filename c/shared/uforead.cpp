@@ -1941,6 +1941,7 @@ static bool parseFontInfoFDArray(ufoCtx h, xmlNodePtr cur) {
     abfInitFontDict(h->top.FDArray.array);
     h->parseState.FDArray = true;
     h->parseState.GLIFInfo.currentiFD = -1;
+    h->top.FDArray.cnt = 0;
     char *tmp = parseXMLKeyValue(h, cur);
     memFree(h, tmp);
     h->parseState.FDArray = false;
@@ -1961,7 +1962,7 @@ static bool parseFDArraySelectGroup(ufoCtx h, const char* FDArraySelectKeyName,
     memFree(h, errMsg);
 
     /* check if FDArray is defined */
-    if (h->top.FDArray.cnt - 1 <= FDIndexInt)
+    if (h->top.FDArray.cnt - 1 < FDIndexInt)
         fatal(h, ufoErrParseFail, "In groups.plist: FDict referenced in FDSelect Group %s is not defined at expected FDArray index %i.", FDArraySelectKeyName, FDIndexInt);
 
     cur = cur->xmlChildrenNode;
@@ -1969,8 +1970,8 @@ static bool parseFDArraySelectGroup(ufoCtx h, const char* FDArraySelectKeyName,
         char* glyphName = parseXMLKeyValue(h, cur);
         g = findGLIFRecByName(h, glyphName);
         if (g != NULL) {
-            if (FDIndexInt >= h->top.FDArray.cnt - 1) {  /* one cnt reserved for default FDArray at this point */
-//                message(h, "Glyph %s is assigned to font dict index %d which is not defined. Will be assigned to default font dict at index 0 instead.\n", glyphName, FDIndexInt);
+            if (FDIndexInt > h->top.FDArray.cnt - 1) {  /* one cnt reserved for default FDArray at this point */
+                h->logger->log(sWARNING, "Glyph %s is assigned to font dict index %d which is not defined. Will be assigned to default font dict at index 0 instead.\n", glyphName, FDIndexInt);
                 FDIndexInt  = 0;
             }
             g->iFD = FDIndexInt;
@@ -2572,12 +2573,14 @@ static int parseXMLContour(ufoCtx h, xmlNodePtr cur, GLIF_Rec* glifRec, abfGlyph
         /* Now we need to fix up the OpList. In GLIF, there is usually no explicit start point, as the format expresses
          the path segments as a complete closed path, with no explicit start point.
 
-         I use the first path operator end point as the start point, and convert this first operator to move-to.
-         If the first path operator was a line-to, then I do not add it to the end of the op-list, as it should become an implicit rather than explicit close path.
-         If it is a curve, then I need to add it to the oplist as the final path segment. */
+         I use the first path operator end point as the start point, and convert this first operator to move-to. */
         if (firstOpRec->opType == linetoType) {
-            /* I just need to convert this to a move-to. The final line-to will become implicit */
+            /* CHKOFLOW(2);
+            PUSH(firstOpRec->coords[0]);
+            PUSH(firstOpRec->coords[1]);
+            doOp_dt(h, glyph_cb, h->hints.pointName); */
             firstOpRec->opType = movetoType;
+            h->hints.pointName = NULL;
         } else if (firstOpRec->opType == curvetoType) {
             /* The first two points for the curve should be on the stack.
            If there is a hint set for this last curve, it was part of the first point element for the curve
@@ -3271,6 +3274,8 @@ int ufoBegFont(ufoCtx h, long flags, abfTopDict** top, char* altLayerDir) {
 
     /* Set error handler */
     DURING_EX(h->err.env)
+
+    h->flags = flags;
 
     /* Initialize */
     abfInitTopDict(&h->top);

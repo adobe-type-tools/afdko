@@ -1,4 +1,4 @@
-## Filename /home/skef/src/afdko4/tests/tx_data/input/cid_roundtrip/testCID.ufo
+## Filename /Users/skefiterum/src/afdko4/tests/tx_data/input/cid_roundtrip/testCID.ufo
 ## Top Dict
 version             "2.3"
 Notice              "Copyright 2014-2020 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'. Source is a trademark of Adobe in the United States and/or other countries."
@@ -32,14 +32,6 @@ StdHW               35
 StdVW               28
 StemSnapV           {28,46}
 LanguageGroup       1
-## FontDict[2]
-## Private
-BlueScale           0
-BlueShift           0
-BlueFuzz            0
-StdHW               0
-StdVW               0
-ExpansionFactor     0
 ## glyph[tag] {name,cid,iFD,LanguageGroup}
 glyph[0] {cid00000,0,0,1}
 glyph[1] {cid17899,17899,1,1}

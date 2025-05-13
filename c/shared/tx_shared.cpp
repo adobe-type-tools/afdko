@@ -2476,9 +2476,11 @@ static void t1_EndFont(txCtx h) {
 
         abfFontDict* temp = (abfFontDict *) sMemNew( sizeof(abfFontDict));
         memcpy(temp, selectedFD, sizeof(abfFontDict));
-        int l = strlen(selectedFD->FontName.ptr) + 1;
-        temp->FontName.ptr = (char *) sMemNew(l);
-        STRCPY_S((char *) temp->FontName.ptr, l, selectedFD->FontName.ptr);
+        if (selectedFD->FontName.ptr != NULL) {
+            int l = strlen(selectedFD->FontName.ptr) + 1;
+            temp->FontName.ptr = (char *) sMemNew(l);
+            STRCPY_S((char *) temp->FontName.ptr, l, selectedFD->FontName.ptr);
+        }
 //        for (int i=0; i < h->top->FDArray.cnt; i++) {
 //            char* fdFontName = h->top->FDArray.array[i].FontName.ptr;
 //            if (fdFontName != NULL)
