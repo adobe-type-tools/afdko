@@ -144,8 +144,8 @@ def test_build_font_and_check_messages(args, ttx_fname):
     expected_msg_path = get_expected_path(f'{ttx_fname}_output.txt')
     ttx_filename = f'{ttx_fname}.ttx'
     stderr_path = runner(CMD + [
-        '-s', '-e', '-o', 'f', f'_{get_input_path("font.pfa")}',
-                          'o', f'_{actual_path}'] + args)
+        '-s', '-e', '-n', '-o', 'f', f'_{get_input_path("font.pfa")}',
+                                'o', f'_{actual_path}'] + args)
     actual_ttx = generate_ttx_dump(actual_path)
     expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
@@ -654,7 +654,7 @@ def test_duplicate_warning_messages_bug751():
     otf_path = get_temp_file_path()
 
     stderr_path = runner(
-        CMD + ['-s', '-e', '-o',
+        CMD + ['-s', '-e', '-n', '-o',
                'f', f'_{get_input_path(input_filename)}',
                'o', f'_{otf_path}'])
 
@@ -688,7 +688,7 @@ def test_cli_numerics():
     expected_msg_path = get_expected_path("clinum_output.txt")
     out_font_path = get_temp_file_path()
     stderr_path = runner(CMD + [
-        '-s', '-e', '-o',
+        '-s', '-e', '-n', '-o',
         'f', f'_{get_input_path(input_filename)}',
         'o', f'_{out_font_path}',
         'fi', f'_{get_input_path(fontinfo_filename)}'])
