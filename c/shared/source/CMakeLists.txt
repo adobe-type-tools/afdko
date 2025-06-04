@@ -3,9 +3,6 @@ include_directories(../include ../resource)
 MACRO(ADD_AFDKOLIB lm)
     file(GLOB sl_sources "${lm}/*")
     add_library(${lm} STATIC ${sl_sources})
-    if(${NEED_LIBXML2_DEPEND})
-        add_dependencies(${lm} ${LIBXML2_TARGET})
-    endif(${NEED_LIBXML2_DEPEND})
 ENDMACRO(ADD_AFDKOLIB)
 
 ADD_AFDKOLIB(absfont)
@@ -47,11 +44,7 @@ target_compile_definitions(t1write PRIVATE $<$<CONFIG:Debug>:T1W_DEBUG=1>)
 target_compile_definitions(ttread PRIVATE $<$<CONFIG:Debug>:TTR_DEBUG=1>)
 target_compile_definitions(tx_shared PRIVATE $<$<CONFIG:Debug>:CFW_DEBUG=1>)
 
-target_link_libraries(tx_shared PUBLIC ${CHOSEN_LIBXML2_LIBRARY})
-
-if (${NEED_LIBXML2_DEPEND})
-    target_compile_definitions(tx_shared PUBLIC -DLIBXML_STATIC)
-endif()
+target_link_libraries(tx_shared PUBLIC LibXml2::LibXml2)
 
 # These libraries are partially ordered
 
