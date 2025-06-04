@@ -39,38 +39,8 @@ set(ANTLR4_WITH_STATIC_CRT OFF)
 set(ANTLR4_TAG df4d68c09cdef73e023b8838a8bc7ca4dff1d1de)
 include(ExternalAntlr4Cpp)
 
-# libxml2 configuration
-
-if (DEFINED ENV{FORCE_BUILD_LIBXML2})
-    set(BUILD_STATIC_LIBXML2 TRUE)
-else()
-    FIND_PACKAGE(LibXml2)
-    if (${LibXml2_FOUND})
-        set(BUILD_STATIC_LIBXML2 FALSE)
-    elseif (DEFINED ENV{FORCE_SYSTEM_LIBXML2})
-        message(FATAL_ERROR "FORCE_SYSTEM_LIBXML2 set but LibXML2 not found")
-    else()
-        set(BUILD_STATIC_LIBXML2 TRUE)
-    endif()
-endif()
-
-if (${BUILD_STATIC_LIBXML2})
-    message(STATUS "LibXML2 not found or overridden -- will download and statically link")
-    set(LIBXML2_TAG tags/v2.9.13)
-    include(ExternalLibXML2)
-    include_directories(${LIBXML2_STATIC_INCLUDE_DIR})
-    set(NEED_LIBXML2_DEPEND TRUE)
-    if (WIN32)
-        add_compile_definitions(LIBXML_STATIC)
-        set(CHOSEN_LIBXML2_LIBRARY ${LIBXML2_WIN_LIBRARIES})
-    else()
-        set(CHOSEN_LIBXML2_LIBRARY ${LIBXML2_NONWIN_LIBRARIES})
-    endif()
-else()
-    include_directories(${LIBXML2_INCLUDE_DIR})
-    set(NEED_LIBXML2_DEPEND FALSE)
-    set(CHOSEN_LIBXML2_LIBRARY ${LIBXML2_LIBRARY})
-endif()
+set(LIBXML2_TAG tags/v2.9.13)
+include(ExternalLibXML2)
 
 # sanitizer support
 # work around https://github.com/pypa/setuptools/issues/1928 with environment
@@ -99,7 +69,7 @@ if (HAVE_M_LIB)
     target_link_libraries(_internal PRIVATE m)
 endif ()
 
-target_link_libraries(_internal PRIVATE ${CHOSEN_LIBXML2_LIBRARY})
+target_link_libraries(_internal PRIVATE LibXml2::LibXml2)
 
 add_custom_command(
     OUTPUT _internal.c

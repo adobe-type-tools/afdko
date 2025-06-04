@@ -72,9 +72,7 @@ target_include_directories(hotconv AFTER PRIVATE ../include ../../shared/include
 # establish the build dependency
 target_link_libraries(hotconv PUBLIC afdko::antlr4)
 
-if (${NEED_LIBXML2_DEPEND})
-    add_dependencies(hotconv ${LIBXML2_TARGET})
-endif()
+target_link_libraries(hotconv PUBLIC LibXml2::LibXml2)
 
 if ( CMAKE_COMPILER_IS_GNUCC )
         set_property(TARGET hotconv APPEND PROPERTY
