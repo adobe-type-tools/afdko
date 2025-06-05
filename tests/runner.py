@@ -90,6 +90,10 @@ def run_tool(opts):
     if opts.std_error:
         stderr = subprocess.STDOUT
 
+    sp_env = os.environ.copy()
+    if opts.no_python_warn:
+        sp_env['PYTHONWARNINGS'] = 'ignore'
+
     if allow_skip_console and console_scripts.get(opts.tool):
         mod, fcn = console_scripts[opts.tool].split(':')
         args[0] = sys.executable
@@ -103,11 +107,11 @@ def run_tool(opts):
     try:
         if opts.save_path:
             output = subprocess.check_output(args, stderr=stderr,
-                                             timeout=TIMEOUT)
+                                             timeout=TIMEOUT, env=sp_env)
             _write_file(opts.save_path, output)
             return opts.save_path
         else:
-            return subprocess.check_call(args, timeout=TIMEOUT)
+            return subprocess.check_call(args, timeout=TIMEOUT, env=sp_env)
     except (subprocess.CalledProcessError, OSError) as err:
         if opts.save_path:
             _write_file(opts.save_path, err.output)
@@ -227,6 +231,12 @@ def get_options(args):
         '--std-error',
         action='store_true',
         help="capture stderr instead of stdout"
+    )
+    parser.add_argument(
+        '-n',
+        '--no-python-warn',
+        action='store_true',
+        help="Suppress python warnings"
     )
     options = parser.parse_args(args)
 
