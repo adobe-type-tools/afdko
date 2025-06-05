@@ -12,15 +12,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "goadb.h"
 #include "slogger.h"
 
-#define HOT_VERSION 0x010101 /* Library version (1.1.1) */
-/* Major, minor, build = (HOT_VERSION >> 16) & 0xff, (HOT_VERSION >> 8) & 0xff, HOT_VERSION & 0xff) */
-/* Warning: this string is now part of heuristic used by CoolType to identify the
-first round of CoolType fonts which had the backtrack sequence of a chaining
-contextual substitution ordered incorrectly.  Fonts with the old ordering MUST match
-the regex:
-    "(Version|OTF) 1.+;Core 1\.0\..+;addfeatureslib1\."
-inside the (1,0,0) nameID 5 "Version: string. */
-
 /***********************************************************************/
 /* Note: multiple master Type 1 is not supported by this version of    */
 /* the library.                                                        */
@@ -553,13 +544,7 @@ void hotConvert(hotCtx g);
    convertFlags is used to control the processing of the data. */
 
 /* convertFlags values */
-#define HOT_ID2_CHAIN_CONTXT3         (1 << 0) /* Index the backup glyph node list   */
-                                               /* backwards (relative to the spec)   */
-                                               /* in GSUB Lookup 6/GPOS Lookup 8, as */
-                                               /* required by InDesign 2 and other   */
-                                               /* consumers of the CoolType OpenType */
-                                               /* libraries of Aug 2002 and earlier  */
-
+#define HOT_UNUSED_FLAG_0             (1 << 0)
 #define HOT_ALLOW_STUB_GSUB           (1 << 1) /* If no GSUB rules are specified, make a stub GSUB table */
 #define HOT_USE_V1_MENU_NAMES         (1 << 3) /* Build name table Mac menu names as */
                                                /* Apple originally asked in 1999,    */

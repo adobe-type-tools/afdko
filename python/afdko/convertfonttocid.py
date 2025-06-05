@@ -60,7 +60,7 @@ import sys
 
 from afdko import fdkutils
 
-__version__ = "1.13.1"
+__version__ = fdkutils.fdk_version()
 
 # Tokens seen in font info file that are not part
 # of a FDDict or GlyphSet definition.

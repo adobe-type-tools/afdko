@@ -40,7 +40,6 @@ void CTL_CDECL cbFatal(cbCtx h, const char *fmt, ...);
 void CTL_CDECL cbWarning(cbCtx h, const char *fmt, ...);
 #define OTHERFLAGS_ISWINDOWSBOLD (1 << 0)
 #define OTHERFLAGS_ISITALIC (1 << 4)
-#define OTHERFLAGS_DO_ID2_GSUB_CHAIN_CONXT (1 << 5)
 #define OTHERFLAGS_DOUBLE_MAP_GLYPHS (1 << 6) /* Provide 2 unicode values for a hard-coded list of glyphs - see agl2uv.h: */
     /* { "Delta",                0x2206 }, */
     /* { "Delta%",               0x0394 }, */

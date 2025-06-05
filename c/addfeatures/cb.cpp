@@ -679,10 +679,6 @@ void cbConvert(cbCtx h, int flags, const char *clientVers, const char *infile,
     unsigned long hotConvertFlags = 0;
     bool isROS;
 
-    if (otherflags & OTHERFLAGS_DO_ID2_GSUB_CHAIN_CONXT) {
-        hotConvertFlags |= HOT_ID2_CHAIN_CONTXT3;
-    }
-
     if (otherflags & OTHERFLAGS_ALLOW_STUB_GSUB) {
         hotConvertFlags |= HOT_ALLOW_STUB_GSUB;
     }

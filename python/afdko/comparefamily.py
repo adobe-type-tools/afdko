@@ -21,8 +21,6 @@ feel free to edit or disable them in the source script file at:
 See 'comparefamily -h' for details.
 """
 
-__version__ = "2.1.5"
-
 __help__ = """
 
 comparefamily will look in the specified directory and examine and
@@ -95,6 +93,8 @@ import math
 from fontTools import ttLib
 
 from afdko import fdkutils
+
+__version__ = fdkutils.fdk_version()
 
 
 gDesignSpaceTolerance = 0 # don't complain about metrics differences greater than this amount.

@@ -15,7 +15,7 @@
 #include "smem.h"
 #include "slogger.h"
 
-static const char *version = "3.0.1"; /* Program version */
+extern char *FDK_VERSION;
 
 static const char *progname = "sfntdiff";
 
@@ -42,7 +42,7 @@ static void printUsage(void) {
         "    %s\n",
         progname,
         progname,
-        version);
+        FDK_VERSION);
 }
 
 /* Show usage information */
@@ -126,7 +126,7 @@ int main__sfntdiff(int argc, char *argv[]) {
     name2isDir = sFileIsDir(filename2);
 
     printf("%s\n", ourtime());
-    printf("%s (%s) (-d %d)  files:\n", progname, version, level);
+    printf("%s (%s) (-d %d)  files:\n", progname, FDK_VERSION, level);
 
     if (!name1isDir && !name2isDir) {
         if (!sdFileIsOpened(1)) sdFileOpen(1, filename1);

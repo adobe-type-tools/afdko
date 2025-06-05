@@ -774,7 +774,7 @@ void FeatCtx::includeDFLT(bool includeDFLT, int langChange, bool seenOD) {
         /* statement. Languages which don't exclude_dflt get the feature- */
         /* level defaults at the end of the feature.                      */
         for (auto &i : DFLTLkps)
-            callLkp(i);
+            callLkp(i, true);
     } else {
         /* Defaults have been explicitly excluded from the this language.  */
         /* Find the matching  script-lang lang-sys, and set the flag so it */
@@ -1093,13 +1093,8 @@ void FeatCtx::setLkpFlag(uint16_t flag) {
     /* if UseMarkSet, then the markSetIndex is set in setLkpFlagAttribute() */
 }
 
-void FeatCtx::callLkp(State &st) {
+void FeatCtx::callLkp(State &st, bool fromDFLT) {
     Label lab = st.label;
-
-    if (st.tbl != GSUB_ && st.tbl != GPOS_) {
-        featMsg(sWARNING, "Internal: Bad table %d seen callLkp, ignoring.");
-        return;
-    }
 
 #if HOT_DEBUG
     if (g->font.debug & HOT_DB_FEAT_2) {
@@ -1134,7 +1129,7 @@ void FeatCtx::callLkp(State &st) {
     currNamedLkp = (Label)(lab | REF_LAB); /* As in:  lookup <name> {  */
     curr.lkpFlag = st.lkpFlag;
     curr.markSetIndex = st.markSetIndex;
-    prepRule(st.tbl, st.lkpType, nullptr, nullptr);
+    prepRule(st.tbl, st.lkpType, nullptr, nullptr, fromDFLT);
     /* No actual rules will be fed into GPOS/GSUB */
     wrapUpRule();
     currNamedLkp = LAB_UNDEF; /* As in:  } <name>;        */
@@ -1474,8 +1469,8 @@ void FeatCtx::getValueDef(const std::string &name, MetricsInfo &mi) {
 // ------------------------------ Substitutions --------------------------------
 
 void FeatCtx::prepRule(Tag newTbl, int newlkpType, const GPat::SP &targ,
-                       const GPat::SP &repl) {
-    int accumDFLTLkps = 1;
+                       const GPat::SP &repl, bool fromDFLT) {
+    bool accumDFLTLkps = !fromDFLT;
 
     curr.tbl = newTbl;
     curr.lkpType = newlkpType;
@@ -1506,8 +1501,8 @@ void FeatCtx::prepRule(Tag newTbl, int newlkpType, const GPat::SP &targ,
                    curr.feature == prev.feature) {
             /* Store lkp state only once per lookup. If the script/feature  */
             /* has changed but the named label hasn't, accumDFLTLkps should */
-            /* be 1.                                                        */
-            accumDFLTLkps = 0;
+            /* be true.                                                     */
+            accumDFLTLkps = false;
         }
     } else {
         /* This is an anonymous rule */
@@ -1522,7 +1517,7 @@ void FeatCtx::prepRule(Tag newTbl, int newlkpType, const GPat::SP &targ,
                 curr.label = getNextAnonLabel();
             } else {
                 curr.label = prev.label;
-                accumDFLTLkps = 0; /* Store lkp state only once per lookup */
+                accumDFLTLkps = false; /* Store lkp state only once per lookup */
             }
         } else {
             curr.label = getNextAnonLabel();
@@ -1556,7 +1551,7 @@ void FeatCtx::prepRule(Tag newTbl, int newlkpType, const GPat::SP &targ,
 
     /* stop accumulating script specific defaults once a language other than 'dflt' is seen */
     if (accumDFLTLkps && curr.language != dflt_)
-        accumDFLTLkps = 0;
+        accumDFLTLkps = false;
 
     if (accumDFLTLkps)
         /* Save for possible inclusion later in lang-specific stuff */

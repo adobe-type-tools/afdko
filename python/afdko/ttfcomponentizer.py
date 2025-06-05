@@ -14,10 +14,10 @@ from fontTools.ttLib import TTFont, getTableModule
 from fontTools.ufoLib.errors import UFOLibError
 from defcon import Font
 
-from afdko.fdkutils import get_font_format
+from afdko.fdkutils import get_font_format, fdk_version
 
 
-__version__ = '0.3.2'
+__version__ = fdk_version()
 
 
 PUBLIC_PSNAMES = "public.postscriptNames"

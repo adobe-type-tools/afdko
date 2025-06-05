@@ -14,9 +14,10 @@ from fontTools.ttLib import sfnt, TTFont
 from afdko.fdkutils import (
     get_font_format,
     validate_path,
+    fdk_version,
 )
 
-__version__ = '2.0.0'
+__version__ = fdk_version()
 
 logger = logging.getLogger(__name__)
 

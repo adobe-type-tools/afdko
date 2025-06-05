@@ -1024,22 +1024,12 @@ void GSUB::ChainSubst::write(OTL *h) {
 
     OUT2((uint16_t)backtracks.size());
 
-    if (h->g->convertFlags & HOT_ID2_CHAIN_CONTXT3) {
-        /* do it per OpenType spec 1.4 and earlier,as In Design 2.0 and earlier requires. */
-        for (auto &bt : backtracks) {
-            if (!isExt())
-                bt += adjustment;
-            h->checkOverflow("backtrack coverage table", bt, "chain contextual substitution");
-            OUT2((uint16_t)bt);
-        }
-    } else {
-        /* do it per OpenType spec 1.5 */
-        for (auto ri = backtracks.rbegin(); ri != backtracks.rend(); ri++) {
-            if (!isExt())
-                *ri += adjustment;
-            h->checkOverflow("backtrack coverage table", *ri, "chain contextual substitution");
-            OUT2((uint16_t)*ri);
-        }
+    /* do it per OpenType spec 1.5 */
+    for (auto ri = backtracks.rbegin(); ri != backtracks.rend(); ri++) {
+        if (!isExt())
+            *ri += adjustment;
+        h->checkOverflow("backtrack coverage table", *ri, "chain contextual substitution");
+        OUT2((uint16_t)*ri);
     }
 
     OUT2((uint16_t)inputGlyphs.size());
@@ -1140,22 +1130,12 @@ void GSUB::ReverseSubst::write(OTL *h) {
     OUT2((uint16_t)InputCoverage);
     OUT2((uint16_t)backtracks.size());
 
-    if (h->g->convertFlags & HOT_ID2_CHAIN_CONTXT3) {
-        /* do it per OpenType spec 1.4 and earlier,as In Design 2.0 and earlier requires. */
-        for (auto &bt : backtracks) {
-            if (!isExt())
-                bt += adjustment;
-            h->checkOverflow("backtrack coverage table", bt, "reverse chain contextual substitution");
-            OUT2((uint16_t)bt);
-        }
-    } else {
-        /* do it per OpenType spec 1.5 */
-        for (auto ri = backtracks.rbegin(); ri != backtracks.rend(); ri++) {
-            if (!isExt())
-                *ri += adjustment;
-            h->checkOverflow("backtrack coverage table", *ri, "reverse chain contextual substitution");
-            OUT2((uint16_t)*ri);
-        }
+    /* do it per OpenType spec 1.5 */
+    for (auto ri = backtracks.rbegin(); ri != backtracks.rend(); ri++) {
+        if (!isExt())
+            *ri += adjustment;
+        h->checkOverflow("backtrack coverage table", *ri, "reverse chain contextual substitution");
+        OUT2((uint16_t)*ri);
     }
 
     OUT2((uint16_t)lookaheads.size());

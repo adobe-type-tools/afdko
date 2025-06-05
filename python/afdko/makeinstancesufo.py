@@ -28,11 +28,12 @@ from ufoProcessor.ufoOperator import UFOOperator
 from afdko.checkoutlinesufo import run as checkoutlinesUFO
 from afdko.fdkutils import (
     validate_path,
+    fdk_version
 )
 from afdko.ufotools import validateLayers
 
 
-__version__ = '2.4.4'
+__version__ = fdk_version()
 
 logger = logging.getLogger(__name__)
 

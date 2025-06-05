@@ -9,10 +9,22 @@ import os
 import subprocess
 import tempfile
 import zipfile
-
-__version__ = '1.3.7'
+from importlib.metadata import version, PackageNotFoundError
 
 LEN_CID_TOK = 31  # length of string '%!PS-Adobe-3.0 Resource-CIDFont'
+
+__version__ = 'unknown'
+
+
+def fdk_version():
+    global __version__
+    if __version__ != 'unknown':
+        return __version__
+    try:
+        __version__ = version("afdko")
+    except PackageNotFoundError:
+        pass
+    return __version__
 
 
 def validate_path(path_str):

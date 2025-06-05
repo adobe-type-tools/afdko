@@ -132,7 +132,7 @@ def test_input_formats(arg, input_filename, ttx_filename):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
+                   '-r', r'^\s+Version.*;addfeatures *'])
 
 
 @pytest.mark.parametrize('args, ttx_fname', [
@@ -142,8 +142,8 @@ def test_build_font(args, ttx_fname):
     actual_path = get_temp_file_path()
     ttx_filename = f'{ttx_fname}.ttx'
     runner(CMD + [
-        '-s', '-e', '-o', 'f', f'_{get_input_path("font.pfa")}',
-                          'o', f'_{actual_path}'] + args)
+        '-s', '-e', '-n', '-o', 'f', f'_{get_input_path("font.pfa")}',
+                                'o', f'_{actual_path}'] + args)
     actual_ttx = generate_ttx_dump(actual_path)
     expected_ttx = get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx,
@@ -153,7 +153,7 @@ def test_build_font(args, ttx_fname):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
+                   '-r', r'^\s+Version.*;addfeatures *'])
 
 
 def test_getSourceGOADBData():
@@ -504,7 +504,7 @@ def test_GOADB_options_bug497(opts):
                    '    <checkSumAdjustment value=' + SPLIT_MARKER +
                    '    <created value=' + SPLIT_MARKER +
                    '    <modified value=',
-                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
+                   '-r', r'^\s+Version.*;addfeatures *'])
 
 
 @pytest.mark.parametrize('feat_name, has_warn', [('v0005', False),
@@ -649,7 +649,7 @@ def test_duplicate_warning_messages_bug751():
     otf_path = get_temp_file_path()
 
     stderr_path = runner(
-        CMD + ['-s', '-e', '-o', 'swo', 'shw',
+        CMD + ['-s', '-e', '-n', '-o', 'swo', 'shw',
                'f', f'_{get_input_path(input_filename)}',
                'o', f'_{otf_path}'])
 
@@ -683,7 +683,7 @@ def test_cli_numerics():
     expected_msg_path = get_expected_path("clinum_output.txt")
     out_font_path = get_temp_file_path()
     stderr_path = runner(CMD + [
-        '-s', '-e', '-o',
+        '-s', '-e', '-n', '-o',
         'f', f'_{get_input_path(input_filename)}',
         'o', f'_{out_font_path}',
         'fi', f'_{get_input_path(fontinfo_filename)}'])
@@ -704,7 +704,7 @@ def test_check_psname_in_fmndb_bug1171(explicit_fmndb):
     actual_ttx = generate_ttx_dump(actual_path, ['name'])
     assert differ([expected_ttx, actual_ttx,
                    '-s', '<ttFont sfntVersion',
-                   '-r', r'^\s+Version.*;hotconv.*;addfeatures'])
+                   '-r', r'^\s+Version.*;addfeatures *'])
 
 
 libplist_warn = (b"Unable to open "

@@ -21,7 +21,7 @@
 
 #include "slogger.h"
 
-#define VERSION "1.4.3"
+extern "C" char *FDK_VERSION;
 
 namespace fs = std::filesystem;
 
@@ -274,18 +274,10 @@ void SfntEdit::fatal(const char *fmt, ...) {
     std::vector<char> buf(INI_FATAL_BUFSIZ);
 
     va_start(ap, fmt);
-    int l = std::vsnprintf(buf.data(), buf.size(), fmt, ap) + 1;
+    logger->vlog(sFATAL, fmt, ap);
     va_end(ap);
 
-    if (l <= 0)
-        throw std::runtime_error("Error during formatting");
-    else if (l > INI_FATAL_BUFSIZ) {
-        buf.resize(l);
-        va_start(ap, fmt);
-        std::vsnprintf(buf.data(), buf.size(), fmt, ap);
-        va_end(ap);
-    }
-    throw std::runtime_error(buf.data());
+    throw std::runtime_error("FATAL error, see logs");
 }
 
 /* ----------------------------- Usage and Help ---------------------------- */
@@ -313,7 +305,7 @@ static void printUsage(const char *progname) {
             "\n",
             progname,
             progname,
-            VERSION);
+            FDK_VERSION);
 }
 
 /* Show usage and help information */

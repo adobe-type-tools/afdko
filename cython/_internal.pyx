@@ -2,7 +2,21 @@ import sys
 import cython
 
 from libc.stdlib cimport malloc, free
-from libc.string cimport strcpy
+from libc.string cimport strcpy, strcmp, strlen
+
+cdef extern char *FDK_VERSION
+
+try:
+    from afdko.fdkutils import fdk_version
+    tmp_str = fdk_version().encode('UTF-8')
+    tmp_s = cython.declare(cython.p_char, tmp_str)
+    global FDK_VERSION
+    if strcmp(FDK_VERSION, "unknown") != 0:
+        free(FDK_VERSION)
+    FDK_VERSION = <char*> malloc(sizeof(char) * strlen(tmp_s) + 1)
+    strcpy(FDK_VERSION, tmp_s)
+except:
+    pass
 
 ctypedef int (*mainesque_t)(int argc, char *argv[])
 

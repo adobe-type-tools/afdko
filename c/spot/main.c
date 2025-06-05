@@ -23,7 +23,7 @@
 jmp_buf spot_mark;
 #define MAX_ARGS 200
 
-static const char *version = "3.5.65520";    /* Program version */
+extern char *FDK_VERSION;
 char *sourcepath;
 char *outputfilebase = NULL;
 char *infilename = NULL;
@@ -228,7 +228,7 @@ static void printUsage(void) {
             spotGlobal.progname,
 #endif
             spotGlobal.progname,
-            version);
+            FDK_VERSION);
 }
 
 /* Show usage information */
