@@ -692,7 +692,7 @@ class FeatCtx {
     uint16_t setLkpFlagAttribute(uint16_t val, unsigned int attr,
                                  uint16_t markAttachClassIndex);
     void setLkpFlag(uint16_t flagVal);
-    void callLkp(State &st);
+    void callLkp(State &st, bool fromDFLT=false);
     void useLkp(const std::string &name);
 
     struct NamedLkp {
@@ -764,7 +764,7 @@ class FeatCtx {
 
     // Substitutions
     void prepRule(Tag newTbl, int newlkpType, const GPat::SP &targ,
-                  const GPat::SP &repl);
+                  const GPat::SP &repl, bool fromDFLT=false);
     void addGSUB(int lkpType, GPat::SP targ, GPat::SP repl);
     bool validateGSUBSingle(const GPat::ClassRec &targcr,
                             const GPat::SP &repl, bool isSubrule);
