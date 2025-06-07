@@ -3,6 +3,7 @@ include_directories(../include ../resource)
 MACRO(ADD_AFDKOLIB lm)
     file(GLOB sl_sources "${lm}/*")
     add_library(${lm} STATIC ${sl_sources})
+    target_link_libraries(${lm} PRIVATE LibXml2::LibXml2)
 ENDMACRO(ADD_AFDKOLIB)
 
 ADD_AFDKOLIB(absfont)
