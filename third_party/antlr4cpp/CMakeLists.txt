@@ -24,19 +24,10 @@ FetchContent_Declare(antlr4-runtime
     ${fetch_content_args}
 )
 
-include(CMakeDependentOption)
-option(AFDKO_USE_ANTLR_SHARED_LIB
-    "Whether to use the shared library of afdko" OFF)
-
 option(ANTLR_BUILD_CPP_TESTS "Override: afdko" OFF)
-cmake_dependent_option(ANTLR_BUILD_SHARED "Override: afdko" ON AFDKO_USE_ANTLR_SHARED_LIB OFF)
+option(ANTLR_BUILD_SHARED "Override: afdko" OFF)
 option(ANTLR_BUILD_STATIC "Override: afdko" ON)
 
 set(CMAKE_CXX_STANDARD 17)
 FetchContent_MakeAvailable(antlr4-runtime)
-
-if(AFDKO_USE_ANTLR_SHARED_LIB)
-  add_library(afdko::antlr4 ALIAS antlr4_shared)
-else()
-  add_library(afdko::antlr4 ALIAS antlr4_static)
-endif()
+add_library(afdko::antlr4 ALIAS antlr4_static)
