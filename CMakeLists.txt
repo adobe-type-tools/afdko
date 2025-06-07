@@ -42,10 +42,8 @@ set(ANTLR4_WITH_STATIC_CRT OFF)
 # This is a more recent commit than 4.13.2 that addresses a missing
 # include directive needed in more recent Visual Studio releases
 set(ANTLR4_TAG df4d68c09cdef73e023b8838a8bc7ca4dff1d1de)
-include(ExternalAntlr4Cpp)
-
 set(LIBXML2_TAG tags/v2.9.13)
-include(ExternalLibXML2)
+add_subdirectory(third_party)
 
 # sanitizer support
 # work around https://github.com/pypa/setuptools/issues/1928 with environment
