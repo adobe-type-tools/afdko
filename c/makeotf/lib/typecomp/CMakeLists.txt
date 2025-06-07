@@ -45,10 +45,7 @@ add_library(typecomp STATIC
     tc.c
 )
 
-target_link_libraries(typecomp PUBLIC ${CHOSEN_LIBXML2_LIBRARY})
-if (${NEED_LIBXML2_DEPEND})
-    add_dependencies(typecomp ${LIBXML2_TARGET})
-endif()
+target_link_libraries(typecomp PUBLIC LibXml2::LibXml2)
 
 target_compile_definitions(typecomp PRIVATE
     TC_HINT_CHECK=1
