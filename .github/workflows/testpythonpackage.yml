@@ -8,7 +8,6 @@ on:
 
   pull_request:
     branches: [develop]
-    types: [opened]
     paths-ignore:
       - 'docs/**'
       - '**.md'
@@ -21,6 +20,10 @@ on:
       reason:
         description: 'Reason for running workflow'
         required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   run_tests:
