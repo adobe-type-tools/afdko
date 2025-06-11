@@ -2215,6 +2215,9 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
     else if (h->path.state != 0) {
         /* Call sequence error */
         h->err.code = t1wErrBadCall;
+        h->logger->log(sERROR, "Call sequence error in glyphBeg for glyph '%s': path state is %d",
+            info->gname.ptr ? info->gname.ptr : "unknown",
+            h->path.state);
         return ABF_FAIL_RET;
     } else if (info->flags & ABF_GLYPH_SEEN)
         return ABF_SKIP_RET; /* Ignore duplicate glyph */
@@ -2230,8 +2233,11 @@ static int glyphBeg(abfGlyphCallbacks *cb, abfGlyphInfo *info) {
             h->CIDCount = info->cid;
         h->flags |= SEEN_CID_KEYED_GLYPH;
     } else {
-        if (info->gname.ptr == NULL || info->gname.ptr[0] == '\0')
-            return ABF_FAIL_RET; /* No glyph name in name-keyed font */
+        if (info->gname.ptr == NULL || info->gname.ptr[0] == '\0') {
+            h->logger->log(sERROR, "No glyph name in name-keyed font for glyph '%s'",
+                           info->gname.ptr ? info->gname.ptr : "unknown");
+            return ABF_FAIL_RET;
+        }
         h->flags |= SEEN_NAME_KEYED_GLYPH;
     }
 
@@ -2870,11 +2876,17 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
     Glyph *glyph;
     long index;
 
-    if (h->err.code != 0)
+    if (h->err.code != 0) {
+        h->logger->log(sERROR, "Error in glyphEnd for glyph '%s': %s",
+            cb->info->gname.ptr ? cb->info->gname.ptr : "unknown",
+            t1wErrStr(h->err.code));
         return;
-    else if (h->path.state < 2) {
+    } else if (h->path.state < 2) {
         /* Call sequence error */
         h->err.code = t1wErrBadCall;
+        h->logger->log(sERROR, "Call sequence error in glyphEnd for glyph '%s': path state is %d",
+            cb->info->gname.ptr ? cb->info->gname.ptr : "unknown",
+            h->path.state);
         return;
     }
 
@@ -2896,8 +2908,10 @@ static void glyphEnd(abfGlyphCallbacks *cb) {
 
     /* Save charstring */
     if (saveCstr(h, glyph->info,
-                 h->cstr.cnt, (uint8_t *)h->cstr.array, &glyph->cstr)) {
+                h->cstr.cnt, (uint8_t *)h->cstr.array, &glyph->cstr)) {
         h->err.code = t1wErrTmpStream;
+        h->logger->log(sERROR, "Failed to save charstring for glyph '%s'",
+                       cb->info->gname.ptr ? cb->info->gname.ptr : "unknown");
         return;
     }
 
