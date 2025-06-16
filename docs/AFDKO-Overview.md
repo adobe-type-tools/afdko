@@ -37,7 +37,8 @@ This script will use a .designspace file and the output OTFs of `buildmasterotfs
 
 ### `makeinstancesufo`
 
-This script will generate UFO instances from a .designspace file, and a set of compatible UFO masters. More info on designspace files and interpolation systems can be found at [Superpolator.com](http://superpolator.com/) and [DesignSpaceDocument Specification](https://github.com/fonttools/fonttools/tree/master/Doc/source/designspaceLib).
+This script will build UFO instances from a .designspace file and a set of compatible UFO masters, to prepare for building static OTF fonts. By default, the instances are run through `checkoutlinesufo` (for overlap removal) and `otfautohint` (for PS hinting). Finally, the UFO instances are normalized.  
+More info on designspace files and interpolation systems can be found at [Superpolator.com](https://superpolator.com/designspace.html) and [DesignSpaceDocument Specification](https://fonttools.readthedocs.io/en/latest/designspaceLib/index.html).
 
 ### `mergefonts`
 
