@@ -137,7 +137,7 @@ The auto-hinting program will report at length about hinting issues. Some of the
 
 ### `checkoutlinesufo`
 
-This tool will check the quality of the glyph outline data, and should always be used. It is very good at detecting serious problems, such as overlap and incorrect path direction. It is overly enthusiastic about finding a number of smaller issues, but is right often enough to be worth checking all the error messages. It can also fix the problems it finds, but you should always check any glyphs that it changed - the fixes are not always better than the original problem.
+This tool can be used to check the general quality of glyph outline data. The `-e` option can be passed to remove overlaps. When working with UFO files, the results of overlap removal are written to a new layer (`com.adobe.type.processedglyphs`), the original glyph is not touched.
 
 ### `comparefamily`
 
