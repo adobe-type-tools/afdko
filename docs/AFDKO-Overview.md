@@ -20,20 +20,26 @@ The tools fall into several different functional groups.
 ### `otfautohint`
 
 This program is the Adobe auto-hinter. It is used by several AFDKO tools.
-
-It can be applied to both OpenType/CFF and Type 1 fonts. Works with Type 1 and OpenType/CFF fonts only.
+otfautohint can be used with UFO source data, and OpenType/CFF and Type 1 fonts.
 
 ### `makeotf`
 
-This program will build an OpenType/CFF font from a feature file that defines the OpenType layout rules, and overrides for default values, and a font file (Type 1 font, TrueType font, 'detype1' text version of a Type 1 font, or UFO font). It also requires some other meta-data files. It will also build an OpenType/TTF font from a TrueType source font file.
+This program will build an OpenType/CFF font from a font (source) file and auxiliry metadata files.
+Typical input formats are
+* UFO (Unified Font Object, font source format)
+* PFA (Type 1 font)
+* TXT (decrypted plain-text version of a Type 1 font, obtained via `detype1`)
+* TTF (TrueType source font file)
+
+`makeotf` also optionally accepts further metadata files, e.g. a feature file that defines the OpenType layout rules, overrides for makeotf’s default values, a GlyphOrderAndAliasDB, etc. For details, see the makeotf user guide.
 
 ### `buildmasterotfs`
 
-This script uses `makeotf` to build OTF files from a .designspace file with compatible UFO masters. These OTF files represent the first step toward building a CFF2 variable font.
+Step 1 of 2 to build a CFF Variable Font – this script builds static CFF2 OTF files (with overlaps) from a .designspace file with compatible UFO masters. 
 
 ### `buildcff2vf`
 
-This script will use a .designspace file and the output OTFs of `buildmasterotfs` to assemble a CFF2 variable font file.
+Step 2 of 2 to build a CFF Variable Font – this script will use a .designspace file and the output OTFs of `buildmasterotfs` to assemble a CFF2 variable font file.
 
 ### `makeinstancesufo`
 
