@@ -10,8 +10,8 @@ Copyright 2015-2021 Adobe. All Rights Reserved. This software is licensed as
 OpenSource, under the Apache License, Version 2.0. This license is available at:
 http://opensource.org/licenses/Apache-2.0.
 
-Document version 1.26
-Last updated 7 June 2021
+Document version 1.26.1
+Last updated 1 Aug 2023
 
 **Caution: Portions of the syntax unimplemented by Adobe are subject to change.**
 
@@ -615,7 +615,8 @@ supported for development glyph names:
     U+007C | Vertical bar
     U+007E ~ Tilde
 
-However, none of these characters are allowed at the start of a glyph name.
+However, none of these characters are allowed at the start of a glyph name and
+a hyphen may not be the last character in a name.
 
 For glyphs where the development glyph name differs from the final production
 glyph name, an implementation of the feature file syntax must be able to accept
@@ -3997,6 +3998,10 @@ along with the tag `sbit`.
 
 <a name="11"></a>
 ## 11. Document revisions
+
+<<<<<<< HEAD
+**v1.26.1 [1 Aug 2023]:**
+*   Clarify the use of hyphens in [glyph names](#2.f.i)
 
 **v1.26 [7 June 2021]:**
 *   Clarified syntax of [keywords](#2.c), [glyph names](#2.f.i), 
