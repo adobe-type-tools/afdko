@@ -22,6 +22,10 @@ The tools fall into several different functional groups.
 This program is the Adobe auto-hinter. It is used by several AFDKO tools.
 otfautohint can be used with UFO files (cubic outlines), and OpenType/CFF or Type 1 fonts.
 
+### `checkoutlinesufo`
+
+With the `-e` option, `checkoutlinesufo` is used to remove overlaps. When working with UFO files, the results of overlap removal are written to a new layer (`com.adobe.type.processedglyphs`), the original glyph is not touched.
+
 ### `makeotf`
 
 This program will build an OpenType/CFF font from a font (source) file and auxiliry metadata files.
@@ -89,17 +93,17 @@ This tool can be used to convert most font formats to CFF or Type 1 fonts. TrueT
 
 ### `type1`/`detype1`
 
-These two programs will respectively compile and decompile a Type 1 font to and from a plain-text representation that is easy to edit. This is good for fixing individual fields. It is also good for copying a specific path element to many glyphs.
+These two programs will respectively decrypt or encrypt a Type 1 font to and from a plain-text representation. This is useful for fixing or controlling individual data fields. It is also good for copying a specific path element to many glyphs.
 
 ## 2.2 Proofing
 
 ### `spot`
 
-This program can report data from an OpenType font in a variety of ways. All tables can be shown as a text report of the low-level structure of the table. Most tables can be shown with a report in a more human-readable format. Some tables, including the GPOS and GSUB layout tables can be shown graphically, by outputting a PostScript file that can be sent to a printer, or viewed in Mac OSX Preview, Adobe Acrobat or Adobe InDesign.
+This program can report data from an OpenType font in a variety of ways. All tables can be shown as a text report of the low-level structure of the table. Most tables can be shown with a report in a more human-readable format. Some tables, including the GPOS and GSUB layout tables can be shown graphically, by outputting a PostScript file that can be converted to a PDF.
 
 ### `tx`
 
-This tool has two modes that are useful for proofing. With the `-bc` option, it will rasterize a glyph to the command line window, using ASCII characters. This is surprisingly useful when you want a quick look at a glyph. With the `-pdf` option, it will write a pdf file which shows the glyphs in the font, either 320 per page or 1 per page.
+This tool has two modes that are useful for proofing. With the `-bc` option, it will rasterize a glyph to the command line window, using ASCII characters. This is surprisingly useful when you want a quick look at a glyph. With the `-pdf` option, it will write a PDF file which shows the glyphs in the font, either 320 per page or 1 per page.
 
 ### `ttx`
 
@@ -107,19 +111,19 @@ The XML format output offers a useful report for most of the data in an OpenType
 
 ### `charplot`
 
-Make a pdf file showing all the glyphs in the font. Shows one glyph per page. Shows the nodes and control points.
+Make a PDF file showing all the glyphs in the font. Shows one glyph per page. Shows the nodes and control points.
 
 ### `digiplot`
 
-Make a pdf file showing all the glyphs in the font. Format favored by CJK developers; shows a large filled outline, useful glyph metrics, and a larger outline with the nodes marked.
+Make a PDF file showing all the glyphs in the font. Format favored by CJK developers; shows a large filled outline, useful glyph metrics, and a larger outline with the nodes marked.
 
 ### `fontplot`
 
-Make a pdf file showing all the glyphs in the font. This fills a page with many glyphs, and shows just the filled outlines at a small point size, with some info around each glyph. Works with OpenType fonts and Type 1 fonts.
+Make a PDF file showing all the glyphs in the font. This fills a page with many glyphs, and shows just the filled outlines at a small point size, with some info around each glyph. Works with OpenType fonts and Type 1 fonts.
 
 ### `fontsetplot`
 
-Make a pdf file showing all the glyphs in in a list fonts. The glyphs are shown in glyph ID order, with a fixed spacing of one em, with the glyphs from one font in one line, so that all glyphs with the same glyph name from different fonts should be in a single column. This is used to visually confirm that that charsets are the same, and that glyph shapes are similar. It is useful for catching cases where a place-holder glyph outline was pasted in for a glyph name, but never corrected to the correct shape. The fonts are sorted first by length of character set, then by alphabetic order of the character sets, then by PostScript name.
+Make a PDF file showing all the glyphs in in a list fonts. The glyphs are shown in glyph ID order, with a fixed spacing of one em, with the glyphs from one font in one line, so that all glyphs with the same glyph name from different fonts should be in a single column. This is used to visually confirm that that charsets are the same, and that glyph shapes are similar. It is useful for catching cases where a place-holder glyph outline was pasted in for a glyph name, but never corrected to the correct shape. The fonts are sorted first by length of character set, then by alphabetic order of the character sets, then by PostScript name.
 
 ### `hintplot`
 
@@ -139,23 +143,20 @@ The auto-hinting program will report at length about hinting issues. Some of the
 
 ### `checkoutlinesufo`
 
-This tool can be used to check the general quality of glyph outline data. The `-e` option can be passed to remove overlaps. When working with UFO files, the results of overlap removal are written to a new layer (`com.adobe.type.processedglyphs`), the original glyph is not touched.
+This tool can be used to report on the general quality of glyph outline data,  reporting outline overlaps, collinear points, and flat curves.
 
 ### `comparefamily`
 
-The tool examines all the fonts in a directory and runs many quality checks. It is the only tool which checks consistency and compares data across a family of fonts, as well as in a single font. It will point out any errors in naming within a style-linked group. Every time the Adobe Type Department finds a bug in the Adobe OpenType fonts, we try to put a check in here. It is not a complete validation tool, but it does represent several years of experience of mistakes made by typographers.
+`comparefamily` examines all the fonts in a directory and runs many quality checks. It will check consistency of data across a family of fonts, as well as in a single font. It will point out any errors in naming within a style-linked group.  
+Typical options for running `comparefamily` are `-rm` (menu name report), `-rn` (metrics report), `-rp` (PANOSE number report).
 
 ### `sfntdiff`
 
 This tool does a low-level comparison of two OpenType font files. It is most useful for quickly checking if two fonts are identical, or in which tables they differ.
 
-### `ttx`
-
-The best way to see in detail how two fonts differ is to use the ttx tool to dump XML files, and then compare them with a good difference editor, such as BBEdit on the Mac, or UltraEdit on the PC. This tool was developed by Just van Rossum of LettError, and is available under OpenSource licensing from: https://github.com/fonttools/fonttools
-
 ### `ttxn`
 
-This tool is used to test if two fonts are functionally the same. It sorts and modifies the output from the ttx and tx tools to build a normalized text dump that eliminates differences due to issues such as OTL table record order, glyph order and subroutinization differences. It writes one file for each table in the font. A good difference editor, such as BBEdit on the Mac, or UltraEdit on the PC, can then be used to compare the output files from two different fonts. It is particularly useful in comparing older and newer versions of the same font.
+This tool is used to test if two fonts are functionally the same. It sorts and modifies the output from the ttx and tx tools to build a normalized text dump that eliminates differences due to issues such as OTL table record order, glyph order and subroutinization differences. It writes one file for each table in the font, which can be `diff`ed in the next step. `ttxn` It is particularly useful in comparing older and newer versions of the same font.
 
 ### `tx`
 
