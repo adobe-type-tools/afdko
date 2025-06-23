@@ -20,13 +20,13 @@ The tools fall into several different functional groups.
 ### `otfautohint`
 
 This program is the Adobe auto-hinter. It is used by several AFDKO tools.
-otfautohint can be used with UFO source data, and OpenType/CFF and Type 1 fonts.
+otfautohint can be used with UFO files (cubic outlines), and OpenType/CFF or Type 1 fonts.
 
 ### `makeotf`
 
 This program will build an OpenType/CFF font from a font (source) file and auxiliry metadata files.
 Typical input formats are
-* UFO (Unified Font Object, font source format)
+* UFO (Unified Font Object, font source format, cubic outlines)
 * PFA (Type 1 font)
 * TXT (decrypted plain-text version of a Type 1 font, obtained via `detype1`)
 * TTF (TrueType source font file)
@@ -35,7 +35,7 @@ Typical input formats are
 
 ### `buildmasterotfs`
 
-Step 1 of 2 to build a CFF Variable Font – this script builds static CFF2 OTF files (with overlaps) from a .designspace file with compatible UFO masters. 
+Step 1 of 2 to build a CFF Variable Font – this script builds static OTF files (with overlaps) from a .designspace file with compatible UFO masters. 
 
 ### `buildcff2vf`
 
