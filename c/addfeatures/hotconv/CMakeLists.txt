@@ -70,11 +70,9 @@ target_include_directories(hotconv BEFORE PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${AN
 target_include_directories(hotconv AFTER PRIVATE ../include ../../shared/include ../../shared/resource)
 # Because hotconv is an object library, all this should do is
 # establish the build dependency
-target_link_libraries(hotconv PUBLIC antlr4_static)
+target_link_libraries(hotconv PUBLIC afdko::antlr4)
 
-if (${NEED_LIBXML2_DEPEND})
-    add_dependencies(hotconv ${LIBXML2_TARGET})
-endif()
+target_link_libraries(hotconv PUBLIC LibXml2::LibXml2)
 
 if ( CMAKE_COMPILER_IS_GNUCC )
         set_property(TARGET hotconv APPEND PROPERTY
