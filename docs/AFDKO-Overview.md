@@ -83,10 +83,6 @@ hinting the font.
 
 Componentizes glyphs of a TrueType font with information from an external UFO font. The script only supports components that are not scaled, rotated or flipped.
 
-### `ttx`
-
-This tool can dump all or a few tables from an OpenType font to a human-readable text XML file, and can compile this XML file back to full OpenType font. It is an ideal tool for making simple changes of a few values. Used with care, it can also be used to make extensive changes. This is tool is provided by Just van Rossum as part of the fontTools library. It is provided here for convenience, in a form that does not require an installed Python interpreter.
-
 ### `tx`
 
 This tool can be used to convert most font formats to CFF or Type 1 fonts. TrueType fonts will lose their hinting in the process. It cannot convert from PostScript to TrueType, and cannot rasterize TrueType fonts. When used to convert from a Type 1 or CFF font, it undoes subroutinization, so that each glyph contains all the drawing operators, rather than referring to subroutines for common path elements. However, it does have an option to apply subroutinization to the output font.
