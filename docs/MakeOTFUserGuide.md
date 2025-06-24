@@ -2,29 +2,36 @@
 
 ## **Overview**
 
-`makeotf` is a tool designed to create an OpenType® font from a source font file and from a text file containing high-level descriptions of OpenType layout features. It is designed to run as a command line tool: a command typed into the Terminal window on Mac OS® X, or in the DOS window on Windows®. Note that `makeotf` is only a compiler of font data, not a font editor.
+`makeotf` is a command-line tool designed to build OpenType® fonts from font source files, auxiliary text files, and text files containing high-level descriptions of OpenType layout features (“feature files”).
 
-`makeotf` requires a number of source files that can all be specified through options for the `makeotf` command:
-  * **`font`** - usually named `font.pfa` or `cidfont.ps`. This can be either a Type 1 or CID font file, a TrueType font file, or an OpenType/CFF font file. Note that only the glyph outlines are taken from the source font.
+`makeotf` requires a number of auxiliary files that can all be specified through options for the `makeotf` command:  
 
-  * **`features`** - a text file which provides the definitions for the OpenType layout feature rules, and specifies values for some of the OpenType table fields that will override the default values calculated by `makeotf`.
+  * **`font`** - usually named `font.ufo`, `cidfont.ps`, or `font.pfa`. This can be either a UFO file with CFF outlines, a Type 1 or CID font file, a TrueType font file, or an OpenType/CFF font file. Note that only the glyph outlines are taken from the source font.
 
-  * **`FontMenuNameDB`** - a text file which provides the Windows and Mac menu names for the font.
+  * **`features.fea`** – a text file which provides the definitions for the OpenType layout feature rules, and specifies values for some of the OpenType table fields that will override the default values calculated by `makeotf`.
 
-  * **`GlyphOrderAndAliasDB`** - this file serves three purposes. One purpose is to establish the glyph ID order in the font. Another is to allow glyphs in the output .otf file to have different names than the glyphs in the input source font data. This permits developers to use friendlier names during development of a font, and use different names in the final OpenType file. The third is to provide Unicode® values for the glyphs. `makeotf` will provide Unicode values by default for some glyphs, but not all.
+  * **`FontMenuNameDB`** – a suffix-less text file which provides menu names for the font family, and is used for establishing inter-font relationships (style linking). As such, fhe FMNDB is usually found in the root folder of a font family (and will be found there by `makeotf`).
 
-  * An additional file, **`fontinfo`**, is not required, but if present, will be examined for keywords that cause `makeotf` to set some specific options.
+  * **`GlyphOrderAndAliasDB`** - a suffix-less, spreadsheet-like text file which establishes the glyph order of the font. The GOADB file has two to three tab-separated columns per glyph name: final name, friendly name, Unicode override. Further purposes of the GlyphOrderAndAliasDB file are:
+  
+    * re-mapping of glyph names from “friendly” to production names. This permits developers to use human-readable names during development.
+    * provide Unicode® overrides for some glyphs. `makeotf` will set Unicode values for a number of known glyph names (governed by the AGD), or glyph names matching the `uniXXXX` notation, but cannot know all possible glyph names.
+    * provide code point multi-mapping. A typical example is the space glyph, which can be mapped to two code points – `uni0020` for space, and `uni00A0` for non-breaking space  
+  
+    The GOADB also is often found in the root folder of the family (or slope), and `makeotf` will find the file there.
+
+  * An additional suffix-less text file, **`fontinfo`**, is not required, but if present, will be examined for keywords that cause `makeotf` to set some specific options (such as `IsBoldStyle` or `IsItalicStyle` for setting style linking).
 
 In order to avoid having to enter the options to specify the necessary files every time you want to build an OpenType font, `makeotf` can save a font project file that stores all desired options. `makeotf` will always write the last set of options used, to a file named `current.fpr` located in the same directory as the input font file. (Project files can also be saved under other names).
 
-Options can be added to the ``makeotf`` command to set parameters that change how `makeotf` builds an OpenType font. When options conflict, the last one on the command line will override any earlier conflicting options.
+Options can be added to the `makeotf` command to set parameters that change how `makeotf` builds an OpenType font. When options conflict, the last one on the command line will override any earlier conflicting options.
 
 ## **Using `makeotf`**
 
 `makeotf` comes in two parts which can actually be called independently:
   * **``makeotfexe``** is a program written in C, and is actually the tool that builds the OpenType font file. It requires, however, that all the source files be explicitly specified with options on the command line.
 
-  * **``makeotf``** is a command shell that calls the Python™ script **``makeotf`.py`**. This will look for the source files in some standard locations, and fill in default values for options. It can also read the options needed from a project file (`current.fpr`), which means that for a particular font, one only needs to type-in all the options once. When **``makeotf`.py`** has gathered all the source files, it will call the **``makeotfexe``** program.
+  * **`makeotf`** is a command shell that calls the Python™ script **``makeotf`.py`**. This will look for the source files in some standard locations, and fill in default values for options. It can also read the options needed from a project file (`current.fpr`), which means that for a particular font, one only needs to type-in all the options once. When **``makeotf`.py`** has gathered all the source files, it will call the **``makeotfexe``** program.
 
 In general, one should invoke **``makeotf`.py`** with the `makeotf` command. This way, the last set of options used will always be recorded in a project file.
 
@@ -38,38 +45,43 @@ MyFontFamily/
 │   ├── MyFont-BoldItalic/
 │   │   ├── features
 │   │   ├── features.kern
-│   │   └── font.pfa
+│   │   └── font.ufo
 │   ├── MyFont-Italic/
 │   │   ├── features
 │   │   ├── features.kern
-│   │   └── font.pfa
+│   │   └── font.ufo
 │   └── features.family
 └── Roman/
     ├── MyFont-Bold/
     │   ├── features
     │   ├── features.kern
-    │   └── font.pfa
+    │   └── font.ufo
     ├── MyFont-Regular/
     │   ├── features
     │   ├── features.kern
-    │   └── font.pfa
+    │   └── font.ufo
     └── features.family
 ```
 The idea is that some data, such as the files `FontMenuNameDB` and `GlyphOrderAndAliasDB`, will be shared between all members of the type family, whereas other data will only apply to a subgroup of the family. By placing the shareable data at a higher level in the directory tree, one can avoid having multiple copies of the same data, which means there will be less files to edit, in case the data needs to be changed. This is most important for the `features.family` file.
 
 Usually, positioning rules such as kerning (`features.kern`) are specific to each font, but most (or all) of the substitution rules are likely to be the same for all fonts. A good practice is to have a feature file for each family member, in the same directory as the source font file, and then use an include statement to reference feature files located higher in the directory tree. In the example above, there are two separate `features.family` files, one for Roman and another for Italic. These can, in turn, be shared between all family members under each branch. The need for two different `features.family` files comes from the fact that Roman and Italic styles might not have the same number of substitution (GSUB) rules — Italic tends to have more.
 
-Once one has assembled all the necessary files, the next step is to open a command window — the Terminal program on Mac OS X, or the Command program on Windows —, and use the cd command to set the current working directory to the directory which contains the set of source files to compile the OpenType font:
+Once one has assembled all the necessary files, the next step is to open a command window — the Terminal program on macOS, or the cmd program on Windows — and to navigate to the directory which contains the set of source files to compile the OpenType font:
+
 ```bash
 cd <path to font directory>
 ```
-and then type the ``makeotf`` command, with the options needed. For example:
+
+then, execute the `makeotf` command, with the options needed. For example:
+
 ```bash
-`makeotf` –f myfont.pfa –ff myfeatures –b –r
+makeotf –f myfont.ufo –ff myfeatures –b –r
 ```
+
 or
+
 ```bash
-`makeotf` –fp myproject.fpr
+makeotf –fp myproject.fpr
 ```
 
 ## **`makeotf` options**
@@ -77,14 +89,14 @@ or
 | Option | Setting | Description |
 |--------|---------|-------------|
 |`–fp`| `<file path>` | Specify path to project file. If no path is given, the default is `current.fpr.` `makeotf` will read the options from this project file. The project file contains values only when they differ from the default value. The `–fp` option can be used with other options, but must always be first. Additional options will override those read from the project file. For example, `–fp release.fpr –o test.otf` will build an OpenType font with all the options in the release.fpr project file, but will write the output file as test.otf, instead of <PostScript-Name>.otf.|
-|`–f` | `<file path>` | Specify path to input font. If not provided, `makeotf` assumes the file name is font.pfa.|
+|`–f` | `<file path>` | Specify path to input font. If not provided, `makeotf` assumes the file name is `font.ufo` or `font.pfa`.|
 |`–o` | `<file path>` | Specify path to output font. If not provided, `makeotf` assumes the file name is `<PostScript-Name>.otf`.|
 |`–b` | | Set style to Bold. Affects style-linking. If not provided, `makeotf` assumes that the font is not bold.|
 |`–i` | | Set style to Italic. Affects style-linking. If not provided, `makeotf` assumes that the font is not italic.|
-|`–ff` | `<file path>` | Specify path to features file. If not provided, `makeotf` assumes the file name is features.|
-|`-gs` | | Omit any glyphs that are not named in the GOADB file. Works only if either the -ga or -r options is specified.|
+|`–ff` | `<file path>` | Specify path to features file. If not provided, `makeotf` assumes the file name is `features.fea` or `features`.|
+|`-gs` | | Omit any glyphs that are not named in the GOADB file. Works only if either the `-ga` or `-r` option is specified.|
 |`–mf` | `<file path>` | Specify path to FontMenuNameDB file. If not provided, `makeotf` will look in the current directory for a file named FontMenuNameDB, and then one directory up, and finally two directories up.|
-|`–gf` | `<file path>` | Specify path to GlyphOrderAndAliasDB file. If not provided, `makeotf` will look in the current directory for a file named GlyphOrderAndAliasDB, and then one directory up, and finally two directories up. Also, if this option is specified, and the `–r` or `–ga` options are NOT specified, the effect is to use the Unicode assignments from the third column of the GOADB without renaming the glyphs.|
+|`–gf` | `<file path>` | Specify path to the GlyphOrderAndAliasDB file. If not provided, `makeotf` will look in the current directory for a file named GlyphOrderAndAliasDB, and then one directory up, and finally two directories up. Also, if this option is specified, and the `–r` or `–ga` options are NOT specified, the effect is to use the Unicode assignments from the third column of the GOADB without renaming the glyphs.|
 |`–r` | | Set release mode. This option turns on subroutinization, applies the GlyphOrderAndAliasDB file, and removes the word Development from the name table Version (Name ID 5) string.|
 |`–S` | | Turn on subroutinization.|
 |`–ga` | | Apply the GlyphOrderAndAliasDB file. Use when the `–r` option is NOT specified.|
@@ -93,7 +105,7 @@ or
 |`–osbOff` | `<number>` | Turn off the specified bit number(s) in the OS/2 table fsSelection field. Can be used more than once to turn OFF more than one bit at a time. `–osbOff 7 –osbOff 8` will turn off bits 7 and 8. See section below on New OS/2 Bits.|
 |`-osv` | `<number>` | Set version number of the OS/2 table. The default value is 3 if none of the bits specified only in version 4 and later are used; otherwise, the default version is 4. See section below on New OS/2 Bits.|
 |`-addn` | | Replace the `.notdef` glyph in the source data (if any) with a standard `.notdef` glyph, that will match the font’s weight and width.|
-|`-adds` | | Create any Apple Mac Symbol glyphs missing from the font. Added glyphs will match the font’s weight and width.|
+|`-adds` | | Create any Mac Roman Symbol glyphs missing from the font. Added glyphs will match the font’s weight and width.|
 |`-serif` | | Specify that any added glyph will use the serif Multiple Master built-in glyph data.|
 |`-sans` | | Specify that any added glyphs will use the sans-serif Multiple Master builtin glyph data.|
 |`-cs` | | Override the heuristics, and specify the script ID for the Mac cmap subtable.|
@@ -111,7 +123,7 @@ or
 |`-nS`| |Turn off subroutinization.|
 |`-nga`| |Turn off applying the GlyphOrderAndAliasDB file|
 |`-naddn`| |Turn off adding a standard .notdef. Can be used to override a project file setting, otherwise has no effect.|
-|`-nadds`| |Turn off adding Apple symbol glyphs. Can be used to override a project file setting, otherwise has no effect.| 
+|`-nadds`| |Turn off adding MacRoman symbol glyphs. Can be used to override a project file setting, otherwise has no effect.| 
 
 Options are applied in the order in which they are specified: `–r –nS` will not subroutinize a font, but `–nS –r` will subroutinize a font. Option values are read (in order of increasing priority) from first the fontinfo file keyword/value pairs, then the specified project file, if any, and then from the command line, in order from left to right. 
 
@@ -137,7 +149,7 @@ The `FontMenuNameDB` file is used to specify font menu-naming information. It co
 
 Each `FontMenuNameDB` entry is composed of at least `Preferred Family name`, which is specified with the key `f=`, followed by the family name.
 
-In many programs’ font menus, the fonts will be listed in a cascading menu showing the Family names in the first level, followed by a pop-out list of Style names, containing all fonts that share the same Family name. In other programs, the menus will show a “flat” list of all fonts using the *Full name*. ``makeotf`` will build this by concatenating the `Family name`, a space character, and the `Style name`.
+In many programs’ font menus, the fonts will be listed in a cascading menu showing the Family names in the first level, followed by a pop-out list of Style names, containing all fonts that share the same Family name. In other programs, the menus will show a “flat” list of all fonts using the *Full name*. `makeotf` will build this by concatenating the `Family name`, a space character, and the `Style name`.
 
 However, additional names may need to be supplied. This happens because style-linking (selecting another font of the same family by applying Bold or Italic options to the current font) only allows for families to have up to four members. This means that only four fonts can share the same Family name. If the family has more than four members, or has members which are not style-linked, it is then necessary to divide the family into sub-families which are style-linked, and to provide each sub-family with a unique compatible family menu name.
 
@@ -221,7 +233,7 @@ To use accented characters in Latin menu names, one needs two `f=` entries: one 
 
 In general, the `f=`, `s=`, and `l=` can be extended to set non-Latin strings by adding the triplet (platform code, script code, language code) after the equal sign (=). The values are the same as described for the name table name ID strings. For example:
 
-|**#### 小塚明朝 Pro (Kozuka Mincho® Pro)**||
+|**小塚明朝 Pro (Kozuka Mincho® Pro)**||
 |-----------------------------------------|---|
 |`[KozMinPro-Bold]`                       ||
 |`f=3,1,0x411,\5c0f\585a\660e\671d Pro`   | Windows, Unicode, Japanese |
@@ -287,7 +299,7 @@ Note that `makeotf` no longer assigns glyphs Unicode values from the Private Use
 
 ## **fontinfo**
 
-The fontinfo file is a simple text file containing key-value pairs. Each line contains two white-space separated fields. The first field is a keyword, and the second field is the value. `makeotf` will look for a fontinfo file in the same directory as the source font file, and, if found, use it to set some default values. These values will be overridden if they are also set by a project file, and then by any ``makeotf`` command line options. The keywords and values currently supported are:
+The fontinfo file is a simple text file containing key-value pairs. Each line contains two white-space separated fields. The first field is a keyword, and the second field is the value. `makeotf` will look for a fontinfo file in the same directory as the source font file, and, if found, use it to set some default values. These values will be overridden if they are also set by a project file, and then by any `makeotf` command line options. The keywords and values currently supported are:
 
 | Keyword | Values | Effect |
 |---------|--------|--------|
@@ -319,7 +331,7 @@ When looking for default CID CMap files, `makeotf` uses the following rules:
   | Adobe-CNS1:   | B5pc-H      | UniCNS-UTF32-H | UniCNS-UTF32-V |
   | Adobe-Korea1: | KSCpc-EUC-H | UniKS-UTF32-H  | UniKS-UTF32-V  |
 
-  If one wants to use a CMap, which would not be found by these assumptions, one must specify them explicitly on the command line while using ``makeotf``.
+  If one wants to use a CMap, which would not be found by these assumptions, one must specify them explicitly on the command line while using `makeotf`.
 
 For further information on CMaps, please read the many [Adobe Technical Notes](https://github.com/adobe-type-tools/cmap-resources)
 
@@ -327,7 +339,7 @@ For further information on CMaps, please read the many [Adobe Technical Notes](h
 A UVS file is a list of records, each of which specifies the glyph which should be displayed for a given combination of a Unicode encoding value and a Unicode Variation Selector. You can read about Unicode Variation Sequence in the publication “Unicode Technical Standard #37 , Ideographic Variation Database , at http://unicode.org/reports/tr37/. The format depends on the source font format: CID-keyed fonts require three fields in each record, non-CID fonts require only two.
 
 #### For CID-keyed fonts:
-The ``makeotf`` command will look for a UVS file under FDK/Tools/SharedData/Adobe CMAPS/<R-OS>, where <R-O-S> stands for the font’s CID Registry-Order-Supplement. The file will be assumed to be named “`<R-O>_sequences.txt`. For a CID font with the R-O-S “Adobe-Japan1-6”. the default UVS file path would be “FDK/Tools/SharedData/Adobe CMAPS/Adobe-Japan1-6/Adobe-Japan1_sequences.txt“ . The option `-ci <path>` may be used to specify a UVS file path other than the default.
+The `makeotf` command will look for a UVS file under FDK/Tools/SharedData/Adobe CMAPS/<R-OS>, where <R-O-S> stands for the font’s CID Registry-Order-Supplement. The file will be assumed to be named “`<R-O>_sequences.txt`. For a CID font with the R-O-S “Adobe-Japan1-6”. the default UVS file path would be “FDK/Tools/SharedData/Adobe CMAPS/Adobe-Japan1-6/Adobe-Japan1_sequences.txt“ . The option `-ci <path>` may be used to specify a UVS file path other than the default.
 
 The file format is an ASCII text file. Each line represents one Unicode Variation Sequence(UVS). A line may be blank, or contain a comment that starts with the character “#”.
 
@@ -384,7 +396,7 @@ Yet another issue is that WPF uses heuristics applied to the font menu names to 
 
 When bit 9 is on, programs that support the CSS2 font specification standards will consider the font to have the Oblique style, otherwise not. If the document specifies an Oblique style font, and no Oblique font is present within the CSS font family, then the application may synthetically create an Oblique style by slanting the base font. This will occur even if there is an Italic font within the same CSS font family. However, if a document font specification requires an Italic style, but only an Oblique font is available, then the latter will be used. An additional proposal suggests that if this bit is not set and the OS/2 version is 4 or greater, then the application would look for Windows platform names ID 21 and 22. If present, name ID 21 would supply the CSS compatible family name, and name ID 22 would supply the CSS-compatible property name. As of the writing of this document, the status of this proposal is still uncertain – please check the latest OpenType specification. If this proposal is accepted, the additional names can be specified in the feature file.
 
-Note that if any of these three new bits is turned on, with the option `–osbOn <n>`, then ``makeotf`` will require that all three values be explicitly set to be on or off. This is because, if any of new the bits is set on, ``makeotf`` will by default set the OS/2 version number to 4. When the version number is 4, then both the on and the off setting has a specific meaning for each bit.
+Note that if any of these three new bits is turned on, with the option `–osbOn <n>`, then `makeotf` will require that all three values be explicitly set to be on or off. This is because, if any of new the bits is set on, `makeotf` will by default set the OS/2 version number to 4. When the version number is 4, then both the on and the off setting has a specific meaning for each bit.
 
 ## **Synthetic Glyphs**
 
