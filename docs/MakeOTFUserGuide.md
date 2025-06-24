@@ -237,26 +237,21 @@ If the key `c=` is used, then `makeotf` will build the older style name table. I
 
 ## **GlyphOrderAndAliasDB** (GOADB)
 
-The GOADB file is used to rename and to establish an order for the glyphs in a font.
-It is a simple text file with one line per glyph name. Each line contains at least two fields,
-and optionally a third field.
-Fields within a line are tab separated
-(technically any amount of a whitespace works but a single ASCII TAB is preferred).
-Blank lines are ignored.
-Lines beginning with `#` are comments and are also ignored.
-The first field is the final glyph name to be used in the output font.
-The second field is the ‘friendly’ name used in the source font data. 
-The third field is a Unicode value, specified in the form `uniXXXX` or `uXXXX[XX]` (see [note](#unicode_note)). 
-One may specify more than one Unicode value for a glyph by giving a comma separated list of values, for example: `uni0020,uni00A0`. 
+The GOADB file is used to rename and to establish an order for the glyphs in a font. It is a simple text file with one line per glyph name. Each line contains at least two columns, and optionally a third column.  
+Colums are tab-separated (technically any amount of a whitespace works but a single tab character is preferred).  
+Blank lines are ignored. Lines beginning with `#` are comments and are also ignored.
+
+* The first column is the final glyph name to be used in the output font.
+* The second column is the ‘friendly’ name used in the source font data. 
+* The third column is a Unicode value, specified in the form `uniXXXX` or `uXXXX[XX]` (see [note](#unicode_note)). 
+
+It is possible to specify more than one Unicode value for a glyph by giving a comma-separated list of values, for example: `uni0020,uni00A0`. 
 The `XXXX` hexadecimal values *must* be either numerals (0-9) or uppercase letters. Values containing lowercase letters will be ignored. 
 The source font is not required to have any glyphs that are named in the `GlyphOrderAndAliasDB` file.
 
+
 <a name="unicode_note"></a>
-Note: Unicode values can be used in the form `uniXXXX` or `uXXXX[XX]` where `XXXX[XX]` is a hexadecimal Unicode value.
-The number of `X` is determined by the codepoint. For example, `U+0903` can be written as either 
-`uni0903` or `u0903`. If the codepoint requires 5 or 6 digits, for example `U+F0002` or `U+F00041`, 
-then the format must contain the same number of digits: `uF0002` or `uF00041`. This only applies when 
-assigning Unicode values using column 3.
+Note: Unicode values can be used in the form `uniXXXX` or `uXXXX[XX]` where `XXXX[XX]` is a hexadecimal Unicode value. The number of `X` is determined by the codepoint. For example, `U+0903` can be written as either `uni0903` or `u0903`. If the codepoint requires 5 or 6 digits, for example `U+F0002` or `U+F00041`, then the format must contain the same number of digits: `uF0002` or `uF00041`. This only applies when assigning Unicode values using column 3.
 
 
 It should be noted that the ordering, renaming, and Unicode override operations are applied only if the `–r` option or the `-ga` option is specified. These operations work as follows:
