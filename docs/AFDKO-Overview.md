@@ -76,12 +76,9 @@ This allows you to cut and paste the entire binary block of a font table from on
 
 ### `otfstemhist`
 
-This program is actually the same tool as `otfautohint` but with a different
-"face". It provides reports which help in selecting the global hint data and
-alignment zones for CFF hinting. You should look at the reports from this
-tool in order to select the most common stem widths, and then use a program such
-as FontLab or RoboFont to set the values in the font. This should be done before
-hinting the font.
+`otfstemhist` is a tool to help making decisions for setting global hinting values.   
+In default mode, `otfstemhist` outputs reports which list stems in order of occurrence. In zone mode (`-z`), `otfstemhist` reports on the top- and bottom extremes of glyphs.
+The resulting report files can be used to pick alignment zones and the most common stem widths, which should be transferred to the font source files before hinting.
 
 ### `ttfcomponentizer`
 
@@ -89,7 +86,7 @@ Componentizes glyphs of a TrueType font with information from an external UFO fo
 
 ### `tx`
 
-This tool can be used to convert most font formats to CFF or Type 1 fonts. TrueType fonts will lose their hinting in the process. It cannot convert from PostScript to TrueType, and cannot rasterize TrueType fonts. When used to convert from a Type 1 or CFF font, it undoes subroutinization, so that each glyph contains all the drawing operators, rather than referring to subroutines for common path elements. However, it does have an option to apply subroutinization to the output font.
+`tx` can be used to convert most font formats to CFF, Type 1, or UFO format. TrueType fonts will lose their hinting in the process. `tx` cannot convert from PostScript to TrueType, and cannot rasterize TrueType fonts. When used to convert from a Type 1 or CFF font, it undoes subroutinization, so that each glyph contains all the drawing operators, rather than referring to subroutines for common path elements. However, it does have an option to apply subroutinization to the output font.
 
 ### `type1`/`detype1`
 
@@ -103,7 +100,7 @@ This program can report data from an OpenType font in a variety of ways. All tab
 
 ### `tx`
 
-This tool has two modes that are useful for proofing. With the `-bc` option, it will rasterize a glyph to the command line window, using ASCII characters. This is surprisingly useful when you want a quick look at a glyph. With the `-pdf` option, it will write a PDF file which shows the glyphs in the font, either 320 per page or 1 per page.
+`tx` has a `-pdf` mode which is useful for proofing. This mode will write a PDF file which shows the all the glyphs in the input file, either as an overview at 320 glyphs per page, or a detailed view with 1 glyph per page.
 
 ### `ttx`
 
@@ -139,7 +136,7 @@ Note that the tools ending in “plot” are all simply small command-file scrip
 
 ### `otfautohint`
 
-The auto-hinting program will report at length about hinting issues. Some of these you can ignore, such as reports about near misses when a stem could be controlled by a hint-zone but is just a little too wide or too narrow. By adjusting either the stem widths or the hint-zones according to these reports, you can include more stems in the set that are controlled by hints, but you can also reasonably decide that is not worth the effort. However, many complaints do need fixing, such not having nodes at vertical or horizontal extremes of a curve.
+In `-v` (verbose) mode, `otfautohint` will report “near misses” of a stem or alignment zone. While this output can be informative and reveal drafting errors (such as a glyph missing an alignment zone), these reports should not influence conscious design decisions.
 
 ### `checkoutlinesufo`
 
@@ -160,4 +157,4 @@ This tool is used to test if two fonts are functionally the same. It sorts and m
 
 ### `tx`
 
-This tool has a couple of modes that are good for testing. It will show only data about the font program within a font file, either CFF or TrueType. The `-dump` option is good for looking at a text report of the CFF font global and glyph data. The `-bc` option takes additional option that outputs a hash of the rasterized glyphs to a file. This is good for finding if hinting has changed in a font; if the hash files for a set of glyphs are the same between two fonts, then the glyphs rasterized identically at the specified point size. You can use this to judge if fonts are functionally equivalent, even if the outlines are not exactly the same. Finally, converting any font to CFF will yield error reports if the font data is not syntactically correct, and if any glyphs are not hinted.
+`tx` has a couple of modes that are good for testing. It will show only data about the font program within a font file, either CFF or TrueType. The `-dump` option is good for looking at a text report of the CFF font global and glyph data. Finally, converting any font to CFF will yield error reports if the font data is not syntactically correct, and if any glyphs are not hinted.
