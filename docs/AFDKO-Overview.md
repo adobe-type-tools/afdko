@@ -5,22 +5,21 @@ Adobe Font Development Kit for OpenType (AFDKO) Overview
 
 # 1. Introduction
 
-This release of the Adobe Font Development Kit for OpenType (AFDKO) contains a set of tools used to make OpenType fonts by adding the OpenType-specific data to a TrueType or Type1 font. It does not offer tools for designing or editing glyphs. These command line programs will allow you to build an OpenType font from an existing font, verify the contents of the font, and proof the font on screen or on paper. The AFDKO also contains useful technical documentation and some example font source material. Note! Although the FDK directory tree contains a number of Python scripts, none of them can be used by double-clicking on them; they can only be called by typing commands into a command line window.
+The Adobe Font Development Kit for OpenType (AFDKO) contains a set of tools for making make OpenType fonts by adding the OpenType-specific data to a TrueType or Type1 font. These command line programs will allow you to build an OpenType font from an existing font- or UFO file, to verify the contents of the font, and to proof the font on screen or on paper. The AFDKO also contains useful technical documentation and some example font source material.
 
 See the [`afdko`](https://github.com/adobe-type-tools/afdko) home page for installation instructions.
 
-Once the AFDKO is installed, all the command line programs can be run by entering the command name in a Terminal window (OSX, Windows, Linux), along with the necessary option text. All command line tools provide usage and help text with the options `-u` and `-h`.
+Once the AFDKO is installed, all the command line programs can be run by entering the command name in a Terminal window, along with the necessary arguments. All command line tools provide usage (`-u`) and help (`-h`) information.
 
 # 2. Overview of Programs
 
-The tools fall into several different functional groups.
+The AFDKO tools fall into several different functional groups.
 
 ## 2.1 Making/editing fonts
 
 ### `otfautohint`
 
-This program is the Adobe auto-hinter. It is used by several AFDKO tools.
-otfautohint can be used with UFO files (cubic outlines), and OpenType/CFF or Type 1 fonts.
+`otfautohint` uses global hinting information (stems and alignment zones) to apply hints to a font or font source file. `otfautohint` can be used with UFO files (cubic outlines), and OpenType/CFF or Type 1 fonts.
 
 ### `checkoutlinesufo`
 
@@ -28,9 +27,9 @@ With the `-e` option, `checkoutlinesufo` is used to remove overlaps. When workin
 
 ### `makeotf`
 
-This program will build an OpenType/CFF font from a font (source) file and auxiliry metadata files.
+This program will build an OpenType/CFF font from a font (source) file and auxiliary metadata files.
 Typical input formats are
-* UFO (Unified Font Object, font source format, cubic outlines)
+* UFO (font source format, cubic outlines)
 * PFA (Type 1 font)
 * TXT (decrypted plain-text version of a Type 1 font, obtained via `detype1`)
 * TTF (TrueType source font file)
@@ -47,12 +46,12 @@ Step 2 of 2 to build a CFF Variable Font – this script will use a .designspace
 
 ### `makeinstancesufo`
 
-This script will build UFO instances from a .designspace file and a set of compatible UFO masters, to prepare for building static OTF fonts. By default, the instances are run through `checkoutlinesufo` (for overlap removal) and `otfautohint` (for PS hinting). Finally, the UFO instances are normalized.  
+`makeinstancesufo` is a tool to build UFO instances from a .designspace file and a set of compatible UFO masters, to prepare for building static OTF fonts. By default, the instances are run through `checkoutlinesufo` (for overlap removal) and `otfautohint` (for PS hinting). Finally, the UFO instances are normalized.  
 More info on designspace files and interpolation systems can be found at [Superpolator.com](https://superpolator.com/designspace.html) and [DesignSpaceDocument Specification](https://fonttools.readthedocs.io/en/latest/designspaceLib/index.html).
 
 ### `mergefonts`
 
-This program will merge glyphs from one font into another, optionally copying a subset from the source fonts, and changing the names of the glyphs. It can also be used to subset and change the glyph names in a font. By using the same font more than once as a source with different mapping files, glyphs can be duplicated under other names. It can also convert a named-keyed font to a CID-keyed font.
+This program will merge glyphs from one font into another, optionally copying a subset from the source fonts, and changing the names of the glyphs. It can also be used to subset and change the glyph names in a font. By using the same font more than once as a source with different mapping files, glyphs can be duplicated under other names. `mergefonts` can also convert a named-keyed font to a CID-keyed font.
 
 ### `otc2otf`
 
@@ -68,21 +67,20 @@ Converts OpenType-CFF fonts to TrueType.
 
 ### `rotatefont`
 
-This tool will rotate and translate glyphs in a font, including the hints. However, hints will be discarded if the rotation is not a multiple of 90 degrees.
+This tool will rotate and translate glyphs in a font, including the hints (rotated Latin glyphs are common in CJK fonts). Hints will be discarded if the rotation is not a multiple of 90 degrees.
 
 ### `sfntedit`
 
-This allows you to cut and paste the entire binary block of a font table from one font to another. You do this by first using it on a source font with the `-x` option to copy a table from the source font to a separate file, and then using it with the `-a` option to add that table to a target font. It can also be used to simply delete a table, and to fix the font table checksums.
+`sfntedit` allows cutting and pasting the entire binary block of a font table from one font to another. From a source font, tables can be extracted to a separate file with the `-x` option, and then pasted to a target font with the `-a` option. `sfntedit` can also be used to simply delete a table, and to fix the font table checksums.
 
 ### `otfstemhist`
 
-`otfstemhist` is a tool to help making decisions for setting global hinting values.   
-In default mode, `otfstemhist` outputs reports which list stems in order of occurrence. In zone mode (`-z`), `otfstemhist` reports on the top- and bottom extremes of glyphs.
-The resulting report files can be used to pick alignment zones and the most common stem widths, which should be transferred to the font source files before hinting.
+`otfstemhist` is a tool to help preparing global hinting values. In default mode, `otfstemhist` outputs reports which list stems in order of occurrence. In zone mode (`-z`), `otfstemhist` reports on the top- and bottom extremes of glyphs.  
+The resulting report files can be used to pick alignment zones common stem widths, which should be transferred to the UFO source files before running `otfautohint`.
 
 ### `ttfcomponentizer`
 
-Componentizes glyphs of a TrueType font with information from an external UFO font. The script only supports components that are not scaled, rotated or flipped.
+Componentizes glyphs of a TrueType font, using component information from an external UFO file. The process only supports components that are not scaled, rotated or flipped.
 
 ### `tx`
 
@@ -90,7 +88,10 @@ Componentizes glyphs of a TrueType font with information from an external UFO fo
 
 ### `type1`/`detype1`
 
-These two programs will respectively decrypt or encrypt a Type 1 font to and from a plain-text representation. This is useful for fixing or controlling individual data fields. It is also good for copying a specific path element to many glyphs.
+* `detype1`: decrypt a Type 1 font file (PFA/PFB) to a human-readable plain-text file.
+* `type1`: encrypt the above text file back to Type 1.
+
+This workflow is useful for fixing or checking individual data fields (for example the alignment zones and stems, which are found in the encyrypted portion of a Type 1 font). It is also useful for copying a specific path element to many glyphs.
 
 ## 2.2 Proofing
 
@@ -100,37 +101,38 @@ This program can report data from an OpenType font in a variety of ways. All tab
 
 ### `tx`
 
-`tx` has a `-pdf` mode which is useful for proofing. This mode will write a PDF file which shows the all the glyphs in the input file, either as an overview at 320 glyphs per page, or a detailed view with 1 glyph per page.
+`tx` has a `-pdf` mode which is useful for proofing. This mode will write a PDF file which shows the all the glyphs in the input file. By default, a font overview at 320 glyphs per page is written. With option `-1`, this overview is extended by a page for every glyph in the input font, detailing point coordinates, alignment zones, metrics, etc.
+Since the PDF file is just dumped to stdout, the output needs to be redirected:  
+`tx -pdf -1 font.ufo > output.pdf`
 
-### `ttx`
+### `*plot`
 
-The XML format output offers a useful report for most of the data in an OpenType font.
+All the `*plot` tools are similar in functionality, and all accept OpenType, Type 1, and UFO input files.  
+The `*plot` tools are simply small command-file scripts that call a single Python script with different options. The `-h` option for all these scripts will produce the same list of **all** the options supported by the single Python script. You can customize the PDF proofs by providing additional arguments.
 
-### `charplot`
+##### `charplot`
 
-Make a PDF file showing all the glyphs in the font. Shows one glyph per page. Shows the nodes and control points.
+`charplot` creates a PDF file showing all the glyphs in the font, one glyph per page, with nodes and control points. The output is very similar to `tx -pdf -1`, with the addition of a filled glyph preview, but without the alignment zones. 
 
-### `digiplot`
+##### `digiplot`
 
-Make a PDF file showing all the glyphs in the font. Format favored by CJK developers; shows a large filled outline, useful glyph metrics, and a larger outline with the nodes marked.
+`digiplot` creates a PDF proof very similar to `charplot`, showing all the glyphs in the font, two glyphs per page. Useful for CJK projects, characters are shown in relationship to an em-box.
 
-### `fontplot`
+##### `fontplot`
 
-Make a PDF file showing all the glyphs in the font. This fills a page with many glyphs, and shows just the filled outlines at a small point size, with some info around each glyph. Works with OpenType fonts and Type 1 fonts.
+`fontplot` creates a PDF file showing all the glyphs in the font. Similar but inferior to `tx -pdf`. The resulting pages show just the filled outlines at a small point size, with some info around each glyph. 
 
-### `fontsetplot`
+##### `fontsetplot`
 
-Make a PDF file showing all the glyphs in in a list fonts. The glyphs are shown in glyph ID order, with a fixed spacing of one em, with the glyphs from one font in one line, so that all glyphs with the same glyph name from different fonts should be in a single column. This is used to visually confirm that that charsets are the same, and that glyph shapes are similar. It is useful for catching cases where a place-holder glyph outline was pasted in for a glyph name, but never corrected to the correct shape. The fonts are sorted first by length of character set, then by alphabetic order of the character sets, then by PostScript name.
+`fontsetplot` creates a spreadsheet-like PDF file, allowing the comparison of glyphs (rows) in a number of fonts (columns). Glyphs are shown in GID order, with a fixed spacing of one em, so that all glyphs with the same glyph name should align in a single column. The input fonts are sorted first by length of character set, then by alphabetic order of the character sets, then by PostScript name.
 
-### `hintplot`
+##### `hintplot`
 
-Shows one glyph per page. Shows hints and alignment zones.
+`hintplot` creates a PDF proof showing all glyphs in the font with applied hints and applicable alignment zones. Four glyphs per page.
 
-### `waterfallplot`
+##### `waterfallplot`
 
-Shows a waterfall of point sizes for all glyphs in the font. This is used to evaluate hinting. In order to allow hinting to be seen, the font is embedded in the PDF, and glyphs are referenced by char code. Does not yet work with TrueType and CID-keyed fonts.
-
-Note that the tools ending in “plot” are all simply small command-file scripts that call a single Python script with different options. The `-h` option for all these scripts will produce the same list of **all** the options supported by the single Python script. You can customize the PDF proofs by providing additional options. Look at the command files; these can be edited to supply additional options to the main script. This was completed shortly before the FDK was released, and has seen little use. It will improve over time. It uses the OpenSource Python package “Pickle” to create the PDF documents, and Just van Rossum's fontTools Python package for accessing the font data.
+Creates a waterfall of point sizes for all glyphs in the font, which is used to evaluate hinting. In order to allow for the hinting to be seen, the font is embedded in the PDF, and glyphs are referenced by char code. Please note that not all PDF viewers interpret glyph hinting, so use a known-good PDF viewer (Adobe Acrobat).
 
 ## 2.3 Validation
 
@@ -140,7 +142,7 @@ In `-v` (verbose) mode, `otfautohint` will report “near misses” of a stem or
 
 ### `checkoutlinesufo`
 
-This tool can be used to report on the general quality of glyph outline data,  reporting outline overlaps, collinear points, and flat curves.
+This tool reports on the general quality of glyph outline data, by flagging outline overlaps, collinear points, and flat curves.
 
 ### `comparefamily`
 
@@ -153,8 +155,8 @@ This tool does a low-level comparison of two OpenType font files. It is most use
 
 ### `ttxn`
 
-This tool is used to test if two fonts are functionally the same. It sorts and modifies the output from the ttx and tx tools to build a normalized text dump that eliminates differences due to issues such as OTL table record order, glyph order and subroutinization differences. It writes one file for each table in the font, which can be `diff`ed in the next step. `ttxn` It is particularly useful in comparing older and newer versions of the same font.
+This tool is used to test if two fonts are functionally the same. It sorts and modifies the output from the `ttx` and `tx` tools to build a normalized text dump that eliminates differences due to issues such as OTL table record order, glyph order, and subroutinization differences. It writes one file for each table in the font, which can be `diff`ed in a further step. `ttxn` is particularly useful in comparing older and newer versions of the same font.
 
 ### `tx`
 
-`tx` has a couple of modes that are good for testing. It will show only data about the font program within a font file, either CFF or TrueType. The `-dump` option is good for looking at a text report of the CFF font global and glyph data. Finally, converting any font to CFF will yield error reports if the font data is not syntactically correct, and if any glyphs are not hinted.
+`tx` has a number of modes that are useful for testing. It will show only data about the font program within a font file, either CFF or TrueType. The `-dump` option is good for looking at a text report of the CFF font’s global and glyph data. Finally, converting any font to CFF will yield error reports if the font data is not syntactically correct, and if any glyphs are not hinted.
