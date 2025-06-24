@@ -94,9 +94,6 @@ makeotf –f myfont.ufo –ff myfeatures –b –r
 |`–osbOff` | `<number>` | Turn off the specified bit number(s) in the OS/2 table fsSelection field. Can be used more than once to turn OFF more than one bit at a time. `–osbOff 7 –osbOff 8` will turn off bits 7 and 8. See section below on New OS/2 Bits.|
 |`-osv` | `<number>` | Set version number of the OS/2 table. The default value is 3 if none of the bits specified only in version 4 and later are used; otherwise, the default version is 4. See section below on New OS/2 Bits.|
 |`-addn` | | Replace the `.notdef` glyph in the source data (if any) with a standard `.notdef` glyph, that will match the font’s weight and width.|
-|`-adds` | | Create any Mac Roman Symbol glyphs missing from the font. Added glyphs will match the font’s weight and width.|
-|`-serif` | | Specify that any added glyph will use the serif Multiple Master built-in glyph data.|
-|`-sans` | | Specify that any added glyphs will use the sans-serif Multiple Master builtin glyph data.|
 |`-cs` | | Override the heuristics, and specify the script ID for the Mac cmap subtable.|
 |`-cl`| | Override the heuristics, and specify the language ID for the Mac cmap subtable.|
 |`-cm` |`<file path>` | Specify path to CID CMap encoding file for the font Mac encoding. (CID-keyed fonts only)|
@@ -382,34 +379,6 @@ Yet another issue is that WPF uses heuristics applied to the font menu names to 
 When bit 9 is on, programs that support the CSS2 font specification standards will consider the font to have the Oblique style, otherwise not. If the document specifies an Oblique style font, and no Oblique font is present within the CSS font family, then the application may synthetically create an Oblique style by slanting the base font. This will occur even if there is an Italic font within the same CSS font family. However, if a document font specification requires an Italic style, but only an Oblique font is available, then the latter will be used. An additional proposal suggests that if this bit is not set and the OS/2 version is 4 or greater, then the application would look for Windows platform names ID 21 and 22. If present, name ID 21 would supply the CSS compatible family name, and name ID 22 would supply the CSS-compatible property name. As of the writing of this document, the status of this proposal is still uncertain – please check the latest OpenType specification. If this proposal is accepted, the additional names can be specified in the feature file.
 
 Note that if any of these three new bits is turned on, with the option `–osbOn <n>`, then `makeotf` will require that all three values be explicitly set to be on or off. This is because, if any of new the bits is set on, `makeotf` will by default set the OS/2 version number to 4. When the version number is 4, then both the on and the off setting has a specific meaning for each bit.
-
-## **Synthetic Glyphs**
-
-`makeotf` includes two Multiple Master fonts built-in, one serif and one sans-serif. With these it can synthesize glyphs that match (more or less) the width and weight of the source font. It requires the glyphs zero and O to be present in the font, in order to determine the required weight and width. If the option `–adds` is used, the list of glyphs to generate will be derived from the concatenation of the following three groups of glyphs:
-  1) Euro
-  2) Apple Symbol glyphs. These glyphs were formerly supplied by the Macintosh ATM™ and the Laserwriter® drivers. This is no longer true for OpenType fonts.
-  3) A miscellany of glyphs missing from some of the Adobe Type Library fonts, which were just a few glyphs short of containing the full Adobe PostScript Standard glyph set.
-
-| Synthetic Glyphs |                |               |
-|------------------|----------------|---------------|
-| € Euro           | ∆ Delta        | Ω Omega       |
-| ≈ approxequal    | ^ asciicircum  | ~ asciitilde  |
-| @ at             | \ backslash    | \| bar        |
-| ¦ brokenbar      | ¤ currency     | † dagger      |
-| ‡ daggerdbl      | ° degree       | ÷ divide      |
-| = equal          | ℮ estimated    | ⁄ fraction    |
-| > greater        | ≥ greaterequal | ∞ infinity    |
-| ∫ integral       | < less         | ≤ lessequal   |
-| ℓ litre          | ¬ logicalnot   | ◊ lozenge     |
-| − minus          | × multiply     | ≠ notequal    |
-| № numbersign     | ½ onehalf      | ¼ onequarter  |
-| ¶ paragraph      | ∂ partialdiff  | ‰ perthousand |
-| π pi             | + plus         | ± plusminus   |
-| ∏ product        | " quotedbl     | ' quotesingle |
-| √ radical        | § section      | ∑ summation   |
-| ¾ threequarters  | 0 zero         |               |
-
-The glyphs are synthesized from the MM fonts which `makeotf` has built-in. It will try to match the glyph width of the zero and the dominant stem width of the target font. However, `makeotf` cannot stretch the MM font data to match very thick strokes, very wide glyphs, and it cannot match the design’s stem contrast.
 
 ---
 
