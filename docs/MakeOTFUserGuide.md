@@ -22,18 +22,14 @@
 
   * An additional suffix-less text file, **`fontinfo`**, is not required, but if present, will be examined for keywords that cause `makeotf` to set some specific options (such as `IsBoldStyle` or `IsItalicStyle` for setting style linking).
 
-In order to avoid having to enter the options to specify the necessary files every time you want to build an OpenType font, `makeotf` can save a font project file that stores all desired options. `makeotf` will always write the last set of options used, to a file named `current.fpr` located in the same directory as the input font file. (Project files can also be saved under other names).
-
-Options can be added to the `makeotf` command to set parameters that change how `makeotf` builds an OpenType font. When options conflict, the last one on the command line will override any earlier conflicting options.
-
 ## **Using `makeotf`**
 
 `makeotf` comes in two parts which can actually be called independently:
   * **``makeotfexe``** is a program written in C, and is actually the tool that builds the OpenType font file. It requires, however, that all the source files be explicitly specified with options on the command line.
 
-  * **`makeotf`** is a command shell that calls the Python™ script **``makeotf`.py`**. This will look for the source files in some standard locations, and fill in default values for options. It can also read the options needed from a project file (`current.fpr`), which means that for a particular font, one only needs to type-in all the options once. When **``makeotf`.py`** has gathered all the source files, it will call the **``makeotfexe``** program.
+  * **`makeotf`** is a command shell that calls the Python™ script **``makeotf`.py`**. This will look for the source files in some standard locations, and fill in default values for options. When **``makeotf`.py`** has gathered all the source files, it will call the **``makeotfexe``** program.
 
-In general, one should invoke **``makeotf`.py`** with the `makeotf` command. This way, the last set of options used will always be recorded in a project file.
+In general, one should invoke **``makeotf`.py`** with the `makeotf` command. 
 
 The first step in using `makeotf` is to assemble the source files. It is often a good idea to organize the files in a directory tree, like this:
 
@@ -78,17 +74,10 @@ then, execute the `makeotf` command, with the options needed. For example:
 makeotf –f myfont.ufo –ff myfeatures –b –r
 ```
 
-or
-
-```bash
-makeotf –fp myproject.fpr
-```
-
 ## **`makeotf` options**
 
 | Option | Setting | Description |
 |--------|---------|-------------|
-|`–fp`| `<file path>` | Specify path to project file. If no path is given, the default is `current.fpr.` `makeotf` will read the options from this project file. The project file contains values only when they differ from the default value. The `–fp` option can be used with other options, but must always be first. Additional options will override those read from the project file. For example, `–fp release.fpr –o test.otf` will build an OpenType font with all the options in the release.fpr project file, but will write the output file as test.otf, instead of <PostScript-Name>.otf.|
 |`–f` | `<file path>` | Specify path to input font. If not provided, `makeotf` assumes the file name is `font.ufo` or `font.pfa`.|
 |`–o` | `<file path>` | Specify path to output font. If not provided, `makeotf` assumes the file name is `<PostScript-Name>.otf`.|
 |`–b` | | Set style to Bold. Affects style-linking. If not provided, `makeotf` assumes that the font is not bold.|
@@ -116,16 +105,12 @@ makeotf –fp myproject.fpr
 |`-ci`|`<file path>`| Specify path to Unicode Variation Sequence specification file.|
 |`-dbl`| |Map glyph names to two Unicode values rather than one. This was the default behavior of `makeotf` in FDK 1.6 and earlier. The Adobe Type Department now discourages this practice. The option exists only to allow building fonts that match original versions. See ``makeotf` –h` for the hard-coded list of glyphs.|
 |`-dcs`| |Set OS/2.DefaultChar to the Unicode value for `space`, rather than `.notdef`. The latter is correct by the OT spec, but QuarkXPress 6.5 requires the former in order to print OTF/CFF fonts.|
-|`-fi` |`<file path>`| Path to the `fontinfo` file. If no path is given, the default is to look for first `fontinfo`, then `cidfontinfo`, in the current directory. Used to set some default values. This are overridden by any conflicting settings in the project file and then by command line options. This option is processed before any others, so if the path is relative, it is relative to the current working directory. All other relative paths are relative so the source font’s parent directory.|
+|`-fi` |`<file path>`| Path to the `fontinfo` file. If no path is given, the default is to look for first `fontinfo`, then `cidfontinfo`, in the current directory. Used to set some default values.|
 |`-sp`|`<file path>`|Save the current options to the file path provided, as well as to the current.fpr file.|
-|`-nb`| |Turn off the Bold style. Can be used to override a project file setting, otherwise has no effect.|
-|`-ni`| |Turn off the Italic style. Can be used to override a project file setting, otherwise has no effect.|
 |`-nS`| |Turn off subroutinization.|
 |`-nga`| |Turn off applying the GlyphOrderAndAliasDB file|
-|`-naddn`| |Turn off adding a standard .notdef. Can be used to override a project file setting, otherwise has no effect.|
-|`-nadds`| |Turn off adding MacRoman symbol glyphs. Can be used to override a project file setting, otherwise has no effect.| 
 
-Options are applied in the order in which they are specified: `–r –nS` will not subroutinize a font, but `–nS –r` will subroutinize a font. Option values are read (in order of increasing priority) from first the fontinfo file keyword/value pairs, then the specified project file, if any, and then from the command line, in order from left to right. 
+Options are applied in the order in which they are specified: `–r –nS` will not subroutinize a font, but `–nS –r` will subroutinize a font. Option values are read (in order of increasing priority) from first the fontinfo file keyword/value pairs, and then from the command line, in order from left to right. 
 
 Subroutinization is a process by which common elements in a set of glyphs are decomposed in separate subroutines. This can reduce the size of the final font but can require extreme amounts of memory and time for a large font, such as CID fonts. `makeotf` may need as much as 64 Mbytes of memory for large Roman fonts, and will do most with only 32 Mbytes, but it may need 768 Mbytes of memory to subroutinize a 5-Mbyte CID font. Subroutinizing is reasonably fast when done all in memory: a few minutes for a Roman font, half an hour to three hours for a CID font. However, if the system must use virtual memory, the time required can increase by a factor of 20 or more. Subroutinizing is likely to be useful for Roman fonts, and for Korean CID fonts. Japanese and Chinese CID fonts usually only yield a few percent size reduction with subroutinizing, due to fewer repeating path elements.
 
@@ -299,7 +284,7 @@ Note that `makeotf` no longer assigns glyphs Unicode values from the Private Use
 
 ## **fontinfo**
 
-The fontinfo file is a simple text file containing key-value pairs. Each line contains two white-space separated fields. The first field is a keyword, and the second field is the value. `makeotf` will look for a fontinfo file in the same directory as the source font file, and, if found, use it to set some default values. These values will be overridden if they are also set by a project file, and then by any `makeotf` command line options. The keywords and values currently supported are:
+The fontinfo file is a simple text file containing key-value pairs. Each line contains two white-space separated fields. The first field is a keyword, and the second field is the value. `makeotf` will look for a fontinfo file in the same directory as the source font file, and, if found, use it to set some default values. These values will be overridden by any `makeotf` command line options. The keywords and values currently supported are:
 
 | Keyword | Values | Effect |
 |---------|--------|--------|
