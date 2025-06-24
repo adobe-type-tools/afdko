@@ -272,8 +272,6 @@ It should be noted that the ordering, renaming, and Unicode override operations 
 
 Note that `makeotf` cannot re-order glyphs when the source font is a TrueType or OpenType/TTF font: the glyph order in the source font and the glyph order in the `GlyphOrderAndAliasDB` file must be the same. It can, however, still rename glyphs and assign Unicode values.
 
-Note that `makeotf` no longer assigns glyphs Unicode values from the Private Use Area (PUA) block. If such Unicode values are needed, they must be specified in a `GOADB` file.
-
 ## **fontinfo**
 
 The fontinfo file is a simple text file containing key-value pairs. Each line contains two white-space separated fields. The first field is a keyword, and the second field is the value. `makeotf` will look for a fontinfo file in the same directory as the source font file, and, if found, use it to set some default values. These values will be overridden by any `makeotf` command line options. The keywords and values currently supported are:
