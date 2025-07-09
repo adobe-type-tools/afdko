@@ -10,7 +10,7 @@
 
   * **`features.fea`** – a text file which provides the definitions for the OpenType layout feature rules, and specifies values for some of the OpenType table fields that will override the default values calculated by `makeotf`.
 
-  * **`FontMenuNameDB`** – a suffix-less text file which provides menu names for the font family, and is used for establishing inter-font relationships (style linking). As such, fhe FMNDB is usually found in the root folder of a font family (and will be found there by `makeotf`).
+  * **`FontMenuNameDB`** – a suffix-less text file which provides menu names for the font family, and is used for establishing inter-font relationships (style linking). As such, the FMNDB is usually found in the root folder of a font family (and will be found there by `makeotf`).
 
   * **`GlyphOrderAndAliasDB`** - a suffix-less, spreadsheet-like text file which establishes the glyph order of the font. The GOADB file has two to three tab-separated columns per glyph name: final name, friendly name, Unicode override. Further purposes of the GlyphOrderAndAliasDB file are:
   
@@ -109,7 +109,9 @@ makeotf –f myfont.ufo –ff myfeatures –b –r
 
 Options are applied in the order in which they are specified: `–r –nS` will not subroutinize a font, but `–nS –r` will subroutinize a font. Option values are read (in order of increasing priority) from first the fontinfo file keyword/value pairs, and then from the command line, in order from left to right. 
 
-Subroutinization is a process by which common elements in a set of glyphs are decomposed in separate subroutines. This can reduce the size of the final font but can require extreme amounts of memory and time for a large font, such as CID fonts. `makeotf` may need as much as 64 Mbytes of memory for large Roman fonts, and will do most with only 32 Mbytes, but it may need 768 Mbytes of memory to subroutinize a 5-Mbyte CID font. Subroutinizing is reasonably fast when done all in memory: a few minutes for a Roman font, half an hour to three hours for a CID font. However, if the system must use virtual memory, the time required can increase by a factor of 20 or more. Subroutinizing is likely to be useful for Roman fonts, and for Korean CID fonts. Japanese and Chinese CID fonts usually only yield a few percent size reduction with subroutinizing, due to fewer repeating path elements.
+Subroutinization is a process by which common elements in a set of glyphs are decomposed in separate subroutines, thereby reducing the size of the final font. The subroutinization process is relatively quick for a typical Roman font, but will take a bit longer for a large CJK font.
+Subroutinizing is likely to be most useful for fonts with lots of repeated elements (e.g. Korean or Latin fonts) – Japanese and Chinese fonts usually only yield a few percent size reduction with subroutinizing, due to there being fewer repeating path elements.
+
 
 ## FontMenuNameDB – Version 2
 
@@ -238,7 +240,7 @@ If the key `c=` is used, then `makeotf` will build the older style name table. I
 ## **GlyphOrderAndAliasDB** (GOADB)
 
 The GOADB file is used to rename and to establish an order for the glyphs in a font. It is a simple text file with one line per glyph name. Each line contains at least two columns, and optionally a third column.  
-Colums are tab-separated (technically any amount of a whitespace works but a single tab character is preferred).  
+Columns are tab-separated (technically any amount of a whitespace works, but a single tab character is recommended).  
 Blank lines are ignored. Lines beginning with `#` are comments and are also ignored.
 
 * The first column is the final glyph name to be used in the output font.
@@ -251,7 +253,7 @@ The source font is not required to have any glyphs that are named in the `GlyphO
 
 
 <a name="unicode_note"></a>
-Note: Unicode values can be used in the form `uniXXXX` or `uXXXX[XX]` where `XXXX[XX]` is a hexadecimal Unicode value. The number of `X` is determined by the codepoint. For example, `U+0903` can be written as either `uni0903` or `u0903`. If the codepoint requires 5 or 6 digits, for example `U+F0002` or `U+F00041`, then the format must contain the same number of digits: `uF0002` or `uF00041`. This only applies when assigning Unicode values using column 3.
+Note: Unicode values can be used in the form `uniXXXX` or `uXXXX[XX]` where `XXXX[XX]` is a hexadecimal Unicode value. The number of `X` is determined by the code point. For example, `U+0903` can be written as either `uni0903` or `u0903`. If the code point requires 5 or 6 digits, for example `U+F0002` or `U+F00041`, then the format must contain the same number of digits: `uF0002` or `uF00041`. This only applies when assigning Unicode values using column 3.
 
 
 It should be noted that the ordering, renaming, and Unicode override operations are applied only if the `–r` option or the `-ga` option is specified. These operations work as follows:
@@ -311,7 +313,7 @@ When looking for default CID CMap files, `makeotf` uses the following rules:
 For further information on CMaps, please read the many [Adobe Technical Notes](https://github.com/adobe-type-tools/cmap-resources)
 
 ## **Unicode Variation Sequence (UVS) File**
-A UVS file is a list of records, each of which specifies the glyph which should be displayed for a given combination of a Unicode encoding value and a Unicode Variation Selector. You can read about Unicode Variation Sequence in the publication “Unicode Technical Standard #37 , Ideographic Variation Database , at http://unicode.org/reports/tr37/. The format depends on the source font format: CID-keyed fonts require three fields in each record, non-CID fonts require only two.
+A UVS file is a list of records, each of which specifies the glyph which should be displayed for a given combination of a Unicode encoding value and a Unicode Variation Selector. You can read about Unicode Variation Sequence in the publication “Unicode Technical Standard #37, Ideographic Variation Database, at http://unicode.org/reports/tr37/. The format depends on the source font format: CID-keyed fonts require three fields in each record, non-CID fonts require only two.
 
 #### For CID-keyed fonts:
 The `makeotf` command will look for a UVS file under FDK/Tools/SharedData/Adobe CMAPS/<R-OS>, where <R-O-S> stands for the font’s CID Registry-Order-Supplement. The file will be assumed to be named “`<R-O>_sequences.txt`. For a CID font with the R-O-S “Adobe-Japan1-6”. the default UVS file path would be “FDK/Tools/SharedData/Adobe CMAPS/Adobe-Japan1-6/Adobe-Japan1_sequences.txt“ . The option `-ci <path>` may be used to specify a UVS file path other than the default.
@@ -380,3 +382,4 @@ Note that if any of these three new bits is turned on, with the option `–osbOn
 Version 1.0 - Initial version  
 Version 1.5 - Revisions for `makeotf` v2.5 - 2016  
 Version 2.0 - Convert to Markdown, many minor updates and fixes - Josh Hadley, October 2019  
+Version 2.1 - Updates and fixes - Frank Grießhammer, July 2025  
