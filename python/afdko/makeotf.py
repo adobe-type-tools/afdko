@@ -1406,7 +1406,7 @@ def getOptions(makeOTFParams, args):
                 licenseCode = args[i]
             except IndexError:
                 licenseCode = None
-            setattr(makeOTFParams, kFileOptPrefix + licenseCode, licenseCode)
+            setattr(makeOTFParams, kFileOptPrefix + kLicenseCode, licenseCode)
             i += 1
 
         elif arg == kMOTFOptions[kConvertToCID][1]:
