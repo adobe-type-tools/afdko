@@ -462,7 +462,7 @@ void hotWritePString(hotCtx g, const char *string);
 void hotAddVertOriginY(hotCtx g, GID gid, VarValueRecord &vvr);
 void hotAddVertAdvanceY(hotCtx g, GID gid, VarValueRecord &vvr);
 
-void setVendId_str(hotCtx g, const char *vend);
+void setVendId_str(hotCtx g, std::string &vend);
 
 #define OVERRIDE(field) ((field) != SHRT_MAX)
 

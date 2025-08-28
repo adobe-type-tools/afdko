@@ -6,6 +6,7 @@ import io
 import os
 import re
 import sys
+import shlex
 
 from fontTools.ttLib import TTFont, TTLibError
 from fontTools.ttLib.tables.DefaultTable import DefaultTable
@@ -1953,10 +1954,12 @@ def convertFontIfNeeded(makeOTFParams):
         inputFilePath = tempTxtPath
 
     # Now convert to CFF
-    params.extend(['-o', tmpPath, '-f', inputFilePath])
+    params.extend(['-o', os.path.realpath(tmpPath), '-f',
+                   os.path.realpath(inputFilePath)])
     if makeOTFParams.verbose:
+        params_str = shlex.join(params)
         print("makeotf [Note] Running tx with commands:")
-        print(f"   {params}")
+        print(f"   {params_str}")
     if not fdkutils.run_shell_command(params):
         raise MakeOTFShellError
 
@@ -2493,9 +2496,9 @@ def runMakeOTF(makeOTFParams):
     params = [
         'addfeatures',
         f'{kMOTFOptions[kInputFont][1]}',
-        inputFontPath,
+        os.path.realpath(inputFontPath),
         f'{kMOTFOptions[kOutputFont][1]}',
-        tempOutPath,
+        os.path.realpath(tempOutPath),
     ]
 
     # Add the rest of the parameters
@@ -2544,8 +2547,9 @@ def runMakeOTF(makeOTFParams):
     if makeOTFParams.verbose:
         print("makeotf [Note] Running %s with commands:" %
               os.path.basename('addfeatures'))
+        params_str = shlex.join(params)
         print(f'   cd "{fontDir}"')
-        print(f"   {params}")
+        print(f"   {params_str}")
 
     success = fdkutils.run_shell_command_logging(params)
 

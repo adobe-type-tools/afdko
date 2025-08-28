@@ -66,7 +66,7 @@ static Funcs g_funcs[] = {
     {GPOS_, GPOSNew, GPOSFill, GPOSWrite, GPOSReuse, GPOSFree, 1, 14, 0},
     {HVAR_, HVARNew, HVARFill, HVARWrite, HVARReuse, HVARFree, 3, 15, 0},
     {VVAR_, VVARNew, VVARFill, VVARWrite, VVARReuse, VVARFree, 4, 16, 0},
-    {MVAR_, MVARNew, MVARFill, MVARWrite, MVARReuse, MVARFree, 2, 17, 0},
+    {MVAR_, MVARNew, MVARFill, MVARWrite, MVARReuse, MVARFree, 4, 17, 0},
     {BASE_, BASENew, BASEFill, BASEWrite, BASEReuse, BASEFree, 1, 18, 0},
     {VORG_, VORGNew, VORGFill, VORGWrite, VORGReuse, VORGFree, 3, 19, 0},
     {STAT_, STATNew, STATFill, STATWrite, STATReuse, STATFree, 1, 20, 0},

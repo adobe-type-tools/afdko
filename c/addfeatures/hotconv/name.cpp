@@ -94,7 +94,7 @@ static void addStdNames(hotCtx g, bool win, bool mac) {
         buf.resize(sz);
         /* Don't add if one has already been provided from the feature file */
         if (nam->noName(nam_name::MATCH_ANY, nam_name::MATCH_ANY, nam_name::MATCH_ANY,
-                        nam_name::NAME_ID_UNIQUEID))
+                        nam_name::NAME_ID_UNIQUEID, true))
             addStdNamePair(g, win, mac, nam_name::NAME_ID_UNIQUEID, buf);
 
         buf.erase();
@@ -107,7 +107,7 @@ static void addStdNames(hotCtx g, bool win, bool mac) {
     }
 
     if (nam->noName(nam_name::MATCH_ANY, nam_name::MATCH_ANY,
-                    nam_name::MATCH_ANY, nam_name::NAME_ID_VERSION))
+                    nam_name::MATCH_ANY, nam_name::NAME_ID_VERSION, true))
         addStdNamePair(g, win, mac, nam_name::NAME_ID_VERSION, buf);
 
     /* Add PostScript name */
@@ -233,7 +233,7 @@ int nameFill(hotCtx g) {
     for (auto nrp : mv)
         matchrecs.emplace_back(nrp->platspecId, nrp->languageId, nrp->content);
     for (auto &[platspec, language, content] : matchrecs) {
-        if (nam->noName(nam_name::NAME_WIN_PLATFORM, platspec, language, nam_name::NAME_ID_FAMILY)) {
+        if (nam->noName(nam_name::NAME_WIN_PLATFORM, platspec, language, nam_name::NAME_ID_FAMILY, true)) {
             nam->addName(nam_name::NAME_WIN_PLATFORM, platspec, language, nam_name::NAME_ID_FAMILY, content);
             if (doWarning) {
                 g->logger->log(sWARNING, "[name] The Font Menu Name DB entry for this font is missing an MS Platform Compatible Family Name entry to match the MS Platform Preferred Family Name for language ID %d. Using the Preferred Name only.", language);
@@ -263,7 +263,8 @@ int nameFill(hotCtx g) {
         addWinDfltName(g, nam_name::NAME_ID_FULL, g->font.FontName);
     } else {
         if (nam->noName(nam_name::NAME_WIN_PLATFORM, nam_name::NAME_WIN_UGL,
-                                 nam_name::MATCH_ANY, nam_name::NAME_ID_FULL)) {
+                                 nam_name::MATCH_ANY, nam_name::NAME_ID_FULL,
+                                 true)) {
             mv.clear();
             mv = nam->allMatches(nam_name::NAME_WIN_PLATFORM, nam_name::NAME_WIN_UGL,
                                  nam_name::MATCH_ANY, nam_name::NAME_ID_FAMILY);
@@ -328,7 +329,7 @@ int nameFill(hotCtx g) {
         for (auto nrp : mv)
             matchrecs.emplace_back(nrp->platspecId, nrp->languageId, nrp->content);
         for (auto &[platspec, language, family] : matchrecs) {
-            if (nam->noName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_FAMILY)) {
+            if (nam->noName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_FAMILY, true)) {
                 nam->addName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_FAMILY, family);
                 if (doWarning && !doV1Names) {
                     g->logger->log(sWARNING, "[name] The Font Menu Name DB entry for this font is missing a Mac Platform Compatible Family Name entry to match the Mac Platform Preferred Family Name for language ID %d. Using the Preferred Name only.", language);
@@ -366,7 +367,7 @@ int nameFill(hotCtx g) {
             for (auto nrp : mv)
                 matchrecs.emplace_back(nrp->platspecId, nrp->languageId, nrp->content);
             for (auto &[platspec, language, subfamily] : matchrecs) {
-                if (nam->noName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_SUBFAMILY))
+                if (nam->noName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_SUBFAMILY, true))
                     nam->addName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_SUBFAMILY, subfamily);
             }
         }
@@ -383,7 +384,7 @@ int nameFill(hotCtx g) {
         for (auto nrp : mv)
             matchrecs.emplace_back(nrp->platspecId, nrp->languageId, nrp->content);
         for (auto &[platspec, language, subfamily] : matchrecs) {
-            if (nam->noName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_SUBFAMILY))
+            if (nam->noName(nam_name::NAME_MAC_PLATFORM, platspec, language, nam_name::NAME_ID_SUBFAMILY, true))
                 nam->addName(nam_name::NAME_MAC_PLATFORM, platspec, language,
                              nam_name::NAME_ID_SUBFAMILY, style);
         }
@@ -403,7 +404,7 @@ int nameFill(hotCtx g) {
             matchrecs.emplace_back(nrp->platspecId, nrp->languageId, nrp->content);
         for (auto &[platspec, language, family] : matchrecs) {
             if (!nam->noName(nam_name::NAME_MAC_PLATFORM, nam_name::MATCH_ANY,
-                             nam_name::MATCH_ANY, nam_name::NAME_ID_FULL))
+                             nam_name::MATCH_ANY, nam_name::NAME_ID_FULL, true))
                 break;
             auto subfamily = nam->getName(nam_name::NAME_MAC_PLATFORM, platspec, language, subFamId);
             if (!doOTSpecName4 && subfamily.empty())
@@ -444,9 +445,9 @@ int nameFill(hotCtx g) {
     }
     /* Determine if platform names are present */
     bool win = !nam->noName(nam_name::NAME_WIN_PLATFORM, nam_name::MATCH_ANY,
-                            nam_name::MATCH_ANY, nam_name::MATCH_ANY);
+                            nam_name::MATCH_ANY, nam_name::MATCH_ANY, true);
     bool mac = !nam->noName(nam_name::NAME_MAC_PLATFORM, nam_name::MATCH_ANY,
-                            nam_name::MATCH_ANY, nam_name::MATCH_ANY);
+                            nam_name::MATCH_ANY, nam_name::MATCH_ANY, true);
 
     addStdNames(g, win, mac);
 

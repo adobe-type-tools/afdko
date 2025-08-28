@@ -162,7 +162,6 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     g->convertFlags = 0;
 
     g->font.version.otf = (1 << 16); /* 1.0 in Fixed */
-    g->font.vendId = "";
 
     /* Get current time */
 
@@ -230,33 +229,21 @@ hotCtx hotNew(hotCallbacks *hotcb, std::shared_ptr<GOADB> goadb,
     return g;
 }
 
-void setVendId_str(hotCtx g, const char *vend) {
-    char *id;
-
-    int l = strlen(vend) + 1;
-    id = (char *)hotMemNew(g, l);
-    STRCPY_S(id, l, vend);
-    g->font.vendId = id;
+void setVendId_str(hotCtx g, std::string &vend) {
+    g->font.vendId = vend;
 }
 
 /* Try to set vendor id by matching against copyright strings in the font */
 static void setVendId(hotCtx g) {
-    typedef struct {
-        const char *string;
-        const char *id;
-    } Match;
-    static Match vendor[] = {  // Arranged by most likely first
-        {"Adobe", "ADBE"},
-    };
+    std::array<std::pair<std::string,std::string>, 1> vendors {{{ "Adobe", "ADBE" }}};
 
     if (!g->font.vendId.empty())
         return; /*Must have been set by feature file*/
 
     /* Match vendor */
-    for (uint32_t i = 0; i < ARRAY_LEN(vendor); i++) {
-        std::string vid = vendor[i].string;
-        if (g->font.Notice.find(vid) != std::string::npos) {
-            g->font.vendId = vendor[i].id;
+    for (auto &i: vendors) {
+        if (g->font.Notice.find(i.first) != std::string::npos) {
+            g->font.vendId = i.second;
             return;
         }
     }

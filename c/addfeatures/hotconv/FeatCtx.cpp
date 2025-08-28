@@ -1398,7 +1398,7 @@ void FeatCtx::addVendorString(std::string str) {
         featMsg(sERROR, "Vendor name too long. Max is 4 characters.");
     }
 
-    setVendId_str(g, str.c_str());
+    setVendId_str(g, str);
 }
 
 // --------------------------------- Anchors -----------------------------------

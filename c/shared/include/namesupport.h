@@ -195,31 +195,38 @@ class nam_name {
     void Write(VarWriter &vw);
     int Fill();
     std::vector<NameRecord*> allMatches(uint16_t platformId, uint16_t platspecId,
-                                        uint16_t languageId, uint16_t nameId) {
+                                        uint16_t languageId, uint16_t nameId,
+                                        bool ignoreFromTable=false) {
         std::vector<NameRecord*> nrv;
         auto i = lowerBound(platformId, platspecId, languageId, nameId);
         auto e = upperBound(platformId, platspecId, languageId, nameId);
         for (; i != e; i++)
-            if (nrMatch(i->second, platformId, platspecId, languageId, nameId))
+            if (nrMatch(i->second, platformId, platspecId, languageId, nameId,
+                        ignoreFromTable))
                 nrv.push_back(&i->second);
         return nrv;
     }
     std::string getName(uint16_t platformId, uint16_t platspecId,
-                        uint16_t languageId, uint16_t nameId) {
-        auto i = firstMatch(platformId, platspecId, languageId, nameId);
+                        uint16_t languageId, uint16_t nameId,
+                        bool ignoreFromTable=false) {
+        auto i = firstMatch(platformId, platspecId, languageId, nameId,
+                            ignoreFromTable);
         if (i == entries.end())
             return "";
         return i->second.content;
     }
     bool noName(uint16_t platformId, uint16_t platspecId, uint16_t languageId,
-                uint16_t nameId) {
-        return firstMatch(platformId, platspecId, languageId, nameId) == entries.end();
+                uint16_t nameId, bool ignoreFromTable=false) {
+        return firstMatch(platformId, platspecId, languageId,
+                          nameId, ignoreFromTable) == entries.end();
     }
-    bool noWinDfltName(uint16_t nameId) {
-        return noName(NAME_WIN_PLATFORM, NAME_WIN_UGL, NAME_WIN_ENGLISH, nameId);
+    bool noWinDfltName(uint16_t nameId, bool ignoreFromTable=false) {
+        return noName(NAME_WIN_PLATFORM, NAME_WIN_UGL, NAME_WIN_ENGLISH, nameId,
+                      ignoreFromTable);
     }
-    bool noMacDfltName(uint16_t nameId) {
-        return noName(NAME_MAC_PLATFORM, NAME_MAC_ROMAN, NAME_MAC_ENGLISH, nameId);
+    bool noMacDfltName(uint16_t nameId, bool ignoreFromTable=false) {
+        return noName(NAME_MAC_PLATFORM, NAME_MAC_ROMAN, NAME_MAC_ENGLISH, nameId,
+                      ignoreFromTable);
     }
     void deleteDuplicates(uint16_t platformId, uint16_t targetId, uint16_t referenceId);
 
@@ -265,19 +272,23 @@ class nam_name {
                                             toF(languageId), toF(nameId)));
     }
     bool nrMatch(NameRecord &nr, uint16_t platformId, uint16_t platspecId,
-                 uint16_t languageId, uint16_t nameId) {
+                 uint16_t languageId, uint16_t nameId,
+                 bool ignoreFromTable=false) {
         return (platformId == MATCH_ANY || platformId == nr.platformId) &&
                (platspecId == MATCH_ANY || platspecId == nr.platspecId) &&
                (languageId == MATCH_ANY || languageId == nr.languageId) &&
-               (nameId == MATCH_ANY || nameId == nr.nameId);
+               (nameId == MATCH_ANY || nameId == nr.nameId) &&
+               (!ignoreFromTable || nr.fromTable == false);
     }
 
     EntryMap::iterator firstMatch(uint16_t platformId, uint16_t platspecId,
-                                  uint16_t languageId, uint16_t nameId) {
+                                  uint16_t languageId, uint16_t nameId,
+                                  bool ignoreFromTable=false) {
         auto i = lowerBound(platformId, platspecId, languageId, nameId);
         auto e = upperBound(platformId, platspecId, languageId, nameId);
         for (; i != e; i++)
-            if (nrMatch(i->second, platformId, platspecId, languageId, nameId))
+            if (nrMatch(i->second, platformId, platspecId, languageId, nameId,
+                        ignoreFromTable))
                 return i;
         return entries.end();
     }
