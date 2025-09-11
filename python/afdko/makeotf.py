@@ -154,7 +154,7 @@ __usage__ = 'makeotf.py ' + __version__ + """
                     Note: if any of the bits 7,8,9 are set on or
                     off, they must all three be explicitly
                     set. See "New OS/2 Bits" in the
-                    "MakeOTFUserGuide.pdf" file.
+                    makeotf user guide (URL at bottom).
 
 -osv <number>       Set the OS/2 table version to the specified
                     value. Must be greater than 0. If no bits >6
@@ -282,7 +282,8 @@ __usage__ = 'makeotf.py ' + __version__ + """
 
 Note that options are applied in the order in which they are
 specified: "-r -nS" will not subroutinize a font, but "-nS -r" will
-subroutinize a font. See the document 'MakeOTFUserGuide.pdf' for the
+subroutinize a font. See the makeotf user guide at
+https://adobe-type-tools.github.io/afdko/MakeOTFUserGuide.html for
 format and contents of the fontinfo and project files.
 """
 
