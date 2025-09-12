@@ -124,6 +124,7 @@ add_library(shared OBJECT
 set_property(TARGET shared PROPERTY CXX_STANDARD 17)
 
 target_include_directories(shared PRIVATE include resource)
+target_link_libraries(shared PUBLIC LibXml2::LibXml2)
 
 if(NOT ${CMAKE_GENERATOR} MATCHES "Xcode.*")
   set_property(SOURCE absfont/absfont.cpp PROPERTY
@@ -150,8 +151,4 @@ if(NOT ${CMAKE_GENERATOR} MATCHES "Xcode.*")
                COMPILE_DEFINITIONS $<$<CONFIG:Debug>:T1W_DEBUG=1>)
   set_property(SOURCE ttread.cpp PROPERTY
                COMPILE_DEFINITIONS $<$<CONFIG:Debug>:TTR_DEBUG=1>)
-endif()
-
-if (${NEED_LIBXML2_DEPEND})
-    add_dependencies(shared ${LIBXML2_TARGET})
 endif()

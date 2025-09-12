@@ -6,7 +6,3 @@ add_library(mergefonts OBJECT
 )
 
 target_include_directories(mergefonts PRIVATE ../shared/include ../shared/resource ../shared/include/tx_help)
-
-if (${NEED_LIBXML2_DEPEND})
-    add_dependencies(mergefonts ${LIBXML2_TARGET})
-endif()
