@@ -1025,8 +1025,8 @@ static void setupRotationCallbacks(txCtx h) {
     h->cb.glyph.curve = rotate_curve;
     if ((rotateInfo->flags & ROTATE_KEEP_HINTS) || (rotateInfo->origMatrix[1] == 0)) /* rotation is some multiple of 90 degrees */
     {
-        h->cb.glyph.stem = rotate_stem;
-        h->cb.glyph.flex = rotate_flex;
+        h->cb.glyph.stem = (rotateInfo->savedGlyphCB.stem != NULL) ? rotate_stem : NULL;
+        h->cb.glyph.flex = (rotateInfo->savedGlyphCB.flex != NULL) ? rotate_flex : NULL;
     } else {
         h->cb.glyph.stem = NULL;
         h->cb.glyph.flex = NULL;
