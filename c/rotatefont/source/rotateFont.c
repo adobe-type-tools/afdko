@@ -43,6 +43,7 @@ typedef struct
     float origMatrix[6];            /* rotation/translation matrix specified by user. */
     float curMatrix[6];             /* rotation/translation matrix currently in use. */
     abfGlyphCallbacks savedGlyphCB; /* originally chosen writer call-backs */
+    void (*begfont)(txCtx h, abfTopDict *top); /* override to fix up ufow beg callback */
     void (*endfont)(txCtx h);       /* override to fix up hint dicts */
     char rtFile[FILENAME_MAX];      /* text file containing per-glyph entries */
     dnaDCL(RotateGlyphEntry, rotateGlyphEntries);
@@ -1014,9 +1015,8 @@ static void rotateLoadGlyphList(txCtx h, char *filePath) {
     return;
 }
 
-static void setupRotationCallbacks(txCtx h) {
+static void setupRotationGlyphCallbacks(txCtx h) {
     RotateInfo *rotateInfo = (RotateInfo *)h->appSpecificInfo;
-    rotateInfo->savedGlyphCB = h->cb.glyph;
     h->cb.glyph.indirect_ctx = h;
     h->cb.glyph.beg = rotate_beg;
     h->cb.glyph.width = rotate_width;
@@ -1034,6 +1034,21 @@ static void setupRotationCallbacks(txCtx h) {
     h->cb.glyph.genop = rotate_genop;
     h->cb.glyph.seac = rotate_seac;
     h->cb.glyph.end = rotate_end;
+}
+
+static void rotateBegFont(txCtx h, abfTopDict *top) {
+    /* restore our callback after ufow overwrites it at begfont */
+    RotateInfo *rotateInfo = (RotateInfo *)h->appSpecificInfo;
+    rotateInfo->begfont(h, top);
+    setupRotationGlyphCallbacks(h);
+}
+
+static void setupRotationCallbacks(txCtx h) {
+    RotateInfo *rotateInfo = (RotateInfo *)h->appSpecificInfo;
+    rotateInfo->savedGlyphCB = h->cb.glyph;
+    setupRotationGlyphCallbacks(h);
+    rotateInfo->begfont = h->dst.begfont;
+    h->dst.begfont = rotateBegFont;
     rotateInfo->endfont = h->dst.endfont;
     h->dst.endfont = rotateEndFont;
     if (rotateInfo->rtFile[0] != 0)
