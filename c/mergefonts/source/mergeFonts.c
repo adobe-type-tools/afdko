@@ -1177,6 +1177,14 @@ static void stringStrip(char *str) {
     if (end == 0)
         return;
 
+    while (end >= 0) {
+        if ((str[end] == ' ') || (str[end] == '\t') || (str[end] == ')') || (str[end] == '\r') || (str[end] == '\n'))
+            end--;
+        else
+            break;
+    }
+    str[end + 1] = 0;
+
     while (start < MAX_DICT_ENTRY_LEN) {
         if ((str[start] == ' ') || (str[start] == '\t') || (str[start] == '(') || (str[start] == '\r') || (str[start] == '\n'))
             start++;
@@ -1184,14 +1192,6 @@ static void stringStrip(char *str) {
             break;
     }
 
-    while (end >= 0) {
-        if ((str[end] == ' ') || (str[end] == '\t') || (str[end] == ')') || (str[end] == '\r') || (str[end] == '\n'))
-            end--;
-        else
-            break;
-    }
-
-    str[end + 1] = 0;
     if (start > 0)
         memmove(str, &str[start], (end - start) + 2);
     if (strlen(str) == 0) {
