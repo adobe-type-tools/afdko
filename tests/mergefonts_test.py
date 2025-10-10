@@ -83,3 +83,21 @@ def test_camel_case():
     expected_path = generate_ps_dump(expected_path)
 
     assert differ([expected_path, actual_path, '-s', r'%ADOt1write:'])
+
+
+def test_cidwhitespace():
+    font1_filename = 'font1.pfa'
+    font2_filename = 'font2.pfa'
+    font3_filename = 'font3.pfa'
+    alias1_filename = 'alias1.txt'
+    alias2_filename = 'alias2.txt'
+    alias3_filename = 'alias3.txt'
+    fontinfo_filename = 'cidwhitespace/cidfontinfo.txt'
+    actual_path = get_temp_file_path()
+
+    # without fix this dies with <Signals.SIGSEGV: 11...>
+    runner(CMD + ['-o', 'cid', '-f', fontinfo_filename, actual_path,
+                  alias1_filename, font1_filename,
+                  alias2_filename, font2_filename,
+                  alias3_filename, font3_filename])
+
