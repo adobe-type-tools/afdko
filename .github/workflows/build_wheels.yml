@@ -75,7 +75,7 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: wheelstorage
+        name: wheelstorage-${{ matrix.runs-on }}
         path: ./dist/*
         if-no-files-found: error
         retention-days: 30
@@ -102,6 +102,8 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: wheelstorage
+        pattern: wheelstorage-*
+        merge-multiple: true
         path: dist
 
     - name: Publish dist(s) to PyPI
