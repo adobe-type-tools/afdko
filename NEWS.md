@@ -1,6 +1,13 @@
 Changelog
 =========
 
+4.0.3 (released 2025-12-04)
+---------------------------
+ - [ANTLR] Workarounds for Antlr build problems
+ - [resources] Updates to the Adobe Glyph List
+ - [otfautohint] rounding fixes ([#1772](https://github.com/adobe-type-tools/afdko/pull/1772)
+ - [makeinstancesufo] Add support for strict flag passed to ufoProcessor/fontMath
+
 4.0.2 (released 2024-11-05)
 ---------------------------
 - [otfautohint] Fix otfautohint bugs ([#1759](https://github.com/adobe-type-tools/afdko/pull/1759), [#1751](https://github.com/adobe-type-tools/afdko/pull/1751), [#1749](https://github.com/adobe-type-tools/afdko/pull/1749), [#1758](https://github.com/adobe-type-tools/afdko/pull/1758))
