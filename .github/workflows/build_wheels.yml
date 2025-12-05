@@ -73,9 +73,9 @@ jobs:
         python -m build --sdist
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: wheelstorage
+        name: wheelstorage-${{ matrix.os }}
         path: ./dist/*
         if-no-files-found: error
         retention-days: 30
@@ -99,9 +99,10 @@ jobs:
       shell: bash
 
     - name: Download release assets
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: wheelstorage
+        pattern: wheelstorage-*
+        merge-multiple: true
         path: dist
 
     - name: Publish dist(s) to PyPI

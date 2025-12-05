@@ -468,6 +468,8 @@ class instanceStemState:
             if sid in self.usedSegs:
                 return
             self.usedSegs.add(sid)
+        if self.dhinter.options.roundCoords:
+            loc = round(loc)
         if loc in self.candDict:
             sLC = self.candDict[loc]
         else:

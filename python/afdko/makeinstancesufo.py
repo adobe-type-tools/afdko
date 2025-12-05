@@ -1,9 +1,10 @@
 # Copyright 2015 Adobe. All rights reserved.
 
 """
-Generates UFO font instances from a set of master UFO fonts.
-It uses the mutatorMath library. The paths to the masters and
-instances fonts are specified in the .designspace file.
+Generates UFO font instances from a set of source UFO fonts
+using either MutatorMath or the fontTools varLib library.
+The paths to the source and instance fonts are specified in
+the .designspace file.
 """
 
 import argparse
@@ -22,7 +23,7 @@ from fontTools.designspaceLib import (
 from defcon import Font
 from .otfautohint.__main__ import main as otfautohint
 from ufonormalizer import normalizeUFO
-from ufoProcessor import build as ufoProcessorBuild
+from ufoProcessor.ufoOperator import UFOOperator
 
 from afdko.checkoutlinesufo import run as checkoutlinesUFO
 from afdko.fdkutils import (
@@ -336,10 +337,15 @@ def run(options):
     tool_str = "fontTools.varlib" if options.useVarlib else "MutatorMath"
     info_str = f"Building {newInstancesCount} {icnt_str} with {tool_str} ..."
     logger.info(info_str)
-    ufoProcessorBuild(documentPath=dsPath,
-                      outputUFOFormatVersion=options.ufo_version,
-                      roundGeometry=(not options.no_round),
-                      logger=logger, useVarlib=options.useVarlib)
+    ufoOperator = UFOOperator(pathOrObject=dsPath,
+                              ufoVersion=options.ufo_version,
+                              useVarlib=options.useVarlib,
+                              extrapolate=True,
+                              strict=options.strict,
+                              debug=options.verbose > 2)
+    ufoOperator.roundGeometry = (not options.no_round)
+    ufoOperator.loadFonts()
+    ufoOperator.generateUFOs()
 
     # Remove temporary designspace file
     if (dsPath != options.dsPath) and os.path.exists(dsPath):
@@ -469,6 +475,12 @@ def get_options(args):
         '--no-round',
         action='store_true',
         help='do NOT round coordinates to integer'
+    )
+    parser.add_argument(
+        '-s',
+        '--strict',
+        action='store_true',
+        help='Pass the strict flag to ufoProcessor'
     )
     parser.add_argument(
         '-i',
