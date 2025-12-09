@@ -27,7 +27,7 @@ if (HAVE_M_LIB)
     target_link_libraries(makeotfexe PRIVATE m)
 endif ()
 
-target_link_libraries(makeotfexe PUBLIC ${CHOSEN_LIBXML2_LIBRARY})
+target_link_libraries(makeotfexe PUBLIC LibXml2::LibXml2)
 
 target_compile_definitions(makeotfexe PRIVATE MAKEOTFLIB_EXPORTS=1)
 

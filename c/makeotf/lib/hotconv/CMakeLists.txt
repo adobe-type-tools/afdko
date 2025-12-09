@@ -70,13 +70,9 @@ add_library(hotconv STATIC
 set_property(TARGET hotconv PROPERTY C_STANDARD 99)
 set_property(TARGET hotconv PROPERTY CXX_STANDARD 17)
 target_include_directories(hotconv PRIVATE AFTER $<$<COMPILE_LANGUAGE:CXX>:${ANTLR4_INCLUDE_DIRS}>)
-target_link_libraries(hotconv PUBLIC antlr4_static)
+target_link_libraries(hotconv PUBLIC afdko::antlr4)
 
-target_link_libraries(hotconv PUBLIC ${CHOSEN_LIBXML2_LIBRARY})
-
-if (${NEED_LIBXML2_DEPEND})
-    add_dependencies(hotconv ${LIBXML2_TARGET})
-endif()
+target_link_libraries(hotconv PUBLIC LibXml2::LibXml2)
 
 if ( CMAKE_COMPILER_IS_GNUCC )
     target_compile_options(hotconv PRIVATE -Wall -Wno-attributes)
