@@ -51,12 +51,12 @@ jobs:
         echo "Reason for triggering: ${{ github.event.inputs.reason }}"
 
     - name: Check out
-      uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
         fetch-depth: 0  # unshallow fetch for setuptools-scm
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
