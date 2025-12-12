@@ -27,18 +27,18 @@ jobs:
         echo "Reason for triggering: ${{ github.event.inputs.reason }}"
 
     - name: Check out
-      uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
         fetch-depth: 0  # unshallow fetch for setuptools-scm
 
     - name: Install Python 3.9
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
-        python-version: '3.9'
+        python-version: '3.14'
 
     - name: Build wheel (only macosx_universal2)
       if: matrix.os == 'macos-latest'
-      uses: pypa/cibuildwheel@v2.21.1
+      uses: pypa/cibuildwheel@v3.3.0
       with:
         output-dir: dist
       env:
@@ -47,7 +47,7 @@ jobs:
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64 -I/usr/include/libxml2' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'  MACOSX_DEPLOYMENT_TARGET='10.13'"
 
     - name: Build wheel (except macosx_universal2)
-      uses: pypa/cibuildwheel@v2.21.1
+      uses: pypa/cibuildwheel@v3.3.0
       with:
         output-dir: dist
       env:
@@ -73,7 +73,7 @@ jobs:
         python -m build --sdist
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: wheelstorage-${{ matrix.os }}
         path: ./dist/*
@@ -99,7 +99,7 @@ jobs:
       shell: bash
 
     - name: Download release assets
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         pattern: wheelstorage-*
         merge-multiple: true
@@ -112,7 +112,7 @@ jobs:
         password: ${{ secrets.pypi_password }}
 
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
