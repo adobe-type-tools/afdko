@@ -205,9 +205,6 @@ def dispatch_command(cmd: str) -> NoReturn:
 
 def main() -> NoReturn:
     """Main entry point for the unified afdko command."""
-    help_flags = ('-h', '--help', 'help')
-    pre_command_forward_flags = help_flags + ('-u',)
-
     # No subcommand provided
     if len(sys.argv) < 2:
         print_help('primary')
@@ -227,22 +224,21 @@ def main() -> NoReturn:
         sys.exit(0)
 
     # Help requested
-    if subcmd in pre_command_forward_flags:
+    if subcmd in ('-h', '--help', 'help', '-u'):
         # Check for command name after -h/-u
         if len(sys.argv) > 2:
             arg = sys.argv[2]
             # afdko -h <command> -> afdko <command> -h
-            # afdko -u <command> -> afdko <command> -u
+            # afdko -u <command> -> afdko <command> -h
             # Check if it's a valid command
             if arg in ALL_COMMANDS:
-                forwarded_flag = '-h' if subcmd in help_flags else subcmd
-                sys.argv = ['afdko', arg, forwarded_flag]
+                sys.argv = ['afdko', arg, '-h']
                 dispatch_command(arg)
             else:
                 print(f"Error: Unknown command '{arg}'", file=sys.stderr)
                 print("Run 'afdko --help' for usage.", file=sys.stderr)
                 sys.exit(1)
-        elif subcmd in help_flags:
+        else:
             print_help('primary')
             sys.exit(0)
 
