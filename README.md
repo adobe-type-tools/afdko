@@ -35,8 +35,10 @@ for additional information, such as links to reference materials and related
 projects.
 
 📣 Recent News
-------------
+--------------
+
 **AFDKO 5.0.0** is a major release featuring:
+
 - Unified command interface: `afdko <command>` syntax
 - Variable font support in `addfeatures` (replaces `makeotfexe`)
 - Extensive C→C++ codebase modernization
@@ -46,8 +48,8 @@ See [NEWS.md](NEWS.md) for full release notes and migration guide.
 Installation
 ------------
 
-The AFDKO requires [Python](http://www.python.org/download) 3.9
-or later. It should work with any Python > 3.9, but occasionally
+The AFDKO requires [Python](http://www.python.org/download) 3.10
+or later. It should work with any Python > 3.10, but occasionally
 tool-chain components and dependencies don't keep pace with major
 Python releases, so there might be some lag time while they catch up.
 
@@ -71,11 +73,11 @@ wrong `pip` being called, and the package landing in the wrong location.
 The combination of using a `venv` + `python -m pip install` helps to ensure
 that pip-managed packages land in the right place.
 
-Note for Linux users (and users of other platforms that are not macOS or Windows): When there is not a pre-built "wheel" for your platform `pip` will attempt to build the C and C++ portions of the package from source. This process will only succeed if both the C and C++ development tools and libuuid are installed. See [build from source](#Build-from-source) below.
+Note for Linux users (and users of other platforms that are not macOS or Windows): When there is not a pre-built "wheel" for your platform `pip` will attempt to build the C and C++ portions of the package from source. This process will only succeed if both the C and C++ development tools and libuuid are installed. See [build from source](#build-from-source) below.
 
 ### Installing
 
-**Option 1 (Recommended)**
+#### Option 1 (Recommended)
 
 - Create a virtual environment:
 
@@ -85,17 +87,17 @@ Note for Linux users (and users of other platforms that are not macOS or Windows
 
 - Activate the virtual environment:
 
-    - macOS & Linux
+  - macOS & Linux
 
-        ```sh
-        source afdko_env/bin/activate
-        ```
+    ```sh
+    source afdko_env/bin/activate
+    ```
 
-    - Windows
+  - Windows
 
-        ```sh
-        afdko_env\Scripts\activate.bat
-        ```
+    ```sh
+    afdko_env\Scripts\activate.bat
+    ```
 
 - Install [afdko](https://pypi.python.org/pypi/afdko):
 
@@ -106,28 +108,36 @@ Note for Linux users (and users of other platforms that are not macOS or Windows
 Installing the **afdko** inside a virtual environment prevents conflicts
 between its dependencies and other modules installed globally.
 
-**Option 2 (not recommended unless there is a global conflict)**
+#### Option 2 (not recommended unless there is a global conflict)
 
 Local user installation [afdko](https://pypi.python.org/pypi/afdko) ([info](https://pip.pypa.io/en/stable/user_guide/?highlight=%E2%80%93%20user#user-installs)):
 
-    python -m pip install --user afdko
+```sh
+python -m pip install --user afdko
+```
 
 ### Updating
 
 Use the `-U` (or `--upgrade`) option to update the afdko (and its
 dependencies) to the newest stable release:
 
-    python -m pip install -U afdko
+```sh
+python -m pip install -U afdko
+```
 
 To get pre-release and in-development versions, use the `--pre` flag:
 
-    python -m pip install -U afdko --pre
+```sh
+python -m pip install -U afdko --pre
+```
 
 ### Uninstalling
 
 To remove the afdko package use the command:
 
-    python -m pip uninstall afdko
+```sh
+python -m pip uninstall afdko
+```
 
 Build from source
 -----------------
@@ -136,14 +146,18 @@ First you must have installed the development tools for your platform.
 
 On macOS, install these with:
 
-    xcode-select --install
+```sh
+xcode-select --install
+```
 
 On Linux (Ubuntu 17.10 LTS or later), install these with:
 
-    apt-get -y install python3.9
-    apt-get -y install python-pip
-    apt-get -y install python-dev
-    apt-get -y install uuid-dev
+```sh
+apt-get -y install python3.9
+apt-get -y install python-pip
+apt-get -y install python-dev
+apt-get -y install uuid-dev
+```
 
 On other POSIX-like operating systems, `libuuid` and its header files
 may be in a package named `libuuid-devel`, `util-linux-libs` or `uuid-dev`. The
@@ -152,19 +166,23 @@ source code for `libuuid` is maintained in the
 
 On Windows, you need Visual Studio 2017 or later.
 
-
 To build the **afdko** from source, clone the [afdko GitHub
 repository](https://github.com/adobe-type-tools/afdko), ensure the `wheel`
 module is installed (`python -m pip install wheel`), then `cd` to the top-level
 directory of the afdko, and run:
 
-    python -m pip install .
+```sh
+python -m pip install .
+```
 
 Developing
 -----------------
+
 If you'd like to develop & debug AFDKO using Xcode, run:
 
-    CMake -G Xcode .
+```sh
+CMake -G Xcode .
+```
 
 For further information on building from source see
 [docs/FDK\_Build\_Notes.md](docs/FDK_Build_Notes.md).
