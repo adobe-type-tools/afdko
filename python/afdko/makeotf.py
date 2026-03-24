@@ -229,7 +229,7 @@ __usage__ = 'makeotf.py ' + __version__ + """
                     work in some applications.
 
 -ncn                Turn off the -cn option, converting the CFF table
-                    to a CID-keyed CFF that specifies the 
+                    to a CID-keyed CFF that specifies the
                     Adobe-Identity-0 ROS, if it has been previously set.
 
 -shw/-nshw          Suppress/Show warnings about unhinted glyphs.
@@ -380,7 +380,7 @@ kMacCMAPPath = "MacEncodingCMAPPath"
 kHUniCMAPPath = "H_UniEncodingCMAPPath"
 # path to the specification file for Unicode variation Sequences.
 kUVSPath = "UVSPath"
-kDoubleMapGlyphs = "DoulbeMapGlyphs"
+kDoubleMapGlyphs = "DoubleMapGlyphs"
 # omit all Mac platform names from the name table
 kOmitMacNames = "OmitMacNames"
 kOverrideMenuNames = "OverrideMenuNames"
@@ -2637,7 +2637,7 @@ def CheckEnvironment():
             missingTools.append(name)
 
     if missingTools:
-        print("Please check your PATH, and if necessary, re-install the AFDKO. "
+        print("Please check your PATH, and if necessary, reinstall the AFDKO. "
               "Unable to find these tools: %s." % missingTools)
         raise FDKEnvironmentError
 
