@@ -11,6 +11,7 @@ to an optimal set.
 import logging
 import bisect
 import math
+import sys
 from copy import copy, deepcopy
 from abc import abstractmethod, ABC
 from typing import (
@@ -18,7 +19,11 @@ from typing import (
     Iterable,
     NamedTuple,
 )
-from typing_extensions import Self
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 from fontTools.misc.bezierTools import solveCubic
 

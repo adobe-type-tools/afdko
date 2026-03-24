@@ -6,10 +6,13 @@
  * sfnt reading/dumping.
  */
 
-#include <ctype.h>
 #include <string.h>
 
 #include "sfnt.h"
+
+/* ASCII printable range (0x20-0x7e) - locale-independent alternative to isprint() */
+#define IS_ASCII_PRINT(c) ((c) >= 0x20 && (c) <= 0x7e)
+
 #include "sfnt_sfnt.h"
 
 #include "BASE.h"
@@ -715,7 +718,7 @@ static void hexDump(uint32_t tag, int32_t start, uint32_t length) {
         fprintf(OUTPUTBUFF, " |");
         for (i = 0; i < 16; i++)
             if (i < left)
-                fprintf(OUTPUTBUFF, "%c", isprint(data[i]) ? data[i] : data[i] ? '?' : '.');
+                fprintf(OUTPUTBUFF, "%c", IS_ASCII_PRINT(data[i]) ? data[i] : data[i] ? '?' : '.');
             else
                 fprintf(OUTPUTBUFF, " ");
         fprintf(OUTPUTBUFF, "|\n");
