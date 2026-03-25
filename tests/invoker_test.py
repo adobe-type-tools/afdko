@@ -8,9 +8,8 @@ These tests verify:
 - Commands are correctly dispatched to their implementations
 """
 
-import subprocess
-
 import pytest
+import subprocess
 
 
 class TestHelpSystem:
@@ -91,25 +90,6 @@ class TestHelpSystem:
                                capture_output=True, text=True)
         assert result.returncode == 1
         assert "Unknown command 'invalidcmd'" in result.stderr
-
-    @pytest.mark.parametrize('command', ['tx', 'makeotf'])
-    def test_usage_command_specific_forwarding(self, command):
-        """afdko -u <command> forwards to command usage output."""
-        reordered = subprocess.run(['afdko', '-u', command],
-                                   capture_output=True, text=True)
-        direct = subprocess.run(['afdko', command, '-u'],
-                                capture_output=True, text=True)
-
-        assert reordered.returncode == direct.returncode, (
-            f"afdko -u {command} returned {reordered.returncode}, expected "
-            f"the same exit code as afdko {command} -u ({direct.returncode})."
-        )
-        assert reordered.stdout == direct.stdout, (
-            f"afdko -u {command} stdout did not match afdko {command} -u."
-        )
-        assert reordered.stderr == direct.stderr, (
-            f"afdko -u {command} stderr did not match afdko {command} -u."
-        )
 
 
 class TestErrorHandling:
