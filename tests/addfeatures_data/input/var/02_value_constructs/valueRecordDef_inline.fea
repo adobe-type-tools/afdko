@@ -1,15 +1,15 @@
 # Test: Value records with inline locations
 # Level 2: Value constructs
 # Dependencies: 01_location_references/inline_location_single.fea
-# Tests: ValueRecordDef using inline location syntax
+# Tests: ValueRecordDef using inline location syntax with complete min/default/max
 
 languagesystem DFLT dflt;
 
-# Single value with variation
-valueRecordDef (50 wght=400d:47 wght=700d:53) KERN1;
+# Single value with variation - complete min/default/max
+valueRecordDef (50 wght=200d:45 wght=900d:55) KERN1;
 
-# Value record with multiple metrics
-valueRecordDef (<10 20 30 40> wght=400d:<8 18 28 38>) VAL_RECORD;
+# Value record with multiple metrics - complete min/default/max
+valueRecordDef (<10 20 30 40> wght=200d:<8 18 28 38> wght=900d:<12 22 32 42>) VAL_RECORD;
 
-# Multiple variations
-valueRecordDef (wght=200d:45 wght=400d:50 wght=900d:60) KERN2;
+# Multiple variations - complete min/default/max (was missing default!)
+valueRecordDef (50 wght=200d:45 wght=900d:60) KERN2;
