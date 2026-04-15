@@ -1,18 +1,20 @@
 # Test: Named location references
 # Level 1: Location references
 # Dependencies: 00_foundation/locationDef_basic.fea
-# Tests: Using @location labels in value records and anchors
+# Tests: Using @location labels in value records and anchors with complete min/default/max
 
 languagesystem DFLT dflt;
 
-# Define locations
-locationDef wght=400d @Regular;
-locationDef wght=700d @Bold;
+# Define locations at min, intermediate, and max (no @Regular since it's default)
+locationDef wght=200d @ExtraLight;
+locationDef wght=600d @Semibold;
+locationDef wght=900d @Black;
 
-# Use named locations in value records
-valueRecordDef (@Regular:50) VAL_REG;
-valueRecordDef (@Bold:60) VAL_BOLD;
-valueRecordDef (@Regular:50 @Bold:60) VAL_BOTH;
+# Use named locations in value records - complete min/default/max
+valueRecordDef (50 @ExtraLight:45 @Black:60) VAL_MIN_MAX;
+valueRecordDef (60 @ExtraLight:55 @Black:70) VAL_BOTH;
+valueRecordDef (55 @ExtraLight:50 @Semibold:57 @Black:65) VAL_ALL_THREE;
 
-# Use named locations in anchors
-anchorDef (250 @Regular:240 @Bold:260) 620 anc1;
+# Use named locations in anchors - complete min/default/max
+anchorDef (250 @ExtraLight:240 @Black:260) 620 anc1;
+anchorDef (260 @ExtraLight:250 @Semibold:265 @Black:270) 620 anc2;
