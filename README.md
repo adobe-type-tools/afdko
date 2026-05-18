@@ -57,14 +57,6 @@ Releases are available on the [Python Package
 Index](https://pypi.python.org/pypi/afdko) (PyPI) and can be installed
 with [pip](https://pip.pypa.io).
 
-Note for macOS users: we recommend that you do **not** use the system
-Python. Among other reasons, some versions of macOS ship with Python 2
-and the latest version of the AFDKO is only available for Python 3. You
-can find instructions for using Brew to install Python 3 on macOS here:
-[Installing Python 3 on Mac OS X](https://docs.python-guide.org/starting/install3/osx/).
-Also: [pyenv](https://github.com/pyenv/pyenv) is a great tool for
-installing and managing multiple Python versions on macOS.
-
 Note for all users: we **STRONGLY** recommend the use of a Python virtual
 environment ([`venv`](https://docs.python.org/3/library/venv.html))
 and the use of `python -m pip install <package>` to install all packages
