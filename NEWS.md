@@ -1,6 +1,19 @@
 Changelog
 =========
 
+5.0.1 (released 2026-05-18)
+---------------------------
+- [otfautohint/otfstemhist] Fix "No module named 'typing_extensions'" failure on Python 3.10
+  ([#1828](https://github.com/adobe-type-tools/afdko/pull/1828))
+- [spot] Fix U+00A9 (copyright) rendering as U+FFFD in name table output
+  ([#1828](https://github.com/adobe-type-tools/afdko/pull/1828))
+- [build] Fix STRCPY_S macro to avoid format-security error
+  ([#1830](https://github.com/adobe-type-tools/afdko/pull/1830))
+- [addfeatures tests] Fix variable font test files; add comprehensive test coverage
+  ([#1832](https://github.com/adobe-type-tools/afdko/pull/1832))
+- [README] Remove outdated macOS Python installation note
+  ([#1836](https://github.com/adobe-type-tools/afdko/pull/1836))
+
 5.0.0 (released 2026-03-22)
 ---------------------------
 **Major restructuring: Unified command interface, massive C++ modernization, and build system overhaul**
