@@ -11,7 +11,12 @@ from math import sqrt
 from collections import defaultdict
 from builtins import tuple as _tuple
 from typing import Iterator, Any, Callable
-from typing_extensions import Self
+import sys
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 from fontTools.misc.bezierTools import (
     solveQuadratic,

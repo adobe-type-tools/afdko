@@ -2,21 +2,25 @@
 # Level 0: Foundation test
 # Dependencies: None
 # Tests: Simple locationDef with single and multiple axes
+# ENHANCED: Added zero/max/min normalized patterns from repo
 
 languagesystem DFLT dflt;
 
-# Single axis locations
-locationDef wght=200d @Light;
-locationDef wght=400d @Regular;
+# Single axis locations (no @Regular since wght=400d is the default)
+locationDef wght=200d @ExtraLight;
 locationDef wght=700d @Bold;
 locationDef wght=900d @Black;
 
 # Single axis with different unit (normalized)
-locationDef wght=200n @LightN;
+locationDef wght=200n @ExtraLightN;
 locationDef wght=1000n @BlackN;
 
-# Multiple axes
-locationDef wght=400d,opsz=20d @RegularText;
+# Define locations using normalized units (n) - from repo
+locationDef wght=0n, opsz=0n @DefaultLocation;
+locationDef wght=1n @MaxWeight;
+locationDef wght=-1n @MinWeight;
+
+# Multiple axes (no @RegularText since wght=400d,opsz=20d is the full default)
 locationDef wght=700d,opsz=20d @BoldText;
 locationDef wght=400d,opsz=60d @RegularDisplay;
 locationDef wght=700d,opsz=60d @BoldDisplay;

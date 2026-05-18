@@ -1,5 +1,6 @@
 # Comprehensive Variable Font Grammar Test
 # Tests all variable font features added to afdko4
+# FIXED: All variable values have complete min/default/max
 
 languagesystem DFLT dflt;
 
@@ -7,23 +8,23 @@ languagesystem DFLT dflt;
 # 1. LOCATIONDEF STATEMENTS (LocationDefMode)
 # ============================================================================
 
-# Single axis, design units
-locationDef wght=400d @Regular;
-locationDef wght=700d @Bold;
+# Single axis at min and max for design units (no @Regular since it's the default)
+locationDef wght=200d @ExtraLight;
+locationDef wght=900d @Black;
 
-# Single axis, user units
+# Single axis, user units (testing user unit syntax)
 locationDef wght=400u @RegularUser;
 
 # Single axis, normalized
+locationDef wght=-1n @Min;
 locationDef wght=0n @Default;
 locationDef wght=1n @Max;
 
-# Multiple axes
-locationDef wght=400d, opsz=20d @RegMid;
+# Multiple axes (no location at wght=400d,opsz=20d since that's the full default)
 locationDef wght=700d, opsz=8d @BoldSmall;
 
-# Negative values
-locationDef wght=-100d @ExtraLight;
+# Negative values (design units can be negative for extralight)
+locationDef wght=-100d @NegativeExample;
 
 # Decimal values
 locationDef wght=450.5d @Medium;
@@ -35,32 +36,35 @@ locationDef wght=450.5d @Medium;
 # Single value in parens (variable)
 valueRecordDef (50) VAL_SINGLE;
 
-# Single value with named location
-valueRecordDef (@Regular:50) VAL_NAMED;
+# Value with named location - complete min/default/max
+valueRecordDef (50 @ExtraLight:45 @Black:60) VAL_NAMED;
 
-# Single value with inline location WITHOUT SPACES (the key fix!)
-valueRecordDef (wght=400d:47) VAL_INLINE_NOSPACE;
+# Single value with inline location WITHOUT SPACES (the key fix!) - complete min/default/max
+valueRecordDef (47 wght=200d:42 wght=900d:54) VAL_INLINE_NOSPACE;
 
-# Single value with inline location WITH spaces
-valueRecordDef (wght=400d : 47) VAL_INLINE_SPACE;
+# Single value with inline location WITH spaces - complete min/default/max
+valueRecordDef (47 wght=200d : 42 wght=900d : 54) VAL_INLINE_SPACE;
 
-# Multiple location:value pairs WITHOUT SPACES
-valueRecordDef (wght=400d:47 wght=700d:54) VAL_MULTI_NOSPACE;
+# Multiple location:value pairs WITHOUT SPACES - complete min/default/max
+valueRecordDef (47 wght=200d:42 wght=900d:54) VAL_MULTI_NOSPACE;
 
-# Multiple location:value pairs WITH spaces
-valueRecordDef (wght=400d : 47 wght=700d : 54) VAL_MULTI_SPACE;
+# Multiple location:value pairs WITH spaces - complete min/default/max
+valueRecordDef (47 wght=200d : 42 wght=900d : 54) VAL_MULTI_SPACE;
 
-# Multiple location:value pairs MIXED spacing
-valueRecordDef (wght=400d:47 wght=700d : 54) VAL_MULTI_MIXED;
+# Multiple location:value pairs MIXED spacing - complete min/default/max
+valueRecordDef (47 wght=200d:42 wght=900d : 54) VAL_MULTI_MIXED;
 
-# Mixed inline and named locations
-valueRecordDef (wght=400d:47 @Bold:54) VAL_MIXED_INLINE_NAMED;
+# Mixed inline and named locations - complete min/default/max
+valueRecordDef (47 wght=200d:42 @Black:54) VAL_MIXED_INLINE_NAMED;
 
-# Value record literals (angle brackets) with named locations
-valueRecordDef (@Regular:<-80 0 -160 0>) VAL_RECORD;
+# Value record literals (angle brackets) with named locations - complete min/default/max
+valueRecordDef (<-80 0 -160 0> @ExtraLight:<-70 0 -150 0> @Black:<-90 0 -170 0>) VAL_RECORD;
 
-# Value record literals with inline locations
-valueRecordDef (wght=400d:<-80 0 -160 0>) VAL_RECORD_INLINE;
+# Four-value record with one variable component (from phase1) - complete min/default/max
+valueRecordDef <0 0 (20 @ExtraLight:15 @Black:25) 0> KERN_C;
+
+# Value record literals with inline locations - complete min/default/max
+valueRecordDef (<-80 0 -160 0> wght=200d:<-70 0 -150 0> wght=900d:<-90 0 -170 0>) VAL_RECORD_INLINE;
 
 # Plain number (static)
 valueRecordDef 100 VAL_PLAIN;
@@ -72,32 +76,36 @@ valueRecordDef 100 VAL_PLAIN;
 # Simple static anchor
 anchorDef 250 620 top;
 
-# Variable anchor with inline locations - NO SPACES
-anchorDef (250 wght=400d:240 wght=700d:260) 620 top_var;
+# Variable anchor with inline locations - NO SPACES - complete min/default/max
+anchorDef (250 wght=200d:240 wght=900d:260) 620 top_var;
 
-# Variable anchor with inline locations - WITH SPACES
-anchorDef (250 wght=400d : 240 wght=700d : 260) 620 top_var_space;
+# Variable anchor with inline locations - WITH SPACES - complete min/default/max
+anchorDef (250 wght=200d : 240 wght=900d : 260) 620 top_var_space;
 
-# Variable anchor with named locations
-anchorDef (250 @Regular:240 @Bold:260) 620 top_named;
+# Variable anchor with named locations - complete min/default/max
+anchorDef (250 @ExtraLight:240 @Black:260) 620 top_named;
 
-# Variable anchor with value records
-anchorDef (<250 620> @Regular:<240 620> @Bold:<260 620>) top_record;
+# Variable anchor with value records - complete min/default/max
+anchorDef (<250 620> @ExtraLight:<240 620> @Black:<260 620>) top_record;
+
+# Variable anchor with separate x and y values (from phase1) - complete min/default/max
+# Note: Using anchorDef instead of markClass to avoid missing glyph errors
+anchorDef (250 @ExtraLight:240 @Black:260) (620 @ExtraLight:610 @Black:630) top_separate_xy;
 
 # ============================================================================
 # 4. MARK CLASS - Variable Anchors in Mark Statements
 # ============================================================================
 
-@MARKS = [acute grave];
+@MARKS = [a e];
 
 # Static mark class
 markClass [a b c] <anchor 250 620> @BASE_MARKS;
 
-# Variable mark class - inline locations NO SPACES
-markClass acute <anchor (250 wght=400d:240 wght=700d:260) 620> @TOP_MARKS;
+# Variable mark class - inline locations NO SPACES - complete min/default/max
+markClass a <anchor (250 wght=200d:240 wght=900d:260) 620> @TOP_MARKS;
 
-# Variable mark class - inline locations WITH SPACES
-markClass grave <anchor (250 wght=400d : 240 wght=700d : 260) 620> @TOP_MARKS_SPACE;
+# Variable mark class - inline locations WITH SPACES - complete min/default/max
+markClass e <anchor (250 wght=200d : 240 wght=900d : 260) 620> @TOP_MARKS_SPACE;
 
 # ============================================================================
 # 5. GLYPH NAMES - d, u, n as glyphs (AXISUNIT removed from default mode)
@@ -107,7 +115,8 @@ markClass grave <anchor (250 wght=400d : 240 wght=700d : 260) 620> @TOP_MARKS_SP
 @AXIS_LETTERS = [d u n];
 
 # Extended names with colons (EXTNAME in default mode)
-@EXTENDED = [d:47 u:48 n:49];
+# Note: These glyphs don't exist in test font, commented out
+# @EXTENDED = [d:47 u:48 n:49];
 
 # ============================================================================
 # 6. VARIABLE METRICS - singleValueLiteral in table statements
@@ -118,16 +127,16 @@ table OS/2 {
     TypoAscender 750;
     TypoDescender -250;
 
-    # Variable values with named locations
-    XHeight (@Regular:500);
-    CapHeight (@Regular:700);
+    # Variable values with named locations - complete min/default/max
+    XHeight (500 @ExtraLight:480 @Black:520);
+    CapHeight (700 @ExtraLight:680 @Black:720);
 
-    # Variable values with inline locations
-    SubscriptXSize (wght=400d:100);
-    SubscriptYSize (wght=400d:100);
-    SuperscriptXSize (wght=400d:100);
-    SuperscriptYSize (wght=400d:100);
-    StrikeoutSize (wght=400d:50);
+    # Variable values with inline locations - complete min/default/max
+    SubscriptXSize (100 wght=200d:90 wght=900d:110);
+    SubscriptYSize (100 wght=200d:90 wght=900d:110);
+    SuperscriptXSize (100 wght=200d:90 wght=900d:110);
+    SuperscriptYSize (100 wght=200d:90 wght=900d:110);
+    StrikeoutSize (50 wght=200d:45 wght=900d:55);
 } OS/2;
 
 table hhea {
@@ -136,23 +145,23 @@ table hhea {
     Descender -250;
     LineGap 0;
 
-    # Variable values with named locations
-    CaretOffset (@Regular:0);
-    CaretSlopeRise (@Regular:1);
-    CaretSlopeRun (@Regular:0);
+    # Variable values with named locations - complete min/default/max
+    CaretOffset (0 @ExtraLight:0 @Black:0);
+    CaretSlopeRise (1 @ExtraLight:1 @Black:1);
+    CaretSlopeRun (0 @ExtraLight:0 @Black:0);
 } hhea;
 
 table vhea {
-    # Variable values with inline locations
-    VertTypoAscender (wght=400d:750);
-    VertTypoDescender (wght=400d:-250);
-    CaretOffset (wght=400d:0);
+    # Variable values with inline locations - complete min/default/max
+    VertTypoAscender (750 wght=200d:730 wght=900d:770);
+    VertTypoDescender (-250 wght=200d:-230 wght=900d:-270);
+    CaretOffset (0 wght=200d:0 wght=900d:0);
 } vhea;
 
 table vmtx {
-    # Variable vertical metrics
-    VertOriginY A (wght=400d:750);
-    VertAdvanceY A (wght=400d:1000);
+    # Variable vertical metrics - complete min/default/max
+    VertOriginY A (750 wght=200d:730 wght=900d:770);
+    VertAdvanceY A (1000 wght=200d:980 wght=900d:1020);
 } vmtx;
 
 # ============================================================================
@@ -169,11 +178,11 @@ feature test {
     # Note: these glyphs don't exist in our test font, but tests the grammar
     # sub d:47 by A;
 
-    # Single positioning with inline variable value - NO SPACES
-    pos A (wght=400d:10);
+    # Single positioning with inline variable value - NO SPACES - complete min/default/max
+    pos A (10 wght=200d:8 wght=900d:12);
 
-    # Pair positioning with inline variable value - WITH SPACES
-    pos A b (wght=400d : 20);
+    # Pair positioning with inline variable value - WITH SPACES - complete min/default/max
+    pos A b (20 wght=200d : 18 wght=900d : 22);
 } test;
 
 # ============================================================================
@@ -184,6 +193,6 @@ table GDEF {
     # Static ligature caret
     LigatureCaretByPos A 500;
 
-    # Variable ligature caret with inline location
-    LigatureCaretByPos b (wght=400d:500);
+    # Variable ligature caret with inline location - complete min/default/max
+    LigatureCaretByPos b (500 wght=200d:480 wght=900d:520);
 } GDEF;

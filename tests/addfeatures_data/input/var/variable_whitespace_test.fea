@@ -1,5 +1,6 @@
 # Variable Font Whitespace Variation Tests
 # Tests where whitespace is/isn't required with lexer modes
+# FIXED: All variable values have complete min/default/max
 
 languagesystem DFLT dflt;
 
@@ -7,53 +8,53 @@ languagesystem DFLT dflt;
 # TEST 1: locationDef spacing (LocationDefMode)
 # ============================================================================
 
-# No spaces around operators (should work)
-locationDef wght=400d @Loc1;
-locationDef wght=400d,opsz=20d @Loc2;
+# No spaces around operators (should work) - testing various non-default points
+locationDef wght=200d @Loc1;
+locationDef wght=700d,opsz=8d @Loc2;
+locationDef wght=900d @Loc8;
 
-# Spaces around = (should work)
-locationDef wght = 400d @Loc3;
-locationDef wght =400d @Loc4;
-locationDef wght= 400d @Loc5;
+# Spaces around = (should work) - at intermediate points, not default
+locationDef wght = 600d @Loc3;
+locationDef wght =700d @Loc4;
+locationDef wght= 800d @Loc5;
 
-# Spaces around , (should work)
-locationDef wght=400d , opsz=20d @Loc6;
-locationDef wght=400d, opsz=20d @Loc7;
-locationDef wght=400d ,opsz=20d @Loc8;
+# Spaces around , (should work) - at non-default multi-axis points
+locationDef wght=700d , opsz=8d @Loc6;
+locationDef wght=700d, opsz=60d @Loc7;
 
 # ============================================================================
 # TEST 2: valueRecordDef with inline locations - THE KEY FIX
 # ============================================================================
 
-# NO SPACES around colon (should work - this is the fix!)
-valueRecordDef (wght=400n:50) VAL_NOSPACE;
-valueRecordDef (wght=400n:50 wght=700n:60) VAL_MULTI_NOSPACE;
+# NO SPACES around colon (should work - this is the fix!) - complete min/default/max
+valueRecordDef (50 wght=-1n:45 wght=1n:60) VAL_NOSPACE;
+valueRecordDef (50 wght=-1n:45 wght=1n:60) VAL_MULTI_NOSPACE;
 
-# SPACES around colon (should work)
-valueRecordDef (wght=400n : 50) VAL_SPACE;
-valueRecordDef (wght=400n : 50 wght=700n : 60) VAL_MULTI_SPACE;
+# SPACES around colon (should work) - complete min/default/max
+valueRecordDef (50 wght=-1n : 45 wght=1n : 60) VAL_SPACE;
+valueRecordDef (50 wght=-1n : 45 wght=1n : 60) VAL_MULTI_SPACE;
 
-# Space before colon only (should work?)
-valueRecordDef (wght=400n :50) VAL_SPACE_BEFORE;
+# Space before colon only (should work?) - complete min/default/max
+valueRecordDef (50 wght=-1n :45 wght=1n :60) VAL_SPACE_BEFORE;
 
-# Space after colon only (should work?)
-valueRecordDef (wght=400n: 50) VAL_SPACE_AFTER;
+# Space after colon only (should work?) - complete min/default/max
+valueRecordDef (50 wght=-1n: 45 wght=1n: 60) VAL_SPACE_AFTER;
 
-# Mixed spacing (should work)
-valueRecordDef (wght=400n:50 wght=700n : 60) VAL_MIXED;
+# Mixed spacing (should work) - complete min/default/max
+valueRecordDef (50 wght=-1n:45 wght=1n : 60) VAL_MIXED;
 
 # ============================================================================
 # TEST 3: anchorDef with inline locations
 # ============================================================================
 
-# NO SPACES around colon in anchors (should work - the fix!)
-anchorDef (250 wght=400n:240 wght=700n:260) 620 anc1;
+# NO SPACES around colon in anchors (should work - the fix!) - complete min/default/max
+anchorDef (250 wght=-1n:240 wght=1n:260) 620 anc1;
 
-# WITH SPACES around colon in anchors
-anchorDef (250 wght=400n : 240 wght=700n : 260) 620 anc2;
+# WITH SPACES around colon in anchors - complete min/default/max
+anchorDef (250 wght=-1n : 240 wght=1n : 260) 620 anc2;
 
-# Mixed spacing in anchors
-anchorDef (250 wght=400n:240 wght=700n : 260) 620 anc3;
+# Mixed spacing in anchors - complete min/default/max
+anchorDef (250 wght=-1n:240 wght=1n : 260) 620 anc3;
 
 # ============================================================================
 # TEST 4: Axis unit letters as glyphs (default mode - AXISUNIT removed)
@@ -81,43 +82,43 @@ feature test {
 # TEST 6: Nested parentheses (mode recursion)
 # ============================================================================
 
-# Value records in parens (should work)
-valueRecordDef (@Loc1:<-80 0 -160 0>) VAL_RECORD;
+# Value records in parens (should work) - complete min/default/max
+valueRecordDef (<-80 0 -160 0> @Loc1:<-70 0 -150 0> @Loc8:<-90 0 -170 0>) VAL_RECORD;
 
-# Nested with inline locations - NO SPACES
-valueRecordDef (wght=400n:<-80 0 -160 0>) VAL_RECORD_INLINE;
+# Nested with inline locations - NO SPACES - complete min/default/max
+valueRecordDef (<-80 0 -160 0> wght=-1n:<-70 0 -150 0> wght=1n:<-90 0 -170 0>) VAL_RECORD_INLINE;
 
-# Nested with inline locations - WITH SPACES
-valueRecordDef (wght=400n : <-80 0 -160 0>) VAL_RECORD_SPACE;
+# Nested with inline locations - WITH SPACES - complete min/default/max
+valueRecordDef (<-80 0 -160 0> wght=-1n : <-70 0 -150 0> wght=1n : <-90 0 -170 0>) VAL_RECORD_SPACE;
 
 # ============================================================================
 # TEST 7: locationDef axis value spacing
 # ============================================================================
 
-# No space before unit (should work)
-locationDef wght=400d @Loc9;
+# No space before unit (should work) - at non-default point
+locationDef wght=700d @Loc9;
 
-# Space before unit (should work?)
-locationDef wght=400 d @Loc10;
+# Space before unit (should work?) - at non-default point
+locationDef wght=700 d @Loc10;
 
-# No space after equals (should work)
-locationDef wght=400d @Loc11;
+# No space after equals (should work) - at non-default point
+locationDef wght=700d @Loc11;
 
-# Multiple axes, no spaces at all (should work)
-locationDef wght=400d,opsz=20d @Loc12;
+# Multiple axes, no spaces at all (should work) - at non-default multi-axis
+locationDef wght=700d,opsz=8d @Loc12;
 
 # ============================================================================
 # TEST 8: Inline location axis value spacing
 # ============================================================================
 
-# No space before unit in inline location (should work)
-valueRecordDef (wght=400d:50) VAL_UNIT_NOSPACE;
+# No space before unit in inline location (should work) - complete min/default/max
+valueRecordDef (50 wght=200d:45 wght=900d:60) VAL_UNIT_NOSPACE;
 
-# Space before unit in inline location (should work?)
-valueRecordDef (wght=400 d:50) VAL_UNIT_SPACE;
+# Space before unit in inline location (should work?) - complete min/default/max
+valueRecordDef (50 wght=200 d:45 wght=900 d:60) VAL_UNIT_SPACE;
 
-# No space after equals in inline location (should work)
-valueRecordDef (wght=400d:50) VAL_EQ_NOSPACE;
+# No space after equals in inline location (should work) - complete min/default/max
+valueRecordDef (50 wght=200d:45 wght=900d:60) VAL_EQ_NOSPACE;
 
-# Space after equals in inline location (should work?)
-valueRecordDef (wght= 400d:50) VAL_EQ_SPACE;
+# Space after equals in inline location (should work?) - complete min/default/max
+valueRecordDef (50 wght= 200d:45 wght= 900d:60) VAL_EQ_SPACE;

@@ -55,7 +55,7 @@ extern "C" {
 #define SSCANF_S sscanf
 #endif
 #ifndef STRCPY_S
-#define STRCPY_S(d, ds, s) snprintf(d, ds, s)
+#define STRCPY_S(d, ds, s) snprintf(d, ds, "%s", s)
 #endif
 #ifndef STRNCPY_S
 #define STRNCPY_S(d, ds, s, n) strncpy(d, s, n)

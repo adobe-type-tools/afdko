@@ -19,7 +19,12 @@ from typing import (
     Set,
     Protocol,
 )
-from typing_extensions import Self
+import sys
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 log: logging.Logger = logging.getLogger(__name__)
 

@@ -1,18 +1,18 @@
 # Test: Single inline location references
 # Level 1: Location references
 # Dependencies: 00_foundation/locationDef_basic.fea
-# Tests: Basic inline (axis=value:metric) syntax
+# Tests: Basic inline (axis=value:metric) syntax with complete min/default/max
 
 languagesystem DFLT dflt;
 
-# Single axis, single variation point
-valueRecordDef (wght=400d:50) VAL1;
-valueRecordDef (wght=700d:60) VAL2;
+# Single axis with design units - complete min/default/max
+valueRecordDef (50 wght=200d:45 wght=900d:60) VAL1;
+valueRecordDef (60 wght=200d:55 wght=900d:70) VAL2;
 
-# Using normalized units
-valueRecordDef (wght=0n:50) VAL3;
-valueRecordDef (wght=1000n:70) VAL4;
+# Using normalized units - complete min/default/max
+valueRecordDef (50 wght=-1n:45 wght=1n:60) VAL3;
+valueRecordDef (70 wght=-1n:60 wght=1n:85) VAL4;
 
-# In anchors
-anchorDef (250 wght=400d:240) 620 anc1;
-anchorDef (250 wght=700d:260) 620 anc2;
+# In anchors - complete min/default/max
+anchorDef (250 wght=200d:240 wght=900d:260) 620 anc1;
+anchorDef (260 wght=200d:250 wght=900d:270) 620 anc2;

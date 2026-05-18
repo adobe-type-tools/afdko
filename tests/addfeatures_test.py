@@ -1260,6 +1260,101 @@ def test_var_mark_positioning():
             f"c+acute {description} wght={wght}, opsz={opsz}: expected y offset {exp_y_off}, got {mark_y_offset}"
 
 
+def test_var_inline_location_single():
+    """Test inline location syntax with single axis."""
+    input_filename = "var/font_var.otf"
+    feat_filename = "var/01_location_references/inline_location_single.fea"
+    ds_filename = "var/font.designspace"
+    actual_path = get_temp_file_path()
+
+    runner(CMD + ['-o',
+                  'f', f'_{get_input_path(input_filename)}',
+                  'ff', f'_{get_input_path(feat_filename)}',
+                  'ds', f'_{get_input_path(ds_filename)}',
+                  'o', f'_{actual_path}'])
+    assert os.path.exists(actual_path)
+
+
+def test_var_named_location_single():
+    """Test named location references with single axis."""
+    input_filename = "var/font_var.otf"
+    feat_filename = "var/01_location_references/named_location_single.fea"
+    ds_filename = "var/font.designspace"
+    actual_path = get_temp_file_path()
+
+    runner(CMD + ['-o',
+                  'f', f'_{get_input_path(input_filename)}',
+                  'ff', f'_{get_input_path(feat_filename)}',
+                  'ds', f'_{get_input_path(ds_filename)}',
+                  'o', f'_{actual_path}'])
+    assert os.path.exists(actual_path)
+
+
+def test_var_valueRecordDef_inline():
+    """Test valueRecordDef statements with inline locations."""
+    input_filename = "var/font_var.otf"
+    feat_filename = "var/02_value_constructs/valueRecordDef_inline.fea"
+    ds_filename = "var/font.designspace"
+    actual_path = get_temp_file_path()
+
+    runner(CMD + ['-o',
+                  'f', f'_{get_input_path(input_filename)}',
+                  'ff', f'_{get_input_path(feat_filename)}',
+                  'ds', f'_{get_input_path(ds_filename)}',
+                  'o', f'_{actual_path}'])
+    assert os.path.exists(actual_path)
+
+
+def test_var_variable_comprehensive():
+    """Test comprehensive variable font features including valueRecordDef, anchors, and table metrics."""
+    input_filename = "var/font_var.otf"
+    feat_filename = "var/variable_comprehensive.fea"
+    ds_filename = "var/font.designspace"
+    actual_path = get_temp_file_path()
+
+    runner(CMD + ['-o',
+                  'f', f'_{get_input_path(input_filename)}',
+                  'ff', f'_{get_input_path(feat_filename)}',
+                  'ds', f'_{get_input_path(ds_filename)}',
+                  'o', f'_{actual_path}'])
+    assert os.path.exists(actual_path)
+
+
+def test_var_whitespace_test():
+    """Test whitespace variations in variable value syntax."""
+    input_filename = "var/font_var.otf"
+    feat_filename = "var/variable_whitespace_test.fea"
+    ds_filename = "var/font.designspace"
+    actual_path = get_temp_file_path()
+
+    runner(CMD + ['-o',
+                  'f', f'_{get_input_path(input_filename)}',
+                  'ff', f'_{get_input_path(feat_filename)}',
+                  'ds', f'_{get_input_path(ds_filename)}',
+                  'o', f'_{actual_path}'])
+    assert os.path.exists(actual_path)
+
+
+def test_var_error_undefined_location():
+    """Test that referencing an undefined location produces proper error."""
+    input_filename = "var/font_var.otf"
+    feat_filename = "var/99_errors/error_undefined_location.fea"
+    ds_filename = "var/font.designspace"
+    actual_path = get_temp_file_path()
+
+    stderr_path = runner(CMD + ['-s', '-e', '-o',
+                                'f', f'_{get_input_path(input_filename)}',
+                                'ff', f'_{get_input_path(feat_filename)}',
+                                'ds', f'_{get_input_path(ds_filename)}',
+                                'o', f'_{actual_path}'])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+
+    # Should mention the undefined location
+    assert b'DoesNotExist' in output or b'not in list' in output.lower()
+
+
 # ---------------------------------
 # Backwards Compatibility Tests
 # ---------------------------------

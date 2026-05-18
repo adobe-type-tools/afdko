@@ -2,12 +2,13 @@
    This software is licensed as OpenSource, under the Apache License, Version 2.0.
    This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-#include <ctype.h>
-
 #include "name.h"
 #include "desc.h"
 #include "sfnt_name.h"
 #include "sfnt.h"
+
+/* ASCII printable range (0x20-0x7e) - locale-independent alternative to isprint() */
+#define IS_ASCII_PRINT(c) ((c) >= 0x20 && (c) <= 0x7e)
 
 static nameTbl *name = NULL;
 static int loaded = 0;
@@ -75,7 +76,7 @@ static void dumpString(NameRecord *record, int level) {
         if (twoByte)
             code = code << 8 | *p++;
 
-        if ((code & 0xff00) == 0 && isprint(code))
+        if (IS_ASCII_PRINT(code))
             DL(3, (OUTPUTBUFF, "%c", (int)code));
         else
             DL(3, (OUTPUTBUFF, "\\%0*x", precision, code));
@@ -95,7 +96,7 @@ static void dumpLanguageTagString(LangTagRecord *langTagRec, int level) {
 
         code = code << 8 | *p++;
 
-        if ((code & 0xff00) == 0 && isprint(code))
+        if (IS_ASCII_PRINT(code))
             DL(3, (OUTPUTBUFF, "%c", (int)code));
         else
             DL(3, (OUTPUTBUFF, "\\%0*x", precision, code));
@@ -116,7 +117,7 @@ static void makeString(NameRecord *record, int8_t *str) {
         if (twoByte)
             code = code << 8 | *p++;
 
-        if ((code & 0xff00) == 0 && isprint(code)) {
+        if (IS_ASCII_PRINT(code)) {
             *strptr++ = (int8_t)code;
             len++;
         }
