@@ -294,7 +294,7 @@ void GlyphMetrics::processGlyphs(const std::vector<uint16_t> &gids,
 }
 
 void GlyphMetrics::processGlyphs(const std::vector<uint16_t> &gids) {
-    static abfGlyphCallbacks glyphcb = {
+    abfGlyphCallbacks glyphcb = {
         (void *)this,
         NULL,
         NULL,
