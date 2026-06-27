@@ -52,12 +52,12 @@ int hmtxFill(hotCtx g) {
     /* Optimize metrics */
     FWord width = hmtx.advanceWidth.back();
     size_t i;
-    for (i = hmtx.advanceWidth.size() - 2; i >= 0; i--) {
-        if (hmtx.advanceWidth[i] != width)
+    for (i = hmtx.advanceWidth.size(); i >= 2; i--) {
+        if (hmtx.advanceWidth[i-2] != width)
             break;
     }
-    if (i + 2 != hmtx.advanceWidth.size())
-        hmtx.advanceWidth.resize(i+2);
+    if (i != hmtx.advanceWidth.size())
+        hmtx.advanceWidth.resize(i);
 
     return hmtx.Fill();
 }
