@@ -45,7 +45,7 @@
       <map uv="0x4e9c" uvs="0xe0100"/>
       <map uv="0x9bf5" uvs="0xe0100"/>
     </cmap_format_14>
-    <cmap_format_2 platformID="1" platEncID="1" language="3">
+    <cmap_format_2 platformID="1" platEncID="1" language="4">
       <map code="0x0" name="cid00001"/>
       <map code="0x1" name="cid00001"/>
       <map code="0x2" name="cid00001"/>
