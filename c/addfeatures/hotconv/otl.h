@@ -355,6 +355,7 @@ class OTL {
     virtual void writeOTL();
     virtual void AddSubtable(typename std::unique_ptr<Subtable> s);
     virtual void updateMaxContext(uint16_t m) { maxContext = MAX(m, maxContext); }
+    void autoPromoteExtensions();
 #if HOT_DEBUG
     void dumpSizes(LOffset subtableSize, LOffset extensionSectionSize);
 #endif

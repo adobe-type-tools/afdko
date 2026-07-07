@@ -1146,15 +1146,212 @@ GPOS::PairPos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
 }
 
 void GPOS::PairPos::fill(GPOS &h, SubtableInfo &si) {
-    if (si.pairs.size() != 0) {
-        if (si.pairFmt == 1) {
-            h.AddSubtable(std::move(std::make_unique<Format1>(h, si)));
-        } else {
-            assert(si.pairFmt == 2);
-            h.AddSubtable(std::move(std::make_unique<Format2>(h, si)));
-        }
+    if (si.pairs.size() == 0) {
+        h.updateMaxContext(2);
+        return;
+    }
+
+    if (si.pairFmt == 1) {
+        fillFormat1(h, si);
+    } else {
+        assert(si.pairFmt == 2);
+        fillFormat2(h, si);
     }
     h.updateMaxContext(2);
+}
+
+void GPOS::PairPos::fillFormat1(GPOS &h, SubtableInfo &si) {
+    std::sort(si.pairs.begin(), si.pairs.end());
+
+    auto nvals = MetricsInfo::numValues(si.pairValFmt1)
+               + MetricsInfo::numValues(si.pairValFmt2);
+    auto nvars = MetricsInfo::numVariables(si.pairValFmt1)
+               + MetricsInfo::numVariables(si.pairValFmt2);
+
+    // Estimate total size: walk PairSets
+    LOffset totalSize = pair1Size(0);
+    uint32_t nPairSets = 0;
+    GID prevFirst = GID_UNDEF;
+    uint32_t pairsInSet = 0;
+    for (auto &p : si.pairs) {
+        if (p.first != prevFirst) {
+            if (prevFirst != GID_UNDEF)
+                totalSize += sizeof(uint16_t) + pairSetSize(pairsInSet, nvals, nvars);
+            nPairSets++;
+            prevFirst = p.first;
+            pairsInSet = 0;
+        }
+        pairsInSet++;
+    }
+    if (prevFirst != GID_UNDEF)
+        totalSize += sizeof(uint16_t) + pairSetSize(pairsInSet, nvals, nvars);
+    totalSize += sizeof(uint16_t) * nPairSets;  // offset array in header
+
+    if (totalSize <= 0xFFFF || (h.g->convertFlags & HOT_NO_AUTO_OVERFLOW)) {
+        h.AddSubtable(std::make_unique<Format1>(h, si));
+        return;
+    }
+
+    // Auto-split: partition pairs by first glyph, greedy fill
+    const LOffset maxSize = 0xC000;
+
+    if (h.g->convertFlags & HOT_VERBOSE)
+        h.g->logger->log(sINFO,
+            "Auto-splitting specific pair subtable (estimated %u bytes) "
+            "in %s", totalSize, h.g->error_id_text.c_str());
+
+    SubtableInfo partSI;
+    partSI.useExtension = si.useExtension;
+    partSI.lkpType = si.lkpType;
+    partSI.lkpFlag = si.lkpFlag;
+    partSI.label = si.label;
+    partSI.pairFmt = 1;
+    partSI.pairValFmt1 = si.pairValFmt1;
+    partSI.pairValFmt2 = si.pairValFmt2;
+
+    LOffset currentSize = pair1Size(0);
+    uint32_t currentPairSets = 0;
+    prevFirst = GID_UNDEF;
+    pairsInSet = 0;
+    size_t partStart = 0;
+
+    for (size_t i = 0; i <= si.pairs.size(); i++) {
+        bool atEnd = (i == si.pairs.size());
+        bool newFirst = !atEnd && (si.pairs[i].first != prevFirst);
+
+        if (newFirst && prevFirst != GID_UNDEF) {
+            // Account for the just-completed PairSet
+            LOffset setContrib = sizeof(uint16_t) + pairSetSize(pairsInSet, nvals, nvars);
+            LOffset projected = currentSize + setContrib;
+
+            if (projected > maxSize && currentPairSets > 0) {
+                // Emit partition up to (but not including) this PairSet's first glyph
+                size_t splitAt = i - pairsInSet;
+                partSI.pairs.clear();
+                for (size_t k = partStart; k < splitAt; k++)
+                    partSI.pairs.emplace_back(std::move(si.pairs[k]));
+                h.AddSubtable(std::make_unique<Format1>(h, partSI));
+                partSI.pairs.clear();
+                partSI.label = 0;  // Only first partition carries the label
+                partStart = splitAt;
+                currentSize = pair1Size(0);
+                currentPairSets = 0;
+            }
+            currentSize += setContrib;
+            currentPairSets++;
+            pairsInSet = 0;
+        }
+
+        if (atEnd) {
+            // Emit remaining
+            if (partStart < si.pairs.size()) {
+                partSI.pairs.clear();
+                for (size_t k = partStart; k < si.pairs.size(); k++)
+                    partSI.pairs.emplace_back(std::move(si.pairs[k]));
+                h.AddSubtable(std::make_unique<Format1>(h, partSI));
+            }
+        } else {
+            if (prevFirst == GID_UNDEF || si.pairs[i].first != prevFirst) {
+                prevFirst = si.pairs[i].first;
+                if (currentPairSets == 0)
+                    currentPairSets = 1;
+            }
+            pairsInSet++;
+        }
+    }
+}
+
+void GPOS::PairPos::fillFormat2(GPOS &h, SubtableInfo &si) {
+    // Determine class counts to estimate size
+    uint32_t class1Count = h.classDef[0].classInfo.size();
+    uint32_t class2Count = h.classDef[1].classInfo.size() + 1;
+
+    if (!(h.g->convertFlags & HOT_DO_NOT_OPTIMIZE_KERN))
+        class1Count = h.classDef[0].classInfo.size();  // no +1 for classDef[0]
+    else
+        class1Count = h.classDef[0].classInfo.size() + 1;
+
+    auto nvals = MetricsInfo::numValues(si.pairValFmt1)
+               + MetricsInfo::numValues(si.pairValFmt2);
+    auto nvars = MetricsInfo::numVariables(si.pairValFmt1)
+               + MetricsInfo::numVariables(si.pairValFmt2);
+
+    LOffset estimatedSize = pair2Size(class1Count, class2Count, nvals, nvars);
+
+    if (estimatedSize <= 0xFFFF || (h.g->convertFlags & HOT_NO_AUTO_OVERFLOW)) {
+        h.AddSubtable(std::make_unique<Format2>(h, si));
+        return;
+    }
+
+    // --- Auto-split by partitioning Class1 classes ---
+    if (h.g->convertFlags & HOT_VERBOSE)
+        h.g->logger->log(sINFO,
+            "Auto-splitting class pair subtable (%u classes, estimated %u bytes) "
+            "in %s", class1Count, estimatedSize, h.g->error_id_text.c_str());
+
+    // Save full classDefs before splitting (AddSubtable resets them).
+    // We must copy element-by-element since ClassInfo has explicit copy ctor.
+    ClassDef savedCD0, savedCD1;
+    for (auto &[gid, ci] : h.classDef[0].classInfo)
+        savedCD0.classInfo.emplace(gid, ClassInfo(ci));
+    savedCD0.cov = h.classDef[0].cov;
+    for (auto &[gid, ci] : h.classDef[1].classInfo)
+        savedCD1.classInfo.emplace(gid, ClassInfo(ci));
+    savedCD1.cov = h.classDef[1].cov;
+
+    // Calculate number of splits needed
+    const LOffset targetSize = 0xC000;
+    uint32_t nSplits = (estimatedSize + targetSize - 1) / targetSize;
+    uint32_t classesPerSplit = (class1Count + nSplits - 1) / nSplits;
+
+    std::sort(si.pairs.begin(), si.pairs.end());
+
+    uint32_t splitStart = 0;
+    bool isFirst = true;
+    for (uint32_t s = 0; s < nSplits && splitStart < class1Count; s++) {
+        uint32_t splitEnd = std::min(splitStart + classesPerSplit, class1Count);
+
+        // Rebuild classDef[0] for this partition (remapped class IDs)
+        h.classDef[0].classInfo.clear();
+        h.classDef[0].cov.clear();
+        for (auto &[gid, ci] : savedCD0.classInfo) {
+            if (ci.cls >= splitStart && ci.cls < splitEnd) {
+                h.classDef[0].classInfo.emplace(gid,
+                    ClassInfo(ci.cls - splitStart, ci.cr));
+                h.classDef[0].cov.insert(gid);
+            }
+        }
+        // Restore classDef[1] (cleared by previous AddSubtable)
+        h.classDef[1].classInfo.clear();
+        h.classDef[1].cov.clear();
+        for (auto &[gid, ci] : savedCD1.classInfo)
+            h.classDef[1].classInfo.emplace(gid, ClassInfo(ci));
+        h.classDef[1].cov = savedCD1.cov;
+
+        // Build partition pairs with remapped Class1 IDs
+        SubtableInfo partSI;
+        partSI.useExtension = si.useExtension;
+        partSI.lkpType = si.lkpType;
+        partSI.lkpFlag = si.lkpFlag;
+        partSI.label = isFirst ? si.label : (Label)0;
+        partSI.pairFmt = 2;
+        partSI.pairValFmt1 = si.pairValFmt1;
+        partSI.pairValFmt2 = si.pairValFmt2;
+
+        for (auto &p : si.pairs) {
+            if (p.first >= (GID)splitStart && p.first < (GID)splitEnd) {
+                GID remappedFirst = p.first - splitStart;
+                partSI.pairs.emplace_back(
+                    KernRec(remappedFirst, p.second, p.metricsInfo1, p.metricsInfo2));
+            }
+        }
+
+        if (!partSI.pairs.empty())
+            h.AddSubtable(std::make_unique<Format2>(h, partSI));
+
+        isFirst = false;
+        splitStart = splitEnd;
+    }
 }
 
 void GPOS::PairPos::Format1::write(OTL *h) {

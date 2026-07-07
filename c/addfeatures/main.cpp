@@ -367,6 +367,14 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                         }
                         break;
 
+                    case 'n':
+                        if (!strcmp(arg, "-nao")) {
+                            convert.otherflags |= OTHERFLAGS_NO_AUTO_OVERFLOW;
+                        } else {
+                            cbFatal(cbctx, "unrecognized option (%s)", arg);
+                        }
+                        break;
+
                     case 'm': /* Font conversion database */
                         if (!strcmp(arg, "-mf")) {
                             if (argsleft == 0)
