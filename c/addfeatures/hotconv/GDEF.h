@@ -35,7 +35,8 @@ class GDEF {
         GlyphClassTable() = delete;
         explicit GlyphClassTable(GDEF &h) : cac(h.g), h(h) {}
         void set(GPat::ClassRec &simple, GPat::ClassRec &ligature,
-                 GPat::ClassRec &mark, GPat::ClassRec &component);
+                 GPat::ClassRec &mark, GPat::ClassRec &component,
+                 bool isExplicit = false);
         static const char *names[4];
         static const uint16_t classIDmap[4];
         Offset fill(Offset offset);
@@ -235,8 +236,9 @@ class GDEF {
         return sizeof(Fixed) + 4 * sizeof(Offset);
     }
     void setGlyphClass(GPat::ClassRec &simpl, GPat::ClassRec &ligature,
-                       GPat::ClassRec &mark, GPat::ClassRec &component) {
-        glyphClassTable.set(simpl, ligature, mark, component);
+                       GPat::ClassRec &mark, GPat::ClassRec &component,
+                       bool isExplicit = false) {
+        glyphClassTable.set(simpl, ligature, mark, component, isExplicit);
     }
     bool addAttachEntry(GID gid, uint16_t contour) {
         return attachTable.add(gid, contour);

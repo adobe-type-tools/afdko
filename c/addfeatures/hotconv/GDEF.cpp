@@ -112,7 +112,8 @@ void GDEFFree(hotCtx g) {
 }
 
 void GDEF::GlyphClassTable::set(GPat::ClassRec &simple, GPat::ClassRec &ligature,
-                                GPat::ClassRec &mark, GPat::ClassRec &component) {
+                                GPat::ClassRec &mark, GPat::ClassRec &component,
+                                bool isExplicit) {
     // Mark is first because glyphs there take presidence.
     glyphClasses[0] = mark;
     glyphClasses[1] = simple;
@@ -132,7 +133,7 @@ void GDEF::GlyphClassTable::set(GPat::ClassRec &simple, GPat::ClassRec &ligature
             if (!b) {
                 // Don't complain if overriding mark class
                 // or duplicate is part of same class
-                if (seeni->second != 0 && seeni->second != i) {
+                if (isExplicit && seeni->second != 0 && seeni->second != i) {
                     hadConflictingClassDef = true;
                     if (h.g->convertFlags & HOT_VERBOSE) {
                         h.g->ctx.feat->dumpGlyph(gid, 0, 0);
