@@ -122,6 +122,7 @@ def print_help(show_category: str = 'primary') -> None:
     """
     print("Usage: afdko <command> [options]")
     print("   or: afdko -h <command>  (get help for specific command)")
+    print("   or: afdko -v            (show version)")
     print()
     print("AFDKO (Adobe Font Development Kit for OpenType) is "
           "Adobe's open source")
@@ -213,8 +214,12 @@ def main() -> NoReturn:
 
     subcmd = sys.argv[1]
 
-    # Top-level help flags
-    if subcmd in ('-s', '--secondary'):
+    # Top-level flags
+    if subcmd in ('-v', '--version'):
+        from importlib.metadata import version
+        print(version('afdko'))
+        sys.exit(0)
+    elif subcmd in ('-s', '--secondary'):
         print_help('secondary')
         sys.exit(0)
     elif subcmd in ('-p', '--plot'):
