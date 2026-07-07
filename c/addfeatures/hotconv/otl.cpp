@@ -673,18 +673,21 @@ void OTL::prepLookupList() {
     std::stable_sort(subtables.begin(), subtables.end(), Subtable::ltLookupList);
 
     auto prevl = subtables.begin();
-    for (auto sl = prevl + 1; sl <= subtables.end(); sl++) {
+    auto sl = prevl + 1;
+    for (; sl != subtables.end(); sl++) {
         auto &slr = *sl;
         auto &prevlr = *prevl;
-        if (sl == subtables.end() || slr->isRef() || slr->isParam() ||
+        if (slr->isRef() || slr->isParam() ||
             slr->index.lookup != prevlr->index.lookup) {
             /* Lookup index change */
             prevlr->span.lookup = sl;
             prevl = sl;
         }
-        if (sl != subtables.end() && (slr->isRef() || slr->isParam()))
+        if (slr->isRef() || slr->isParam())
             break;
     }
+    if (sl == subtables.end())
+        (*prevl)->span.lookup = subtables.end();
 }
 
 Offset OTL::fillLookupList() {
