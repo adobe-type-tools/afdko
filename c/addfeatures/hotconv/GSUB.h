@@ -156,7 +156,7 @@ class GSUB : public OTL {
         uint16_t subformat() override { return 1; }
         static void fill(GSUB &h, SubtableInfo &si);
         void write(OTL *h) override;
-        void setCacOffsets() override { Coverage = cac->getCoverageOffset(); }
+        void setCacOffsets() override { Coverage = cac.getCoverageOffset(); }
         LOffset Coverage;
         std::vector<MultSequence> sequences;
     };
@@ -179,7 +179,7 @@ class GSUB : public OTL {
         uint16_t subformat() override { return 1; }
         static void fill(GSUB &h, SubtableInfo &si);
         void write(OTL *h) override;
-        void setCacOffsets() override { Coverage = cac->getCoverageOffset(); }
+        void setCacOffsets() override { Coverage = cac.getCoverageOffset(); }
         LOffset Coverage;
         std::vector<AlternateSet> altSets;
     };
@@ -209,7 +209,7 @@ class GSUB : public OTL {
         uint16_t subformat() override { return 1; }
         static void fill(GSUB &h, SubtableInfo &si);
         void write(OTL *h) override;
-        void setCacOffsets() override { Coverage = cac->getCoverageOffset(); }
+        void setCacOffsets() override { Coverage = cac.getCoverageOffset(); }
         LOffset Coverage {0};
         std::vector<LigatureSet> ligatureSets;
     };
@@ -230,9 +230,9 @@ class GSUB : public OTL {
         static void fill(GSUB &h, SubtableInfo &si);
         void write(OTL *h) override;
         void setCacOffsets() override {
-            for (auto &o : backtracks) o = cac->getCoverageOffset();
-            for (auto &o : inputGlyphs) o = cac->getCoverageOffset();
-            for (auto &o : lookaheads) o = cac->getCoverageOffset();
+            for (auto &o : backtracks) o = cac.getCoverageOffset();
+            for (auto &o : inputGlyphs) o = cac.getCoverageOffset();
+            for (auto &o : lookaheads) o = cac.getCoverageOffset();
         }
         std::vector<LOffset> backtracks;
         std::vector<LOffset> inputGlyphs;
@@ -251,9 +251,9 @@ class GSUB : public OTL {
         static void fill(GSUB &h, SubtableInfo &si);
         void write(OTL *h) override;
         void setCacOffsets() override {
-            for (auto &o : backtracks) o = cac->getCoverageOffset();
-            InputCoverage = cac->getCoverageOffset();
-            for (auto &o : lookaheads) o = cac->getCoverageOffset();
+            for (auto &o : backtracks) o = cac.getCoverageOffset();
+            InputCoverage = cac.getCoverageOffset();
+            for (auto &o : lookaheads) o = cac.getCoverageOffset();
         }
         LOffset InputCoverage;
         std::vector<LOffset> backtracks;
@@ -322,7 +322,7 @@ class GSUB::SingleSubst::Format1 : public GSUB::SingleSubst {
     virtual ~Format1() {}
     void write(OTL *h) override;
     uint16_t subformat() override { return 1; }
-    void setCacOffsets() override { Coverage = cac->getCoverageOffset(); }
+    void setCacOffsets() override { Coverage = cac.getCoverageOffset(); }
     static LOffset size() { return sizeof(uint16_t) * 3; }
     LOffset Coverage {0};        // 32 bit for overflow check
     GID DeltaGlyphID {0};
@@ -335,7 +335,7 @@ class GSUB::SingleSubst::Format2 : public GSUB::SingleSubst {
     virtual ~Format2() {}
     void write(OTL *h) override;
     uint16_t subformat() override { return 2; }
-    void setCacOffsets() override { Coverage = cac->getCoverageOffset(); }
+    void setCacOffsets() override { Coverage = cac.getCoverageOffset(); }
     static LOffset size(int count) { return sizeof(uint16_t) * (3 + count); }
     LOffset Coverage {0};        // 32 bit for overflow check
     std::vector<GID> gids;

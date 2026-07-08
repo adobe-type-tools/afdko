@@ -375,11 +375,11 @@ void GSUB::AddCVParam(CVParameterFormat &&params) {
 GSUB::SingleSubst::SingleSubst(GSUB &h, SubtableInfo &si) : Subtable(h, si) {}
 
 Offset GSUB::SingleSubst::fillSingleCoverage(SubtableInfo &si) {
-    cac->coverageBegin();
+    cac.coverageBegin();
     for (auto [t, _] : si.singles) {
-        cac->coverageAddGlyph(t);
+        cac.coverageAddGlyph(t);
     }
-    return cac->coverageEnd();
+    return cac.coverageEnd();
 }
 
 GSUB::SingleSubst::Format1::Format1(GSUB &h, SubtableInfo &si, int delta) : SingleSubst(h, si) {
@@ -389,7 +389,7 @@ GSUB::SingleSubst::Format1::Format1(GSUB &h, SubtableInfo &si, int delta) : Sing
 
     if (isExt()) {
         Coverage += sz; /* Final value */
-        h.incExtOffset(sz + cac->coverageSize());
+        h.incExtOffset(sz + cac.coverageSize());
     } else {
         h.incSubOffset(sz);
     }
@@ -404,7 +404,7 @@ GSUB::SingleSubst::Format2::Format2(GSUB &h, SubtableInfo &si) : SingleSubst(h, 
 
     if (isExt()) {
         Coverage += sz; /* Final value */
-        h.incExtOffset(sz + cac->coverageSize());
+        h.incExtOffset(sz + cac.coverageSize());
     } else {
         h.incSubOffset(sz);
     }
@@ -452,7 +452,7 @@ void GSUB::SingleSubst::Format1::write(OTL *h) {
     OUT2(DeltaGlyphID);
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 void GSUB::SingleSubst::Format2::write(OTL *h) {
@@ -468,7 +468,7 @@ void GSUB::SingleSubst::Format2::write(OTL *h) {
         OUT2((GID)gid);
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* ------------------------- Multiple Substitution ------------------------- */
@@ -487,13 +487,13 @@ GSUB::MultipleSubst::MultipleSubst(GSUB &h, SubtableInfo &si, int64_t beg,
     int nSequences = end - beg + 1;
 
     LOffset offst = headerSize(nSequences);
-    cac->coverageBegin();
+    cac.coverageBegin();
     for (int i = 0; i < nSequences; i++) {
         auto &rule = si.rules[i + beg];
         MultSequence seq;
 
         assert(rule.targ->is_glyph());
-        cac->coverageAddGlyph(rule.targ->classes[0].glyphs[0].gid);
+        cac.coverageAddGlyph(rule.targ->classes[0].glyphs[0].gid);
 
         if (rule.repl != nullptr) {
             for (auto &cr : rule.repl->classes) {
@@ -520,10 +520,10 @@ GSUB::MultipleSubst::MultipleSubst(GSUB &h, SubtableInfo &si, int64_t beg,
 #endif
 #endif /* HOT_DEBUG */
 
-    Coverage = cac->coverageEnd(); /* Adjusted later */
+    Coverage = cac.coverageEnd(); /* Adjusted later */
     if (isExt()) {
         Coverage += offst; /* Final value */
-        h.incExtOffset(offst + cac->coverageSize());
+        h.incExtOffset(offst + cac.coverageSize());
     } else {
         h.incSubOffset(offst);
     }
@@ -592,7 +592,7 @@ void GSUB::MultipleSubst::write(OTL *h) {
     }
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* ------------------------- Alternate Substitution ------------------------ */
@@ -616,13 +616,13 @@ GSUB::AlternateSubst::AlternateSubst(GSUB &h, SubtableInfo &si,
     uint32_t nAltSets = end - beg + 1;
 
     LOffset offst = headerSize(nAltSets);
-    cac->coverageBegin();
+    cac.coverageBegin();
     for (uint32_t i = 0; i < nAltSets; i++) {
         auto &rule = si.rules[i + beg];
         AlternateSet altSet;
 
         assert(rule.targ->is_glyph());
-        cac->coverageAddGlyph(rule.targ->classes[0].glyphs[0].gid);
+        cac.coverageAddGlyph(rule.targ->classes[0].glyphs[0].gid);
 
         /* --- Fill an AlternateSet --- */
         for (GID gid : rule.repl->classes[0].glyphs)
@@ -646,10 +646,10 @@ GSUB::AlternateSubst::AlternateSubst(GSUB &h, SubtableInfo &si,
 #endif
 #endif /* HOT_DEBUG */
 
-    Coverage = cac->coverageEnd(); /* Adjusted later */
+    Coverage = cac.coverageEnd(); /* Adjusted later */
     if (isExt()) {
         Coverage += offst; /* Final value */
-        h.incExtOffset(offst + cac->coverageSize());
+        h.incExtOffset(offst + cac.coverageSize());
     } else {
         h.incSubOffset(offst);
     }
@@ -722,7 +722,7 @@ void GSUB::AlternateSubst::write(OTL *h) {
     }
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* ------------------------- Ligature Substitution ------------------------- */
@@ -730,7 +730,7 @@ void GSUB::AlternateSubst::write(OTL *h) {
 GSUB::LigatureSubst::LigatureSubst(GSUB &h, SubtableInfo &si) : Subtable(h, si) {
     LigatureSet ligSet;
     int32_t lastgid = -1;
-    cac->coverageBegin();
+    cac.coverageBegin();
     // Add coverage and populate ligatureSets (without offsets)
     for (auto [l, rg] : si.ligatures) {
         GID gid = l.gids[0];
@@ -739,7 +739,7 @@ GSUB::LigatureSubst::LigatureSubst(GSUB &h, SubtableInfo &si) : Subtable(h, si) 
                 ligatureSets.emplace_back(std::move(ligSet));
                 ligSet.reset();
             }
-            cac->coverageAddGlyph(gid);
+            cac.coverageAddGlyph(gid);
             lastgid = gid;
         }
         LigatureGlyph lg {rg};
@@ -762,10 +762,10 @@ GSUB::LigatureSubst::LigatureSubst(GSUB &h, SubtableInfo &si) : Subtable(h, si) 
     }
 
     h.checkOverflow("lookup subtable", offst, "ligature substitution");
-    Coverage = cac->coverageEnd(); /* Adjusted later */
+    Coverage = cac.coverageEnd(); /* Adjusted later */
     if (isExt()) {
         Coverage += offst; /* Final value */
-        h.incExtOffset(offst + cac->coverageSize());
+        h.incExtOffset(offst + cac.coverageSize());
     } else {
         h.incSubOffset(offst);
     }
@@ -799,7 +799,7 @@ void GSUB::LigatureSubst::write(OTL *h) {
     }
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* ------------------ Chaining Contextual Substitution --------------------- */
@@ -1003,7 +1003,7 @@ GSUB::ChainSubst::ChainSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subta
     h.updateMaxContext(inputs.size() + looks.size());
 
     if (isExt())
-        h.incExtOffset(sz + cac->coverageSize());
+        h.incExtOffset(sz + cac.coverageSize());
     else
         h.incSubOffset(sz);
 }
@@ -1055,7 +1055,7 @@ void GSUB::ChainSubst::write(OTL *h) {
     }
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 GSUB::ReverseSubst::ReverseSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subtable(h, si) {
@@ -1086,11 +1086,11 @@ GSUB::ReverseSubst::ReverseSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : S
         std::sort(subs.begin(), subs.end());
     }
 
-    cac->coverageBegin();
+    cac.coverageBegin();
     for (auto [tg, _] : subs)
-        cac->coverageAddGlyph(tg);
+        cac.coverageAddGlyph(tg);
 
-    InputCoverage = cac->coverageEnd(); /* Adjusted later */
+    InputCoverage = cac.coverageEnd(); /* Adjusted later */
 
     LOffset sz = rchain1size(backs.size(), looks.size(), subs.size());
     LOffset o = isExt() ? sz : 0;
@@ -1104,7 +1104,7 @@ GSUB::ReverseSubst::ReverseSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : S
     h.updateMaxContext(inputs.size() + looks.size());
 
     if (isExt())
-        h.incExtOffset(sz + cac->coverageSize());
+        h.incExtOffset(sz + cac.coverageSize());
     else
         h.incSubOffset(sz);
 }
@@ -1151,5 +1151,5 @@ void GSUB::ReverseSubst::write(OTL *h) {
         OUT2(gid);
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }

@@ -35,12 +35,12 @@ class CoverageAndClass {
     virtual void coverageAddGlyph(GID gid, bool warn = false);
     virtual void coverageWrite();
     virtual Offset coverageEnd();
-    virtual LOffset coverageSize() { return coverage.size; }
+    virtual LOffset coverageSize() { return sharedCac ? sharedCac->coverageSize() : coverage.size; }
     virtual void classBegin();
     virtual void classAddMapping(GID gid, uint32_t classId);
     virtual void classWrite();
     virtual Offset classEnd();
-    virtual LOffset classSize() { return cls.size; }
+    virtual LOffset classSize() { return sharedCac ? sharedCac->classSize() : cls.size; }
 #if HOT_DEBUG
     virtual void dump();
 #endif
@@ -98,7 +98,7 @@ class CoverageAndClass {
 
     // Replay API: after building a shared cac, set sharedCac on each private
     // cac. Then getCoverageOffset()/getClassOffset() resolve through it.
-    void setSharedCac(std::shared_ptr<CoverageAndClass> shared) { sharedCac = shared; }
+    void setSharedCac(CoverageAndClass *shared) { sharedCac = shared; }
     void resetReplay() { covReplayPos = 0; clsReplayPos = 0; }
     Offset getCoverageOffset();
     Offset getClassOffset();
@@ -107,7 +107,7 @@ class CoverageAndClass {
     virtual Offset coverageFill();
     virtual Offset classFill();
 
-    std::shared_ptr<CoverageAndClass> sharedCac;
+    CoverageAndClass *sharedCac {nullptr};
     std::vector<uint16_t> coverageCallSeq;  // record index per coverageEnd() call
     std::vector<uint16_t> classCallSeq;     // record index per classEnd() call
     size_t covReplayPos {0};
@@ -241,7 +241,7 @@ class OTL {
         bool isFeatParam {false};
         ExtensionFormat1 extension;
         std::string id_text;
-        std::shared_ptr<CoverageAndClass> cac;
+        CoverageAndClass cac;
         struct {
             int16_t feature {-1};
             int16_t lookup {-1};
@@ -383,7 +383,7 @@ class OTL {
     virtual void createAnonLookups() = 0;
 
     static void setCoverages(std::vector<LOffset> &covs,
-                             std::shared_ptr<CoverageAndClass> &cac,
+                             CoverageAndClass &cac,
                              std::vector<GPat::ClassRec*> classes, LOffset o);
 
  private:

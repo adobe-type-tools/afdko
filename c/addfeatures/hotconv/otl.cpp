@@ -372,11 +372,8 @@ OTL::Subtable::Subtable(OTL *otl, SubtableInfo *si, std::string &id_text,
                           offset(IS_REF_LAB(si->label) ? 0 : isFeatParam ? otl->offset.featParam : otl->offset.subtable),
                           label(si->label),
                           seenInFeature(feature != TAG_STAND_ALONE),
-                          isFeatParam(isFeatParam), id_text(id_text) {
-    // Every subtable gets its own private CoverageAndClass. After promotion
-    // decisions are finalized, non-extension subtables' cacs are merged into
-    // a shared pool in fillOTL().
-    cac = std::make_shared<CoverageAndClass>(otl->g);
+                          isFeatParam(isFeatParam), id_text(id_text),
+                          cac(otl->g) {
     if (isExt() && !isRef()) {
         extension.offset = otl->extOffset();
         otl->incSubOffset(extension.size());
@@ -789,13 +786,13 @@ std::shared_ptr<CoverageAndClass> OTL::buildMergedCac() {
     for (auto &sub : subtables) {
         if (sub->isRef() || sub->isParam() || sub->isExt())
             continue;
-        for (auto &rec : sub->cac->getCoverageRecords()) {
+        for (auto &rec : sub->cac.getCoverageRecords()) {
             merged->coverageBegin();
             for (GID gid : rec.glyphs)
                 merged->coverageAddGlyph(gid);
             merged->coverageEnd();
         }
-        for (auto &rec : sub->cac->getClassRecords()) {
+        for (auto &rec : sub->cac.getClassRecords()) {
             merged->classBegin();
             for (auto &[gid, classId] : rec.map)
                 merged->classAddMapping(gid, classId);
@@ -807,11 +804,9 @@ std::shared_ptr<CoverageAndClass> OTL::buildMergedCac() {
     for (auto &sub : subtables) {
         if (sub->isRef() || sub->isParam() || sub->isExt())
             continue;
-        sub->cac->setSharedCac(merged);
-        sub->cac->resetReplay();
+        sub->cac.setSharedCac(merged.get());
+        sub->cac.resetReplay();
         sub->setCacOffsets();
-        // Point subtable to shared cac for writing
-        sub->cac = merged;
     }
     return merged;
 }
@@ -848,13 +843,13 @@ void OTL::autoPromoteExtensions() {
         for (auto &sub : subtables) {
             if (sub->isRef() || sub->isParam() || sub->isExt())
                 continue;
-            for (auto &rec : sub->cac->getCoverageRecords()) {
+            for (auto &rec : sub->cac.getCoverageRecords()) {
                 tempCac->coverageBegin();
                 for (GID gid : rec.glyphs)
                     tempCac->coverageAddGlyph(gid);
                 tempCac->coverageEnd();
             }
-            for (auto &rec : sub->cac->getClassRecords()) {
+            for (auto &rec : sub->cac.getClassRecords()) {
                 tempCac->classBegin();
                 for (auto &[gid, classId] : rec.map)
                     tempCac->classAddMapping(gid, classId);
@@ -1185,17 +1180,17 @@ void OTL::setDevOffset(ValueIndex vi, LOffset o) {
 
 
 void OTL::setCoverages(std::vector<LOffset> &covs,
-                       std::shared_ptr<CoverageAndClass> &cac,
+                       CoverageAndClass &cac,
                        std::vector<GPat::ClassRec*> classes, LOffset o) {
     if (classes.size() == 0)
         return;
 
     covs.reserve(classes.size());
     for (auto cr : classes) {
-        cac->coverageBegin();
+        cac.coverageBegin();
         for (auto &g : cr->glyphs)
-            cac->coverageAddGlyph(g);
+            cac.coverageAddGlyph(g);
 
-        covs.push_back(cac->coverageEnd() + o);
+        covs.push_back(cac.coverageEnd() + o);
     }
 }
