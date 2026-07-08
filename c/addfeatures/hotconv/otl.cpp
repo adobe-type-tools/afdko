@@ -760,77 +760,35 @@ void OTL::checkOverflow(const char* offsetType, long offset, const char* posType
     }
 }
 
-// Calculate the hypothetical merged coverage+class size if only the
-// non-extension subtables' cac records were merged (with deduplication).
-LOffset OTL::calcMergedCacSize() {
-    LOffset mergedSize = 0;
-    std::vector<std::set<GID>> seenCoverages;
-    std::vector<std::map<GID, uint16_t>> seenClasses;
-
+// Merge non-extension subtables' private cac records into a fresh shared cac
+// (with deduplication), updating each subtable's coverage/class offset fields.
+// Returns the shared cac.
+std::shared_ptr<CoverageAndClass> OTL::buildMergedCac() {
+    auto merged = std::make_shared<CoverageAndClass>(g);
     for (auto &sub : subtables) {
         if (sub->isRef() || sub->isParam() || sub->isExt())
             continue;
-        // Check each coverage record in this subtable's private cac
-        for (auto &rec : sub->cac->getCoverageRecords()) {
-            bool found = false;
-            for (auto &seen : seenCoverages) {
-                if (seen == rec.glyphs) { found = true; break; }
-            }
-            if (!found) {
-                mergedSize += rec.size();
-                seenCoverages.push_back(rec.glyphs);
-            }
-        }
-        // Check each class record
-        for (auto &rec : sub->cac->getClassRecords()) {
-            bool found = false;
-            for (auto &seen : seenClasses) {
-                if (seen == rec.map) { found = true; break; }
-            }
-            if (!found) {
-                mergedSize += rec.size();
-                seenClasses.push_back(rec.map);
-            }
-        }
-    }
-    return mergedSize;
-}
 
-// Merge non-extension subtables' private cac records into the shared cac,
-// updating each subtable's coverage/class offset fields.
-void OTL::buildMergedCac() {
-    for (auto &sub : subtables) {
-        if (sub->isRef() || sub->isParam() || sub->isExt())
-            continue;
-        // Re-register this subtable's coverage records into the shared cac
-        auto &covRecords = sub->cac->getCoverageRecords();
-        auto &clsRecords = sub->cac->getClassRecords();
-
-        // Map old offsets to new offsets in the merged cac
         std::map<Offset, Offset> covOffsetMap;
-        for (auto &rec : covRecords) {
-            cac->coverageBegin();
+        for (auto &rec : sub->cac->getCoverageRecords()) {
+            merged->coverageBegin();
             for (GID gid : rec.glyphs)
-                cac->coverageAddGlyph(gid);
-            Offset newOff = cac->coverageEnd();
-            covOffsetMap[rec.offset] = newOff;
+                merged->coverageAddGlyph(gid);
+            covOffsetMap[rec.offset] = merged->coverageEnd();
         }
 
         std::map<Offset, Offset> clsOffsetMap;
-        for (auto &rec : clsRecords) {
-            cac->classBegin();
+        for (auto &rec : sub->cac->getClassRecords()) {
+            merged->classBegin();
             for (auto &[gid, classId] : rec.map)
-                cac->classAddMapping(gid, classId);
-            Offset newOff = cac->classEnd();
-            clsOffsetMap[rec.offset] = newOff;
+                merged->classAddMapping(gid, classId);
+            clsOffsetMap[rec.offset] = merged->classEnd();
         }
 
-        // Update subtable's stored offsets via virtual method
         sub->remapCacOffsets(covOffsetMap, clsOffsetMap);
-
-        // Point subtable to shared cac for writing
-        sub->cac = cac;
+        sub->cac = merged;
     }
+    return merged;
 }
 
 void OTL::autoPromoteExtensions() {
@@ -857,20 +815,22 @@ void OTL::autoPromoteExtensions() {
             return a->subtableSize > b->subtableSize;
         });
 
-    // Promotion loop: calculate merged cac, check fit, promote if needed
+    // Promotion loop: build merged cac, check fit, promote largest if needed
     uint32_t nPromoted = 0;
     while (true) {
-        LOffset mergedCacSize = calcMergedCacSize();
-        LOffset inlineTotal = offset.subtable + mergedCacSize;
-        if (inlineTotal <= 0xFFFF)
+        auto merged = buildMergedCac();
+        LOffset inlineTotal = offset.subtable + merged->coverageSize()
+                                              + merged->classSize();
+        if (inlineTotal <= 0xFFFF) {
+            cac = merged;  // keep this one
             break;
+        }
 
         // Find the largest non-ext subtable to promote
         bool promoted = false;
         for (auto &sub : subtables) {
             if (sub->isRef() || sub->isParam() || sub->isExt())
                 continue;
-            // Promote this one
             offset.subtable -= sub->subtableSize;
             offset.subtable += extStubSize;
             sub->useExtension = true;
@@ -884,6 +844,7 @@ void OTL::autoPromoteExtensions() {
                 "Offset overflow in %s (0x%lx) cannot be resolved by extension "
                 "promotion -- all subtables are already extensions",
                 objName(), inlineTotal);
+            cac = merged;
             break;
         }
     }
@@ -893,9 +854,6 @@ void OTL::autoPromoteExtensions() {
             "Auto-promoted %u lookup subtable%s to extension format to resolve "
             "offset overflow in %s",
             nPromoted, nPromoted == 1 ? "" : "s", objName());
-
-    // Build the merged cac from non-extension subtables
-    buildMergedCac();
 
     // Recompute all subtable offsets
     offset.subtable = 0;
