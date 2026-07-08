@@ -819,15 +819,6 @@ void OTL::autoPromoteExtensions() {
 
     LOffset extStubSize = Subtable::ExtensionFormat1::size();
 
-    // Validate: sum of stored sizes should equal offset.subtable
-    LOffset computedInline = 0;
-    for (auto &sub : subtables) {
-        if (sub->isRef() || sub->isParam())
-            continue;
-        computedInline += sub->subtableSize;
-    }
-    assert(computedInline == offset.subtable);
-
     // Sort by decreasing subtable size for greedy promotion
     std::stable_sort(subtables.begin(), subtables.end(),
         [](const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
@@ -837,7 +828,15 @@ void OTL::autoPromoteExtensions() {
     // Promotion loop: build a temporary merged cac to check size, promote if needed
     uint32_t nPromoted = 0;
     while (true) {
-        // Build a temporary cac just to measure the merged size
+        // Compute inline subtable total
+        LOffset subtableTotal = 0;
+        for (auto &sub : subtables) {
+            if (sub->isRef() || sub->isParam())
+                continue;
+            subtableTotal += sub->isExt() ? extStubSize : sub->subtableSize;
+        }
+
+        // Build a temporary cac to measure the merged coverage/class size
         auto tempCac = std::make_shared<CoverageAndClass>(g);
         for (auto &sub : subtables) {
             if (sub->isRef() || sub->isParam() || sub->isExt())
@@ -856,8 +855,8 @@ void OTL::autoPromoteExtensions() {
             }
         }
 
-        LOffset inlineTotal = offset.subtable + tempCac->coverageSize()
-                                              + tempCac->classSize();
+        LOffset inlineTotal = subtableTotal + tempCac->coverageSize()
+                                            + tempCac->classSize();
         if (inlineTotal <= 0xFFFF)
             break;
 
@@ -866,10 +865,7 @@ void OTL::autoPromoteExtensions() {
         for (auto &sub : subtables) {
             if (sub->isRef() || sub->isParam() || sub->isExt())
                 continue;
-            offset.subtable -= sub->subtableSize;
-            offset.subtable += extStubSize;
             sub->useExtension = true;
-            sub->subtableSize = extStubSize;
             nPromoted++;
             promoted = true;
             break;
@@ -888,15 +884,6 @@ void OTL::autoPromoteExtensions() {
             "Auto-promoted %u lookup subtable%s to extension format to resolve "
             "offset overflow in %s",
             nPromoted, nPromoted == 1 ? "" : "s", objName());
-
-    // Recompute inline subtable offsets (ext offsets set by buildMergedCac caller)
-    offset.subtable = 0;
-    for (auto &sub : subtables) {
-        if (sub->isRef() || sub->isParam())
-            continue;
-        sub->offset = offset.subtable;
-        offset.subtable += sub->subtableSize;
-    }
 }
 
     /* The font tables are in the order:
@@ -979,6 +966,25 @@ int OTL::fillOTL(bool force) {
     // Build the merged shared cac from all non-ext subtables' private cacs.
     // This must always run since subtables now use private cacs during construction.
     cac = buildMergedCac();
+
+    // Assign final subtable offsets from stored sizes
+    LOffset extStubSize = Subtable::ExtensionFormat1::size();
+    offset.subtable = 0;
+    offset.extension = 0;
+    for (auto &sub : subtables) {
+        if (sub->isRef() || sub->isParam())
+            continue;
+        sub->offset = offset.subtable;
+        if (sub->isExt()) {
+            sub->extension.offset = offset.extension;
+            offset.subtable += extStubSize;
+            offset.extension += sub->subtableSize
+                              + sub->cac.coverageSize()
+                              + sub->cac.classSize();
+        } else {
+            offset.subtable += sub->subtableSize;
+        }
+    }
 
     prepLookupList();
     header.lookupOffset = offst;
