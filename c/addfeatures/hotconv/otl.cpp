@@ -374,10 +374,9 @@ OTL::Subtable::Subtable(OTL *otl, SubtableInfo *si, std::string &id_text,
                           seenInFeature(feature != TAG_STAND_ALONE),
                           isFeatParam(isFeatParam), id_text(id_text),
                           cac(otl->g) {
-    if (isExt() && !isRef()) {
-        extension.offset = otl->extOffset();
-        otl->incSubOffset(extension.size());
-    }
+    // No ext/non-ext distinction at construction time. All subtables are
+    // constructed uniformly; extension decisions and offset adjustments
+    // happen later in fillOTL() after autoPromoteExtensions().
 }
 
 /* ---------------------------- Table Functions ---------------------------- */

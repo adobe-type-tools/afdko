@@ -503,12 +503,7 @@ GPOS::SinglePos::Format1::Format1(GPOS &h, GPOS::SubtableInfo &si,
 
     Coverage = cac.coverageEnd(); /* Adjusted later */
 
-    if (isExt()) {
-        Coverage += sz; /* Final value */
-        h.incExtOffset(sz + cac.coverageSize());
-    } else {
-        h.incSubOffset(sz);
-    }
+    h.incSubOffset(sz);
 }
 
 GPOS::SinglePos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si,
@@ -530,12 +525,7 @@ GPOS::SinglePos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si,
     }
 
     Coverage = cac.coverageEnd(); /* Adjusted later */
-    if (useExtension) {
-        Coverage += sz; /* Final value */
-        h.incExtOffset(sz + cac.coverageSize());
-    } else {
-        h.incSubOffset(sz);
-    }
+    h.incSubOffset(sz);
 }
 
 void GPOS::SinglePos::Format1::fill(GPOS &h, GPOS::SubtableInfo &si) {
@@ -1057,12 +1047,7 @@ GPOS::PairPos::Format1::Format1(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
     }
 
     Coverage = cac.coverageEnd(); /* Adjusted later */
-    if (isExt()) {
-        Coverage += offst; /* Final value */
-        h.incExtOffset(offst + cac.coverageSize());
-    } else {
-        h.incSubOffset(offst);
-    }
+    h.incSubOffset(offst);
 }
 
 Offset GPOS::classDefMake(CoverageAndClass &cac,
@@ -1135,14 +1120,7 @@ GPOS::PairPos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
            offst));
 #endif
 
-    if (isExt()) {
-        Coverage += offst;                         // Final value
-        ClassDef1 += offst + cac.coverageSize();  // Final value
-        ClassDef2 += offst + cac.coverageSize();  // Final value
-        h.incExtOffset(offst + cac.coverageSize() + cac.classSize());
-    } else {
-        h.incSubOffset(offst);
-    }
+    h.incSubOffset(offst);
 }
 
 void GPOS::PairPos::fill(GPOS &h, SubtableInfo &si) {
@@ -1387,10 +1365,7 @@ GPOS::ChainContextPos::ChainContextPos(GPOS &h, GPOS::SubtableInfo &si,
 
     h.updateMaxContext(inputs.size() + looks.size());
 
-    if (isExt())
-        h.incExtOffset(sz + cac.coverageSize());
-    else
-        h.incSubOffset(sz);
+    h.incSubOffset(sz);
 }
 
 void GPOS::ChainContextPos::fill(GPOS &h, SubtableInfo &si) {
@@ -1684,13 +1659,7 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
     auto &anchorRec = anchorList.back();
     size += anchorRec.offset + anchorRec.size(h.getValues());
 
-    if (isExt()) {
-        MarkCoverage += size; /* Adjust offset */
-        BaseCoverage += size; /* Adjust offset */
-        h.incExtOffset(size + cac.coverageSize());
-    } else {
-        h.incSubOffset(size);
-    }
+    h.incSubOffset(size);
 
     h.checkOverflow("lookup subtable", h.subOffset(), "mark to base positioning");
 }
@@ -1837,13 +1806,7 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
     auto &anchorRec = anchorList.back();
     size += anchorRec.offset + anchorRec.size(h.getValues());
 
-    if (isExt()) {
-        MarkCoverage += size;     /* Adjust offset */
-        LigatureCoverage += size; /* Adjust offset */
-        h.incExtOffset(size + cac.coverageSize());
-    } else {
-        h.incSubOffset(size);
-    }
+    h.incSubOffset(size);
 
     h.checkOverflow("lookup subtable", h.subOffset(), "mark to ligature positioning");
 }
@@ -1969,12 +1932,7 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
     std::cerr << "anchor size: " << anchorRec.size(h.getValues()) << std::endl;
     size += anchorRec.offset + anchorRec.size(h.getValues());
 
-    if (isExt()) {
-        Coverage += size; /* Adjust offset */
-        h.incExtOffset(size + cac.coverageSize());
-    } else {
-        h.incSubOffset(size);
-    }
+    h.incSubOffset(size);
 
     h.checkOverflow("cursive attach table", h.subOffset(), "cursive positioning");
 }
