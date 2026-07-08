@@ -775,17 +775,25 @@ void OTL::autoPromoteExtensions() {
         LOffset size;
     };
     std::vector<SubSize> candidates;
+    LOffset extStubSize = Subtable::ExtensionFormat1::size();
+    uint32_t nPreExistingExt = 0;
 
     for (size_t i = 0; i < subtables.size(); i++) {
         auto &sub = subtables[i];
-        if (sub->isRef() || sub->isExt() || sub->isParam())
+        if (sub->isRef() || sub->isParam())
             continue;
+        if (sub->isExt()) {
+            nPreExistingExt++;
+            continue;
+        }
 
-        // Compute subtable size from offset gaps
+        // Compute subtable size from offset gaps.
+        // Don't skip ext subtables — their 8-byte stubs are in the same
+        // offset space. Only skip ref/param (different offset spaces).
         LOffset subSize = 0;
         for (size_t j = i + 1; j < subtables.size(); j++) {
             auto &next = subtables[j];
-            if (!next->isRef() && !next->isExt() && !next->isParam()) {
+            if (!next->isRef() && !next->isParam()) {
                 subSize = next->offset - sub->offset;
                 break;
             }
@@ -795,12 +803,15 @@ void OTL::autoPromoteExtensions() {
         candidates.push_back({i, subSize});
     }
 
+    // Validate: sum of candidate sizes + ext stubs should equal offset.subtable
+    LOffset computedInline = nPreExistingExt * extStubSize;
+    for (auto &c : candidates)
+        computedInline += c.size;
+    assert(computedInline == offset.subtable);
+
     // Sort by size descending (promote largest first)
     std::sort(candidates.begin(), candidates.end(),
               [](const SubSize &a, const SubSize &b) { return a.size > b.size; });
-
-    // Promote until inline budget fits
-    LOffset extStubSize = Subtable::ExtensionFormat1::size();
     uint32_t nPromoted = 0;
     for (auto &c : candidates) {
         if (inlineTotal <= 0xFFFF)
@@ -813,8 +824,13 @@ void OTL::autoPromoteExtensions() {
         nPromoted++;
     }
 
-    if (nPromoted == 0)
+    if (nPromoted == 0) {
+        g->logger->log(sERROR,
+            "Offset overflow in %s (0x%lx) cannot be resolved by extension "
+            "promotion -- all subtables are already extensions",
+            objName(), inlineTotal);
         return;
+    }
 
     if (g->convertFlags & HOT_VERBOSE)
         g->logger->log(sINFO,
