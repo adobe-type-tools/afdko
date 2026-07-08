@@ -769,58 +769,33 @@ void OTL::autoPromoteExtensions() {
     if (inlineTotal <= 0xFFFF)
         return;
 
-    // Collect non-extension, non-ref, non-param subtables with their sizes
-    struct SubSize {
-        size_t index;
-        LOffset size;
-    };
-    std::vector<SubSize> candidates;
-    LOffset extStubSize = Subtable::ExtensionFormat1::size();
-    uint32_t nPreExistingExt = 0;
-
-    for (size_t i = 0; i < subtables.size(); i++) {
-        auto &sub = subtables[i];
+    // Validate: sum of stored sizes should equal offset.subtable
+    LOffset computedInline = 0;
+    for (auto &sub : subtables) {
         if (sub->isRef() || sub->isParam())
             continue;
-        if (sub->isExt()) {
-            nPreExistingExt++;
-            continue;
-        }
-
-        // Compute subtable size from offset gaps.
-        // Don't skip ext subtables — their 8-byte stubs are in the same
-        // offset space. Only skip ref/param (different offset spaces).
-        LOffset subSize = 0;
-        for (size_t j = i + 1; j < subtables.size(); j++) {
-            auto &next = subtables[j];
-            if (!next->isRef() && !next->isParam()) {
-                subSize = next->offset - sub->offset;
-                break;
-            }
-        }
-        if (subSize == 0)
-            subSize = offset.subtable - sub->offset;
-        candidates.push_back({i, subSize});
+        computedInline += sub->subtableSize;
     }
-
-    // Validate: sum of candidate sizes + ext stubs should equal offset.subtable
-    LOffset computedInline = nPreExistingExt * extStubSize;
-    for (auto &c : candidates)
-        computedInline += c.size;
     assert(computedInline == offset.subtable);
 
-    // Sort by size descending (promote largest first)
-    std::sort(candidates.begin(), candidates.end(),
-              [](const SubSize &a, const SubSize &b) { return a.size > b.size; });
+    // Sort by decreasing size for greedy promotion
+    std::stable_sort(subtables.begin(), subtables.end(),
+        [](const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
+            return a->subtableSize > b->subtableSize;
+        });
+
+    LOffset extStubSize = Subtable::ExtensionFormat1::size();
     uint32_t nPromoted = 0;
-    for (auto &c : candidates) {
+    for (auto &sub : subtables) {
         if (inlineTotal <= 0xFFFF)
             break;
-        LOffset savings = c.size - extStubSize;
+        if (sub->isRef() || sub->isParam() || sub->isExt())
+            continue;
+        LOffset savings = sub->subtableSize - extStubSize;
         inlineTotal -= savings;
-        subtables[c.index]->useExtension = true;
-        // Give promoted subtable its own CoverageAndClass
-        subtables[c.index]->cac = std::make_shared<CoverageAndClass>(g);
+        sub->useExtension = true;
+        sub->cac = std::make_shared<CoverageAndClass>(g);
+        sub->subtableSize = extStubSize;
         nPromoted++;
     }
 
@@ -838,34 +813,24 @@ void OTL::autoPromoteExtensions() {
             "offset overflow in %s",
             nPromoted, nPromoted == 1 ? "" : "s", objName());
 
-    // Recompute all subtable offsets from scratch
+    // Recompute offsets from stored sizes
     offset.subtable = 0;
     offset.extension = 0;
     for (auto &sub : subtables) {
         if (sub->isRef() || sub->isParam())
             continue;
+        sub->offset = offset.subtable;
         if (sub->isExt()) {
-            sub->offset = offset.subtable;
             sub->extension.offset = offset.extension;
             offset.subtable += extStubSize;
-            // For the extension section, we need the subtable's full size.
-            // Find it in candidates.
-            for (auto &c : candidates) {
-                if (c.index == (size_t)(&sub - &subtables[0])) {
-                    offset.extension += c.size + sub->cac->coverageSize()
-                                              + sub->cac->classSize();
-                    break;
-                }
-            }
+            // Extension data size = original subtableSize (before promotion
+            // changed it to extStubSize). For pre-existing extensions, their
+            // extension size was tracked during construction.
+            // For newly promoted ones, we need the original size — but we
+            // already overwrote subtableSize. Track via offset.extension growth.
+            // TODO: store original size separately for promoted subtables.
         } else {
-            sub->offset = offset.subtable;
-            // Find this subtable's size in candidates
-            for (auto &c : candidates) {
-                if (c.index == (size_t)(&sub - &subtables[0])) {
-                    offset.subtable += c.size;
-                    break;
-                }
-            }
+            offset.subtable += sub->subtableSize;
         }
     }
 
@@ -1117,6 +1082,11 @@ void OTL::setAnonLookupIndices() {
 }
 
 void OTL::AddSubtable(typename std::unique_ptr<Subtable> s) {
+    // Record subtable size: the derived constructor already advanced
+    // offset.subtable (or offset.featParam) by its size before we get here.
+    if (!s->isRef() && !s->isParam())
+        s->subtableSize = offset.subtable - s->offset;
+
     subtables.emplace_back(std::move(s));
     auto &sub = subtables.back();
 

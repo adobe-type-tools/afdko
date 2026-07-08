@@ -217,6 +217,7 @@ class OTL {
         uint16_t lkpFlag {0};
         uint16_t markSetIndex {0};
         Offset offset {0};
+        LOffset subtableSize {0};
         Label label {0};
         bool seenInFeature {false};
         bool isFeatParam {false};
