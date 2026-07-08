@@ -369,7 +369,7 @@ OTL::Subtable::Subtable(OTL *otl, SubtableInfo *si, std::string &id_text,
                           feature(si->feature), useExtension(si->useExtension),
                           lkpType(si->lkpType), lkpFlag(si->lkpFlag),
                           markSetIndex(si->markSetIndex),
-                          offset(IS_REF_LAB(si->label) ? 0 : isFeatParam ? otl->offset.featParam : otl->offset.subtable),
+                          offset(0),
                           label(si->label),
                           seenInFeature(feature != TAG_STAND_ALONE),
                           isFeatParam(isFeatParam), id_text(id_text),
@@ -1140,10 +1140,8 @@ void OTL::setAnonLookupIndices() {
 }
 
 void OTL::AddSubtable(typename std::unique_ptr<Subtable> s) {
-    // Record subtable size: the derived constructor already advanced
-    // offset.subtable (or offset.featParam) by its size before we get here.
     if (!s->isRef() && !s->isParam())
-        s->subtableSize = offset.subtable - s->offset;
+        offset.subtable += s->subtableSize;
 
     subtables.emplace_back(std::move(s));
     auto &sub = subtables.back();
@@ -1180,7 +1178,7 @@ void OTL::setDevOffset(ValueIndex vi, LOffset o) {
 
 void OTL::setCoverages(std::vector<LOffset> &covs,
                        CoverageAndClass &cac,
-                       std::vector<GPat::ClassRec*> classes, LOffset o) {
+                       std::vector<GPat::ClassRec*> classes) {
     if (classes.size() == 0)
         return;
 
@@ -1190,6 +1188,7 @@ void OTL::setCoverages(std::vector<LOffset> &covs,
         for (auto &g : cr->glyphs)
             cac.coverageAddGlyph(g);
 
-        covs.push_back(cac.coverageEnd() + o);
+        cac.coverageEnd();
+        covs.push_back(0);  // placeholder, overwritten by setCacOffsets
     }
 }

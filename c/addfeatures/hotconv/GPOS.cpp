@@ -501,9 +501,9 @@ GPOS::SinglePos::Format1::Format1(GPOS &h, GPOS::SubtableInfo &si,
     valueIndex = h.nextValueIndex();
     sz = h.recordValues(ValueFormat, s.metricsInfo, sz);
 
-    Coverage = cac.coverageEnd(); /* Adjusted later */
+    cac.coverageEnd();
 
-    h.incSubOffset(sz);
+    subtableSize = sz;
 }
 
 GPOS::SinglePos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si,
@@ -524,8 +524,8 @@ GPOS::SinglePos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si,
         sz = h.recordValues(s.valFmt, s.metricsInfo, sz);
     }
 
-    Coverage = cac.coverageEnd(); /* Adjusted later */
-    h.incSubOffset(sz);
+    cac.coverageEnd();
+    subtableSize = sz;
 }
 
 void GPOS::SinglePos::Format1::fill(GPOS &h, GPOS::SubtableInfo &si) {
@@ -1046,24 +1046,21 @@ GPOS::PairPos::Format1::Format1(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
         i = e;
     }
 
-    Coverage = cac.coverageEnd(); /* Adjusted later */
-    h.incSubOffset(offst);
+    cac.coverageEnd();
+    subtableSize = offst;
 }
 
-Offset GPOS::classDefMake(CoverageAndClass &cac,
-                          int cdefInx, LOffset *coverage, uint16_t &count) {
+void GPOS::classDefMake(CoverageAndClass &cac,
+                        int cdefInx, bool makeCoverage, uint16_t &count) {
     ClassDef &cdef = classDef[cdefInx];
 
-    /* --- Create coverage, if needed --- */
-    if (coverage != NULL) {
+    if (makeCoverage) {
         cac.coverageBegin();
         for (GID gid : cdef.cov)
             cac.coverageAddGlyph(gid);
-
-        *coverage = cac.coverageEnd(); /* Adjusted later */
+        cac.coverageEnd();
     }
 
-    /* --- Create classdef --- */
     /* Classes start numbering from 0 for ClassDef1, 1 for ClassDef2 */
     if (g->convertFlags & HOT_DO_NOT_OPTIMIZE_KERN)
         count = (uint16_t)cdef.classInfo.size() + 1;
@@ -1076,7 +1073,7 @@ Offset GPOS::classDefMake(CoverageAndClass &cac,
                 cac.classAddMapping(gid, ci.second.cls);
         }
     }
-    return cac.classEnd();
+    cac.classEnd();
 }
 
 GPOS::PairPos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si) {
@@ -1084,8 +1081,8 @@ GPOS::PairPos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
 
     uint16_t class1Count, class2Count;
     /* (ClassDef offsets adjusted later) */
-    ClassDef1 = h.classDefMake(cac, 0, &Coverage, class1Count);
-    ClassDef2 = h.classDefMake(cac, 1, NULL, class2Count);
+    h.classDefMake(cac, 0, true, class1Count);
+    h.classDefMake(cac, 1, false, class2Count);
 
     ValueFormat1 = si.pairValFmt1;
     ValueFormat2 = si.pairValFmt2;
@@ -1120,7 +1117,7 @@ GPOS::PairPos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
            offst));
 #endif
 
-    h.incSubOffset(offst);
+    subtableSize = offst;
 }
 
 void GPOS::PairPos::fill(GPOS &h, SubtableInfo &si) {
@@ -1347,11 +1344,10 @@ GPOS::ChainContextPos::ChainContextPos(GPOS &h, GPOS::SubtableInfo &si,
     }
 
     LOffset sz = chain3Size(backs.size(), inputs.size(), looks.size(), nPos);
-    LOffset o = isExt() ? sz : 0;
 
-    h.setCoverages(backtracks, cac, backs, o);
-    h.setCoverages(inputGlyphs, cac, inputs, o);
-    h.setCoverages(lookaheads, cac, looks, o);
+    h.setCoverages(backtracks, cac, backs);
+    h.setCoverages(inputGlyphs, cac, inputs);
+    h.setCoverages(lookaheads, cac, looks);
 
     if (nPos > 0) {
         lookupRecords.reserve(nPos);
@@ -1365,7 +1361,7 @@ GPOS::ChainContextPos::ChainContextPos(GPOS &h, GPOS::SubtableInfo &si,
 
     h.updateMaxContext(inputs.size() + looks.size());
 
-    h.incSubOffset(sz);
+    subtableSize = sz;
 }
 
 void GPOS::ChainContextPos::fill(GPOS &h, SubtableInfo &si) {
@@ -1580,7 +1576,7 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
             numMarkGlyphs++;
         }
     }
-    MarkCoverage = cac.coverageEnd(); /* otlCoverageEnd does the sort by GID */
+    cac.coverageEnd();
 
     /* Now we know how many mark nodes there are, we can build the MarkArray */
     /* table, and get its size. We will keep things simple, and write the    */
@@ -1652,16 +1648,16 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
     }
 
     size += baseArraySize;
-    BaseCoverage = cac.coverageEnd(); /* otlCoverageEnd does the sort by GID */
+    cac.coverageEnd();
     endArrays = size;
 
     /* Now add the size of the anchor list*/
     auto &anchorRec = anchorList.back();
     size += anchorRec.offset + anchorRec.size(h.getValues());
 
-    h.incSubOffset(size);
+    subtableSize = size;
 
-    h.checkOverflow("lookup subtable", h.subOffset(), "mark to base positioning");
+    h.checkOverflow("lookup subtable", subtableSize, "mark to base positioning");
 }
 
 void GPOS::MarkBasePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
@@ -1731,7 +1727,7 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
             numMarkGlyphs++;
         }
     }
-    MarkCoverage = cac.coverageEnd(); /* coverageEnd does the sort by GID */
+    cac.coverageEnd();
 
     /* Now we know how many mark nodes there are, we can build the MarkArray */
     /* table, and get its size. We will keep things simple, and write the    */
@@ -1796,7 +1792,7 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
         LigatureAttaches.emplace_back(std::move(la));
         ligArraySize += sizeof(uint16_t);
     }
-    LigatureCoverage = cac.coverageEnd(); /* coverageEnd does the sort by GID */
+    cac.coverageEnd();
 
     ligArraySize += sizeof(uint16_t) * LigatureAttaches.size();
     size += ligArraySize;
@@ -1806,9 +1802,9 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
     auto &anchorRec = anchorList.back();
     size += anchorRec.offset + anchorRec.size(h.getValues());
 
-    h.incSubOffset(size);
+    subtableSize = size;
 
-    h.checkOverflow("lookup subtable", h.subOffset(), "mark to ligature positioning");
+    h.checkOverflow("lookup subtable", subtableSize, "mark to ligature positioning");
 }
 
 void GPOS::MarkLigaturePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
@@ -1923,7 +1919,7 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
         }
         prevRec = &baseRec;
     }
-    Coverage = cac.coverageEnd(); /* coverageEnd does the sort by GID */
+    cac.coverageEnd();
     size += entryExitRecords.size() * (2 * sizeof(uint16_t));
     endArrays = size;
 
@@ -1932,9 +1928,9 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
     std::cerr << "anchor size: " << anchorRec.size(h.getValues()) << std::endl;
     size += anchorRec.offset + anchorRec.size(h.getValues());
 
-    h.incSubOffset(size);
+    subtableSize = size;
 
-    h.checkOverflow("cursive attach table", h.subOffset(), "cursive positioning");
+    h.checkOverflow("cursive attach table", subtableSize, "cursive positioning");
 }
 
 void GPOS::CursivePos::fill(GPOS &h, GPOS::SubtableInfo &si) {

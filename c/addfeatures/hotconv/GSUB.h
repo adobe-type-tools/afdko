@@ -135,7 +135,7 @@ class GSUB : public OTL {
         virtual ~SingleSubst() {}
         SingleSubst(GSUB &h, SubtableInfo &si);
         static void fill(GSUB &h, SubtableInfo &si);
-        Offset fillSingleCoverage(SubtableInfo &si);
+        void fillSingleCoverage(SubtableInfo &si);
     };
 
     struct MultipleSubst : public Subtable {

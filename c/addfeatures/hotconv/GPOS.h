@@ -509,8 +509,8 @@ class GPOS : public OTL {
     GPat::ClassRec &getCR(uint32_t cls, int classDefInx);
     void printKernPair(GID gid1, GID gid2, MetricsInfo &mi1, MetricsInfo &mi2,
                        bool fmt1);
-    Offset classDefMake(CoverageAndClass &cac, int classDefInx,
-                        LOffset *coverage, uint16_t &count);
+    void classDefMake(CoverageAndClass &cac, int classDefInx,
+                      bool makeCoverage, uint16_t &count);
 
     void checkBaseAnchorConflict(std::vector<BaseGlyphRec> &baselist);
     void checkBaseLigatureConflict(std::vector<BaseGlyphRec> &baselist);

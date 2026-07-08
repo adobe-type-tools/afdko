@@ -384,7 +384,7 @@ class OTL {
 
     static void setCoverages(std::vector<LOffset> &covs,
                              CoverageAndClass &cac,
-                             std::vector<GPat::ClassRec*> classes, LOffset o);
+                             std::vector<GPat::ClassRec*> classes);
 
  private:
     static void valDump(int16_t val, int16_t excep, bool isRef);
