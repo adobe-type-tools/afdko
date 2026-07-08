@@ -206,6 +206,21 @@ Offset CoverageAndClass::classEnd() {
     return o;
 }
 
+void CoverageAndClass::mergeFrom(CoverageAndClass &source) {
+    for (auto &rec : source.getCoverageRecords()) {
+        coverageBegin();
+        for (GID gid : rec.glyphs)
+            coverageAddGlyph(gid);
+        coverageEnd();
+    }
+    for (auto &rec : source.getClassRecords()) {
+        classBegin();
+        for (auto &[gid, classId] : rec.map)
+            classAddMapping(gid, classId);
+        classEnd();
+    }
+}
+
 Offset CoverageAndClass::getCoverageOffset() {
     assert(covReplayIt != coverageCallSeq.cend());
     uint16_t recIdx = *covReplayIt++;
@@ -765,8 +780,11 @@ void OTL::checkStandAloneRefs() {
     }
 }
 
-void OTL::checkOverflow(const char* offsetType, long offset, const char* posType) {
+void OTL::checkOverflow(const char* offsetType, long offset, const char* posType,
+                        bool earlyCheck) {
     if (offset > 0xFFFF) {
+        if (earlyCheck && !(g->convertFlags & HOT_NO_AUTO_OVERFLOW))
+            return;  // auto-overflow handling will address this later
         g->logger->log(sFATAL,
                        "In %s %s rules cause an offset overflow (0x%lx) to a %s",
                        g->error_id_text.c_str(), posType, offset, offsetType);
@@ -785,18 +803,7 @@ std::shared_ptr<CoverageAndClass> OTL::buildMergedCac() {
     for (auto &sub : subtables) {
         if (sub->isRef() || sub->isParam() || sub->isExt())
             continue;
-        for (auto &rec : sub->cac.getCoverageRecords()) {
-            merged->coverageBegin();
-            for (GID gid : rec.glyphs)
-                merged->coverageAddGlyph(gid);
-            merged->coverageEnd();
-        }
-        for (auto &rec : sub->cac.getClassRecords()) {
-            merged->classBegin();
-            for (auto &[gid, classId] : rec.map)
-                merged->classAddMapping(gid, classId);
-            merged->classEnd();
-        }
+        merged->mergeFrom(sub->cac);
     }
 
     // Set shared pointer and update offset fields
@@ -819,13 +826,11 @@ void OTL::autoPromoteExtensions() {
 
     LOffset extStubSize = Subtable::ExtensionFormat1::size();
 
-    // Sort by decreasing subtable size for greedy promotion
-    std::stable_sort(subtables.begin(), subtables.end(),
-        [](const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
-            return a->subtableSize > b->subtableSize;
-        });
+    // Sort by decreasing size for greedy promotion
+    std::stable_sort(subtables.begin(), subtables.end(), Subtable::ltSizeDesc);
 
-    // Promotion loop: build a temporary merged cac to check size, promote if needed
+    // Promotion loop: build a temporary merged cac to check size, promote
+    // the largest non-ext subtable each iteration until it fits.
     uint32_t nPromoted = 0;
     while (true) {
         // Compute inline subtable total
@@ -841,18 +846,7 @@ void OTL::autoPromoteExtensions() {
         for (auto &sub : subtables) {
             if (sub->isRef() || sub->isParam() || sub->isExt())
                 continue;
-            for (auto &rec : sub->cac.getCoverageRecords()) {
-                tempCac->coverageBegin();
-                for (GID gid : rec.glyphs)
-                    tempCac->coverageAddGlyph(gid);
-                tempCac->coverageEnd();
-            }
-            for (auto &rec : sub->cac.getClassRecords()) {
-                tempCac->classBegin();
-                for (auto &[gid, classId] : rec.map)
-                    tempCac->classAddMapping(gid, classId);
-                tempCac->classEnd();
-            }
+            tempCac->mergeFrom(sub->cac);
         }
 
         LOffset inlineTotal = subtableTotal + tempCac->coverageSize()
@@ -860,7 +854,7 @@ void OTL::autoPromoteExtensions() {
         if (inlineTotal <= 0xFFFF)
             break;
 
-        // Find the largest non-ext subtable to promote
+        // First non-ext in size-sorted order is the largest
         bool promoted = false;
         for (auto &sub : subtables) {
             if (sub->isRef() || sub->isParam() || sub->isExt())
@@ -878,6 +872,9 @@ void OTL::autoPromoteExtensions() {
             break;
         }
     }
+
+    // Restore creation order
+    std::stable_sort(subtables.begin(), subtables.end(), Subtable::ltCreationOrder);
 
     if (nPromoted > 0 && (g->convertFlags & HOT_VERBOSE))
         g->logger->log(sINFO,
@@ -1149,6 +1146,7 @@ void OTL::AddSubtable(typename std::unique_ptr<Subtable> s) {
     if (!s->isRef() && !s->isParam())
         offset.subtable += s->subtableSize;
 
+    s->creationIndex = (uint32_t)subtables.size();
     subtables.emplace_back(std::move(s));
     auto &sub = subtables.back();
 

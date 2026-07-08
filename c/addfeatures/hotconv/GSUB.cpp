@@ -169,7 +169,7 @@ void GSUB::LookupEnd(SubtableInfo *si) {
             g->logger->log(sFATAL, "unknown GSUB lkpType <%d> in %s.", si->lkpType, g->error_id_text.c_str());
     }
 
-    checkOverflow("lookup subtable", subOffset(), "substitution");
+    checkOverflow("lookup subtable", subOffset(), "substitution", true);
     // XXX recycle rules
     /* This prevents the rules from being re-used unintentionally in the  */
     /* case where an empty GSUB feature is called for; because it is      */
@@ -982,7 +982,7 @@ GSUB::ChainSubst::ChainSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subta
 void GSUB::ChainSubst::fill(GSUB &h, SubtableInfo &si) {
     for (auto &rule : si.rules) {
         h.AddSubtable(std::move(std::make_unique<ChainSubst>(h, si, rule)));
-        h.checkOverflow("lookup subtable", h.subOffset(), "chain contextual substitution");
+        h.checkOverflow("lookup subtable", h.subOffset(), "chain contextual substitution", true);
     }
 }
 
@@ -1079,7 +1079,7 @@ GSUB::ReverseSubst::ReverseSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : S
 void GSUB::ReverseSubst::fill(GSUB &h, SubtableInfo &si) {
     for (auto &rule : si.rules) {
         h.AddSubtable(std::move(std::make_unique<ReverseSubst>(h, si, rule)));
-        h.checkOverflow("lookup subtable", h.subOffset(), "reverse chain contextual substitution");
+        h.checkOverflow("lookup subtable", h.subOffset(), "reverse chain contextual substitution", true);
     }
 }
 

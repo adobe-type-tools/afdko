@@ -41,6 +41,7 @@ class CoverageAndClass {
     virtual void classWrite();
     virtual Offset classEnd();
     virtual LOffset classSize() { return sharedCac ? sharedCac->classSize() : cls.size; }
+    void mergeFrom(CoverageAndClass &source);
 #if HOT_DEBUG
     virtual void dump();
 #endif
@@ -211,6 +212,12 @@ class OTL {
         static bool ltOffset(const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
             return a->offset < b->offset;
         }
+        static bool ltCreationOrder(const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
+            return a->creationIndex < b->creationIndex;
+        }
+        static bool ltSizeDesc(const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
+            return a->subtableSize > b->subtableSize;
+        }
         bool isStandAlone() const { return feature == TAG_STAND_ALONE; }
         bool isAnon() const { return script == TAG_UNDEF; }
         bool isRef() const { return IS_REF_LAB(label); }
@@ -236,6 +243,7 @@ class OTL {
         uint16_t markSetIndex {0};
         Offset offset {0};
         LOffset subtableSize {0};
+        uint32_t creationIndex {0};
         Label label {0};
         bool seenInFeature {false};
         bool isFeatParam {false};
@@ -358,7 +366,7 @@ class OTL {
     virtual void incSubOffset(LOffset o) { offset.subtable += o; }
     virtual void incFeatParamOffset(LOffset o) { offset.featParam += o; }
     virtual void checkOverflow(const char* offsetType, long offset,
-                               const char* posType);
+                               const char* posType, bool earlyCheck = false);
     virtual void writeValueRecord(uint32_t valFmt, ValueIndex i) { assert(false); }
     virtual void writeVarSubtables(uint32_t valFmt, ValueIndex i) { assert(false); }
     virtual const VarTrackVec &getValues();

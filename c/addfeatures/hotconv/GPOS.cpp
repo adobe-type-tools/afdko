@@ -205,7 +205,7 @@ void GPOS::LookupEnd(SubtableInfo *si) {
                            si->lkpType, g->error_id_text.c_str());
     }
 
-    checkOverflow("lookup subtable", subOffset(), "positioning");
+    checkOverflow("lookup subtable", subOffset(), "positioning", true);
     startNewPairPosSubtbl = false;
 }
 
@@ -1368,7 +1368,7 @@ void GPOS::ChainContextPos::fill(GPOS &h, SubtableInfo &si) {
     /* xxx Each rule in a fmt3 for now */
     for (auto &rule : si.rules) {
         h.AddSubtable(std::move(std::make_unique<ChainContextPos>(h, si, rule)));
-        h.checkOverflow("lookup subtable", h.subOffset(), "chain contextual positioning");
+        h.checkOverflow("lookup subtable", h.subOffset(), "chain contextual positioning", true);
     }
 }
 
