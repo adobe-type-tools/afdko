@@ -96,9 +96,22 @@ class CoverageAndClass {
     std::vector<CoverageRecord> &getCoverageRecords() { return coverage.records; }
     std::vector<ClassRecord> &getClassRecords() { return cls.records; }
 
+    // Replay API: after building a shared cac, set sharedCac on each private
+    // cac. Then getCoverageOffset()/getClassOffset() resolve through it.
+    void setSharedCac(std::shared_ptr<CoverageAndClass> shared) { sharedCac = shared; }
+    void resetReplay() { covReplayPos = 0; clsReplayPos = 0; }
+    Offset getCoverageOffset();
+    Offset getClassOffset();
+
  private:
     virtual Offset coverageFill();
     virtual Offset classFill();
+
+    std::shared_ptr<CoverageAndClass> sharedCac;
+    std::vector<uint16_t> coverageCallSeq;  // record index per coverageEnd() call
+    std::vector<uint16_t> classCallSeq;     // record index per classEnd() call
+    size_t covReplayPos {0};
+    size_t clsReplayPos {0};
 
  protected:
     struct {
@@ -209,8 +222,7 @@ class OTL {
         virtual std::vector<LookupRecord> *getLookups() { return nullptr; }
         virtual void writeExt(OTL *h, uint32_t extSec) { extension.write(h->g, lkpType, extSec - offset); }
         virtual void write(OTL *h) = 0;
-        virtual void remapCacOffsets(std::map<Offset, Offset> &covMap,
-                                     std::map<Offset, Offset> &clsMap) {}
+        virtual void setCacOffsets() {}  // Override to set Coverage/ClassDef from cac replay
 #if HOT_DEBUG
         virtual void dump(typename std::vector<std::unique_ptr<Subtable>>::iterator sb,
                           uint32_t extLkpType);
