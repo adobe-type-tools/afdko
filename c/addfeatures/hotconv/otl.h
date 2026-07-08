@@ -99,7 +99,7 @@ class CoverageAndClass {
     // Replay API: after building a shared cac, set sharedCac on each private
     // cac. Then getCoverageOffset()/getClassOffset() resolve through it.
     void setSharedCac(CoverageAndClass *shared) { sharedCac = shared; }
-    void resetReplay() { covReplayPos = 0; clsReplayPos = 0; }
+    void resetReplay() { covReplayIt = coverageCallSeq.cbegin(); clsReplayIt = classCallSeq.cbegin(); }
     Offset getCoverageOffset();
     Offset getClassOffset();
 
@@ -110,8 +110,8 @@ class CoverageAndClass {
     CoverageAndClass *sharedCac {nullptr};
     std::vector<uint16_t> coverageCallSeq;  // record index per coverageEnd() call
     std::vector<uint16_t> classCallSeq;     // record index per classEnd() call
-    size_t covReplayPos {0};
-    size_t clsReplayPos {0};
+    std::vector<uint16_t>::const_iterator covReplayIt;
+    std::vector<uint16_t>::const_iterator clsReplayIt;
 
  protected:
     struct {

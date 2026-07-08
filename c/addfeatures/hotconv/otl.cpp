@@ -207,8 +207,8 @@ Offset CoverageAndClass::classEnd() {
 }
 
 Offset CoverageAndClass::getCoverageOffset() {
-    assert(covReplayPos < coverageCallSeq.size());
-    uint16_t recIdx = coverageCallSeq[covReplayPos++];
+    assert(covReplayIt != coverageCallSeq.cend());
+    uint16_t recIdx = *covReplayIt++;
     if (sharedCac) {
         auto &myGlyphs = coverage.records[recIdx].glyphs;
         for (auto &rec : sharedCac->coverage.records) {
@@ -221,8 +221,8 @@ Offset CoverageAndClass::getCoverageOffset() {
 }
 
 Offset CoverageAndClass::getClassOffset() {
-    assert(clsReplayPos < classCallSeq.size());
-    uint16_t recIdx = classCallSeq[clsReplayPos++];
+    assert(clsReplayIt != classCallSeq.cend());
+    uint16_t recIdx = *clsReplayIt++;
     if (sharedCac) {
         auto &myMap = cls.records[recIdx].map;
         for (auto &rec : sharedCac->cls.records) {
