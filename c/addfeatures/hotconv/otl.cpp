@@ -111,6 +111,39 @@ Offset CoverageAndClass::coverageEnd() {
     return coverageFill();
 }
 
+Offset CoverageAndClass::coverageEndRC(uint16_t &index) {
+    for (uint16_t i = 0; i < coverage.records.size(); i++) {
+        if (coverage.records[i].glyphs == coverage.current) {
+            coverage.records[i].refcount++;
+            index = i;
+            return coverage.records[i].offset;
+        }
+    }
+    index = (uint16_t)coverage.records.size();
+    Offset o = coverageFill();
+    coverage.records.back().refcount++;
+    return o;
+}
+
+LOffset CoverageAndClass::activeCoverageSize() {
+    LOffset sz = 0;
+    for (auto &record : coverage.records) {
+        if (record.refcount > 0)
+            sz += record.size();
+    }
+    return sz;
+}
+
+LOffset CoverageAndClass::releaseCoverageRef(uint16_t index) {
+    assert(index < coverage.records.size());
+    auto &record = coverage.records[index];
+    assert(record.refcount > 0);
+    record.refcount--;
+    if (record.refcount == 0)
+        return record.size();  // freed this much space
+    return 0;
+}
+
 CoverageAndClass::ClassRecord::ClassRecord(Offset o, std::map<GID, uint16_t> &m) : offset(o) {
     map.swap(m);
 
@@ -215,6 +248,39 @@ Offset CoverageAndClass::classEnd() {
     }
 
     return classFill();
+}
+
+Offset CoverageAndClass::classEndRC(uint16_t &index) {
+    for (uint16_t i = 0; i < cls.records.size(); i++) {
+        if (cls.records[i].map == cls.current) {
+            cls.records[i].refcount++;
+            index = i;
+            return cls.records[i].offset;
+        }
+    }
+    index = (uint16_t)cls.records.size();
+    Offset o = classFill();
+    cls.records.back().refcount++;
+    return o;
+}
+
+LOffset CoverageAndClass::activeClassSize() {
+    LOffset sz = 0;
+    for (auto &record : cls.records) {
+        if (record.refcount > 0)
+            sz += record.size();
+    }
+    return sz;
+}
+
+LOffset CoverageAndClass::releaseClassRef(uint16_t index) {
+    assert(index < cls.records.size());
+    auto &record = cls.records[index];
+    assert(record.refcount > 0);
+    record.refcount--;
+    if (record.refcount == 0)
+        return record.size();
+    return 0;
 }
 
 #if HOT_DEBUG
@@ -791,7 +857,13 @@ void OTL::autoPromoteExtensions() {
             break;
         if (sub->isRef() || sub->isParam() || sub->isExt())
             continue;
-        LOffset savings = sub->subtableSize - extStubSize;
+        // Savings = subtable data removed from inline + cac entries freed
+        LOffset cacFreed = 0;
+        for (auto ci : sub->cacCoverageRefs)
+            cacFreed += cac->releaseCoverageRef(ci);
+        for (auto ci : sub->cacClassRefs)
+            cacFreed += cac->releaseClassRef(ci);
+        LOffset savings = sub->subtableSize - extStubSize + cacFreed;
         inlineTotal -= savings;
         sub->useExtension = true;
         sub->cac = std::make_shared<CoverageAndClass>(g);

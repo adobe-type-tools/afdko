@@ -35,12 +35,18 @@ class CoverageAndClass {
     virtual void coverageAddGlyph(GID gid, bool warn = false);
     virtual void coverageWrite();
     virtual Offset coverageEnd();
+    virtual Offset coverageEndRC(uint16_t &index);  // refcounted: returns index
     virtual LOffset coverageSize() { return coverage.size; }
+    virtual LOffset activeCoverageSize();  // size of entries with refcount > 0
     virtual void classBegin();
     virtual void classAddMapping(GID gid, uint32_t classId);
     virtual void classWrite();
     virtual Offset classEnd();
+    virtual Offset classEndRC(uint16_t &index);  // refcounted: returns index
     virtual LOffset classSize() { return cls.size; }
+    virtual LOffset activeClassSize();  // size of entries with refcount > 0
+    LOffset releaseCoverageRef(uint16_t index);  // decrement, return freed size (or 0)
+    LOffset releaseClassRef(uint16_t index);
 #if HOT_DEBUG
     virtual void dump();
 #endif
@@ -52,6 +58,7 @@ class CoverageAndClass {
      public:
         CoverageRecord() = delete;
         CoverageRecord(Offset o, std::set<GID> &gl);
+        uint16_t refcount {0};
         LOffset cov1size() {
             return sizeof(uint16_t) * (2 + glyphs.size());
         }
@@ -74,6 +81,7 @@ class CoverageAndClass {
      public:
         ClassRecord() = delete;
         ClassRecord(Offset o, std::map<GID, uint16_t> &gl);
+        uint16_t refcount {0};
         LOffset cls1size(uint16_t nvalues) {
             return sizeof(uint16_t) * (3 + nvalues);
         }
@@ -224,6 +232,8 @@ class OTL {
         ExtensionFormat1 extension;
         std::string id_text;
         std::shared_ptr<CoverageAndClass> cac;
+        std::vector<uint16_t> cacCoverageRefs;  // indices into shared cac coverage records
+        std::vector<uint16_t> cacClassRefs;     // indices into shared cac class records
         struct {
             int16_t feature {-1};
             int16_t lookup {-1};
