@@ -35,30 +35,20 @@ class CoverageAndClass {
     virtual void coverageAddGlyph(GID gid, bool warn = false);
     virtual void coverageWrite();
     virtual Offset coverageEnd();
-    virtual Offset coverageEndRC(uint16_t &index);  // refcounted: returns index
     virtual LOffset coverageSize() { return coverage.size; }
-    virtual LOffset activeCoverageSize();  // size of entries with refcount > 0
     virtual void classBegin();
     virtual void classAddMapping(GID gid, uint32_t classId);
     virtual void classWrite();
     virtual Offset classEnd();
-    virtual Offset classEndRC(uint16_t &index);  // refcounted: returns index
     virtual LOffset classSize() { return cls.size; }
-    virtual LOffset activeClassSize();  // size of entries with refcount > 0
-    LOffset releaseCoverageRef(uint16_t index);  // decrement, return freed size (or 0)
-    LOffset releaseClassRef(uint16_t index);
 #if HOT_DEBUG
     virtual void dump();
 #endif
 
- private:
-    virtual Offset coverageFill();
-    virtual Offset classFill();
     class CoverageRecord {
      public:
         CoverageRecord() = delete;
         CoverageRecord(Offset o, std::set<GID> &gl);
-        uint16_t refcount {0};
         LOffset cov1size() {
             return sizeof(uint16_t) * (2 + glyphs.size());
         }
@@ -81,7 +71,6 @@ class CoverageAndClass {
      public:
         ClassRecord() = delete;
         ClassRecord(Offset o, std::map<GID, uint16_t> &gl);
-        uint16_t refcount {0};
         LOffset cls1size(uint16_t nvalues) {
             return sizeof(uint16_t) * (3 + nvalues);
         }
@@ -103,6 +92,13 @@ class CoverageAndClass {
         };
         std::vector<ClassRangeRecord> ranges;
     };
+
+    std::vector<CoverageRecord> &getCoverageRecords() { return coverage.records; }
+    std::vector<ClassRecord> &getClassRecords() { return cls.records; }
+
+ private:
+    virtual Offset coverageFill();
+    virtual Offset classFill();
 
  protected:
     struct {
@@ -213,6 +209,8 @@ class OTL {
         virtual std::vector<LookupRecord> *getLookups() { return nullptr; }
         virtual void writeExt(OTL *h, uint32_t extSec) { extension.write(h->g, lkpType, extSec - offset); }
         virtual void write(OTL *h) = 0;
+        virtual void remapCacOffsets(std::map<Offset, Offset> &covMap,
+                                     std::map<Offset, Offset> &clsMap) {}
 #if HOT_DEBUG
         virtual void dump(typename std::vector<std::unique_ptr<Subtable>>::iterator sb,
                           uint32_t extLkpType);
@@ -232,8 +230,6 @@ class OTL {
         ExtensionFormat1 extension;
         std::string id_text;
         std::shared_ptr<CoverageAndClass> cac;
-        std::vector<uint16_t> cacCoverageRefs;  // indices into shared cac coverage records
-        std::vector<uint16_t> cacClassRefs;     // indices into shared cac class records
         struct {
             int16_t feature {-1};
             int16_t lookup {-1};
@@ -367,6 +363,8 @@ class OTL {
     virtual void AddSubtable(typename std::unique_ptr<Subtable> s);
     virtual void updateMaxContext(uint16_t m) { maxContext = MAX(m, maxContext); }
     void autoPromoteExtensions();
+    LOffset calcMergedCacSize();
+    void buildMergedCac();
 #if HOT_DEBUG
     void dumpSizes(LOffset subtableSize, LOffset extensionSectionSize);
 #endif
