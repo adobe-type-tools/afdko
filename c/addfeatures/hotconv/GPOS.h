@@ -279,8 +279,6 @@ class GPOS : public OTL {
             return sizeof(uint16_t) * (8 + class1cnt * class2cnt * (nval + nvar));
         }
         static void fill(GPOS &h, SubtableInfo &si);
-        static void fillFormat1(GPOS &h, SubtableInfo &si);
-        static void fillFormat2(GPOS &h, SubtableInfo &si);
         uint16_t ValueFormat1 {0}, ValueFormat2 {0};
         LOffset Coverage {0};         /* 32-bit for overflow check */
     };
