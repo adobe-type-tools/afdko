@@ -566,7 +566,7 @@ void hotConvert(hotCtx g);
 #define HOT_CONVERT_FINAL_NAMES       (1 << 12) /* When showing error messages, use final names rather than source names. */
 #define HOT_LOOKUP_FINAL_NAMES        (1 << 13) /* When looking for unicode mappings in GOADB files use final names rather than source names. */
 #define HOT_KEEP_MVAR                 (1 << 14) /* When loading a pre-existing MVAR table, keep any values that aren't overridden */
-#define HOT_NO_AUTO_OVERFLOW          (1 << 15) /* Do not automatically handle subtable overflow (splitting/extension promotion) */
+#define HOT_NO_AUTO_OVERFLOW          (1 << 16) /* Do not automatically handle subtable overflow (splitting/extension promotion) */
 
 /* hotFree() destroys the library context and all the resources allocated to
    it. It must be the last function called by a client of the library. */

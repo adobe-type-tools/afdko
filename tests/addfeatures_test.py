@@ -512,7 +512,6 @@ def test_auto_extension_nao_flag():
     assert b"offset overflow" in output
 
 
-@pytest.mark.xfail(reason="earlyCheck suppression needs investigation for large tables")
 def test_auto_extension_verbose_message():
     """Test that verbose mode reports auto-promotion."""
     input_filename = 'bug313/font.cff'
