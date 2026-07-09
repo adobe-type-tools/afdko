@@ -864,7 +864,7 @@ void OTL::autoPromoteExtensions() {
         }
         if (!promoted) {
             g->logger->log(sERROR,
-                "Offset overflow in %s (0x%lx) cannot be resolved by extension "
+                "Offset overflow in %s (0x%x) cannot be resolved by extension "
                 "promotion -- all subtables are already extensions",
                 objName(), inlineTotal);
             break;
@@ -986,7 +986,7 @@ int OTL::fillOTL(bool force) {
         LOffset inlineTotal = offset.subtable + cac->coverageSize() + cac->classSize();
         if (inlineTotal > 0xFFFF)
             g->logger->log(sFATAL,
-                "In %s offset overflow (0x%lx): inline subtable section "
+                "In %s offset overflow (0x%x): inline subtable section "
                 "exceeds 64K. Use extension lookups or reduce table size.",
                 objName(), inlineTotal);
     }
