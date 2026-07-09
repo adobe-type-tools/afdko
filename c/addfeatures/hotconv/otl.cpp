@@ -1151,9 +1151,6 @@ void OTL::setAnonLookupIndices() {
 }
 
 void OTL::AddSubtable(typename std::unique_ptr<Subtable> s) {
-    if (!s->isRef() && !s->isParam())
-        offset.subtable += s->subtableSize;
-
     s->creationIndex = (uint32_t)subtables.size();
     subtables.emplace_back(std::move(s));
     auto &sub = subtables.back();

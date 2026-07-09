@@ -360,10 +360,7 @@ class OTL {
     };
 
  public:
-    virtual LOffset extOffset() { return offset.extension; }
     virtual LOffset subOffset() { return offset.subtable; }
-    virtual void incExtOffset(LOffset o) { offset.extension += o; }
-    virtual void incSubOffset(LOffset o) { offset.subtable += o; }
     virtual void incFeatParamOffset(LOffset o) { offset.featParam += o; }
     virtual void checkOverflow(const char* offsetType, long offset,
                                const char* posType);
