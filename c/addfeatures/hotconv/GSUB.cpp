@@ -432,8 +432,8 @@ void GSUB::SingleSubst::fill(GSUB &h, SubtableInfo &si) {
 }
 
 void GSUB::SingleSubst::Format1::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "single substitution");
 
@@ -446,8 +446,8 @@ void GSUB::SingleSubst::Format1::write(OTL *h) {
 }
 
 void GSUB::SingleSubst::Format2::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "single substitution");
 
@@ -559,8 +559,8 @@ void GSUB::MultipleSubst::fill(GSUB &h, SubtableInfo &si) {
 }
 
 void GSUB::MultipleSubst::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "multiple substitution");
 
@@ -685,8 +685,8 @@ void GSUB::AlternateSubst::fill(GSUB &h, SubtableInfo &si) {
 }
 
 void GSUB::AlternateSubst::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "alternate substitution");
     OUT2(subformat());
@@ -751,8 +751,8 @@ void GSUB::LigatureSubst::fill(GSUB &h, SubtableInfo &si) {
 }
 
 void GSUB::LigatureSubst::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "ligature substitution");
     OUT2(subformat());
@@ -987,9 +987,7 @@ void GSUB::ChainSubst::fill(GSUB &h, SubtableInfo &si) {
 }
 
 void GSUB::ChainSubst::write(OTL *h) {
-    LOffset adjustment = 0; /* (Linux compiler complains) */
-    if (!isExt())
-        adjustment = h->subOffset() - offset;
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     OUT2(subformat());
 
@@ -997,24 +995,21 @@ void GSUB::ChainSubst::write(OTL *h) {
 
     /* do it per OpenType spec 1.5 */
     for (auto ri = backtracks.rbegin(); ri != backtracks.rend(); ri++) {
-        if (!isExt())
-            *ri += adjustment;
+        *ri += adjustment;
         h->checkOverflow("backtrack coverage table", *ri, "chain contextual substitution");
         OUT2((uint16_t)*ri);
     }
 
     OUT2((uint16_t)inputGlyphs.size());
     for (auto &ig : inputGlyphs) {
-        if (!isExt())
-            ig += adjustment;
+        ig += adjustment;
         h->checkOverflow("input coverage table", ig, "chain contextual substitution");
         OUT2((uint16_t)ig);
     }
 
     OUT2((uint16_t)lookaheads.size());
     for (auto &la : lookaheads) {
-        if (!isExt())
-            la += adjustment;
+        la += adjustment;
         h->checkOverflow("lookahead coverage table", la, "chain contextual substitution");
         OUT2((uint16_t)la);
     }
@@ -1084,31 +1079,25 @@ void GSUB::ReverseSubst::fill(GSUB &h, SubtableInfo &si) {
 }
 
 void GSUB::ReverseSubst::write(OTL *h) {
-    LOffset adjustment = 0; /* (Linux compiler complains) */
-
-    if (!isExt())
-        adjustment = h->subOffset() - offset;
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     OUT2(subformat());
 
-    if (!isExt())
-        InputCoverage += adjustment;
+    InputCoverage += adjustment;
 
     OUT2((uint16_t)InputCoverage);
     OUT2((uint16_t)backtracks.size());
 
     /* do it per OpenType spec 1.5 */
     for (auto ri = backtracks.rbegin(); ri != backtracks.rend(); ri++) {
-        if (!isExt())
-            *ri += adjustment;
+        *ri += adjustment;
         h->checkOverflow("backtrack coverage table", *ri, "reverse chain contextual substitution");
         OUT2((uint16_t)*ri);
     }
 
     OUT2((uint16_t)lookaheads.size());
     for (auto &la : lookaheads) {
-        if (!isExt())
-            la += adjustment;
+        la += adjustment;
         h->checkOverflow("lookahead coverage table", la, "reverse chain contextual substitution");
         OUT2((uint16_t)la);
     }

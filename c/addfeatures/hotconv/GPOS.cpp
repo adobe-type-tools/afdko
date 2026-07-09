@@ -593,8 +593,8 @@ void GPOS::SinglePos::fill(GPOS &h, SubtableInfo &si) {
 }
 
 void GPOS::SinglePos::Format1::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "single positioning");
 
@@ -609,8 +609,8 @@ void GPOS::SinglePos::Format1::write(OTL *h) {
 }
 
 void GPOS::SinglePos::Format2::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "single positioning");
 
@@ -1133,8 +1133,8 @@ void GPOS::PairPos::fill(GPOS &h, SubtableInfo &si) {
 }
 
 void GPOS::PairPos::Format1::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset;  // Adjust offset
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "pair positioning");
 
@@ -1177,13 +1177,10 @@ void GPOS::PairPos::Format1::write(OTL *h) {
 }
 
 void GPOS::PairPos::Format2::write(OTL *h) {
-    if (!isExt()) {
-        /* Adjust coverage and class offsets */
-        LOffset adjust = h->subOffset() - offset;
-        Coverage += adjust;
-        ClassDef1 += adjust + cac.coverageSize();
-        ClassDef2 += adjust + cac.coverageSize();
-    }
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
+    ClassDef1 += adjust + cac.coverageSize();
+    ClassDef2 += adjust + cac.coverageSize();
     h->checkOverflow("coverage table", Coverage, "pair positioning");
     h->checkOverflow("class 1 definition table", ClassDef1, "pair positioning");
     h->checkOverflow("class 2 definition table", ClassDef2, "pair positioning");
@@ -1373,34 +1370,28 @@ void GPOS::ChainContextPos::fill(GPOS &h, SubtableInfo &si) {
 }
 
 void GPOS::ChainContextPos::write(OTL *h) {
-    LOffset adjustment = 0;
-
-    if (!isExt())
-        adjustment = h->subOffset() - offset;
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     OUT2(subformat());
     OUT2((uint16_t) backtracks.size());
 
     /* do it per OpenType spec 1.5 */
     for (auto ri = backtracks.rbegin(); ri != backtracks.rend(); ri++) {
-        if (!isExt())
-            *ri += adjustment;
+        *ri += adjustment;
         h->checkOverflow("backtrack coverage table", *ri, "chain contextual positioning");
         OUT2((uint16_t)*ri);
     }
 
     OUT2((uint16_t)inputGlyphs.size());
     for (auto &ig : inputGlyphs) {
-        if (!isExt())
-            ig += adjustment;
+        ig += adjustment;
         h->checkOverflow("input coverage table", ig, "chain contextual positioning");
         OUT2((uint16_t)ig);
     }
 
     OUT2((uint16_t)lookaheads.size());
     for (auto &la : lookaheads) {
-        if (!isExt())
-            la += adjustment;
+        la += adjustment;
         h->checkOverflow("input coverage table", la, "chain contextual positioning");
         OUT2((uint16_t)la);
     }
@@ -1665,9 +1656,7 @@ void GPOS::MarkBasePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
 }
 
 void GPOS::MarkBasePos::write(OTL *h) {
-    LOffset adjustment = 0; /* (Linux compiler complains) */
-    if (!isExt())
-        adjustment = (h->subOffset() - offset);
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     MarkCoverage += adjustment; /* Adjust offset */
     BaseCoverage += adjustment; /* Adjust offset */
@@ -1812,9 +1801,7 @@ void GPOS::MarkLigaturePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
 }
 
 void GPOS::MarkLigaturePos::write(OTL *h) {
-    LOffset adjustment = 0; /* (Linux compiler complains) */
-    if (!isExt())
-        adjustment = h->subOffset() - offset;
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     MarkCoverage += adjustment;     /* Adjust offset */
     LigatureCoverage += adjustment; /* Adjust offset */
@@ -1938,10 +1925,7 @@ void GPOS::CursivePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
 }
 
 void GPOS::CursivePos::write(OTL *h) {
-    LOffset adjustment = 0; /* (Linux compiler complains) */
-
-    if (!isExt())
-        adjustment = h->subOffset() - offset;
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     Coverage += adjustment; /* Adjust offset */
 

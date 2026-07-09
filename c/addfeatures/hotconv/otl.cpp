@@ -808,9 +808,10 @@ std::shared_ptr<CoverageAndClass> OTL::buildMergedCac() {
 
     // Set shared pointer and update offset fields
     for (auto &sub : subtables) {
-        if (sub->isRef() || sub->isParam() || sub->isExt())
+        if (sub->isRef() || sub->isParam())
             continue;
-        sub->cac.setSharedCac(merged.get());
+        if (!sub->isExt())
+            sub->cac.setSharedCac(merged.get());
         sub->cac.resetReplay();
         sub->setCacOffsets();
     }
