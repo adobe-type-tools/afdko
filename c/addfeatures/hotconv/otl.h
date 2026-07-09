@@ -366,7 +366,7 @@ class OTL {
     virtual void incSubOffset(LOffset o) { offset.subtable += o; }
     virtual void incFeatParamOffset(LOffset o) { offset.featParam += o; }
     virtual void checkOverflow(const char* offsetType, long offset,
-                               const char* posType, bool earlyCheck = false);
+                               const char* posType);
     virtual void writeValueRecord(uint32_t valFmt, ValueIndex i) { assert(false); }
     virtual void writeVarSubtables(uint32_t valFmt, ValueIndex i) { assert(false); }
     virtual const VarTrackVec &getValues();

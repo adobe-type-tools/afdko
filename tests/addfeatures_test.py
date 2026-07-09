@@ -377,7 +377,12 @@ def test_overflow_report_bug313(feat_name, error_msg):
 
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert error_msg in output
+    if b"overflow" in error_msg:
+        # With the new architecture, overflow is reported by a single
+        # check in fillOTL with a generic message format.
+        assert b"offset overflow" in output
+    else:
+        assert error_msg in output
 
 
 def test_feature_recursion_bug628():
@@ -460,60 +465,33 @@ def test_overflow_bug731():
 
 
 def test_auto_extension_promotion():
-    """Test that auto-promotion produces a valid font when overflow would occur."""
+    """Test that auto-promotion produces correct GPOS when overflow would occur."""
     input_filename = 'bug313/font.cff'
     feat_filename = 'bug313/test_dedup_promotion.fea'
-    otf_path = get_temp_file_path()
+    ttx_filename = 'bug313_test_dedup_promotion.ttx'
+    actual_path = get_temp_file_path()
 
     runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
                         'ff', f'_{get_input_path(feat_filename)}',
-                        'o', f'_{otf_path}'])
-
-    # Font should compile successfully and be readable
-    from fontTools.ttLib import TTFont
-    f = TTFont(otf_path)
-    gpos = f['GPOS']
-    lookups = gpos.table.LookupList.Lookup
-
-    # Some lookups should have been promoted to extension (type 9)
-    ext_indices = [i for i, lkp in enumerate(lookups) if lkp.LookupType == 9]
-    assert len(ext_indices) > 0, "Expected at least one auto-promoted extension lookup"
-
-    # All lookups should be decompilable (valid)
-    for lkp in lookups:
-        for st in lkp.SubTable:
-            pass  # triggers decompile
+                        'o', f'_{actual_path}'])
+    actual_ttx = generate_ttx_dump(actual_path, ['GPOS'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
 def test_auto_extension_promotion_explicit_reduces():
-    """Test that explicit useExtension reduces the number of auto-promotions."""
+    """Test that explicit useExtension produces correct GPOS."""
     input_filename = 'bug313/font.cff'
-    otf_path_none = get_temp_file_path()
-    otf_path_one = get_temp_file_path()
+    feat_filename = 'bug313/test_dedup_promotion_one_explicit.fea'
+    ttx_filename = 'bug313_test_dedup_promotion_one_explicit.ttx'
+    actual_path = get_temp_file_path()
 
-    # No explicit extensions
     runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
-                        'ff', f'_{get_input_path("bug313/test_dedup_promotion.fea")}',
-                        'o', f'_{otf_path_none}'])
-
-    # One explicit extension
-    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
-                        'ff', f'_{get_input_path("bug313/test_dedup_promotion_one_explicit.fea")}',
-                        'o', f'_{otf_path_one}'])
-
-    from fontTools.ttLib import TTFont
-    f_none = TTFont(otf_path_none)
-    f_one = TTFont(otf_path_one)
-
-    ext_none = sum(1 for lkp in f_none['GPOS'].table.LookupList.Lookup
-                   if lkp.LookupType == 9)
-    ext_one = sum(1 for lkp in f_one['GPOS'].table.LookupList.Lookup
-                  if lkp.LookupType == 9)
-
-    # Both should have extensions, but explicit version needs fewer auto-promotions.
-    # (ext_one includes the 1 explicit + fewer auto, so total may be same or less)
-    assert ext_one >= 1, "Explicit extension should be present"
-    assert ext_none >= 1, "Auto-promotions should have occurred"
+                        'ff', f'_{get_input_path(feat_filename)}',
+                        'o', f'_{actual_path}'])
+    actual_ttx = generate_ttx_dump(actual_path, ['GPOS'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
 
 
 def test_auto_extension_nao_flag():

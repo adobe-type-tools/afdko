@@ -205,7 +205,6 @@ void GPOS::LookupEnd(SubtableInfo *si) {
                            si->lkpType, g->error_id_text.c_str());
     }
 
-    checkOverflow("lookup subtable", subOffset(), "positioning", true);
     startNewPairPosSubtbl = false;
 }
 
@@ -1365,7 +1364,6 @@ void GPOS::ChainContextPos::fill(GPOS &h, SubtableInfo &si) {
     /* xxx Each rule in a fmt3 for now */
     for (auto &rule : si.rules) {
         h.AddSubtable(std::move(std::make_unique<ChainContextPos>(h, si, rule)));
-        h.checkOverflow("lookup subtable", h.subOffset(), "chain contextual positioning", true);
     }
 }
 
@@ -1648,7 +1646,6 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
 
     subtableSize = size;
 
-    h.checkOverflow("lookup subtable", subtableSize, "mark to base positioning");
 }
 
 void GPOS::MarkBasePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
@@ -1793,7 +1790,6 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
 
     subtableSize = size;
 
-    h.checkOverflow("lookup subtable", subtableSize, "mark to ligature positioning");
 }
 
 void GPOS::MarkLigaturePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
@@ -1916,7 +1912,6 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
 
     subtableSize = size;
 
-    h.checkOverflow("cursive attach table", subtableSize, "cursive positioning");
 }
 
 void GPOS::CursivePos::fill(GPOS &h, GPOS::SubtableInfo &si) {

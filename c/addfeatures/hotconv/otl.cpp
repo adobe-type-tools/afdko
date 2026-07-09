@@ -780,11 +780,8 @@ void OTL::checkStandAloneRefs() {
     }
 }
 
-void OTL::checkOverflow(const char* offsetType, long offset, const char* posType,
-                        bool earlyCheck) {
+void OTL::checkOverflow(const char* offsetType, long offset, const char* posType) {
     if (offset > 0xFFFF) {
-        if (earlyCheck && !(g->convertFlags & HOT_NO_AUTO_OVERFLOW))
-            return;  // auto-overflow handling will address this later
         g->logger->log(sFATAL,
                        "In %s %s rules cause an offset overflow (0x%lx) to a %s",
                        g->error_id_text.c_str(), posType, offset, offsetType);
@@ -982,6 +979,16 @@ int OTL::fillOTL(bool force) {
         } else {
             offset.subtable += sub->subtableSize;
         }
+    }
+
+    // With -nao, check for overflow now that offsets are finalized
+    if (g->convertFlags & HOT_NO_AUTO_OVERFLOW) {
+        LOffset inlineTotal = offset.subtable + cac->coverageSize() + cac->classSize();
+        if (inlineTotal > 0xFFFF)
+            g->logger->log(sFATAL,
+                "In %s offset overflow (0x%lx): inline subtable section "
+                "exceeds 64K. Use extension lookups or reduce table size.",
+                objName(), inlineTotal);
     }
 
     prepLookupList();
