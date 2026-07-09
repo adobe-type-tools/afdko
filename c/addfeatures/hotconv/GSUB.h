@@ -251,8 +251,9 @@ class GSUB : public OTL {
         static void fill(GSUB &h, SubtableInfo &si);
         void write(OTL *h) override;
         void setCacOffsets() override {
-            for (auto &o : backtracks) o = cac.getCoverageOffset();
+            // Must match construction order: input, backtracks, lookaheads
             InputCoverage = cac.getCoverageOffset();
+            for (auto &o : backtracks) o = cac.getCoverageOffset();
             for (auto &o : lookaheads) o = cac.getCoverageOffset();
         }
         LOffset InputCoverage;
