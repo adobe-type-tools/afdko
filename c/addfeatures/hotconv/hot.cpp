@@ -658,11 +658,6 @@ static void prepWinData(hotCtx g) {
         }
     }
 
-    /* warn if the override values don't sum correctly. */
-    if ((font->TypoAscender.getDefault() - font->TypoDescender.getDefault()) != font->unitsPerEm) {
-        /* can happen only if overrides are used */
-        g->logger->log(sWARNING, "The feature file OS/2 overrides TypoAscender and TypoDescender do not sum to the font em-square.");
-    }
 
     if (!font->TypoLineGap.isInitialized()) {
         font->TypoLineGap.addValue(IS_ROS(g)

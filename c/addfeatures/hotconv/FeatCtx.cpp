@@ -1218,7 +1218,7 @@ void FeatCtx::startTable(Tag tag) {
 void FeatCtx::setGDEFGlyphClassDef(GPat::ClassRec &simple, GPat::ClassRec &ligature,
                                    GPat::ClassRec &mark, GPat::ClassRec &component) {
     gFlags |= seenGDEFGC;
-    g->ctx.GDEFp->setGlyphClass(simple, ligature, mark, component);
+    g->ctx.GDEFp->setGlyphClass(simple, ligature, mark, component, true);
 }
 
 void FeatCtx::createDefaultGDEFClasses() {
