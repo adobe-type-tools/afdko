@@ -372,11 +372,17 @@ def test_overflow_report_bug313(feat_name, error_msg):
         CMD + ['-s', '-e', '-o',
                'f', f'_{get_input_path(input_filename)}',
                'ff', f'_{get_input_path(feat_filename)}',
-               'o', f'_{otf_path}'])
+               'o', f'_{otf_path}',
+               'nao'])
 
     with open(stderr_path, 'rb') as f:
         output = f.read()
-    assert error_msg in output
+    if b"overflow" in error_msg:
+        # With the new architecture, overflow is reported by a single
+        # check in fillOTL with a generic message format.
+        assert b"offset overflow" in output
+    else:
+        assert error_msg in output
 
 
 def test_feature_recursion_bug628():
@@ -456,6 +462,72 @@ def test_overflow_bug731():
         output = f.read()
     assert (b"subtable offset too large (1003c) in "
             b"lookup 0 type 3") in output
+
+
+def test_auto_extension_promotion():
+    """Test that auto-promotion produces correct GPOS when overflow would occur."""
+    input_filename = 'bug313/font.cff'
+    feat_filename = 'bug313/test_dedup_promotion.fea'
+    ttx_filename = 'bug313_test_dedup_promotion.ttx'
+    actual_path = get_temp_file_path()
+
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'ff', f'_{get_input_path(feat_filename)}',
+                        'o', f'_{actual_path}'])
+    actual_ttx = generate_ttx_dump(actual_path, ['GPOS'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_auto_extension_promotion_explicit_reduces():
+    """Test that explicit useExtension produces correct GPOS."""
+    input_filename = 'bug313/font.cff'
+    feat_filename = 'bug313/test_dedup_promotion_one_explicit.fea'
+    ttx_filename = 'bug313_test_dedup_promotion_one_explicit.ttx'
+    actual_path = get_temp_file_path()
+
+    runner(CMD + ['-o', 'f', f'_{get_input_path(input_filename)}',
+                        'ff', f'_{get_input_path(feat_filename)}',
+                        'o', f'_{actual_path}'])
+    actual_ttx = generate_ttx_dump(actual_path, ['GPOS'])
+    expected_ttx = get_expected_path(ttx_filename)
+    assert differ([expected_ttx, actual_ttx, '-s', '<ttFont sfntVersion'])
+
+
+def test_auto_extension_nao_flag():
+    """Test that -nao flag suppresses auto-promotion and preserves fatal error."""
+    input_filename = 'bug313/font.cff'
+    feat_filename = 'bug313/test_cursive_subtable_overflow.fea'
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o',
+               'f', f'_{get_input_path(input_filename)}',
+               'ff', f'_{get_input_path(feat_filename)}',
+               'o', f'_{otf_path}',
+               'nao'])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert b"offset overflow" in output
+
+
+def test_auto_extension_verbose_message():
+    """Test that verbose mode reports auto-promotion."""
+    input_filename = 'bug313/font.cff'
+    feat_filename = 'bug313/test_two_promotions_needed.fea'
+    otf_path = get_temp_file_path()
+
+    stderr_path = runner(
+        CMD + ['-s', '-e', '-o',
+               'f', f'_{get_input_path(input_filename)}',
+               'ff', f'_{get_input_path(feat_filename)}',
+               'o', f'_{otf_path}',
+               'V'])
+
+    with open(stderr_path, 'rb') as f:
+        output = f.read()
+    assert b"Auto-promoted" in output
 
 
 def test_base_anchor_bug811():

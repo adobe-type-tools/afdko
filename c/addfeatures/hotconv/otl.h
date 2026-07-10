@@ -35,19 +35,17 @@ class CoverageAndClass {
     virtual void coverageAddGlyph(GID gid, bool warn = false);
     virtual void coverageWrite();
     virtual Offset coverageEnd();
-    virtual LOffset coverageSize() { return coverage.size; }
+    virtual LOffset coverageSize() { return sharedCac ? sharedCac->coverageSize() : coverage.size; }
     virtual void classBegin();
     virtual void classAddMapping(GID gid, uint32_t classId);
     virtual void classWrite();
     virtual Offset classEnd();
-    virtual LOffset classSize() { return cls.size; }
+    virtual LOffset classSize() { return sharedCac ? sharedCac->classSize() : cls.size; }
+    void mergeFrom(CoverageAndClass &source);
 #if HOT_DEBUG
     virtual void dump();
 #endif
 
- private:
-    virtual Offset coverageFill();
-    virtual Offset classFill();
     class CoverageRecord {
      public:
         CoverageRecord() = delete;
@@ -95,6 +93,26 @@ class CoverageAndClass {
         };
         std::vector<ClassRangeRecord> ranges;
     };
+
+    std::vector<CoverageRecord> &getCoverageRecords() { return coverage.records; }
+    std::vector<ClassRecord> &getClassRecords() { return cls.records; }
+
+    // Replay API: after building a shared cac, set sharedCac on each private
+    // cac. Then getCoverageOffset()/getClassOffset() resolve through it.
+    void setSharedCac(CoverageAndClass *shared) { sharedCac = shared; }
+    void resetReplay() { covReplayIt = coverageCallSeq.cbegin(); clsReplayIt = classCallSeq.cbegin(); }
+    Offset getCoverageOffset();
+    Offset getClassOffset();
+
+ private:
+    virtual Offset coverageFill();
+    virtual Offset classFill();
+
+    CoverageAndClass *sharedCac {nullptr};
+    std::vector<uint16_t> coverageCallSeq;  // record index per coverageEnd() call
+    std::vector<uint16_t> classCallSeq;     // record index per classEnd() call
+    std::vector<uint16_t>::const_iterator covReplayIt;
+    std::vector<uint16_t>::const_iterator clsReplayIt;
 
  protected:
     struct {
@@ -194,6 +212,12 @@ class OTL {
         static bool ltOffset(const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
             return a->offset < b->offset;
         }
+        static bool ltCreationOrder(const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
+            return a->creationIndex < b->creationIndex;
+        }
+        static bool ltSizeDesc(const std::unique_ptr<Subtable> &a, const std::unique_ptr<Subtable> &b) {
+            return a->subtableSize > b->subtableSize;
+        }
         bool isStandAlone() const { return feature == TAG_STAND_ALONE; }
         bool isAnon() const { return script == TAG_UNDEF; }
         bool isRef() const { return IS_REF_LAB(label); }
@@ -205,6 +229,7 @@ class OTL {
         virtual std::vector<LookupRecord> *getLookups() { return nullptr; }
         virtual void writeExt(OTL *h, uint32_t extSec) { extension.write(h->g, lkpType, extSec - offset); }
         virtual void write(OTL *h) = 0;
+        virtual void setCacOffsets() {}  // Override to set Coverage/ClassDef from cac replay
 #if HOT_DEBUG
         virtual void dump(typename std::vector<std::unique_ptr<Subtable>>::iterator sb,
                           uint32_t extLkpType);
@@ -217,12 +242,14 @@ class OTL {
         uint16_t lkpFlag {0};
         uint16_t markSetIndex {0};
         Offset offset {0};
+        LOffset subtableSize {0};
+        uint32_t creationIndex {0};
         Label label {0};
         bool seenInFeature {false};
         bool isFeatParam {false};
         ExtensionFormat1 extension;
         std::string id_text;
-        std::shared_ptr<CoverageAndClass> cac;
+        CoverageAndClass cac;
         struct {
             int16_t feature {-1};
             int16_t lookup {-1};
@@ -333,10 +360,7 @@ class OTL {
     };
 
  public:
-    virtual LOffset extOffset() { return offset.extension; }
     virtual LOffset subOffset() { return offset.subtable; }
-    virtual void incExtOffset(LOffset o) { offset.extension += o; }
-    virtual void incSubOffset(LOffset o) { offset.subtable += o; }
     virtual void incFeatParamOffset(LOffset o) { offset.featParam += o; }
     virtual void checkOverflow(const char* offsetType, long offset,
                                const char* posType);
@@ -355,6 +379,8 @@ class OTL {
     virtual void writeOTL();
     virtual void AddSubtable(typename std::unique_ptr<Subtable> s);
     virtual void updateMaxContext(uint16_t m) { maxContext = MAX(m, maxContext); }
+    void autoPromoteExtensions();
+    std::shared_ptr<CoverageAndClass> buildMergedCac();
 #if HOT_DEBUG
     void dumpSizes(LOffset subtableSize, LOffset extensionSectionSize);
 #endif
@@ -362,8 +388,8 @@ class OTL {
     virtual void createAnonLookups() = 0;
 
     static void setCoverages(std::vector<LOffset> &covs,
-                             std::shared_ptr<CoverageAndClass> &cac,
-                             std::vector<GPat::ClassRec*> classes, LOffset o);
+                             CoverageAndClass &cac,
+                             std::vector<GPat::ClassRec*> classes);
 
  private:
     static void valDump(int16_t val, int16_t excep, bool isRef);
