@@ -8,7 +8,6 @@ for the unified 'afdko' command.
 import sys
 from typing import NoReturn
 
-
 # Complete command registry with abbreviations
 # Format: name -> (module:function, description, category)
 # Categories: 'primary', 'secondary', 'plot'
@@ -230,11 +229,12 @@ def main() -> NoReturn:
         sys.exit(0)
 
     # Help requested
-    if subcmd in ('-h', '--help', 'help'):
-        # Check for command name after -h
+    if subcmd in ('-h', '--help', 'help', '-u'):
+        # Check for command name after -h/-u
         if len(sys.argv) > 2:
             arg = sys.argv[2]
             # afdko -h <command> -> afdko <command> -h
+            # afdko -u <command> -> afdko <command> -h
             # Check if it's a valid command
             if arg in ALL_COMMANDS:
                 sys.argv = ['afdko', arg, '-h']

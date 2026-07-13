@@ -10,7 +10,6 @@ These tests verify:
 
 import pytest
 import subprocess
-import sys
 
 
 class TestHelpSystem:
