@@ -189,7 +189,7 @@ def process_goadb(goadb_path):
     contain entries for glyph names that change from design to production.
     The sctructure of each line of a GOADB file is:
     production_name<tab>design_name<tab>unicode_overrides
-    Blank lines and comment lines are alowed in a GOADB file.
+    Blank lines and comment lines are allowed in a GOADB file.
     """
     gnames_mapping = {}
     dsgn_names_seen = set()
