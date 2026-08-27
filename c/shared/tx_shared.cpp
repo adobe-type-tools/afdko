@@ -7019,7 +7019,7 @@ wrongmode:
 noarg:
     fatal(h, "no argument for option (%s)", arg);
 nogoadb:
-    fatal(h, "option (%s) requires -gf", arg);
+    fatal(h, "option (%s) requires -gf or -r", arg);
 badgoadb:
     fatal(h, "GlyphOrderAndAliasDB file %s has unrecoverable errors", h->file.goadbname);
 badarg:
