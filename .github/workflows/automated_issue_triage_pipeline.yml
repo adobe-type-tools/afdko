@@ -1,0 +1,47 @@
+name: Automated issue triage pipeline
+
+# Requires two repository secrets: SLACK_WEBHOOK_URL and SLACK_TRIAGE_MESSAGE.
+# In SLACK_TRIAGE_MESSAGE, the literal token __ISSUE_URL__ is replaced with the
+# new issue's URL at run time.
+
+on:
+  issues:
+    types: [opened]
+
+# This job only calls out to Slack; it needs no access to the repo.
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+
+    - name: Post new issue to Slack
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        # Values below are passed through the environment (never interpolated
+        # into the shell) so an attacker-controlled issue cannot inject script.
+        MESSAGE_TEMPLATE: ${{ secrets.SLACK_TRIAGE_MESSAGE }}
+        ISSUE_URL: ${{ github.event.issue.html_url }}
+      run: |
+        set -euo pipefail
+
+        if [ -z "${SLACK_WEBHOOK_URL}" ]; then
+          echo "SLACK_WEBHOOK_URL is not configured; skipping Slack notification." >&2
+          exit 0
+        fi
+
+        # Fall back to a minimal, non-sensitive message if the secret template
+        # is unset, so we are still notified of the new issue.
+        template="${MESSAGE_TEMPLATE:-New AFDKO issue: __ISSUE_URL__}"
+        message="${template//__ISSUE_URL__/${ISSUE_URL}}"
+
+        # Build the JSON with jq so the text is correctly escaped.
+        payload="$(jq -n --arg text "${message}" '{text: $text}')"
+
+        curl --silent --show-error --fail \
+          --request POST \
+          --header 'Content-Type: application/json' \
+          --data "${payload}" \
+          "${SLACK_WEBHOOK_URL}"
