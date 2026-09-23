@@ -2527,9 +2527,11 @@ int mapFill(hotCtx g) {
 
     setOS_2Fields(g);
     if (IS_ROS(g)) {
-        makeCIDMaccmap(g); /* will make a Mac cmap with only a not def, if Macintosh Adobe CMap is not provided.*/
-        if (h->cid.mac.name == SINX_UNDEF) {
-            g->logger->log(sWARNING, "Macintosh Adobe CMap not seen");
+        if (h->cid.mac.name != SINX_UNDEF) {
+            makeCIDMaccmap(g);
+        } else {
+            g->logger->log(sWARNING, "Macintosh Adobe CMap not seen; "
+                           "omitting Mac cmap subtable");
         }
 
         if (h->uvs.entries.cnt == 0) {

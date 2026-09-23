@@ -270,11 +270,13 @@ static void parseArgs(int argc, char *argv[], int inScript) {
                                 convert.macScript = atoi(argv[++i]);
                                 break;
 
-                            case 'l': /* [-cl] Mac Adobe CMap script id */
+                            case 'l': /* [-cl] Mac Adobe CMap language id */
                                 if (arg[3] != '\0' || argsleft == 0) {
                                     showUsage();
                                 }
                                 convert.macLanguage = atoi(argv[++i]);
+                                if (convert.macLanguage >= 0)
+                                    convert.macLanguage++;
                                 break;
 
                             default:
