@@ -30,7 +30,7 @@ class GlyphReport:
         self.hstems_pos.clear()
         self.vstems_pos.clear()
         self.char_zones.clear()
-        self.stem_zones_stems.clear()
+        self.stem_zone_stems.clear()
 
     def charZone(self, l, u):
         self.char_zones.add((l, u))
