@@ -1,0 +1,68 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature curs {
+	# Same as test_dedup_promotion.fea but unique_small is explicitly extension.
+	# This should reduce auto-promotions by one.
+	lookup unique_large {
+		include (cursive_range_c.fea);
+	} unique_large;
+	lookup unique_medium {
+		include (cursive_range_b.fea);
+	} unique_medium;
+	lookup unique_small useExtension {
+		include (cursive_range_a.fea);
+	} unique_small;
+
+	lookup shared1 {
+		include (cursive_list.fea);
+	} shared1;
+	lookup shared2 {
+		include (cursive_list.fea);
+	} shared2;
+
+	lookup filler0 {
+		include (cursive_list.fea);
+	} filler0;
+	lookup filler1 {
+		include (cursive_list.fea);
+	} filler1;
+	lookup filler2 {
+		include (cursive_list.fea);
+	} filler2;
+	lookup filler3 {
+		include (cursive_list.fea);
+	} filler3;
+	lookup filler4 {
+		include (cursive_list.fea);
+	} filler4;
+	lookup filler5 {
+		include (cursive_list.fea);
+	} filler5;
+	lookup filler6 {
+		include (cursive_list.fea);
+	} filler6;
+	lookup filler7 {
+		include (cursive_list.fea);
+	} filler7;
+	lookup filler8 {
+		include (cursive_list.fea);
+	} filler8;
+	lookup filler9 {
+		include (cursive_list.fea);
+	} filler9;
+	lookup filler10 {
+		include (cursive_list.fea);
+	} filler10;
+	lookup filler11 {
+		include (cursive_list.fea);
+	} filler11;
+	lookup filler12 {
+		include (cursive_list.fea);
+	} filler12;
+	lookup filler13 {
+		include (cursive_list.fea);
+	} filler13;
+} curs;

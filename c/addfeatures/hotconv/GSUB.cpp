@@ -169,7 +169,6 @@ void GSUB::LookupEnd(SubtableInfo *si) {
             g->logger->log(sFATAL, "unknown GSUB lkpType <%d> in %s.", si->lkpType, g->error_id_text.c_str());
     }
 
-    checkOverflow("lookup subtable", subOffset(), "substitution");
     // XXX recycle rules
     /* This prevents the rules from being re-used unintentionally in the  */
     /* case where an empty GSUB feature is called for; because it is      */
@@ -374,40 +373,30 @@ void GSUB::AddCVParam(CVParameterFormat &&params) {
 
 GSUB::SingleSubst::SingleSubst(GSUB &h, SubtableInfo &si) : Subtable(h, si) {}
 
-Offset GSUB::SingleSubst::fillSingleCoverage(SubtableInfo &si) {
-    cac->coverageBegin();
+void GSUB::SingleSubst::fillSingleCoverage(SubtableInfo &si) {
+    cac.coverageBegin();
     for (auto [t, _] : si.singles) {
-        cac->coverageAddGlyph(t);
+        cac.coverageAddGlyph(t);
     }
-    return cac->coverageEnd();
+    cac.coverageEnd();
 }
 
 GSUB::SingleSubst::Format1::Format1(GSUB &h, SubtableInfo &si, int delta) : SingleSubst(h, si) {
     LOffset sz = size();
-    Coverage = fillSingleCoverage(si); /* Adjusted later */
+    fillSingleCoverage(si);
     DeltaGlyphID = delta;
 
-    if (isExt()) {
-        Coverage += sz; /* Final value */
-        h.incExtOffset(sz + cac->coverageSize());
-    } else {
-        h.incSubOffset(sz);
-    }
+    subtableSize = sz;
 }
 
 GSUB::SingleSubst::Format2::Format2(GSUB &h, SubtableInfo &si) : SingleSubst(h, si) {
     LOffset sz = size(si.singles.size());
 
-    Coverage = fillSingleCoverage(si); /* Adjusted later */
+    fillSingleCoverage(si);
     for (auto [_, r] : si.singles)
         gids.push_back(r);
 
-    if (isExt()) {
-        Coverage += sz; /* Final value */
-        h.incExtOffset(sz + cac->coverageSize());
-    } else {
-        h.incSubOffset(sz);
-    }
+    subtableSize = sz;
 }
 
 void GSUB::SingleSubst::fill(GSUB &h, SubtableInfo &si) {
@@ -442,8 +431,8 @@ void GSUB::SingleSubst::fill(GSUB &h, SubtableInfo &si) {
 }
 
 void GSUB::SingleSubst::Format1::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "single substitution");
 
@@ -452,12 +441,12 @@ void GSUB::SingleSubst::Format1::write(OTL *h) {
     OUT2(DeltaGlyphID);
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 void GSUB::SingleSubst::Format2::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "single substitution");
 
@@ -468,7 +457,7 @@ void GSUB::SingleSubst::Format2::write(OTL *h) {
         OUT2((GID)gid);
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* ------------------------- Multiple Substitution ------------------------- */
@@ -487,13 +476,13 @@ GSUB::MultipleSubst::MultipleSubst(GSUB &h, SubtableInfo &si, int64_t beg,
     int nSequences = end - beg + 1;
 
     LOffset offst = headerSize(nSequences);
-    cac->coverageBegin();
+    cac.coverageBegin();
     for (int i = 0; i < nSequences; i++) {
         auto &rule = si.rules[i + beg];
         MultSequence seq;
 
         assert(rule.targ->is_glyph());
-        cac->coverageAddGlyph(rule.targ->classes[0].glyphs[0].gid);
+        cac.coverageAddGlyph(rule.targ->classes[0].glyphs[0].gid);
 
         if (rule.repl != nullptr) {
             for (auto &cr : rule.repl->classes) {
@@ -520,13 +509,8 @@ GSUB::MultipleSubst::MultipleSubst(GSUB &h, SubtableInfo &si, int64_t beg,
 #endif
 #endif /* HOT_DEBUG */
 
-    Coverage = cac->coverageEnd(); /* Adjusted later */
-    if (isExt()) {
-        Coverage += offst; /* Final value */
-        h.incExtOffset(offst + cac->coverageSize());
-    } else {
-        h.incSubOffset(offst);
-    }
+    cac.coverageEnd();
+    subtableSize = offst;
     h.updateMaxContext(1);
 }
 
@@ -574,8 +558,8 @@ void GSUB::MultipleSubst::fill(GSUB &h, SubtableInfo &si) {
 }
 
 void GSUB::MultipleSubst::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "multiple substitution");
 
@@ -592,7 +576,7 @@ void GSUB::MultipleSubst::write(OTL *h) {
     }
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* ------------------------- Alternate Substitution ------------------------ */
@@ -616,13 +600,13 @@ GSUB::AlternateSubst::AlternateSubst(GSUB &h, SubtableInfo &si,
     uint32_t nAltSets = end - beg + 1;
 
     LOffset offst = headerSize(nAltSets);
-    cac->coverageBegin();
+    cac.coverageBegin();
     for (uint32_t i = 0; i < nAltSets; i++) {
         auto &rule = si.rules[i + beg];
         AlternateSet altSet;
 
         assert(rule.targ->is_glyph());
-        cac->coverageAddGlyph(rule.targ->classes[0].glyphs[0].gid);
+        cac.coverageAddGlyph(rule.targ->classes[0].glyphs[0].gid);
 
         /* --- Fill an AlternateSet --- */
         for (GID gid : rule.repl->classes[0].glyphs)
@@ -646,13 +630,8 @@ GSUB::AlternateSubst::AlternateSubst(GSUB &h, SubtableInfo &si,
 #endif
 #endif /* HOT_DEBUG */
 
-    Coverage = cac->coverageEnd(); /* Adjusted later */
-    if (isExt()) {
-        Coverage += offst; /* Final value */
-        h.incExtOffset(offst + cac->coverageSize());
-    } else {
-        h.incSubOffset(offst);
-    }
+    cac.coverageEnd();
+    subtableSize = offst;
     h.updateMaxContext(1);
 }
 
@@ -705,8 +684,8 @@ void GSUB::AlternateSubst::fill(GSUB &h, SubtableInfo &si) {
 }
 
 void GSUB::AlternateSubst::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "alternate substitution");
     OUT2(subformat());
@@ -722,7 +701,7 @@ void GSUB::AlternateSubst::write(OTL *h) {
     }
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* ------------------------- Ligature Substitution ------------------------- */
@@ -730,7 +709,7 @@ void GSUB::AlternateSubst::write(OTL *h) {
 GSUB::LigatureSubst::LigatureSubst(GSUB &h, SubtableInfo &si) : Subtable(h, si) {
     LigatureSet ligSet;
     int32_t lastgid = -1;
-    cac->coverageBegin();
+    cac.coverageBegin();
     // Add coverage and populate ligatureSets (without offsets)
     for (auto [l, rg] : si.ligatures) {
         GID gid = l.gids[0];
@@ -739,7 +718,7 @@ GSUB::LigatureSubst::LigatureSubst(GSUB &h, SubtableInfo &si) : Subtable(h, si) 
                 ligatureSets.emplace_back(std::move(ligSet));
                 ligSet.reset();
             }
-            cac->coverageAddGlyph(gid);
+            cac.coverageAddGlyph(gid);
             lastgid = gid;
         }
         LigatureGlyph lg {rg};
@@ -761,14 +740,8 @@ GSUB::LigatureSubst::LigatureSubst(GSUB &h, SubtableInfo &si) : Subtable(h, si) 
         offst += offLig;
     }
 
-    h.checkOverflow("lookup subtable", offst, "ligature substitution");
-    Coverage = cac->coverageEnd(); /* Adjusted later */
-    if (isExt()) {
-        Coverage += offst; /* Final value */
-        h.incExtOffset(offst + cac->coverageSize());
-    } else {
-        h.incSubOffset(offst);
-    }
+    cac.coverageEnd();
+    subtableSize = offst;
 }
 
 void GSUB::LigatureSubst::fill(GSUB &h, SubtableInfo &si) {
@@ -776,8 +749,8 @@ void GSUB::LigatureSubst::fill(GSUB &h, SubtableInfo &si) {
 }
 
 void GSUB::LigatureSubst::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "ligature substitution");
     OUT2(subformat());
@@ -799,7 +772,7 @@ void GSUB::LigatureSubst::write(OTL *h) {
     }
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* ------------------ Chaining Contextual Substitution --------------------- */
@@ -979,11 +952,10 @@ GSUB::ChainSubst::ChainSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subta
     }
 
     LOffset sz = chain3size(backs.size(), inputs.size(), looks.size(), nSubst);
-    LOffset o = isExt() ? sz : 0;
 
-    h.setCoverages(backtracks, cac, backs, o);
-    h.setCoverages(inputGlyphs, cac, inputs, o);
-    h.setCoverages(lookaheads, cac, looks, o);
+    h.setCoverages(backtracks, cac, backs);
+    h.setCoverages(inputGlyphs, cac, inputs);
+    h.setCoverages(lookaheads, cac, looks);
 
     if (nSubst > 0) {
         if (rule.repl != NULL) {
@@ -1002,23 +974,17 @@ GSUB::ChainSubst::ChainSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subta
 
     h.updateMaxContext(inputs.size() + looks.size());
 
-    if (isExt())
-        h.incExtOffset(sz + cac->coverageSize());
-    else
-        h.incSubOffset(sz);
+    subtableSize = sz;
 }
 
 void GSUB::ChainSubst::fill(GSUB &h, SubtableInfo &si) {
     for (auto &rule : si.rules) {
         h.AddSubtable(std::move(std::make_unique<ChainSubst>(h, si, rule)));
-        h.checkOverflow("lookup subtable", h.subOffset(), "chain contextual substitution");
     }
 }
 
 void GSUB::ChainSubst::write(OTL *h) {
-    LOffset adjustment = 0; /* (Linux compiler complains) */
-    if (!isExt())
-        adjustment = h->subOffset() - offset;
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     OUT2(subformat());
 
@@ -1026,24 +992,21 @@ void GSUB::ChainSubst::write(OTL *h) {
 
     /* do it per OpenType spec 1.5 */
     for (auto ri = backtracks.rbegin(); ri != backtracks.rend(); ri++) {
-        if (!isExt())
-            *ri += adjustment;
+        *ri += adjustment;
         h->checkOverflow("backtrack coverage table", *ri, "chain contextual substitution");
         OUT2((uint16_t)*ri);
     }
 
     OUT2((uint16_t)inputGlyphs.size());
     for (auto &ig : inputGlyphs) {
-        if (!isExt())
-            ig += adjustment;
+        ig += adjustment;
         h->checkOverflow("input coverage table", ig, "chain contextual substitution");
         OUT2((uint16_t)ig);
     }
 
     OUT2((uint16_t)lookaheads.size());
     for (auto &la : lookaheads) {
-        if (!isExt())
-            la += adjustment;
+        la += adjustment;
         h->checkOverflow("lookahead coverage table", la, "chain contextual substitution");
         OUT2((uint16_t)la);
     }
@@ -1055,7 +1018,7 @@ void GSUB::ChainSubst::write(OTL *h) {
     }
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 GSUB::ReverseSubst::ReverseSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : Subtable(h, si) {
@@ -1086,62 +1049,51 @@ GSUB::ReverseSubst::ReverseSubst(GSUB &h, SubtableInfo &si, SubstRule &rule) : S
         std::sort(subs.begin(), subs.end());
     }
 
-    cac->coverageBegin();
+    cac.coverageBegin();
     for (auto [tg, _] : subs)
-        cac->coverageAddGlyph(tg);
+        cac.coverageAddGlyph(tg);
 
-    InputCoverage = cac->coverageEnd(); /* Adjusted later */
+    cac.coverageEnd();
 
     LOffset sz = rchain1size(backs.size(), looks.size(), subs.size());
-    LOffset o = isExt() ? sz : 0;
 
-    h.setCoverages(backtracks, cac, backs, o);
-    h.setCoverages(lookaheads, cac, looks, o);
+    h.setCoverages(backtracks, cac, backs);
+    h.setCoverages(lookaheads, cac, looks);
 
     for (auto [_, rg] : subs)
         substitutes.push_back(rg);
 
     h.updateMaxContext(inputs.size() + looks.size());
 
-    if (isExt())
-        h.incExtOffset(sz + cac->coverageSize());
-    else
-        h.incSubOffset(sz);
+    subtableSize = sz;
 }
 
 void GSUB::ReverseSubst::fill(GSUB &h, SubtableInfo &si) {
     for (auto &rule : si.rules) {
         h.AddSubtable(std::move(std::make_unique<ReverseSubst>(h, si, rule)));
-        h.checkOverflow("lookup subtable", h.subOffset(), "reverse chain contextual substitution");
     }
 }
 
 void GSUB::ReverseSubst::write(OTL *h) {
-    LOffset adjustment = 0; /* (Linux compiler complains) */
-
-    if (!isExt())
-        adjustment = h->subOffset() - offset;
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     OUT2(subformat());
 
-    if (!isExt())
-        InputCoverage += adjustment;
+    InputCoverage += adjustment;
 
     OUT2((uint16_t)InputCoverage);
     OUT2((uint16_t)backtracks.size());
 
     /* do it per OpenType spec 1.5 */
     for (auto ri = backtracks.rbegin(); ri != backtracks.rend(); ri++) {
-        if (!isExt())
-            *ri += adjustment;
+        *ri += adjustment;
         h->checkOverflow("backtrack coverage table", *ri, "reverse chain contextual substitution");
         OUT2((uint16_t)*ri);
     }
 
     OUT2((uint16_t)lookaheads.size());
     for (auto &la : lookaheads) {
-        if (!isExt())
-            la += adjustment;
+        la += adjustment;
         h->checkOverflow("lookahead coverage table", la, "reverse chain contextual substitution");
         OUT2((uint16_t)la);
     }
@@ -1151,5 +1103,5 @@ void GSUB::ReverseSubst::write(OTL *h) {
         OUT2(gid);
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }

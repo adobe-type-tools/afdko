@@ -397,6 +397,7 @@ kAddStubDSIG = "AddStubDSIG"
 kShowFinalNames = "ShowFinalNames"
 kVerboseWarnings = "VerboseWarnings"
 kMVAR = "MVAR"
+kNoAutoOverflow = "NoAutoOverflow"
 kOptionNotSeen = 99
 
 kMOTFOptions = {
@@ -437,6 +438,7 @@ kMOTFOptions = {
     kSuppressWidthOptimization: [kOptionNotSeen, "-swo", "-nswo"],
     kStubCmap4: [kOptionNotSeen, "-stubCmap4", None],
     kSuppressKernOptimization: [kOptionNotSeen, "-skco", "-nsko"],
+    kNoAutoOverflow: [kOptionNotSeen, "-nao", None],
     kAddStubDSIG: [kOptionNotSeen, "-addDSIG", "-omitDSIG"],
     kShowFinalNames: [kOptionNotSeen, "-showFinal", None],
     kVerboseWarnings: [kOptionNotSeen, "-V", "-nV"],
@@ -1395,6 +1397,11 @@ def getOptions(makeOTFParams, args):
             setattr(makeOTFParams,
                     kFileOptPrefix + kSuppressKernOptimization,
                     None)
+
+        elif arg == kMOTFOptions[kNoAutoOverflow][1]:
+            kMOTFOptions[kNoAutoOverflow][0] = i + optionIndex
+            setattr(makeOTFParams,
+                    kFileOptPrefix + kNoAutoOverflow, 'true')
 
         elif arg == kMOTFOptions[kMVAR][1]:
             kMOTFOptions[kMVAR][0] = i + optionIndex

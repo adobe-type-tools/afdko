@@ -700,6 +700,9 @@ void cbConvert(cbCtx h, int flags, const char *clientVers, const char *infile,
     if (otherflags & OTHERFLAGS_DO_NOT_OPTIMIZE_KERN) {
         hotConvertFlags |= HOT_DO_NOT_OPTIMIZE_KERN;
     }
+    if (otherflags & OTHERFLAGS_NO_AUTO_OVERFLOW) {
+        hotConvertFlags |= HOT_NO_AUTO_OVERFLOW;
+    }
     if (otherflags & OTHERFLAGS_ADD_STUB_DSIG) {
         hotConvertFlags |= HOT_ADD_STUB_DSIG;
     }

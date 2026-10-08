@@ -1,0 +1,88 @@
+languagesystem DFLT dflt;
+table head {
+FontRevision 1.011;
+} head;
+
+feature curs {
+	# Three target lookups with UNIQUE coverages (different glyph ranges).
+	# These have slightly different sizes: C > B > A.
+	# Promoting any of these removes a unique record from the merged cac.
+	lookup unique_large {
+		include (cursive_range_c.fea);
+	} unique_large;
+	lookup unique_medium {
+		include (cursive_range_b.fea);
+	} unique_medium;
+	lookup unique_small {
+		include (cursive_range_a.fea);
+	} unique_small;
+
+	# Two lookups with SHARED coverage (same glyph set as cursive_list.fea).
+	# Dedup means only one coverage record in the merged cac.
+	# Promoting one doesn't free the shared record (the other still uses it).
+	lookup shared1 {
+		include (cursive_list.fea);
+	} shared1;
+	lookup shared2 {
+		include (cursive_list.fea);
+	} shared2;
+
+	# Filler lookups to push total past 64K
+	lookup filler0 {
+		include (cursive_list.fea);
+	} filler0;
+	lookup filler1 {
+		include (cursive_list.fea);
+	} filler1;
+	lookup filler2 {
+		include (cursive_list.fea);
+	} filler2;
+	lookup filler3 {
+		include (cursive_list.fea);
+	} filler3;
+	lookup filler4 {
+		include (cursive_list.fea);
+	} filler4;
+	lookup filler5 {
+		include (cursive_list.fea);
+	} filler5;
+	lookup filler6 {
+		include (cursive_list.fea);
+	} filler6;
+	lookup filler7 {
+		include (cursive_list.fea);
+	} filler7;
+	lookup filler8 {
+		include (cursive_list.fea);
+	} filler8;
+	lookup filler9 {
+		include (cursive_list.fea);
+	} filler9;
+	lookup filler10 {
+		include (cursive_list.fea);
+	} filler10;
+	lookup filler11 {
+		include (cursive_list.fea);
+	} filler11;
+	lookup filler12 {
+		include (cursive_list.fea);
+	} filler12;
+	lookup filler13 {
+		include (cursive_list.fea);
+	} filler13;
+	lookup filler14 {
+		include (cursive_list.fea);
+	} filler14;
+	lookup filler15 {
+		include (cursive_list.fea);
+	} filler15;
+	lookup filler16 {
+		include (cursive_list.fea);
+	} filler16;
+	lookup filler17 {
+		include (cursive_list.fea);
+	} filler17;
+	lookup filler18 {
+		include (cursive_list.fea);
+	} filler18;
+} curs;

@@ -205,7 +205,6 @@ void GPOS::LookupEnd(SubtableInfo *si) {
                            si->lkpType, g->error_id_text.c_str());
     }
 
-    checkOverflow("lookup subtable", subOffset(), "positioning");
     startNewPairPosSubtbl = false;
 }
 
@@ -493,22 +492,17 @@ GPOS::SinglePos::Format1::Format1(GPOS &h, GPOS::SubtableInfo &si,
     LOffset sz = single1DevOffset(s.valFmt);
 
 
-    cac->coverageBegin();
+    cac.coverageBegin();
 
     for (int i = iStart; i < iEnd; i++)
-        cac->coverageAddGlyph(si.singles[i].gid);
+        cac.coverageAddGlyph(si.singles[i].gid);
 
     valueIndex = h.nextValueIndex();
     sz = h.recordValues(ValueFormat, s.metricsInfo, sz);
 
-    Coverage = cac->coverageEnd(); /* Adjusted later */
+    cac.coverageEnd();
 
-    if (isExt()) {
-        Coverage += sz; /* Final value */
-        h.incExtOffset(sz + cac->coverageSize());
-    } else {
-        h.incSubOffset(sz);
-    }
+    subtableSize = sz;
 }
 
 GPOS::SinglePos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si,
@@ -519,23 +513,18 @@ GPOS::SinglePos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si,
 
     /* Sort subrange by GID */
     std::sort(si.singles.begin() + iStart, si.singles.begin() + iEnd, SingleRec::cmpGID);
-    cac->coverageBegin();
+    cac.coverageBegin();
 
     valueIndex = h.nextValueIndex();
 
     for (int i = iStart; i < iEnd; i++) {
         auto &s = si.singles[i];
-        cac->coverageAddGlyph(s.gid);
+        cac.coverageAddGlyph(s.gid);
         sz = h.recordValues(s.valFmt, s.metricsInfo, sz);
     }
 
-    Coverage = cac->coverageEnd(); /* Adjusted later */
-    if (useExtension) {
-        Coverage += sz; /* Final value */
-        h.incExtOffset(sz + cac->coverageSize());
-    } else {
-        h.incSubOffset(sz);
-    }
+    cac.coverageEnd();
+    subtableSize = sz;
 }
 
 void GPOS::SinglePos::Format1::fill(GPOS &h, GPOS::SubtableInfo &si) {
@@ -603,8 +592,8 @@ void GPOS::SinglePos::fill(GPOS &h, SubtableInfo &si) {
 }
 
 void GPOS::SinglePos::Format1::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "single positioning");
 
@@ -615,12 +604,12 @@ void GPOS::SinglePos::Format1::write(OTL *h) {
     h->writeVarSubtables(ValueFormat, valueIndex);
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 void GPOS::SinglePos::Format2::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset; /* Adjust offset */
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "single positioning");
 
@@ -642,7 +631,7 @@ void GPOS::SinglePos::Format2::write(OTL *h) {
     }
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* ---------------------------- Pair Adjustment ---------------------------- */
@@ -1024,10 +1013,10 @@ GPOS::PairPos::Format1::Format1(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
     // Map pair sets and build coverage table
     auto previ = si.pairs.begin();
     std::vector<decltype(previ)> pairSetEnds;
-    cac->coverageBegin();
+    cac.coverageBegin();
     for (auto i = previ + 1; i <= si.pairs.end(); i++) {
         if (i == si.pairs.end() || i->first != previ->first) {
-            cac->coverageAddGlyph(previ->first);
+            cac.coverageAddGlyph(previ->first);
             pairSetEnds.emplace_back(i);
             previ = i;
         }
@@ -1056,42 +1045,34 @@ GPOS::PairPos::Format1::Format1(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
         i = e;
     }
 
-    Coverage = cac->coverageEnd(); /* Adjusted later */
-    if (isExt()) {
-        Coverage += offst; /* Final value */
-        h.incExtOffset(offst + cac->coverageSize());
-    } else {
-        h.incSubOffset(offst);
-    }
+    cac.coverageEnd();
+    subtableSize = offst;
 }
 
-Offset GPOS::classDefMake(std::shared_ptr<CoverageAndClass> &cac,
-                          int cdefInx, LOffset *coverage, uint16_t &count) {
+void GPOS::classDefMake(CoverageAndClass &cac,
+                        int cdefInx, bool makeCoverage, uint16_t &count) {
     ClassDef &cdef = classDef[cdefInx];
 
-    /* --- Create coverage, if needed --- */
-    if (coverage != NULL) {
-        cac->coverageBegin();
+    if (makeCoverage) {
+        cac.coverageBegin();
         for (GID gid : cdef.cov)
-            cac->coverageAddGlyph(gid);
-
-        *coverage = cac->coverageEnd(); /* Adjusted later */
+            cac.coverageAddGlyph(gid);
+        cac.coverageEnd();
     }
 
-    /* --- Create classdef --- */
     /* Classes start numbering from 0 for ClassDef1, 1 for ClassDef2 */
     if (g->convertFlags & HOT_DO_NOT_OPTIMIZE_KERN)
         count = (uint16_t)cdef.classInfo.size() + 1;
     else
         count = (uint16_t)((cdefInx == 0) ? cdef.classInfo.size() : cdef.classInfo.size() + 1);
-    cac->classBegin();
+    cac.classBegin();
     for (auto &ci : cdef.classInfo) {
         if (ci.second.cls != 0) {
             for (GID gid : ci.second.cr.glyphs)
-                cac->classAddMapping(gid, ci.second.cls);
+                cac.classAddMapping(gid, ci.second.cls);
         }
     }
-    return cac->classEnd();
+    cac.classEnd();
 }
 
 GPOS::PairPos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si) {
@@ -1099,8 +1080,8 @@ GPOS::PairPos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
 
     uint16_t class1Count, class2Count;
     /* (ClassDef offsets adjusted later) */
-    ClassDef1 = h.classDefMake(cac, 0, &Coverage, class1Count);
-    ClassDef2 = h.classDefMake(cac, 1, NULL, class2Count);
+    h.classDefMake(cac, 0, true, class1Count);
+    h.classDefMake(cac, 1, false, class2Count);
 
     ValueFormat1 = si.pairValFmt1;
     ValueFormat2 = si.pairValFmt2;
@@ -1135,14 +1116,7 @@ GPOS::PairPos::Format2::Format2(GPOS &h, GPOS::SubtableInfo &si) : PairPos(h, si
            offst));
 #endif
 
-    if (isExt()) {
-        Coverage += offst;                         // Final value
-        ClassDef1 += offst + cac->coverageSize();  // Final value
-        ClassDef2 += offst + cac->coverageSize();  // Final value
-        h.incExtOffset(offst + cac->coverageSize() + cac->classSize());
-    } else {
-        h.incSubOffset(offst);
-    }
+    subtableSize = offst;
 }
 
 void GPOS::PairPos::fill(GPOS &h, SubtableInfo &si) {
@@ -1158,8 +1132,8 @@ void GPOS::PairPos::fill(GPOS &h, SubtableInfo &si) {
 }
 
 void GPOS::PairPos::Format1::write(OTL *h) {
-    if (!isExt())
-        Coverage += h->subOffset() - offset;  // Adjust offset
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
 
     h->checkOverflow("coverage table", Coverage, "pair positioning");
 
@@ -1197,18 +1171,15 @@ void GPOS::PairPos::Format1::write(OTL *h) {
     }
 
     if (isExt()) {
-        cac->coverageWrite();
+        cac.coverageWrite();
     }
 }
 
 void GPOS::PairPos::Format2::write(OTL *h) {
-    if (!isExt()) {
-        /* Adjust coverage and class offsets */
-        LOffset adjust = h->subOffset() - offset;
-        Coverage += adjust;
-        ClassDef1 += adjust + cac->coverageSize();
-        ClassDef2 += adjust + cac->coverageSize();
-    }
+    LOffset adjust = isExt() ? subtableSize : h->subOffset() - offset;
+    Coverage += adjust;
+    ClassDef1 += adjust + cac.coverageSize();
+    ClassDef2 += adjust + cac.coverageSize();
     h->checkOverflow("coverage table", Coverage, "pair positioning");
     h->checkOverflow("class 1 definition table", ClassDef1, "pair positioning");
     h->checkOverflow("class 2 definition table", ClassDef2, "pair positioning");
@@ -1243,8 +1214,8 @@ void GPOS::PairPos::Format2::write(OTL *h) {
     }
 
     if (isExt()) {
-        cac->coverageWrite();
-        cac->classWrite();
+        cac.coverageWrite();
+        cac.classWrite();
     }
 }
 
@@ -1369,11 +1340,10 @@ GPOS::ChainContextPos::ChainContextPos(GPOS &h, GPOS::SubtableInfo &si,
     }
 
     LOffset sz = chain3Size(backs.size(), inputs.size(), looks.size(), nPos);
-    LOffset o = isExt() ? sz : 0;
 
-    h.setCoverages(backtracks, cac, backs, o);
-    h.setCoverages(inputGlyphs, cac, inputs, o);
-    h.setCoverages(lookaheads, cac, looks, o);
+    h.setCoverages(backtracks, cac, backs);
+    h.setCoverages(inputGlyphs, cac, inputs);
+    h.setCoverages(lookaheads, cac, looks);
 
     if (nPos > 0) {
         lookupRecords.reserve(nPos);
@@ -1387,49 +1357,39 @@ GPOS::ChainContextPos::ChainContextPos(GPOS &h, GPOS::SubtableInfo &si,
 
     h.updateMaxContext(inputs.size() + looks.size());
 
-    if (isExt())
-        h.incExtOffset(sz + cac->coverageSize());
-    else
-        h.incSubOffset(sz);
+    subtableSize = sz;
 }
 
 void GPOS::ChainContextPos::fill(GPOS &h, SubtableInfo &si) {
     /* xxx Each rule in a fmt3 for now */
     for (auto &rule : si.rules) {
         h.AddSubtable(std::move(std::make_unique<ChainContextPos>(h, si, rule)));
-        h.checkOverflow("lookup subtable", h.subOffset(), "chain contextual positioning");
     }
 }
 
 void GPOS::ChainContextPos::write(OTL *h) {
-    LOffset adjustment = 0;
-
-    if (!isExt())
-        adjustment = h->subOffset() - offset;
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     OUT2(subformat());
     OUT2((uint16_t) backtracks.size());
 
     /* do it per OpenType spec 1.5 */
     for (auto ri = backtracks.rbegin(); ri != backtracks.rend(); ri++) {
-        if (!isExt())
-            *ri += adjustment;
+        *ri += adjustment;
         h->checkOverflow("backtrack coverage table", *ri, "chain contextual positioning");
         OUT2((uint16_t)*ri);
     }
 
     OUT2((uint16_t)inputGlyphs.size());
     for (auto &ig : inputGlyphs) {
-        if (!isExt())
-            ig += adjustment;
+        ig += adjustment;
         h->checkOverflow("input coverage table", ig, "chain contextual positioning");
         OUT2((uint16_t)ig);
     }
 
     OUT2((uint16_t)lookaheads.size());
     for (auto &la : lookaheads) {
-        if (!isExt())
-            la += adjustment;
+        la += adjustment;
         h->checkOverflow("input coverage table", la, "chain contextual positioning");
         OUT2((uint16_t)la);
     }
@@ -1441,7 +1401,7 @@ void GPOS::ChainContextPos::write(OTL *h) {
     }
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* --------------------------- Cursive Attachment -------------------------- */
@@ -1598,14 +1558,14 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
      * table.
      */
     uint32_t numMarkGlyphs = 0;
-    cac->coverageBegin();
+    cac.coverageBegin();
     for (auto mc : si.markClassList) {
         for (GID gid : mc.cr.glyphs) {
-            cac->coverageAddGlyph(gid);
+            cac.coverageAddGlyph(gid);
             numMarkGlyphs++;
         }
     }
-    MarkCoverage = cac->coverageEnd(); /* otlCoverageEnd does the sort by GID */
+    cac.coverageEnd();
 
     /* Now we know how many mark nodes there are, we can build the MarkArray */
     /* table, and get its size. We will keep things simple, and write the    */
@@ -1631,7 +1591,7 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
 
     BaseOffset = (Offset)size; /* offset from the start of the MarkToBase subtable = size of subtable + size of MarkArray table. */
     long baseArraySize = sizeof(uint16_t); /* size of BaseArray.BaseCount */
-    cac->coverageBegin();
+    cac.coverageBegin();
         /* Note: I have to add the size of the AnchorArray for each baseRec individually, as they can be different sizes. */
     int32_t prevGID = -1;
     for (auto &baseRec : si.baseList) {
@@ -1641,7 +1601,7 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
         }
             /* No need for logic to report base glyph conflict; this is already reported in checkBaseAnchorConflict() */
         /* we are seeing a new glyph ID; need to allocate the anchor tables for it, and add it to the coverage table. */
-        cac->coverageAddGlyph(baseRec.gid);
+        cac.coverageAddGlyph(baseRec.gid);
         baseArraySize += ClassCount * sizeof(uint16_t); /* this adds fmt->ClassCount offset values to the output.*/
         std::vector<LOffset> br(ClassCount, 0xFFFFFFFFL);
         prevGID = baseRec.gid;
@@ -1677,22 +1637,15 @@ GPOS::MarkBasePos::MarkBasePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(
     }
 
     size += baseArraySize;
-    BaseCoverage = cac->coverageEnd(); /* otlCoverageEnd does the sort by GID */
+    cac.coverageEnd();
     endArrays = size;
 
     /* Now add the size of the anchor list*/
     auto &anchorRec = anchorList.back();
     size += anchorRec.offset + anchorRec.size(h.getValues());
 
-    if (isExt()) {
-        MarkCoverage += size; /* Adjust offset */
-        BaseCoverage += size; /* Adjust offset */
-        h.incExtOffset(size + cac->coverageSize());
-    } else {
-        h.incSubOffset(size);
-    }
+    subtableSize = size;
 
-    h.checkOverflow("lookup subtable", h.subOffset(), "mark to base positioning");
 }
 
 void GPOS::MarkBasePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
@@ -1700,9 +1653,7 @@ void GPOS::MarkBasePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
 }
 
 void GPOS::MarkBasePos::write(OTL *h) {
-    LOffset adjustment = 0; /* (Linux compiler complains) */
-    if (!isExt())
-        adjustment = (h->subOffset() - offset);
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     MarkCoverage += adjustment; /* Adjust offset */
     BaseCoverage += adjustment; /* Adjust offset */
@@ -1740,7 +1691,7 @@ void GPOS::MarkBasePos::write(OTL *h) {
     writeAnchorList(h->g->vw, h->getValues(), true);
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* ---------------------- Mark To Ligature Attachment ---------------------- */
@@ -1755,14 +1706,14 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
     /* step through each node, add its GID to the Coverage table, and its   */
     /* info to the mark record list.                                        */
     uint32_t numMarkGlyphs = 0;
-    cac->coverageBegin();
+    cac.coverageBegin();
     for (auto mc : si.markClassList) {
         for (GID gid : mc.cr.glyphs) {
-            cac->coverageAddGlyph(gid);
+            cac.coverageAddGlyph(gid);
             numMarkGlyphs++;
         }
     }
-    MarkCoverage = cac->coverageEnd(); /* coverageEnd does the sort by GID */
+    cac.coverageEnd();
 
     /* Now we know how many mark nodes there are, we can build the MarkArray */
     /* table, and get its size. We will keep things simple, and write the    */
@@ -1788,7 +1739,7 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
     h.checkBaseLigatureConflict(si.baseList);
 
     LigatureOffset = (Offset)size;
-    cac->coverageBegin();
+    cac.coverageBegin();
     int32_t ligArraySize = sizeof(uint16_t); /* size of LigatureArray.LigatureCount */
     LigatureAttach la;
     la.offset = (Offset)ligArraySize;
@@ -1801,7 +1752,7 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
                 ligArraySize += sizeof(uint16_t);
                 la.offset = (Offset)ligArraySize;
             }
-            cac->coverageAddGlyph(baseRec.gid);
+            cac.coverageAddGlyph(baseRec.gid);
             prevGID = baseRec.gid;
         }
         std::vector<LOffset> clo(ClassCount, 0xFFFFFFFFL);
@@ -1827,7 +1778,7 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
         LigatureAttaches.emplace_back(std::move(la));
         ligArraySize += sizeof(uint16_t);
     }
-    LigatureCoverage = cac->coverageEnd(); /* coverageEnd does the sort by GID */
+    cac.coverageEnd();
 
     ligArraySize += sizeof(uint16_t) * LigatureAttaches.size();
     size += ligArraySize;
@@ -1837,15 +1788,8 @@ GPOS::MarkLigaturePos::MarkLigaturePos(GPOS &h, GPOS::SubtableInfo &si) : Anchor
     auto &anchorRec = anchorList.back();
     size += anchorRec.offset + anchorRec.size(h.getValues());
 
-    if (isExt()) {
-        MarkCoverage += size;     /* Adjust offset */
-        LigatureCoverage += size; /* Adjust offset */
-        h.incExtOffset(size + cac->coverageSize());
-    } else {
-        h.incSubOffset(size);
-    }
+    subtableSize = size;
 
-    h.checkOverflow("lookup subtable", h.subOffset(), "mark to ligature positioning");
 }
 
 void GPOS::MarkLigaturePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
@@ -1853,9 +1797,7 @@ void GPOS::MarkLigaturePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
 }
 
 void GPOS::MarkLigaturePos::write(OTL *h) {
-    LOffset adjustment = 0; /* (Linux compiler complains) */
-    if (!isExt())
-        adjustment = h->subOffset() - offset;
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     MarkCoverage += adjustment;     /* Adjust offset */
     LigatureCoverage += adjustment; /* Adjust offset */
@@ -1912,7 +1854,7 @@ void GPOS::MarkLigaturePos::write(OTL *h) {
     writeAnchorList(h->g->vw, h->getValues());
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }
 
 /* ------------------------ Cursive Attachment ------------------------ */
@@ -1937,7 +1879,7 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
     std::sort(si.baseList.begin(), si.baseList.end());
 
     GPOS::BaseGlyphRec *prevRec = NULL;
-    cac->coverageBegin();
+    cac.coverageBegin();
     for (auto &baseRec : si.baseList) {
         if (prevRec && (prevRec->gid == baseRec.gid)) {
             h.g->ctx.feat->dumpGlyph(baseRec.gid, '\0', 0);
@@ -1945,7 +1887,7 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
                              h.g->error_id_text.c_str(), h.g->getNote(), baseRec.locDesc.c_str(), prevRec->locDesc.c_str());
         } else {
             EntryExitRecord eeRec;
-            cac->coverageAddGlyph(baseRec.gid);
+            cac.coverageAddGlyph(baseRec.gid);
             if (baseRec.anchorMarkInfo[0]->isInitialized()) {
                 eeRec.EntryAnchor = getAnchorOffset(h, baseRec.anchorMarkInfo[0]); /* this returns the offset from the start of the anchor list. To be adjusted later*/
             } else {
@@ -1960,23 +1902,16 @@ GPOS::CursivePos::CursivePos(GPOS &h, GPOS::SubtableInfo &si) : AnchorPosBase(h,
         }
         prevRec = &baseRec;
     }
-    Coverage = cac->coverageEnd(); /* coverageEnd does the sort by GID */
+    cac.coverageEnd();
     size += entryExitRecords.size() * (2 * sizeof(uint16_t));
     endArrays = size;
 
     /* Now add the size of the anchor list*/
     auto &anchorRec = anchorList.back();
-    std::cerr << "anchor size: " << anchorRec.size(h.getValues()) << std::endl;
     size += anchorRec.offset + anchorRec.size(h.getValues());
 
-    if (isExt()) {
-        Coverage += size; /* Adjust offset */
-        h.incExtOffset(size + cac->coverageSize());
-    } else {
-        h.incSubOffset(size);
-    }
+    subtableSize = size;
 
-    h.checkOverflow("cursive attach table", h.subOffset(), "cursive positioning");
 }
 
 void GPOS::CursivePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
@@ -1984,10 +1919,7 @@ void GPOS::CursivePos::fill(GPOS &h, GPOS::SubtableInfo &si) {
 }
 
 void GPOS::CursivePos::write(OTL *h) {
-    LOffset adjustment = 0; /* (Linux compiler complains) */
-
-    if (!isExt())
-        adjustment = h->subOffset() - offset;
+    LOffset adjustment = isExt() ? subtableSize : h->subOffset() - offset;
 
     Coverage += adjustment; /* Adjust offset */
 
@@ -2014,5 +1946,5 @@ void GPOS::CursivePos::write(OTL *h) {
     writeAnchorList(h->g->vw, h->getValues());
 
     if (isExt())
-        cac->coverageWrite();
+        cac.coverageWrite();
 }

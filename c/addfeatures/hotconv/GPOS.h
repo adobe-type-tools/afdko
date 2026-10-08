@@ -295,6 +295,11 @@ class GPOS : public OTL {
         std::vector<LookupRecord> *getLookups() override { return &lookupRecords; }
         void write(OTL *h) override;
         uint16_t subformat() override { return 3; }
+        void setCacOffsets() override {
+            for (auto &o : backtracks) o = cac.getCoverageOffset();
+            for (auto &o : inputGlyphs) o = cac.getCoverageOffset();
+            for (auto &o : lookaheads) o = cac.getCoverageOffset();
+        }
         static void fill(GPOS &h, SubtableInfo &si);
 
         std::vector<LOffset> backtracks;
@@ -399,6 +404,7 @@ class GPOS : public OTL {
         static void fill(GPOS &h, GPOS::SubtableInfo &si);
         void write(OTL *h) override;
         uint16_t subformat() override { return 1; }
+        void setCacOffsets() override { Coverage = cac.getCoverageOffset(); }
 
         LOffset Coverage {0};                  /* 32-bit for overflow check */
         std::vector<EntryExitRecord> entryExitRecords;
@@ -421,6 +427,10 @@ class GPOS : public OTL {
         static void fill(GPOS &h, GPOS::SubtableInfo &si);
         void write(OTL *h) override;
         uint16_t subformat() override { return 1; }
+        void setCacOffsets() override {
+            MarkCoverage = cac.getCoverageOffset();
+            BaseCoverage = cac.getCoverageOffset();
+        }
 
         LOffset MarkCoverage {0};
         LOffset BaseCoverage {0};
@@ -444,6 +454,10 @@ class GPOS : public OTL {
         static void fill(GPOS &h, GPOS::SubtableInfo &si);
         void write(OTL *h) override;
         uint16_t subformat() override { return 1; }
+        void setCacOffsets() override {
+            MarkCoverage = cac.getCoverageOffset();
+            LigatureCoverage = cac.getCoverageOffset();
+        }
 
         LOffset MarkCoverage {0};
         LOffset LigatureCoverage {0};
@@ -495,8 +509,8 @@ class GPOS : public OTL {
     GPat::ClassRec &getCR(uint32_t cls, int classDefInx);
     void printKernPair(GID gid1, GID gid2, MetricsInfo &mi1, MetricsInfo &mi2,
                        bool fmt1);
-    Offset classDefMake(std::shared_ptr<CoverageAndClass> &cac, int classDefInx,
-                        LOffset *coverage, uint16_t &count);
+    void classDefMake(CoverageAndClass &cac, int classDefInx,
+                      bool makeCoverage, uint16_t &count);
 
     void checkBaseAnchorConflict(std::vector<BaseGlyphRec> &baselist);
     void checkBaseLigatureConflict(std::vector<BaseGlyphRec> &baselist);
@@ -533,6 +547,7 @@ struct GPOS::SinglePos::Format1 : public GPOS::SinglePos {
     Format1(GPOS &h, SubtableInfo &si, int iStart, int iEnd);
     void write(OTL *h) override;
     uint16_t subformat() override { return 1; }
+    void setCacOffsets() override { Coverage = cac.getCoverageOffset(); }
     static void fill(GPOS &h, SubtableInfo &si);
     static void fillOne(GPOS &h, SubtableInfo &si);
 };
@@ -542,6 +557,7 @@ struct GPOS::SinglePos::Format2 : public GPOS::SinglePos {
     Format2(GPOS &h, GPOS::SubtableInfo &si, int iStart, int iEnd);
     void write(OTL *h) override;
     uint16_t subformat() override { return 2; }
+    void setCacOffsets() override { Coverage = cac.getCoverageOffset(); }
     static void fill(GPOS &h, SubtableInfo &si);
     static void fillOne(GPOS &h, SubtableInfo &si, int iStart, int iEnd);
 
@@ -553,6 +569,7 @@ struct GPOS::PairPos::Format1 : public GPOS::PairPos {
     Format1(GPOS &h, SubtableInfo &si);
     void write(OTL *h) override;
     uint16_t subformat() override { return 1; }
+    void setCacOffsets() override { Coverage = cac.getCoverageOffset(); }
 
     ValueIndex valueIndex {VAL_INDEX_UNDEF};
     std::vector<PairSet> PairSets;
@@ -563,6 +580,11 @@ struct GPOS::PairPos::Format2 : public GPOS::PairPos {
     Format2(GPOS &h, SubtableInfo &si);
     void write(OTL *h) override;
     uint16_t subformat() override { return 2; }
+    void setCacOffsets() override {
+        Coverage = cac.getCoverageOffset();
+        ClassDef1 = cac.getClassOffset();
+        ClassDef2 = cac.getClassOffset();
+    }
 
     LOffset ClassDef1 {0};
     LOffset ClassDef2 {0};
