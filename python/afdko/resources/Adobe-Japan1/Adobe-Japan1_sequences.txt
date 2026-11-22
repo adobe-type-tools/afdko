@@ -1,6 +1,6 @@
 # Registered Adobe-Japan1 IVSes & 91 Standardized Variants (Unicode 11.0)
-# Version 2017-12-07
-# Prepared by Dr. Ken Lunde (lunde@adobe.com), Adobe Systems Incorporated
+# Version 2022-09-14
+# Prepared by Dr. Ken Lunde (lunde@unicode.org), Masataka Hattori (mhattori@adobe.com)
 3402 E0100; Adobe-Japan1; CID+13698
 3402 E0101; Adobe-Japan1; CID+13697
 3402 E0102; Adobe-Japan1; CID+13699
@@ -14684,6 +14684,7 @@ FA29 E0100; Adobe-Japan1; CID+8687
 2E278 E0100; Adobe-Japan1; CID+14187
 2E569 E0100; Adobe-Japan1; CID+13863
 2E6EA E0100; Adobe-Japan1; CID+14226
+31350 E0100; Adobe-Japan1; CID+19130
 # 1 Standardized Variant (Unicode 9.0)
 0030 FE00; Standardized_Variants; CID+230
 # 1 Standardized Variant (Unicode 11.0)
