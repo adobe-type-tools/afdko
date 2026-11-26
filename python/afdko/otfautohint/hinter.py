@@ -2470,8 +2470,8 @@ class glyphHinter:
         for i, hs in enumerate((glyph.hhs, glyph.vhs)):
             mask = None
             if hs.keepHints:
-                if pe.mask:
-                    mask = copy(pe.mask[i])
+                if pe.masks:
+                    mask = copy(pe.masks[i])
             elif hs.counterHinted:
                 mask = copy(hs.mainMask)
             else:
