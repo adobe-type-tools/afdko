@@ -223,49 +223,43 @@ table/feature blocks:
 
 | keyword | table | implemented |
 | -- | -- | -- |
-| [`HorizAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
+| [`sizemenuname`](#8.b) | size feature | ✅ |
 | [`HorizAxis.BaseTagList`](#9.a) | BASE table | ✅ |
+| [`HorizAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
 | [`HorizAxis.MinMax`](#9.a) | BASE table | ❌ |
-| [`VertAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
 | [`VertAxis.BaseTagList`](#9.a) | BASE table | ✅ |
+| [`VertAxis.BaseScriptList`](#9.a) | BASE table | ✅ |
 | [`VertAxis.MinMax`](#9.a) | BASE table | ❌ |
-| [`Attach`](#9.b) | GDEF table | ✅ |
 | [`GlyphClassDef`](#9.b) | GDEF table | ✅ |
+| [`Attach`](#9.b) | GDEF table | ✅ |
 | [`LigatureCaretByDev`](#9.b) | GDEF table | ❌ |
-| [`LigatureCaretByIndex`](#9.b) | GDEF table | ✅ |
 | [`LigatureCaretByPos`](#9.b) | GDEF table | ✅ |
+| [`LigatureCaretByIndex`](#9.b) | GDEF table | ✅ |
 | [`FontRevision`](#9.c) | head table | ✅ |
+| [`CaretOffset`](#9.d) | hhea table,vhea table | ✅ |
+| [`CaretSlopeRise`](#9.d) | hhea table,vhea table | ✅ |
+| [`CaretSlopeRun`](#9.d) | hhea table,vhea table | ✅ |
 | [`Ascender`](#9.d) | hhea table | ✅ |
-| [`CaretOffset`](#9.d) | hhea,vhea table | ✅ |
 | [`Descender`](#9.d) | hhea table | ✅ |
 | [`LineGap`](#9.d) | hhea table | ✅ |
-| [`CapHeight`](#9.f) | OS/2 table | ✅ |
-| [`CodePageRange`](#9.f) | OS/2 table | ✅ |
+| [`nameid`](#9.e) | name table | ✅ |
+| [`FSType`](#9.f) | OS/2 table | ✅ |
 | [`Panose`](#9.f) | OS/2 table | ✅ |
+| [`UnicodeRange`](#9.f) | OS/2 table | ✅ |
+| [`CodePageRange`](#9.f) | OS/2 table | ✅ |
 | [`TypoAscender`](#9.f) | OS/2 table | ✅ |
 | [`TypoDescender`](#9.f) | OS/2 table | ✅ |
 | [`TypoLineGap`](#9.f) | OS/2 table | ✅ |
-| [`UnicodeRange`](#9.f) | OS/2 table | ✅ |
-| [`Vendor`](#9.f) | OS/2 table | ✅ |
 | [`winAscent`](#9.f) | OS/2 table | ✅ |
 | [`winDescent`](#9.f) | OS/2 table | ✅ |
 | [`XHeight`](#9.f) | OS/2 table | ✅ |
-| [`sizemenuname`](#8.b) | size feature | ✅ |
-| [`VertTypoAscender`](#9.g) | vhea table | ✅ |
-| [`VertTypoDescender`](#9.g) | vhea table | ✅ |
-| [`VertTypoLineGap`](#9.g) | vhea table | ✅ |
-| [`VertAdvanceY`](#9.h) | vmtx table | ✅ |
-| [`VertOriginY`](#9.h) | vmtx table | ✅ |
-| [`ElidedFallbackName`](#9.i) | STAT table | ✅ |
-| [`ElidedFallbackNameID`](#9.i) | STAT table | ✅ |
-| [`DesignAxis`](#9.i) | STAT table | ✅ |
-| [`AxisValue`](#9.i) | STAT table | ✅ |
-| [`flag`](#9.i) | STAT table | ✅ |
-| [`location`](#9.i) | STAT table | ✅ |
-| [`ElidableAxisValueName`](#9.i) | STAT table | ✅ |
-| [`OlderSiblingFontAttribute`](#9.i) | STAT table | ✅ |
-| [`CaretSlopeRise`](#9.d) | hhea,vhea table | ✅ |
-| [`CaretSlopeRun`](#9.d) | hhea,vhea table | ✅ |
+| [`CapHeight`](#9.f) | OS/2 table | ✅ |
+| [`WeightClass`](#9.f) | OS/2 table | ✅ |
+| [`WidthClass`](#9.f) | OS/2 table | ✅ |
+| [`Vendor`](#9.f) | OS/2 table | ✅ |
+| [`LowerOpSize`](#9.f) | OS/2 table | ✅ |
+| [`UpperOpSize`](#9.f) | OS/2 table | ✅ |
+| [`FamilyClass`](#9.f) | OS/2 table | ✅ |
 | [`SubscriptXSize`](#9.f) | OS/2 table | ✅ |
 | [`SubscriptXOffset`](#9.f) | OS/2 table | ✅ |
 | [`SubscriptYSize`](#9.f) | OS/2 table | ✅ |
@@ -276,6 +270,20 @@ table/feature blocks:
 | [`SuperscriptYOffset`](#9.f) | OS/2 table | ✅ |
 | [`StrikeoutSize`](#9.f) | OS/2 table | ✅ |
 | [`StrikeoutPosition`](#9.f) | OS/2 table | ✅ |
+| [`VertTypoAscender`](#9.g) | vhea table | ✅ |
+| [`VertTypoDescender`](#9.g) | vhea table | ✅ |
+| [`VertTypoLineGap`](#9.g) | vhea table | ✅ |
+| [`VertOriginY`](#9.h) | vmtx table | ✅ |
+| [`VertAdvanceY`](#9.h) | vmtx table | ✅ |
+| [`ElidedFallbackName`](#9.i) | STAT table | ✅ |
+| [`ElidedFallbackNameID`](#9.i) | STAT table | ✅ |
+| [`DesignAxis`](#9.i) | STAT table | ✅ |
+| [`AxisValue`](#9.i) | STAT table | ✅ |
+| [`flag`](#9.i) | STAT table | ✅ |
+| [`location`](#9.i) | STAT table | ✅ |
+| [`name`](#9.i) | STAT table | ✅ |
+| [`ElidableAxisValueName`](#9.i) | STAT table | ✅ |
+| [`OlderSiblingFontAttribute`](#9.i) | STAT table | ✅ |
 
 The following are keywords only where a tag is expected:
 
